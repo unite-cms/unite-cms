@@ -1,0 +1,11 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ domain }} / {{ view.contentType }} / Delete #{{ content.id }}{% endblock title %}
+{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block content %}
+    <h1 class="uk-heading-divider">Delete Definitely {{ contentType }} #{{ content.id }}</h1>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        {{ form(form) }}
+    </div>
+{% endblock content %}

@@ -1,0 +1,75 @@
+parameters:
+    locale: en
+    jms_serializer.unserialize_object_constructor.class: UnitedCMS\CoreBundle\Serializer\ObjectConstructor
+
+# Twig Configuration
+twig:
+    debug: '%kernel.debug%'
+    strict_variables: '%kernel.debug%'
+    form_themes:
+        - '@UnitedCMSCore/Form/uikit_layout.html.twig'
+        - '@UnitedCMSCollectionField/Form/form_widgets.html.twig'
+        - '@UnitedCMSStorage/Form/form_widgets.html.twig'
+    globals:
+        united: '@united.cms.manager'
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        driver: pdo_mysql
+        host: '%env(DATABASE_HOST)%'
+        port: '%env(DATABASE_PORT)%'
+        dbname: '%env(DATABASE_NAME)%'
+        user: '%env(DATABASE_USER)%'
+        password: '%env(DATABASE_PASSWORD)%'
+        charset: utf8mb4
+        default_table_options:
+            charset: utf8mb4
+            collate: utf8mb4_unicode_ci
+        # if using pdo_sqlite as your database driver:
+        #   1. add the path in parameters.yml
+        #     e.g. database_path: "%kernel.project_dir%/var/data/data.sqlite"
+        #   2. Uncomment database_path in parameters.yml.dist
+        #   3. Uncomment next line:
+        #path: '%database_path%'
+
+    orm:
+        auto_generate_proxy_classes: '%kernel.debug%'
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true
+        mappings:
+            gedmo_loggable:
+                type: annotation
+                prefix: Gedmo\Loggable\Entity
+                dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Loggable/Entity"
+                alias: GedmoLoggable # (optional) it will default to the name set for the mappingmapping
+                is_bundle: false
+        filters:
+            gedmo_softdeleteable:
+                class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
+                enabled: true
+        dql:
+            string_functions:
+                JSON_EXTRACT:   Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
+                JSON_SET:       Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
+                CAST:           Oro\ORM\Query\AST\Functions\Cast
+
+stof_doctrine_extensions:
+    default_locale: en
+    orm:
+        default:
+            softdeleteable: true
+            sortable: true
+            timestampable: true
+            loggable: true
+
+knp_paginator:
+    page_range: 5
+    default_options:
+        page_name: page
+        sort_field_name: sort
+        sort_direction_name: direction
+        distinct: false
+    template:
+        pagination: 'UnitedCMSCoreBundle:Pagination:sliding.html.twig'
+        sortable: 'UnitedCMSCoreBundle:Pagination:sortable_link.html.twig'

@@ -1,0 +1,5 @@
+{%- block united_cms_storage_file_widget -%}
+    <{{ tag }} {{ block('widget_attributes') }} value="{{ value }}"></{{ tag }}>
+    <link type="text/css" rel="stylesheet" href="{{ asset('main.css', 'UnitedCMSStorageBundle') }}">
+    <script type="text/javascript" src="{{ asset('main.js', 'UnitedCMSStorageBundle') }}"></script>
+{%- endblock united_cms_storage_file_widget -%}

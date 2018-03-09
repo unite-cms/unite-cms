@@ -1,0 +1,15 @@
+{% extends '@UnitedCMSCore/layout.slim.html.twig' %}
+{% block title %}{{ organization }}: Domain erstellen{% endblock title %}
+{% block navtitle %}<a class="uk-navbar-item uk-button uk-button-text"
+                       href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}">{{ organization }}</a>{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.organization.html.twig') }}{% endblock navigation %}
+{% block content %}
+<div class="united-domain-editor">
+    {{ form_start(form) }}
+    <div class="header uk-background-secondary">
+        <h1 class="uk-h5 uk-light">Create Domain</h1>
+        {{ form_widget(form.submit) }}
+    </div>
+    {{ form_end(form) }}
+</div>
+{% endblock content %}

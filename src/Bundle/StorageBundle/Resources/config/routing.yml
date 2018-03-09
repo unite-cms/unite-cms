@@ -1,0 +1,8 @@
+
+unitedcms_storage_sign:
+    resource: "@UnitedCMSStorageBundle/Controller/SignController.php"
+    type:     annotation
+    prefix:   /{organization}/{domain}/storage/sign
+    requirements:
+        organization: '[a-z0-9_]+'
+        domain: '[a-z0-9_]+'

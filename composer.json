@@ -1,0 +1,56 @@
+{
+    "name": "unite-cms/unite-cms",
+    "description": "Decoupled, data-centric content management system for creative professionals",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Franz Wilding",
+            "email": "franz@unite.co.at"
+        },
+        {
+            "name": "Stefan Kamsker",
+            "email": "stefan@unite.co.at"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "src/Bundle/CoreBundle"
+        },
+        {
+            "type": "path",
+            "url": "src/Bundle/CollectionFieldBundle"
+        },
+        {
+            "type": "path",
+            "url": "src/Bundle/StorageBundle"
+        }
+    ],
+    "require": {
+        "unite-cms/core-bundle": "0@dev",
+        "unite-cms/collection-field-bundle": "0@dev",
+        "unite-cms/storage-bundle": "0@dev"
+    },
+    "require-dev": {
+        "symfony/thanks": "^1.0",
+        "symfony/browser-kit": "^4.0"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "bin/console assets:install --symlink"
+        ],
+        "post-update-cmd": [
+            "bin/console assets:install --symlink"
+        ]
+    }
+}

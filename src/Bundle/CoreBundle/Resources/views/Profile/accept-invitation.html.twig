@@ -1,0 +1,54 @@
+{% extends '@UnitedCMSCore/layout.full.html.twig' %}
+{% block title %}United. Accept Invitation{% endblock title %}
+{% block content %}
+
+    <div class="uk-card uk-card-default uk-card-body" style="width: 90%; max-width: 450px; margin: 0 auto;">
+
+        <h2>Accept Invitation</h2>
+
+        {% if not tokenPresent %}
+            <div class="uk-alert-danger" uk-alert>
+                <a class="uk-alert-close" uk-close></a>
+                <p>{% trans %}invitation.token_missing{% endtrans %}</p>
+            </div>
+        {% elseif not tokenFound %}
+            <div class="uk-alert-danger" uk-alert>
+                <a class="uk-alert-close" uk-close></a>
+                <p>{% trans %}invitation.token_not_found{% endtrans %}</p>
+            </div>
+        {% elseif tokenExpired %}
+            <div class="uk-alert-danger" uk-alert>
+                <a class="uk-alert-close" uk-close></a>
+                <p>{% trans %}invitation.token_expired{% endtrans %}</p>
+            </div>
+        {% elseif wrongUser %}
+            <div class="uk-alert-warning" uk-alert>
+                <a class="uk-alert-close" uk-close></a>
+                <p>{% trans %}invitation.wrong_user{% endtrans %}</p>
+            </div>
+        {% elseif alreadyMember %}
+            <div class="uk-alert-warning" uk-alert>
+                <a class="uk-alert-close" uk-close></a>
+                <p>{% trans %}invitation.already_member{% endtrans %}</p>
+            </div>
+        {% elseif form %}
+
+            {% if not form.vars.submitted or not form.vars.valid %}
+                {{ form_start(form, {attr: {class: 'uk-form-vertical', autocomplete: 'off'}}) }}
+                {{ form_end(form) }}
+            {% else %}
+                <h3>Thank you!</h3>
+
+                {% if app.user %}
+                    <p>You are now member of the domain <strong>{{ invitation.domain }}</strong>.</p>
+                {% else %}
+                    <p>Now you can login with your email address and password.</p>
+                    <p><a href="{{ path('unitedcms_core_authentication_login') }}"
+                          class="uk-button uk-button-default uk-button-small">Zur Anmeldung</a></p>
+                {% endif %}
+
+            {% endif %}
+
+        {% endif %}
+    </div>
+{% endblock content %}

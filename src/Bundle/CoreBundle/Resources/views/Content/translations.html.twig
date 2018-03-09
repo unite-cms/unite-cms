@@ -1,0 +1,96 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ united.domain }} / {{ view.contentType }} / Update #{{ content.id }}{% endblock title %}
+{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block content %}
+    <h1 class="uk-heading-divider">Translations for {{ contentType }} #{{ content.id }}</h1>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        <table class="uk-table uk-table-justify uk-table-divider uk-table-hover">
+            <thead>
+                <tr>
+                    <th>Language</th>
+                    <th>Content #ID</th>
+                    <th>Actions</th>
+            </thead>
+            <tbody>
+            {% set translated = [] %}
+            {% for translation in content.allTranslations %}
+                {% set translated = translated|merge([translation.locale]) %}
+                <tr>
+                    <td>{{ translation.locale }}</td>
+                    <td>{{ translation.id }}</td>
+                    <td>
+                        <div class="uk-button-group">
+                            <a href="{{ path('unitedcms_core_content_update', {
+                                'organization': united.domain.organization.identifier,
+                                'domain': united.domain.identifier,
+                                'content_type': contentType.identifier,
+                                'view': view.identifier,
+                                'content': translation.id
+                            }) }}" class="uk-button uk-button-default"><span uk-icon="icon: file-edit" class="uk-margin-small-right"></span>Update content</a>
+
+                            {% if translation.translationOf %}
+                                <div class="uk-inline">
+                                    <button style="padding: 0 15px;" class="uk-button uk-button-default" type="button">
+                                        <span uk-icon="icon: chevron-down"></span>
+                                    </button>
+                                    <div uk-dropdown="mode: click; boundary: ! .uk-button-group; boundary-align: true;">
+                                        <ul class="uk-nav uk-dropdown-nav">
+                                            <li><a class="uk-text-danger" href="{{ path('unitedcms_core_content_removetranslation', {
+                                                    'organization': united.domain.organization.identifier,
+                                                    'domain': united.domain.identifier,
+                                                    'content_type': contentType.identifier,
+                                                    'view': view.identifier,
+                                                    'content': translation.translationOf.id,
+                                                    'locale': translation.locale
+                                                }) }}" href="#"><span class="uk-margin-small-right" uk-icon="icon: minus-circle"></span> Remove as translation</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            {% for locale in contentType.locales %}
+                {% if locale not in translated %}
+                    <tr>
+                        <td>{{ locale }}</td>
+                        <td></td>
+                        <td>
+                            <div class="uk-button-group">
+                                <a class="uk-button uk-button-default uk-text-success" href="{{ path('unitedcms_core_content_create', {
+                                    'organization': united.domain.organization.identifier,
+                                    'domain': united.domain.identifier,
+                                    'content_type': contentType.identifier,
+                                    'view': view.identifier,
+                                    'locale': locale,
+                                    'translation_of': content.id
+                                }) }}"><span uk-icon="icon: plus" class="uk-margin-small-right"></span> Create Translation</a>
+                                <div class="uk-inline">
+                                    <button style="padding: 0 15px;" class="uk-button uk-button-default" type="button">
+                                        <span uk-icon="icon: chevron-down"></span>
+                                    </button>
+                                    <div uk-dropdown="mode: click; boundary: ! .uk-button-group; boundary-align: true;">
+                                        <ul class="uk-nav uk-dropdown-nav">
+                                            <li><a class="uk-text-success" href="{{ path('unitedcms_core_content_addtranslation', {
+                                                    'organization': united.domain.organization.identifier,
+                                                    'domain': united.domain.identifier,
+                                                    'content_type': contentType.identifier,
+                                                    'view': view.identifier,
+                                                    'content': content.id,
+                                                    'locale': locale
+                                                }) }}"><span class="uk-margin-small-right" uk-icon="icon: folder"></span> Add an existing content as translation</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

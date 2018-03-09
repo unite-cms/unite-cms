@@ -1,0 +1,101 @@
+{% use "form_div_layout.html.twig" %}
+
+{# Widgets #}
+
+{%- block form_start -%}
+    {% if (attr.class is not defined) or (not 'uk-form-vertical' in attr.class) %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-form-horizontal')|trim}) %}
+    {% endif %}
+    {{- parent() -}}
+{%- endblock form_start -%}
+
+{%- block form_row -%}
+    {% if label is not same as(false) -%}
+        <div class="uk-margin">
+            {{- form_label(form) -}}
+            <div class="uk-form-controls">
+                {{- form_widget(form) -}}
+                {{- form_errors(form) -}}
+            </div>
+        </div>
+    {% else %}
+        {{- form_widget(form) -}}
+        {{- form_errors(form) -}}
+    {% endif %}
+{%- endblock form_row -%}
+
+{%- block button_row -%}
+    <p class="uk-text-right" uk-margin>
+        {{- form_widget(form) -}}
+    </p>
+{%- endblock button_row -%}
+
+{% block form_label -%}
+    {%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' uk-form-label')|trim}) -%}
+    {{- parent() -}}
+{%- endblock form_label %}
+
+{%- block form_widget_simple -%}
+    {% if type is not defined or type == 'text' or type == 'email' or type == 'password' or type == 'number' %}{%- set attr = attr|merge({class: (attr.class|default('') ~ ' uk-input')|trim}) -%}{% endif %}
+    {{- parent() -}}
+{%- endblock form_widget_simple -%}
+
+{% block button_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button')|trim}) %}
+    {{- parent() -}}
+{%- endblock %}
+
+{%- block textarea_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-textarea')|trim}) %}
+    {{- parent() -}}
+{%- endblock textarea_widget -%}
+
+{%- block checkbox_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-checkbox')|trim}) %}
+
+    {{- parent() -}}
+{%- endblock checkbox_widget -%}
+
+{%- block radio_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-radio')|trim}) %}
+    {{- parent() -}}
+{%- endblock radio_widget -%}
+
+{%- block choice_widget_collapsed -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-select')|trim}) %}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed -%}
+
+{%- block range_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-range')|trim}) %}
+    {{- parent() -}}
+{%- endblock range_widget %}
+
+{%- block submit_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button-primary')|trim}) %}
+    {{- parent() -}}
+{%- endblock submit_widget -%}
+
+{%- block reset_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button-default')|trim}) %}
+    {{- parent() -}}
+{%- endblock reset_widget -%}
+
+{%- block collection_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' collection-form')|trim}) %}
+    {{- parent() -}}
+{%- endblock collection_widget -%}
+
+{%- block united_cms_web_component_widget -%}
+    <{{ tag }} {{ block('widget_attributes') }} value="{{ value }}"></{{ tag }}>
+{%- endblock united_cms_web_component_widget -%}
+
+{%- block form_errors -%}
+    {%- if errors|length > 0 -%}
+        {%- for error in errors -%}
+            <div style="margin-top: 5px; padding: 10px;" uk-alert class="uk-alert-danger uk-text-small">
+                <p>{{ error.message }}</p>
+            </div>
+        {%- endfor -%}
+    {%- endif -%}
+{%- endblock form_errors -%}

@@ -1,0 +1,56 @@
+# To get started with security, check out the documentation:
+# https://symfony.com/doc/current/security.html
+security:
+
+    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+    providers:
+        united_core_user:
+            entity:
+                class: UnitedCMSCoreBundle:User
+                property: email
+
+        united_core_api_client:
+            id: united.cms.api_client_provider
+
+    encoders:
+        UnitedCMS\CoreBundle\Entity\User:
+            algorithm: bcrypt
+            cost: 12
+
+    firewalls:
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        api:
+            anonymous: false
+            provider: united_core_api_client
+            request_matcher: united.cms.api_request_matcher
+            stateless: true
+            guard:
+                authenticators:
+                    - united.cms.api_client_authenticator
+
+        main:
+            anonymous: ~
+            provider: united_core_user
+            form_login:
+                login_path: unitedcms_core_authentication_login
+                check_path: unitedcms_core_authentication_login
+            logout:
+                path:   /logout
+                target: /
+            remember_me:
+                secret:   '%env(APP_SECRET)%'
+                lifetime: 8640000 # 100 days
+                path:     /
+
+    access_control:
+        - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/profile/reset-password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/profile/reset-password-confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/profile/accept-invitation, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/|$), roles: [ROLE_USER, IS_AUTHENTICATED_FULLY] }
+        - { path: ^/*, roles: ROLE_USER }

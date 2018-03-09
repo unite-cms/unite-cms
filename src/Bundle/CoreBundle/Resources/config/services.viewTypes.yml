@@ -1,0 +1,12 @@
+# Contains all core view types
+services:
+
+  # A simple table view type that renders all content documents as table rows.
+  UnitedCMS\CoreBundle\View\Types\TableViewType:
+    tags: [united_cms.view_type]
+    public: false
+
+  # A table view type that allows the user to sort rows via drag and drop.
+  UnitedCMS\CoreBundle\View\Types\SortableViewType:
+    tags: [united_cms.view_type]
+    public: false

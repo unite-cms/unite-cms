@@ -1,0 +1,58 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ domain }}: User{% endblock title %}
+{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block content %}
+
+    <h1 class="uk-heading-divider">
+        Domain API Clients <a href="{{ path('unitedcms_core_domainapiclient_create', {
+            domain: domain.identifier,
+            organization: organization.identifier
+        }) }}" class="uk-icon-button uk-button-primary" uk-icon="icon: plus"></a>
+    </h1>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        <table class="uk-table uk-table-justify uk-table-divider">
+            <thead>
+            <tr>
+                <th>{{ knp_pagination_sortable(clients, 'Name', 'client.name') }}</th>
+                <th>{{ knp_pagination_sortable(clients, 'Created', 'client.created') }}</th>
+                <th>{{ knp_pagination_sortable(clients, 'Roles', 'client.roles') }}</th>
+                <th>Token</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for client in clients %}
+                <tr>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.created|date }}</td>
+                    <td>{{ client.roles|join(', ') }}</td>
+                    <td>
+                        <div class="uk-margin">
+                            <span class="uk-label">{{ client.token }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <ul class="uk-iconnav">
+                            <li><a href="{{ path('unitedcms_core_domainapiclient_update', {
+                                    domain: domain.identifier,
+                                    organization: organization.identifier,
+                                    client: client.id
+                                }) }}" uk-icon="icon: file-edit"></a></li>
+                            <li><a class="uk-text-danger" href="{{ path('unitedcms_core_domainapiclient_delete', {
+                                    domain: domain.identifier,
+                                    organization: organization.identifier,
+                                    client: client.id
+                                }) }}" uk-icon="icon: trash"></a></li>
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="navigation">
+            {{ knp_pagination_render(clients) }}
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,38 @@
+# Contains all custom validators.
+services:
+
+  # Checks, that a fieldType is available.
+  UnitedCMS\CoreBundle\Validator\Constraints\FieldTypeValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['@united.cms.field_type_manager']
+    public: false
+
+  # Checks, that a viewType is available.
+  UnitedCMS\CoreBundle\Validator\Constraints\ViewTypeValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['@united.cms.view_type_manager']
+    public: false
+
+  # Checks, that the fieldableContent (content or setting) data is valid according to the contentType / settingType definition.
+  UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentDataValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['@united.cms.field_type_manager']
+    public: false
+
+  # Checks, that the field setting data is valid by asking the corresponding fieldType.
+  UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldSettingsValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['@united.cms.field_type_manager']
+    public: false
+
+  # Checks, that the view setting data is valid by asking the corresponding viewType.
+  UnitedCMS\CoreBundle\Validator\Constraints\ValidViewSettingsValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['@united.cms.view_type_manager']
+    public: false
+
+  # Checks, that the view setting data is valid by asking the corresponding viewType.
+  UnitedCMS\CoreBundle\Validator\Constraints\ValidContentTranslationOfValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['@doctrine.orm.entity_manager']
+    public: false

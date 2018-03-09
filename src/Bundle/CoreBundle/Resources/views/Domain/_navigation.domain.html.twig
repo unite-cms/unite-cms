@@ -1,0 +1,86 @@
+{{ include('@UnitedCMSCore/Domain/_navigaton_header.html.twig') }}
+
+<button style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 100%"
+        class="uk-button uk-button-default uk-align-center" type="button">{{ united.domain }} <span
+            uk-icon="icon:  triangle-down"></span></button>
+<div uk-dropdown="mode: click">
+    <ul class="uk-nav uk-dropdown-nav">
+        {% for d in united.organization.domains %}
+            <li{% if d == united.domain %} class="uk-active"{% endif %}><a
+                        href="{{ path('unitedcms_core_domain_view', {organization: united.organization.identifier, domain: d.identifier}) }}"><span
+                            uk-icon="icon: chevron-right" class="uk-margin-small-right"></span>{{ d }}</a></li>
+        {% endfor %}
+        <li class="uk-nav-divider"></li>
+        <li><a class="uk-text-primary"
+               href="{{ path('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}"><span
+                        uk-icon="icon: plus" class="uk-margin-small-right"></span>Create New Domain</a></li>
+    </ul>
+</div>
+
+<ul class="uk-iconnav uk-flex-center">
+    <li><a uk-icon="icon: users" title="User verwalten" uk-tooltip href="{{ url('unitedcms_core_domainuser_index', {
+            organization: united.organization.identifier,
+            domain: united.domain.identifier
+        }) }}"></a></li>
+    <li><a uk-icon="icon: server" title="API Clients verwalten" uk-tooltip href="{{ url('unitedcms_core_domainapiclient_index', {
+            organization: united.organization.identifier,
+            domain: united.domain.identifier
+        }) }}"></a></li>
+    <li><a uk-icon="icon: cog" title="Domain bearbeiten" uk-tooltip href="{{ url('unitedcms_core_domain_update', {
+            organization: united.organization.identifier,
+            domain: united.domain.identifier
+        }) }}"></a></li>
+    <li><a uk-icon="icon: trash" title="Domain löschen" uk-tooltip href="{{ url('unitedcms_core_domain_delete', {
+            organization: united.organization.identifier,
+            domain: united.domain.identifier
+        }) }}"></a></li>
+</ul>
+
+<hr/>
+
+<ul class="uk-nav-default uk-nav-parent-icon" uk-nav>
+    {% if united.domain.contentTypes|length > 0 %}
+        <li class="uk-nav-header">Inhaltstypen</li>
+        {% for type in united.domain.contentTypes %}
+            <li><a href="{{ path('unitedcms_core_content_index', {
+                    organization: united.organization.identifier,
+                    domain: united.domain.identifier,
+                    content_type: type.identifier,
+                    view: 'all'
+                }) }}"><span class="uk-margin-small-right"
+                             uk-icon="icon: {{ type.icon ? type.icon : 'album' }}"></span> {{ type }}</a>
+
+                {% if type.views|length > 1 %}
+                    <ul class="uk-nav-sub">
+                        {% for view in type.views %}
+                        {% if view.identifier != "all" %}
+                        <li><a href="{{ path('unitedcms_core_content_index', {
+                                organization: united.organization.identifier,
+                                domain: united.domain.identifier,
+                                content_type: type.identifier,
+                                view: view.identifier
+                            }) }}"><span class="uk-margin-small-right"
+                                         uk-icon="icon: {{ view.icon ? view.icon : 'chevron-right' }}"></span> {{ view }}
+                            </a>
+                            {% endif %}
+                            {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% endfor %}
+    {% endif %}
+    {% if united.domain.settingTypes|length > 0 %}
+        <li class="uk-nav-divider"></li>
+        <li class="uk-nav-header">Einstellungen</li>
+        {% for type in united.domain.settingTypes %}
+            <li><a href="{{ path('unitedcms_core_setting_index', {
+                    organization: united.organization.identifier,
+                    domain: united.domain.identifier,
+                    setting_type: type.identifier
+                }) }}"><span class="uk-margin-small-right"
+                             uk-icon="icon: {{ type.icon ? type.icon : 'settings' }}"></span> {{ type }}</a></li>
+        {% endfor %}
+    {% endif %}
+</ul>
+
+{{ include('@UnitedCMSCore/Domain/_navigaton_footer.html.twig') }}

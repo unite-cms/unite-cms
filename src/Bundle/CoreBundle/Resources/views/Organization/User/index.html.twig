@@ -1,0 +1,49 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ organization }}{% endblock title %}
+{% block navtitle %}<a class="uk-navbar-item uk-button uk-button-text"
+                       href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}">{{ organization }}</a>{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.organization.html.twig') }}{% endblock navigation %}
+{% block content %}
+
+    <h1 class="uk-heading-divider">Organization Users</h1>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        <table class="uk-table uk-table-justify uk-table-divider">
+            <thead>
+            <tr>
+                <th>{{ knp_pagination_sortable(users, 'Firstname', 'user.firstname') }}</th>
+                <th>{{ knp_pagination_sortable(users, 'Lastname', 'user.lastname') }}</th>
+                <th>{{ knp_pagination_sortable(users, 'Email', 'user.email') }}</th>
+                <th>{{ knp_pagination_sortable(users, 'Roles', 'user.roles') }}</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for member in users %}
+                <tr>
+                    <td>{{ member.user.firstname }}</td>
+                    <td>{{ member.user.lastname }}</td>
+                    <td>{{ member.user.email }}</td>
+                    <td>{{ member.roles|join(', ') }}</td>
+                    <td>
+                        <ul class="uk-iconnav">
+                            <li><a href="{{ path('unitedcms_core_organizationuser_update', {
+                                    organization: organization.identifier,
+                                    member: member.id
+                                }) }}" uk-icon="icon: file-edit"></a></li>
+                            <li><a class="uk-text-danger" href="{{ path('unitedcms_core_organizationuser_delete', {
+                                    organization: organization.identifier,
+                                    member: member.id
+                                }) }}" uk-icon="icon: trash"></a></li>
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="navigation">
+            {{ knp_pagination_render(users) }}
+        </div>
+    </div>
+
+{% endblock content %}

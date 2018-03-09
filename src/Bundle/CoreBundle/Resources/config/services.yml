@@ -1,0 +1,10 @@
+imports:
+  - { resource: services.core.yml }
+  - { resource: services.commands.yml }
+  - { resource: services.graphql.yml }
+  - { resource: services.security.yml }
+  - { resource: services.fieldTypes.yml }
+  - { resource: services.viewTypes.yml }
+  - { resource: services.validators.yml }
+  - { resource: services.doctrineListener.yml }
+  - { resource: services.serialization.yml }

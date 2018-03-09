@@ -1,0 +1,29 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ domain }} / Settings / {{ settingType }}{% endblock title %}
+{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block content %}
+    <h1 class="uk-heading-divider">Settings: {{ settingType }}</h1>
+
+    <div class="uk-card uk-card-default uk-card-body">
+
+        <div class="uk-align-right">
+            <ul class="uk-iconnav">
+                {% if settingType.locales|length > 0 %}<li><a href="{{ path('unitedcms_core_setting_translations', {
+                        'organization': united.domain.organization.identifier,
+                        'domain': united.domain.identifier,
+                        'setting_type': settingType.identifier,
+                        'setting': setting.id
+                    }) }}" uk-icon="icon: world">Translations</a></li>{% endif %}
+                <li><a href="{{ path('unitedcms_core_setting_revisions', {
+                        'organization': united.domain.organization.identifier,
+                        'domain': united.domain.identifier,
+                        'setting_type': settingType.identifier,
+                        'setting': setting.id
+                    }) }}" uk-icon="icon: history">Revisions</a></li>
+            </ul>
+        </div>
+
+        {{ form(form) }}
+    </div>
+{% endblock content %}

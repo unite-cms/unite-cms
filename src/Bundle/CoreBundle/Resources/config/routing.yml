@@ -1,0 +1,73 @@
+
+unitedcms_core_authentication:
+    resource: "@UnitedCMSCoreBundle/Controller/AuthenticationController.php"
+    type:     annotation
+    prefix:   /
+
+unitedcms_core_profile:
+    resource: "@UnitedCMSCoreBundle/Controller/ProfileController.php"
+    type:     annotation
+    prefix:   /profile
+
+unitedcms_core_organizations:
+    path:     /
+    methods: ['GET']
+    defaults: { _controller: UnitedCMSCoreBundle:Organization:index }
+
+unitedcms_core_organization_user:
+    resource: "@UnitedCMSCoreBundle/Controller/OrganizationUserController.php"
+    type:     annotation
+    prefix:   /{organization}/user
+    requirements:
+        organization: '[a-z0-9_]+'
+
+unitedcms_core_domains:
+    resource: "@UnitedCMSCoreBundle/Controller/DomainController.php"
+    type:     annotation
+    prefix:   /{organization}
+    requirements:
+        organization: '[a-z0-9_]+'
+
+unitedcms_core_domain_user:
+    resource: "@UnitedCMSCoreBundle/Controller/DomainUserController.php"
+    type:     annotation
+    prefix:   /{organization}/{domain}/user
+    requirements:
+        organization: '[a-z0-9_]+'
+        domain: '[a-z0-9_]+'
+
+unitedcms_core_domain_api_client:
+    resource: "@UnitedCMSCoreBundle/Controller/DomainApiClientController.php"
+    type:     annotation
+    prefix:   /{organization}/{domain}/client
+    requirements:
+        organization: '[a-z0-9_]+'
+        domain: '[a-z0-9_]+'
+
+unitedcms_core_content:
+    resource: "@UnitedCMSCoreBundle/Controller/ContentController.php"
+    type:     annotation
+    prefix:   /{organization}/{domain}/content
+    requirements:
+        organization: '[a-z0-9_]+'
+        domain: '[a-z0-9_]+'
+
+unitedcms_core_setting:
+    resource: "@UnitedCMSCoreBundle/Controller/SettingController.php"
+    type:     annotation
+    prefix:   /{organization}/{domain}/setting
+    requirements:
+        organization: '[a-z0-9_]+'
+        domain: '[a-z0-9_]+'
+
+
+# Add a route to api that will return the default implementation (graphQL)
+unitedcms_core_api:
+    path:     /{organization}/{domain}/api
+    methods: ['POST']
+    defaults: { _controller: UnitedCMSCoreBundle:GraphQLApi:index }
+
+unitedcms_graph_api:
+    path:     /{organization}/{domain}/api/graphql
+    methods: ['POST']
+    defaults: { _controller: UnitedCMSCoreBundle:GraphQLApi:index }

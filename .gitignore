@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+.env
+composer.lock
+package-lock.json
+/node_modules/
+/vendor/
+/var/
+/public/bundles/

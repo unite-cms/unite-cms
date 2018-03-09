@@ -1,0 +1,27 @@
+<?php
+
+namespace UnitedCMS\CoreBundle\Tests\Field;
+
+use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
+
+class TextAreaTypeTest extends FieldTypeTestCase
+{
+    public function testContentTypeFieldTypeWithEmptySettings() {
+
+        // Content Type Field with empty settings should be valid.
+        $ctField = $this->createContentTypeField('textarea');
+        $errors = $this->container->get('validator')->validate($ctField);
+        $this->assertCount(0, $errors);
+    }
+
+    public function testContentTypeFieldTypeWithInvalidSettings() {
+
+        // Content Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('textarea');
+        $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
+
+        $errors = $this->container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+    }
+}

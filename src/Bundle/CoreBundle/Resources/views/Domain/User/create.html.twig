@@ -1,0 +1,17 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ domain }}: Create user{% endblock title %}
+{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block content %}
+    <h2 class="uk-heading-divider">Add Organization User to Domain</h2>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        {{ form(form_create) }}
+    </div>
+
+    <h2 class="uk-heading-divider">Import new User into Domain</h2>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        {{ form(form_invite) }}
+    </div>
+{% endblock content %}

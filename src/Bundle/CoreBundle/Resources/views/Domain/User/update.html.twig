@@ -1,0 +1,11 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ domain }}: Update Membership for user {{ member.user }}{% endblock title %}
+{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block content %}
+    <h1 class="uk-heading-divider">{{ domain }}: Update Domain Membership for user {{ member.user }}</h1>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        {{ form(form) }}
+    </div>
+{% endblock content %}

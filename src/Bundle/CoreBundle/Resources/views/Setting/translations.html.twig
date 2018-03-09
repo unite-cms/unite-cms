@@ -1,0 +1,57 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ united.domain }} / {{ settingType }} / Update #{{ setting.id }}{% endblock title %}
+{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block content %}
+    <h1 class="uk-heading-divider">Translations for {{ settingType }} #{{ setting.id }}</h1>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        <table class="uk-table uk-table-justify uk-table-divider uk-table-hover">
+            <thead>
+                <tr>
+                    <th>Language</th>
+                    <th>Content #ID</th>
+                    <th>Actions</th>
+            </thead>
+            <tbody>
+            {% set translated = [] %}
+            {% set primary_translation = settingType.locales|length > 0 ? settingType.locales[0] : null %}
+            {% for translation in settingType.settings %}
+                {% set translated = translated|merge([translation.locale]) %}
+                <tr>
+                    <td>{{ translation.locale }}</td>
+                    <td>{{ translation.id }}</td>
+                    <td>
+                        <div class="uk-button-group">
+                            <a href="{{ path('unitedcms_core_setting_index', {
+                                'organization': united.domain.organization.identifier,
+                                'domain': united.domain.identifier,
+                                'setting_type': settingType.identifier,
+                                'locale': translation.locale
+                            }) }}" class="uk-button uk-button-default"><span uk-icon="icon: file-edit" class="uk-margin-small-right"></span>Update setting</a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            {% for locale in settingType.locales %}
+                {% if locale not in translated %}
+                    <tr>
+                        <td>{{ locale }}</td>
+                        <td></td>
+                        <td>
+                            <div class="uk-button-group">
+                                <a href="{{ path('unitedcms_core_setting_index', {
+                                    'organization': united.domain.organization.identifier,
+                                    'domain': united.domain.identifier,
+                                    'setting_type': settingType.identifier,
+                                    'locale': locale
+                                }) }}" class="uk-button uk-button-default uk-text-success"><span uk-icon="icon: plus" class="uk-margin-small-right"></span>Add translation</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

@@ -1,0 +1,38 @@
+# Contains all core field types
+services:
+
+  # A simple text input field
+  UnitedCMS\CoreBundle\Field\Types\TextFieldType:
+    public: false
+    tags: [united_cms.field_type]
+
+  # A simple textarea input field
+  UnitedCMS\CoreBundle\Field\Types\TextAreaFieldType:
+    public: false
+    tags: [united_cms.field_type]
+
+  # A simple checkbox input field
+  UnitedCMS\CoreBundle\Field\Types\CheckboxFieldType:
+    public: false
+    tags: [united_cms.field_type]
+
+  # A simple choice input field
+  UnitedCMS\CoreBundle\Field\Types\ChoiceFieldType:
+    public: false
+    tags: [united_cms.field_type]
+
+  # A simple range input field
+  UnitedCMS\CoreBundle\Field\Types\RangeFieldType:
+    public: false
+    tags: [united_cms.field_type]
+
+  # A reference input field that allows to add a reference to a content item in any domain in the same organization.
+  UnitedCMS\CoreBundle\Field\Types\ReferenceFieldType:
+    public: false
+    tags: [united_cms.field_type]
+    arguments: ['@validator', '@security.authorization_checker', '@united.cms.manager', '@doctrine.orm.entity_manager', '@united.cms.view_type_manager', '@templating.engine.twig']
+
+  # An integer input field that automatically handles position indexing (on INSERT, UPDATE, DELETE).
+  UnitedCMS\CoreBundle\Field\Types\SortIndexFieldType:
+    public: false
+    tags: [united_cms.field_type]

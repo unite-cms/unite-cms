@@ -1,0 +1,30 @@
+# Contains all doctrine event listeners.
+services:
+
+  # When removing an OrganizationMember object, also all DomainMember objects of this user must be removed.
+  UnitedCMS\CoreBundle\Subscriber\RemoveMember:
+    public: false
+    tags:
+      - { name: doctrine.event_listener, event: preRemove }
+
+  # When adding an DomainMember, also an OrganizationMember for this user and organization must be added.
+  UnitedCMS\CoreBundle\Subscriber\AddMember:
+    public: false
+    tags:
+      - { name: doctrine.event_listener, event: prePersist }
+
+  # When recovering content, create a log entry
+  UnitedCMS\CoreBundle\Subscriber\RecoverContentLogger:
+    public: false
+    arguments: ['@security.token_storage']
+    tags:
+      - { name: doctrine.event_listener, event: onFlush }
+
+  # When inserting, updating or deleting content, the dispatcher notifies all parts of united CMS about this change.
+  UnitedCMS\CoreBundle\Subscriber\ContentEventDispatcher:
+    public: false
+    arguments: ['@united.cms.field_type_manager']
+    tags:
+      - { name: doctrine.event_listener, event: prePersist }
+      - { name: doctrine.event_listener, event: preUpdate }
+      - { name: doctrine.event_listener, event: preRemove }

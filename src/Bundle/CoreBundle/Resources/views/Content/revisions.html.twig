@@ -1,0 +1,53 @@
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ united.domain }} / {{ view.contentType }} / Update #{{ content.id }}{% endblock title %}
+{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block content %}
+    <h1 class="uk-heading-divider">Revisions for {{ contentType }} #{{ content.id }}</h1>
+
+    <div class="uk-card uk-card-default uk-card-body">
+        <div class="uk-overflow-auto">
+            <table class="uk-table uk-table-justify uk-table-divider uk-table-hover">
+                <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>Action</th>
+                    <th>Data</th>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for revision in revisions %}
+                    <tr>
+                        <td>{{ revision.version }}</td>
+                        <td>{{ revision.action }}</td>
+                        <td>
+                            {% if revision.data %}
+                                <pre>{{ revision.data.data|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                            {% endif %}
+                        </td>
+                        <td>{{ revision.loggedAt|date }}</td>
+                        <td>{{ revision.username }}</td>
+                        <td>
+                            {% if not loop.first and revision.action != 'remove' %}
+                                <div class="uk-button-group">
+                                    <a style="white-space: nowrap" href="{{ path('unitedcms_core_content_revisionsrevert', {
+                                        'organization': united.domain.organization.identifier,
+                                        'domain': united.domain.identifier,
+                                        'content_type': contentType.identifier,
+                                        'view': view.identifier,
+                                        'content': content.id,
+                                        'version': revision.version
+                                    }) }}" class="uk-button uk-button-default"><span uk-icon="icon: history" class="uk-margin-small-right"></span>Revert to version {{ revision.version }}</a>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock content %}

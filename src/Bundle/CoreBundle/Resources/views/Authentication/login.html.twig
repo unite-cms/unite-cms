@@ -1,0 +1,44 @@
+{% extends '@UnitedCMSCore/layout.full.html.twig' %}
+{% block title %}United.{% endblock title %}
+{% block content %}
+    <div class="uk-card uk-card-default uk-card-body" style="width: 90%; max-width: 450px; margin: 0 auto;">
+
+        {% if error %}
+            <div uk-alert class="uk-alert-danger">
+                <a class="uk-alert-close" uk-close></a>
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+
+        <form class="uk-form-vertical" action="{{ path('unitedcms_core_authentication_login') }}" method="post">
+
+            <h2>Anmelden</h2>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="username">Email</label>
+                <div class="uk-form-controls">
+                    <input type="email" id="username" name="_username" value="{{ last_username }}" class="uk-input"/>
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="username">Password</label>
+                <div class="uk-form-controls">
+                    <input type="password" id="password" name="_password" class="uk-input"/>
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <label for="remember_me"><input class="uk-checkbox" type="checkbox" id="remember_me" name="_remember_me"
+                                                checked> Eingeloggt bleiben</label>
+            </div>
+
+            <div class="uk-margin uk-text-right">
+                <a href="{{ path('unitedcms_core_profile_resetpassword') }}" class="uk-button uk-button-link">Passwort
+                    vergessen?</a>
+            </div>
+
+            <button class="uk-button-primary uk-button uk-first-column" type="submit">Anmelden</button>
+        </form>
+    </div>
+{% endblock %}
