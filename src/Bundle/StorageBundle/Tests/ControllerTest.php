@@ -355,8 +355,8 @@ class ControllerTest extends DatabaseAwareTestCase {
     $presignedRequest = $s3Client->createPresignedRequest($command, '+5 minutes');
     $newResponse = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
 
-    $generatedParts = explode('&X-Amz-Signature=', $newResponse->pre_signed_url);
-    $actualParts = explode('&X-Amz-Signature=', (string)$presignedRequest->getUri());
+    $generatedParts = explode('&X-Amz-Date=', $newResponse->pre_signed_url);
+    $actualParts = explode('&X-Amz-Date=', (string)$presignedRequest->getUri());
 
     $this->assertEquals($actualParts[0], $generatedParts[0]);
   }
