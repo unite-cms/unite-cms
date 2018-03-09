@@ -23,21 +23,15 @@
 
     <testsuites>
         <testsuite name="unite cms test cases">
-            <directory>./Tests/</directory>
             <directory>./src/Bundle/*/Tests/</directory>
         </testsuite>
     </testsuites>
 
     <filter>
         <whitelist>
-            <directory>./</directory>
+            <directory>./src/Bundle</directory>
             <exclude>
-                <directory>./Tests</directory>
-                <directory>./src/Bundle/*/Tests/</directory>
-                <directory>./vendor</directory>
-                <directory>./public</directory>
-                <directory>./var</directory>
-                <directory>./bin</directory>
+                <directory>./src/Bundle/*/Tests</directory>
             </exclude>
         </whitelist>
     </filter>
