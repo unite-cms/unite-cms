@@ -19,7 +19,7 @@ At the moment unite cms is based on the Symfony 4.0 and only requires PHP >= 7.1
 
     composer create-project unite-cms/standard u --stability dev
 
-    # Now set database configuration using environment variables or .env file 
+    # Now set configuration using environment variables or .env file. See .env.dist for a list of all required environment parameters. 
     
     bin/console doctrine:schema:update --force
 
