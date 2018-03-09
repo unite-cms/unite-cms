@@ -137,6 +137,17 @@ class Domain
     }
 
     /**
+     *  checks if domain has content types
+     */
+    public function hasContentTypes() {
+        if ($this->getContentTypes()->count() > 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns contentTypes that are present in this domain but not in $domain.
      *
      * @param Domain $domain
