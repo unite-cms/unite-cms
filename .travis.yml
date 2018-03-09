@@ -10,6 +10,7 @@ matrix:
         - php: 7.1
         - php: 7.2
         - php: 7.1
+          if: branch = master
           env: coverage=true
 
     fast_finish: true
