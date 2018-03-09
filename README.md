@@ -1,7 +1,8 @@
 unite cms
 =========
 
-[![Build Status](https://travis-ci.org/unite-cms/standard.svg?branch=master)](https://travis-ci.org/unite-cms/standard)
+[![Build Status](https://travis-ci.org/unite-cms/unite-cms.svg?branch=master)](https://travis-ci.org/unite-cms/unite-cms)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/59a0dce5677500c486a5/test_coverage)](https://codeclimate.com/github/unite-cms/unite-cms/test_coverage)
 
 unite cms is a decoupled content management system that allows you to manage all kind of content in a datacentred way by using an intuitv and simple userinterface.
 
@@ -37,6 +38,11 @@ To run unite cms content in production mode, execute:
     bin/console assets:install
     bin/console doctrine:schema:update --force --env=prod
     bin/console cache:clear --env=prod    
+
+## Development
+
+    git clone git@github.com:unite-cms/unite-cms.git
+    composer install
 
 ## Testing
 
