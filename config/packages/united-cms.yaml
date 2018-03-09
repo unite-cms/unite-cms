@@ -1,6 +1,8 @@
 parameters:
     locale: en
     jms_serializer.unserialize_object_constructor.class: UnitedCMS\CoreBundle\Serializer\ObjectConstructor
+    env(DATABASE_PORT): null
+    env(DATABASE_PASSWORD): null
 
 # Twig Configuration
 twig:
