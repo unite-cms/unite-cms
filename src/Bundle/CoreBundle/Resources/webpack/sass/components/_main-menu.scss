@@ -4,11 +4,12 @@
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 0;
   left: 0;
   overflow: auto;
   -webkit-overflow-scrolling: auto;
   background: map-get($colors, white);
+  height: 50px;
+  bottom: auto;
 }
 
 @media (min-width: $breakpoint-medium) {
@@ -16,6 +17,8 @@
     width: 310px;
     right: auto;
     box-shadow: 2px 0 10px 0 rgba(0,0,0,0.08);
+    height: auto;
+    bottom: 0;
   }
 }
 

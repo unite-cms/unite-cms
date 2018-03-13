@@ -1,8 +1,9 @@
-{% extends '@UnitedCMSCore/layout.full.html.twig' %}
-{% block title %}United.{% endblock title %}
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block navigation %}{% endblock %}
+{% block title %}unite{% endblock title %}
 {% block content %}
 
-    <div class="uk-card uk-card-default uk-card-body" style="width: 90%; max-width: 450px; margin: 0 auto;">
+    <div class="uk-card uk-card-default uk-card-body uk-width-large" style="margin: 20px; border-radius: 5px; box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);">
         <h2>Organizations</h2>
 
         {% if organizations|length == 0 %}

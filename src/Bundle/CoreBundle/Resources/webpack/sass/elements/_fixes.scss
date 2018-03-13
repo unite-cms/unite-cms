@@ -1,17 +1,17 @@
 
 // Don't show symfony dev toolbar over main menu.
 @media (min-width: $breakpoint-medium) {
-  .unite-main-section + .sf-toolbar .sf-toolbarreset {
-    left: 320px;
-  }
-
-  .unite-main-section + .sf-toolbar.sf-toolbar-clearer {
-    display: none !important;
+  .unite-main-menu + .unite-main-section + .sf-toolbar {
+    .sf-toolbarreset {
+      left: 320px;
+    }
   }
 }
 
 @media (min-width: $breakpoint-xlarge) {
-  .unite-main-section + .sf-toolbar .sf-toolbarreset {
-    left: 450px;
+  .unite-main-menu + .unite-main-section + .sf-toolbar {
+    .sf-toolbarreset {
+      left: 450px;
+    }
   }
 }

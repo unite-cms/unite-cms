@@ -1,28 +1,21 @@
 
 .unite-main-section {
-  background: map-get($colors, grey-very-light);
-  min-height: 100vh;
   position: relative;
+}
 
-  > header {
-    background: map-get($colors, white);
-    padding: 40px 30px 0;
-  }
+.unite-main-menu + .unite-main-section {
+  margin-top: 50px;
 }
 
 @media (min-width: $breakpoint-medium) {
-  .unite-main-section {
-    margin-left: 320px;
-    box-shadow: 2px 0 10px 0 rgba(0,0,0,0.08);
+  .unite-main-menu + .unite-main-section {
+    margin-left: 310px;
+    margin-top: 0;
   }
 }
 
 @media (min-width: $breakpoint-xlarge) {
-  .unite-main-section {
-    min-height: 100px;
-    max-width: 1160px;
-    left: 50%;
-    margin: 50px 0 50px -380px;
-    border-radius: 5px;
+  .unite-main-menu + .unite-main-section {
+    margin-left: 400px;
   }
 }
