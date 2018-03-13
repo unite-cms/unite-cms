@@ -8,7 +8,7 @@
     {% include '@UnitedCMSCore/_assets.html.twig' %}
 </head>
 <body>
-<div class="uk-navbar-container uk-hidden@m" uk-navbar uk-sticky
+<!--div class="uk-navbar-container uk-hidden@m" uk-navbar uk-sticky
      style="background: white; border-bottom: 1px solid #e5e5e5;">
     {% if _nav is not empty %}
         <div class="uk-navbar-left">
@@ -18,28 +18,32 @@
     <div class="uk-navbar-center">
         {{ block('navtitle') }}
     </div>
-</div>
+</div-->
 
 {% if _nav is not empty %}
-    <div class="united-sidebar uk-visible@m">
+    <div class="unite-main-menu">
         {{ block('navigation') }}
     </div>
 {% endif %}
 
-<div class="uk-section united-main-section">
-    {% set message_bags = app.session.flashbag.all %}
-    {% if message_bags|length > 0 %}
-        <div style="margin: 20px 20px 0">
-            {% for label, messages in message_bags %}
-                {% for message in messages %}
-                    <div uk-alert class="uk-alert-{{ label }}">
-                        <a class="uk-alert-close" uk-close></a>
-                        <p>{{ message }}</p>
-                    </div>
+<div class="unite-main-section">
+    <header>
+        {% set message_bags = app.session.flashbag.all %}
+        {% if message_bags|length > 0 %}
+            <div style="margin: 20px 20px 0">
+                {% for label, messages in message_bags %}
+                    {% for message in messages %}
+                        <div uk-alert class="uk-alert-{{ label }}">
+                            <a class="uk-alert-close" uk-close></a>
+                            <p>{{ message }}</p>
+                        </div>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </div>
-    {% endif %}
+            </div>
+        {% endif %}
+
+        <h1>This is the title</h1>
+    </header>
 
     <div class="uk-container">
         {% block content %}{% endblock %}
@@ -47,7 +51,7 @@
 </div>
 
 {% if _nav is not empty %}
-    <div id="modal-main-nav" class="uk-modal-full" uk-modal>
+    <!--div id="modal-main-nav" class="uk-modal-full" uk-modal>
         <div class="uk-modal-dialog">
             <button class="uk-modal-close-full uk-close-large" type="button" uk-close></button>
             <div class="uk-section uk-section-large" style="min-height: 100vh">
@@ -56,7 +60,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div-->
 {% endif %}
 </body>
 </html>

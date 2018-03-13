@@ -1,0 +1,27 @@
+
+:not(pre) > code, :not(pre) > kbd, :not(pre) > samp {
+  white-space: pre-wrap;
+  font: 12px Menlo, Monaco, Consolas, monospace;
+  padding: 0;
+  background: none;
+}
+
+// For the moment we just dump all custom css here. This must be refactored in the future.
+.united-domain-editor {
+  position: relative;
+
+  h1.uk-h5 {
+    margin: 0;
+    padding: 9px;
+  }
+
+  form {
+    margin: 0;
+  }
+
+  button[type="submit"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}

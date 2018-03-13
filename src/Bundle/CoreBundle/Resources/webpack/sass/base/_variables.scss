@@ -1,0 +1,24 @@
+
+// COLORS
+$united-color: #05BE82;
+$united-color-hover: #03845A;
+
+$colors: (
+  white:              #FFFFFF,
+  grey-very-light:    #FCFCFC,
+  grey:               #EBEBEB,
+  grey-dark:          #989898,
+  grey-very-dark:     #242424,
+
+  green:              #0BD49E,
+  red:                #FF5A8A
+);
+
+// UI KIT OVERRIDES
+$global-background: map-get($colors, grey);
+$global-muted-background: map-get($colors, grey-very-light);
+$global-link-color: map-get($colors, green);
+$global-link-hover-color: darken(map-get($colors, green), 25%);
+$navbar-nav-item-height: 50px;
+
+$card-default-background: $global-muted-background;

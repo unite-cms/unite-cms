@@ -11,7 +11,7 @@ import Sortable from "./vue/views/Sortable.vue";
 import DomainEditor from "./vue/DomainEditor.vue";
 import Reference from "./vue/field/Reference.vue";
 
-require("./sass/united.scss");
+require("./sass/unite.scss");
 
 // loads the Icon plugin
 UIkit.use(Icons);
