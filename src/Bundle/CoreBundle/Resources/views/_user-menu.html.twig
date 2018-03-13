@@ -1,0 +1,21 @@
+<section class="unite-user-menu">
+    <hr />
+    <button class="uk-button uk-button-text uk-width-1-1" type="button">
+        {{ app.user }}
+        <span class="uk-margin-small-left" uk-icon="icon: chevron-down"></span>
+    </button>
+    <div uk-dropdown="mode: click; pos: top-justify">
+        <ul class="uk-nav uk-dropdown-nav">
+            <li><a href="{{ path('unitedcms_core_profile_update') }}">
+                <span class="uk-margin-small-right" uk-icon="icon: cog"></span>
+                Profil bearbeiten
+            </a></li>
+            <li><a class="uk-text-danger" href="/logout">
+                <span class="uk-margin-small-right" uk-icon="icon: sign-out"></span>
+                Ausloggen
+            </a></li>
+
+
+        </ul>
+    </div>
+</section>

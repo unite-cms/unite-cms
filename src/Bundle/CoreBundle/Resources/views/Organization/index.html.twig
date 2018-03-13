@@ -3,21 +3,26 @@
 {% block title %}unite{% endblock title %}
 {% block content %}
 
-    <div class="uk-card uk-card-default uk-card-body uk-width-large" style="margin: 20px; border-radius: 5px; box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);">
-        <h2>Organizations</h2>
+    <div class="uk-card uk-card-default uk-card-body uk-width-large uk-flex uk-flex-column" style="margin: 20px; border-radius: 5px; box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);">
 
-        {% if organizations|length == 0 %}
-            <div class="uk-alert-warning" uk-alert>
-                <p>You are not invited to any organization. Please contact the system administrator.</p>
-            </div>
-        {% else %}
-            <ul class="uk-nav">
-                {% for organization in organizations %}
-                    <li><a href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}"><span
-                                    uk-icon="icon: chevron-right" class="uk-margin-small-right"></span>{{ organization }}
-                        </a></li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+        <div class="uk-flex-1">
+            <h2>Organizations</h2>
+
+            {% if organizations|length == 0 %}
+                <div class="uk-alert-warning" uk-alert>
+                    <p>You are not invited to any organization. Please contact the system administrator.</p>
+                </div>
+            {% else %}
+                <ul class="uk-nav">
+                    {% for organization in organizations %}
+                        <li><a href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}"><span
+                                        uk-icon="icon: chevron-right" class="uk-margin-small-right"></span>{{ organization }}
+                            </a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        {% include '@UnitedCMSCore/_user-menu.html.twig' %}
     </div>
 {% endblock %}
