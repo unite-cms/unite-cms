@@ -1,35 +1,34 @@
-{{ include('@UnitedCMSCore/Domain/_navigaton_header.html.twig') }}
+<div class="uk-flex-1">
+    <p>
+        {{ united.organization }}:
+        <a class="uk-button uk-button-secondary uk-button-small"
+           href="{{ url('unitedcms_core_organizationuser_index', {organization: united.organization.identifier}) }}"><span
+                    uk-icon="icon: users" class="uk-margin-small-right"></span> Users</a>
+    </p>
 
-<p>
-    {{ united.organization }}:
-    <a class="uk-button uk-button-secondary uk-button-small"
-       href="{{ url('unitedcms_core_organizationuser_index', {organization: united.organization.identifier}) }}"><span
-                uk-icon="icon: users" class="uk-margin-small-right"></span> Users</a>
-</p>
+    <hr/>
 
-<hr/>
-
-{% if united.organization.domains|length > 0 %}
-    <button style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 100%"
-            class="uk-button uk-button-default uk-align-center" type="button">Domain wählen... <span
-                uk-icon="icon:  triangle-down"></span></button>
-    <div uk-dropdown="mode: click">
-        <ul class="uk-nav uk-dropdown-nav">
-            {% for d in united.organization.domains %}
-                <li>
-                    <a href="{{ path('unitedcms_core_domain_view', {organization: organization.identifier, domain: d.identifier}) }}"><span
-                                uk-icon="icon: chevron-right" class="uk-margin-small-right"></span>{{ d }}</a></li>
-            {% endfor %}
-            <li class="uk-nav-divider"></li>
-            <li><a class="uk-text-primary"
-                   href="{{ path('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}"><span
-                            uk-icon="icon: plus" class="uk-margin-small-right"></span>Create New Domain</a></li>
-        </ul>
-    </div>
-{% else %}
-    <a class="uk-button uk-button-default uk-align-center"
-       href="{{ url('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}"><span
-                uk-icon="icon:  plus" class="uk-margin-small-right"></span> Domain erstellen</a>
-{% endif %}
-
-{{ include('@UnitedCMSCore/Domain/_navigaton_footer.html.twig') }}
+    {% if united.organization.domains|length > 0 %}
+        <button style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 100%"
+                class="uk-button uk-button-default uk-align-center" type="button">Domain wählen... <span
+                    uk-icon="icon:  triangle-down"></span></button>
+        <div uk-dropdown="mode: click">
+            <ul class="uk-nav uk-dropdown-nav">
+                {% for d in united.organization.domains %}
+                    <li>
+                        <a href="{{ path('unitedcms_core_domain_view', {organization: organization.identifier, domain: d.identifier}) }}"><span
+                                    uk-icon="icon: chevron-right" class="uk-margin-small-right"></span>{{ d }}</a></li>
+                {% endfor %}
+                <li class="uk-nav-divider"></li>
+                <li><a class="uk-text-primary"
+                       href="{{ path('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}"><span
+                                uk-icon="icon: plus" class="uk-margin-small-right"></span>Create New Domain</a></li>
+            </ul>
+        </div>
+    {% else %}
+        <a class="uk-button uk-button-default uk-align-center"
+           href="{{ url('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}"><span
+                    uk-icon="icon:  plus" class="uk-margin-small-right"></span> Domain erstellen</a>
+    {% endif %}
+</div>
+{% include '@UnitedCMSCore/_user-menu.html.twig' %}
