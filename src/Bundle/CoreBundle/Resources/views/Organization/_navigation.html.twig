@@ -6,6 +6,9 @@
 <article id="unite-main-menu-main" class="uk-flex-1" hidden>
     <button type="button" uk-close uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"></button>
 
+
+
+
     <ul class="uk-nav uk-nav-default">
         <li class="uk-nav-header">{% trans %}organization.menu.manage.header{% endtrans %}</li>
         <!--li><a href="#">{% trans %}organization.menu.manage.settings{% endtrans %}</a></li-->
@@ -17,6 +20,9 @@
         </li>
         <!--li><a href="#">{% trans %}organization.menu.manage.delete{% endtrans %}</a></li-->
     </ul>
+
+
+
 
     <ul class="uk-nav uk-nav-default">
         <li class="uk-nav-header">{% trans %}organization.menu.domains.header{% endtrans %}</li>
@@ -31,12 +37,15 @@
         {% endfor %}
 
         <li>
-            <a href="{{ url('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}">
+            <a class="uk-text-success" href="{{ url('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}">
                 <span uk-icon="icon: plus" class="uk-margin-small-right"></span>
                 {% trans %}organization.menu.domains.add{% endtrans %}
             </a>
         </li>
     </ul>
+
+
+
 
 </article>
 <footer id="unite-main-menu-user" hidden>

@@ -1,14 +1,16 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
 {% block title %}{{ united.domain }}: Bearbeiten{% endblock title %}
 {% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-<div class="united-domain-editor">
-    {{ form_start(form) }}
-    <div class="header uk-background-secondary">
-        <h1 class="uk-h5 uk-light">Update Domain: {{ united.domain }}</h1>
-        {{ form_widget(form.submit) }}
+<article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
+    <div class="united-domain-editor">
+        {{ form_start(form) }}
+        <div class="header uk-background-secondary">
+            <h1 class="uk-h5 uk-light">Update Domain: {{ united.domain }}</h1>
+            {{ form_widget(form.submit) }}
+        </div>
+        {{ form_end(form) }}
     </div>
-    {{ form_end(form) }}
-</div>
+</article>
 {% endblock content %}

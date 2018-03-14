@@ -1,49 +1,55 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ organization }}{% endblock title %}
+{% block title %}{{ organization }} | {% trans %}organization.user.headline{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UnitedCMSCore/Organization/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 
-    <div class="uk-card uk-card-default uk-card-body uk-width-1-1" style="margin-left: 10px; box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);">
-        <h1 class="uk-heading-divider">Organization Users</h1>
+    <article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
+        <header class="uk-card-header">
+            <h1>{% trans %}organization.user.headline{% endtrans %}</h1>
+        </header>
 
-        <div class="uk-card uk-card-default uk-card-body">
-            <table class="uk-table uk-table-justify uk-table-divider">
-                <thead>
-                <tr>
-                    <th>{{ knp_pagination_sortable(users, 'Firstname', 'user.firstname') }}</th>
-                    <th>{{ knp_pagination_sortable(users, 'Lastname', 'user.lastname') }}</th>
-                    <th>{{ knp_pagination_sortable(users, 'Email', 'user.email') }}</th>
-                    <th>{{ knp_pagination_sortable(users, 'Roles', 'user.roles') }}</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for member in users %}
+        <div class="uk-card-body">
+            <p class="uk-text-lead">{% trans %}organization.user.description{% endtrans %}</p>
+
+            {% if users|length > 0 %}
+                <table class="uk-table uk-table-justify uk-table-divider">
+                    <thead>
                     <tr>
-                        <td>{{ member.user.firstname }}</td>
-                        <td>{{ member.user.lastname }}</td>
-                        <td>{{ member.user.email }}</td>
-                        <td>{{ member.roles|join(', ') }}</td>
-                        <td>
-                            <ul class="uk-iconnav">
-                                <li><a href="{{ path('unitedcms_core_organizationuser_update', {
-                                        organization: organization.identifier,
-                                        member: member.id
-                                    }) }}" uk-icon="icon: file-edit"></a></li>
-                                <li><a class="uk-text-danger" href="{{ path('unitedcms_core_organizationuser_delete', {
-                                        organization: organization.identifier,
-                                        member: member.id
-                                    }) }}" uk-icon="icon: trash"></a></li>
-                            </ul>
-                        </td>
+                        <th>{{ knp_pagination_sortable(users, 'Firstname', 'user.firstname') }}</th>
+                        <th>{{ knp_pagination_sortable(users, 'Lastname', 'user.lastname') }}</th>
+                        <th>{{ knp_pagination_sortable(users, 'Email', 'user.email') }}</th>
+                        <th>{{ knp_pagination_sortable(users, 'Roles', 'user.roles') }}</th>
+                        <th>Actions</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <div class="navigation">
-                {{ knp_pagination_render(users) }}
-            </div>
+                    </thead>
+                    <tbody>
+                    {% for member in users %}
+                        <tr>
+                            <td>{{ member.user.firstname }}</td>
+                            <td>{{ member.user.lastname }}</td>
+                            <td>{{ member.user.email }}</td>
+                            <td>{{ member.roles|join(', ') }}</td>
+                            <td>
+                                <ul class="uk-iconnav">
+                                    <li><a href="{{ path('unitedcms_core_organizationuser_update', {
+                                            organization: organization.identifier,
+                                            member: member.id
+                                        }) }}" uk-icon="icon: file-edit"></a></li>
+                                    <li><a class="uk-text-danger" href="{{ path('unitedcms_core_organizationuser_delete', {
+                                            organization: organization.identifier,
+                                            member: member.id
+                                        }) }}" uk-icon="icon: trash"></a></li>
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="navigation">
+                    {{ knp_pagination_render(users) }}
+                </div>
+            {% endif %}
         </div>
-    </div>
+    </article>
 
 {% endblock content %}

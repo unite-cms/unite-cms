@@ -1,0 +1,111 @@
+<header class="uk-flex">
+    <button uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"><span uk-icon="icon: menu"></span></button>
+
+    <button style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
+            class="uk-button uk-button-default uk-flex-1" type="button">{{ united.domain }} <span
+                uk-icon="icon:  triangle-down"></span></button>
+    <div uk-dropdown="mode: click; pos: bottom-left" class="uk-width-large">
+        <div class="uk-dropdown-grid uk-child-width-1-2@m" uk-grid>
+            <div>
+
+                <ul class="uk-nav uk-dropdown-nav">
+                    {% for d in united.organization.domains %}
+                        <li{% if d == united.domain %} class="uk-active"{% endif %}>
+                            <a href="{{ path('unitedcms_core_domain_view', {organization: united.organization.identifier, domain: d.identifier}) }}">
+                                <span uk-icon="icon: chevron-right" class="uk-margin-small-right"></span>
+                                {{ d }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            </div>
+            <div>
+
+                <ul class="uk-nav uk-dropdown-nav">
+                    <li>
+                        <a href="{{ url('unitedcms_core_domainuser_index', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                            <span uk-icon="icon: users" class="uk-margin-small-right"></span>
+                            {% trans %}domain.menu.manage.user{% endtrans %}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('unitedcms_core_domainapiclient_index', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                            <span uk-icon="icon: server" class="uk-margin-small-right"></span>
+                            {% trans %}domain.menu.manage.api_clients{% endtrans %}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('unitedcms_core_domain_update', {organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                            <span uk-icon="icon: cog" class="uk-margin-small-right"></span>
+                            {% trans %}domain.menu.manage.update{% endtrans %}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="uk-text-danger" href="{{ url('unitedcms_core_domain_delete', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                            <span uk-icon="icon: trash" class="uk-margin-small-right"></span>
+                            {% trans %}domain.menu.manage.trash{% endtrans %}
+                        </a></li>
+                </ul>
+
+            </div>
+        </div>
+
+    </div>
+
+    <button uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"><span uk-icon="icon: user"></span></button>
+</header>
+<article id="unite-main-menu-main" class="uk-flex-1" hidden>
+    <button type="button" uk-close uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"></button>
+
+    <ul class="uk-nav-default uk-nav-parent-icon" uk-nav>
+        {% if united.domain.contentTypes|length > 0 %}
+            <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
+            {% for type in united.domain.contentTypes %}
+                <li><a href="{{ path('unitedcms_core_content_index', {
+                        organization: united.organization.identifier,
+                        domain: united.domain.identifier,
+                        content_type: type.identifier,
+                        view: 'all'
+                    }) }}"><span class="uk-margin-small-right"
+                                 uk-icon="icon: {{ type.icon ? type.icon : 'album' }}"></span> {{ type }}</a>
+
+                    {% if type.views|length > 1 %}
+                        <ul class="uk-nav-sub">
+                            {% for view in type.views %}
+                            {% if view.identifier != "all" %}
+                            <li><a href="{{ path('unitedcms_core_content_index', {
+                                    organization: united.organization.identifier,
+                                    domain: united.domain.identifier,
+                                    content_type: type.identifier,
+                                    view: view.identifier
+                                }) }}"><span class="uk-margin-small-right"
+                                             uk-icon="icon: {{ view.icon ? view.icon : 'chevron-right' }}"></span> {{ view }}
+                                </a>
+                                {% endif %}
+                                {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        {% endif %}
+        {% if united.domain.settingTypes|length > 0 %}
+            <li class="uk-nav-divider"></li>
+            <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
+            {% for type in united.domain.settingTypes %}
+                <li><a href="{{ path('unitedcms_core_setting_index', {
+                        organization: united.organization.identifier,
+                        domain: united.domain.identifier,
+                        setting_type: type.identifier
+                    }) }}"><span class="uk-margin-small-right"
+                                 uk-icon="icon: {{ type.icon ? type.icon : 'settings' }}"></span> {{ type }}</a></li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+
+
+</article>
+<footer id="unite-main-menu-user" hidden>
+    <button type="button" uk-close uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"></button>
+    {% include '@UnitedCMSCore/_user-menu.html.twig' %}
+</footer>

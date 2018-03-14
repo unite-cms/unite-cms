@@ -81,7 +81,7 @@
       border-bottom: 2px solid map-get($colors, grey);
       padding-bottom: 25px;
 
-      > button {
+      > button[uk-toggle] {
         display: none;
       }
     }

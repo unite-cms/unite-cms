@@ -1,11 +1,15 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
 {% block title %}{{ domain }}: Löschen{% endblock title %}
 {% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-    <h1 class="uk-heading-divider">Delete Domain "{{ domain }}"</h1>
+    <article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
+        <header class="uk-card-header">
+            <h1>Delete Domain "{{ domain }}"</h1>
+        </header>
 
-    <div class="uk-card uk-card-default uk-card-body">
-        {{ form(form) }}
-    </div>
+        <div class="uk-card-body">
+            {{ form(form) }}
+        </div>
+    </article>
 {% endblock content %}
