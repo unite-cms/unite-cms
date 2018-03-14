@@ -1,0 +1,111 @@
+
+.unite-main-menu {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: map-get($colors, white);
+  box-shadow: 2px 0 10px 0 rgba(0,0,0,0.08);
+  height: 50px;
+  bottom: auto;
+  z-index: 100;
+  box-sizing: border-box;
+
+  header {
+    button {
+      width: 50px;
+      height: 50px;
+    }
+
+    h2 {
+      margin: 0;
+      line-height: 50px;
+      text-overflow: ellipsis;
+    }
+  }
+
+  > #unite-main-menu-main,
+  > #unite-main-menu-user {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    height: 100vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: auto;
+    background: map-get($colors, white);
+    z-index: 110;
+
+    > button.uk-close {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 50px;
+      height: 50px;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-medium) {
+  .unite-main-menu {
+    .unite-user-menu {
+      margin: 0;
+      padding: 0;
+
+      > button {
+        display: none;
+      }
+      > .uk-dropdown {
+        position: static;
+        display: block;
+        background: none;
+        box-shadow: none;
+        min-width: 0;
+        padding: 0;
+      }
+    }
+  }
+}
+
+@media (min-width: $breakpoint-medium) {
+  .unite-main-menu {
+    width: 310px;
+    right: auto;
+    height: auto;
+    bottom: 0;
+    padding: 30px;
+
+    header {
+      border-bottom: 2px solid map-get($colors, grey);
+      padding-bottom: 25px;
+
+      > button {
+        display: none;
+      }
+    }
+
+    > #unite-main-menu-main,
+    > #unite-main-menu-user {
+      display: block !important;
+      position: static;
+      height: auto;
+
+      > button.uk-close {
+        display: none;
+      }
+    }
+
+    > #unite-main-menu-main {
+      overflow: auto;
+      -webkit-overflow-scrolling: auto;
+    }
+  }
+}
+
+@media (min-width: $breakpoint-xlarge) {
+  .unite-main-menu {
+    width: 400px;
+  }
+}
