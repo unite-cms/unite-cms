@@ -1,0 +1,48 @@
+site:
+  title: unite cms
+
+organizations:
+  headline: Organizations
+  error:
+    no_organizations: You are no member of any organization. Please contact the system administrator. If you are the system administrator, please consult the docs to see how you can create an organization.
+
+  menu:
+    manage:
+      header: Manage this organization
+      settings: Settings
+      user: User
+      delete: Delete organization
+    domains:
+      header: Domains in this organization
+      add: Add a domain
+
+  user:
+    headline: User in this organization
+    description: On this page all users from all domains in this organization are listed. To add an new user, invite him_her to one domain.
+
+invitation:
+  token_missing: __invitation.token_missing
+  token_not_found: __invitation.token_not_found
+  token_expired: __invitation.token_expired
+  wrong_user: __invitation.wrong_user
+  already_member: __invitation.already_member
+
+profile:
+  update:
+    headline: Profile settings
+
+user_menu:
+  edit_profile: Profile settings
+  sign_out: Sign out
+
+domain:
+  menu:
+    manage:
+      user: User
+      api_clients: API clients
+      update: Update domain
+      trash: Delete domain
+    content_types:
+      headline: Content types
+    setting_types:
+      headline: Setting types
