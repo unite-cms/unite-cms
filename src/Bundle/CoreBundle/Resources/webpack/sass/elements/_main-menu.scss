@@ -22,6 +22,7 @@
 
     > button:not([uk-toggle]).uk-open {
       z-index: 1050;
+      background: map-get($colors, white);
     }
 
     h2, .uk-h2 {
@@ -33,49 +34,110 @@
 
     .uk-dropdown-nav {
       .uk-nav-header {
-        font-weight: bold;
-        color: map-get($colors, grey-dark);
         border-bottom: 2px solid map-get($colors, grey-medium);
-        margin-bottom: 10px;
+        padding-bottom: 0;
+        margin-bottom: 20px;
+
+        a {
+          padding-bottom: 0;
+        }
       }
     }
 
-    .uk-dropdown {
-      > button.uk-close {
-        position: absolute;
-        right: 0;
-        top: 0;
-        margin: 0;
-        padding: 0;
-        width: 50px;
-        height: 50px;
+    .uk-dropdown-grid {
+      > div:nth-child(2) {
+        margin-top: 0;
       }
     }
   }
 
-  > #unite-main-menu-main,
-  > #unite-main-menu-user {
+  #unite-main-menu-main,
+  #unite-main-menu-user,
+  #unite-main-menu-domain {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: auto;
     height: 100vh;
+    width: 100vw;
     overflow: auto;
     -webkit-overflow-scrolling: auto;
     background: map-get($colors, white);
     z-index: 110;
+    margin: 0;
 
     .uk-nav {
       margin: 30px;
     }
 
     > button.uk-close {
-      position: absolute;
+      position: fixed;
       right: 0;
       top: 0;
+      margin: 0;
+      padding: 0;
       width: 50px;
       height: 50px;
+    }
+  }
+
+  #unite-main-menu-domain {
+    padding: 0;
+
+    .uk-grid {
+      margin: 0;
+
+      > div {
+        padding: 0;
+      }
+
+      > div:first-child {
+        background: map-get($colors, grey-very-light);
+
+        .uk-nav {
+          li {
+            &.uk-active {
+              background: map-get($colors, white);
+              box-shadow: 0 2px 4px 0 rgba(0,0,0,0.03);
+              border-radius: 3px;
+
+              a {
+                padding-left: 10px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .uk-nav {
+
+    li {
+      padding-left: 10px;
+
+      &.uk-nav-header {
+        color: map-get($colors, grey-dark);
+        font-weight: bold;
+        font-size: 0.75rem;
+        padding-left: 0;
+
+        a {
+          color: map-get($colors, grey-dark);
+        }
+      }
+
+      &.uk-active {
+        font-weight: bold;
+      }
+
+      a {
+        color: map-get($colors, grey-very-dark);
+        display: block;
+        height: 30px;
+        line-height: 30px;
+      }
     }
   }
 }
@@ -83,16 +145,10 @@
 @media (max-width: $breakpoint-medium) {
   .unite-main-menu {
 
-    header {
-      .uk-dropdown {
-        right: 0;
-        margin: 0;
-        padding-top: 50px;
-        left: 0 !important;
-        top: 0 !important;
-        height: 100vh;
-        width: 100vw !important;
-      }
+    #unite-main-menu-domain {
+      top: 0 !important;
+      left: 0 !important;
+      border-top: 50px solid map-get($colors, white);
     }
 
     .unite-user-menu {
@@ -127,6 +183,10 @@
       border-bottom: 2px solid map-get($colors, grey-medium);
       padding-bottom: 25px;
 
+      h2, .uk-h2 {
+        line-height: normal;
+      }
+
       > button[uk-toggle] {
         display: none;
       }
@@ -145,11 +205,11 @@
       }
     }
 
-    > #unite-main-menu-main,
-    > #unite-main-menu-user {
-      display: block !important;
-      position: static;
+    #unite-main-menu-main,
+    #unite-main-menu-user,
+    #unite-main-menu-domain {
       height: auto;
+      overflow: initial;
 
       > button.uk-close {
         display: none;
@@ -160,13 +220,69 @@
       }
     }
 
-    > #unite-main-menu-main {
+    #unite-main-menu-main,
+    #unite-main-menu-user {
+      display: block !important;
+      position: static;
+      width: auto !important;
+    }
+
+    #unite-main-menu-main {
       overflow: auto;
       -webkit-overflow-scrolling: auto;
 
       .uk-nav {
         margin: 30px 0;
       }
+    }
+
+    #unite-main-menu-domain {
+      max-width: none;
+      width: 570px;
+      z-index: 120;
+      border: 1px solid map-get($colors, grey-medium);
+      box-shadow: 0 7px 15px 0 rgba(0,0,0,0.10);
+      border-radius: 2px;
+
+      > button.uk-close {
+        display: block;
+        position: absolute;
+      }
+
+      .uk-grid.uk-dropdown-grid {
+        > div {
+          padding: 10px 30px 20px;
+
+          &:first-child {
+            li.uk-active {
+              margin-right: -30px;
+              position: relative;
+              border-radius: 3px 0 0 3px;
+
+              &:after {
+                position: absolute;
+                width: 6px;
+                right: -3px;
+                top: 0;
+                bottom: 0;
+                content: "";
+                display: block;
+                background: map-get($colors, white);
+              }
+            }
+          }
+
+          &:nth-child(2) {
+            padding-top: 80px;
+            background: map-get($colors, white);
+            box-shadow: 0 -5px 10px 0 rgba(0,0,0,0.10);
+          }
+        }
+      }
+    }
+
+    .unite-user-menu {
+      margin-top: 0;
     }
   }
 }

@@ -4,21 +4,20 @@
     <button style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
             class="uk-button uk-button-default uk-flex-1" type="button">{{ united.domain }} <span
                 uk-icon="icon:  triangle-down"></span></button>
-    <div id="unite-main-menu-domain" uk-dropdown="mode: click; pos: bottom-left; offset: -50" class="uk-width-large">
+    <div id="unite-main-menu-domain" uk-dropdown="mode: click; pos: bottom-left; offset: -50; animation: uk-animation-slide-top" class="uk-width-large">
         <div class="uk-dropdown-grid uk-child-width-1-2@m" uk-grid>
             <div>
 
                 <ul class="uk-nav uk-dropdown-nav">
                     <li class="uk-nav-header">
                         <a href="{{ path('unitedcms_core_domain_index', {organization: united.organization.identifier}) }}">
-                            <span uk-icon="icon: cog" class="uk-margin-small-right"></span>
                             {{ united.organization }}
+                            <span uk-icon="icon: cog; ratio: 0.75"></span>
                         </a>
                     </li>
                     {% for d in united.organization.domains %}
                         <li{% if d == united.domain %} class="uk-active"{% endif %}>
                             <a href="{{ path('unitedcms_core_domain_view', {organization: united.organization.identifier, domain: d.identifier}) }}">
-                                <span uk-icon="icon: chevron-right" class="uk-margin-small-right"></span>
                                 {{ d }}
                             </a>
                         </li>
@@ -56,7 +55,7 @@
 
             </div>
         </div>
-        <button type="button" uk-close uk-toggle="target: #unite-main-menu-domain"></button>
+        <button type="button" uk-close uk-toggle="target: #unite-main-menu-domain; animation: uk-animation-slide-top"></button>
     </div>
 
     <button uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"><span uk-icon="icon: user"></span></button>
@@ -64,7 +63,7 @@
 <article id="unite-main-menu-main" class="uk-flex-1" hidden>
     <button type="button" uk-close uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"></button>
 
-    <ul class="uk-nav-default uk-nav-parent-icon" uk-nav>
+    <ul class="uk-nav uk-nav-parent-icon" uk-nav>
         {% if united.domain.contentTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
             {% for type in united.domain.contentTypes %}
