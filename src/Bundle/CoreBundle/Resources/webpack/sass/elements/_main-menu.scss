@@ -16,12 +16,40 @@
     button {
       width: 50px;
       height: 50px;
+      background: none;
+      border: none;
     }
 
-    h2 {
+    > button:not([uk-toggle]).uk-open {
+      z-index: 1050;
+    }
+
+    h2, .uk-h2 {
       margin: 0;
       line-height: 50px;
       text-overflow: ellipsis;
+      font-size: 1.125rem;
+    }
+
+    .uk-dropdown-nav {
+      .uk-nav-header {
+        font-weight: bold;
+        color: map-get($colors, grey-dark);
+        border-bottom: 2px solid map-get($colors, grey-medium);
+        margin-bottom: 10px;
+      }
+    }
+
+    .uk-dropdown {
+      > button.uk-close {
+        position: absolute;
+        right: 0;
+        top: 0;
+        margin: 0;
+        padding: 0;
+        width: 50px;
+        height: 50px;
+      }
     }
   }
 
@@ -38,6 +66,10 @@
     background: map-get($colors, white);
     z-index: 110;
 
+    .uk-nav {
+      margin: 30px;
+    }
+
     > button.uk-close {
       position: absolute;
       right: 0;
@@ -50,9 +82,23 @@
 
 @media (max-width: $breakpoint-medium) {
   .unite-main-menu {
+
+    header {
+      .uk-dropdown {
+        right: 0;
+        margin: 0;
+        padding-top: 50px;
+        left: 0 !important;
+        top: 0 !important;
+        height: 100vh;
+        width: 100vw !important;
+      }
+    }
+
     .unite-user-menu {
       margin: 0;
       padding: 0;
+      border: none;
 
       > button {
         display: none;
@@ -78,11 +124,24 @@
     padding: 30px;
 
     header {
-      border-bottom: 2px solid map-get($colors, grey);
+      border-bottom: 2px solid map-get($colors, grey-medium);
       padding-bottom: 25px;
 
       > button[uk-toggle] {
         display: none;
+      }
+
+      > button:not([uk-toggle]) {
+        height: auto;
+        width: auto;
+        background: #FFFFFF;
+        border: 1px solid map-get($colors, grey-medium);
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
+        border-radius: 2px;
+
+        &.uk-open {
+          z-index: 0;
+        }
       }
     }
 
@@ -95,11 +154,19 @@
       > button.uk-close {
         display: none;
       }
+
+      .uk-nav {
+        margin: 0;
+      }
     }
 
     > #unite-main-menu-main {
       overflow: auto;
       -webkit-overflow-scrolling: auto;
+
+      .uk-nav {
+        margin: 30px 0;
+      }
     }
   }
 }

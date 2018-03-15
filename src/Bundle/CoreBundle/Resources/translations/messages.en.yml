@@ -6,6 +6,7 @@ organizations:
   error:
     no_organizations: You are no member of any organization. Please contact the system administrator. If you are the system administrator, please consult the docs to see how you can create an organization.
 
+organization:
   menu:
     manage:
       header: Manage this organization
