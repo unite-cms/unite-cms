@@ -3,9 +3,16 @@
 {% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-    <h1 class="uk-heading-divider">Create new {{ contentType }}</h1>
-
-    <div class="uk-card uk-card-default uk-card-body">
-        {{ form(form) }}
-    </div>
+<article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
+    <header class="uk-card-header uk-flex">
+        <a class="back-button" href="{{ path('unitedcms_core_content_index', {
+            domain: domain.identifier,
+            organization: organization.identifier,
+            content_type: contentType.identifier,
+            view: view.identifier
+        }) }}"><i data-feather="arrow-left"></i></a>
+        <h2 class="uk-flex-1">{% trans %}domain.create.headline{% endtrans %}</h2>
+    </header>
+    {{ form(form) }}
+</article>
 {% endblock content %}

@@ -9,10 +9,6 @@
         </header>
 
         <div>
-            <p class="uk-placeholder uk-text-center uk-width-xlarge uk-align-center">
-                <i data-feather="info"></i>
-                {% trans %}organization.user.description{% endtrans %}
-            </p>
             {% if users|length > 0 %}
                 <table class="uk-table uk-table-justify uk-table-divider">
                     <thead>
@@ -51,6 +47,11 @@
                     {{ knp_pagination_render(users) }}
                 </div>
             {% endif %}
+
+            <p class="uk-placeholder uk-text-center uk-width-xlarge uk-align-center">
+                <i data-feather="info"></i>
+                {% trans %}organization.user.description{% endtrans %}
+            </p>
         </div>
     </article>
 

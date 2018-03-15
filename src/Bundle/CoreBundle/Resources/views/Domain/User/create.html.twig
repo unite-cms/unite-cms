@@ -3,15 +3,31 @@
 {% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-    <h2 class="uk-heading-divider">Add Organization User to Domain</h2>
+<article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
+    <header class="uk-card-header uk-flex">
+        <a class="back-button" href="{{ path('unitedcms_core_domainuser_index', {
+            organization: united.organization.identifier,
+            domain: united.domain.identifier
+        }) }}">
+            <i data-feather="arrow-left"></i>
+        </a>
+        <h2 class="uk-flex-1">{% trans %}domain.user.create.headline{% endtrans %}</h2>
+    </header>
 
-    <div class="uk-card uk-card-default uk-card-body">
-        {{ form(form_create) }}
-    </div>
+    {{ form(form_create) }}
+</article>
 
-    <h2 class="uk-heading-divider">Import new User into Domain</h2>
+<article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
+    <header class="uk-card-header uk-flex">
+        <a class="back-button" href="{{ path('unitedcms_core_domainuser_index', {
+            organization: united.organization.identifier,
+            domain: united.domain.identifier
+        }) }}">
+            <i data-feather="arrow-left"></i>
+        </a>
+        <h2 class="uk-flex-1">{% trans %}domain.user.invite.headline{% endtrans %}</h2>
+    </header>
 
-    <div class="uk-card uk-card-default uk-card-body">
-        {{ form(form_invite) }}
-    </div>
+    {{ form(form_invite) }}
+</article>
 {% endblock content %}

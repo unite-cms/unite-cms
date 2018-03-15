@@ -1,5 +1,5 @@
 <template>
-    <div class="uk-card uk-card-default uk-card-body">
+    <div class="unite-card-table">
 
         <div class="uk-align-right" v-if="hasDeletedContent && !selectable">
             <ul class="uk-subnav uk-subnav-pill" uk-margin>
@@ -14,7 +14,7 @@
                 <th v-if="selectable"></th>
                 <th v-for="(title, header) in columns" v-on:click="setSort(header)" class="sortable">
                     {{ title }}
-                    <span v-if="sortArrow(header)" v-bind:uk-icon="sortArrow(header)"></span>
+                    <span v-html="sortArrow(header)"></span>
                 </th>
                 <th v-if="!selectable">Actions</th>
             </tr>
@@ -80,6 +80,7 @@
 
 <script>
 import { GraphQLClient } from 'graphql-request'
+import feather from 'feather-icons';
 
 export default {
     data() {
@@ -161,13 +162,16 @@ export default {
             }
             this.loadData();
         },
-        sortArrow: function(header, isAsc) {
+        sortArrow: function(header) {
 
             if(header !== this.sortFieldKey) {
-                return false;
+                return '';
             }
 
-            return this.sort ? 'icon: arrow-down' : 'icon: arrow-up';
+            return feather.icons[(this.sort ? 'chevron-down' : 'chevron-up')].toSvg({
+                width: 16,
+                height: 16
+            });
         },
         formatDate: function(date) {
             return date.getDate()  + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " +

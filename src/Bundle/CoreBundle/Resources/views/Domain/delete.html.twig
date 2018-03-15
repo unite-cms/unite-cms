@@ -4,8 +4,14 @@
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
     <article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
-        <header class="uk-card-header">
-            <h1>Delete Domain "{{ domain }}"</h1>
+        <header class="uk-card-header uk-flex">
+            <a class="back-button" href="{{ path('unitedcms_core_domain_view', {
+                organization: united.organization.identifier,
+                domain: united.domain.identifier
+            }) }}">
+                <i data-feather="arrow-left"></i>
+            </a>
+            <h1 class="uk-flex-1">{% trans %}domain.delete.headline{% endtrans %}</h1>
         </header>
 
         <div class="uk-card-body">

@@ -1,5 +1,5 @@
 <template>
-    <div class="uk-card uk-card-default uk-card-body">
+    <div class="unite-card-table">
 
         <div class="uk-clearfix">
             <div class="uk-align-right" v-if="hasDeletedContent && !selectable">

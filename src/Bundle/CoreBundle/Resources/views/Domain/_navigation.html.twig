@@ -12,7 +12,7 @@
                     <li class="uk-nav-header">
                         <a href="{{ path('unitedcms_core_domain_index', {organization: united.organization.identifier}) }}">
                             {{ united.organization }}
-                            <span uk-icon="icon: cog; ratio: 0.75"></span>
+                            <i data-feather="settings"></i>
                         </a>
                     </li>
                     {% for d in united.organization.domains %}
@@ -30,25 +30,25 @@
                 <ul class="uk-nav uk-dropdown-nav">
                     <li>
                         <a href="{{ url('unitedcms_core_domainuser_index', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
-                            <span uk-icon="icon: users" class="uk-margin-small-right"></span>
+                            <i class="uk-margin-small-right" data-feather="users"></i>
                             {% trans %}domain.menu.manage.user{% endtrans %}
                         </a>
                     </li>
                     <li>
                         <a href="{{ url('unitedcms_core_domainapiclient_index', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
-                            <span uk-icon="icon: server" class="uk-margin-small-right"></span>
+                            <i class="uk-margin-small-right" data-feather="hard-drive"></i>
                             {% trans %}domain.menu.manage.api_clients{% endtrans %}
                         </a>
                     </li>
                     <li>
                         <a href="{{ url('unitedcms_core_domain_update', {organization: united.organization.identifier, domain: united.domain.identifier}) }}">
-                            <span uk-icon="icon: cog" class="uk-margin-small-right"></span>
+                            <i class="uk-margin-small-right" data-feather="settings"></i>
                             {% trans %}domain.menu.manage.update{% endtrans %}
                         </a>
                     </li>
                     <li>
                         <a class="uk-text-danger" href="{{ url('unitedcms_core_domain_delete', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
-                            <span uk-icon="icon: trash" class="uk-margin-small-right"></span>
+                            <i class="uk-margin-small-right" data-feather="trash-2"></i>
                             {% trans %}domain.menu.manage.trash{% endtrans %}
                         </a></li>
                 </ul>
@@ -72,8 +72,10 @@
                         domain: united.domain.identifier,
                         content_type: type.identifier,
                         view: 'all'
-                    }) }}"><span class="uk-margin-small-right"
-                                 uk-icon="icon: {{ type.icon ? type.icon : 'album' }}"></span> {{ type }}</a>
+                    }) }}">
+                        <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'layers' }}"></i>
+                        {{ type }}
+                    </a>
 
                     {% if type.views|length > 1 %}
                         <ul class="uk-nav-sub">
@@ -84,8 +86,9 @@
                                     domain: united.domain.identifier,
                                     content_type: type.identifier,
                                     view: view.identifier
-                                }) }}"><span class="uk-margin-small-right"
-                                             uk-icon="icon: {{ view.icon ? view.icon : 'chevron-right' }}"></span> {{ view }}
+                                }) }}">
+                                    <i class="uk-margin-small-right" data-feather="{{ view.icon ? view.icon : 'layers' }}"></i>
+                                    {{ view }}
                                 </a>
                                 {% endif %}
                                 {% endfor %}
@@ -101,8 +104,10 @@
                         organization: united.organization.identifier,
                         domain: united.domain.identifier,
                         setting_type: type.identifier
-                    }) }}"><span class="uk-margin-small-right"
-                                 uk-icon="icon: {{ type.icon ? type.icon : 'settings' }}"></span> {{ type }}</a></li>
+                    }) }}">
+                        <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'settings' }}"></i>
+                        {{ type }}
+                    </a></li>
             {% endfor %}
         {% endif %}
     </ul>

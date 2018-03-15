@@ -5,11 +5,11 @@
 
     <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-xlarge uk-flex uk-flex-column">
 
-        <header class="uk-card-header">
-            <a href="{{ path('unitedcms_core_organizations') }}" class="uk-button uk-button-default uk-button-small">
-                <span uk-icon="icon: arrow-left" class="uk-margin-small-right"></span> Zurück
+        <header class="uk-card-header uk-flex">
+            <a class="back-button" href="{{ path('unitedcms_core_organizations') }}">
+                <i data-feather="arrow-left"></i>
             </a>
-            <h1>{% trans %}profile.update.headline{% endtrans %}</h1>
+            <h2>{% trans %}profile.update.headline{% endtrans %}</h2>
         </header>
 
         <div class="uk-card-body">

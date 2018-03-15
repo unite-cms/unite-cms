@@ -1,0 +1,68 @@
+
+.unite-card-table {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: -31px -30px 0 -30px;
+  border-top: 30px solid map-get($colors, white);
+
+  table {
+    thead {
+      background: map-get($colors, white);
+      tr {
+        th:first-child {
+          padding-left: 30px;
+        }
+
+        th:last-child {
+           padding-right: 30px;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        td:first-child {
+          padding-left: 30px;
+        }
+
+        td:last-child {
+          padding-right: 30px;
+        }
+
+        &:nth-child(2n) {
+          background: map-get($colors, white);
+        }
+
+        &:last-child {
+          border-bottom: $table-divider-border-width solid $table-divider-border;
+        }
+      }
+    }
+
+    td {
+      .uk-button.actions-dropdown {
+        box-shadow: none;
+        border: 1px solid transparent;
+        border-radius: 2px;
+        padding: 0 20px;
+      }
+    }
+
+    tr:hover {
+      td {
+        .uk-button.actions-dropdown {
+          background: map-get($colors, white);
+          box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+          border-color: map-get($colors, grey-medium);
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: $breakpoint-medium) {
+  .unite-card-table {
+    margin: -41px -40px 0 -40px;
+    border-top-width: 40px;
+  }
+}

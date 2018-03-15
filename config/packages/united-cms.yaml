@@ -1,6 +1,7 @@
 parameters:
     locale: en
     jms_serializer.unserialize_object_constructor.class: UnitedCMS\CoreBundle\Serializer\ObjectConstructor
+    mailer_sender: '%env(MAILER_SENDER)%'
     env(DATABASE_PORT): null
     env(DATABASE_PASSWORD): null
 

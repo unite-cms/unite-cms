@@ -138,6 +138,7 @@ class UnitedCMSManager
                 ->leftJoin('ct.views', 'co')
                 ->where('ct.domain = :domain')
                 ->andWhere('d.organization = :organization')
+                ->orderBy('ct.weight')
                 ->getQuery()->execute(['organization' => $this->organization, 'domain' => $this->domain]);
 
             foreach ($data as $row) {
@@ -146,9 +147,9 @@ class UnitedCMSManager
 
                 // Get views for this contentType.
                 $viewData = $this->em->createQueryBuilder()
-                    ->select('co.id', 'co.identifier', 'co.title', 'co.type', 'co.icon')
-                    ->from('UnitedCMSCoreBundle:View', 'co')
-                    ->leftJoin('co.contentType', 'ct')
+                    ->select('v.id', 'v.identifier', 'v.title', 'v.type', 'v.icon')
+                    ->from('UnitedCMSCoreBundle:View', 'v')
+                    ->leftJoin('v.contentType', 'ct')
                     ->where('ct.id = :ct')
                     ->getQuery()->execute(['ct' => $contentType->getId()]);
 
@@ -170,6 +171,7 @@ class UnitedCMSManager
                 ->leftJoin('st.domain', 'd')
                 ->where('st.domain = :domain')
                 ->andWhere('d.organization = :organization')
+                ->orderBy('st.weight')
                 ->getQuery()->execute(['organization' => $this->organization, 'domain' => $this->domain]);
 
             foreach ($data as $row) {

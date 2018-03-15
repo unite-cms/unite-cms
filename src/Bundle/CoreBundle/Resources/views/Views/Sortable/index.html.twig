@@ -1,12 +1,16 @@
-<div id="view">
-    <h1 class="uk-heading-divider">
-        {{ view.contentType }}
-        {% if view.identifier != 'all' %} » {{ view }}{% endif %}
+<article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
+    <header class="uk-card-header uk-flex">
+        <h2 class="uk-flex-1">
+            {{ view.contentType }}
+            {% if view.identifier != 'all' %} » {{ view }}{% endif %}
+        </h2>
         {% if parameters.selectModeNone %}
-            <a href="{{ parameters.url('create') }}" class="uk-icon-button uk-button-primary" uk-icon="icon: plus"></a>
+            <a href="{{ parameters.url('create') }}" class="uk-button uk-button-primary">
+                <i data-feather="plus" class="uk-margin-small-right-small"></i>
+                {% trans %}content_type.add.button{% endtrans %}
+            </a>
         {% endif %}
-    </h1>
+    </header>
 
     <united-cms-core-view-sortable parameters='{{ parameters|json_encode|raw }}'></united-cms-core-view-sortable>
-
-</div>
+</article>
