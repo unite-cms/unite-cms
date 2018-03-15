@@ -25,15 +25,15 @@
     "repositories": [
         {
             "type": "path",
-            "url": "src/Bundle/CoreBundle"
+            "url": "./src/Bundle/CoreBundle"
         },
         {
             "type": "path",
-            "url": "src/Bundle/CollectionFieldBundle"
+            "url": "./src/Bundle/CollectionFieldBundle"
         },
         {
             "type": "path",
-            "url": "src/Bundle/StorageBundle"
+            "url": "./src/Bundle/StorageBundle"
         }
     ],
     "require": {
