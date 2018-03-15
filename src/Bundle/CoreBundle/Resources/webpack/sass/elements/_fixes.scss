@@ -1,4 +1,8 @@
 
+svg.feather {
+  margin-top: -4px;
+}
+
 // Don't show symfony dev toolbar over main menu.
 @media (min-width: $breakpoint-medium) {
   .unite-main-menu + .unite-main-section + .sf-toolbar {

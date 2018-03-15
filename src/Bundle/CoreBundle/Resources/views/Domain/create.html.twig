@@ -4,12 +4,12 @@
                        href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}">{{ organization }}</a>{% endblock %}
 {% block navigation %}{{ include('@UnitedCMSCore/Organization/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-<div class="united-domain-editor">
+<article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
     {{ form_start(form) }}
-    <div class="header uk-background-secondary">
-        <h1 class="uk-h5 uk-light">Create Domain</h1>
+    <header class="uk-card-header uk-flex">
+        <h2 class="uk-flex-1">{% trans %}domain.create.headline{% endtrans %}</h2>
         {{ form_widget(form.submit) }}
-    </div>
+    </header>
     {{ form_end(form) }}
-</div>
+</article>
 {% endblock content %}

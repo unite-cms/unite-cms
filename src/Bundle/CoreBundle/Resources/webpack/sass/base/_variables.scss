@@ -20,7 +20,9 @@ $global-background: map-get($colors, grey);
 $global-muted-background: map-get($colors, grey-very-light);
 $global-link-color: map-get($colors, green);
 $global-link-hover-color: darken(map-get($colors, green), 25%);
-$navbar-nav-item-height: 50px;
 
-$card-default-background: map-get($colors, white);
+$navbar-nav-item-height: 50px;
+$global-font-family: 'Work Sans', sans-serif;
+
+$card-default-background: map-get($colors, grey-very-light);
 $dropdown-background: map-get($colors, white);

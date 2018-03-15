@@ -4,13 +4,11 @@
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
-    <div class="united-domain-editor">
-        {{ form_start(form) }}
-        <div class="header uk-background-secondary">
-            <h1 class="uk-h5 uk-light">Update Domain: {{ united.domain }}</h1>
-            {{ form_widget(form.submit) }}
-        </div>
-        {{ form_end(form) }}
-    </div>
+    {{ form_start(form) }}
+    <header class="uk-card-header uk-flex">
+        <h2 class="uk-flex-1">{% trans %}domain.update.headline{% endtrans %}</h2>
+        {{ form_widget(form.submit) }}
+    </header>
+    {{ form_end(form) }}
 </article>
 {% endblock content %}

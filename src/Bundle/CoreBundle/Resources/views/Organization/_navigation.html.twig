@@ -14,7 +14,7 @@
         <!--li><a href="#">{% trans %}organization.menu.manage.settings{% endtrans %}</a></li-->
         <li>
             <a href="{{ url('unitedcms_core_organizationuser_index', {organization: united.organization.identifier}) }}">
-                <span uk-icon="icon: users" class="uk-margin-small-right"></span>
+                <i data-feather="users" class="uk-margin-small-right"></i>
                 {% trans %}organization.menu.manage.user{% endtrans %}
             </a>
         </li>
@@ -30,7 +30,7 @@
         {% for domain in united.organization.domains %}
             <li>
                 <a href="{{ path('unitedcms_core_domain_view', {organization: organization.identifier, domain: domain.identifier}) }}">
-                    <span uk-icon="icon: world" class="uk-margin-small-right"></span>
+                    <i data-feather="globe" class="uk-margin-small-right"></i>
                     {{ domain }}
                 </a>
             </li>
@@ -38,7 +38,7 @@
 
         <li>
             <a class="uk-text-success" href="{{ url('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}">
-                <span uk-icon="icon: plus" class="uk-margin-small-right"></span>
+                <i data-feather="plus" class="uk-margin-small-right"></i>
                 {% trans %}organization.menu.domains.add{% endtrans %}
             </a>
         </li>

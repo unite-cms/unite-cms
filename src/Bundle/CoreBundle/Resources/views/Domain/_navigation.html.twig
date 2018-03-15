@@ -1,9 +1,9 @@
 <header class="uk-flex">
-    <button uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"><span uk-icon="icon: menu"></span></button>
+    <button uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"><i data-feather="menu"></i></button>
 
-    <button style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
-            class="uk-button uk-button-default uk-flex-1" type="button">{{ united.domain }} <span
-                uk-icon="icon:  triangle-down"></span></button>
+    <button class="uk-button uk-button-default uk-flex-1" type="button">
+        <span>{{ united.domain }}</span>
+        <i class="uk-margin-small-right" data-feather="chevron-down"></i></button>
     <div id="unite-main-menu-domain" uk-dropdown="mode: click; pos: bottom-left; offset: -50; animation: uk-animation-slide-top" class="uk-width-large">
         <div class="uk-dropdown-grid uk-child-width-1-2@m" uk-grid>
             <div>
@@ -58,7 +58,7 @@
         <button type="button" uk-close uk-toggle="target: #unite-main-menu-domain; animation: uk-animation-slide-top"></button>
     </div>
 
-    <button uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"><span uk-icon="icon: user"></span></button>
+    <button uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"><i data-feather="user"></i></button>
 </header>
 <article id="unite-main-menu-main" class="uk-flex-1" hidden>
     <button type="button" uk-close uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"></button>

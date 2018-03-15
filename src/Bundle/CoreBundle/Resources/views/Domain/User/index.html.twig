@@ -4,14 +4,18 @@
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 
-    <h1 class="uk-heading-divider">
-        Domain Users <a href="{{ path('unitedcms_core_domainuser_create', {
-            domain: domain.identifier,
-            organization: organization.identifier
-        }) }}" class="uk-icon-button uk-button-primary" uk-icon="icon: plus"></a>
-    </h1>
+    <article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
+        <header class="uk-card-header uk-flex">
+            <h2 class="uk-flex-1">{% trans %}domain.user.headline{% endtrans %}</h2>
+            <a href="{{ path('unitedcms_core_domainuser_create', {
+        domain: domain.identifier,
+        organization: organization.identifier
+    }) }}" class="uk-button uk-button-primary">
+                <i data-feather="plus" class="uk-margin-small-right-small"></i>
+                {% trans %}domain.user.add.button{% endtrans %}
+            </a>
+        </header>
 
-    <div class="uk-card uk-card-default uk-card-body">
         <table class="uk-table uk-table-justify uk-table-divider">
             <thead>
             <tr>
@@ -50,12 +54,15 @@
         <div class="navigation">
             {{ knp_pagination_render(users) }}
         </div>
-    </div>
+    </article>
 
     {% if invites|length > 0 %}
-        <h1 class="uk-heading-divider">Pending Invitations</h1>
 
-        <div class="uk-card uk-card-default uk-card-body">
+        <article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
+            <header class="uk-card-header">
+                <h2>{% trans %}domain.user.pending_invitations.headline{% endtrans %}</h2>
+            </header>
+
             <table class="uk-table uk-table-justify uk-table-divider">
                 <thead>
                 <tr>
@@ -85,7 +92,7 @@
             <div class="navigation">
                 {{ knp_pagination_render(users) }}
             </div>
-        </div>
+        </article>
     {% endif %}
 
 {% endblock content %}
