@@ -88,18 +88,50 @@ content:
   create:
     headline: Create new content of type "%type%"
     button: Create new
+    submit: Submit
   update:
     headline: Update content of type "%type%"
     button: Update
+    submit: Submit
+  delete:
+    headline: Delete content of type "%type%"
+    button: Delete
+    submit: Delete
   revisions:
     headline: Content revisions
+    button: Revisions
     revert:
+      headline: Revert content of tyoe "%type%" to version "%version%"
       button: Revert to this version
+      submit: Revert
   translations:
     headline: Content translations
+    button: Translations
     remove:
+      headline: Remove translation "%locale%"
       button: Remove as translation
+      submit: Remove
     create:
       button: Create a translation
+      submit: Submit
     add_existing:
+      headline: Add existing content as "%locale%" translation
       button: Add existing content as translation
+      submit: Submit
+
+setting:
+  update:
+    headline: Update "%type%"
+    button: Update
+    submit: Submit
+  translations:
+    headline: Translations of "%type%"
+    button: Translations
+    create:
+      button: Add "%locale%" translation
+  revisions:
+    headline: Revisions of "%type%"
+    button: Revisions
+    revert:
+      headline: Revert "%type%" to version "%version%"
+      button: Revert to this version
