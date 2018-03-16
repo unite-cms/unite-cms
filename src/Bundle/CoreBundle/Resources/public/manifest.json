@@ -1,4 +1,6 @@
 {
-  "main.css": "/bundles/unitedcmscore/main.0a97e02b8fe620d836e90b310c98a30b.css",
-  "main.js": "/bundles/unitedcmscore/main.44f1ac49a14d87e1b9cb.js"
+  "fonts/WorkSans-Bold.woff2": "/bundles/unitedcmscore/fonts/WorkSans-Bold.910bcc47.woff2",
+  "fonts/WorkSans-Medium.woff2": "/bundles/unitedcmscore/fonts/WorkSans-Medium.62229411.woff2",
+  "main.css": "/bundles/unitedcmscore/main.4bcec2fdfcc9a1bae95d4f55d4a647fb.css",
+  "main.js": "/bundles/unitedcmscore/main.5de941a335858ac5f18f.js"
 }

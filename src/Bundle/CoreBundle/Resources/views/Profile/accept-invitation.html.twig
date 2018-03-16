@@ -1,11 +1,12 @@
-{% extends '@UnitedCMSCore/layout.full.html.twig' %}
-{% block title %}United. Accept Invitation{% endblock title %}
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{{ site_name }}{% endblock title %}
+{% block navigation %}{% endblock %}
 {% block content %}
-
-    <div class="uk-card uk-card-default uk-card-body" style="width: 90%; max-width: 450px; margin: 0 auto;">
-
-        <h2>Accept Invitation</h2>
-
+    <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-large uk-flex uk-flex-column">
+    <header class="uk-card-header uk-flex">
+            <h2 class="uk-flex-1">{% trans %}authentication.accept_invitation.headline{% endtrans %}</h2>
+    </header>
+    <div class="uk-flex-1">
         {% if not tokenPresent %}
             <div class="uk-alert-danger" uk-alert>
                 <a class="uk-alert-close" uk-close></a>
@@ -51,4 +52,11 @@
 
         {% endif %}
     </div>
+</article>
+<style type="text/css" rel="stylesheet">
+    body {
+        background: url({{ site_background }}) no-repeat;
+        background-size: cover;
+    }
+</style>
 {% endblock content %}

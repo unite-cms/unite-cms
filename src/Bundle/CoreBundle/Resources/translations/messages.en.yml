@@ -6,6 +6,8 @@ authentication:
     headline: Reset password
   reset_password_confirm:
     headline: Reset password
+  accept_invitation:
+    headline: Accept invitation
 
 organizations:
   headline: Organizations
@@ -28,11 +30,11 @@ organization:
     description: On this page all users from all domains in this organization are listed. To add an new user, invite him_her to one domain.
 
 invitation:
-  token_missing: __invitation.token_missing
-  token_not_found: __invitation.token_not_found
-  token_expired: __invitation.token_expired
-  wrong_user: __invitation.wrong_user
-  already_member: __invitation.already_member
+  token_missing: invitation.token_missing
+  token_not_found: invitation.token_not_found
+  token_expired: invitation.token_expired
+  wrong_user: invitation.wrong_user
+  already_member: invitation.already_member
 
 profile:
   update:
