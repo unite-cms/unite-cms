@@ -29,8 +29,5 @@ Vue.customElement('united-cms-core-reference-field', Reference);
 
 window.onload = function(e) {
     // Use feather icon set.
-    feather.replace({
-        width: 16,
-        height: 16
-    });
+    feather.replace();
 };

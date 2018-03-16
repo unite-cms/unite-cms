@@ -28,11 +28,6 @@
 }
 
 @media (min-width: $breakpoint-medium) {
-
-  .uk-card-header {
-    margin: -40px -40px 40px;
-  }
-
   .uk-card.full-content-card {
     margin-left: 10px;
     box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);
@@ -47,6 +42,19 @@
       border-top-left-radius: 5px;
       border-top-right-radius: 5px;
     }
+  }
+
+  .uk-modal-dialog {
+    .full-content-card {
+      margin-left: 0;
+    }
+  }
+}
+
+@media (min-width: $breakpoint-large) {
+  .uk-card-header {
+    margin: -40px -40px 40px;
+    padding: 20px 30px;
   }
 }
 

@@ -18,6 +18,7 @@
       height: 50px;
       background: none;
       border: none;
+      box-shadow: none;
     }
 
     > button:not([uk-toggle]) {
@@ -77,10 +78,6 @@
     z-index: 110;
     margin: 0;
 
-    .uk-nav {
-      margin: 30px;
-    }
-
     > button.uk-close {
       position: fixed;
       right: 0;
@@ -123,6 +120,7 @@
   }
 
   .uk-nav {
+    margin: 30px;
 
     li {
       padding-left: 10px;
@@ -136,6 +134,13 @@
         a {
           color: map-get($colors, grey-dark);
         }
+
+        svg.feather {
+          width: 13px;
+          height: 13px;
+          margin-top: -4px;
+          margin-left: 4px;
+        }
       }
 
       &.uk-active {
@@ -147,6 +152,26 @@
         display: block;
         height: 30px;
         line-height: 30px;
+        opacity: 0.8;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  .uk-nav-sub {
+    li {
+      a {
+        color: map-get($colors, grey-dark);
+        line-height: 20px;
+        height: 20px;
+        font-size: 0.875rem;
+
+        .uk-margin-small-right {
+          margin-right: 7px !important;
+        }
       }
     }
   }
@@ -192,6 +217,21 @@
     header {
       border-bottom: 2px solid map-get($colors, grey-medium);
       padding-bottom: 25px;
+      position: relative;
+
+      &:after {
+        content: "";
+        display: block;
+        height: 30px;
+        background: linear-gradient(rgba(255,255,255,1), rgba(255,255,255,0));
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -32px;
+        top: auto;
+        z-index: 120;
+      }
+
 
       h2, .uk-h2 {
         line-height: normal;
@@ -207,7 +247,6 @@
         background: #FFFFFF;
         border: 1px solid map-get($colors, grey-medium);
         box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
-        border-radius: 2px;
         padding: 0 0 0 16px;
         justify-content: center;
         align-items: center;
@@ -216,10 +255,6 @@
         span {
           text-align: left;
           flex: 1;
-        }
-
-        svg.feather {
-          margin-top: 0;
         }
 
         &.uk-open {
@@ -257,27 +292,12 @@
       .uk-nav {
         margin: 30px 0;
       }
-
-      .uk-nav-sub {
-        li {
-          a {
-            color: map-get($colors, grey-dark);
-            line-height: 20px;
-            height: 20px;
-            font-size: 0.875rem;
-
-            .uk-margin-small-right {
-              margin-right: 7px !important;
-            }
-          }
-        }
-      }
     }
 
     #unite-main-menu-domain {
       max-width: none;
       width: 570px;
-      z-index: 120;
+      z-index: 140;
       border: 1px solid map-get($colors, grey-medium);
       box-shadow: 0 7px 15px 0 rgba(0,0,0,0.10);
       border-radius: 2px;
@@ -321,6 +341,20 @@
 
     .unite-user-menu {
       margin-top: 0;
+      position: relative;
+
+      &:before {
+        content: "";
+        display: block;
+        height: 30px;
+        background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,1));
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -32px;
+        bottom: auto;
+        z-index: 120;
+      }
     }
   }
 }

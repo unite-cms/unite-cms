@@ -1,6 +1,12 @@
 
-svg.feather {
-  margin-top: -4px;
+.uk-nav {
+  li {
+    svg.feather {
+      width: 16px;
+      height: 16px;
+      margin-top: -4px;
+    }
+  }
 }
 
 // Don't show symfony dev toolbar over main menu.

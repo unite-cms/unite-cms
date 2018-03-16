@@ -1,88 +1,59 @@
 <template>
     <div class="unite-card-table">
 
-        <div class="uk-clearfix">
-            <div class="uk-align-right" v-if="hasDeletedContent && !selectable">
-                <ul class="uk-subnav uk-subnav-pill" uk-margin>
-                    <li :class="{'uk-active': !deletedContent}" v-on:click="deletedContent = false"><a href="#">Active Content</a></li>
-                    <li :class="{'uk-active': deletedContent}" v-on:click="deletedContent = true"><a href="#">Deleted Content</a></li>
-                </ul>
-            </div>
-        </div>
+        <ul class="unite-card-table-tabs" uk-tab v-if="hasDeletedContent && !selectable">
+            <li :class="{'uk-active': !deletedContent}" v-on:click="deletedContent = false"><a href="#">Active Content</a></li>
+            <li :class="{'uk-active': deletedContent}" v-on:click="deletedContent = true"><a href="#">Deleted Content</a></li>
+        </ul>
 
-        <div class="uk-container">
-
-            <div class="uk-flex uk-flex-middle">
-                <div class="uk-flex-none" v-if="!deletedContent">
-                    <span v-if="selectable">Select</span>
-                    <span v-if="!selectable">Sort</span>
+        <div class="unite-card-div-table uk-table">
+            <div class="unite-card-div-table-thead">
+                <div>
+                    <div v-if="!deletedContent">
+                        <span v-if="selectable">Select</span>
+                        <span v-if="!selectable">Sort</span>
+                    </div>
+                    <div v-for="field in columnKeys"></div>
+                    <div v-if="!selectable">Actions</div>
                 </div>
-                <div class="uk-flex-auto"></div>
-                <div class="uk-flex-none" v-if="!selectable">Actions</div>
             </div>
 
-            <ul class="uk-list uk-list-striped" uk-sortable="handle: .uk-sortable-handle" v-on:moved="moved">
-                <li class="uk-flex uk-flex-middle" v-for="row in content" :data-id="row.id" :key="row.id">
+            <div class="unite-card-div-table-tbody" uk-sortable="handle: .uk-sortable-handle; cls-drag: table-div-ghost-row" v-on:moved="moved">
+                <div v-for="row in content" :data-id="row.id" :key="row.id">
 
-                    <div class="uk-flex-none" v-if="selectable && !deletedContent">
+                    <div v-if="selectable && !deletedContent">
                         <button class="uk-button uk-button-secondary uk-button-small" v-on:click="select(row)">Select</button>
                     </div>
 
-                    <div class="uk-flex-none" v-if="!selectable && !deletedContent">
-                        <span class="uk-sortable-handle uk-margin-small-right" uk-icon="icon: table"></span>
-                    </div>
+                    <div class="uk-sortable-handle" v-if="!selectable && !deletedContent" v-html="feather.icons['move'].toSvg({
+                        width: 16,
+                        height: 16
+                    })"></div>
 
-                    <div class="uk-flex-auto" v-for="field in columnKeys">
+                    <div v-for="field in columnKeys">
                         <span v-if="field == 'created' || field == 'updated'">{{ formatDate(new Date(row[field] * 1000)) }}</span>
                         <span v-else>{{ row[field] }}</span>
                     </div>
-                    <div class="uk-flex-none" v-if="!selectable">
-
-                        <div class="uk-button-group" v-show="!deletedContent">
-                            <a v-bind:href="getUpdateUrl(row.id)" class="uk-button uk-button-default"><span v-bind:uk-icon="'icon: file-edit'" class="uk-margin-small-right"></span>Update content</a>
-
-                            <div class="uk-inline">
-                                <button style="padding: 0 15px;" class="uk-button uk-button-default" type="button">
-                                    <span uk-icon="icon: chevron-down"></span>
-                                </button>
-                                <div uk-dropdown="mode: click; boundary: ! .uk-button-group; boundary-align: true;">
-                                    <ul class="uk-nav uk-dropdown-nav">
-                                        <li><a class="uk-text-danger" v-bind:href="getDeleteUrl(row.id)"><span class="uk-margin-small-right" v-bind:uk-icon="'icon: trash'"></span> Delete content</a></li>
-                                        <li><a v-bind:href="getTranslationsUrl(row.id)"><span class="uk-margin-small-right" v-bind:uk-icon="'icon: world'"></span> Translate</a></li>
-                                        <li><a v-bind:href="getRevisionsUrl(row.id)"><span class="uk-margin-small-right" v-bind:uk-icon="'icon: history'"></span> Revisions</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="uk-button-group" v-show="deletedContent">
-                            <a v-bind:href="getRecoverUrl(row.id)" class="uk-button uk-button-default"><span v-bind:uk-icon="'icon: bolt'" class="uk-margin-small-right"></span>Recover</a>
-
-                            <div class="uk-inline">
-                                <button style="padding: 0 15px;" class="uk-button uk-button-default" type="button">
-                                    <span uk-icon="icon: chevron-down"></span>
-                                </button>
-                                <div uk-dropdown="mode: click; boundary: ! .uk-button-group; boundary-align: true;">
-                                    <ul class="uk-nav uk-dropdown-nav">
-                                        <li><a class="uk-text-danger" v-bind:href="getDeleteDefinitelyUrl(row.id)"><span class="uk-margin-small-right" v-bind:uk-icon="'icon: trash'"></span> Delete Definitely</a></li>
-                                    </ul>
-                                </div>
-                            </div>
+                    <div class="actions" v-if="!selectable">
+                        <button class="uk-button uk-button-default actions-dropdown" type="button" v-html="feather.icons['more-horizontal'].toSvg()"></button>
+                        <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                            <ul class="uk-nav uk-dropdown-nav">
+                                <li v-for="action in contentActions(row)"><a :href="action.url" :class="action.class ? action.class : ''"><span class="uk-margin-small-right" v-html="action.icon"></span>{{ action.name }}</a></li>
+                            </ul>
                         </div>
                     </div>
 
-                </li>
-
-            </ul>
-
-            <ul class="uk-pagination uk-flex-center" uk-margin>
-                <li v-for="p in pages()" v-bind:class="{'uk-active': p.active}">
-                    <a v-on:click="setPage(p.page)">{{p.page}}</a>
-                </li>
-            </ul>
-            <div v-if="!loaded" class="uk-text-center" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255,255,255,0.75);">
-                <div style="position: absolute; top: 50%; margin-top: -15px;" uk-spinner></div>
+                </div>
             </div>
+        </div>
+
+        <ul class="uk-pagination uk-flex-center" uk-margin>
+            <li v-for="p in pages()" v-bind:class="{'uk-active': p.active}">
+                <a v-on:click="setPage(p.page)">{{p.page}}</a>
+            </li>
+        </ul>
+        <div v-if="!loaded" class="uk-text-center" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255,255,255,0.75);">
+            <div style="position: absolute; top: 50%; margin-top: -15px;" uk-spinner></div>
         </div>
     </div>
 </template>
@@ -90,6 +61,7 @@
 <script>
 import { GraphQLClient } from 'graphql-request'
 import UIkit from 'uikit';
+import feather from 'feather-icons';
 
 export default {
     data() {
@@ -115,6 +87,7 @@ export default {
             deleteDefinitelyUrlPattern: bag.urls.delete_definitely,
             revisionsUrlPattern: bag.urls.revisions,
             translationsUrlPattern: bag.urls.translations,
+            feather: feather
         };
     },
     props: ['parameters'],
@@ -160,6 +133,21 @@ export default {
         setPage: function(page) {
             this.page = page;
             this.loadData();
+        },
+        contentActions: function(row) {
+            if(!this.deletedContent) {
+                return [
+                    { url: this.getUpdateUrl(row.id), icon: feather.icons['edit'].toSvg({ width: 24, height: 16 }), name: 'Update content' },
+                    { url: this.getTranslationsUrl(row.id), icon: feather.icons['globe'].toSvg({ width: 24, height: 16 }), name: 'Translate content' },
+                    { url: this.getRevisionsUrl(row.id), icon: feather.icons['skip-back'].toSvg({ width: 24, height: 16 }), name: 'Revisions' },
+                    { url: this.getDeleteUrl(row.id), icon: feather.icons['trash-2'].toSvg({ width: 24, height: 16 }), name: 'Delete content', class: 'uk-text-danger' }
+                ];
+            } else {
+                return [
+                    { url: this.getRecoverUrl(row.id), icon: feather.icons['rotate-ccw'].toSvg({ width: 24, height: 16 }), name: 'Recover' },
+                    { url: this.getDeleteDefinitelyUrl(row.id), icon: feather.icons['x-circle'].toSvg({ width: 24, height: 16 }), name: 'Delete definitely', class: 'uk-text-danger' }
+                ];
+            }
         },
         formatDate: function(date) {
             return date.getDate()  + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " +

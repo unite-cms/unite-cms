@@ -11,7 +11,7 @@
         }) }}">
             <i data-feather="arrow-left"></i>
         </a>
-        <h2 class="uk-flex-1">{% trans %}domain.user.create.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans %}domain.user.add.headline{% endtrans %}</h2>
     </header>
 
     {{ form(form_create) }}
@@ -19,12 +19,6 @@
 
 <article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitedcms_core_domainuser_index', {
-            organization: united.organization.identifier,
-            domain: united.domain.identifier
-        }) }}">
-            <i data-feather="arrow-left"></i>
-        </a>
         <h2 class="uk-flex-1">{% trans %}domain.user.invite.headline{% endtrans %}</h2>
     </header>
 

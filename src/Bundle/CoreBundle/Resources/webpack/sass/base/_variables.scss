@@ -18,6 +18,7 @@ $colors: (
 // UI KIT OVERRIDES
 $global-background: map-get($colors, grey);
 $global-muted-background: map-get($colors, grey-very-light);
+$global-primary-background: map-get($colors, green);
 $global-link-color: map-get($colors, green);
 $global-link-hover-color: darken(map-get($colors, green), 25%);
 

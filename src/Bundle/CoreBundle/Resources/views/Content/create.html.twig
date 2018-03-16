@@ -11,7 +11,7 @@
             content_type: contentType.identifier,
             view: view.identifier
         }) }}"><i data-feather="arrow-left"></i></a>
-        <h2 class="uk-flex-1">{% trans %}domain.create.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans with {"%type%": view.contentType } %}content.create.headline{% endtrans %}</h2>
     </header>
     {{ form(form) }}
 </article>

@@ -47,3 +47,59 @@ domain:
       headline: Content types
     setting_types:
       headline: Setting types
+
+  create:
+    headline: Create a new domain
+
+  delete:
+    headline: Delete domain "%domain%"
+
+  update:
+    headline: Update domain "%domain%"
+
+  user:
+    headline: Members of this domain
+
+    add:
+      headline: Add existing user as member
+      button: Add a new member
+
+    invite:
+      headline: Invite a new user
+
+    pending_invitations:
+      headline: Pending invitations
+      delete:
+        button: Delete
+
+
+  api_client:
+    headline: API clients
+    create:
+      headline: Create new API client
+      button: Create new API client
+    update:
+      button: Update
+    delete:
+      headline: Delete API client "%client%"
+      button: Delete
+
+content:
+  create:
+    headline: Create new content of type "%type%"
+    button: Create new
+  update:
+    headline: Update content of type "%type%"
+    button: Update
+  revisions:
+    headline: Content revisions
+    revert:
+      button: Revert to this version
+  translations:
+    headline: Content translations
+    remove:
+      button: Remove as translation
+    create:
+      button: Create a translation
+    add_existing:
+      button: Add existing content as translation

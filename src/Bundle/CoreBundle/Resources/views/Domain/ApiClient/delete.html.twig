@@ -11,7 +11,7 @@
         }) }}">
             <i data-feather="arrow-left"></i>
         </a>
-        <h2 class="uk-flex-1">{% trans %}domain.api_client.delete.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans with {'%client%': client } %}domain.api_client.delete.headline{% endtrans %}</h2>
     </header>
 
     {{ form(form) }}

@@ -11,7 +11,7 @@
             }) }}">
                 <i data-feather="arrow-left"></i>
             </a>
-            <h1 class="uk-flex-1">{% trans %}domain.delete.headline{% endtrans %}</h1>
+            <h1 class="uk-flex-1">{% trans with {'%domain%': united.domain} %}domain.delete.headline{% endtrans %}</h1>
         </header>
 
         <div class="uk-card-body">

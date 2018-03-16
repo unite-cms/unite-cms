@@ -18,26 +18,27 @@
         <table class="uk-table uk-table-justify uk-table-divider uk-table-hover">
             <thead>
             <tr>
-                <th>Version</th>
-                <th>Action</th>
+                <th>Info</th>
                 <th>Data</th>
-                <th>Timestamp</th>
-                <th>User</th>
                 <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             {% for revision in revisions %}
                 <tr>
-                    <td>{{ revision.version }}</td>
-                    <td>{{ revision.action }}</td>
+                    <td>
+                        <h4>Version: #{{ revision.version }}</h4>
+                        <ul class="uk-list">
+                            <li>Action: {{ revision.action }}</li>
+                            <li>Timestamp: {{ revision.loggedAt|date }}</li>
+                            <li>Actor: {{ revision.username }}</li>
+                        </ul>
+                    </td>
                     <td>
                         {% if revision.data %}
                             <pre>{{ revision.data.data|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
                         {% endif %}
                     </td>
-                    <td>{{ revision.loggedAt|date }}</td>
-                    <td>{{ revision.username }}</td>
                     <td>
                         {% if not loop.first and revision.action != 'remove' %}
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
@@ -52,7 +53,7 @@
                                             'version': revision.version
                                         }) }}">
                                             <i class="uk-margin-small-right" data-feather="rewind"></i>
-                                            {% trans %}conrent.revisions.revert.button{% endtrans %}
+                                            {% trans %}content.revisions.revert.button{% endtrans %}
                                         </a></li>
                                 </ul>
                             </div>

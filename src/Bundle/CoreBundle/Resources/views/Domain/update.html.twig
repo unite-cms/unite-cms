@@ -12,7 +12,7 @@
         }) }}">
             <i data-feather="arrow-left"></i>
         </a>
-        <h2 class="uk-flex-1">{% trans %}domain.update.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans with {'%domain%': united.domain} %}domain.update.headline{% endtrans %}</h2>
         {{ form_widget(form.submit) }}
     </header>
     {{ form_end(form) }}
