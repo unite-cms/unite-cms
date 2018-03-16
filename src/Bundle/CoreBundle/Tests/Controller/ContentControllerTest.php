@@ -137,7 +137,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $crawler = $this->client->request('GET', $url_list);
 
         // Assert add button.
-        $addButton = $crawler->filter('a.uk-icon-button.uk-button-primary');
+        $addButton = $crawler->filter('header .uk-button-primary');
         $this->assertCount(1, $addButton);
 
         // Click on add button.
@@ -632,7 +632,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Create english translation.
-        $crawler = $this->client->click($crawler->filter('a.uk-button:contains("Create Translation")')->link());
+        $crawler = $this->client->click($crawler->filter('a.uk-text-success')->link());
 
         // Assert add form
         $form = $crawler->filter('form');
@@ -770,7 +770,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertNull($translated_content->getTranslationOf());
 
         // Link existing content was translation.
-        $crawler = $this->client->click($crawler->filter('a.uk-text-success:contains("Add an existing content as translation")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('content.translations.add_existing.button') .'")')->link());
 
         // Assert add form
         $form = $crawler->filter('form');
@@ -851,7 +851,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Make sure, that there is one revision.
-        $this->assertCount(1, $crawler->filter('.united-main-section table tbody tr'));
+        $this->assertCount(1, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Update content.
         $content = $this->em->getRepository('UnitedCMSCoreBundle:Content')->find($content->getId());
@@ -860,10 +860,10 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Make sure, that there are 2 revisions.
         $crawler = $this->client->request('GET', $revisions_url);
-        $this->assertCount(2, $crawler->filter('.united-main-section table tbody tr'));
+        $this->assertCount(2, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Revert to version 1.
-        $crawler = $this->client->click($crawler->filter('a.uk-button:contains("Revert to version 1")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")')->link());
 
         // Assert form
         $form = $crawler->filter('form');
@@ -893,7 +893,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         // Compare values & make sure, that there are 3 revisions.
         $this->em->refresh($content);
         $this->assertEquals(['f1' => 'la', 'f2' => 'b'], $content->getData());
-        $this->assertCount(3, $crawler->filter('.united-main-section table tbody tr'));
+        $this->assertCount(3, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Delete content.
         $this->em->remove($content);
@@ -911,15 +911,15 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // There should be an entry for the remove and the recover actions.
         $crawler = $this->client->request('GET', $revisions_url);
-        $this->assertCount(5, $crawler->filter('.united-main-section table tbody tr'));
-        $this->assertCount(1, $crawler->filter('.united-main-section table tbody td:contains("remove")'));
-        $this->assertCount(1, $crawler->filter('.united-main-section table tbody td:contains("recover")'));
+        $this->assertCount(5, $crawler->filter('.unite-card-table table tbody tr'));
+        $this->assertCount(1, $crawler->filter('.unite-card-table table tbody td:contains("remove")'));
+        $this->assertCount(1, $crawler->filter('.unite-card-table table tbody td:contains("recover")'));
 
         // And delete should not have a recover action.
-        $this->assertCount(1, $crawler->filter('a.uk-button:contains("Revert to version 1")'));
-        $this->assertCount(1, $crawler->filter('a.uk-button:contains("Revert to version 2")'));
-        $this->assertCount(1, $crawler->filter('a.uk-button:contains("Revert to version 3")'));
-        $this->assertCount(0, $crawler->filter('a.uk-button:contains("Revert to version 4")'));
-        $this->assertCount(0, $crawler->filter('a.uk-button:contains("Revert to version 5")'));
+        $this->assertCount(1, $crawler->filter('tr:nth-child(5) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
+        $this->assertCount(1, $crawler->filter('tr:nth-child(4) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
+        $this->assertCount(1, $crawler->filter('tr:nth-child(3) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
+        $this->assertCount(0, $crawler->filter('tr:nth-child(2) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
+        $this->assertCount(0, $crawler->filter('tr:nth-child(1) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
     }
 }

@@ -250,7 +250,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Create english translation.
-        $crawler = $this->client->click($crawler->filter('a.uk-button:contains("Add translation")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('setting.translations.create.button', ['%locale%' => $this->client->getRequest()->getLocale()]) .'")')->link());
 
         // Assert add form
         $form = $crawler->filter('form');
@@ -328,7 +328,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Make sure, that there is one revision.
-        $this->assertCount(1, $crawler->filter('.united-main-section table tbody tr'));
+        $this->assertCount(1, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Update setting.
         $setting = $this->em->getRepository('UnitedCMSCoreBundle:Setting')->find($setting->getId());
@@ -337,10 +337,10 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Make sure, that there are 2 revisions.
         $crawler = $this->client->request('GET', $revisions_url);
-        $this->assertCount(2, $crawler->filter('.united-main-section table tbody tr'));
+        $this->assertCount(2, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Revert to version 1.
-        $crawler = $this->client->click($crawler->filter('a.uk-button:contains("Revert to version 1")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('setting.revisions.revert.button') .'")')->link());
 
         // Assert form
         $form = $crawler->filter('form');
@@ -370,6 +370,6 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         // Compare values & make sure, that there are 3 revisions.
         $this->em->refresh($setting);
         $this->assertEquals(['f1' => 'la', 'f2' => 'b'], $setting->getData());
-        $this->assertCount(3, $crawler->filter('.united-main-section table tbody tr'));
+        $this->assertCount(3, $crawler->filter('.unite-card-table table tbody tr'));
     }
 }

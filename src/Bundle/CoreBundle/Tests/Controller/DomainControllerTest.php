@@ -77,7 +77,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Check that there is a add domain button.
-        $addButton = $crawler->filter('.uk-button:contains("Domain erstellen")');
+        $addButton = $crawler->filter('a:contains("' . $this->container->get('translator')->trans('organization.menu.domains.add') . '")');
         $this->assertGreaterThanOrEqual(1, $addButton->count());
         $crawler = $this->client->click($addButton->first()->link());
 
@@ -116,7 +116,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
             'domain' => 'd1',
         ])));
         $crawler = $this->client->followRedirect();
-        $updateButton = $crawler->filter('a[title="Domain bearbeiten"]');
+        $updateButton = $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")');
         $this->assertGreaterThanOrEqual(1, $updateButton->count());
         $crawler = $this->client->click($updateButton->first()->link());
 
@@ -171,7 +171,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         ], $domain->getRoles());
 
         // Click on domain delete.
-        $deleteButton = $crawler->filter('a[title="Domain löschen"]');
+        $deleteButton = $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")');
         $this->assertGreaterThanOrEqual(1, $deleteButton->count());
         $crawler = $this->client->click($deleteButton->first()->link());
 
