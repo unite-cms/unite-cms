@@ -1,5 +1,11 @@
-site:
-  title: unite cms
+
+authentication:
+  login:
+    headline: Sign in
+  reset_password:
+    headline: Reset password
+  reset_password_confirm:
+    headline: Reset password
 
 organizations:
   headline: Organizations
