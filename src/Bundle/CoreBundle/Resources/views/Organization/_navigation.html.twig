@@ -23,25 +23,28 @@
 
 
 
-
     <ul class="uk-nav">
         <li class="uk-nav-header">{% trans %}organization.menu.domains.header{% endtrans %}</li>
 
         {% for domain in united.organization.domains %}
-            <li>
-                <a href="{{ path('unitedcms_core_domain_view', {organization: organization.identifier, domain: domain.identifier}) }}">
-                    <i data-feather="globe" class="uk-margin-small-right"></i>
-                    {{ domain }}
-                </a>
-            </li>
+            {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain) %}
+                <li>
+                    <a href="{{ path('unitedcms_core_domain_view', {organization: organization.identifier, domain: domain.identifier}) }}">
+                        <i data-feather="globe" class="uk-margin-small-right"></i>
+                        {{ domain }}
+                    </a>
+                </li>
+            {% endif %}
         {% endfor %}
 
-        <li>
-            <a class="uk-text-success" href="{{ url('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}">
-                <i data-feather="plus" class="uk-margin-small-right"></i>
-                {% trans %}organization.menu.domains.add{% endtrans %}
-            </a>
-        </li>
+        {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization) %}
+            <li>
+                <a class="uk-text-success" href="{{ url('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}">
+                    <i data-feather="plus" class="uk-margin-small-right"></i>
+                    {% trans %}organization.menu.domains.add{% endtrans %}
+                </a>
+            </li>
+        {% endif %}
     </ul>
 
 

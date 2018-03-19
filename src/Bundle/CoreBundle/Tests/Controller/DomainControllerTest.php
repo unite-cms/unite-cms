@@ -12,6 +12,7 @@ namespace UnitedCMS\CoreBundle\Tests\Controller;
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use UnitedCMS\CoreBundle\Entity\Domain;
 use UnitedCMS\CoreBundle\Entity\DomainMember;
 use UnitedCMS\CoreBundle\Entity\Organization;
 use UnitedCMS\CoreBundle\Entity\OrganizationMember;
@@ -32,6 +33,11 @@ class DomainControllerTest extends DatabaseAwareTestCase
     private $admin;
 
     /**
+     * @var User $editor
+     */
+    private $editor;
+
+    /**
      * @var Organization $organization
      */
     private $organization;
@@ -50,16 +56,26 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->refresh($this->organization);
 
         $this->admin = new User();
-        $this->admin->setEmail('editor@example.com')->setFirstname('Domain Admin')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->admin->setEmail('admin@example.com')->setFirstname('Domain Admin')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $domainAdminOrgMember = new OrganizationMember();
+        $domainAdminOrgMember->setRoles([Organization::ROLE_ADMINISTRATOR])->setOrganization($this->organization);
+        $this->admin->addOrganization($domainAdminOrgMember);
+
+        $this->editor = new User();
+        $this->editor->setEmail('editor@example.com')->setFirstname('Domain Editor')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
         $domainEditorOrgMember = new OrganizationMember();
-        $domainEditorOrgMember->setRoles([Organization::ROLE_ADMINISTRATOR])->setOrganization($this->organization);
-        $this->admin->addOrganization($domainEditorOrgMember);
+        $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
+        $this->editor->addOrganization($domainEditorOrgMember);
 
         $this->em->persist($this->admin);
+        $this->em->persist($this->editor);
         $this->em->flush();
         $this->em->refresh($this->admin);
+        $this->em->refresh($this->editor);
+    }
 
-        $token = new UsernamePasswordToken($this->admin, null, 'main', $this->admin->getRoles());
+    private function login(User $user) {
+        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
         $session = $this->client->getContainer()->get('session');
         $session->set('_security_main', serialize($token));
         $session->save();
@@ -67,8 +83,9 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->client->getCookieJar()->set($cookie);
     }
 
-    public function testCRUDActions() {
+    public function testCRUDActionsAsAdmin() {
 
+        $this->login($this->admin);
 
         // List all domains.
         $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_domain_index', [
@@ -225,5 +242,66 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Assert domain was deleted.
         $this->assertCount(0, $this->em->getRepository('UnitedCMSCoreBundle:Domain')->findAll());
+    }
+
+    public function testCRUDActionsAsEditor() {
+
+        $this->login($this->editor);
+
+        // Create test domain.
+        $domain = new Domain();
+        $domain
+            ->setIdentifier('test')
+            ->setTitle('Test')
+            ->setOrganization($this->organization);
+        $this->em->persist($domain);
+        $this->em->flush($domain);
+
+        // List all domains.
+        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_domain_index', [
+            'organization' => $this->organization->getIdentifier(),
+        ]));
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        // org editors are not automatically domain editors.
+        $this->assertCount(0, $crawler->filter('a .uk-margin-small-right[data-feather="globe"]'));
+
+        // Org editors are not allowed to add new domains.
+        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('organization.menu.domains.add') . '")'));
+
+        // Add this editor to the domain as admin.
+        $domainMember = new DomainMember();
+        $domainMember->setDomain($domain)->setUser($this->editor)->setRoles([Domain::ROLE_EDITOR]);
+        $this->em->persist($domainMember);
+        $this->em->flush($domainMember);
+        $this->em->refresh($domainMember);
+
+        $crawler = $this->client->reload();
+
+        // editor now sees domain.
+        $domainIcon = $crawler->filter('a .uk-margin-small-right[data-feather="globe"]');
+        $this->assertCount(1, $domainIcon);
+        $crawler = $this->client->click($domainIcon->parents()->first()->link());
+
+        // org editors are not allowed to edit domains.
+        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")'));
+        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));
+        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.user') .'")'));
+        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.api_clients') .'")'));
+
+        // Make this domain member an domain administrator.
+        $domainMember = $this->em->getRepository('UnitedCMSCoreBundle:DomainMember')->findOneBy([
+            'domain' => $domain,
+            'user' => $this->editor,
+        ]);
+        $domainMember->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR]);
+        $this->em->flush($domainMember);
+        $crawler = $this->client->reload();
+
+        // org editors, that are domain admins are allowed to edit domain.
+        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")'));
+        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));
+        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.user') .'")'));
+        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.api_clients') .'")'));
     }
 }
