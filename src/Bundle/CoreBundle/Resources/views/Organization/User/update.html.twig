@@ -1,7 +1,5 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
 {% block title %}{{ organization }}{% endblock title %}
-{% block navtitle %}<a class="uk-navbar-item uk-button uk-button-text"
-                       href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}">{{ organization }}</a>{% endblock %}
 {% block navigation %}{{ include('@UnitedCMSCore/Organization/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
     <h1 class="uk-heading-divider">Update Organization Membership for user {{ member.user }}</h1>
