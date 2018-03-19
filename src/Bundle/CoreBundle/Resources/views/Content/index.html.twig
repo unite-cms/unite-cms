@@ -1,6 +1,4 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ domain }} / {{ view.contentType }}{% endblock title %}
+{% block title %}{% trans with {'%type%': view.contentType } %}content.index.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
-{% block content %}
-    {{ include(template, {parameters: templateParameters}) }}
-{% endblock content %}
+{% block content %}{{ include(template, {parameters: templateParameters}) }}{% endblock content %}

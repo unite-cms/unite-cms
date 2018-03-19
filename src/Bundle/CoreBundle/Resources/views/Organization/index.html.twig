@@ -2,28 +2,27 @@
 {% block navigation %}{% endblock %}
 {% block title %}{{ site_name }}{% endblock title %}
 {% block content %}
+<article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-large uk-flex uk-flex-column">
+    <header class="uk-card-header">
+        <h2>{% trans %}organizations.headline{% endtrans %}</h2>
+    </header>
+    <div class="uk-flex-1">
+        {% if organizations|length == 0 %}
+            <div class="uk-alert-warning" uk-alert>
+                {% trans %}organizations.error.no_organizations{% endtrans %}
+            </div>
+        {% else %}
+            <ul class="uk-nav uk-nav-primary">
+                {% for organization in organizations %}
+                    <li><a href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}">
+                            <i data-feather="arrow-right" class="uk-margin-small-right-small"></i>
+                            {{ organization }}
+                        </a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 
-    <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-large uk-flex uk-flex-column">
-        <header class="uk-card-header">
-            <h2>{% trans %}organizations.headline{% endtrans %}</h2>
-        </header>
-        <div class="uk-flex-1">
-            {% if organizations|length == 0 %}
-                <div class="uk-alert-warning" uk-alert>
-                    {% trans %}organizations.error.no_organizations{% endtrans %}
-                </div>
-            {% else %}
-                <ul class="uk-nav uk-nav-primary">
-                    {% for organization in organizations %}
-                        <li><a href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}">
-                                <i data-feather="arrow-right" class="uk-margin-small-right-small"></i>
-                                {{ organization }}
-                            </a></li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </div>
-
-        {% include '@UnitedCMSCore/_user-menu.html.twig' %}
-    </article>
+    {% include '@UnitedCMSCore/_user-menu.html.twig' %}
+</article>
 {% endblock %}

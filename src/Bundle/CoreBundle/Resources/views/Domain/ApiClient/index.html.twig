@@ -1,72 +1,71 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ domain }}: User{% endblock title %}
+{% block title %}{% trans %}domain.api_client.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
+<article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
+    <header class="uk-card-header uk-flex">
+        <h2 class="uk-flex-1">{% trans %}domain.api_client.headline{% endtrans %}</h2>
+        <a href="{{ path('unitedcms_core_domainapiclient_create', {
+            domain: domain.identifier,
+            organization: organization.identifier
+        }) }}" class="uk-button uk-button-primary">
+            <i data-feather="plus" class="uk-margin-small-right-small"></i>
+            {% trans %}domain.api_client.create.button{% endtrans %}
+        </a>
+    </header>
 
-    <article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
-        <header class="uk-card-header uk-flex">
-            <h2 class="uk-flex-1">{% trans %}domain.api_client.headline{% endtrans %}</h2>
-            <a href="{{ path('unitedcms_core_domainapiclient_create', {
-                domain: domain.identifier,
-                organization: organization.identifier
-            }) }}" class="uk-button uk-button-primary">
-                <i data-feather="plus" class="uk-margin-small-right-small"></i>
-                {% trans %}domain.api_client.create.button{% endtrans %}
-            </a>
-        </header>
-
-        <div class="unite-card-table">
-            <table class="uk-table uk-table-justify uk-table-divider">
-                <thead>
+    <div class="unite-card-table">
+        <table class="uk-table uk-table-justify uk-table-divider">
+            <thead>
+            <tr>
+                <th>{{ knp_pagination_sortable(clients, 'Name', 'client.name') }}</th>
+                <th>{{ knp_pagination_sortable(clients, 'Created', 'client.created') }}</th>
+                <th>{{ knp_pagination_sortable(clients, 'Roles', 'client.roles') }}</th>
+                <th>Token</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for client in clients %}
                 <tr>
-                    <th>{{ knp_pagination_sortable(clients, 'Name', 'client.name') }}</th>
-                    <th>{{ knp_pagination_sortable(clients, 'Created', 'client.created') }}</th>
-                    <th>{{ knp_pagination_sortable(clients, 'Roles', 'client.roles') }}</th>
-                    <th>Token</th>
-                    <th>Actions</th>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.created|date }}</td>
+                    <td>{{ client.roles|join(', ') }}</td>
+                    <td>
+                        <div class="uk-margin">
+                            <span class="uk-label">{{ client.token }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                        <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                            <ul class="uk-nav uk-dropdown-nav">
+                                <li><a href="{{ path('unitedcms_core_domainapiclient_update', {
+                                    domain: domain.identifier,
+                                    organization: organization.identifier,
+                                    client: client.id
+                                }) }}">
+                                        <i class="uk-margin-small-right" data-feather="edit"></i>
+                                        {% trans %}domain.api_client.update.button{% endtrans %}
+                                    </a></li>
+                                <li><a class="uk-text-danger" href="{{ path('unitedcms_core_domainapiclient_delete', {
+                                    domain: domain.identifier,
+                                    organization: organization.identifier,
+                                    client: client.id
+                                }) }}">
+                                        <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                        {% trans %}domain.api_client.delete.button{% endtrans %}
+                                    </a></li>
+                            </ul>
+                        </div>
+                    </td>
                 </tr>
-                </thead>
-                <tbody>
-                {% for client in clients %}
-                    <tr>
-                        <td>{{ client.name }}</td>
-                        <td>{{ client.created|date }}</td>
-                        <td>{{ client.roles|join(', ') }}</td>
-                        <td>
-                            <div class="uk-margin">
-                                <span class="uk-label">{{ client.token }}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
-                            <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
-                                <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a href="{{ path('unitedcms_core_domainapiclient_update', {
-                                        domain: domain.identifier,
-                                        organization: organization.identifier,
-                                        client: client.id
-                                    }) }}">
-                                            <i class="uk-margin-small-right" data-feather="edit"></i>
-                                            {% trans %}domain.api_client.update.button{% endtrans %}
-                                        </a></li>
-                                    <li><a class="uk-text-danger" href="{{ path('unitedcms_core_domainapiclient_delete', {
-                                        domain: domain.identifier,
-                                        organization: organization.identifier,
-                                        client: client.id
-                                    }) }}">
-                                            <i class="uk-margin-small-right" data-feather="trash-2"></i>
-                                            {% trans %}domain.api_client.delete.button{% endtrans %}
-                                        </a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="navigation">
-            {{ knp_pagination_render(clients) }}
-        </div>
-    </article>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="navigation">
+        {{ knp_pagination_render(clients) }}
+    </div>
+</article>
 {% endblock content %}
