@@ -16,29 +16,33 @@
 
         <form class="uk-form-vertical" action="{{ path('unitedcms_core_authentication_login') }}" method="post">
             <div class="uk-margin">
-                <label class="uk-form-label" for="username">Email</label>
+                <label class="uk-form-label" for="username">{% trans %}authentication.login.username{% endtrans %}</label>
                 <div class="uk-form-controls">
                     <input type="email" id="username" name="_username" value="{{ last_username }}" class="uk-input"/>
                 </div>
             </div>
 
             <div class="uk-margin">
-                <label class="uk-form-label" for="username">Password</label>
+                <label class="uk-form-label" for="username">{% trans %}authentication.login.password{% endtrans %}</label>
                 <div class="uk-form-controls">
                     <input type="password" id="password" name="_password" class="uk-input"/>
                 </div>
             </div>
 
             <div class="uk-margin">
-                <label for="remember_me"><input class="uk-checkbox" type="checkbox" id="remember_me" name="_remember_me"
-                                                checked> Eingeloggt bleiben</label>
+                <label for="remember_me">
+                    <input class="uk-checkbox" type="checkbox" id="remember_me" name="_remember_me" checked>
+                    {% trans %}authentication.login.remember_me{% endtrans %}
+                </label>
             </div>
 
             <div class="uk-margin uk-text-right">
-                <a href="{{ path('unitedcms_core_profile_resetpassword') }}">Passwort vergessen?</a>
+                <a href="{{ path('unitedcms_core_profile_resetpassword') }}">
+                    {% trans %}authentication.login.reset_password{% endtrans %}
+                </a>
             </div>
 
-            <button class="uk-button-primary uk-button uk-first-column" type="submit">Anmelden</button>
+            <button class="uk-button-primary uk-button uk-first-column" type="submit">{% trans %}authentication.login.submit{% endtrans %}</button>
         </form>
     </div>
 </article>
