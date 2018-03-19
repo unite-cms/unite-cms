@@ -1,6 +1,5 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ domain }}: User{% endblock title %}
-{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
+{% block title %}{% trans %}domain.user.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 
@@ -12,7 +11,7 @@
         organization: organization.identifier
     }) }}" class="uk-button uk-button-primary">
                 <i data-feather="plus" class="uk-margin-small-right-small"></i>
-                {% trans %}domain.user.add.button{% endtrans %}
+                {% trans %}domain.user.create.button{% endtrans %}
             </a>
         </header>
 

@@ -1,5 +1,5 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ domain }}: Update Membership for user {{ member.user }}{% endblock title %}
+{% block title %}{% trans with { '%user%' : member.user } %}domain.user.update.title{% endtrans %}{% endblock title %}
 {% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
@@ -11,7 +11,7 @@
         }) }}">
             <i data-feather="arrow-left"></i>
         </a>
-        <h2>{% trans %}domain.user.update.headline{% endtrans %}</h2>
+        <h2>{% trans with { '%user%' : member.user } %}domain.user.update.headline{% endtrans %}</h2>
     </header>
     {{ form(form) }}
 </article>
