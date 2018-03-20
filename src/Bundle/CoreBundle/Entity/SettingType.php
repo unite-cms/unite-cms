@@ -173,7 +173,8 @@ class SettingType implements Fieldable
             ->setWeight($settingType->getWeight())
             ->setIcon($settingType->getIcon())
             ->setDescription($settingType->getDescription())
-            ->setLocales($settingType->getLocales());
+            ->setLocales($settingType->getLocales())
+            ->setPermissions($settingType->getPermissions());
 
         // Fields to delete
         foreach (array_diff($this->getFields()->getKeys(), $settingType->getFields()->getKeys()) as $field) {

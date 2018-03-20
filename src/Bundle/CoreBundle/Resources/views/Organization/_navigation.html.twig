@@ -9,17 +9,19 @@
 
 
 
-    <ul class="uk-nav">
-        <li class="uk-nav-header">{% trans %}organization.menu.manage.header{% endtrans %}</li>
-        <!--li><a href="#">{% trans %}organization.menu.manage.settings{% endtrans %}</a></li-->
-        <li>
-            <a href="{{ url('unitedcms_core_organizationuser_index', {organization: united.organization.identifier}) }}">
-                <i data-feather="users" class="uk-margin-small-right"></i>
-                {% trans %}organization.menu.manage.user{% endtrans %}
-            </a>
-        </li>
-        <!--li><a href="#">{% trans %}organization.menu.manage.delete{% endtrans %}</a></li-->
-    </ul>
+    {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), united.organization) %}
+        <ul class="uk-nav">
+            <li class="uk-nav-header">{% trans %}organization.menu.manage.header{% endtrans %}</li>
+            <!--li><a href="#">{% trans %}organization.menu.manage.settings{% endtrans %}</a></li-->
+            <li>
+                <a href="{{ url('unitedcms_core_organizationuser_index', {organization: united.organization.identifier}) }}">
+                    <i data-feather="users" class="uk-margin-small-right"></i>
+                    {% trans %}organization.menu.manage.user{% endtrans %}
+                </a>
+            </li>
+            <!--li><a href="#">{% trans %}organization.menu.manage.delete{% endtrans %}</a></li-->
+        </ul>
+    {% endif %}
 
 
 

@@ -50,11 +50,13 @@
                                 {% trans %}domain.menu.manage.update{% endtrans %}
                             </a>
                         </li>
-                        <li>
-                            <a class="uk-text-danger" href="{{ url('unitedcms_core_domain_delete', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
-                                <i class="uk-margin-small-right" data-feather="trash-2"></i>
-                                {% trans %}domain.menu.manage.trash{% endtrans %}
-                            </a></li>
+                        {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::DELETE'), united.domain) %}
+                            <li>
+                                <a class="uk-text-danger" href="{{ url('unitedcms_core_domain_delete', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                                    <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                    {% trans %}domain.menu.manage.trash{% endtrans %}
+                                </a></li>
+                        {% endif %}
                     </ul>
                 </div>
             {% endif %}
@@ -71,59 +73,63 @@
         {% if united.domain.contentTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
             {% for type in united.domain.contentTypes %}
-                <li><a {% spaceless %}
-                        {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
-                            class="uk-active"
-                        {% endif %}
-                    {% endspaceless %} href="{{ path('unitedcms_core_content_index', {
-                        organization: united.organization.identifier,
-                        domain: united.domain.identifier,
-                        content_type: type.identifier,
-                        view: 'all'
-                    }) }}">
-                        <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'layers' }}"></i>
-                        {{ type }}
-                    </a>
+                {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::LIST'), type) %}
+                    <li><a {% spaceless %}
+                            {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
+                                class="uk-active"
+                            {% endif %}
+                        {% endspaceless %} href="{{ path('unitedcms_core_content_index', {
+                            organization: united.organization.identifier,
+                            domain: united.domain.identifier,
+                            content_type: type.identifier,
+                            view: 'all'
+                        }) }}">
+                            <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'layers' }}"></i>
+                            {{ type }}
+                        </a>
 
-                    {% if type.views|length > 1 %}
-                        <ul class="uk-nav-sub">
-                            {% for v in type.views %}
-                            {% if v.identifier != "all" %}
-                            <li><a {% spaceless %}
-                                        {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}
-                                            class="uk-active"
-                                        {% endif %}
-                                        {% endspaceless %}href="{{ path('unitedcms_core_content_index', {
-                                    organization: united.organization.identifier,
-                                    domain: united.domain.identifier,
-                                    content_type: type.identifier,
-                                    view: v.identifier
-                                }) }}">
-                                    <i class="uk-margin-small-right" data-feather="{{ v.icon ? v.icon : 'layers' }}"></i>
-                                    {{ v }}
-                                </a>
-                                {% endif %}
-                                {% endfor %}
-                        </ul>
-                    {% endif %}
-                </li>
+                        {% if type.views|length > 1 %}
+                            <ul class="uk-nav-sub">
+                                {% for v in type.views %}
+                                {% if v.identifier != "all" %}
+                                <li><a {% spaceless %}
+                                            {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}
+                                                class="uk-active"
+                                            {% endif %}
+                                            {% endspaceless %}href="{{ path('unitedcms_core_content_index', {
+                                        organization: united.organization.identifier,
+                                        domain: united.domain.identifier,
+                                        content_type: type.identifier,
+                                        view: v.identifier
+                                    }) }}">
+                                        <i class="uk-margin-small-right" data-feather="{{ v.icon ? v.icon : 'layers' }}"></i>
+                                        {{ v }}
+                                    </a>
+                                    {% endif %}
+                                    {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endif %}
             {% endfor %}
         {% endif %}
         {% if united.domain.settingTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
             {% for type in united.domain.settingTypes %}
-                <li><a {% spaceless %}
-                            {% if settingType is defined and settingType.identifier == type.identifier %}
-                                class="uk-active"
-                            {% endif %}
-                            {% endspaceless %} href="{{ path('unitedcms_core_setting_index', {
-                        organization: united.organization.identifier,
-                        domain: united.domain.identifier,
-                        setting_type: type.identifier
-                    }) }}">
-                        <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'settings' }}"></i>
-                        {{ type }}
-                    </a></li>
+                {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), type) %}
+                    <li><a {% spaceless %}
+                                {% if settingType is defined and settingType.identifier == type.identifier %}
+                                    class="uk-active"
+                                {% endif %}
+                                {% endspaceless %} href="{{ path('unitedcms_core_setting_index', {
+                            organization: united.organization.identifier,
+                            domain: united.domain.identifier,
+                            setting_type: type.identifier
+                        }) }}">
+                            <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'settings' }}"></i>
+                            {{ type }}
+                        </a></li>
+                {% endif %}
             {% endfor %}
         {% endif %}
     </ul>

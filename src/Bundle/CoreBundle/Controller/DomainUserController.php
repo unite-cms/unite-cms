@@ -300,7 +300,7 @@ class DomainUserController extends Controller
         Request $request
     ) {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Remove'])->getForm();
+            ->add('submit', SubmitType::class, ['label' => 'domain.user.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

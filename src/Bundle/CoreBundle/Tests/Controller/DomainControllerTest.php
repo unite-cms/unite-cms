@@ -223,6 +223,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->submit($form);
 
         // Should not delete domain, since we have a domain user.
+        print_r($this->client->getResponse()->getContent());
         $this->assertFalse($this->client->getResponse()->isRedirection());
         $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("Domain could not be deleted.")'));
 
@@ -300,8 +301,10 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // org editors, that are domain admins are allowed to edit domain.
         $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")'));
-        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));
         $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.user') .'")'));
         $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.api_clients') .'")'));
+
+        // but are not allowed to delete the domain.
+        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));
     }
 }

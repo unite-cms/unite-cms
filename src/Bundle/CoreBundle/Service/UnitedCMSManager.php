@@ -132,7 +132,7 @@ class UnitedCMSManager
             }
 
             $data = $this->em->createQueryBuilder()
-                ->select('ct.id', 'ct.identifier', 'ct.title', 'ct.icon')
+                ->select('ct.id', 'ct.identifier', 'ct.title', 'ct.icon', 'ct.permissions')
                 ->from('UnitedCMSCoreBundle:ContentType', 'ct')
                 ->leftJoin('ct.domain', 'd')
                 ->leftJoin('ct.views', 'co')
@@ -143,7 +143,7 @@ class UnitedCMSManager
 
             foreach ($data as $row) {
                 $contentType = new ContentType();
-                $contentType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon($row['icon']);
+                $contentType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon($row['icon'])->setPermissions($row['permissions']);
 
                 // Get views for this contentType.
                 $viewData = $this->em->createQueryBuilder()
@@ -166,7 +166,7 @@ class UnitedCMSManager
             }
 
             $data = $this->em->createQueryBuilder()
-                ->select('st.id', 'st.identifier', 'st.title', 'st.icon')
+                ->select('st.id', 'st.identifier', 'st.title', 'st.icon', 'st.permissions')
                 ->from('UnitedCMSCoreBundle:SettingType', 'st')
                 ->leftJoin('st.domain', 'd')
                 ->where('st.domain = :domain')
@@ -176,7 +176,7 @@ class UnitedCMSManager
 
             foreach ($data as $row) {
                 $settingType = new SettingType();
-                $settingType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon($row['icon']);
+                $settingType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon($row['icon'])->setPermissions($row['permissions']);
                 $this->domain->addSettingType($settingType);
             }
         }

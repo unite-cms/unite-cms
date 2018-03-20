@@ -36,7 +36,6 @@ class OrganizationMember
     /**
      * @var Organization
      * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Valid()
      * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\Organization", inversedBy="users")
      * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="CASCADE")
      */

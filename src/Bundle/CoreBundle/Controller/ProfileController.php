@@ -384,7 +384,7 @@ class ProfileController extends Controller
                                         'attr' => ['autocomplete' => 'off'],
                                     ]
                                 )
-                                ->add('submit', SubmitType::class, ['label' => 'invitation.accept'])
+                                ->add('submit', SubmitType::class, ['label' => 'profile.accept_invitation.submit'])
                                 ->getForm();
 
                             $form->handleRequest($request);

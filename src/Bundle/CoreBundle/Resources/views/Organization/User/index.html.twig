@@ -28,16 +28,25 @@
                             <td>{{ member.user.email }}</td>
                             <td>{{ member.roles|join(', ') }}</td>
                             <td>
-                                <ul class="uk-iconnav">
-                                    <li><a href="{{ path('unitedcms_core_organizationuser_update', {
-                                            organization: organization.identifier,
-                                            member: member.id
-                                        }) }}" uk-icon="icon: file-edit"></a></li>
-                                    <li><a class="uk-text-danger" href="{{ path('unitedcms_core_organizationuser_delete', {
-                                            organization: organization.identifier,
-                                            member: member.id
-                                        }) }}" uk-icon="icon: trash"></a></li>
-                                </ul>
+                                <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                                <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                                    <ul class="uk-nav uk-dropdown-nav">
+                                        <li><a href="{{ path('unitedcms_core_organizationuser_update', {
+                                                organization: organization.identifier,
+                                                member: member.id
+                                            }) }}">
+                                                <i class="uk-margin-small-right" data-feather="edit"></i>
+                                                {% trans %}organization.user.update.button{% endtrans %}
+                                            </a></li>
+                                        <li><a class="uk-text-danger" href="{{ path('unitedcms_core_organizationuser_delete', {
+                                                organization: organization.identifier,
+                                                member: member.id
+                                            }) }}">
+                                                <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                                {% trans %}organization.user.delete.button{% endtrans %}
+                                            </a></li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
