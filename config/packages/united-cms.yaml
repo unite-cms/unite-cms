@@ -20,6 +20,11 @@ twig:
         site_name: '%site_name%'
         site_background: '%site_background%'
 
+# Swift Mailer settings
+swiftmailer:
+    url: '%env(MAILER_URL)%'
+
+
 # Doctrine Configuration
 doctrine:
     dbal:
