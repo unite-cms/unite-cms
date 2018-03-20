@@ -10,7 +10,7 @@
             content_type: contentType.identifier,
             view: view.identifier
         }) }}"><i data-feather="arrow-left"></i></a>
-        <h2 class="uk-flex-1">{% trans with {"%type%": view.contentType } %}content.update.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans with {"%content%": content } %}content.update.headline{% endtrans %}</h2>
 
         <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">

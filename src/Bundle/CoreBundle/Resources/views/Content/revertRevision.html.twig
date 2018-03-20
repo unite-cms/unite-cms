@@ -1,5 +1,5 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{% trans with {'%content%': content } %}content.revisions.revert.title{% endtrans %}{% endblock title %}
+{% block title %}{% trans with { "%content%": content, "%version%": version } %}content.revisions.revert.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body uk-width-1-1 full-content-card">
@@ -11,7 +11,7 @@
             view: view.identifier,
             content: content.id
         }) }}"><i data-feather="arrow-left"></i></a>
-        <h2 class="uk-flex-1">{% trans with { "%type%": view.contentType, "%version%": version } %}content.revisions.revert.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans with { "%content%": content, "%version%": version } %}content.revisions.revert.headline{% endtrans %}</h2>
     </header>
     {{ form(form) }}
 </article>

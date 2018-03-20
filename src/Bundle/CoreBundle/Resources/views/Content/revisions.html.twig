@@ -10,7 +10,7 @@
             content_type: contentType.identifier,
             view: view.identifier
         }) }}"><i data-feather="arrow-left"></i></a>
-        <h2 class="uk-flex-1">{% trans %}content.revisions.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans with {'%content%': content } %}content.revisions.headline{% endtrans %}</h2>
     </header>
 
     <div class="unite-card-table">
