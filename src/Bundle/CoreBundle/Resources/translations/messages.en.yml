@@ -72,7 +72,7 @@ domain.api_client.update.title: 'Update API client "%client"'
 domain.api_client.update.headline: 'Update API client "%client"'
 domain.api_client.update.button: 'Submit'
 
-content.index.title: 'type'
+content.index.title: '%type%'
 
 content.create.title: 'Create new content of type "%type%"'
 content.create.headline: 'Create new content of type "%type%"'

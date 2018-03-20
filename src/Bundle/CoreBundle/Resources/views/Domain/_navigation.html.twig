@@ -71,7 +71,11 @@
         {% if united.domain.contentTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
             {% for type in united.domain.contentTypes %}
-                <li><a href="{{ path('unitedcms_core_content_index', {
+                <li><a {% spaceless %}
+                        {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
+                            class="uk-active"
+                        {% endif %}
+                    {% endspaceless %} href="{{ path('unitedcms_core_content_index', {
                         organization: united.organization.identifier,
                         domain: united.domain.identifier,
                         content_type: type.identifier,
@@ -83,16 +87,20 @@
 
                     {% if type.views|length > 1 %}
                         <ul class="uk-nav-sub">
-                            {% for view in type.views %}
-                            {% if view.identifier != "all" %}
-                            <li><a href="{{ path('unitedcms_core_content_index', {
+                            {% for v in type.views %}
+                            {% if v.identifier != "all" %}
+                            <li><a {% spaceless %}
+                                        {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}
+                                            class="uk-active"
+                                        {% endif %}
+                                        {% endspaceless %}href="{{ path('unitedcms_core_content_index', {
                                     organization: united.organization.identifier,
                                     domain: united.domain.identifier,
                                     content_type: type.identifier,
-                                    view: view.identifier
+                                    view: v.identifier
                                 }) }}">
-                                    <i class="uk-margin-small-right" data-feather="{{ view.icon ? view.icon : 'layers' }}"></i>
-                                    {{ view }}
+                                    <i class="uk-margin-small-right" data-feather="{{ v.icon ? v.icon : 'layers' }}"></i>
+                                    {{ v }}
                                 </a>
                                 {% endif %}
                                 {% endfor %}
@@ -104,7 +112,11 @@
         {% if united.domain.settingTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
             {% for type in united.domain.settingTypes %}
-                <li><a href="{{ path('unitedcms_core_setting_index', {
+                <li><a {% spaceless %}
+                            {% if settingType is defined and settingType.identifier == type.identifier %}
+                                class="uk-active"
+                            {% endif %}
+                            {% endspaceless %} href="{{ path('unitedcms_core_setting_index', {
                         organization: united.organization.identifier,
                         domain: united.domain.identifier,
                         setting_type: type.identifier
