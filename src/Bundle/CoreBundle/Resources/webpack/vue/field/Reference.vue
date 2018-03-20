@@ -129,5 +129,9 @@
     };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+    united-cms-core-reference-field {
+        position: relative;
+        display: block;
+    }
 </style>

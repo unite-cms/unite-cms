@@ -22,5 +22,9 @@
     };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+    united-cms-collection-field-row {
+        position: relative;
+        display: block;
+    }
 </style>
