@@ -14,7 +14,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use UnitedCMS\CoreBundle\Entity\DomainMember;
 use UnitedCMS\CoreBundle\Entity\User;
@@ -40,10 +39,10 @@ class ProfileController extends Controller
          */
         $user = $this->getUser();
         $form = $this->get('form.factory')->createNamedBuilder('user', FormType::class, $user)
-            ->add('firstname', TextType::class, ['label' => 'Firstname', 'required' => true])
-            ->add('lastname', TextType::class, ['label' => 'Lastname', 'required' => true])
-            ->add('email', EmailType::class, ['label' => 'Email', 'required' => true])
-            ->add('submit', SubmitType::class, ['label' => 'Update'])
+            ->add('firstname', TextType::class, ['label' => 'profile.update.form.first_name', 'required' => true])
+            ->add('lastname', TextType::class, ['label' => 'profile.update.form.last_name', 'required' => true])
+            ->add('email', EmailType::class, ['label' => 'profile.update.form.email', 'required' => true])
+            ->add('submit', SubmitType::class, ['label' => 'profile.update.form.submit'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -61,7 +60,7 @@ class ProfileController extends Controller
             $changePassword,
             ['validation_groups' => 'UPDATE']
         )
-            ->add('currentPassword', PasswordType::class, ['label' => 'Password', 'required' => true])
+            ->add('currentPassword', PasswordType::class, ['label' => 'profile.change_password.form.current_password', 'required' => true])
             ->add(
                 'newPassword',
                 RepeatedType::class,
@@ -69,11 +68,11 @@ class ProfileController extends Controller
                     'type' => PasswordType::class,
                     'invalid_message' => 'validation.passwords_must_match',
                     'required' => true,
-                    'first_options' => array('label' => 'Password'),
-                    'second_options' => array('label' => 'Repeat Password'),
+                    'first_options' => array('label' => 'profile.change_password.form.new_password'),
+                    'second_options' => array('label' => 'profile.change_password.form.new_password_repeat'),
                 ]
             )
-            ->add('submit', SubmitType::class, ['label' => 'Update'])
+            ->add('submit', SubmitType::class, ['label' => 'profile.change_password.form.submit'])
             ->getForm();
 
         $changePasswordForm->handleRequest($request);

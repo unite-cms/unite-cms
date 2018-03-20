@@ -65,14 +65,14 @@ class DomainApiClientController extends Controller
             ->add(
                 'name',
                 TextType::class,
-                ['label' => 'Name', 'required' => true]
+                ['label' => 'domain.api_client.create.form.name', 'required' => true]
             )
             ->add(
                 'roles',
                 ChoiceType::class,
-                ['label' => 'Roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions(true)]
+                ['label' => 'domain.api_client.create.form.roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions(true)]
             )
-            ->add('submit', SubmitType::class, ['label' => 'Create'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.api_client.create.form.submit'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -121,14 +121,14 @@ class DomainApiClientController extends Controller
             ->add(
                 'name',
                 TextType::class,
-                ['label' => 'Name', 'required' => true]
+                ['label' => 'domain.api_client.update.form.name', 'required' => true]
             )
             ->add(
                 'roles',
                 ChoiceType::class,
-                ['label' => 'Roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions(true)]
+                ['label' => 'domain.api_client.update.form.roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions(true)]
             )
-            ->add('submit', SubmitType::class, ['label' => 'Update'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.api_client.update.form.submit'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -174,7 +174,7 @@ class DomainApiClientController extends Controller
     public function deleteAction(Organization $organization, Domain $domain, ApiClient $client, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Remove'])->getForm();
+            ->add('submit', SubmitType::class, ['label' => 'domain.api_client.delete.form.submit', 'attr' => ['class' => 'uk-button-danger']])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

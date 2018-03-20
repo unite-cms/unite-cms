@@ -80,7 +80,7 @@ class ContentController extends Controller
             $content,
             ['attr' => ['class' => 'uk-form-vertical']]
         );
-        $form->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('content.create.submit')]);
+        $form->add('submit', SubmitType::class, ['label' => 'content.create.submit']);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -154,7 +154,7 @@ class ContentController extends Controller
             $content,
             ['attr' => ['class' => 'uk-form-vertical']]
         );
-        $form->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('content.update.submit')]);
+        $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -224,7 +224,7 @@ class ContentController extends Controller
     {
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('content.delete.submit'), 'attr' => ['class' => 'uk-button-danger']])
+            ->add('submit', SubmitType::class, ['label' => 'content.delete.submit', 'attr' => ['class' => 'uk-button-danger']])
             ->getForm();
 
         $form->handleRequest($request);
@@ -311,7 +311,7 @@ class ContentController extends Controller
         }
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('content.delete_definitely.submit'), 'attr' => ['class' => 'uk-button-danger']])
+            ->add('submit', SubmitType::class, ['label' => 'content.delete_definitely.submit', 'attr' => ['class' => 'uk-button-danger']])
             ->getForm();
 
         $form->handleRequest($request);
@@ -404,7 +404,7 @@ class ContentController extends Controller
         }
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('content.recover.submit')])
+            ->add('submit', SubmitType::class, ['label' => 'content.recover.submit'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -527,7 +527,7 @@ class ContentController extends Controller
                         ),
                     ],
                 ])
-            ->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('content.translations.add_existing.submit')])->getForm();
+            ->add('submit', SubmitType::class, ['label' => 'content.translations.add_existing.submit'])->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -619,7 +619,7 @@ class ContentController extends Controller
         $translation = $translations->first();
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('content.translations.remove.submit'), 'attr' => ['class' => 'uk-button-danger']])
+            ->add('submit', SubmitType::class, ['label' => 'content.translations.remove.submit', 'attr' => ['class' => 'uk-button-danger']])
             ->getForm();
 
         $form->handleRequest($request);
@@ -697,7 +697,7 @@ class ContentController extends Controller
     public function revisionsRevertAction(View $view, Content $content, int $version, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('content.revisions.revert.submit')])
+            ->add('submit', SubmitType::class, ['label' => 'content.revisions.revert.submit'])
             ->getForm();
 
         $form->handleRequest($request);

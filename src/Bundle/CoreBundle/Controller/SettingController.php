@@ -52,7 +52,7 @@ class SettingController extends Controller
             $setting,
             ['attr' => ['class' => 'uk-form-vertical']]
         );
-        $form->add('submit', SubmitType::class, ['label' => $this->get('translator')->trans('setting.update.submit')]);
+        $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
