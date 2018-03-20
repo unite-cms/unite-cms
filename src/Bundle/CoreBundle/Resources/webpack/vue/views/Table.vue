@@ -70,6 +70,7 @@ export default {
             sortFieldKey: bag.settings.sort.field,
             filter: bag.settings.filter,
             contentType: bag.settings.contentType,
+            hasTranslations: bag.settings.hasTranslations,
             view: bag.settings.view,
             columns: bag.settings.columns,
             columnKeys: Object.keys(bag.settings.columns),
@@ -148,19 +149,21 @@ export default {
             });
         },
         contentActions: function(row){
+            let actions = [];
             if(!this.deletedContent) {
-                return [
-                    { url: this.getUpdateUrl(row.id), icon: feather.icons['edit'].toSvg({ width: 24, height: 16 }), name: 'Update content' },
-                    { url: this.getTranslationsUrl(row.id), icon: feather.icons['globe'].toSvg({ width: 24, height: 16 }), name: 'Translate content' },
-                    { url: this.getRevisionsUrl(row.id), icon: feather.icons['skip-back'].toSvg({ width: 24, height: 16 }), name: 'Revisions' },
-                    { url: this.getDeleteUrl(row.id), icon: feather.icons['trash-2'].toSvg({ width: 24, height: 16 }), name: 'Delete content', class: 'uk-text-danger' }
-                ];
+                actions.push({ url: this.getUpdateUrl(row.id), icon: feather.icons['edit'].toSvg({ width: 24, height: 16 }), name: 'Update content' });
+
+                if(this.hasTranslations) {
+                    actions.push({ url: this.getTranslationsUrl(row.id), icon: feather.icons['globe'].toSvg({ width: 24, height: 16 }), name: 'Translate content' });
+                }
+
+                actions.push({ url: this.getRevisionsUrl(row.id), icon: feather.icons['skip-back'].toSvg({ width: 24, height: 16 }), name: 'Revisions' });
+                actions.push({ url: this.getDeleteUrl(row.id), icon: feather.icons['trash-2'].toSvg({ width: 24, height: 16 }), name: 'Delete content', class: 'uk-text-danger' });
             } else {
-                return [
-                    { url: this.getRecoverUrl(row.id), icon: feather.icons['rotate-ccw'].toSvg({ width: 24, height: 16 }), name: 'Recover' },
-                    { url: this.getDeleteDefinitelyUrl(row.id), icon: feather.icons['x-circle'].toSvg({ width: 24, height: 16 }), name: 'Delete definitely', class: 'uk-text-danger' }
-                ];
+                actions.push({ url: this.getRecoverUrl(row.id), icon: feather.icons['rotate-ccw'].toSvg({ width: 24, height: 16 }), name: 'Recover' });
+                actions.push({ url: this.getDeleteDefinitelyUrl(row.id), icon: feather.icons['x-circle'].toSvg({ width: 24, height: 16 }), name: 'Delete definitely', class: 'uk-text-danger' });
             }
+            return actions;
         },
         formatDate: function(date) {
             return date.getDate()  + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " +

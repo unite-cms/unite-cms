@@ -15,13 +15,15 @@
         <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
             <ul class="uk-nav uk-dropdown-nav">
-                <li><a href="{{ path('unitedcms_core_content_translations', {
-                        domain: domain.identifier,
-                        organization: organization.identifier,
-                        content_type: contentType.identifier,
-                        view: view.identifier,
-                        content: content.id
-                    }) }}"><i class="uk-margin-small-right" data-feather="globe"></i>{% trans %}content.translations.button{% endtrans %}</a></li>
+                {% if contentType.locales|length > 1 %}
+                    <li><a href="{{ path('unitedcms_core_content_translations', {
+                            domain: domain.identifier,
+                            organization: organization.identifier,
+                            content_type: contentType.identifier,
+                            view: view.identifier,
+                            content: content.id
+                        }) }}"><i class="uk-margin-small-right" data-feather="globe"></i>{% trans %}content.translations.button{% endtrans %}</a></li>
+                {% endif %}
                 <li><a href="{{ path('unitedcms_core_content_revisions', {
                         domain: domain.identifier,
                         organization: organization.identifier,
