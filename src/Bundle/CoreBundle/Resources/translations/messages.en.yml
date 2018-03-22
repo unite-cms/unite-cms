@@ -117,6 +117,7 @@ content.revisions.revert.submit: 'Revert'
 
 content.recover.title: 'Recover "%content%"'
 content.recover.headline: 'Recover "%content%"'
+content.recover.submit: 'Recover'
 
 content.translations.title: 'Translations of "%content%"'
 content.translations.headline: 'Translations of "%content%"'

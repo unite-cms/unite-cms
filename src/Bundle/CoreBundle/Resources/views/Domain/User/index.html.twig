@@ -3,7 +3,7 @@
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 
-    <article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
+    <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
         <header class="uk-card-header uk-flex">
             <h2 class="uk-flex-1">{% trans %}domain.user.headline{% endtrans %}</h2>
             <a href="{{ path('unitedcms_core_domainuser_create', {

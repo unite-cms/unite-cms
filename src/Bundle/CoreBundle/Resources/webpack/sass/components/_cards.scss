@@ -1,4 +1,28 @@
 
+.uk-card.full-content-card {
+  align-self: normal;
+}
+
+.uk-card.centered-content-card {
+  margin: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);
+  align-self: center;
+  height: auto;
+  max-width: 90%;
+
+  .uk-card-header {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+}
+
+.uk-modal-dialog {
+  .full-content-card {
+    margin-left: 0;
+  }
+}
+
 .uk-card-header {
   background: map-get($colors, white);
   border-bottom: 1px solid map-get($colors, grey-medium);
@@ -31,24 +55,7 @@
   .uk-card.full-content-card {
     margin-left: 10px;
     box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);
-  }
-
-  .uk-card.centered-content-card {
-    margin: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);
-    align-self: center;
-
-    .uk-card-header {
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
-    }
-  }
-
-  .uk-modal-dialog {
-    .full-content-card {
-      margin-left: 0;
-    }
+    align-self: normal;
   }
 }
 
@@ -63,6 +70,21 @@
   .uk-card.full-content-card {
     border-radius: 5px;
     margin: 50px;
-    max-width: 1600px;
+
+    .uk-card-header {
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+    }
+
+    + .uk-card.full-content-card {
+      margin-top: 0;
+    }
+  }
+}
+
+@media (min-width: 2100px) {
+  .uk-card.full-content-card {
+    width: 1600px;
+    align-self: center;
   }
 }
