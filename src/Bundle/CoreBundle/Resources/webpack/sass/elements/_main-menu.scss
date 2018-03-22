@@ -267,7 +267,7 @@
       > button:not([uk-toggle]) {
         height: auto;
         width: auto;
-        background: #FFFFFF;
+        background: map-get($colors, white);
         border: 1px solid map-get($colors, grey-medium);
         box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
         padding: 0 0 0 16px;

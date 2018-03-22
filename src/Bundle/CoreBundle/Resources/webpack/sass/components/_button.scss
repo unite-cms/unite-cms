@@ -19,3 +19,18 @@
     }
   }
 }
+
+.close-button {
+  background: none;
+  border: none;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  margin-top: -10px;
+  color: map-get($colors, grey-dark);
+  cursor: pointer;
+
+  &:hover {
+    color: map-get($colors, red);
+  }
+}

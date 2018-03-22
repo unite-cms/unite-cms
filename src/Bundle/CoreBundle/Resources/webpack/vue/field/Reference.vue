@@ -11,14 +11,17 @@
             </div>
         </div>
 
-        <button v-if="!content" class="uk-button uk-button-default" v-on:click.prevent="openModal">
-            <span uk-icon="icon: plus"></span>
-            Select
+        <button v-if="!content" class="uk-placeholder" v-on:click.prevent="openModal">
+            <span v-html="feather.icons['plus'].toSvg({ width: 18, height: 18 })"></span>
+            Select...
         </button>
-        <div v-if="content" class="uk-placeholder uk-padding-small">
+        <div v-if="content" class="content-holder">
             <div v-if="loading" uk-spinner></div>
-            {{ title }}
-            <button uk-close class="uk-modal-close-default" v-on:click.prevent="clearSelection"></button>
+            <div  v-if="!loading">
+                <div class="meta">{{ contentType }} /</div>
+                {{ title }}
+            </div>
+            <button class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearSelection"></button>
         </div>
 
     </div>
@@ -27,6 +30,7 @@
 <script>
     import { GraphQLClient } from 'graphql-request'
     import UIkit from 'uikit';
+    import feather from 'feather-icons';
 
     export default {
         data() {
@@ -46,7 +50,8 @@
                 content: value.content ? value.content : null,
                 contentLabelFields: contentLabelFields,
                 loading: false,
-                title: ''
+                title: '',
+                feather: feather
             };
         },
         props: [
