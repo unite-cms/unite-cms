@@ -12,6 +12,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
@@ -28,24 +29,18 @@ class SignInputType extends AbstractType implements DataTransformerInterface
     }
 
     /**
-     * determines if the current authentication is done via API token or not, disable csrf for API Token
-     *
-     * @param $options
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function handleCsrfProtection($options)
+    public function configureOptions(OptionsResolver $resolver)
     {
-        if ($this->securityTokenStorage->getToken() && $this->securityTokenStorage->getToken()->getProviderKey() == "united_core_api_client")
+        if ($this->securityTokenStorage->getToken() && $this->securityTokenStorage->getToken()->getProviderKey() == "api")
         {
-            $options['csrf_protection'] = false;
+            $resolver->setDefault('csrf_protection', false);
         }
-        return $options;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $options = $this->handleCsrfProtection($options);
         $builder->addModelTransformer($this);
         $builder
           ->add('field', TextType::class, [

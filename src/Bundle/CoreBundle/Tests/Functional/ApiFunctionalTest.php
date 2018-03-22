@@ -601,7 +601,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $reflector->setAccessible(true);
         $reflector->invoke($this->container->get('united.cms.manager'));
 
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'united_core_api_client', $user->getRoles()));
+        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'api', $user->getRoles()));
 
         $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
         return json_decode($response->getContent());
