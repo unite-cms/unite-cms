@@ -36,7 +36,7 @@ class SignInputType extends AbstractType implements DataTransformerInterface
      */
     public function handleCsrfProtection($options)
     {
-        if ($this->securityTokenStorage->getToken() && $this->securityTokenStorage->getToken()->getProviderKey() == "api")
+        if ($this->securityTokenStorage->getToken() && $this->securityTokenStorage->getToken()->getProviderKey() == "united_core_api_client")
         {
             $options['csrf_protection'] = false;
         }

@@ -148,7 +148,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
     // In this test, we don't care about access checking.
     $admin = new User();
     $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
-    $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($admin, null, 'api', $admin->getRoles()));
+    $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($admin, null, 'united_core_api_client', $admin->getRoles()));
 
     // Create GraphQL Schema
     $schemaTypeManager = $this->container->get('united.cms.graphql.schema_type_manager');

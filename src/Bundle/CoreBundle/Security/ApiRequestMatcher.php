@@ -9,7 +9,8 @@ class ApiRequestMatcher extends RequestMatcher
 {
 
     public function __construct() {
-        parent::__construct('^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/|$)');
+        // old one ^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/|$) doesnt match sign controller route
+        parent::__construct('^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/.+|$)');
     }
 
     /**
