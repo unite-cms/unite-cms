@@ -248,7 +248,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
             'type' => "image/jpeg",
             'id' => "XXX-YYY-ZZZ",
         ]])->setContentType($field->getContentType());
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
         $formView = $form->createView();
 
         // Check root file field.
