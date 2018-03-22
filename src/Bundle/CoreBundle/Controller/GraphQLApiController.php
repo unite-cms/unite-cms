@@ -34,12 +34,13 @@ class GraphQLApiController extends Controller
         $schema = new Schema(
             [
                 'query' => $schemaTypeManager->getSchemaType('Query'),
-                'mutation' => $schemaTypeManager->getSchemaType('Mutation'),
+                'mutation' => ($domain->hasContentOrSettingTypes()) ? $schemaTypeManager->getSchemaType('Mutation') : NULL,
                 'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
                     return $schemaTypeManager->getSchemaType($name, $domain);
                 },
             ]
         );
+
         $server = new StandardServer(
             ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug(true)
         );

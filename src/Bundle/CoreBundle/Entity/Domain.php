@@ -137,6 +137,20 @@ class Domain
     }
 
     /**
+     *  checks if current domain has content types or settings types and returns true if so
+     *
+     *  @return boolean
+     */
+    public function hasContentOrSettingTypes()
+    {
+        if ($this->getContentTypes()->count() > 0 or $this->getSettingTypes()->count() > 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns contentTypes that are present in this domain but not in $domain.
      *
      * @param Domain $domain
