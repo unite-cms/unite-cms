@@ -34,7 +34,7 @@ class GraphQLApiController extends Controller
         $schema = new Schema(
             [
                 'query' => $schemaTypeManager->getSchemaType('Query'),
-                'mutation' => ($domain->hasContentOrSettingTypes()) ? $schemaTypeManager->getSchemaType('Mutation'):NULL,
+                'mutation' => ($domain->hasContentOrSettingTypes()) ? $schemaTypeManager->getSchemaType('Mutation') : NULL,
                 'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
                     return $schemaTypeManager->getSchemaType($name, $domain);
                 },
