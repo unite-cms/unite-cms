@@ -103,6 +103,7 @@ class Domain
     /**
      * @var DomainMember[]
      * @Assert\Valid()
+     * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
      * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $users;

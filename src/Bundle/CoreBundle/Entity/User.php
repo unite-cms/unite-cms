@@ -242,7 +242,7 @@ class User implements UserInterface, \Serializable
     public function getDomainRoles(Domain $domain)
     {
         foreach ($this->getDomains() as $domainMember) {
-            if ($domainMember->getDomain()->getId() === $domain->getId()) {
+            if (!empty($domain->getId()) && $domainMember->getDomain()->getId() === $domain->getId()) {
                 return $domainMember->getRoles();
             }
         }
