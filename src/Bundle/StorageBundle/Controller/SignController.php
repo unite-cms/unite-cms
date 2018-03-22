@@ -38,7 +38,7 @@ class SignController extends Controller {
   public function uploadContentTypeAction(ContentType $contentType, Request $request) {
 
     // TODO: This should only be possible when auth is TOKEN and not Cookie
-    $form = $this->createForm(SignInputType::class, null, ['csrf_protection' => false]);
+    $form = $this->createForm(SignInputType::class, null);
     $form->handleRequest($request);
 
     if($form->isSubmitted() && $form->isValid()) {

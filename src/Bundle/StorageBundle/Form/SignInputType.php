@@ -27,9 +27,25 @@ class SignInputType extends AbstractType implements DataTransformerInterface
         $this->securityTokenStorage = $tokenStorage;
     }
 
+    /**
+     * determines if the current authentication is done via API token or not, disable csrf for API Token
+     *
+     * @param $options
+     *
+     * @return array
+     */
+    public function handleCsrfProtection($options)
+    {
+        if ($this->securityTokenStorage->getToken() && $this->securityTokenStorage->getToken()->getProviderKey() == "api")
+        {
+            $options['csrf_protection'] = false;
+        }
+        return $options;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        echo "exit"; exit;
+        $options = $this->handleCsrfProtection($options);
         $builder->addModelTransformer($this);
         $builder
           ->add('field', TextType::class, [
