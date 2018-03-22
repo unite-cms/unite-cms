@@ -20,8 +20,8 @@
             <tbody>
             <tr v-for="row in content">
 
-                <td v-if="selectable">
-                    <button class="uk-button uk-button-secondary uk-button-small" v-on:click="select(row)">Select</button>
+                <td v-if="selectable && !deletedContent" class="select">
+                    <button v-on:click="select(row)" v-html="selectIcon(row)"></button>
                 </td>
 
                 <td v-for="field in columnKeys">
@@ -54,6 +54,7 @@
 <script>
 import { GraphQLClient } from 'graphql-request'
 import feather from 'feather-icons';
+import UIkit from 'uikit';
 
 export default {
     data() {
@@ -81,6 +82,7 @@ export default {
             deleteDefinitelyUrlPattern: bag.urls.delete_definitely,
             revisionsUrlPattern: bag.urls.revisions,
             translationsUrlPattern: bag.urls.translations,
+            selected: [],
             feather: feather
         };
     },
@@ -95,6 +97,26 @@ export default {
 
         this.loadData();
     },
+    mounted: function(){
+        let findModal = (element) => {
+            if(element.hasAttribute('uk-modal')) {
+                return element;
+            }
+
+            if(!element.parentElement) {
+                return null;
+            }
+
+            return findModal(element.parentElement);
+        };
+        let modal = findModal(this.$el);
+        if(modal) {
+            UIkit.util.on(modal, 'beforeshow', () => {
+                this.selected = [];
+            });
+        }
+    },
+
     methods: {
         pages: function(){
             var pages = [];
@@ -206,11 +228,21 @@ export default {
             });
         },
         select: function(row) {
-            window.UnitedCMSEventBus.$emit('contentSelected', [ {
-                contentType: this.contentType,
-                view: this.view,
-                row: row
-            } ]);
+            if(this.selected.includes(row)) {
+                this.selected.splice(this.selected.indexOf(row), 1);
+            } else {
+                this.selected.push(row);
+
+                // For the moment, we only support single element selection.
+                window.UnitedCMSEventBus.$emit('contentSelected', [ {
+                    contentType: this.contentType,
+                    view: this.view,
+                    row: row
+                } ]);
+            }
+        },
+        selectIcon: function(row) {
+            return feather.icons[(this.selected.includes(row) ? 'check-circle' : 'circle')].toSvg();
         }
     },
     computed: {

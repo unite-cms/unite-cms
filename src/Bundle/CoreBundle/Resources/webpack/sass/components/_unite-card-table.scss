@@ -86,6 +86,22 @@
             vertical-align: middle;
           }
 
+          &.select {
+            width: 30px;
+
+            button {
+              background: none;
+              border: none;
+              color: map-get($colors, grey-dark);
+              padding: 0;
+              cursor: pointer;
+
+              &:hover {
+                color: map-get($colors, grey-very-dark);
+              }
+            }
+          }
+
           .uk-button.actions-dropdown {
             box-shadow: none;
             border: 1px solid transparent;
