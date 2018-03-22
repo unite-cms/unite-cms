@@ -31,5 +31,5 @@ services:
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
   united.cms.fieldable_form_builder:
     class: UnitedCMS\CoreBundle\Form\FieldableFormBuilder
-    arguments: ['@form.factory', '@united.cms.field_type_manager']
+    arguments: ['@form.factory', '@united.cms.field_type_manager', '@security.token_storage']
     public: true

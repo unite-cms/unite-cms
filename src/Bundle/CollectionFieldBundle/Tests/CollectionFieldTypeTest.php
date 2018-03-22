@@ -240,7 +240,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $admin = new User();
         $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
         $this->container->get('security.token_storage')->setToken(
-          new UsernamePasswordToken($admin, null, 'main', $admin->getRoles())
+          new UsernamePasswordToken($admin, null, 'api', $admin->getRoles())
         );
 
         // Create GraphQL Schema

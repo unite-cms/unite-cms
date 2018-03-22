@@ -174,7 +174,7 @@ class MutationType extends AbstractType
         }
 
         $content = new Content();
-        $form = $this->fieldableFormBuilder->createForm($contentType, $content, ['csrf_protection' => false]);
+        $form = $this->fieldableFormBuilder->createForm($contentType, $content);
         $form->submit($args['data']);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -237,7 +237,7 @@ class MutationType extends AbstractType
             throw new UserError("You are not allowed to update content with id '$id'.");
         }
 
-        $form = $this->fieldableFormBuilder->createForm($content->getContentType(), $content, ['csrf_protection' => false]);
+        $form = $this->fieldableFormBuilder->createForm($content->getContentType(), $content);
 
         // Update only changed fields on this entity. Note: nested values will get replaced, no recursively replacement possible here.
         $args['data'] = array_replace($content->getData(), $args['data']);
