@@ -171,6 +171,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       ['organization' => $this->org1->getIdentifier(), 'domain' => $this->domain1->getIdentifier(), 'content_type' => 'foo'],
     ] as $params) {
       $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', $params), []);
+      print_r($this->client->getResponse()); exit;
       $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
