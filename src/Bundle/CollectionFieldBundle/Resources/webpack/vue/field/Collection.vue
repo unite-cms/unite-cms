@@ -7,14 +7,13 @@
                 :prototype="row.prototype"
                 @remove="removeRow"
         ></united-cms-collection-field-row>
-        <button v-if="!maxRows || rows.length < maxRows" class="uk-button uk-button-default" v-on:click.prevent="addRow">
-            <span uk-icon="icon: plus"></span>
-            Add Row
-        </button>
+        <button v-if="!maxRows || rows.length < maxRows" class="uk-button uk-button-default add" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></button>
     </div>
 </template>
 
 <script>
+    import feather from 'feather-icons';
+
     export default {
         data() {
 
@@ -39,6 +38,7 @@
             return {
                 counter: rows.length,
                 rows: rows,
+                feather: feather
             };
         },
         props: [
@@ -76,6 +76,62 @@
     };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+    @import "../../../../../CoreBundle/Resources/webpack/sass/base/variables";
 
+    united-cms-collection-field {
+        display: block;
+        margin: 5px 0;
+        border: 1px solid map-get($colors, grey-medium);
+        background: map-get($colors, white);
+        padding: 10px;
+
+        united-cms-collection-field-row {
+            position: relative;
+            display: block;
+            background: $global-muted-background;
+            opacity: 0.75;
+
+            > .uk-placeholder {
+                margin-bottom: 10px;
+                padding: 15px 15px 0;
+
+                > div > div > .uk-margin {
+                    margin-bottom: 15px;
+                }
+
+                > .close-button {
+                    display: none;
+                    background: map-get($colors, red);
+                    color: map-get($colors, white);
+                    width: 24px;
+                    height: 24px;
+                    top: 0;
+                    right: 0;
+                    border-radius: 0 0 0 2px;
+
+                    svg {
+                        width: 16px;
+                        height: 16px;
+                    }
+                }
+            }
+
+            &:hover {
+                opacity: 1;
+
+                > .uk-placeholder > .close-button {
+                    display: block;
+                }
+            }
+        }
+
+        > div > button.add {
+            padding: 0;
+            width: 40px;
+            border-radius: 100%;
+            margin: 10px auto;
+            display: block;
+        }
+    }
 </style>

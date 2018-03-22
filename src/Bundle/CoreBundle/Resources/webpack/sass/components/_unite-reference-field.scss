@@ -40,7 +40,9 @@ united-cms-core-reference-field {
     }
 
     .close-button {
-      right: 10px;
+      right: 5px;
+      top: 50%;
+      margin-top: -20px;
     }
 
     &:hover {
