@@ -233,7 +233,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         $reflector->setAccessible(true);
         $reflector->setValue($this->container->get('united.cms.manager'), true);
 
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'united_core_api_client', $user->getRoles()));
+        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'api', $user->getRoles()));
 
         $request = new Request([], [], [
             'organization' => $domain->getOrganization(),
