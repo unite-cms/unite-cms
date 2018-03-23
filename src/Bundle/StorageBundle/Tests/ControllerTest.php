@@ -18,6 +18,7 @@ use UnitedCMS\CoreBundle\Entity\Organization;
 use UnitedCMS\CoreBundle\Entity\OrganizationMember;
 use UnitedCMS\CoreBundle\Entity\User;
 use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UnitedCMS\StorageBundle\Form\SignInputType;
 use UnitedCMS\StorageBundle\Model\PreSignedUrl;
 
 class ControllerTest extends DatabaseAwareTestCase {
@@ -26,6 +27,11 @@ class ControllerTest extends DatabaseAwareTestCase {
    * @var Client $client
    */
   private $client;
+
+  /**
+   * @var Client $client
+   */
+  private $crsf_token;
 
   /**
    * @var string
@@ -138,6 +144,10 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->client->followRedirects(false);
 
     $token = new UsernamePasswordToken($editor, null, 'main', $editor->getRoles());
+
+    # generate new crsf_token
+    $this->crsf_token = $this->container->get('security.csrf.token_manager')->getToken(SignInputType::class);
+
     $session = $this->client->getContainer()->get('session');
     $session->set('_security_main', serialize($token));
     $session->save();
@@ -146,6 +156,8 @@ class ControllerTest extends DatabaseAwareTestCase {
   }
 
   public function testPreSignFileUpload() {
+
+      $this->client->setServerParameter('HTTP_Authentication-Fallback', true);
 
     // Try to access with invalid method.
     $baseUrl = $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']);
@@ -170,6 +182,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'content_type' => 'foo'],
       ['organization' => $this->org1->getIdentifier(), 'domain' => $this->domain1->getIdentifier(), 'content_type' => 'foo'],
     ] as $params) {
+
       $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', $params), []);
       $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
@@ -278,6 +291,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
     // Try to pre sign filename with special chars.
+
     $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
@@ -285,6 +299,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     ]), [
       'field' => 'file',
       'filename' => 'ö Aä.*#ä+ .txt',
+        '_token' => $this->crsf_token->getValue()
     ]);
     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -327,6 +342,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     ]), [
       'field' => 'file',
       'filename' => 'ö Aä.*#ä+ .txt',
+        '_token' => $this->crsf_token->getValue()
     ]);
     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
