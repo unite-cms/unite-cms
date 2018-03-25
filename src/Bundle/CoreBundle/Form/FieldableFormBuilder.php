@@ -6,46 +6,21 @@ use Symfony\Component\Form\FormFactory;
 use UnitedCMS\CoreBundle\Entity\Fieldable;
 use UnitedCMS\CoreBundle\Entity\FieldableContent;
 use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class FieldableFormBuilder
 {
-    /**
-     * @var TokenStorage $securityTokenStorage
-     */
-    private $securityTokenStorage;
-
     private $formFactory;
     private $fieldTypeManager;
 
-    public function __construct(FormFactory $formFactory, FieldTypeManager $fieldTypeManager, TokenStorage $tokenStorage)
+    public function __construct(FormFactory $formFactory, FieldTypeManager $fieldTypeManager)
     {
         $this->formFactory = $formFactory;
         $this->fieldTypeManager = $fieldTypeManager;
-        $this->securityTokenStorage = $tokenStorage;
-    }
-
-    /**
-     * determine if the current authentication is done via API token or not, disable csrf for API Token
-     *
-     * @param $options
-     *
-     * @return array
-     */
-    public function handleCsrfProtection($options)
-    {
-        if ($this->securityTokenStorage->getToken() && $this->securityTokenStorage->getToken()->getProviderKey() == "api")
-        {
-            $options['csrf_protection'] = false;
-        }
-        return $options;
     }
 
     public function createForm(Fieldable $fieldable, FieldableContent $content = null, $options = [])
     {
         $data = [];
-
-        $options = $this->handleCsrfProtection($options);
 
         // Set all possible locales from fieldable.
         $options['locales'] = $fieldable->getLocales();

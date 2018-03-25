@@ -33,7 +33,7 @@ class ControllerTest extends DatabaseAwareTestCase {
   /**
    * @var $token
    */
-  private $crsf_token;
+  private $csrf_token;
 
     /**
      * @var User $user
@@ -184,8 +184,8 @@ class ControllerTest extends DatabaseAwareTestCase {
 
       $token = new UsernamePasswordToken($this->user, null, 'main', $this->user->getRoles());
 
-      # generate new crsf_token
-      $this->crsf_token = $this->container->get('security.csrf.token_manager')->getToken(SignInputType::class);
+      # generate new csrf_token
+      $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(SignInputType::class);
 
       $session = $this->client->getContainer()->get('session');
       $session->set('_security_main', serialize($token));
@@ -220,7 +220,6 @@ class ControllerTest extends DatabaseAwareTestCase {
     ] as $params) {
 
       $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', $params), []);
-      print_r($this->client->getResponse()); exit;
       $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
@@ -336,7 +335,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     ]), [
       'field' => 'file',
       'filename' => 'ö Aä.*#ä+ .txt',
-        '_token' => $this->crsf_token->getValue()
+        '_token' => $this->csrf_token->getValue()
     ]);
     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -379,7 +378,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     ]), [
       'field' => 'file',
       'filename' => 'ö Aä.*#ä+ .txt',
-        '_token' => $this->crsf_token->getValue()
+        '_token' => $this->csrf_token->getValue()
     ]);
     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 

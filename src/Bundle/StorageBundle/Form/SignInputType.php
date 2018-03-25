@@ -19,13 +19,13 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 class SignInputType extends AbstractType implements DataTransformerInterface
 {
     /**
-     * @var TokenStorage $securityTokenStorage
+     * @var TokenStorage $tokenStorage
      */
-    private $securityTokenStorage;
+    private $tokenStorage;
 
     public function __construct(TokenStorage $tokenStorage)
     {
-        $this->securityTokenStorage = $tokenStorage;
+        $this->tokenStorage = $tokenStorage;
     }
 
     /**
@@ -33,7 +33,7 @@ class SignInputType extends AbstractType implements DataTransformerInterface
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        if ($this->securityTokenStorage->getToken() && $this->securityTokenStorage->getToken()->getProviderKey() == "api")
+        if ($this->tokenStorage->getToken() && $this->tokenStorage->getToken()->getProviderKey() == "api")
         {
             $resolver->setDefault('csrf_protection', false);
         }
