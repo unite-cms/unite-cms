@@ -15,6 +15,11 @@ class ViewParameterBag implements \JsonSerializable
     /**
      * @var string
      */
+    private $csrfToken = '';
+
+    /**
+     * @var string
+     */
     private $selectMode = '';
 
     /**
@@ -252,6 +257,22 @@ class ViewParameterBag implements \JsonSerializable
     /**
      * @return string
      */
+    public function getCsrfToken() : string {
+        return $this->csrfToken;
+    }
+
+    /**
+     * @param string $csrfToken
+     * @return ViewParameterBag
+     */
+    public function setCsrfToken($csrfToken) {
+        $this->csrfToken = $csrfToken;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function getSelectMode(): string
     {
         return $this->selectMode;
@@ -359,6 +380,7 @@ class ViewParameterBag implements \JsonSerializable
                 'is_mode_none' => $this->isSelectModeNone(),
                 'is_mode_single' => $this->isSelectModeSingle(),
             ],
+            'csrf_token' => $this->getCsrfToken(),
             'settings' => $this->getSettings(),
         ];
     }

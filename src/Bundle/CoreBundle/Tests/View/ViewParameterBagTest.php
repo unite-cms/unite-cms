@@ -22,6 +22,8 @@ class ViewParameterBagTest extends TestCase
         $this->assertEquals(['baa'], $bag->get('foo2'));
         $this->assertNull($bag->get('any_unknown'));
 
+        $this->assertEquals('foo_token', $bag->setCsrfToken('foo_token')->getCsrfToken());
+
         $this->assertEquals('any_select_mode', $bag->setSelectMode('any_select_mode')->getSelectMode());
         $this->assertEquals('any_url_pattern', $bag->setUpdateUrlPattern('any_url_pattern')->getUpdateUrlPattern());
         $this->assertEquals('any_endpoint_pattern', $bag->setApiEndpointPattern('any_endpoint_pattern')->getApiEndpointPattern());
@@ -58,6 +60,7 @@ class ViewParameterBagTest extends TestCase
                 'is_mode_none' => false,
                 'is_mode_single' => false,
             ],
+            'csrf_token' => 'foo_token',
             'settings' => [
                 'foo' => 'baa',
                 'foo2' => ['baa'],
@@ -107,6 +110,7 @@ class ViewParameterBagTest extends TestCase
                 'is_mode_none' => false,
                 'is_mode_single' => true,
             ],
+            'csrf_token' => '',
             'settings' => [
                 'foo' => 'baa',
             ],
