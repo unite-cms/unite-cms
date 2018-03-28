@@ -4,6 +4,7 @@ namespace UnitedCMS\StorageBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\ConstraintViolation;
 use UnitedCMS\CoreBundle\Entity\Content;
 use UnitedCMS\CoreBundle\Entity\ContentType;
@@ -27,12 +28,14 @@ class FileFieldType extends FieldType
     private $router;
     private $secret;
     private $storageService;
+    private $csrfTokenManager;
 
-    public function __construct(Router $router, string $secret, StorageService $storageService)
+    public function __construct(Router $router, string $secret, StorageService $storageService, CsrfTokenManager $csrfTokenManager)
     {
         $this->router = $router;
         $this->secret = $secret;
         $this->storageService = $storageService;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
 
     /**
@@ -71,7 +74,8 @@ class FileFieldType extends FieldType
             'file-types' => $field->getSettings()->file_types,
             'field-path' => join('/', $identifier_path_parts),
             'endpoint' => $field->getSettings()->bucket['endpoint'] . '/' . $field->getSettings()->bucket['bucket'],
-            'upload-sign-url' => $url
+            'upload-sign-url' => $url,
+            'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
           ],
         ]);
     }
