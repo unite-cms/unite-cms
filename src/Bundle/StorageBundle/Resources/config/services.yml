@@ -30,7 +30,7 @@ services:
         tags:
             - { name: 'console.command', command: 'united:storage:delete-unused' }
 
-    # Provide SignInputType form as a service for S3 presigning from type
-    UnitedCMS\StorageBundle\Form\SignInputType:
-            tags: [form.type]
-            arguments: ['@security.token_storage']
+    # Provide PreSignFormType form as a service for S3 presigning from type
+    UnitedCMS\StorageBundle\Form\PreSignFormType:
+        tags: [form.type]
+        arguments: ['@security.token_storage']

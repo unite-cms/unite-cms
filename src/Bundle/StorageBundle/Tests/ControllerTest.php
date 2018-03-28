@@ -10,6 +10,7 @@ namespace UnitedCMS\StorageBundle\Tests;
 
 use Aws\S3\S3Client;
 use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -20,7 +21,7 @@ use UnitedCMS\CoreBundle\Entity\Organization;
 use UnitedCMS\CoreBundle\Entity\OrganizationMember;
 use UnitedCMS\CoreBundle\Entity\User;
 use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
-use UnitedCMS\StorageBundle\Form\SignInputType;
+use UnitedCMS\StorageBundle\Form\PreSignFormType;
 use UnitedCMS\StorageBundle\Model\PreSignedUrl;
 
 class ControllerTest extends DatabaseAwareTestCase {
@@ -172,8 +173,10 @@ class ControllerTest extends DatabaseAwareTestCase {
       ], Router::ABSOLUTE_URL);
 
       $parameters = [
-          'field' => 'file',
-          'filename' => 'ö Aä.*#ä+ .txt'
+          'pre_sign_form' => [
+              'field' => 'file',
+              'filename' => 'ö Aä.*#ä+ .txt'
+          ],
       ];
 
       $this->client->request('POST', $route_uri, $parameters, [], ['CONTENT_TYPE' => 'application/json'], json_encode(['query' => '{}']));
@@ -185,14 +188,13 @@ class ControllerTest extends DatabaseAwareTestCase {
       $token = new UsernamePasswordToken($this->user, null, 'main', $this->user->getRoles());
 
       # generate new csrf_token
-      $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(SignInputType::class);
+      $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(PreSignFormType::class));
 
       $session = $this->client->getContainer()->get('session');
       $session->set('_security_main', serialize($token));
       $session->save();
       $cookie = new Cookie($session->getName(), $session->getId());
       $this->client->getCookieJar()->set($cookie);
-
       $this->client->setServerParameter('HTTP_Authentication-Fallback', true);
 
     // Try to access with invalid method.
@@ -253,7 +255,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'foo',
+        'pre_sign_form' => ['field' => 'foo'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -263,7 +265,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'foo',
+        'pre_sign_form' => ['field' => 'foo'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -273,7 +275,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'foo/baa',
+        'pre_sign_form' => ['field' => 'foo/baa'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -282,7 +284,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'nested/baa',
+      'pre_sign_form' => ['field' => 'nested/baa'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -292,7 +294,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'foo/baa',
+        'pre_sign_form' => ['field' => 'foo/baa'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -301,7 +303,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'nested/baa',
+        'pre_sign_form' => ['field' => 'nested/baa'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -311,8 +313,10 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'file',
-      'filename' => 'unsupported.unsupported',
+        'pre_sign_form' => [
+          'field' => 'file',
+          'filename' => 'unsupported.unsupported',
+        ]
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -321,8 +325,10 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'file',
-      'filename' => 'unsupported.unsupported',
+        'pre_sign_form' => [
+          'field' => 'file',
+          'filename' => 'unsupported.unsupported',
+        ],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -333,9 +339,11 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'file',
-      'filename' => 'ö Aä.*#ä+ .txt',
-        '_token' => $this->csrf_token->getValue()
+        'pre_sign_form' => [
+          'field' => 'file',
+          'filename' => 'ö Aä.*#ä+ .txt',
+            '_token' => $this->csrf_token->getValue()
+        ],
     ]);
     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -376,9 +384,11 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'file',
-      'filename' => 'ö Aä.*#ä+ .txt',
-        '_token' => $this->csrf_token->getValue()
+        'pre_sign_form' => [
+          'field' => 'file',
+          'filename' => 'ö Aä.*#ä+ .txt',
+            '_token' => $this->csrf_token->getValue()
+        ],
     ]);
     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 

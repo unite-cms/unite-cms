@@ -16,7 +16,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
-class SignInputType extends AbstractType implements DataTransformerInterface
+class PreSignFormType extends AbstractType implements DataTransformerInterface
 {
     /**
      * @var TokenStorage $tokenStorage
@@ -51,14 +51,6 @@ class SignInputType extends AbstractType implements DataTransformerInterface
             'required' => true,
             'constraints' => [ new NotBlank() ]
           ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix()
-    {
-        return '';
     }
 
     /**
