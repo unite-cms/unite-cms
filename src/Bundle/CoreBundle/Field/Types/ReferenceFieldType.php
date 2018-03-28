@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UnitedCMS\CoreBundle\Entity\Content;
 use UnitedCMS\CoreBundle\Entity\FieldableField;
@@ -34,14 +35,16 @@ class ReferenceFieldType extends FieldType
     private $viewTypeManager;
     private $entityManager;
     private $templating;
+    private $csrfTokenManager;
 
-    function __construct(ValidatorInterface $validator, AuthorizationChecker $authorizationChecker, UnitedCMSManager $unitedCMSManager, EntityManager $entityManager, ViewTypeManager $viewTypeManager, TwigEngine $templating) {
+    function __construct(ValidatorInterface $validator, AuthorizationChecker $authorizationChecker, UnitedCMSManager $unitedCMSManager, EntityManager $entityManager, ViewTypeManager $viewTypeManager, TwigEngine $templating, CsrfTokenManager $csrfTokenManager) {
         $this->validator = $validator;
         $this->authorizationChecker = $authorizationChecker;
         $this->unitedCMSManager = $unitedCMSManager;
         $this->viewTypeManager = $viewTypeManager;
         $this->entityManager = $entityManager;
         $this->templating = $templating;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
 
     /**
@@ -118,7 +121,9 @@ class ReferenceFieldType extends FieldType
                     $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
                     [
                         'view' => $view,
-                        'parameters' => $this->viewTypeManager->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE),
+                        'parameters' => $this->viewTypeManager
+                            ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
+                            ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form')),
                     ]
                 ),
             ],
