@@ -132,7 +132,7 @@ class UnitedCMSManager
             }
 
             $data = $this->em->createQueryBuilder()
-                ->select('ct.id', 'ct.identifier', 'ct.title', 'ct.icon', 'ct.permissions')
+                ->select('ct.id', 'ct.identifier', 'ct.title', 'ct.contentLabel', 'ct.icon', 'ct.permissions')
                 ->from('UnitedCMSCoreBundle:ContentType', 'ct')
                 ->leftJoin('ct.domain', 'd')
                 ->leftJoin('ct.views', 'co')
@@ -143,7 +143,7 @@ class UnitedCMSManager
 
             foreach ($data as $row) {
                 $contentType = new ContentType();
-                $contentType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon($row['icon'])->setPermissions($row['permissions']);
+                $contentType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setContentLabel($row['contentLabel'])->setIcon($row['icon'])->setPermissions($row['permissions']);
 
                 // Get views for this contentType.
                 $viewData = $this->em->createQueryBuilder()
