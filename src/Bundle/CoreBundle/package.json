@@ -16,5 +16,9 @@
     "vue-custom-element": "^1.4.2",
     "vue-loader": "^13.5.0",
     "vue-template-compiler": "^2.5.6"
+  },
+  "scripts": {
+    "dev": "./node_modules/.bin/encore dev --watch",
+    "build": "./node_modules/.bin/encore production"
   }
 }
