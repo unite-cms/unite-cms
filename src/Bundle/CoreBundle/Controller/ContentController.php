@@ -44,7 +44,7 @@ class ContentController extends Controller
                 )::getTemplate(),
                 'templateParameters' => $this->get('united.cms.view_type_manager')->getTemplateRenderParameters(
                     $view
-                ),
+                )->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form')),
             ]
         );
     }
@@ -522,7 +522,9 @@ class ContentController extends Controller
                             $this->get('united.cms.view_type_manager')->getViewType($view->getType())::getTemplate(),
                             [
                                 'view' => $view,
-                                'parameters' => $this->get('united.cms.view_type_manager')->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE),
+                                'parameters' => $this->get('united.cms.view_type_manager')
+                                    ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
+                                    ->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form')),
                             ]
                         ),
                     ],

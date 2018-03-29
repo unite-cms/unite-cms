@@ -59,18 +59,25 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         // Try to validate collection without fields.
         $this->assertCount(0, $this->container->get('validator')->validate($field));
 
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
         $this->assertInstanceOf(FieldableFormType::class, $form->getConfig()->getType()->getInnerType());
         $this->assertTrue($form->has($field->getIdentifier()));
         $this->assertEquals($field->getTitle(), $form->get($field->getIdentifier())->getConfig()->getOption('label'));
+        $csrf_token = $this->container->get('security.csrf.token_manager')->getToken($form->getName());
+        $formData = [
+            '_token' => $csrf_token->getValue()
+        ];
 
         // Submitting empty data should be valid.
-        $form->submit([]);
+        $form->submit($formData);
         $this->assertTrue($form->isValid());
 
         // Submitting sub field data should be valid since we auto-delete empty rows, but content data must be empty.
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
-        $form->submit([$field->getIdentifier() => [['foo' => 'baa']]]);
+        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
+        $form->submit([
+            '_token' => $csrf_token->getValue(),
+            $field->getIdentifier() => [['foo' => 'baa']]
+        ]);
         $this->assertTrue($form->isValid());
         $this->assertEmpty($form->getData()[$field->getIdentifier()]);
     }
@@ -94,8 +101,12 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $this->container->get('validator')->validate($field));
 
         // Submitting sub field data should work, for the given fields.
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
-        $form->submit([$field->getIdentifier() => [['f1' => 'value']]]);
+        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
+        $csrf_token = $this->container->get('security.csrf.token_manager')->getToken($form->getName());
+        $form->submit([
+            '_token' => $csrf_token->getValue(),
+            $field->getIdentifier() => [['f1' => 'value']]
+        ]);
         $this->assertTrue($form->isValid());
         $this->assertNotEmpty($form->getData());
         $this->assertEquals([$field->getIdentifier() => [['f1' => 'value']]], $form->getData());
@@ -240,7 +251,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $admin = new User();
         $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
         $this->container->get('security.token_storage')->setToken(
-          new UsernamePasswordToken($admin, null, 'main', $admin->getRoles())
+          new UsernamePasswordToken($admin, null, 'api', $admin->getRoles())
         );
 
         // Create GraphQL Schema
@@ -487,8 +498,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $form = $this->container->get('united.cms.fieldable_form_builder')
           ->createForm(
             $field->getContentType(),
-            $content,
-            ['csrf_protection' => false]
+            $content
           );
         $formView = $form->createView();
 

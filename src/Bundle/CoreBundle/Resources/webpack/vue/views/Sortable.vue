@@ -89,7 +89,8 @@ export default {
             revisionsUrlPattern: bag.urls.revisions,
             translationsUrlPattern: bag.urls.translations,
             selected: [],
-            feather: feather
+            feather: feather,
+            csrf_token: bag.csrf_token
         };
     },
     props: ['parameters'],
@@ -97,7 +98,8 @@ export default {
         this.client = new GraphQLClient(this.endpoint, {
             credentials: "same-origin",
             headers: {
-                "Authentication-Fallback": true
+                "Authentication-Fallback": true,
+                "X-CSRF-TOKEN": this.csrf_token
             },
         });
 

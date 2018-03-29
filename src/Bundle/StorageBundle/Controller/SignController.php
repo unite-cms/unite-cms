@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use UnitedCMS\CoreBundle\Entity\ContentType;
 use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\StorageBundle\Form\SignInputType;
+use UnitedCMS\StorageBundle\Form\PreSignFormType;
 
 class SignController extends Controller {
 
@@ -37,8 +37,7 @@ class SignController extends Controller {
    */
   public function uploadContentTypeAction(ContentType $contentType, Request $request) {
 
-    // TODO: This should only be possible when auth is TOKEN and not Cookie
-    $form = $this->createForm(SignInputType::class, null, ['csrf_protection' => false]);
+    $form = $this->createForm(PreSignFormType::class, null);
     $form->handleRequest($request);
 
     if($form->isSubmitted() && $form->isValid()) {
@@ -72,8 +71,7 @@ class SignController extends Controller {
    */
   public function uploadSettingTypeAction(SettingType $settingType, Request $request) {
 
-    // TODO: This should only be possible when auth is TOKEN and not Cookie
-    $form = $this->createForm(SignInputType::class, null, ['csrf_protection' => false]);
+    $form = $this->createForm(PreSignFormType::class, null);
     $form->handleRequest($request);
 
     if($form->isSubmitted() && $form->isValid()) {

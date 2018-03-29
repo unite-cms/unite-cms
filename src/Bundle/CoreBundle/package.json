@@ -19,7 +19,7 @@
     "vue-template-compiler": "^2.5.15"
   },
   "scripts": {
-    "watch": "./node_modules/.bin/encore dev --watch",
+    "dev": "./node_modules/.bin/encore dev --watch",
     "build": "./node_modules/.bin/encore production"
   }
 }

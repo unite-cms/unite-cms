@@ -165,12 +165,14 @@
                 }
 
                 let data = new FormData();
-                data.append('filename', tmpFile.name);
-                data.append('field', t.fieldPath);
+                data.append('pre_sign_form[filename]', tmpFile.name);
+                data.append('pre_sign_form[field]', t.fieldPath);
+                data.append('pre_sign_form[_token]', t.uploadSignCsrfToken);
 
                 UIkit.util.ajax(t.uploadSignUrl, {
                     method: 'POST',
-                    data: data
+                    data: data,
+                    headers: { "Authentication-Fallback": true }
                 }).then((result) => {
 
                     // Temporary save the parameter of this file. If upload is successful, we save them to the component.
@@ -216,6 +218,7 @@
             'fileTypes',
             'fieldPath',
             'uploadSignUrl',
+            'uploadSignCsrfToken',
             'thumbnailUrl',
             'endpoint'
         ],

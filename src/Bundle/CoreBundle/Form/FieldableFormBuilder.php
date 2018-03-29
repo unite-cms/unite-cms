@@ -9,7 +9,6 @@ use UnitedCMS\CoreBundle\Field\FieldTypeManager;
 
 class FieldableFormBuilder
 {
-
     private $formFactory;
     private $fieldTypeManager;
 

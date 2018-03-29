@@ -33,3 +33,9 @@ services:
     class: UnitedCMS\CoreBundle\Form\FieldableFormBuilder
     arguments: ['@form.factory', '@united.cms.field_type_manager']
     public: true
+
+  # Provide FieldableFormType form as a service, pass tokenstorage as an argument, auto wire not working in forms
+  united.cms.fieldable_form_type:
+    class: UnitedCMS\CoreBundle\Form\FieldableFormType
+    arguments: ['@security.token_storage']
+    tags: [form.type]

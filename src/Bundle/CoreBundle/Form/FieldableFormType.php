@@ -8,9 +8,19 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class FieldableFormType extends AbstractType
 {
+    /**
+     * @var TokenStorage $tokenStorage
+     */
+    private $tokenStorage;
+
+    public function __construct(TokenStorage $tokenStorage)
+    {
+        $this->tokenStorage = $tokenStorage;
+    }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -47,5 +57,9 @@ class FieldableFormType extends AbstractType
     {
         $resolver->setRequired('fields');
         $resolver->setDefined('locales');
+        if ($this->tokenStorage->getToken() && $this->tokenStorage->getToken()->getProviderKey() == "api")
+        {
+            $resolver->setDefault('csrf_protection', false);
+        }
     }
 }

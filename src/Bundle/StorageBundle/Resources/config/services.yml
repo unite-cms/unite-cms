@@ -9,12 +9,12 @@ services:
     # A file upload field.
     UnitedCMS\StorageBundle\Field\Types\FileFieldType:
         tags: [united_cms.field_type]
-        arguments: ['@router.default', '%kernel.secret%', '@united.cms.storage.service']
+        arguments: ['@router.default', '%kernel.secret%', '@united.cms.storage.service', '@security.csrf.token_manager']
 
     # A image upload field.
     UnitedCMS\StorageBundle\Field\Types\ImageFieldType:
         tags: [united_cms.field_type]
-        arguments: ['@router.default', '%kernel.secret%', '@united.cms.storage.service']
+        arguments: ['@router.default', '%kernel.secret%', '@united.cms.storage.service', '@security.csrf.token_manager']
 
     # A file graphQL schema object type.
     UnitedCMS\StorageBundle\SchemaType\StorageFileType:
@@ -29,3 +29,8 @@ services:
         arguments: ['@doctrine.orm.default_entity_manager', '@united.cms.field_type_manager']
         tags:
             - { name: 'console.command', command: 'united:storage:delete-unused' }
+
+    # Provide PreSignFormType form as a service for S3 presigning from type
+    UnitedCMS\StorageBundle\Form\PreSignFormType:
+        tags: [form.type]
+        arguments: ['@security.token_storage']
