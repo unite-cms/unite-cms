@@ -45,13 +45,23 @@
   }
 
   h1, h2, .uk-h1, .uk-h2 {
-    font-size: 1.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1rem;
+    line-height: 40px;
     margin: 0;
-    line-height: 1.7;
+    padding-right: 10px;
   }
 }
 
 @media (min-width: $breakpoint-medium) {
+  .uk-card-header {
+    h1, h2, .uk-h1, .uk-h2 {
+      font-size: 1.5rem;
+    }
+  }
+
   .uk-card.full-content-card {
     margin-left: 10px;
     box-shadow: 0 2px 10px 0 rgba(0,0,0,0.08);

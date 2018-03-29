@@ -1,5 +1,5 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{% trans with {'%content%': content } %}content.translations.title{% endtrans %}{% endblock title %}
+{% block title %}{% trans with {'%content%': content|escape } %}content.translations.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
     <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
@@ -10,7 +10,7 @@
                 content_type: contentType.identifier,
                 view: view.identifier
             }) }}"><i data-feather="arrow-left"></i></a>
-            <h2 class="uk-flex-1">{% trans with {'%content%': content } %}content.translations.headline{% endtrans %}</h2>
+            <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.translations.headline{% endtrans %}</h2>
         </header>
 
         <div class="unite-card-table">

@@ -1,5 +1,5 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{% trans with { '%invite%': invite } %}domain.user.delete_invitation.title{% endtrans %}{% endblock title %}
+{% block title %}{% trans with { '%invite%': invite|escape } %}domain.user.delete_invitation.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
@@ -10,7 +10,7 @@
         }) }}">
             <i data-feather="arrow-left"></i>
         </a>
-        <h2>{% trans with { '%invite%': invite } %}domain.user.delete_invitation.headline{% endtrans %}</h2>
+        <h2>{% trans with { '%invite%': invite|escape } %}domain.user.delete_invitation.headline{% endtrans %}</h2>
     </header>
     {{ form(form) }}
 </article>

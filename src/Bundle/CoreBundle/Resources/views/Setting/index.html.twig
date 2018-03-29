@@ -1,10 +1,10 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{% trans with {"%type%": settingType } %}setting.update.title{% endtrans %}{% endblock title %}
+{% block title %}{% trans with {"%type%": settingType|escape } %}setting.update.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <h2 class="uk-flex-1">{% trans with {"%type%": settingType } %}setting.update.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans with {"%type%": settingType|escape } %}setting.update.headline{% endtrans %}</h2>
         <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
             <ul class="uk-nav uk-dropdown-nav">
