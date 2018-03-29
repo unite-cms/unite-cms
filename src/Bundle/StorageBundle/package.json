@@ -6,6 +6,7 @@
   },
   "devDependencies": {
     "@symfony/webpack-encore": "^0.17.0",
+    "feather-icons": "^4.7.0",
     "node-sass": "^4.7.1",
     "npm": "^5.5.1",
     "sass-loader": "^6.0.6",
