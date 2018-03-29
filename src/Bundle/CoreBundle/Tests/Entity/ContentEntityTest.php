@@ -221,6 +221,6 @@ class ContentEntityTest extends DatabaseAwareTestCase
         $this->assertEquals('value', (string)$content);
 
         $contentType->setContentLabel("{unknown}");
-        $this->assertEquals('unknown', (string)$content);
+        $this->assertEquals('{unknown}', (string)$content);
     }
 }

@@ -116,7 +116,9 @@ class Content implements FieldableContent
             preg_match_all("/{([a-z0-9._]+)}/", $string, $output_array);
             if(count($output_array) == 2) {
                 foreach($output_array[1] as $value) {
-                    $string = str_replace('{' . $value . '}', $this->findDataBySelector($value), $string);
+                    if(($replacement = $this->findDataBySelector($value)) !== null) {
+                        $string = str_replace('{' . $value . '}', $replacement, $string);
+                    }
                 }
             }
 
@@ -146,9 +148,9 @@ class Content implements FieldableContent
      * @param string $selector
      * @param array $data, this param is used internal to recursively find nested values.
      *
-     * @return string
+     * @return string|null
      */
-    public function findDataBySelector(string $selector, array $data = NULL) : string {
+    public function findDataBySelector(string $selector, array $data = null) {
 
         // For the root call, $data is NULL. In this case we can select content root fields.
         if($data === NULL) {
@@ -166,12 +168,12 @@ class Content implements FieldableContent
 
         // If this is the deepest component of the selector, try to return from array.
         if(count($selector_parts) == 1) {
-            return isset($data[$selector]) ? (string) $data[$selector] : $selector;
+            return isset($data[$selector]) ? (string) $data[$selector] : null;
         }
 
         // if this is not the deepest component try to find this field in the data array.
         $top_selector = array_shift($selector_parts);
-        return !empty($data[$top_selector]) ? $this->findDataBySelector(implode('.', $selector_parts), $data[$top_selector]) : $top_selector;
+        return !empty($data[$top_selector]) ? $this->findDataBySelector(implode('.', $selector_parts), $data[$top_selector]) : null;
     }
 
     /**
