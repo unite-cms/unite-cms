@@ -251,4 +251,10 @@ class ContentTypeEntityTest extends DatabaseAwareTestCase
         // Try to find with valid identifier.
         $this->assertEquals($contentType, $repo->findByIdentifiers('org', 'domain', 'ct1'));
     }
+
+    public function testContentLabelProperty() {
+        $ct = new ContentType();
+        $this->assertEquals('{type} #{id}', $ct->getContentLabel());
+        $this->assertEquals('Foo', $ct->setContentLabel('Foo')->getContentLabel());
+    }
 }

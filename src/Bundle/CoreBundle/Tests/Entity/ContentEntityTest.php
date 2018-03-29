@@ -167,4 +167,60 @@ class ContentEntityTest extends DatabaseAwareTestCase
         $content->setData(['invalid' => false]);
         $this->assertCount(0, $this->container->get('validator')->validate($content));
     }
+
+    public function testContentEntityToStringMethod() {
+
+        // Empty content should be printed as "".
+        $this->assertEquals('Content', (string)new Content());
+
+        // Content entity with id but no content_type should be printed as "Content #{id}".
+        $content = new Content();
+        $rp = new \ReflectionProperty($content, 'id');
+        $rp->setAccessible(true);
+        $rp->setValue($content, 'XXX-YYY-ZZZ');
+
+        $this->assertEquals('Content #XXX-YYY-ZZZ', (string)$content);
+
+        // Content with set content_type that has no defined content_label and no title should be the same.
+        $contentType = new ContentType();
+        $contentType->setContentLabel('');
+        $content->setContentType($contentType);
+        $this->assertEquals('Content #XXX-YYY-ZZZ', (string)$content);
+
+        // Content with set content_type that has no defined content_label but a title should be "{ContentType} #{id}".
+        $contentType->setTitle('News');
+        $this->assertEquals('News #XXX-YYY-ZZZ', (string)$content);
+
+        // Content with set content_type and defined content_label should interprets content_label.
+        $contentType->setContentLabel("Foo");
+        $this->assertEquals('Foo', (string)$content);
+
+        $contentType->setContentLabel("#{id}");
+        $this->assertEquals('#XXX-YYY-ZZZ', (string)$content);
+
+        $content->setData([
+            'title' => 'My title',
+            'foo' => 'baa',
+            'nested' => [
+                'lu' => [
+                    'la' => 'value',
+                ]
+            ],
+        ]);
+
+        $contentType->setContentLabel("{title}");
+        $this->assertEquals('My title', (string)$content);
+
+        $contentType->setContentLabel("#{id} {foo}");
+        $this->assertEquals('#XXX-YYY-ZZZ baa', (string)$content);
+
+        $contentType->setContentLabel("{type}");
+        $this->assertEquals('News', (string)$content);
+
+        $contentType->setContentLabel("{nested.lu.la}");
+        $this->assertEquals('value', (string)$content);
+
+        $contentType->setContentLabel("{unknown}");
+        $this->assertEquals('unknown', (string)$content);
+    }
 }

@@ -74,6 +74,14 @@ class ContentType implements Fieldable
     private $icon;
 
     /**
+     * @var string
+     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @ORM\Column(name="content_label", type="string", length=255, nullable=true)
+     * @Expose
+     */
+    private $contentLabel = '{type} #{id}';
+
+    /**
      * @var Domain
      * @Gedmo\SortableGroup
      * @Assert\NotBlank(message="validation.not_blank")
@@ -207,6 +215,7 @@ class ContentType implements Fieldable
             ->setIdentifier($contentType->getIdentifier())
             ->setWeight($contentType->getWeight())
             ->setIcon($contentType->getIcon())
+            ->setContentLabel($contentType->getContentLabel())
             ->setPermissions($contentType->getPermissions())
             ->setDescription($contentType->getDescription())
             ->setLocales($contentType->getLocales());
@@ -371,6 +380,26 @@ class ContentType implements Fieldable
     public function getIcon()
     {
         return $this->icon;
+    }
+
+    /**
+     * @param string $contentLabel
+     *
+     * @return ContentType
+     */
+    public function setContentLabel($contentLabel)
+    {
+        $this->contentLabel = $contentLabel;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentLabel()
+    {
+        return $this->contentLabel;
     }
 
     /**
