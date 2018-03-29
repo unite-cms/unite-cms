@@ -47,8 +47,12 @@ class SettingController extends Controller
             $this->getDoctrine()->getManager()->flush();
         }
 
-        $form = $this->get('united.cms.fieldable_form_builder')->createForm($settingType, $setting);
-        $form->add('submit', SubmitType::class, ['label' => 'Save']);
+        $form = $this->get('united.cms.fieldable_form_builder')->createForm(
+            $settingType,
+            $setting,
+            ['attr' => ['class' => 'uk-form-vertical']]
+        );
+        $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

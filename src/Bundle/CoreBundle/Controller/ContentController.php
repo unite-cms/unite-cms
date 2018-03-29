@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Translation\Translator;
 use UnitedCMS\CoreBundle\View\ViewTypeInterface;
 use UnitedCMS\CoreBundle\Entity\View;
 use UnitedCMS\CoreBundle\Entity\Content;
@@ -74,8 +75,12 @@ class ContentController extends Controller
             }
         }
 
-        $form = $this->get('united.cms.fieldable_form_builder')->createForm($view->getContentType(), $content);
-        $form->add('submit', SubmitType::class, ['label' => 'Create']);
+        $form = $this->get('united.cms.fieldable_form_builder')->createForm(
+            $view->getContentType(),
+            $content,
+            ['attr' => ['class' => 'uk-form-vertical']]
+        );
+        $form->add('submit', SubmitType::class, ['label' => 'content.create.submit']);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -144,8 +149,12 @@ class ContentController extends Controller
      */
     public function updateAction(View $view, Content $content, Request $request)
     {
-        $form = $this->get('united.cms.fieldable_form_builder')->createForm($view->getContentType(), $content);
-        $form->add('submit', SubmitType::class, ['label' => 'Update']);
+        $form = $this->get('united.cms.fieldable_form_builder')->createForm(
+            $view->getContentType(),
+            $content,
+            ['attr' => ['class' => 'uk-form-vertical']]
+        );
+        $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -215,7 +224,7 @@ class ContentController extends Controller
     {
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Delete'])
+            ->add('submit', SubmitType::class, ['label' => 'content.delete.submit', 'attr' => ['class' => 'uk-button-danger']])
             ->getForm();
 
         $form->handleRequest($request);
@@ -302,7 +311,7 @@ class ContentController extends Controller
         }
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Delete definitely'])
+            ->add('submit', SubmitType::class, ['label' => 'content.delete_definitely.submit', 'attr' => ['class' => 'uk-button-danger']])
             ->getForm();
 
         $form->handleRequest($request);
@@ -395,7 +404,7 @@ class ContentController extends Controller
         }
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Restore deleted content'])
+            ->add('submit', SubmitType::class, ['label' => 'content.recover.submit'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -520,7 +529,7 @@ class ContentController extends Controller
                         ),
                     ],
                 ])
-            ->add('submit', SubmitType::class, ['label' => 'Save as Translation'])->getForm();
+            ->add('submit', SubmitType::class, ['label' => 'content.translations.add_existing.submit'])->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -612,7 +621,7 @@ class ContentController extends Controller
         $translation = $translations->first();
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Remove'])
+            ->add('submit', SubmitType::class, ['label' => 'content.translations.remove.submit', 'attr' => ['class' => 'uk-button-danger']])
             ->getForm();
 
         $form->handleRequest($request);
@@ -690,7 +699,7 @@ class ContentController extends Controller
     public function revisionsRevertAction(View $view, Content $content, int $version, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Revert'])
+            ->add('submit', SubmitType::class, ['label' => 'content.revisions.revert.submit'])
             ->getForm();
 
         $form->handleRequest($request);

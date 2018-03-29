@@ -60,6 +60,7 @@ class TableViewType extends ViewType
             'columns' => $columns,
             'View' => $this->view->getIdentifier(),
             'contentType' => $this->view->getContentType()->getIdentifier(),
+            'hasTranslations' => count($this->view->getContentType()->getLocales()) > 1,
         ];
     }
 

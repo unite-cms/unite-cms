@@ -1,0 +1,23 @@
+
+.unite-main-section {
+  position: relative;
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+
+.unite-main-menu + .unite-main-section {
+  margin-top: 50px;
+}
+
+@media (min-width: $breakpoint-medium) {
+  .unite-main-menu + .unite-main-section {
+    margin-left: 310px;
+    margin-top: 0;
+  }
+}
+
+@media (min-width: $breakpoint-xlarge) {
+  .unite-main-menu + .unite-main-section {
+    margin-left: 400px;
+  }
+}

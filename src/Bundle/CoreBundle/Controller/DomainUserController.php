@@ -73,7 +73,7 @@ class DomainUserController extends Controller
                 'user',
                 EntityType::class,
                 [
-                    'label' => 'User',
+                    'label' => 'domain.user.create.form.user',
                     'class' => User::class,
                     'query_builder' => function (EntityRepository $er) use ($organization, $domain) {
 
@@ -99,9 +99,9 @@ class DomainUserController extends Controller
             ->add(
                 'roles',
                 ChoiceType::class,
-                ['label' => 'Roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions()]
+                ['label' => 'domain.user.create.form.roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions()]
             )
-            ->add('submit', SubmitType::class, ['label' => 'Create'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.user.create.form.submit'])
             ->getForm();
 
         $formCreate->handleRequest($request);
@@ -125,13 +125,13 @@ class DomainUserController extends Controller
         $invitation->setDomain($domain);
 
         $formInvite = $this->get('form.factory')->createNamedBuilder('invite_domain_user', FormType::class, $invitation)
-            ->add('email', EmailType::class, ['label' => 'Email',])
+            ->add('email', EmailType::class, ['label' => 'domain.user.invite.form.email',])
             ->add(
                 'roles',
                 ChoiceType::class,
-                ['label' => 'Roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions()]
+                ['label' => 'domain.user.invite.form.roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions()]
             )
-            ->add('submit', SubmitType::class, ['label' => 'Invite'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.user.invite.form.submit'])
             ->getForm();
 
         $formInvite->handleRequest($request);
@@ -300,7 +300,7 @@ class DomainUserController extends Controller
         Request $request
     ) {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Remove'])->getForm();
+            ->add('submit', SubmitType::class, ['label' => 'domain.user.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

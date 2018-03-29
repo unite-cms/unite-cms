@@ -1,91 +1,117 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ domain }}: User{% endblock title %}
-{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block title %}{% trans %}domain.user.title{% endtrans %}{% endblock title %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 
-    <h1 class="uk-heading-divider">
-        Domain Users <a href="{{ path('unitedcms_core_domainuser_create', {
-            domain: domain.identifier,
-            organization: organization.identifier
-        }) }}" class="uk-icon-button uk-button-primary" uk-icon="icon: plus"></a>
-    </h1>
+    <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+        <header class="uk-card-header uk-flex">
+            <h2 class="uk-flex-1">{% trans %}domain.user.headline{% endtrans %}</h2>
+            <a href="{{ path('unitedcms_core_domainuser_create', {
+        domain: domain.identifier,
+        organization: organization.identifier
+    }) }}" class="uk-button uk-button-primary">
+                <i data-feather="plus" class="uk-margin-small-right-small"></i>
+                {% trans %}domain.user.create.button{% endtrans %}
+            </a>
+        </header>
 
-    <div class="uk-card uk-card-default uk-card-body">
-        <table class="uk-table uk-table-justify uk-table-divider">
-            <thead>
-            <tr>
-                <th>{{ knp_pagination_sortable(users, 'Firstname', 'user.firstname') }}</th>
-                <th>{{ knp_pagination_sortable(users, 'Lastname', 'user.lastname') }}</th>
-                <th>{{ knp_pagination_sortable(users, 'Email', 'user.email') }}</th>
-                <th>{{ knp_pagination_sortable(users, 'Roles', 'user.roles') }}</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for member in users %}
-                <tr>
-                    <td>{{ member.user.firstname }}</td>
-                    <td>{{ member.user.lastname }}</td>
-                    <td>{{ member.user.email }}</td>
-                    <td>{{ member.roles|join(', ') }}</td>
-                    <td>
-                        <ul class="uk-iconnav">
-                            <li><a href="{{ path('unitedcms_core_domainuser_update', {
-                                    domain: domain.identifier,
-                                    organization: organization.identifier,
-                                    member: member.id
-                                }) }}" uk-icon="icon: file-edit"></a></li>
-                            <li><a class="uk-text-danger" href="{{ path('unitedcms_core_domainuser_delete', {
-                                    domain: domain.identifier,
-                                    organization: organization.identifier,
-                                    member: member.id
-                                }) }}" uk-icon="icon: trash"></a></li>
-                        </ul>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <div class="navigation">
-            {{ knp_pagination_render(users) }}
-        </div>
-    </div>
-
-    {% if invites|length > 0 %}
-        <h1 class="uk-heading-divider">Pending Invitations</h1>
-
-        <div class="uk-card uk-card-default uk-card-body">
+        <div class="unite-card-table">
             <table class="uk-table uk-table-justify uk-table-divider">
                 <thead>
                 <tr>
-                    <th>{{ knp_pagination_sortable(invites, 'Email', 'email') }}</th>
-                    <th>{{ knp_pagination_sortable(invites, 'Roles', 'roles') }}</th>
+                    <th>{{ knp_pagination_sortable(users, 'Firstname', 'user.firstname') }}</th>
+                    <th>{{ knp_pagination_sortable(users, 'Lastname', 'user.lastname') }}</th>
+                    <th>{{ knp_pagination_sortable(users, 'Email', 'user.email') }}</th>
+                    <th>{{ knp_pagination_sortable(users, 'Roles', 'user.roles') }}</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for invite in invites %}
+                {% for member in users %}
                     <tr>
-                        <td>{{ invite.email }}</td>
-                        <td>{{ invite.roles|join(', ') }}</td>
+                        <td>{{ member.user.firstname }}</td>
+                        <td>{{ member.user.lastname }}</td>
+                        <td>{{ member.user.email }}</td>
+                        <td>{{ member.roles|join(', ') }}</td>
                         <td>
-                            <ul class="uk-iconnav">
-                                <li><a class="uk-text-danger" href="{{ path('unitedcms_core_domainuser_deleteinvite', {
-                                        organization: organization.identifier,
-                                        domain: domain.identifier,
-                                        invite: invite.id
-                                    }) }}" uk-icon="icon: trash"></a></li>
-                            </ul>
+                            <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                            <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                                <ul class="uk-nav uk-dropdown-nav">
+                                    <li><a href="{{ path('unitedcms_core_domainuser_update', {
+                                            domain: domain.identifier,
+                                            organization: organization.identifier,
+                                            member: member.id
+                                        }) }}">
+                                            <i class="uk-margin-small-right" data-feather="edit"></i>
+                                            {% trans %}domain.user.update.button{% endtrans %}
+                                        </a></li>
+                                    <li><a class="uk-text-danger" href="{{ path('unitedcms_core_domainuser_delete', {
+                                            domain: domain.identifier,
+                                            organization: organization.identifier,
+                                            member: member.id
+                                        }) }}">
+                                            <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                            {% trans %}domain.user.delete.button{% endtrans %}
+                                    </a></li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
-            <div class="navigation">
-                {{ knp_pagination_render(users) }}
-            </div>
         </div>
+        <div class="navigation">
+            {{ knp_pagination_render(users) }}
+        </div>
+    </article>
+
+        {% if invites|length > 0 %}
+
+            <article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
+                <header class="uk-card-header">
+                    <h2>{% trans %}domain.user.pending_invitations.headline{% endtrans %}</h2>
+                </header>
+
+                <div class="unite-card-table">
+                    <table class="uk-table uk-table-justify uk-table-divider">
+                        <thead>
+                        <tr>
+                            <th>{{ knp_pagination_sortable(invites, 'Email', 'email') }}</th>
+                            <th>{{ knp_pagination_sortable(invites, 'Roles', 'roles') }}</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for invite in invites %}
+                            <tr>
+                                <td>{{ invite.email }}</td>
+                                <td>{{ invite.roles|join(', ') }}</td>
+                                <td>
+                                    <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                                    <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                                        <ul class="uk-nav uk-dropdown-nav">
+                                            <li><a class="uk-text-danger" href="{{ path('unitedcms_core_domainuser_deleteinvite', {
+                                                    organization: organization.identifier,
+                                                    domain: domain.identifier,
+                                                    invite: invite.id
+                                                }) }}">
+                                                    <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                                    {% trans %}domain.user.pending_invitations.delete.button{% endtrans %}
+                                                </a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="navigation">
+                    {{ knp_pagination_render(users) }}
+                </div>
+        </article>
     {% endif %}
 
 {% endblock content %}

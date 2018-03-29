@@ -1,12 +1,14 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ organization }}{% endblock title %}
-{% block navtitle %}<a class="uk-navbar-item uk-button uk-button-text"
-                       href="{{ path('unitedcms_core_domain_index', {organization: organization.identifier}) }}">{{ organization }}</a>{% endblock %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.organization.html.twig') }}{% endblock navigation %}
+{% block title %}{% trans with { '%user%' : member.user } %}organization.user.delete.title{% endtrans %}{% endblock title %}
+{% block navigation %}{{ include('@UnitedCMSCore/Organization/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-    <h1 class="uk-heading-divider">Remove {{ member.user }} from organization.</h1>
-
-    <div class="uk-card uk-card-default uk-card-body">
-        {{ form(form) }}
-    </div>
+<article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    <header class="uk-card-header uk-flex">
+        <a class="back-button" href="{{ path('unitedcms_core_organizationuser_index', { organization: united.organization.identifier}) }}">
+            <i data-feather="arrow-left"></i>
+        </a>
+        <h2 class="uk-flex-1">{% trans with {'%user%': member.user } %}organization.user.delete.headline{% endtrans %}</h2>
+    </header>
+    {{ form(form) }}
+</article>
 {% endblock content %}

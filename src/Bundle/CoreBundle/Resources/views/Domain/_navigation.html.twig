@@ -1,0 +1,142 @@
+<header class="uk-flex">
+    <button uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"><i data-feather="menu"></i></button>
+
+    <button class="uk-button uk-button-default uk-flex-1" type="button">
+        <span>{{ united.domain }}</span>
+        <i class="uk-margin-small-right" data-feather="chevron-down"></i></button>
+    <div id="unite-main-menu-domain" uk-dropdown="mode: click; pos: bottom-left; offset: -50; animation: uk-animation-slide-top" class="uk-width-large">
+        <div class="uk-dropdown-grid uk-child-width-1-2@m" uk-grid>
+            <div>
+
+                <ul class="uk-nav uk-dropdown-nav">
+                    <li class="uk-nav-header">
+                        <a href="{{ path('unitedcms_core_domain_index', {organization: united.organization.identifier}) }}">
+                            {{ united.organization }}
+                            {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), united.organization) %}
+                                <i data-feather="settings"></i>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% for d in united.organization.domains %}
+                        {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), d) %}
+                            <li{% if d == united.domain %} class="uk-active"{% endif %}>
+                                <a href="{{ path('unitedcms_core_domain_view', {organization: united.organization.identifier, domain: d.identifier}) }}">
+                                    {{ d }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+
+            </div>
+            {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), united.domain) %}
+                <div>
+                    <ul class="uk-nav uk-dropdown-nav">
+                        <li>
+                            <a href="{{ url('unitedcms_core_domainuser_index', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                                <i class="uk-margin-small-right" data-feather="users"></i>
+                                {% trans %}domain.menu.manage.user{% endtrans %}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('unitedcms_core_domainapiclient_index', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                                <i class="uk-margin-small-right" data-feather="hard-drive"></i>
+                                {% trans %}domain.menu.manage.api_clients{% endtrans %}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('unitedcms_core_domain_update', {organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                                <i class="uk-margin-small-right" data-feather="settings"></i>
+                                {% trans %}domain.menu.manage.update{% endtrans %}
+                            </a>
+                        </li>
+                        {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::DELETE'), united.domain) %}
+                            <li>
+                                <a class="uk-text-danger" href="{{ url('unitedcms_core_domain_delete', { organization: united.organization.identifier, domain: united.domain.identifier}) }}">
+                                    <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                    {% trans %}domain.menu.manage.trash{% endtrans %}
+                                </a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+        <button type="button" uk-close uk-toggle="target: #unite-main-menu-domain; animation: uk-animation-slide-top"></button>
+    </div>
+
+    <button uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"><i data-feather="user"></i></button>
+</header>
+<article id="unite-main-menu-main" class="uk-flex-1" hidden>
+    <button type="button" uk-close uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"></button>
+
+    <ul class="uk-nav uk-nav-parent-icon" uk-nav>
+        {% if united.domain.contentTypes|length > 0 %}
+            <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
+            {% for type in united.domain.contentTypes %}
+                {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::LIST'), type) %}
+                    <li><a {% spaceless %}
+                            {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
+                                class="uk-active"
+                            {% endif %}
+                        {% endspaceless %} href="{{ path('unitedcms_core_content_index', {
+                            organization: united.organization.identifier,
+                            domain: united.domain.identifier,
+                            content_type: type.identifier,
+                            view: 'all'
+                        }) }}">
+                            <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'layers' }}"></i>
+                            {{ type }}
+                        </a>
+
+                        {% if type.views|length > 1 %}
+                            <ul class="uk-nav-sub">
+                                {% for v in type.views %}
+                                {% if v.identifier != "all" %}
+                                <li><a {% spaceless %}
+                                            {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}
+                                                class="uk-active"
+                                            {% endif %}
+                                            {% endspaceless %}href="{{ path('unitedcms_core_content_index', {
+                                        organization: united.organization.identifier,
+                                        domain: united.domain.identifier,
+                                        content_type: type.identifier,
+                                        view: v.identifier
+                                    }) }}">
+                                        <i class="uk-margin-small-right" data-feather="{{ v.icon ? v.icon : 'layers' }}"></i>
+                                        {{ v }}
+                                    </a>
+                                    {% endif %}
+                                    {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% if united.domain.settingTypes|length > 0 %}
+            <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
+            {% for type in united.domain.settingTypes %}
+                {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), type) %}
+                    <li><a {% spaceless %}
+                                {% if settingType is defined and settingType.identifier == type.identifier %}
+                                    class="uk-active"
+                                {% endif %}
+                                {% endspaceless %} href="{{ path('unitedcms_core_setting_index', {
+                            organization: united.organization.identifier,
+                            domain: united.domain.identifier,
+                            setting_type: type.identifier
+                        }) }}">
+                            <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'settings' }}"></i>
+                            {{ type }}
+                        </a></li>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </ul>
+
+
+</article>
+<footer id="unite-main-menu-user" hidden>
+    <button type="button" uk-close uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"></button>
+    {% include '@UnitedCMSCore/_user-menu.html.twig' %}
+</footer>

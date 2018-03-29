@@ -115,7 +115,7 @@ class ReferenceFieldType extends FieldType
                 'content_type' => $contentType->getIdentifier(),
             ],
             'attr' => [
-                'base-url' => '/' . $this->unitedCMSManager->getOrganization() . '/',
+                'base-url' => '/' . $this->unitedCMSManager->getOrganization()->getIdentifier() . '/',
                 'content-label' => $settings->content_label ?? ucfirst($contentType->getTitle()) . '# {id}',
                 'modal-html' => $this->templating->render(
                     $this->viewTypeManager->getViewType($view->getType())::getTemplate(),

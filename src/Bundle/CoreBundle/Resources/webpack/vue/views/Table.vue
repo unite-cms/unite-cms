@@ -1,12 +1,10 @@
 <template>
-    <div class="uk-card uk-card-default uk-card-body">
+    <div class="unite-card-table">
 
-        <div class="uk-align-right" v-if="hasDeletedContent && !selectable">
-            <ul class="uk-subnav uk-subnav-pill" uk-margin>
-                <li :class="{'uk-active': !deletedContent}" v-on:click="deletedContent = false"><a href="#">Active Content</a></li>
-                <li :class="{'uk-active': deletedContent}" v-on:click="deletedContent = true"><a href="#">Deleted Content</a></li>
-            </ul>
-        </div>
+        <ul class="unite-card-table-tabs" uk-tab v-if="hasDeletedContent && !selectable">
+            <li :class="{'uk-active': !deletedContent}" v-on:click="deletedContent = false"><a href="#">Active Content</a></li>
+            <li :class="{'uk-active': deletedContent}" v-on:click="deletedContent = true"><a href="#">Deleted Content</a></li>
+        </ul>
 
         <table class="uk-table uk-table-justify uk-table-divider uk-table-hover">
             <thead>
@@ -14,7 +12,7 @@
                 <th v-if="selectable"></th>
                 <th v-for="(title, header) in columns" v-on:click="setSort(header)" class="sortable">
                     {{ title }}
-                    <span v-if="sortArrow(header)" v-bind:uk-icon="sortArrow(header)"></span>
+                    <span v-html="sortArrow(header)"></span>
                 </th>
                 <th v-if="!selectable">Actions</th>
             </tr>
@@ -22,46 +20,21 @@
             <tbody>
             <tr v-for="row in content">
 
-                <td v-if="selectable">
-                    <button class="uk-button uk-button-secondary uk-button-small" v-on:click="select(row)">Select</button>
+                <td v-if="selectable && !deletedContent" class="select">
+                    <button v-on:click="select(row)" v-html="selectIcon(row)"></button>
                 </td>
 
                 <td v-for="field in columnKeys">
                     <span v-if="field == 'created' || field == 'updated'">{{ formatDate(new Date(row[field] * 1000)) }}</span>
                     <span v-else>{{ row[field] }}</span>
                 </td>
-                <td v-if="!selectable">
+                <td v-if="!selectable" class="actions">
 
-                    <div class="uk-button-group" v-show="!deletedContent">
-                        <a v-bind:href="getUpdateUrl(row.id)" class="uk-button uk-button-default"><span v-bind:uk-icon="'icon: file-edit'" class="uk-margin-small-right"></span>Update content</a>
-
-                        <div class="uk-inline">
-                            <button style="padding: 0 15px;" class="uk-button uk-button-default" type="button">
-                                <span uk-icon="icon: chevron-down"></span>
-                            </button>
-                            <div uk-dropdown="mode: click; boundary: ! .uk-button-group; boundary-align: true;">
-                                <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a class="uk-text-danger" v-bind:href="getDeleteUrl(row.id)"><span class="uk-margin-small-right" v-bind:uk-icon="'icon: trash'"></span> Delete content</a></li>
-                                    <li><a v-bind:href="getTranslationsUrl(row.id)"><span class="uk-margin-small-right" v-bind:uk-icon="'icon: world'"></span> Translate</a></li>
-                                    <li><a v-bind:href="getRevisionsUrl(row.id)"><span class="uk-margin-small-right" v-bind:uk-icon="'icon: history'"></span> Revisions</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="uk-button-group" v-show="deletedContent">
-                        <a v-bind:href="getRecoverUrl(row.id)" class="uk-button uk-button-default"><span v-bind:uk-icon="'icon: bolt'" class="uk-margin-small-right"></span>Recover</a>
-
-                        <div class="uk-inline">
-                            <button style="padding: 0 15px;" class="uk-button uk-button-default" type="button">
-                                <span uk-icon="icon: chevron-down"></span>
-                            </button>
-                            <div uk-dropdown="mode: click; boundary: ! .uk-button-group; boundary-align: true;">
-                                <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a class="uk-text-danger" v-bind:href="getDeleteDefinitelyUrl(row.id)"><span class="uk-margin-small-right" v-bind:uk-icon="'icon: trash'"></span> Delete Definitely</a></li>
-                                </ul>
-                            </div>
-                        </div>
+                    <button class="uk-button uk-button-default actions-dropdown" type="button" v-html="feather.icons['more-horizontal'].toSvg()"></button>
+                    <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                        <ul class="uk-nav uk-dropdown-nav">
+                            <li v-for="action in contentActions(row)"><a :href="action.url" :class="action.class ? action.class : ''"><span class="uk-margin-small-right" v-html="action.icon"></span>{{ action.name }}</a></li>
+                        </ul>
                     </div>
                 </td>
             </tr>
@@ -80,6 +53,8 @@
 
 <script>
 import { GraphQLClient } from 'graphql-request'
+import feather from 'feather-icons';
+import UIkit from 'uikit';
 
 export default {
     data() {
@@ -96,6 +71,7 @@ export default {
             sortFieldKey: bag.settings.sort.field,
             filter: bag.settings.filter,
             contentType: bag.settings.contentType,
+            hasTranslations: bag.settings.hasTranslations,
             view: bag.settings.view,
             columns: bag.settings.columns,
             columnKeys: Object.keys(bag.settings.columns),
@@ -106,6 +82,8 @@ export default {
             deleteDefinitelyUrlPattern: bag.urls.delete_definitely,
             revisionsUrlPattern: bag.urls.revisions,
             translationsUrlPattern: bag.urls.translations,
+            selected: [],
+            feather: feather
         };
     },
     props: ['parameters'],
@@ -119,6 +97,26 @@ export default {
 
         this.loadData();
     },
+    mounted: function(){
+        let findModal = (element) => {
+            if(element.hasAttribute('uk-modal')) {
+                return element;
+            }
+
+            if(!element.parentElement) {
+                return null;
+            }
+
+            return findModal(element.parentElement);
+        };
+        let modal = findModal(this.$el);
+        if(modal) {
+            UIkit.util.on(modal, 'beforeshow', () => {
+                this.selected = [];
+            });
+        }
+    },
+
     methods: {
         pages: function(){
             var pages = [];
@@ -161,13 +159,33 @@ export default {
             }
             this.loadData();
         },
-        sortArrow: function(header, isAsc) {
+        sortArrow: function(header) {
 
             if(header !== this.sortFieldKey) {
-                return false;
+                return '';
             }
 
-            return this.sort ? 'icon: arrow-down' : 'icon: arrow-up';
+            return feather.icons[(this.sort ? 'arrow-down' : 'arrow-up')].toSvg({
+                width: 16,
+                height: 16
+            });
+        },
+        contentActions: function(row){
+            let actions = [];
+            if(!this.deletedContent) {
+                actions.push({ url: this.getUpdateUrl(row.id), icon: feather.icons['edit'].toSvg({ width: 24, height: 16 }), name: 'Update content' });
+
+                if(this.hasTranslations) {
+                    actions.push({ url: this.getTranslationsUrl(row.id), icon: feather.icons['globe'].toSvg({ width: 24, height: 16 }), name: 'Translate content' });
+                }
+
+                actions.push({ url: this.getRevisionsUrl(row.id), icon: feather.icons['skip-back'].toSvg({ width: 24, height: 16 }), name: 'Revisions' });
+                actions.push({ url: this.getDeleteUrl(row.id), icon: feather.icons['trash-2'].toSvg({ width: 24, height: 16 }), name: 'Delete content', class: 'uk-text-danger' });
+            } else {
+                actions.push({ url: this.getRecoverUrl(row.id), icon: feather.icons['rotate-ccw'].toSvg({ width: 24, height: 16 }), name: 'Recover' });
+                actions.push({ url: this.getDeleteDefinitelyUrl(row.id), icon: feather.icons['x-circle'].toSvg({ width: 24, height: 16 }), name: 'Delete definitely', class: 'uk-text-danger' });
+            }
+            return actions;
         },
         formatDate: function(date) {
             return date.getDate()  + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " +
@@ -210,11 +228,21 @@ export default {
             });
         },
         select: function(row) {
-            window.UnitedCMSEventBus.$emit('contentSelected', [ {
-                contentType: this.contentType,
-                view: this.view,
-                row: row
-            } ]);
+            if(this.selected.includes(row)) {
+                this.selected.splice(this.selected.indexOf(row), 1);
+            } else {
+                this.selected.push(row);
+
+                // For the moment, we only support single element selection.
+                window.UnitedCMSEventBus.$emit('contentSelected', [ {
+                    contentType: this.contentType,
+                    view: this.view,
+                    row: row
+                } ]);
+            }
+        },
+        selectIcon: function(row) {
+            return feather.icons[(this.selected.includes(row) ? 'check-circle' : 'circle')].toSvg();
         }
     },
     computed: {

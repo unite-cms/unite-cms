@@ -1,0 +1,11 @@
+
+.unite-user-menu {
+  border-top: 2px solid map-get($colors, grey-medium);
+  padding-top: 25px;
+
+  > .uk-button {
+    display: block;
+    margin: 0 auto;
+    box-shadow: none;
+  }
+}

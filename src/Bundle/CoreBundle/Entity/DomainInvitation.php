@@ -75,6 +75,11 @@ class DomainInvitation
         $this->roles = [];
     }
 
+    public function __toString()
+    {
+        return $this->getEmail();
+    }
+
     public function allowedRoles(): array
     {
         if (!$this->getDomain()) {

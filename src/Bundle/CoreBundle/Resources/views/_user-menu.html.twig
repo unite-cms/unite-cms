@@ -1,0 +1,18 @@
+<div class="unite-user-menu">
+    <button class="uk-button uk-button-text" type="button">
+        {{ app.user }}
+        <i data-feather="chevron-down"></i>
+    </button>
+    <div uk-dropdown="mode: click; pos: top-center">
+        <ul class="uk-nav uk-dropdown-nav">
+            <li><a href="{{ path('unitedcms_core_profile_update') }}">
+                <i class="uk-margin-small-right" data-feather="user"></i>
+                    {% trans %}user_menu.edit_profile{% endtrans %}
+            </a></li>
+            <li><a class="uk-text-danger" href="/logout">
+                <i class="uk-margin-small-right" data-feather="log-out"></i>
+                {% trans %}user_menu.sign_out{% endtrans %}
+            </a></li>
+        </ul>
+    </div>
+</div>

@@ -1,14 +1,18 @@
 <template>
     <div class="uk-placeholder uk-padding-small">
         <div v-if="prototype" v-html="prototype"></div>
-        <button uk-close class="uk-modal-close-default" v-on:click.prevent="removeRow"></button>
+        <button class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="removeRow"></button>
     </div>
 </template>
 
 <script>
+    import feather from 'feather-icons';
+
     export default {
         data() {
-            return {};
+            return {
+                feather: feather
+            };
         },
         props: [
             'delta',
@@ -22,5 +26,4 @@
     };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss"></style>

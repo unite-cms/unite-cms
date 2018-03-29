@@ -1,11 +1,18 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ united.domain }} / {{ settingType }} / Update #{{ setting.id }}{% endblock title %}
-{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block title %}{% trans with {"%type%": settingType } %}setting.translations.title{% endtrans %}{% endblock title %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-    <h1 class="uk-heading-divider">Translations for {{ settingType }} #{{ setting.id }}</h1>
+<article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    <header class="uk-card-header uk-flex">
+        <a class="back-button" href="{{ path('unitedcms_core_setting_index', {
+            domain: united.domain.identifier,
+            organization: united.organization.identifier,
+            setting_type: settingType.identifier
+        }) }}"><i data-feather="arrow-left"></i></a>
+        <h2 class="uk-flex-1">{% trans with {"%type%": settingType} %}setting.translations.headline{% endtrans %}</h2>
+    </header>
 
-    <div class="uk-card uk-card-default uk-card-body">
+    <div class="unite-card-table">
         <table class="uk-table uk-table-justify uk-table-divider uk-table-hover">
             <thead>
                 <tr>
@@ -21,14 +28,21 @@
                 <tr>
                     <td>{{ translation.locale }}</td>
                     <td>{{ translation.id }}</td>
-                    <td>
-                        <div class="uk-button-group">
-                            <a href="{{ path('unitedcms_core_setting_index', {
-                                'organization': united.domain.organization.identifier,
-                                'domain': united.domain.identifier,
-                                'setting_type': settingType.identifier,
-                                'locale': translation.locale
-                            }) }}" class="uk-button uk-button-default"><span uk-icon="icon: file-edit" class="uk-margin-small-right"></span>Update setting</a>
+                    <td class="actions">
+                        <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                        <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                            <ul class="uk-nav uk-dropdown-nav">
+
+                                <li><a href="{{ path('unitedcms_core_setting_index', {
+                                        'organization': united.domain.organization.identifier,
+                                        'domain': united.domain.identifier,
+                                        'setting_type': settingType.identifier,
+                                        'locale': translation.locale
+                                    }) }}">
+                                        <i class="uk-margin-small-right" data-feather="edit"></i>
+                                        {% trans %}setting.update.button{% endtrans %}
+                                </a></li>
+                            </ul>
                         </div>
                     </td>
                 </tr>
@@ -38,14 +52,21 @@
                     <tr>
                         <td>{{ locale }}</td>
                         <td></td>
-                        <td>
-                            <div class="uk-button-group">
-                                <a href="{{ path('unitedcms_core_setting_index', {
-                                    'organization': united.domain.organization.identifier,
-                                    'domain': united.domain.identifier,
-                                    'setting_type': settingType.identifier,
-                                    'locale': locale
-                                }) }}" class="uk-button uk-button-default uk-text-success"><span uk-icon="icon: plus" class="uk-margin-small-right"></span>Add translation</a>
+                        <td class="actions">
+                            <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                            <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                                <ul class="uk-nav uk-dropdown-nav">
+
+                                    <li><a href="{{ path('unitedcms_core_setting_index', {
+                                            'organization': united.domain.organization.identifier,
+                                            'domain': united.domain.identifier,
+                                            'setting_type': settingType.identifier,
+                                            'locale': locale
+                                        }) }}" class="uk-text-success">
+                                            <i class="uk-margin-small-right" data-feather="plus-circle"></i>
+                                            {% trans with {"%locale%": locale} %}setting.translations.create.button{% endtrans %}
+                                        </a></li>
+                                </ul>
                             </div>
                         </td>
                     </tr>
@@ -54,4 +75,5 @@
             </tbody>
         </table>
     </div>
+</article>
 {% endblock content %}

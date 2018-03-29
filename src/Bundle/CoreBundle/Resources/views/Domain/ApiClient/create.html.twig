@@ -1,11 +1,18 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ domain }}: Create api client{% endblock title %}
-{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block title %}{% trans %}domain.api_client.create.title{% endtrans %}{% endblock title %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-    <h2 class="uk-heading-divider">Add API Client to Domain</h2>
+<article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    <header class="uk-card-header uk-flex">
+        <a class="back-button" href="{{ path('unitedcms_core_domainapiclient_index', {
+            organization: united.organization.identifier,
+            domain: united.domain.identifier
+        }) }}">
+            <i data-feather="arrow-left"></i>
+        </a>
+        <h2 class="uk-flex-1">{% trans %}domain.api_client.create.headline{% endtrans %}</h2>
+    </header>
 
-    <div class="uk-card uk-card-default uk-card-body">
-        {{ form(form) }}
-    </div>
+    {{ form(form) }}
+</article>
 {% endblock content %}

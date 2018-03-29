@@ -1,29 +1,28 @@
 {% extends '@UnitedCMSCore/layout.html.twig' %}
-{% block title %}{{ domain }} / Settings / {{ settingType }}{% endblock title %}
-{% block navtitle %}{{ include('@UnitedCMSCore/Domain/_navtitle.html.twig') }}{% endblock %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.domain.html.twig') }}{% endblock navigation %}
+{% block title %}{% trans with {"%type%": settingType } %}setting.update.title{% endtrans %}{% endblock title %}
+{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
-    <h1 class="uk-heading-divider">Settings: {{ settingType }}</h1>
-
-    <div class="uk-card uk-card-default uk-card-body">
-
-        <div class="uk-align-right">
-            <ul class="uk-iconnav">
+<article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    <header class="uk-card-header uk-flex">
+        <h2 class="uk-flex-1">{% trans with {"%type%": settingType } %}setting.update.headline{% endtrans %}</h2>
+        <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+        <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+            <ul class="uk-nav uk-dropdown-nav">
                 {% if settingType.locales|length > 0 %}<li><a href="{{ path('unitedcms_core_setting_translations', {
                         'organization': united.domain.organization.identifier,
                         'domain': united.domain.identifier,
                         'setting_type': settingType.identifier,
                         'setting': setting.id
-                    }) }}" uk-icon="icon: world">Translations</a></li>{% endif %}
+                    }) }}"><i class="uk-margin-small-right" data-feather="globe"></i>{% trans %}setting.translations.button{% endtrans %}</a></li>{% endif %}
                 <li><a href="{{ path('unitedcms_core_setting_revisions', {
                         'organization': united.domain.organization.identifier,
                         'domain': united.domain.identifier,
                         'setting_type': settingType.identifier,
                         'setting': setting.id
-                    }) }}" uk-icon="icon: history">Revisions</a></li>
+                    }) }}"><i class="uk-margin-small-right" data-feather="skip-back"></i>{% trans %}setting.revisions.button{% endtrans %}</a></li>
             </ul>
         </div>
-
-        {{ form(form) }}
-    </div>
+    </header>
+    {{ form(form) }}
+</article>
 {% endblock content %}

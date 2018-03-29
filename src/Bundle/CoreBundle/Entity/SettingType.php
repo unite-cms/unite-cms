@@ -66,7 +66,7 @@ class SettingType implements Fieldable
     /**
      * @var string
      * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
+     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="validation.invalid_characters")
      * @ORM\Column(name="icon", type="string", length=255, nullable=true)
      * @Expose
      */
@@ -173,7 +173,8 @@ class SettingType implements Fieldable
             ->setWeight($settingType->getWeight())
             ->setIcon($settingType->getIcon())
             ->setDescription($settingType->getDescription())
-            ->setLocales($settingType->getLocales());
+            ->setLocales($settingType->getLocales())
+            ->setPermissions($settingType->getPermissions());
 
         // Fields to delete
         foreach (array_diff($this->getFields()->getKeys(), $settingType->getFields()->getKeys()) as $field) {

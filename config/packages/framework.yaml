@@ -4,6 +4,10 @@ framework:
     #csrf_protection: ~
     #http_method_override: true
 
+    default_locale: 'en'
+    translator:
+        fallbacks: ['en']
+
     # uncomment this entire section to enable sessions
     session:
         handler_id: ~

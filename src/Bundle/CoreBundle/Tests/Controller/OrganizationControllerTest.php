@@ -64,7 +64,7 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->request('GET', $url);
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertFalse($this->client->getResponse()->isRedirect());
-        $this->assertCount(1, $crawler->filter('.uk-alert-warning p:contains("You are not invited to any organization. Please contact the system administrator.")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . $this->container->get('translator')->trans('organizations.error.no_organizations') .'")'));
 
         // Add an organization, but not for this user.
         $org1 = new Organization();
@@ -76,7 +76,7 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->request('GET', $url);
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertFalse($this->client->getResponse()->isRedirect());
-        $this->assertCount(1, $crawler->filter('.uk-alert-warning p:contains("You are not invited to any organization. Please contact the system administrator.")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . $this->container->get('translator')->trans('organizations.error.no_organizations') .'")'));
 
         // Now invite the user to the organization.
         $org1 = $this->em->getRepository('UnitedCMSCoreBundle:Organization')->findAll()[0];

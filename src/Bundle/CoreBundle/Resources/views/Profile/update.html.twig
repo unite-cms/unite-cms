@@ -1,16 +1,21 @@
-{% extends '@UnitedCMSCore/layout.full.html.twig' %}
-{% block title %}Profile{% endblock title %}
+{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% block title %}{% trans %}profile.update.title{% endtrans %}{% endblock title %}
+{% block navigation %}{% endblock %}
 {% block content %}
 
-    <div class="uk-card uk-card-default uk-card-body" style="width: 90%; max-width: 800px; margin: 0 auto;">
+    <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-xlarge">
 
-        <a href="{{ path('unitedcms_core_organizations') }}" class="uk-button uk-button-default uk-button-small">
-            <span uk-icon="icon: arrow-left" class="uk-margin-small-right"></span> Zurück
-        </a>
+        <header class="uk-card-header uk-flex">
+            <a class="back-button" href="{{ path('unitedcms_core_organizations') }}">
+                <i data-feather="arrow-left"></i>
+            </a>
+            <h2>{% trans %}profile.update.headline{% endtrans %}</h2>
+        </header>
 
-        <h1 class="uk-heading-divider">Update Profile</h1>
-        {{ form(form) }}
-
-        {{ form(change_password_form) }}
-    </div>
+        <div class="uk-card-body">
+            {{ form(form) }}
+            <h3>{% trans %}profile.change_password.headline{% endtrans %}</h3>
+            {{ form(change_password_form) }}
+        </div>
+    </article>
 {% endblock content %}

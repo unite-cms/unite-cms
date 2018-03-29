@@ -104,6 +104,21 @@ class Content implements FieldableContent
         $this->translationOf = null;
     }
 
+    public function __toString()
+    {
+        $string = '';
+
+        if($this->getContentType()) {
+            $string .= $this->getContentType();
+        }
+
+        if($this->getId()) {
+            $string .= ': #' . $this->getId();
+        }
+
+        return $string;
+    }
+
     /**
      * Get id
      *

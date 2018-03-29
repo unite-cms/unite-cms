@@ -1,0 +1,59 @@
+<header class="uk-flex">
+    <button uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"><i data-feather="menu"></i></button>
+    <h2 class="uk-text-center uk-flex-1">{{ united.organization }}</h2>
+    <button uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"><i data-feather="user"></i></button>
+</header>
+<article id="unite-main-menu-main" class="uk-flex-1" hidden>
+    <button type="button" uk-close uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"></button>
+
+
+
+
+    {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), united.organization) %}
+        <ul class="uk-nav">
+            <li class="uk-nav-header">{% trans %}organization.menu.manage.header{% endtrans %}</li>
+            <!--li><a href="#">{% trans %}organization.menu.manage.settings{% endtrans %}</a></li-->
+            <li>
+                <a href="{{ url('unitedcms_core_organizationuser_index', {organization: united.organization.identifier}) }}">
+                    <i data-feather="users" class="uk-margin-small-right"></i>
+                    {% trans %}organization.menu.manage.user{% endtrans %}
+                </a>
+            </li>
+            <!--li><a href="#">{% trans %}organization.menu.manage.delete{% endtrans %}</a></li-->
+        </ul>
+    {% endif %}
+
+
+
+    <ul class="uk-nav">
+        <li class="uk-nav-header">{% trans %}organization.menu.domains.header{% endtrans %}</li>
+
+        {% for domain in united.organization.domains %}
+            {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain) %}
+                <li>
+                    <a href="{{ path('unitedcms_core_domain_view', {organization: organization.identifier, domain: domain.identifier}) }}">
+                        <i data-feather="globe" class="uk-margin-small-right"></i>
+                        {{ domain }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization) %}
+            <li>
+                <a class="uk-text-success" href="{{ url('unitedcms_core_domain_create', {organization: united.organization.identifier}) }}">
+                    <i data-feather="plus" class="uk-margin-small-right"></i>
+                    {% trans %}organization.menu.domains.add{% endtrans %}
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+
+
+
+
+</article>
+<footer id="unite-main-menu-user" hidden>
+    <button type="button" uk-close uk-toggle="target: #unite-main-menu-user; animation: uk-animation-slide-top"></button>
+    {% include '@UnitedCMSCore/_user-menu.html.twig' %}
+</footer>

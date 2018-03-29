@@ -1,8 +1,11 @@
 parameters:
     locale: en
     jms_serializer.unserialize_object_constructor.class: UnitedCMS\CoreBundle\Serializer\ObjectConstructor
+    mailer_sender: '%env(MAILER_SENDER)%'
     env(DATABASE_PORT): null
     env(DATABASE_PASSWORD): null
+    site_name: unite cms
+    site_background: https://source.unsplash.com/XVTWFHcNIko/1440x1024
 
 # Twig Configuration
 twig:
@@ -14,6 +17,13 @@ twig:
         - '@UnitedCMSStorage/Form/form_widgets.html.twig'
     globals:
         united: '@united.cms.manager'
+        site_name: '%site_name%'
+        site_background: '%site_background%'
+
+# Swift Mailer settings
+swiftmailer:
+    url: '%env(MAILER_URL)%'
+
 
 # Doctrine Configuration
 doctrine:
