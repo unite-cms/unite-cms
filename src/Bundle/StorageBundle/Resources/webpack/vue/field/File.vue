@@ -1,23 +1,25 @@
 <template>
-    <div class="js-upload uk-placeholder uk-text-center">
+    <div class="js-upload">
 
         <div v-if="error" class="uk-alert-danger" uk-alert>
             <a class="uk-alert-close" uk-close></a>
             <p>{{ error }}</p>
         </div>
 
-        <div v-if="fileName" class="uk-flex uk-flex-middle">
-            <div class="uk-margin-small-right">
-                <span v-if="!this.hasThumbnailUrl()" uk-icon="icon: file; ratio: 2"></span>
-                <img class="uk-border-rounded" style="max-height: 100px; margin-right: 20px;" v-if="this.hasThumbnailUrl()" :src="this.actualThumbnailUrl" />
-            </div>
-            <a class="uk-text-left uk-flex-auto" :href="fileUrl" target="_blank">
-                {{ fileName }}<br />
-                <small>{{ fileSizeHuman }}</small>
+        <div v-if="fileName" class="content-holder">
+            <a class="filename uk-flex uk-flex-middle" :href="fileUrl" target="_blank">
+                <div class="thumbnail uk-margin-small-right">
+                    <span v-if="!this.hasThumbnailUrl()" v-html="feather.icons['file'].toSvg({ width: 24, height: 24 })"></span>
+                    <img v-if="this.hasThumbnailUrl()" :src="this.actualThumbnailUrl" />
+                </div>
+
+                <div class="uk-flex-1">
+                    <div class="meta">Size: {{ fileSizeHuman }}, Type: {{ fileType }}</div>
+                    {{ fileName }}
+                </div>
             </a>
-            <div>
-                <button uk-close v-on:click.prevent="clearFile"></button>
-            </div>
+
+            <button class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearFile"></button>
 
             <input type="hidden" :name="name + '[name]'" :value="fileName" />
             <input type="hidden" :name="name + '[type]'" :value="fileType" />
@@ -25,13 +27,14 @@
             <input type="hidden" :name="name + '[id]'" :value="fileId" />
             <input type="hidden" :name="name + '[checksum]'" :value="checksum" />
         </div>
-        <div v-else>
-            <span uk-icon="icon: cloud-upload"></span>
-            <span class="uk-text-middle">Add file by dropping it here or</span>
+        <div v-else class="uk-placeholder">
+            <span v-html="feather.icons['upload-cloud'].toSvg({ width: 18, height: 18 })"></span>
+            Add file by dropping it here or
             <div uk-form-custom>
-                <input type="file">
+                <input type="file" multiple>
                 <span class="uk-link">selecting one</span>
             </div>
+
         </div>
 
         <div v-if="loading" class="uk-text-center" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255,255,255,0.75);">
@@ -43,6 +46,7 @@
 <script>
 
     import UIkit from 'uikit';
+    import feather from 'feather-icons';
 
     export default {
         data() {
@@ -55,7 +59,8 @@
                 fileId: value.id,
                 checksum: value.checksum,
                 error: null,
-                loading: false
+                loading: false,
+                feather: feather
             };
         },
         computed: {
@@ -240,5 +245,103 @@
     };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+    @import "../../../../../CoreBundle/Resources/webpack/sass/base/variables";
+
+    united-cms-storage-file-field {
+        padding: 5px 0;
+        display: block;
+
+        .uk-placeholder {
+            padding: 20px;
+            display: block;
+            width: 100%;
+            border-color: map-get($colors, grey-dark);
+            color: map-get($colors, grey-dark);
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 2px;
+            margin: 0;
+            box-sizing: border-box;
+            text-align: center;
+
+            svg.feather {
+                margin-top: -3px;
+            }
+
+            a, .uk-link {
+                color: map-get($colors, grey-very-dark);
+                text-decoration: underline;
+            }
+        }
+
+        .uk-dragover {
+            .uk-placeholder {
+                background: map-get($colors, white);
+                border: 1px solid map-get($colors, grey-medium);
+                color: map-get($colors, grey-very-dark);
+            }
+        }
+
+        .content-holder {
+            position: relative;
+            background: map-get($colors, white);
+            border: 1px solid map-get($colors, grey-medium);
+            box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
+            padding: 10px;
+            border-radius: 2px;
+
+            a {
+                color: #666;
+                text-decoration: none;
+                margin-right: 40px;
+
+                &:hover {
+                    color: map-get($colors, grey-very-dark);
+                }
+
+                > * {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+
+                    .meta {
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                    }
+                }
+            }
+
+            img {
+                height: 75px;
+                border-radius: 2px;
+            }
+
+            .uk-spinner {
+                svg {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+
+            .close-button {
+                right: 5px;
+                top: 50%;
+                margin-top: -20px;
+            }
+
+            &:hover {
+                .close-button {
+                    color: map-get($colors, red);
+                }
+            }
+
+            .meta {
+                font-size: 0.6rem;
+                line-height: normal;
+                color: darken(map-get($colors, grey-medium), 10%);
+                text-transform: uppercase;
+            }
+        }
+    }
 </style>
