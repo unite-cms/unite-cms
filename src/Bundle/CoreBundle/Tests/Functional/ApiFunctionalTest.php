@@ -8,6 +8,7 @@
 
 namespace UnitedCMS\CoreBundle\Tests\Functional;
 
+use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -18,6 +19,7 @@ use UnitedCMS\CoreBundle\Entity\Content;
 use UnitedCMS\CoreBundle\Entity\Domain;
 use UnitedCMS\CoreBundle\Entity\Organization;
 use UnitedCMS\CoreBundle\Entity\View;
+use UnitedCMS\CoreBundle\Form\FieldableFormType;
 use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
 use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -575,7 +577,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->controller->setContainer($this->container);
     }
 
-    private function api(Domain $domain, UserInterface $user, string $query, array $variables = []) {
+    private function api(Domain $domain, UserInterface $user, string $query, array $variables = [], $set_csrf_token = FALSE, $firewall = 'api') {
 
         // Fake a real HTTP request.
         $request = new Request([], [], [
@@ -601,7 +603,12 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $reflector->setAccessible(true);
         $reflector->invoke($this->container->get('united.cms.manager'));
 
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'united_core_api_client', $user->getRoles()));
+        // If we fallback to the statefull main firewall, we need to add a csrf-token with the request.
+        if($set_csrf_token) {
+            $request->headers->set('X-CSRF-TOKEN', $this->container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))->getValue());
+        }
+
+        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, $firewall, $user->getRoles()));
 
         $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
         return json_decode($response->getContent());
@@ -1315,5 +1322,96 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals("Updated News2", $response->data->updateNews->title);
         $this->assertEquals("<p>Hello new World</p>", $response->data->updateNews->content);
         $this->assertNull($response->data->updateNews->category);
+    }
+
+    public function testAPICRUDActionsWithCookieAuthentication() {
+
+        // The api can also be accessed via the main firewall, with uses cookie authentication. If this is the case,
+        // we also need to provide a CSRF token with the request.
+
+        // Try READ without csrf token
+        $this->assertApiResponse([
+            'data' => [
+                'findNews' => [
+                    'page' => 1
+                ]
+            ]
+        ], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_ROLE_PUBLIC'],'query {
+                findNews {
+                    page
+                }
+            }', [], false, 'main')
+        );
+
+        // Try READ with csrf token
+        $this->assertApiResponse([
+            'data' => [
+                'findNews' => [
+                    'page' => 1
+                ]
+            ]
+        ], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_ROLE_PUBLIC'],'query {
+                findNews {
+                    page
+                }
+            }', [], true, 'main')
+        );
+
+        // Try Create without csrf token
+        $response = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_ROLE_EDITOR'], 'mutation {
+                createNews(data: { title: "First News" }) {
+                    id, 
+                    title
+                }
+            }', [], false, 'main');
+
+        $this->assertNotEmpty($response->errors);
+        $this->assertStringStartsWith('ERROR: The CSRF token is invalid. Please try to resubmit the form.', $response->errors[0]->message);
+
+        // Try Create with csrf token
+        $response = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_ROLE_EDITOR'], 'mutation {
+                createNews(data: { title: "First News" }) {
+                    id, 
+                    title
+                }
+            }', [], true, 'main');
+
+        $this->assertNotNull($response->data->createNews->id);
+        $this->assertEquals('First News', $response->data->createNews->title);
+
+        // Try Update
+        $responseUpdate = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+                updateNews(id: $id, data: { title: "Updated News" }) { 
+                    title
+                }
+            }', [
+                'id' => $response->data->createNews->id,
+        ], false, 'main');
+
+        $this->assertNotEmpty($responseUpdate->errors);
+        $this->assertStringStartsWith("ERROR: The CSRF token is invalid. Please try to resubmit the form.", $responseUpdate->errors[0]->message);
+
+        $responseUpdate = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+                updateNews(id: $id, data: { title: "Updated News" }) { 
+                    title
+                }
+            }', [
+            'id' => $response->data->createNews->id,
+        ], true, 'main');
+
+        $this->assertEquals('Updated News', $responseUpdate->data->updateNews->title);
+
     }
 }

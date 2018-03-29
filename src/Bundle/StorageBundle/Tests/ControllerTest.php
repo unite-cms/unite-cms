@@ -10,14 +10,18 @@ namespace UnitedCMS\StorageBundle\Tests;
 
 use Aws\S3\S3Client;
 use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpKernel\Client;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use UnitedCMS\CoreBundle\Entity\ApiClient;
 use UnitedCMS\CoreBundle\Entity\Domain;
 use UnitedCMS\CoreBundle\Entity\DomainMember;
 use UnitedCMS\CoreBundle\Entity\Organization;
 use UnitedCMS\CoreBundle\Entity\OrganizationMember;
 use UnitedCMS\CoreBundle\Entity\User;
 use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UnitedCMS\StorageBundle\Form\PreSignFormType;
 use UnitedCMS\StorageBundle\Model\PreSignedUrl;
 
 class ControllerTest extends DatabaseAwareTestCase {
@@ -26,6 +30,16 @@ class ControllerTest extends DatabaseAwareTestCase {
    * @var Client $client
    */
   private $client;
+
+  /**
+   * @var $token
+   */
+  private $csrf_token;
+
+    /**
+     * @var User $user
+     */
+    private $user;
 
   /**
    * @var string
@@ -133,19 +147,55 @@ class ControllerTest extends DatabaseAwareTestCase {
     $editor->addDomain($editorDomainMember);
     $this->em->persist($editor);
     $this->em->flush($editor);
+    $this->user = $editor;
 
     $this->client = $this->container->get('test.client');
     $this->client->followRedirects(false);
 
-    $token = new UsernamePasswordToken($editor, null, 'main', $editor->getRoles());
-    $session = $this->client->getContainer()->get('session');
-    $session->set('_security_main', serialize($token));
-    $session->save();
-    $cookie = new Cookie($session->getName(), $session->getId());
-    $this->client->getCookieJar()->set($cookie);
   }
 
-  public function testPreSignFileUpload() {
+  public function testPreSignFileUploadWithApiFirewall() {
+
+      $apiClient = new ApiClient();
+      $apiClient
+          ->setRoles([Domain::ROLE_EDITOR])
+          ->setName('API Client 1')
+          ->setDomain($this->domain1)
+          ->setToken('abc');
+      $this->em->persist($apiClient);
+      $this->em->flush($apiClient);
+
+      $route_uri = $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
+           'domain' => $this->domain1->getIdentifier(),
+           'organization' => $this->org1->getIdentifier(),
+           'content_type' => 'ct1',
+           'token' => $apiClient->getToken()
+      ], Router::ABSOLUTE_URL);
+
+      $parameters = [
+          'pre_sign_form' => [
+              'field' => 'file',
+              'filename' => 'ö Aä.*#ä+ .txt'
+          ],
+      ];
+
+      $this->client->request('POST', $route_uri, $parameters, [], ['CONTENT_TYPE' => 'application/json'], json_encode(['query' => '{}']));
+      $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+  }
+
+  public function testPreSignFileUploadWithMainFirewall() {
+
+      $token = new UsernamePasswordToken($this->user, null, 'main', $this->user->getRoles());
+
+      # generate new csrf_token
+      $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(PreSignFormType::class));
+
+      $session = $this->client->getContainer()->get('session');
+      $session->set('_security_main', serialize($token));
+      $session->save();
+      $cookie = new Cookie($session->getName(), $session->getId());
+      $this->client->getCookieJar()->set($cookie);
+      $this->client->setServerParameter('HTTP_Authentication-Fallback', true);
 
     // Try to access with invalid method.
     $baseUrl = $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']);
@@ -170,6 +220,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'content_type' => 'foo'],
       ['organization' => $this->org1->getIdentifier(), 'domain' => $this->domain1->getIdentifier(), 'content_type' => 'foo'],
     ] as $params) {
+
       $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', $params), []);
       $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
@@ -204,7 +255,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'foo',
+        'pre_sign_form' => ['field' => 'foo'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -214,7 +265,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'foo',
+        'pre_sign_form' => ['field' => 'foo'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -224,7 +275,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'foo/baa',
+        'pre_sign_form' => ['field' => 'foo/baa'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -233,7 +284,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'nested/baa',
+      'pre_sign_form' => ['field' => 'nested/baa'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -243,7 +294,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'foo/baa',
+        'pre_sign_form' => ['field' => 'foo/baa'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -252,7 +303,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'nested/baa',
+        'pre_sign_form' => ['field' => 'nested/baa'],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -262,8 +313,10 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'file',
-      'filename' => 'unsupported.unsupported',
+        'pre_sign_form' => [
+          'field' => 'file',
+          'filename' => 'unsupported.unsupported',
+        ]
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
@@ -272,19 +325,25 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'file',
-      'filename' => 'unsupported.unsupported',
+        'pre_sign_form' => [
+          'field' => 'file',
+          'filename' => 'unsupported.unsupported',
+        ],
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
     // Try to pre sign filename with special chars.
+
     $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
     ]), [
-      'field' => 'file',
-      'filename' => 'ö Aä.*#ä+ .txt',
+        'pre_sign_form' => [
+          'field' => 'file',
+          'filename' => 'ö Aä.*#ä+ .txt',
+            '_token' => $this->csrf_token->getValue()
+        ],
     ]);
     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -325,8 +384,11 @@ class ControllerTest extends DatabaseAwareTestCase {
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
     ]), [
-      'field' => 'file',
-      'filename' => 'ö Aä.*#ä+ .txt',
+        'pre_sign_form' => [
+          'field' => 'file',
+          'filename' => 'ö Aä.*#ä+ .txt',
+            '_token' => $this->csrf_token->getValue()
+        ],
     ]);
     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 

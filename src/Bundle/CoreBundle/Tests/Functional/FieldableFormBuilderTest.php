@@ -108,7 +108,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
         $options = ['fields' => [
             new FieldableFormField($ft1, $ft1Field),
             new FieldableFormField($ft2, $ft2Field),
-        ], 'csrf_protection' => false];
+        ]];
 
         $form = $this->container->get('form.factory')->create(FieldableFormType::class, $data, $options);
 
