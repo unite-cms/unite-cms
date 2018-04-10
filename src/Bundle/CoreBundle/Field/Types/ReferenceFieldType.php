@@ -69,6 +69,12 @@ class ReferenceFieldType extends FieldType
             throw new InvalidArgumentException("No domain with identifier '{$domain_identifier}' was found in this organization.");
         }
 
+        // We need to reload the full domain. unitedCMSManager only holds infos for the current domain.
+        $domain = $this->entityManager->getRepository('UnitedCMSCoreBundle:Domain')->findOneBy([
+            'organization' => $organization,
+            'id' => $domain->getId(),
+        ]);
+
         if(!$this->authorizationChecker->isGranted(DomainVoter::VIEW, $domain)) {
             throw new InvalidArgumentException("You are not allowed to view this domain.");
         }
@@ -135,6 +141,12 @@ class ReferenceFieldType extends FieldType
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
 
+        // Get content type and check if we have access to it.
+        $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
+        if(!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+            throw new InvalidArgumentException("You are not allowed to view this content_type.");
+        }
+
         $name = ucfirst($field->getSettings()->content_type . 'Content');
 
         if($nestingLevel > 0) {
@@ -142,14 +154,21 @@ class ReferenceFieldType extends FieldType
         }
 
         // We use the default content factory to build the type.
-        return $schemaTypeManager->getSchemaType($name, $this->unitedCMSManager->getDomain(), $nestingLevel);
+        return $schemaTypeManager->getSchemaType($name, $contentType->getDomain(), $nestingLevel);
     }
 
     /**
      * {@inheritdoc}
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
-        return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $this->unitedCMSManager->getDomain(), $nestingLevel);
+
+        // Get content type and check if we have access to it.
+        $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
+        if(!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+            throw new InvalidArgumentException("You are not allowed to view this content_type.");
+        }
+
+        return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $contentType->getDomain(), $nestingLevel);
     }
 
     /**

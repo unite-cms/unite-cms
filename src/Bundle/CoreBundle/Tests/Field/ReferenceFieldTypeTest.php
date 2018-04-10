@@ -4,8 +4,16 @@ namespace UnitedCMS\CoreBundle\Tests\Field;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use UnitedCMS\CoreBundle\Entity\ApiClient;
+use UnitedCMS\CoreBundle\Entity\ContentType;
+use UnitedCMS\CoreBundle\Entity\Domain;
+use UnitedCMS\CoreBundle\Entity\DomainMember;
+use UnitedCMS\CoreBundle\Entity\User;
 use UnitedCMS\CoreBundle\Entity\View;
 use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
 use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
@@ -122,5 +130,62 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $options = $fieldType->getFormOptions($ctField);
         $this->assertEquals('baa', $options['attr']['content-label']);
+    }
+
+    public function testReferenceToAnotherDomain() {
+
+        $ctField = $this->createContentTypeField('reference');
+        $ctField->setSettings(new FieldableFieldSettings([
+            'domain' => 'domain2',
+            'content_type' => 'ct2',
+        ]));
+        $ctField->getContentType()->setIdentifier('ct1');
+        $ctField->getContentType()->getDomain()->getContentTypes()->clear();
+        $ctField->getContentType()->getDomain()->addContentType($ctField->getContentType());
+        $domain2 = new Domain();
+        $domain2->setTitle('Domain 2')->setIdentifier("domain2");
+        $domain2->setOrganization($ctField->getContentType()->getDomain()->getOrganization());
+        $ct2 = new ContentType();
+        $ct2->setIdentifier('ct2')->setTitle('CT 2')->setDomain($domain2);
+
+        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($ctField->getContentType()->getDomain());
+        $this->em->persist($ctField->getContentType());
+        $this->em->persist($ctField);
+        $this->em->persist($domain2);
+        $this->em->persist($ct2);
+        $this->em->flush();
+
+        // Inject current domain and org in unite.cms.manager.
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request([], [], [
+            'organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+            'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+        ]));
+
+        $user = new User();
+        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $userInDomain1 = new DomainMember();
+        $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
+        $user->addDomain($userInDomain1);
+        $userInDomain2 = new DomainMember();
+        $userInDomain2->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($domain2);
+        $user->addDomain($userInDomain2);
+        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'main', $user->getRoles()));
+
+        $reflector = new \ReflectionProperty(UnitedCMSManager::class, 'requestStack');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('united.cms.manager'), $requestStack);
+
+        $reflector = new \ReflectionMethod(UnitedCMSManager::class, 'initialize');
+        $reflector->setAccessible(true);
+        $reflector->invoke($this->container->get('united.cms.manager'));
+
+        $contentSchemaType = $this->container->get('united.cms.graphql.schema_type_manager')->getSchemaType(
+            ucfirst($ctField->getContentType()->getIdentifier()) . 'Content', $ctField->getContentType()->getDomain());
+
+        // If we can get reach this line, no exceptions where thrown during content schema creation.
+        $this->assertTrue(true);
+        $this->assertGreaterThan(0, $contentSchemaType->getFields());
     }
 }
