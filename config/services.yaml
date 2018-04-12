@@ -1,6 +1,11 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    locale: en
+    mailer_sender: '%env(MAILER_SENDER)%'
+    jms_serializer.unserialize_object_constructor.class: UnitedCMS\CoreBundle\Serializer\ObjectConstructor
+    site_name: unite cms
+    site_background: https://source.unsplash.com/XVTWFHcNIko/1440x1024
 
 services:
     # default configuration for services in *this* file
