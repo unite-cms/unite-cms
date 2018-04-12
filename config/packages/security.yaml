@@ -18,11 +18,13 @@ security:
             cost: 12
 
     firewalls:
-        # disables authentication for assets and the profiler, adapt it according to your needs
+        # Disables authentication for assets and the profiler, adapt it according to your needs.
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        # Stateless api fire. Authentication is done via api token.
+        # If Authentication-Fallback header is present, this firewall gets skipped and the main firewall will be used.
         api:
             anonymous: false
             provider: united_core_api_client
@@ -32,6 +34,7 @@ security:
                 authenticators:
                     - united.cms.api_client_authenticator
 
+        # Main firewall for authentication via user or remember_me cookie.
         main:
             anonymous: ~
             provider: united_core_user

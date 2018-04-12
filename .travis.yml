@@ -24,7 +24,7 @@ services:
 
 before_install:
   - composer self-update
-  - mysql -e 'CREATE DATABASE united_core_test;'
+  - mysql -e 'CREATE DATABASE unite_test;'
   - cp .env.dist .env
 
 install:
