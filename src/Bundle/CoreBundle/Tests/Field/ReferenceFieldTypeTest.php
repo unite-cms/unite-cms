@@ -89,10 +89,16 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $o3 = new \ReflectionProperty($fieldType, 'entityManager');
         $o3->setAccessible(true);
-        $repositoryMock = $this->createMock(EntityRepository::class);
-        $repositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getView('all'));
+        $viewRepositoryMock = $this->createMock(EntityRepository::class);
+        $viewRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getView('all'));
+        $domainRepositoryMock = $this->createMock(EntityRepository::class);
+        $domainRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getDomain());
+
         $cmsManager = $this->createMock(EntityManager::class);
-        $cmsManager->expects($this->any())->method('getRepository')->willReturn($repositoryMock);
+        $cmsManager->expects($this->any())->method('getRepository')->will($this->returnValueMap([
+            ['UnitedCMSCoreBundle:View', $viewRepositoryMock],
+            ['UnitedCMSCoreBundle:Domain', $domainRepositoryMock],
+        ]));
         $o3->setValue($fieldType, $cmsManager);
 
 

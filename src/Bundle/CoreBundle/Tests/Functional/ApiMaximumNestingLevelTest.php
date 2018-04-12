@@ -105,7 +105,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
           "identifier": "news",
           "type": "reference",
           "settings": {
-            "domain": "news",
+            "domain": "marketing",
             "content_type": "news"
           }
         }
