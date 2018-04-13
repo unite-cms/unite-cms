@@ -374,11 +374,11 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // Inject created domain into untied.cms.manager.
         $d = new \ReflectionProperty(
-            $this->container->get('united.cms.manager'), 'domain'
+            $this->container->get('unite.cms.manager'), 'domain'
         );
         $d->setAccessible(true);
         $d->setValue(
-            $this->container->get('united.cms.manager'),
+            $this->container->get('unite.cms.manager'),
             $field->getContentType()->getDomain()
         );
         $domain = $field->getContentType()->getDomain();
@@ -392,7 +392,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // Create GraphQL Schema
         $schemaTypeManager = $this->container->get(
-            'united.cms.graphql.schema_type_manager'
+            'unite.cms.graphql.schema_type_manager'
         );
 
         $schema = new Schema(
@@ -443,7 +443,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
     );
         $result = json_decode(json_encode($result->toArray()));
         $this->assertNotEmpty($result->data->createCt1->id);
-        $content = $this->em->getRepository('UnitedCMSCoreBundle:Content')
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')
             ->find($result->data->createCt1->id);
         $this->assertNotNull($content);
         $this->assertNotNull($result->data->createCt1->f1[0]);
