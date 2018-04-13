@@ -17,10 +17,10 @@
         <env name="APP_ENV" value="test"/>
         <env name="APP_DEBUG" value="1"/>
         <env name="DATABASE_HOST" value="127.0.0.1"/>
-        <env name="DATABASE_PORT" value="3306"/>
+        <env name="DATABASE_PORT" value=""/>
         <env name="DATABASE_NAME" value="unite_test"/>
         <env name="DATABASE_USER" value="root"/>
-        <env name="DATABASE_PASSWORD" value="root"/>
+        <env name="DATABASE_PASSWORD" value=""/>
     </php>
 
     <testsuites>
