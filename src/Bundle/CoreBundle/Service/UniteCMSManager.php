@@ -1,17 +1,17 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Service;
+namespace UniteCMS\CoreBundle\Service;
 
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\RequestStack;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\SettingType;
 
-class UnitedCMSManager
+class UniteCMSManager
 {
 
     /**
@@ -25,12 +25,12 @@ class UnitedCMSManager
     private $requestStack;
 
     /**
-     * @var \UnitedCMS\CoreBundle\Entity\Organization
+     * @var \UniteCMS\CoreBundle\Entity\Organization
      */
     private $organization;
 
     /**
-     * @var \UnitedCMS\CoreBundle\Entity\Domain
+     * @var \UniteCMS\CoreBundle\Entity\Domain
      */
     private $domain;
 
@@ -93,7 +93,7 @@ class UnitedCMSManager
         // Get organization information from db.
         $data = $this->em->createQueryBuilder()
             ->select('o.id', 'o.identifier', 'o.title')
-            ->from('UnitedCMSCoreBundle:Organization', 'o')
+            ->from('UniteCMSCoreBundle:Organization', 'o')
             ->where('o.identifier = :organization')
             ->getQuery()->execute(['organization' => $organizationIdentifier]);
 
@@ -107,7 +107,7 @@ class UnitedCMSManager
         // Get all domains of this organization from db.
         $data = $this->em->createQueryBuilder()
             ->select('d.id', 'd.identifier', 'd.title')
-            ->from('UnitedCMSCoreBundle:Domain', 'd')
+            ->from('UniteCMSCoreBundle:Domain', 'd')
             ->where('d.organization = :organization')
             ->getQuery()->execute(['organization' => $this->organization]);
 
@@ -133,7 +133,7 @@ class UnitedCMSManager
 
             $data = $this->em->createQueryBuilder()
                 ->select('ct.id', 'ct.identifier', 'ct.title', 'ct.contentLabel', 'ct.icon', 'ct.permissions')
-                ->from('UnitedCMSCoreBundle:ContentType', 'ct')
+                ->from('UniteCMSCoreBundle:ContentType', 'ct')
                 ->leftJoin('ct.domain', 'd')
                 ->leftJoin('ct.views', 'co')
                 ->where('ct.domain = :domain')
@@ -148,7 +148,7 @@ class UnitedCMSManager
                 // Get views for this contentType.
                 $viewData = $this->em->createQueryBuilder()
                     ->select('v.id', 'v.identifier', 'v.title', 'v.type', 'v.icon')
-                    ->from('UnitedCMSCoreBundle:View', 'v')
+                    ->from('UniteCMSCoreBundle:View', 'v')
                     ->leftJoin('v.contentType', 'ct')
                     ->where('ct.id = :ct')
                     ->getQuery()->execute(['ct' => $contentType->getId()]);
@@ -167,7 +167,7 @@ class UnitedCMSManager
 
             $data = $this->em->createQueryBuilder()
                 ->select('st.id', 'st.identifier', 'st.title', 'st.icon', 'st.permissions')
-                ->from('UnitedCMSCoreBundle:SettingType', 'st')
+                ->from('UniteCMSCoreBundle:SettingType', 'st')
                 ->leftJoin('st.domain', 'd')
                 ->where('st.domain = :domain')
                 ->andWhere('d.organization = :organization')
@@ -185,7 +185,7 @@ class UnitedCMSManager
     /**
      * Get the current organization.
      *
-     * @return \UnitedCMS\CoreBundle\Entity\Organization
+     * @return \UniteCMS\CoreBundle\Entity\Organization
      */
     public function getOrganization()
     {
@@ -200,7 +200,7 @@ class UnitedCMSManager
     /**
      * Get the current domain.
      *
-     * @return \UnitedCMS\CoreBundle\Entity\Domain
+     * @return \UniteCMS\CoreBundle\Entity\Domain
      */
     public function getDomain()
     {
