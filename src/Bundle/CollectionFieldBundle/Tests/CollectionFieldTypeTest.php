@@ -5,8 +5,11 @@ namespace UnitedCMS\CollectionFieldBundle\Tests;
 use GraphQL\GraphQL;
 use GraphQL\Schema;
 use GraphQL\Type\Definition\ObjectType;
+use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use UnitedCMS\CoreBundle\Entity\ApiClient;
 use UnitedCMS\CoreBundle\Entity\Content;
+use UnitedCMS\CoreBundle\Entity\Domain;
 use UnitedCMS\CoreBundle\Entity\User;
 use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
 use UnitedCMS\CoreBundle\Form\FieldableFormType;
@@ -248,8 +251,9 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $domain = $field->getContentType()->getDomain();
 
         // In this test, we don't care about access checking.
-        $admin = new User();
-        $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        $admin = new ApiClient();
+        $admin->setDomain($field->getContentType()->getDomain());
+        $admin->setRoles([Domain::ROLE_ADMINISTRATOR]);
         $this->container->get('security.token_storage')->setToken(
           new UsernamePasswordToken($admin, null, 'api', $admin->getRoles())
         );
@@ -311,6 +315,142 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals(
           'Baa',
           $result->data->createCt1->f1[1]->n1[0]->n2[0]->f2
+        );
+        $this->assertEquals('Foo', $content->getData()['f1'][1]['f1']);
+    }
+
+    public function testWritingGraphQLDataViaMainFirewallWithCSRFProtection()
+    {
+
+        $field = $this->createContentTypeField('collection');
+        $field->setIdentifier('f1');
+        $field->getContentType()->setIdentifier('ct1');
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'fields' => [
+                        [
+                            'title' => 'Sub Field 1',
+                            'identifier' => 'f1',
+                            'type' => 'text',
+                        ],
+                        [
+                            'title' => 'Nested Field 1',
+                            'identifier' => 'n1',
+                            'type' => 'collection',
+                            'settings' => [
+                                'fields' => [
+                                    [
+                                        'title' => 'Nested Field 2',
+                                        'identifier' => 'n2',
+                                        'type' => 'collection',
+                                        'settings' => [
+                                            'fields' => [
+                                                [
+                                                    'title' => 'Sub Field 2',
+                                                    'identifier' => 'f2',
+                                                    'type' => 'text',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ]
+            )
+        );
+        $this->em->persist(
+            $field->getContentType()->getDomain()->getOrganization()
+        );
+        $this->em->persist($field->getContentType()->getDomain());
+        $this->em->persist($field->getContentType());
+        $this->em->flush();
+
+        $this->em->refresh($field->getContentType()->getDomain());
+        $this->em->refresh($field->getContentType());
+        $this->em->refresh($field);
+
+        // Inject created domain into untied.cms.manager.
+        $d = new \ReflectionProperty(
+            $this->container->get('united.cms.manager'), 'domain'
+        );
+        $d->setAccessible(true);
+        $d->setValue(
+            $this->container->get('united.cms.manager'),
+            $field->getContentType()->getDomain()
+        );
+        $domain = $field->getContentType()->getDomain();
+
+        // In this test, we don't care about access checking.
+        $admin = new User();
+        $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($admin, null, 'main', $admin->getRoles())
+        );
+
+        // Create GraphQL Schema
+        $schemaTypeManager = $this->container->get(
+            'united.cms.graphql.schema_type_manager'
+        );
+
+        $schema = new Schema(
+            [
+                'query' => $schemaTypeManager->getSchemaType('Query'),
+                'mutation' => $schemaTypeManager->getSchemaType('Mutation'),
+                'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
+                    return $schemaTypeManager->getSchemaType($name, $domain);
+                },
+            ]
+        );
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
+      createCt1(
+        data: {
+          f1: [
+            {},
+            {
+              f1: "Foo",
+              n1: [
+                {
+                  n2: [
+                    { f2: "Baa" }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ) {
+        id,
+        f1 {
+          f1,
+          n1 {
+            n2 {
+              f2
+            }
+          }
+        }
+       }
+    }', null, [
+        'csrf_token' => $this->container->get('security.csrf.token_manager')
+            ->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))
+            ->getValue()
+        ]
+    );
+        $result = json_decode(json_encode($result->toArray()));
+        $this->assertNotEmpty($result->data->createCt1->id);
+        $content = $this->em->getRepository('UnitedCMSCoreBundle:Content')
+            ->find($result->data->createCt1->id);
+        $this->assertNotNull($content);
+        $this->assertNotNull($result->data->createCt1->f1[0]);
+        $this->assertEquals('Foo', $result->data->createCt1->f1[1]->f1);
+        $this->assertEquals(
+            'Baa',
+            $result->data->createCt1->f1[1]->n1[0]->n2[0]->f2
         );
         $this->assertEquals('Foo', $content->getData()['f1'][1]['f1']);
     }
