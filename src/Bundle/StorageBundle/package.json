@@ -1,5 +1,5 @@
 {
-  "name": "UnitedCMSStorageBundle",
+  "name": "UniteCMSStorageBundle",
   "version": "1.0.0",
   "dependencies": {
     "uikit": "^3.0.0-beta.40"

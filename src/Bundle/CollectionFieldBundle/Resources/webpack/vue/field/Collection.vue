@@ -1,12 +1,12 @@
 <template>
     <div>
-        <united-cms-collection-field-row
+        <unite-cms-collection-field-row
                 v-for="row in rows"
                 :key="row.delta"
                 :delta="row.delta"
                 :prototype="row.prototype"
                 @remove="removeRow"
-        ></united-cms-collection-field-row>
+        ></unite-cms-collection-field-row>
         <button v-if="!maxRows || rows.length < maxRows" class="uk-button uk-button-default add" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></button>
     </div>
 </template>
@@ -79,14 +79,14 @@
 <style lang="scss">
     @import "../../../../../CoreBundle/Resources/webpack/sass/base/variables";
 
-    united-cms-collection-field {
+    unite-cms-collection-field {
         display: block;
         margin: 5px 0;
         border: 1px solid map-get($colors, grey-medium);
         background: map-get($colors, white);
         padding: 10px;
 
-        united-cms-collection-field-row {
+        unite-cms-collection-field-row {
             position: relative;
             display: block;
             background: $global-muted-background;

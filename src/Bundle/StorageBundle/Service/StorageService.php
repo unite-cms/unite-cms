@@ -6,17 +6,17 @@
  * Time: 09:35
  */
 
-namespace UnitedCMS\StorageBundle\Service;
+namespace UniteCMS\StorageBundle\Service;
 
 use Aws\S3\S3Client;
 use Ramsey\Uuid\Uuid;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Field\NestableFieldTypeInterface;
-use UnitedCMS\StorageBundle\Field\Types\FileFieldType;
-use UnitedCMS\StorageBundle\Field\Types\ImageFieldType;
-use UnitedCMS\StorageBundle\Model\PreSignedUrl;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
+use UniteCMS\StorageBundle\Field\Types\FileFieldType;
+use UniteCMS\StorageBundle\Field\Types\ImageFieldType;
+use UniteCMS\StorageBundle\Model\PreSignedUrl;
 
 class StorageService
 {

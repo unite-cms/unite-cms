@@ -1,19 +1,19 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Controller;
+namespace UniteCMS\CoreBundle\Tests\Controller;
 
 use Doctrine\ORM\Id\UuidGenerator;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow
@@ -92,7 +92,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Organization')->setIdentifier('org1');
-        $this->domain = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
@@ -124,7 +124,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
     public function testCRUDActions() {
 
-        $url_list = $this->container->get('router')->generate('unitedcms_core_setting_index', [
+        $url_list = $this->container->get('router')->generate('unitecms_core_setting_index', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -159,7 +159,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->client->submit($form);
 
         // Assert update
-        $setting = $this->em->getRepository('UnitedCMSCoreBundle:Setting')->findOneBy([
+        $setting = $this->em->getRepository('UniteCMSCoreBundle:Setting')->findOneBy([
             'settingType' => $this->domain->getSettingTypes()->first(),
             'locale' => 'en',
         ]);
@@ -174,10 +174,10 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $setting->setSettingType($this->domain->getSettingTypes()->first())->setData(['f1' => 'la', 'f2' => 'b'])->setLocale('de');
         $this->em->persist($setting);
         $this->em->flush($setting);
-        $this->assertCount(1, $this->em->getRepository('UnitedCMSCoreBundle:Setting')->findAll());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
 
         // Test update content validation.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_setting_index', [
+        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_index', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -226,11 +226,11 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $setting->setSettingType($this->domain->getSettingTypes()->first())->setData(['f1' => 'la', 'f2' => 'b'])->setLocale('de');
         $this->em->persist($setting);
         $this->em->flush($setting);
-        $this->assertCount(1, $this->em->getRepository('UnitedCMSCoreBundle:Setting')->findAll());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
 
         // Try to access translations page with invalid content id.
         $doctrineUUIDGenerator = new UuidGenerator();
-        $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_setting_translations', [
+        $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_translations', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -240,7 +240,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to access translations page with valid setting id.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_setting_translations', [
+        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_translations', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -267,7 +267,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->client->submit($form);
 
         // Assert update
-        $settingType = $this->em->getRepository('UnitedCMSCoreBundle:SettingType')->find($this->domain->getSettingTypes()->first()->getId());
+        $settingType = $this->em->getRepository('UniteCMSCoreBundle:SettingType')->find($this->domain->getSettingTypes()->first()->getId());
         $setting = $settingType->getSetting('de');
         $this->assertEquals('la', $setting->getData()['f1']);
         $this->assertEquals('b', $setting->getData()['f2']);
@@ -283,7 +283,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
 
         // Try to access translations page with valid setting id.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_setting_translations', [
+        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_translations', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -303,9 +303,9 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $setting->setSettingType($this->domain->getSettingTypes()->first())->setData(['f1' => 'la', 'f2' => 'b']);
         $this->em->persist($setting);
         $this->em->flush($setting);
-        $this->assertCount(1, $this->em->getRepository('UnitedCMSCoreBundle:Setting')->findAll());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
 
-        $revisions_url = $this->container->get('router')->generate('unitedcms_core_setting_revisions', [
+        $revisions_url = $this->container->get('router')->generate('unitecms_core_setting_revisions', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -314,7 +314,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Try to get revisions page of unknown setting.
         $doctrineUUIDGenerator = new UuidGenerator();
-        $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_setting_revisions', [
+        $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_revisions', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -331,7 +331,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Update setting.
-        $setting = $this->em->getRepository('UnitedCMSCoreBundle:Setting')->find($setting->getId());
+        $setting = $this->em->getRepository('UniteCMSCoreBundle:Setting')->find($setting->getId());
         $setting->setData(['f1' => 'foo', 'f2' => 'a']);
         $this->em->flush();
 

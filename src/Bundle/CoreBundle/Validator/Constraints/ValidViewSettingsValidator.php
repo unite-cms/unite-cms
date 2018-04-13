@@ -1,14 +1,14 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Validator\Constraints;
+namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\View\ViewSettings;
-use UnitedCMS\CoreBundle\View\ViewTypeManager;
-use UnitedCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\View\ViewSettings;
+use UniteCMS\CoreBundle\View\ViewTypeManager;
+use UniteCMS\CoreBundle\Entity\View;
 
 class ValidViewSettingsValidator extends ConstraintValidator
 {
@@ -49,13 +49,13 @@ class ValidViewSettingsValidator extends ConstraintValidator
     {
         if (!$value instanceof ViewSettings) {
             throw new InvalidArgumentException(
-                'The ValidViewSettingsValidator constraint expects a UnitedCMS\CoreBundle\View\ViewSettings value.'
+                'The ValidViewSettingsValidator constraint expects a UniteCMS\CoreBundle\View\ViewSettings value.'
             );
         }
 
         if (!$this->context->getObject() instanceof View) {
             throw new InvalidArgumentException(
-                'The ValidViewSettingsValidator constraint expects a UnitedCMS\CoreBundle\Entity\View object.'
+                'The ValidViewSettingsValidator constraint expects a UniteCMS\CoreBundle\Entity\View object.'
             );
         }
 

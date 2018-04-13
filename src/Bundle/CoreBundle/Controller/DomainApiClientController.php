@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Controller;
+namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -12,9 +12,9 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
 
 class DomainApiClientController extends Controller
 {
@@ -23,7 +23,7 @@ class DomainApiClientController extends Controller
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -34,7 +34,7 @@ class DomainApiClientController extends Controller
         $clients = $this->get('knp_paginator')->paginate($domain->getApiClients());
 
         return $this->render(
-            'UnitedCMSCoreBundle:Domain/ApiClient:index.html.twig',
+            'UniteCMSCoreBundle:Domain/ApiClient:index.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -48,7 +48,7 @@ class DomainApiClientController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -82,7 +82,7 @@ class DomainApiClientController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitedcms_core_domainapiclient_index',
+                'unitecms_core_domainapiclient_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -91,7 +91,7 @@ class DomainApiClientController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Domain/ApiClient:create.html.twig',
+            'UniteCMSCoreBundle:Domain/ApiClient:create.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -106,7 +106,7 @@ class DomainApiClientController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("client")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -137,7 +137,7 @@ class DomainApiClientController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitedcms_core_domainuser_index',
+                'unitecms_core_domainuser_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -146,7 +146,7 @@ class DomainApiClientController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Domain/ApiClient:update.html.twig',
+            'UniteCMSCoreBundle:Domain/ApiClient:update.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -162,7 +162,7 @@ class DomainApiClientController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -182,7 +182,7 @@ class DomainApiClientController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitedcms_core_domainapiclient_index',
+                'unitecms_core_domainapiclient_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -191,7 +191,7 @@ class DomainApiClientController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Domain/ApiClient:delete.html.twig',
+            'UniteCMSCoreBundle:Domain/ApiClient:delete.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,

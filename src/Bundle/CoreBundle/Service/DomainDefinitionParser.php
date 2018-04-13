@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Service;
+namespace UniteCMS\CoreBundle\Service;
 
 use JMS\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\Domain;
 
 class DomainDefinitionParser
 {

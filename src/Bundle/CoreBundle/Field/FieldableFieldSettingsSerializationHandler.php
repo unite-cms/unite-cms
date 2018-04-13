@@ -6,7 +6,7 @@
  * Time: 13:33
  */
 
-namespace UnitedCMS\CoreBundle\Field;
+namespace UniteCMS\CoreBundle\Field;
 
 use JMS\Serializer\Context;
 use JMS\Serializer\GraphNavigator;

@@ -6,7 +6,7 @@
  * Time: 13:19
  */
 
-namespace UnitedCMS\CoreBundle\View;
+namespace UniteCMS\CoreBundle\View;
 
 class ViewSettings
 {

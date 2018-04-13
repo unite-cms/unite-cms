@@ -1,12 +1,12 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Security;
+namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use UnitedCMS\CoreBundle\Security\ApiClientAuthenticator;
+use UniteCMS\CoreBundle\Security\ApiClientAuthenticator;
 
 class ApiClientAuthenticatorTest extends TestCase
 {

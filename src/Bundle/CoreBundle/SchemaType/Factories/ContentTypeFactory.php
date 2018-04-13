@@ -1,18 +1,18 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Factories;
+namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class ContentTypeFactory implements SchemaTypeFactoryInterface
 {
@@ -76,7 +76,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
     public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
     {
         if(!$domain) {
-            throw new \InvalidArgumentException('UnitedCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument');
+            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument');
         }
 
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
@@ -96,7 +96,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
         // Load the full contentType if it is not already loaded.
         if(!$this->entityManager->contains($contentType)) {
-            $contentType = $this->entityManager->getRepository('UnitedCMSCoreBundle:ContentType')->find(
+            $contentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find(
                 $contentType->getId()
             );
         }
@@ -112,7 +112,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
         $fieldTypes = [];
 
         /**
-         * @var \UnitedCMS\CoreBundle\Entity\ContentTypeField $field
+         * @var \UniteCMS\CoreBundle\Entity\ContentTypeField $field
          */
         foreach ($contentType->getFields() as $field) {
             $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());

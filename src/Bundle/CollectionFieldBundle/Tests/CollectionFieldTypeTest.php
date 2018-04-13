@@ -1,16 +1,16 @@
 <?php
 
-namespace UnitedCMS\CollectionFieldBundle\Tests;
+namespace UniteCMS\CollectionFieldBundle\Tests;
 
 use GraphQL\GraphQL;
 use GraphQL\Schema;
 use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
-use UnitedCMS\CoreBundle\Form\FieldableFormType;
-use UnitedCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
 
 class CollectionFieldTypeTest extends FieldTypeTestCase
 {
@@ -59,7 +59,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         // Try to validate collection without fields.
         $this->assertCount(0, $this->container->get('validator')->validate($field));
 
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
+        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
         $this->assertInstanceOf(FieldableFormType::class, $form->getConfig()->getType()->getInnerType());
         $this->assertTrue($form->has($field->getIdentifier()));
         $this->assertEquals($field->getTitle(), $form->get($field->getIdentifier())->getConfig()->getOption('label'));
@@ -73,7 +73,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertTrue($form->isValid());
 
         // Submitting sub field data should be valid since we auto-delete empty rows, but content data must be empty.
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
+        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
         $form->submit([
             '_token' => $csrf_token->getValue(),
             $field->getIdentifier() => [['foo' => 'baa']]
@@ -101,7 +101,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $this->container->get('validator')->validate($field));
 
         // Submitting sub field data should work, for the given fields.
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
+        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
         $csrf_token = $this->container->get('security.csrf.token_manager')->getToken($form->getName());
         $form->submit([
             '_token' => $csrf_token->getValue(),
@@ -159,12 +159,12 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
       $this->em->refresh($field);
 
       // Inject created domain into untied.cms.manager.
-      $d = new \ReflectionProperty($this->container->get('united.cms.manager'), 'domain');
+      $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
       $d->setAccessible(true);
-      $d->setValue($this->container->get('united.cms.manager'), $field->getContentType()->getDomain());
+      $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
 
       $key = ucfirst($field->getContentType()->getIdentifier()) . 'Content';
-      $type = $this->container->get('united.cms.graphql.schema_type_manager')->getSchemaType($key, $field->getContentType()->getDomain());
+      $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType($key, $field->getContentType()->getDomain());
       $this->assertInstanceOf(ObjectType::class, $type);
 
       // Check nested collection field structure.
@@ -238,11 +238,11 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // Inject created domain into untied.cms.manager.
         $d = new \ReflectionProperty(
-          $this->container->get('united.cms.manager'), 'domain'
+          $this->container->get('unite.cms.manager'), 'domain'
         );
         $d->setAccessible(true);
         $d->setValue(
-          $this->container->get('united.cms.manager'),
+          $this->container->get('unite.cms.manager'),
           $field->getContentType()->getDomain()
         );
         $domain = $field->getContentType()->getDomain();
@@ -256,7 +256,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // Create GraphQL Schema
         $schemaTypeManager = $this->container->get(
-          'united.cms.graphql.schema_type_manager'
+          'unite.cms.graphql.schema_type_manager'
         );
 
         $schema = new Schema(
@@ -303,7 +303,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
         $result = json_decode(json_encode($result->toArray()));
         $this->assertNotEmpty($result->data->createCt1->id);
-        $content = $this->em->getRepository('UnitedCMSCoreBundle:Content')
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')
           ->find($result->data->createCt1->id);
         $this->assertNotNull($content);
         $this->assertNotNull($result->data->createCt1->f1[0]);
@@ -362,24 +362,24 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
 
         // Inject created domain into untied.cms.manager.
-        $d = new \ReflectionProperty($this->container->get('united.cms.manager'), 'domain');
+        $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
-        $d->setValue($this->container->get('united.cms.manager'), $field->getContentType()->getDomain());
-        $o = new \ReflectionProperty($this->container->get('united.cms.manager'), 'organization');
+        $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+        $o = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'organization');
         $o->setAccessible(true);
-        $o->setValue($this->container->get('united.cms.manager'), $field->getContentType()->getDomain()->getOrganization());
+        $o->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain()->getOrganization());
 
         // Validate min rows.
-        $violations = $this->container->get('united.cms.field_type_manager')->validateFieldData($field, []);
+        $violations = $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, []);
         $this->assertCount(1, $violations);
         $this->assertEquals('['.$field->getIdentifier().']', $violations[0]->getPropertyPath());
         $this->assertEquals('validation.too_few_rows', $violations[0]->getMessage());
 
         // on DELETE all content is valid.
-        $this->assertCount(0, $this->container->get('united.cms.field_type_manager')->validateFieldData($field, [], 'DELETE'));
+        $this->assertCount(0, $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], 'DELETE'));
 
         // Validate max rows.
-        $violations = $this->container->get('united.cms.field_type_manager')
+        $violations = $this->container->get('unite.cms.field_type_manager')
           ->validateFieldData(
             $field,
             [
@@ -395,10 +395,10 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('validation.too_many_rows', $violations[0]->getMessage());
 
         // on DELETE all content is valid.
-        $this->assertCount(0, $this->container->get('united.cms.field_type_manager')->validateFieldData($field, [], 'DELETE'));
+        $this->assertCount(0, $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], 'DELETE'));
 
         // Validate additional data (also nested).
-        $violations = $this->container->get('united.cms.field_type_manager')
+        $violations = $this->container->get('unite.cms.field_type_manager')
           ->validateFieldData(
             $field,
             [
@@ -441,7 +441,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('validation.additional_data', $violations[3]->getMessage());
 
         // on DELETE all content is valid.
-        $this->assertCount(0, $this->container->get('united.cms.field_type_manager')->validateFieldData($field, [], 'DELETE'));
+        $this->assertCount(0, $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], 'DELETE'));
     }
 
     public function testFormBuilding()
@@ -495,7 +495,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             ],
           ]
         )->setContentType($field->getContentType());
-        $form = $this->container->get('united.cms.fieldable_form_builder')
+        $form = $this->container->get('unite.cms.fieldable_form_builder')
           ->createForm(
             $field->getContentType(),
             $content
@@ -504,7 +504,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // Check root collection field.
         $root = $formView->getIterator()->current();
-        $this->assertEquals('united-cms-collection-field', $root->vars['tag']);
+        $this->assertEquals('unite-cms-collection-field', $root->vars['tag']);
 
         // First Row
         $row1 = array_shift($root->children);
@@ -524,7 +524,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $row2N1 = array_shift($row2->children);
         $this->assertEquals('n1', $row2N1->vars['name']);
         $this->assertEquals(
-          'united-cms-collection-field',
+          'unite-cms-collection-field',
           $row2N1->vars['tag']
         );
 
@@ -533,7 +533,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $row2N1Row1N2 = array_shift($row2N1Row1->children);
         $this->assertEquals('n2', $row2N1Row1N2->vars['name']);
         $this->assertEquals(
-          'united-cms-collection-field',
+          'unite-cms-collection-field',
           $row2N1Row1N2->vars['tag']
         );
 

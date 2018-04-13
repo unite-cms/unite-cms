@@ -87,7 +87,7 @@
             openModal() {
 
                 // When opening a modal, we start listen to contentSelected events.
-                window.UnitedCMSEventBus.$on('contentSelected', (data) => {
+                window.UniteCMSEventBus.$on('contentSelected', (data) => {
                     // For the moment, we can only handle single selections
                     if(data.length > 0) {
                         this.content = data[0].row.id;
@@ -101,7 +101,7 @@
             closeModal() {
 
                 // When closing a modal, we stop listen to contentSelected events.
-                window.UnitedCMSEventBus.$off('contentSelected');
+                window.UniteCMSEventBus.$off('contentSelected');
 
                 this.modal.hide();
             },
@@ -135,7 +135,7 @@
 </script>
 
 <style lang="scss">
-    united-cms-core-reference-field {
+    unite-cms-core-reference-field {
         position: relative;
         display: block;
     }

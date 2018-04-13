@@ -1,16 +1,16 @@
 <?php
 
-namespace UnitedCMS\CollectionFieldBundle\Tests;
+namespace UniteCMS\CollectionFieldBundle\Tests;
 
 use GraphQL\GraphQL;
 use GraphQL\Schema;
 use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
-use UnitedCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
-use UnitedCMS\StorageBundle\Model\PreSignedUrl;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
+use UniteCMS\StorageBundle\Model\PreSignedUrl;
 
 class ImageFieldTypeTest extends FieldTypeTestCase
 {
@@ -94,12 +94,12 @@ class ImageFieldTypeTest extends FieldTypeTestCase
         $this->em->refresh($field);
 
         // Inject created domain into untied.cms.manager.
-        $d = new \ReflectionProperty($this->container->get('united.cms.manager'), 'domain');
+        $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
-        $d->setValue($this->container->get('united.cms.manager'), $field->getContentType()->getDomain());
+        $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
 
         $key = ucfirst($field->getContentType()->getIdentifier()) . 'Content';
-        $type = $this->container->get('united.cms.graphql.schema_type_manager')->getSchemaType($key, $field->getContentType()->getDomain());
+        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType($key, $field->getContentType()->getDomain());
         $this->assertInstanceOf(ObjectType::class, $type);
 
         // Check file field structure.
@@ -140,9 +140,9 @@ class ImageFieldTypeTest extends FieldTypeTestCase
     $this->em->refresh($field);
 
     // Inject created domain into untied.cms.manager.
-    $d = new \ReflectionProperty($this->container->get('united.cms.manager'), 'domain');
+    $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
     $d->setAccessible(true);
-    $d->setValue($this->container->get('united.cms.manager'), $field->getContentType()->getDomain());
+    $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
     $domain = $field->getContentType()->getDomain();
 
     // In this test, we don't care about access checking.
@@ -151,7 +151,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
     $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($admin, null, 'api', $admin->getRoles()));
 
     // Create GraphQL Schema
-    $schemaTypeManager = $this->container->get('united.cms.graphql.schema_type_manager');
+    $schemaTypeManager = $this->container->get('unite.cms.graphql.schema_type_manager');
 
     $schema = new Schema(
       [
@@ -218,7 +218,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
     $result = json_decode(json_encode($result->toArray(true)));
 
     $this->assertNotEmpty($result->data->createCt1->id);
-    $content = $this->em->getRepository('UnitedCMSCoreBundle:Content')->find($result->data->createCt1->id);
+    $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($result->data->createCt1->id);
     $this->assertNotNull($content);
     $this->assertNotNull($result->data->createCt1->f1);
     $this->assertEquals('cat.jpg', $result->data->createCt1->f1->name);
@@ -248,12 +248,12 @@ class ImageFieldTypeTest extends FieldTypeTestCase
             'type' => "image/jpeg",
             'id' => "XXX-YYY-ZZZ",
         ]])->setContentType($field->getContentType());
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
+        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
         $formView = $form->createView();
 
         // Check root file field.
         $root = $formView->getIterator()->current();
-        $this->assertEquals('united-cms-storage-file-field', $root->vars['tag']);
+        $this->assertEquals('unite-cms-storage-file-field', $root->vars['tag']);
 
         // Assert values
         $this->assertEquals(json_encode($content->getData()['f1']), $root->vars['value']);

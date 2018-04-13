@@ -6,12 +6,12 @@
  * Time: 08:38
  */
 
-namespace UnitedCMS\CollectionFieldBundle\Tests;
+namespace UniteCMS\CollectionFieldBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use UnitedCMS\CollectionFieldBundle\Model\Collection;
-use UnitedCMS\CollectionFieldBundle\Model\CollectionField;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CollectionFieldBundle\Model\Collection;
+use UniteCMS\CollectionFieldBundle\Model\CollectionField;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class ModelsUnitTest extends TestCase {
 

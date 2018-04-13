@@ -1,10 +1,10 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Security;
+namespace UniteCMS\CoreBundle\Tests\Security;
 
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Security\OrganizationVoter;
-use UnitedCMS\CoreBundle\Tests\SecurityVoterTestCase;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Security\OrganizationVoter;
+use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
 class OrganizationVoterTest extends SecurityVoterTestCase
 {

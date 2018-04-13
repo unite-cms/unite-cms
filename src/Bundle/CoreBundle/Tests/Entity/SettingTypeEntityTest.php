@@ -1,12 +1,12 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class SettingTypeEntityTest extends DatabaseAwareTestCase
 {
@@ -117,10 +117,10 @@ class SettingTypeEntityTest extends DatabaseAwareTestCase
         $this->em->flush($setting);
 
         $this->assertCount(0, $this->container->get('validator')->validate($settingType, null, ['DELETE']));
-        $this->assertCount(1, $this->em->getRepository('UnitedCMSCoreBundle:Setting')->findAll());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
         $this->em->remove($settingType);
         $this->em->flush();
-        $this->assertCount(0, $this->em->getRepository('UnitedCMSCoreBundle:Setting')->findAll());
+        $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
 
     }
 

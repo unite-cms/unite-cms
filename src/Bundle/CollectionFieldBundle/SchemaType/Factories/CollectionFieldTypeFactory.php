@@ -1,17 +1,17 @@
 <?php
 
-namespace UnitedCMS\CollectionFieldBundle\SchemaType\Factories;
+namespace UniteCMS\CollectionFieldBundle\SchemaType\Factories;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use UnitedCMS\CollectionFieldBundle\Model\Collection;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldTypeInterface;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CollectionFieldBundle\Model\Collection;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeInterface;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class CollectionFieldTypeFactory
 {

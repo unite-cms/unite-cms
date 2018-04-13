@@ -1,12 +1,12 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class ContentTypeEntityTest extends DatabaseAwareTestCase
 {
@@ -171,7 +171,7 @@ class ContentTypeEntityTest extends DatabaseAwareTestCase
         $this->assertCount(0, $errors);
         $this->em->persist($ct3);
         $this->em->flush($ct3);
-        $ct3 = $this->em->find('UnitedCMSCoreBundle:ContentType', $ct3->getId());
+        $ct3 = $this->em->find('UniteCMSCoreBundle:ContentType', $ct3->getId());
         $this->assertFalse($ct3->getViews()->containsKey('other'));
     }
 
@@ -240,7 +240,7 @@ class ContentTypeEntityTest extends DatabaseAwareTestCase
         $this->em->flush($contentType);
 
         // Try to find with invalid identifiers.
-        $repo = $this->em->getRepository('UnitedCMSCoreBundle:ContentType');
+        $repo = $this->em->getRepository('UniteCMSCoreBundle:ContentType');
         $this->assertNull($repo->findByIdentifiers('foo', 'baa', 'luu'));
         $this->assertNull($repo->findByIdentifiers('org', 'baa', 'luu'));
         $this->assertNull($repo->findByIdentifiers('foo', 'domain', 'luu'));

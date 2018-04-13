@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Field\Types;
+namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Twig\TwigEngine;
@@ -8,19 +8,19 @@ use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Form\ReferenceType;
-use UnitedCMS\CoreBundle\View\ViewTypeInterface;
-use UnitedCMS\CoreBundle\View\ViewTypeManager;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\Security\ContentVoter;
-use UnitedCMS\CoreBundle\Security\DomainVoter;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Form\ReferenceType;
+use UniteCMS\CoreBundle\View\ViewTypeInterface;
+use UniteCMS\CoreBundle\View\ViewTypeManager;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\DomainVoter;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class ReferenceFieldType extends FieldType
 {
@@ -31,16 +31,16 @@ class ReferenceFieldType extends FieldType
 
     private $validator;
     private $authorizationChecker;
-    private $unitedCMSManager;
+    private $uniteCMSManager;
     private $viewTypeManager;
     private $entityManager;
     private $templating;
     private $csrfTokenManager;
 
-    function __construct(ValidatorInterface $validator, AuthorizationChecker $authorizationChecker, UnitedCMSManager $unitedCMSManager, EntityManager $entityManager, ViewTypeManager $viewTypeManager, TwigEngine $templating, CsrfTokenManager $csrfTokenManager) {
+    function __construct(ValidatorInterface $validator, AuthorizationChecker $authorizationChecker, UniteCMSManager $uniteCMSManager, EntityManager $entityManager, ViewTypeManager $viewTypeManager, TwigEngine $templating, CsrfTokenManager $csrfTokenManager) {
         $this->validator = $validator;
         $this->authorizationChecker = $authorizationChecker;
-        $this->unitedCMSManager = $unitedCMSManager;
+        $this->uniteCMSManager = $uniteCMSManager;
         $this->viewTypeManager = $viewTypeManager;
         $this->entityManager = $entityManager;
         $this->templating = $templating;
@@ -61,7 +61,7 @@ class ReferenceFieldType extends FieldType
         }
 
         // Only allow to resolve a content type from the same organization.
-        $organization = $this->unitedCMSManager->getOrganization();
+        $organization = $this->uniteCMSManager->getOrganization();
 
         $domain = $organization->getDomains()->filter(function( Domain $domain ) use($domain_identifier) { return $domain->getIdentifier() == $domain_identifier; })->first();
 
@@ -69,8 +69,8 @@ class ReferenceFieldType extends FieldType
             throw new InvalidArgumentException("No domain with identifier '{$domain_identifier}' was found in this organization.");
         }
 
-        // We need to reload the full domain. unitedCMSManager only holds infos for the current domain.
-        $domain = $this->entityManager->getRepository('UnitedCMSCoreBundle:Domain')->findOneBy([
+        // We need to reload the full domain. uniteCMSManager only holds infos for the current domain.
+        $domain = $this->entityManager->getRepository('UniteCMSCoreBundle:Domain')->findOneBy([
             'organization' => $organization,
             'id' => $domain->getId(),
         ]);
@@ -109,7 +109,7 @@ class ReferenceFieldType extends FieldType
         }
 
         // Reload the full view object.
-        $view = $this->entityManager->getRepository('UnitedCMSCoreBundle:View')->findOneBy([
+        $view = $this->entityManager->getRepository('UniteCMSCoreBundle:View')->findOneBy([
             'contentType' => $contentType,
             'id' => $view->getId(),
         ]);
@@ -121,7 +121,7 @@ class ReferenceFieldType extends FieldType
                 'content_type' => $contentType->getIdentifier(),
             ],
             'attr' => [
-                'base-url' => '/' . $this->unitedCMSManager->getOrganization()->getIdentifier() . '/',
+                'base-url' => '/' . $this->uniteCMSManager->getOrganization()->getIdentifier() . '/',
                 'content-label' => $settings->content_label ?? (empty($contentType->getContentLabel()) ? (string)$contentType . ' #{id}' : $contentType->getContentLabel()),
                 'modal-html' => $this->templating->render(
                     $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
@@ -186,7 +186,7 @@ class ReferenceFieldType extends FieldType
         $contentType = $this->resolveContentType($value['domain'], $value['content_type']);
 
         // Find content for this content type.
-        $content = $this->entityManager->getRepository('UnitedCMSCoreBundle:Content')->findOneBy(['contentType' => $contentType, 'id' => $value['content']]);
+        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['contentType' => $contentType, 'id' => $value['content']]);
         if(!$content) {
             throw new InvalidArgumentException("No content with id '{$value['content']}' was found.");
         }

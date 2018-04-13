@@ -6,7 +6,7 @@
  * Time: 08:42
  */
 
-namespace UnitedCMS\StorageBundle\Form;
+namespace UniteCMS\StorageBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;

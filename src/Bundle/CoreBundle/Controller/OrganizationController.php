@@ -1,19 +1,19 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Controller;
+namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Security\OrganizationVoter;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\OrganizationVoter;
 
 class OrganizationController extends Controller
 {
 
     /**
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::LIST'), 'UnitedCMS\\CoreBundle\\Entity\\Organization')")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::LIST'), 'UniteCMS\\CoreBundle\\Entity\\Organization')")
      * @return Response
      */
     public function indexAction()
@@ -22,7 +22,7 @@ class OrganizationController extends Controller
          * Platform admins are allowed to view all organizations.
          */
         if($this->isGranted(User::ROLE_PLATFORM_ADMIN)) {
-            $organizations = $this->getDoctrine()->getRepository('UnitedCMSCoreBundle:Organization')->findAll();
+            $organizations = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Organization')->findAll();
         } else {
             $organizations = $this->getUser()->getOrganizations()->map(
                 function (OrganizationMember $member) {
@@ -34,7 +34,7 @@ class OrganizationController extends Controller
         // If only one organization was found on the system, we can redirect to it.
         if (count($organizations) == 1) {
             return $this->redirectToRoute(
-                'unitedcms_core_domain_index',
+                'unitecms_core_domain_index',
                 ['organization' => $organizations[0]->getIdentifier()]
             );
         }
@@ -48,7 +48,7 @@ class OrganizationController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Organization:index.html.twig',
+            'UniteCMSCoreBundle:Organization:index.html.twig',
             [
                 'organizations' => $allowedOrganizations,
             ]

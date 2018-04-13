@@ -1,10 +1,10 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Validator\Constraints;
+namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use UnitedCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\View;
 
 class DefaultViewTypeValidator extends ConstraintValidator
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\ExclusionPolicy;
@@ -9,11 +9,11 @@ use JMS\Serializer\Annotation\Type;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
-use UnitedCMS\CoreBundle\Validator\Constraints\FieldType;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWords;
-use UnitedCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Validator\Constraints\FieldType;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
 
 /**
  * Field
@@ -50,7 +50,7 @@ class ContentTypeField implements FieldableField
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
      * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UnitedCMS\CoreBundle\Entity\ContentTypeField::RESERVED_IDENTIFIERS")
+     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\ContentTypeField::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -72,7 +72,7 @@ class ContentTypeField implements FieldableField
      * @ORM\Column(name="settings", type="object", nullable=true)
      * @ValidFieldSettings()
      * @Assert\NotNull(message="validation.not_null")
-     * @Type("UnitedCMS\CoreBundle\Field\FieldableFieldSettings")
+     * @Type("UniteCMS\CoreBundle\Field\FieldableFieldSettings")
      * @Expose
      */
     private $settings;
@@ -81,7 +81,7 @@ class ContentTypeField implements FieldableField
      * @var ContentType
      * @Gedmo\SortableGroup
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\ContentType", inversedBy="fields")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", inversedBy="fields")
      */
     private $contentType;
 

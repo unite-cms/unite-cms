@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Repository;
+namespace UniteCMS\CoreBundle\Repository;
 
 use Gedmo\Sortable\Entity\Repository\SortableRepository;
 

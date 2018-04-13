@@ -1,11 +1,11 @@
 # Contains all custom serialization handler
 services:
-  UnitedCMS\CoreBundle\Field\FieldableFieldSettingsSerializationHandler:
+  UniteCMS\CoreBundle\Field\FieldableFieldSettingsSerializationHandler:
     public: false
     tags:
-      - { name: jms_serializer.handler, type: 'UnitedCMS\CoreBundle\Field\FieldableFieldSettings', format: 'json', method: 'handle' }
+      - { name: jms_serializer.handler, type: 'UniteCMS\CoreBundle\Field\FieldableFieldSettings', format: 'json', method: 'handle' }
 
-  UnitedCMS\CoreBundle\View\ViewSettingsSerializationHandler:
+  UniteCMS\CoreBundle\View\ViewSettingsSerializationHandler:
     public: false
     tags:
-      - { name: jms_serializer.handler, type: 'UnitedCMS\CoreBundle\View\ViewSettings', format: 'json', method: 'handle' }
+      - { name: jms_serializer.handler, type: 'UniteCMS\CoreBundle\View\ViewSettings', format: 'json', method: 'handle' }

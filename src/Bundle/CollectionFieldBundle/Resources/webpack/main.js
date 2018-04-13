@@ -8,5 +8,5 @@ import CollectionRow from "./vue/field/CollectionRow.vue";
 // Use VueCustomElement
 Vue.use(vueCustomElement);
 
-Vue.customElement('united-cms-collection-field-row', CollectionRow);
-Vue.customElement('united-cms-collection-field', Collection);
+Vue.customElement('unite-cms-collection-field-row', CollectionRow);
+Vue.customElement('unite-cms-collection-field', Collection);

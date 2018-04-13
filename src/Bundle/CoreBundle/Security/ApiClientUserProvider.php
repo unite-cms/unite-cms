@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security;
 
 
 use Doctrine\ORM\EntityManager;
@@ -8,24 +8,24 @@ use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
 class ApiClientUserProvider implements UserProviderInterface
 {
     /**
-     * @var UnitedCMSManager $unitedCMSManager
+     * @var UniteCMSManager $uniteCMSManager
      */
-    private $unitedCMSManager;
+    private $uniteCMSManager;
 
     /**
      * @var EntityManager $entityManager
      */
     private $entityManager;
 
-    public function __construct(UnitedCMSManager $unitedCMSManager, EntityManager $entityManager)
+    public function __construct(UniteCMSManager $uniteCMSManager, EntityManager $entityManager)
     {
-        $this->unitedCMSManager = $unitedCMSManager;
+        $this->uniteCMSManager = $uniteCMSManager;
         $this->entityManager = $entityManager;
     }
 
@@ -43,7 +43,7 @@ class ApiClientUserProvider implements UserProviderInterface
      */
     public function loadUserByUsername($username)
     {
-        if(($domain = $this->unitedCMSManager->getDomain()) && ($token = $this->entityManager->getRepository('UnitedCMSCoreBundle:ApiClient')->findOneBy([
+        if(($domain = $this->uniteCMSManager->getDomain()) && ($token = $this->entityManager->getRepository('UniteCMSCoreBundle:ApiClient')->findOneBy([
             'token' => $username,
             'domain' => $domain,
         ]))) {

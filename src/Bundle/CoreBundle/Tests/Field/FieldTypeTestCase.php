@@ -1,14 +1,14 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Field;
+namespace UniteCMS\CoreBundle\Tests\Field;
 
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\CoreBundle\Entity\SettingTypeField;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\SettingTypeField;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 abstract class FieldTypeTestCase extends DatabaseAwareTestCase
 {

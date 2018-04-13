@@ -6,13 +6,13 @@
  * Time: 15:12
  */
 
-namespace UnitedCMS\CoreBundle\Tests\Command;
+namespace UniteCMS\CoreBundle\Tests\Command;
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
-use UnitedCMS\CoreBundle\Command\CreatePlatformAdminCommand;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Command\CreatePlatformAdminCommand;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
 {
@@ -27,10 +27,10 @@ class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
         $command->disableHidePasswordInput();
         $application->add($command);
 
-        $command = $application->find('united:user:create');
+        $command = $application->find('unite:user:create');
         $commandTester = new CommandTester($command);
 
-        $this->assertCount(0, $this->em->getRepository('UnitedCMSCoreBundle:User')->findAll());
+        $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:User')->findAll());
 
         $firstName = $this->generateRandomMachineName(10);
         $lastName = $this->generateRandomMachineName(10);
@@ -44,7 +44,7 @@ class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
         $this->assertContains('Platform Admin was created!', $commandTester->getDisplay());
 
         // Verify creation
-        $users = $this->em->getRepository('UnitedCMSCoreBundle:User')->findAll();
+        $users = $this->em->getRepository('UniteCMSCoreBundle:User')->findAll();
         $this->assertCount(1, $users);
         $this->assertEquals($firstName, $users[0]->getFirstname());
         $this->assertEquals($lastName, $users[0]->getLastname());
@@ -57,6 +57,6 @@ class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
         $commandTester->setInputs(array($firstName, $lastName, $email, $password, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
         $this->assertContains('There was an error while creating the user', $commandTester->getDisplay());
-        $this->assertCount(1, $this->em->getRepository('UnitedCMSCoreBundle:User')->findAll());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:User')->findAll());
     }
 }

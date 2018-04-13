@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,7 +11,7 @@ use JMS\Serializer\Annotation\Accessor;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 
 /**
  * Domain
@@ -52,7 +52,7 @@ class Domain
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
      * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UnitedCMS\CoreBundle\Entity\Domain::RESERVED_IDENTIFIERS")
+     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Domain::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -74,16 +74,16 @@ class Domain
     /**
      * @var Organization
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\Organization", inversedBy="domains")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="domains")
      */
     private $organization;
 
     /**
      * @var ContentType[]
-     * @Type("ArrayCollection<UnitedCMS\CoreBundle\Entity\ContentType>")
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\ContentType>")
      * @Accessor(getter="getContentTypes",setter="setContentTypes")
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\ContentType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
      */
@@ -91,10 +91,10 @@ class Domain
 
     /**
      * @var SettingType[]
-     * @Type("ArrayCollection<UnitedCMS\CoreBundle\Entity\SettingType>")
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\SettingType>")
      * @Accessor(getter="getSettingTypes",setter="setSettingTypes")
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\SettingType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
      */
@@ -104,21 +104,21 @@ class Domain
      * @var DomainMember[]
      * @Assert\Valid()
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $users;
 
     /**
      * @var DomainInvitation[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domain", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domain", fetch="EXTRA_LAZY")
      */
     private $invites;
 
     /**
      * @var ApiClient[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\ApiClient", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\ApiClient", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $apiClients;
 
@@ -181,7 +181,7 @@ class Domain
      * @param Domain $domain
      * @param bool $objects , return keys or objects
      *
-     * @return \UnitedCMS\CoreBundle\Entity\SettingType[]
+     * @return \UniteCMS\CoreBundle\Entity\SettingType[]
      */
     public function getSettingTypesDiff(Domain $domain, $objects = false)
     {

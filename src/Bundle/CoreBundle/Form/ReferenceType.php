@@ -6,7 +6,7 @@
  * Time: 15:07
  */
 
-namespace UnitedCMS\CoreBundle\Form;
+namespace UniteCMS\CoreBundle\Form;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -17,7 +17,7 @@ class ReferenceType extends WebComponentType implements DataTransformerInterface
      * {@inheritdoc}
      */
     public function getBlockPrefix() {
-        return 'united_cms_core_reference';
+        return 'unite_cms_core_reference';
     }
 
     /**
@@ -30,7 +30,7 @@ class ReferenceType extends WebComponentType implements DataTransformerInterface
     public function configureOptions(OptionsResolver $resolver) {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'tag' => 'united-cms-core-reference-field',
+            'tag' => 'unite-cms-core-reference-field',
             'empty_data' => [
                 'domain' => null,
                 'content_type' => null,

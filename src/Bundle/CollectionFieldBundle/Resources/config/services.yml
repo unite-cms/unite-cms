@@ -1,11 +1,11 @@
 services:
 
   # A collection input field that allows to add multiple, repeatable sub fields
-  UnitedCMS\CollectionFieldBundle\Field\Types\CollectionFieldType:
-    tags: [united_cms.field_type]
-    arguments: ['@validator', '@united.cms.collection_field.collection_field_type_factory', '@united.cms.field_type_manager' ]
+  UniteCMS\CollectionFieldBundle\Field\Types\CollectionFieldType:
+    tags: [unite_cms.field_type]
+    arguments: ['@validator', '@unite.cms.collection_field.collection_field_type_factory', '@unite.cms.field_type_manager' ]
 
 
-  united.cms.collection_field.collection_field_type_factory:
-    class: UnitedCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory
-    arguments: ['@united.cms.field_type_manager']
+  unite.cms.collection_field.collection_field_type_factory:
+    class: UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory
+    arguments: ['@unite.cms.field_type_manager']

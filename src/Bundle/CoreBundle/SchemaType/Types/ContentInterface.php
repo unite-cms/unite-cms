@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Types;
+namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class ContentInterface extends InterfaceType
 {

@@ -6,7 +6,7 @@
  * Time: 11:28
  */
 
-namespace UnitedCMS\CoreBundle\SchemaType;
+namespace UniteCMS\CoreBundle\SchemaType;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -17,13 +17,13 @@ class SchemaTypeCompilerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         // always first check if the primary service is defined
-        if (!$container->has('united.cms.graphql.schema_type_manager')) {
+        if (!$container->has('unite.cms.graphql.schema_type_manager')) {
             return;
         }
 
-        $definition = $container->findDefinition('united.cms.graphql.schema_type_manager');
-        $taggedServices = $container->findTaggedServiceIds('united_cms.graphql.schema_type');
-        $taggedFactoryServices = $container->findTaggedServiceIds('united_cms.graphql.schema_type_factory');
+        $definition = $container->findDefinition('unite.cms.graphql.schema_type_manager');
+        $taggedServices = $container->findTaggedServiceIds('unite_cms.graphql.schema_type');
+        $taggedFactoryServices = $container->findTaggedServiceIds('unite_cms.graphql.schema_type_factory');
 
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('registerSchemaType', array(new Reference($id)));

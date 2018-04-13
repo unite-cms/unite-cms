@@ -1,17 +1,17 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\View\Types;
+namespace UniteCMS\CoreBundle\View\Types;
 
 use Doctrine\ORM\Query\QueryException;
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
-use UnitedCMS\CoreBundle\View\ViewSettings;
-use UnitedCMS\CoreBundle\View\ViewType;
+use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
+use UniteCMS\CoreBundle\View\ViewSettings;
+use UniteCMS\CoreBundle\View\ViewType;
 
 class TableViewType extends ViewType
 {
     const TYPE = "table";
-    const TEMPLATE = "UnitedCMSCoreBundle:Views:Table/index.html.twig";
+    const TEMPLATE = "UniteCMSCoreBundle:Views:Table/index.html.twig";
 
     const SETTINGS = [
         'columns',

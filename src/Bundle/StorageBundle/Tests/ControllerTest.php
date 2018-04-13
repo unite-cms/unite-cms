@@ -6,7 +6,7 @@
  * Time: 09:19
  */
 
-namespace UnitedCMS\StorageBundle\Tests;
+namespace UniteCMS\StorageBundle\Tests;
 
 use Aws\S3\S3Client;
 use Symfony\Component\BrowserKit\Cookie;
@@ -14,15 +14,15 @@ use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
-use UnitedCMS\StorageBundle\Form\PreSignFormType;
-use UnitedCMS\StorageBundle\Model\PreSignedUrl;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\StorageBundle\Form\PreSignFormType;
+use UniteCMS\StorageBundle\Model\PreSignedUrl;
 
 class ControllerTest extends DatabaseAwareTestCase {
 
@@ -132,7 +132,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->em->persist($this->org1);
     $this->em->flush($this->org1);
 
-    $this->domain1 = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+    $this->domain1 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
     $this->domain1->setOrganization($this->org1);
     $this->em->persist($this->domain1);
     $this->em->flush($this->domain1);
@@ -165,7 +165,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       $this->em->persist($apiClient);
       $this->em->flush($apiClient);
 
-      $route_uri = $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
+      $route_uri = $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
            'domain' => $this->domain1->getIdentifier(),
            'organization' => $this->org1->getIdentifier(),
            'content_type' => 'ct1',
@@ -198,7 +198,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       $this->client->setServerParameter('HTTP_Authentication-Fallback', true);
 
     // Try to access with invalid method.
-    $baseUrl = $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']);
+    $baseUrl = $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']);
     $this->client->request('GET', $baseUrl);
     $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
     $this->client->request('PUT', $baseUrl);
@@ -206,7 +206,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->client->request('DELETE', $baseUrl);
     $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
 
-    $baseUrl = $this->container->get('router')->generate('unitedcms_storage_sign_uploadsettingtype', ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo']);
+    $baseUrl = $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo']);
     $this->client->request('GET', $baseUrl);
     $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
     $this->client->request('PUT', $baseUrl);
@@ -221,7 +221,7 @@ class ControllerTest extends DatabaseAwareTestCase {
       ['organization' => $this->org1->getIdentifier(), 'domain' => $this->domain1->getIdentifier(), 'content_type' => 'foo'],
     ] as $params) {
 
-      $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', $params), []);
+      $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params), []);
       $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
@@ -230,19 +230,19 @@ class ControllerTest extends DatabaseAwareTestCase {
               ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'setting_type' => 'foo'],
               ['organization' => $this->org1->getIdentifier(), 'domain' => $this->domain1->getIdentifier(), 'setting_type' => 'foo'],
             ] as $params) {
-      $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadsettingtype', $params), []);
+      $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params), []);
       $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
     // Try to pre sign without CREATE permission.
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct2',
     ]));
     $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadsettingtype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st2',
@@ -250,7 +250,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
     // Try to pre sign for invalid content type field.
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
@@ -260,7 +260,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
     // Try to pre sign for invalid setting type field.
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadsettingtype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
@@ -270,7 +270,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
     // Try to pre sign for invalid content type nested field.
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
@@ -279,7 +279,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
@@ -289,7 +289,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
     // Try to pre sign for invalid setting type nested field.
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadsettingtype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
@@ -298,7 +298,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadsettingtype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
@@ -308,7 +308,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
     // Try to pre sign invalid file type.
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
@@ -320,7 +320,7 @@ class ControllerTest extends DatabaseAwareTestCase {
     ]);
     $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadsettingtype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',
@@ -334,7 +334,7 @@ class ControllerTest extends DatabaseAwareTestCase {
 
     // Try to pre sign filename with special chars.
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadcontenttype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'content_type' => 'ct1',
@@ -379,7 +379,7 @@ class ControllerTest extends DatabaseAwareTestCase {
 
     $this->assertEquals($actualParts[0], $generatedParts[0]);
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitedcms_storage_sign_uploadsettingtype', [
+    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
       'organization' => $this->org1->getIdentifier(),
       'domain' => $this->domain1->getIdentifier(),
       'setting_type' => 'st1',

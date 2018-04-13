@@ -1,8 +1,8 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Field;
+namespace UniteCMS\CoreBundle\Tests\Field;
 
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class TextFieldTypeTest extends FieldTypeTestCase
 {

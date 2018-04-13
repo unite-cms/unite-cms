@@ -1,10 +1,10 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Factories;
+namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
 use GraphQL\Type\Definition\Type;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 interface SchemaTypeFactoryInterface {
 

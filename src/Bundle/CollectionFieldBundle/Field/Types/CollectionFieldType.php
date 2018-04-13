@@ -1,25 +1,25 @@
 <?php
 
-namespace UnitedCMS\CollectionFieldBundle\Field\Types;
+namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use UnitedCMS\CollectionFieldBundle\Form\CollectionFormType;
-use UnitedCMS\CollectionFieldBundle\Model\Collection;
-use UnitedCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Field\NestableFieldTypeInterface;
-use UnitedCMS\CoreBundle\Form\FieldableFormField;
-use UnitedCMS\CoreBundle\Form\FieldableFormType;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
+use UniteCMS\CollectionFieldBundle\Model\Collection;
+use UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
+use UniteCMS\CoreBundle\Form\FieldableFormField;
+use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class CollectionFieldType extends FieldType implements NestableFieldTypeInterface
 {

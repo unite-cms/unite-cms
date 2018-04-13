@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Controller;
+namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -18,7 +18,7 @@ class AuthenticationController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitedcms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_organizations');
         }
 
         // get the login error if there is one
@@ -28,7 +28,7 @@ class AuthenticationController extends Controller
         $lastUsername = $this->get('security.authentication_utils')->getLastUsername();
 
         return $this->render(
-            'UnitedCMSCoreBundle:Authentication:login.html.twig',
+            'UniteCMSCoreBundle:Authentication:login.html.twig',
             array(
                 'last_username' => $lastUsername,
                 'error' => $error,

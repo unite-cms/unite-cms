@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests;
+namespace UniteCMS\CoreBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Constraint;

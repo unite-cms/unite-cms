@@ -1,7 +1,7 @@
-united CMS API documentation
+unite CMS API documentation
 ============================
 
-To get content out of united CMS developers can consume the graphQL API at: 
+To get content out of unite CMS developers can consume the graphQL API at: 
 
     https://yourdomain.com/{organization}/{domain}/api
 
@@ -9,14 +9,14 @@ Or if you are using the subdomain-approach:
 
     https://{organization}.yourdomain.com/{domain}/api
     
-Note, that united CMS do not use API version numbers. This is because of the flexibility of GraphQL.  
+Note, that unite CMS do not use API version numbers. This is because of the flexibility of GraphQL.  
 
-At the root leve, united CMS supports two types of operations: **query** to get data and **mutation** to create, update 
+At the root leve, unite CMS supports two types of operations: **query** to get data and **mutation** to create, update 
 or delete data.
 
 ## querying data
 
-The following example shows how to get content and settings from an united CMS domain with a content type *News* and a 
+The following example shows how to get content and settings from an unite CMS domain with a content type *News* and a 
 setting type *General*. To find a single news article you can simply use: 
 
     query {
@@ -32,7 +32,7 @@ setting type *General*. To find a single news article you can simply use:
         }
     }
 
-This returns an instance of Type *UnitedCMS\GraphQLBundle\SchemaType\Types\ContentInterface*. If you want to get a list of 
+This returns an instance of Type *UniteCMS\GraphQLBundle\SchemaType\Types\ContentInterface*. If you want to get a list of 
 content you can use:
 
     query {
@@ -47,7 +47,7 @@ content you can use:
         }
     }
     
-Which returns an instance of Type *UnitedCMS\GraphQLBundle\SchemaType\Types\ContentResultType*. findNews also except 
+Which returns an instance of Type *UniteCMS\GraphQLBundle\SchemaType\Types\ContentResultType*. findNews also except 
 one or more of the following optional parameters to filter the result: 
 
     findNews(
@@ -72,7 +72,7 @@ one or more of the following optional parameters to filter the result:
         ...
     }
 
-The united CMS API also supports getting content from different content types within a single search. The next example
+The unite CMS API also supports getting content from different content types within a single search. The next example
 shows how we could get a list of recent News and Event content that gets ordered by date:
 
     query {
@@ -129,7 +129,7 @@ Finally, by using the API you can get your setting data. In this example for the
 
 ### Implementation reference
 
-A list of all query types under the namespace *UnitedCMS\GraphQLBundle\SchemaType\Types* and their response:
+A list of all query types under the namespace *UniteCMS\GraphQLBundle\SchemaType\Types* and their response:
 
 - **query**: QueryType
 - **find**: ContentResultType, implementation of: ContentResultInterface

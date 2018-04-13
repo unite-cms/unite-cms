@@ -6,7 +6,7 @@
  * Time: 11:44
  */
 
-namespace UnitedCMS\StorageBundle\SchemaType;
+namespace UniteCMS\StorageBundle\SchemaType;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type;
@@ -36,7 +36,7 @@ class StorageFileInputType extends InputObjectType
               ],
               'checksum' => [
                 'type' => Type::nonNull(Type::string()),
-                'description' => 'A checksum for uuid and filename, created by united CMS.',
+                'description' => 'A checksum for uuid and filename, created by unite CMS.',
               ],
             ],
           ]

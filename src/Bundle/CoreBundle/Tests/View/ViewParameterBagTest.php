@@ -1,16 +1,16 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\View;
+namespace UniteCMS\CoreBundle\Tests\View;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RequestContext;
-use UnitedCMS\CoreBundle\View\ViewParameterBag;
-use UnitedCMS\CoreBundle\View\ViewTypeInterface;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\View\ViewParameterBag;
+use UniteCMS\CoreBundle\View\ViewTypeInterface;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
 
 class ViewParameterBagTest extends TestCase
 {
@@ -96,14 +96,14 @@ class ViewParameterBagTest extends TestCase
         };
         $this->assertEquals(json_encode([
             'urls' => [
-                'api' => 'unitedcms_core_api_d1,o1',
-                'create' => 'unitedcms_core_content_create_d1,o1,co1,ct1',
-                'update' => 'unitedcms_core_content_update_d1,o1,co1,ct1,__id__',
-                'delete' => 'unitedcms_core_content_delete_d1,o1,co1,ct1,__id__',
-                'recover' => 'unitedcms_core_content_recover_d1,o1,co1,ct1,__id__',
-                'delete_definitely' => 'unitedcms_core_content_deletedefinitely_d1,o1,co1,ct1,__id__',
-                'translations' => 'unitedcms_core_content_translations_d1,o1,co1,ct1,__id__',
-                'revisions' => 'unitedcms_core_content_revisions_d1,o1,co1,ct1,__id__',
+                'api' => 'unitecms_core_api_d1,o1',
+                'create' => 'unitecms_core_content_create_d1,o1,co1,ct1',
+                'update' => 'unitecms_core_content_update_d1,o1,co1,ct1,__id__',
+                'delete' => 'unitecms_core_content_delete_d1,o1,co1,ct1,__id__',
+                'recover' => 'unitecms_core_content_recover_d1,o1,co1,ct1,__id__',
+                'delete_definitely' => 'unitecms_core_content_deletedefinitely_d1,o1,co1,ct1,__id__',
+                'translations' => 'unitecms_core_content_translations_d1,o1,co1,ct1,__id__',
+                'revisions' => 'unitecms_core_content_revisions_d1,o1,co1,ct1,__id__',
             ],
             'select' => [
                 'mode' => ViewTypeInterface::SELECT_MODE_SINGLE,

@@ -1,9 +1,9 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\View;
+namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use UnitedCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\View;
 
 class ViewParameterBag implements \JsonSerializable
 {
@@ -75,23 +75,23 @@ class ViewParameterBag implements \JsonSerializable
             'domain' => $view->getContentType()->getDomain()->getIdentifier(),
             'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
         ];
-        $bag->setApiEndpointPattern($generator->generate('unitedcms_core_api', $urlParameter));
+        $bag->setApiEndpointPattern($generator->generate('unitecms_core_api', $urlParameter));
 
         $urlParameter['view'] = $view->getIdentifier();
         $urlParameter['content_type'] = $view->getContentType()->getIdentifier();
-        $bag->setCreateUrlPattern($generator->generate('unitedcms_core_content_create', $urlParameter));
+        $bag->setCreateUrlPattern($generator->generate('unitecms_core_content_create', $urlParameter));
 
         $urlParameter['content'] = '__id__';
-        $bag->setUpdateUrlPattern($generator->generate('unitedcms_core_content_update', $urlParameter));
-        $bag->setDeleteUrlPattern($generator->generate('unitedcms_core_content_delete', $urlParameter));
-        $bag->setRecoverUrlPattern($generator->generate('unitedcms_core_content_recover', $urlParameter));
-        $bag->setDeleteDefinitelyUrlPattern($generator->generate('unitedcms_core_content_deletedefinitely', $urlParameter));
+        $bag->setUpdateUrlPattern($generator->generate('unitecms_core_content_update', $urlParameter));
+        $bag->setDeleteUrlPattern($generator->generate('unitecms_core_content_delete', $urlParameter));
+        $bag->setRecoverUrlPattern($generator->generate('unitecms_core_content_recover', $urlParameter));
+        $bag->setDeleteDefinitelyUrlPattern($generator->generate('unitecms_core_content_deletedefinitely', $urlParameter));
 
         if(count($view->getContentType()->getLocales()) > 1) {
-            $bag->setTranslationsUrlPattern($generator->generate('unitedcms_core_content_translations', $urlParameter));
+            $bag->setTranslationsUrlPattern($generator->generate('unitecms_core_content_translations', $urlParameter));
         }
 
-        $bag->setRevisionsUrlPattern($generator->generate('unitedcms_core_content_revisions', $urlParameter));
+        $bag->setRevisionsUrlPattern($generator->generate('unitecms_core_content_revisions', $urlParameter));
 
         $bag->setSelectMode($select_mode);
         return $bag;

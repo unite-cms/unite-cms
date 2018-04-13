@@ -6,10 +6,10 @@
  * Time: 15:07
  */
 
-namespace UnitedCMS\StorageBundle\Form;
+namespace UniteCMS\StorageBundle\Form;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use UnitedCMS\CoreBundle\Form\WebComponentType;
+use UniteCMS\CoreBundle\Form\WebComponentType;
 
 class StorageFileType extends WebComponentType
 {
@@ -17,7 +17,7 @@ class StorageFileType extends WebComponentType
      * {@inheritdoc}
      */
     public function getBlockPrefix() {
-        return 'united_cms_storage_file';
+        return 'unite_cms_storage_file';
     }
 
     /**
@@ -30,7 +30,7 @@ class StorageFileType extends WebComponentType
     public function configureOptions(OptionsResolver $resolver) {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'tag' => 'united-cms-storage-file-field',
+            'tag' => 'unite-cms-storage-file-field',
             'file-types' => '*',
         ]);
         $resolver->setRequired(['file-types']);

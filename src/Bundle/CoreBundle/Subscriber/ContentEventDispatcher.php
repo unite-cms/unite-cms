@@ -6,13 +6,13 @@
  * Time: 13:12
  */
 
-namespace UnitedCMS\CoreBundle\Subscriber;
+namespace UniteCMS\CoreBundle\Subscriber;
 
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class ContentEventDispatcher
 {

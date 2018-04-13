@@ -1,15 +1,15 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Field\Types;
+namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class SortIndexFieldType extends FieldType
 {
@@ -48,7 +48,7 @@ class SortIndexFieldType extends FieldType
             if($originalPosition !== null && $originalPosition > $updatedPosition) {
 
                 $repository->createQueryBuilder('c')
-                    ->update('UnitedCMSCoreBundle:Content', 'c')
+                    ->update('UniteCMSCoreBundle:Content', 'c')
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) +1 AS int))")
                     ->where('c.contentType = :contentType')
                     ->andWhere("JSON_EXTRACT(c.data, :identifier) BETWEEN :first AND :last")
@@ -66,7 +66,7 @@ class SortIndexFieldType extends FieldType
             if($originalPosition !== null && $originalPosition < $updatedPosition) {
 
                 $repository->createQueryBuilder('c')
-                    ->update('UnitedCMSCoreBundle:Content', 'c')
+                    ->update('UniteCMSCoreBundle:Content', 'c')
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) -1 AS int))")
                     ->where('c.contentType = :contentType')
                     ->andWhere("JSON_EXTRACT(c.data, :identifier) BETWEEN :first AND :last")
@@ -83,7 +83,7 @@ class SortIndexFieldType extends FieldType
             if($originalPosition === null) {
 
                 $repository->createQueryBuilder('c')
-                    ->update('UnitedCMSCoreBundle:Content', 'c')
+                    ->update('UniteCMSCoreBundle:Content', 'c')
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) +1 AS int))")
                     ->where('c.contentType = :contentType')
                     ->andWhere("JSON_EXTRACT(c.data, :identifier) >= :first")
@@ -102,7 +102,7 @@ class SortIndexFieldType extends FieldType
 
         // all content after the deleted one should get --.
         $repository->createQueryBuilder('c')
-            ->update('UnitedCMSCoreBundle:Content', 'c')
+            ->update('UniteCMSCoreBundle:Content', 'c')
             ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) -1 AS int))")
             ->where('c.contentType = :contentType')
             ->andWhere("JSON_EXTRACT(c.data, :identifier) > :last")

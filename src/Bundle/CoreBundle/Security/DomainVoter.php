@@ -6,15 +6,15 @@
  * Time: 09:15
  */
 
-namespace UnitedCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\User;
 
 class DomainVoter extends Voter
 {
@@ -65,7 +65,7 @@ class DomainVoter extends Voter
             return $this->checkPermission($attribute, $token->getRoles());
         }
 
-        // This voter can decide all permissions for united users.
+        // This voter can decide all permissions for unite users.
         if (!$token->getUser() instanceof User) {
             return self::ACCESS_ABSTAIN;
         }

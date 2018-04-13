@@ -2,40 +2,40 @@
 services:
 
   # You can get the current organization and domain from this service, based on request information (like the path).
-  united.cms.manager:
-    class: UnitedCMS\CoreBundle\Service\UnitedCMSManager
+  unite.cms.manager:
+    class: UniteCMS\CoreBundle\Service\UniteCMSManager
     arguments: ['@doctrine.orm.entity_manager', '@request_stack']
     public: true
 
 
   # You can get all registered field types from this service and validate field settings and field data.
-  united.cms.field_type_manager:
-    class: UnitedCMS\CoreBundle\Field\FieldTypeManager
+  unite.cms.field_type_manager:
+    class: UniteCMS\CoreBundle\Field\FieldTypeManager
     public: true
 
 
   # You can get all registered view types from this service.
-  united.cms.view_type_manager:
-    class: UnitedCMS\CoreBundle\View\ViewTypeManager
+  unite.cms.view_type_manager:
+    class: UniteCMS\CoreBundle\View\ViewTypeManager
     arguments: ['@router.default']
     public: true
 
 
   # Parses and serializes a domain object. This service is used to create a domain object from the JSON definition.
-  united.cms.domain_definition_parser:
-    class: UnitedCMS\CoreBundle\Service\DomainDefinitionParser
+  unite.cms.domain_definition_parser:
+    class: UniteCMS\CoreBundle\Service\DomainDefinitionParser
     arguments: ['@jms_serializer', '@validator']
     public: true
 
 
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
-  united.cms.fieldable_form_builder:
-    class: UnitedCMS\CoreBundle\Form\FieldableFormBuilder
-    arguments: ['@form.factory', '@united.cms.field_type_manager']
+  unite.cms.fieldable_form_builder:
+    class: UniteCMS\CoreBundle\Form\FieldableFormBuilder
+    arguments: ['@form.factory', '@unite.cms.field_type_manager']
     public: true
 
   # Provide FieldableFormType form as a service, pass tokenstorage as an argument, auto wire not working in forms
-  united.cms.fieldable_form_type:
-    class: UnitedCMS\CoreBundle\Form\FieldableFormType
+  unite.cms.fieldable_form_type:
+    class: UniteCMS\CoreBundle\Form\FieldableFormType
     arguments: ['@security.token_storage']
     tags: [form.type]

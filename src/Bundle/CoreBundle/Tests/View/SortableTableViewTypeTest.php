@@ -1,14 +1,14 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\View;
+namespace UniteCMS\CoreBundle\Tests\View;
 
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\View\ViewSettings;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\View\ViewSettings;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class SortableTableViewTypeTest extends DatabaseAwareTestCase
 {
@@ -50,7 +50,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertCount(0, $this->container->get('validator')->validate($view));
 
         // Test templateRenderParameters.
-        $parameters = $this->container->get('united.cms.view_type_manager')->getTemplateRenderParameters($view);
+        $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals([
             'created' => 'Created',
@@ -126,7 +126,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertCount(0, $this->container->get('validator')->validate($view));
 
         // Test templateRenderParameters.
-        $parameters = $this->container->get('united.cms.view_type_manager')->getTemplateRenderParameters($view);
+        $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals([
             'id' => 'ID',

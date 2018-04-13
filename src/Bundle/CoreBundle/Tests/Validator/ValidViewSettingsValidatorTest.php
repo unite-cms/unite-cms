@@ -1,15 +1,15 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\View\ViewSettings;
-use UnitedCMS\CoreBundle\View\ViewTypeManager;
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidViewSettings;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidViewSettingsValidator;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\View\ViewSettings;
+use UniteCMS\CoreBundle\View\ViewTypeManager;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidViewSettings;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidViewSettingsValidator;
 
 class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
 {
@@ -17,7 +17,7 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The ValidViewSettingsValidator constraint expects a UnitedCMS\CoreBundle\View\ViewSettings value.
+     * @expectedExceptionMessage The ValidViewSettingsValidator constraint expects a UniteCMS\CoreBundle\View\ViewSettings value.
      */
     public function testNonContentValue() {
         // Create validator with mocked ViewTypeManager.
@@ -29,7 +29,7 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The ValidViewSettingsValidator constraint expects a UnitedCMS\CoreBundle\Entity\View object.
+     * @expectedExceptionMessage The ValidViewSettingsValidator constraint expects a UniteCMS\CoreBundle\Entity\View object.
      */
     public function testNonContextObject() {
         // Create validator with mocked ViewTypeManager.

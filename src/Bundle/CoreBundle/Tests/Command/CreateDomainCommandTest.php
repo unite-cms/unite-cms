@@ -6,13 +6,13 @@
  * Time: 15:12
  */
 
-namespace UnitedCMS\CoreBundle\Tests\Command;
+namespace UniteCMS\CoreBundle\Tests\Command;
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
-use UnitedCMS\CoreBundle\Command\CreateDomainCommand;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Command\CreateDomainCommand;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class CreateDomainCommandTest extends DatabaseAwareTestCase
 {
@@ -24,10 +24,10 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $application->add(new CreateDomainCommand(
             $this->container->get('doctrine.orm.default_entity_manager'),
             $this->container->get('validator'),
-            $this->container->get('united.cms.domain_definition_parser')
+            $this->container->get('unite.cms.domain_definition_parser')
         ));
 
-        $command = $application->find('united:domain:create');
+        $command = $application->find('unite:domain:create');
         $commandTester = new CommandTester($command);
 
         $organization = new Organization();
@@ -36,9 +36,9 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $this->em->persist($organization);
         $this->em->flush();
 
-        $this->assertCount(0, $this->em->getRepository('UnitedCMSCoreBundle:Domain')->findAll());
+        $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
 
-        $inputDomain = $this->container->get('united.cms.domain_definition_parser')->parse($this->validDomain);
+        $inputDomain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->validDomain);
         $commandTester->setInputs(array('0', $this->validDomain, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
 
@@ -46,7 +46,7 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $this->assertContains('Domain was created successfully!', $commandTester->getDisplay());
 
         // Verify creation
-        $domains = $this->em->getRepository('UnitedCMSCoreBundle:Domain')->findAll();
+        $domains = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll();
         $this->assertCount(1, $domains);
         $this->assertEquals($inputDomain->getTitle(), $domains[0]->getTitle());
         $this->assertEquals($inputDomain->getIdentifier(), $domains[0]->getIdentifier());
@@ -57,6 +57,6 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $commandTester->setInputs(array('0', $this->validDomain, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
         $this->assertContains('There was an error while creating the domain', $commandTester->getDisplay());
-        $this->assertCount(1, $this->em->getRepository('UnitedCMSCoreBundle:Domain')->findAll());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
     }
 }

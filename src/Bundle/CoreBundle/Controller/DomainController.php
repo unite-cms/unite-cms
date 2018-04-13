@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Controller;
+namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -13,9 +13,9 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolationList;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Form\WebComponentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Form\WebComponentType;
 
 class DomainController extends Controller
 {
@@ -23,7 +23,7 @@ class DomainController extends Controller
      * @Route("/")
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::VIEW'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::VIEW'), organization)")
      *
      * @param Organization $organization
      * @param Request $request
@@ -34,7 +34,7 @@ class DomainController extends Controller
         $domains = $organization->getDomains();
 
         return $this->render(
-            'UnitedCMSCoreBundle:Domain:index.html.twig',
+            'UniteCMSCoreBundle:Domain:index.html.twig',
             ['organization' => $organization, 'domains' => $domains]
         );
     }
@@ -43,7 +43,7 @@ class DomainController extends Controller
      * @Route("/create")
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @param Request $request
@@ -55,12 +55,12 @@ class DomainController extends Controller
         $domain->setTitle('Untitled Domain')->setIdentifier('untitled');
         $form = $this->createFormBuilder(
             [
-                'definition' => $this->get('united.cms.domain_definition_parser')->serialize($domain),
+                'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
             ]
         )
             ->add(
                 'definition',
-                WebComponentType::class, ['tag' => 'united-cms-core-domaineditor']
+                WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor']
             )->getForm()
             ->add('submit', SubmitType::class, ['attr' => ['class' => 'uk-button uk-button-primary']]);
         $form->handleRequest($request);
@@ -70,7 +70,7 @@ class DomainController extends Controller
             $domain = null;
 
             try {
-                $domain = $this->get('united.cms.domain_definition_parser')->parse($form->getData()['definition']);
+                $domain = $this->get('unite.cms.domain_definition_parser')->parse($form->getData()['definition']);
             } catch (\Exception $e) {
                 $form->get('definition')->addError(new FormError('Could not parse domain definition JSON.'));
             }
@@ -85,7 +85,7 @@ class DomainController extends Controller
                     $this->getDoctrine()->getManager()->flush();
 
                     return $this->redirectToRoute(
-                        'unitedcms_core_domain_view',
+                        'unitecms_core_domain_view',
                         [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),
@@ -100,7 +100,7 @@ class DomainController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Domain:create.html.twig',
+            'UniteCMSCoreBundle:Domain:create.html.twig',
             ['organization' => $organization, 'form' => $form->createView()]
         );
     }
@@ -110,7 +110,7 @@ class DomainController extends Controller
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -122,7 +122,7 @@ class DomainController extends Controller
         $settingTypes = $domain->getSettingTypes();
 
         return $this->render(
-            'UnitedCMSCoreBundle:Domain:view.html.twig',
+            'UniteCMSCoreBundle:Domain:view.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -137,7 +137,7 @@ class DomainController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -148,12 +148,12 @@ class DomainController extends Controller
     {
         $form = $this->createFormBuilder(
             [
-                'definition' => $this->get('united.cms.domain_definition_parser')->serialize($domain),
+                'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
             ]
         )
             ->add(
                 'definition',
-                WebComponentType::class, ['tag' => 'united-cms-core-domaineditor']
+                WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor']
             )->getForm()
             ->add('submit', SubmitType::class, ['attr' => ['class' => 'uk-button uk-button-primary']]);
         $form->handleRequest($request);
@@ -161,7 +161,7 @@ class DomainController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             try {
-                $updatedDomain = $this->get('united.cms.domain_definition_parser')->parse(
+                $updatedDomain = $this->get('unite.cms.domain_definition_parser')->parse(
                     $form->getData()['definition']
                 );
             } catch (\Exception $e) {
@@ -188,7 +188,7 @@ class DomainController extends Controller
                     $this->getDoctrine()->getManager()->flush();
 
                     return $this->redirectToRoute(
-                        'unitedcms_core_domain_view',
+                        'unitecms_core_domain_view',
                         [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),
@@ -203,7 +203,7 @@ class DomainController extends Controller
             }
         }
 
-        return $this->render('UnitedCMSCoreBundle:Domain:update.html.twig', ['form' => $form->createView()]);
+        return $this->render('UniteCMSCoreBundle:Domain:update.html.twig', ['form' => $form->createView()]);
     }
 
     /**
@@ -211,7 +211,7 @@ class DomainController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::DELETE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::DELETE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -230,7 +230,7 @@ class DomainController extends Controller
                 $this->getDoctrine()->getManager()->flush();
 
                 return $this->redirectToRoute(
-                    'unitedcms_core_domain_index',
+                    'unitecms_core_domain_index',
                     [
                         'organization' => $organization->getIdentifier(),
                     ]
@@ -241,7 +241,7 @@ class DomainController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Domain:delete.html.twig',
+            'UniteCMSCoreBundle:Domain:delete.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,

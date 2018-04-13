@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Controller;
+namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -11,8 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 
 class OrganizationUserController extends Controller
 {
@@ -20,7 +20,7 @@ class OrganizationUserController extends Controller
      * @Route("/")
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @return Response
@@ -30,7 +30,7 @@ class OrganizationUserController extends Controller
         $users = $this->get('knp_paginator')->paginate($organization->getUsers());
 
         return $this->render(
-            'UnitedCMSCoreBundle:Organization/User:index.html.twig',
+            'UniteCMSCoreBundle:Organization/User:index.html.twig',
             [
                 'organization' => $organization,
                 'users' => $users,
@@ -43,7 +43,7 @@ class OrganizationUserController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @param OrganizationMember $member
@@ -69,7 +69,7 @@ class OrganizationUserController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitedcms_core_organizationuser_index',
+                'unitecms_core_organizationuser_index',
                 [
                     'organization' => $organization->getIdentifier(),
                 ]
@@ -77,7 +77,7 @@ class OrganizationUserController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Organization/User:update.html.twig',
+            'UniteCMSCoreBundle:Organization/User:update.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),
@@ -91,7 +91,7 @@ class OrganizationUserController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @param OrganizationMember $member
@@ -110,7 +110,7 @@ class OrganizationUserController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitedcms_core_organizationuser_index',
+                'unitecms_core_organizationuser_index',
                 [
                     'organization' => $organization->getIdentifier(),
                 ]
@@ -118,7 +118,7 @@ class OrganizationUserController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Organization/User:delete.html.twig',
+            'UniteCMSCoreBundle:Organization/User:delete.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),

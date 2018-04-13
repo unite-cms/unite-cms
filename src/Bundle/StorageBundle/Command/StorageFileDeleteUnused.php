@@ -6,7 +6,7 @@
  * Time: 11:37
  */
 
-namespace UnitedCMS\StorageBundle\Command;
+namespace UniteCMS\StorageBundle\Command;
 
 use Aws\S3\S3Client;
 use Doctrine\ORM\EntityManager;
@@ -14,13 +14,13 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Field\NestableFieldTypeInterface;
-use UnitedCMS\StorageBundle\Field\Types\FileFieldType;
-use UnitedCMS\StorageBundle\Field\Types\ImageFieldType;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
+use UniteCMS\StorageBundle\Field\Types\FileFieldType;
+use UniteCMS\StorageBundle\Field\Types\ImageFieldType;
 
 class StorageFileDeleteUnused extends Command
 {
@@ -50,7 +50,7 @@ class StorageFileDeleteUnused extends Command
     protected function configure()
     {
         $this
-          ->setName('united:storage:delete-unused')
+          ->setName('unite:storage:delete-unused')
           ->setDescription('Deletes all files from a given s3 bucket, that are not referenced by a file field.')
           ->addOption('force', InputOption::VALUE_OPTIONAL);
     }
@@ -104,14 +104,14 @@ class StorageFileDeleteUnused extends Command
 
             // Find usage for (possible nested) content.
             if($field->getEntity()->getRootEntity() instanceof ContentType) {
-                foreach ($this->em->getRepository('UnitedCMSCoreBundle:Content')->findBy(['contentType' => $field->getEntity()->getRootEntity()]) as $content) {
+                foreach ($this->em->getRepository('UniteCMSCoreBundle:Content')->findBy(['contentType' => $field->getEntity()->getRootEntity()]) as $content) {
                     $buckets[$bucket_path]['files'] = array_merge($buckets[$bucket_path]['files'], $this->findNestedFieldData($content->getData(), $fieldPathParts));
                 }
             }
 
             // Find usage for (possible nested) setting.
             if($field->getEntity()->getRootEntity() instanceof SettingType) {
-                foreach ($this->em->getRepository('UnitedCMSCoreBundle:Setting')->findBy(['settingType' => $field->getEntity()->getRootEntity()]) as $setting) {
+                foreach ($this->em->getRepository('UniteCMSCoreBundle:Setting')->findBy(['settingType' => $field->getEntity()->getRootEntity()]) as $setting) {
                     $buckets[$bucket_path]['files'] = array_merge($buckets[$bucket_path]['files'], $this->findNestedFieldData($setting->getData(), $fieldPathParts));
                 }
             }
@@ -138,12 +138,12 @@ class StorageFileDeleteUnused extends Command
         $this->em->getFilters()->disable('gedmo_softdeleteable');
 
         // Find all content file fields.
-        foreach($this->em->getRepository('UnitedCMSCoreBundle:ContentTypeField')->findBy(['type' => [FileFieldType::TYPE, ImageFieldType::TYPE, 'collection']]) as $field) {
+        foreach($this->em->getRepository('UniteCMSCoreBundle:ContentTypeField')->findBy(['type' => [FileFieldType::TYPE, ImageFieldType::TYPE, 'collection']]) as $field) {
             $this->findNestedFileDefinitions($field, $buckets);
         }
 
         // Find all setting file fields.
-        foreach($this->em->getRepository('UnitedCMSCoreBundle:SettingTypeField')->findBy(['type' => [FileFieldType::TYPE, ImageFieldType::TYPE, 'collection']]) as $field) {
+        foreach($this->em->getRepository('UniteCMSCoreBundle:SettingTypeField')->findBy(['type' => [FileFieldType::TYPE, ImageFieldType::TYPE, 'collection']]) as $field) {
             $this->findNestedFileDefinitions($field, $buckets);
         }
 

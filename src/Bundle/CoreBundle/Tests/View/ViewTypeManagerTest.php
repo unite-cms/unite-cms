@@ -1,16 +1,16 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\View;
+namespace UniteCMS\CoreBundle\Tests\View;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use UnitedCMS\CoreBundle\View\ViewType;
-use UnitedCMS\CoreBundle\View\ViewTypeInterface;
-use UnitedCMS\CoreBundle\View\ViewTypeManager;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\View\ViewType;
+use UniteCMS\CoreBundle\View\ViewTypeInterface;
+use UniteCMS\CoreBundle\View\ViewTypeManager;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
 
 class ViewTypeManagerTest extends TestCase
 {

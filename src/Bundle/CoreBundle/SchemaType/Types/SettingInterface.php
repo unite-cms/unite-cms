@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Types;
+namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class SettingInterface extends InterfaceType
 {

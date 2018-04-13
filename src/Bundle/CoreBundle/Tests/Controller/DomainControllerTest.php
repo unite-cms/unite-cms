@@ -6,18 +6,18 @@
  * Time: 12:57
  */
 
-namespace UnitedCMS\CoreBundle\Tests\Controller;
+namespace UniteCMS\CoreBundle\Tests\Controller;
 
 
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class DomainControllerTest extends DatabaseAwareTestCase
 {
@@ -88,7 +88,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->login($this->admin);
 
         // List all domains.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_domain_index', [
+        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $this->organization->getIdentifier(),
         ]));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -128,7 +128,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form->disableValidation();
         $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1" }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitedcms_core_domain_view', [
+        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => 'd1',
         ])));
@@ -172,14 +172,14 @@ class DomainControllerTest extends DatabaseAwareTestCase
             "ROLE_FOO"
         ] }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitedcms_core_domain_view', [
+        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => 'd1',
         ])));
         $crawler = $this->client->followRedirect();
 
         // make sure, that the domain was updated.
-        $domain = $this->em->getRepository('UnitedCMSCoreBundle:Domain')->findAll()[0];
+        $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll()[0];
         $this->assertEquals([
             'ROLE_PUBLIC',
             'ROLE_EDITOR',
@@ -235,13 +235,13 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->client->submit($form);
 
         // Assert redirect to index.
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitedcms_core_domain_index', [
+        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $this->organization->getIdentifier(),
         ])));
         $this->client->followRedirect();
 
         // Assert domain was deleted.
-        $this->assertCount(0, $this->em->getRepository('UnitedCMSCoreBundle:Domain')->findAll());
+        $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
     }
 
     public function testCRUDActionsAsEditor() {
@@ -258,7 +258,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->flush($domain);
 
         // List all domains.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitedcms_core_domain_index', [
+        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $this->organization->getIdentifier(),
         ]));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -290,7 +290,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.api_clients') .'")'));
 
         // Make this domain member an domain administrator.
-        $domainMember = $this->em->getRepository('UnitedCMSCoreBundle:DomainMember')->findOneBy([
+        $domainMember = $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy([
             'domain' => $domain,
             'user' => $this->editor,
         ]);

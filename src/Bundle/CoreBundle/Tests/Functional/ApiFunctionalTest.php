@@ -6,22 +6,22 @@
  * Time: 16:55
  */
 
-namespace UnitedCMS\CoreBundle\Tests\Functional;
+namespace UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
-use UnitedCMS\CoreBundle\Controller\GraphQLApiController;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Form\FieldableFormType;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Controller\GraphQLApiController;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow
@@ -516,7 +516,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
     {
         parent::setUp();
 
-        // Create a full united CMS structure with different organizations, domains and users.
+        // Create a full unite CMS structure with different organizations, domains and users.
         foreach($this->data as $id => $domains) {
             $org = new Organization();
             $org->setIdentifier($id)->setTitle(ucfirst($id));
@@ -524,7 +524,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $this->em->flush($org);
 
             foreach($domains as $domain_data) {
-                $domain = $this->container->get('united.cms.domain_definition_parser')->parse($domain_data);
+                $domain = $this->container->get('unite.cms.domain_definition_parser')->parse($domain_data);
                 $domain->setOrganization($org);
                 $this->domains[$domain->getIdentifier()] = $domain;
                 $this->em->persist($domain);
@@ -595,13 +595,13 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             'domain' => $domain->getIdentifier(),
         ]));
 
-        $reflector = new \ReflectionProperty(UnitedCMSManager::class, 'requestStack');
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('united.cms.manager'), $requestStack);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
 
-        $reflector = new \ReflectionMethod(UnitedCMSManager::class, 'initialize');
+        $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
         $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('united.cms.manager'));
+        $reflector->invoke($this->container->get('unite.cms.manager'));
 
         // If we fallback to the statefull main firewall, we need to add a csrf-token with the request.
         if($set_csrf_token) {

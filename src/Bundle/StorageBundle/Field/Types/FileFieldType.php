@@ -1,22 +1,22 @@
 <?php
 
-namespace UnitedCMS\StorageBundle\Field\Types;
+namespace UniteCMS\StorageBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UnitedCMS\StorageBundle\Form\StorageFileType;
-use UnitedCMS\StorageBundle\Model\PreSignedUrl;
-use UnitedCMS\StorageBundle\Service\StorageService;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\StorageBundle\Form\StorageFileType;
+use UniteCMS\StorageBundle\Model\PreSignedUrl;
+use UniteCMS\StorageBundle\Service\StorageService;
 
 class FileFieldType extends FieldType
 {
@@ -49,7 +49,7 @@ class FileFieldType extends FieldType
         $fieldable = $field->getEntity()->getRootEntity();
 
         if($fieldable instanceof ContentType) {
-            $url = $this->router->generate('unitedcms_storage_sign_uploadcontenttype', [
+            $url = $this->router->generate('unitecms_storage_sign_uploadcontenttype', [
               'organization' => $fieldable->getDomain()->getOrganization()->getIdentifier(),
               'domain' => $fieldable->getDomain()->getIdentifier(),
               'content_type' => $fieldable->getIdentifier(),
@@ -57,7 +57,7 @@ class FileFieldType extends FieldType
         }
 
         else if($fieldable instanceof SettingType) {
-            $url = $this->router->generate('unitedcms_storage_sign_uploadsettingtype', [
+            $url = $this->router->generate('unitecms_storage_sign_uploadsettingtype', [
               'organization' => $fieldable->getDomain()->getOrganization()->getIdentifier(),
               'domain' => $fieldable->getDomain()->getIdentifier(),
               'content_type' => $fieldable->getIdentifier(),

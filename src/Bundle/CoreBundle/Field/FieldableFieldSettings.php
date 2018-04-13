@@ -6,7 +6,7 @@
  * Time: 13:19
  */
 
-namespace UnitedCMS\CoreBundle\Field;
+namespace UniteCMS\CoreBundle\Field;
 
 class FieldableFieldSettings
 {

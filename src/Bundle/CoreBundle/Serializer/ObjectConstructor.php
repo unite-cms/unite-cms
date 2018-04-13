@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Serializer;
+namespace UniteCMS\CoreBundle\Serializer;
 
 use JMS\Serializer\Construction\ObjectConstructorInterface;
 use JMS\Serializer\DeserializationContext;

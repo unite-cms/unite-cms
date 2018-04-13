@@ -1,17 +1,17 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Security;
+namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow
@@ -78,7 +78,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Test controller access check')->setIdentifier('access_check');
-        $this->domain = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->domain2 = new Domain();
@@ -118,7 +118,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
     public function testAccessAPIEndpoint() {
 
         // Try to access without token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitedcms_core_api', [
+        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
         ], Router::ABSOLUTE_URL), [], [], [
@@ -128,7 +128,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
 
         // Try to access with wrong token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitedcms_core_api', [
+        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
             'token' => $this->apiClient2->getToken(),
@@ -139,7 +139,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
         // Try to access with valid token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitedcms_core_api', [
+        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
             'token' => $this->apiClient1->getToken(),
@@ -148,7 +148,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Try to access with fallback but no user loggedin.
-        $this->client->request('POST', $this->container->get('router')->generate('unitedcms_core_api', [
+        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
         ], Router::ABSOLUTE_URL), [], [], [
@@ -171,7 +171,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $session->save();
         $cookie = new Cookie($session->getName(), $session->getId());
         $this->client->getCookieJar()->set($cookie);
-        $this->client->request('POST', $this->container->get('router')->generate('unitedcms_core_api', [
+        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
         ], Router::ABSOLUTE_URL), [], [], [
@@ -194,7 +194,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $session->save();
         $cookie = new Cookie($session->getName(), $session->getId());
         $this->client->getCookieJar()->set($cookie);
-        $this->client->request('POST', $this->container->get('router')->generate('unitedcms_core_api', [
+        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
         ], Router::ABSOLUTE_URL), [], [], [

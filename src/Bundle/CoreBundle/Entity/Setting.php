@@ -1,12 +1,12 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocale;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocale;
 
 /**
  * Setting
@@ -29,7 +29,7 @@ class Setting implements FieldableContent
     /**
      * @var SettingType
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\SettingType", inversedBy="settings", fetch="EXTRA_LAZY")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", inversedBy="settings", fetch="EXTRA_LAZY")
      */
     protected $settingType;
 

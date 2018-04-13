@@ -1,36 +1,36 @@
 services:
 
     # A Helper for common s3 storage tasks.
-    united.cms.storage.service:
+    unite.cms.storage.service:
         public: true
-        class: UnitedCMS\StorageBundle\Service\StorageService
-        arguments: ['@united.cms.field_type_manager']
+        class: UniteCMS\StorageBundle\Service\StorageService
+        arguments: ['@unite.cms.field_type_manager']
 
     # A file upload field.
-    UnitedCMS\StorageBundle\Field\Types\FileFieldType:
-        tags: [united_cms.field_type]
-        arguments: ['@router.default', '%kernel.secret%', '@united.cms.storage.service', '@security.csrf.token_manager']
+    UniteCMS\StorageBundle\Field\Types\FileFieldType:
+        tags: [unite_cms.field_type]
+        arguments: ['@router.default', '%kernel.secret%', '@unite.cms.storage.service', '@security.csrf.token_manager']
 
     # A image upload field.
-    UnitedCMS\StorageBundle\Field\Types\ImageFieldType:
-        tags: [united_cms.field_type]
-        arguments: ['@router.default', '%kernel.secret%', '@united.cms.storage.service', '@security.csrf.token_manager']
+    UniteCMS\StorageBundle\Field\Types\ImageFieldType:
+        tags: [unite_cms.field_type]
+        arguments: ['@router.default', '%kernel.secret%', '@unite.cms.storage.service', '@security.csrf.token_manager']
 
     # A file graphQL schema object type.
-    UnitedCMS\StorageBundle\SchemaType\StorageFileType:
-        tags: [united_cms.graphql.schema_type]
+    UniteCMS\StorageBundle\SchemaType\StorageFileType:
+        tags: [unite_cms.graphql.schema_type]
 
     # A file graphQL schema input type.
-    UnitedCMS\StorageBundle\SchemaType\StorageFileInputType:
-        tags: [united_cms.graphql.schema_type]
+    UniteCMS\StorageBundle\SchemaType\StorageFileInputType:
+        tags: [unite_cms.graphql.schema_type]
 
     # A command to delete unsed files from s3 buckets.
-    UnitedCMS\StorageBundle\Command\StorageFileDeleteUnused:
-        arguments: ['@doctrine.orm.default_entity_manager', '@united.cms.field_type_manager']
+    UniteCMS\StorageBundle\Command\StorageFileDeleteUnused:
+        arguments: ['@doctrine.orm.default_entity_manager', '@unite.cms.field_type_manager']
         tags:
-            - { name: 'console.command', command: 'united:storage:delete-unused' }
+            - { name: 'console.command', command: 'unite:storage:delete-unused' }
 
     # Provide PreSignFormType form as a service for S3 presigning from type
-    UnitedCMS\StorageBundle\Form\PreSignFormType:
+    UniteCMS\StorageBundle\Form\PreSignFormType:
         tags: [form.type]
         arguments: ['@security.token_storage']

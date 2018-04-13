@@ -1,12 +1,12 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 
 /**
  * Organization
@@ -45,7 +45,7 @@ class Organization
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
      * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UnitedCMS\CoreBundle\Entity\Organization::RESERVED_IDENTIFIERS")
+     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Organization::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255, unique=true)
      */
     private $identifier;
@@ -54,14 +54,14 @@ class Organization
      * @var Domain[]
      * @Assert\Valid()
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\Domain", mappedBy="organization")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Domain", mappedBy="organization")
      */
     private $domains;
 
     /**
      * @var User[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\OrganizationMember", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $users;
 

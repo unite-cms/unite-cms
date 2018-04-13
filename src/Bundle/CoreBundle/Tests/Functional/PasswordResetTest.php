@@ -1,12 +1,12 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Functional;
+namespace src\UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Client;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow
@@ -92,7 +92,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $this->assertCount(0, $crawler->filter('form'));
 
         // And user should have a reset token.
-        $this->users['domain_editor'] = $this->em->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+        $this->users['domain_editor'] = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(
             ['email' => $this->users['domain_editor']->getEmail()]
         );
         $this->assertNotNull($this->users['domain_editor']->getResetToken());
@@ -121,7 +121,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $this->assertCount(1, $crawler->filter('form div.uk-alert-danger'));
 
         // Reset token should not be updated.
-        $this->users['domain_editor'] = $this->em->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+        $this->users['domain_editor'] = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(
             ['email' => $this->users['domain_editor']->getEmail()]
         );
         $this->assertEquals($resetToken, $this->users['domain_editor']->getResetToken());
@@ -187,7 +187,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $this->assertCount(1, $crawler->filter('h3'));
 
         // Password should be updated.
-        $this->users['domain_editor'] = $this->em->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+        $this->users['domain_editor'] = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(
             ['email' => $this->users['domain_editor']->getEmail()]
         );
         $this->assertTrue(

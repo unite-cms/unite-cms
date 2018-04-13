@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\DefaultViewType;
-use UnitedCMS\CoreBundle\Validator\Constraints\DefaultViewTypeValidator;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\DefaultViewType;
+use UniteCMS\CoreBundle\Validator\Constraints\DefaultViewTypeValidator;
 
 class DefaultViewTypeValidatorTest extends ConstraintValidatorTestCase
 {

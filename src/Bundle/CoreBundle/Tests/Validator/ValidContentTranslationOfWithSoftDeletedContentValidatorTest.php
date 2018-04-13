@@ -1,13 +1,13 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Doctrine\ORM\PersistentCollection;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class ValidContentTranslationOfWithSoftDeletedContentValidatorTest extends DatabaseAwareTestCase
 {
@@ -45,7 +45,7 @@ class ValidContentTranslationOfWithSoftDeletedContentValidatorTest extends Datab
         $this->em->clear();
 
         // And reload our main object.
-        $reloadedObject = $this->em->getRepository('UnitedCMSCoreBundle:Content')->find($object->getId());
+        $reloadedObject = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($object->getId());
 
         $errors = $this->container->get('validator')->validate($reloadedObject);
         $this->assertCount(1, $errors);

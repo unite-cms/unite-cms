@@ -1,14 +1,14 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\CoreBundle\Entity\SettingTypeField;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\SettingTypeField;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class SettingEntityTest extends DatabaseAwareTestCase
 {
@@ -88,7 +88,7 @@ class SettingEntityTest extends DatabaseAwareTestCase
         };
 
         // Inject the field type
-        $this->container->get('united.cms.field_type_manager')->registerFieldType($mockedFieldType);
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType($mockedFieldType);
 
         $st = new SettingType();
         $field = new SettingTypeField();

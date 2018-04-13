@@ -6,9 +6,9 @@
  * Time: 11:09
  */
 
-namespace UnitedCMS\CoreBundle\Field;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
+namespace UniteCMS\CoreBundle\Field;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 
 /**
  * A field type that can have nested children.

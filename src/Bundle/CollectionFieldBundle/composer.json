@@ -6,7 +6,7 @@
         "unite-cms/core-bundle": "0@dev"
     },
     "autoload": {
-        "psr-4": { "UnitedCMS\\CollectionFieldBundle\\": "" },
+        "psr-4": { "UniteCMS\\CollectionFieldBundle\\": "" },
         "exclude-from-classmap": [
             "/Tests/"
         ]

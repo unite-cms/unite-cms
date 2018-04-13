@@ -1,17 +1,17 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Functional;
+namespace src\UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainInvitation;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow
@@ -71,7 +71,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->organization = new Organization();
         $this->organization->setTitle('Test password reset')->setIdentifier('password_reset');
 
-        $this->domain = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
@@ -185,10 +185,10 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Make sure, that a user with this email address does not exist but the invitation does.
         $this->assertNull(
-            $this->em->getRepository('UnitedCMSCoreBundle:User')->findOneBy(['email' => $invitation->getEmail()])
+            $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(['email' => $invitation->getEmail()])
         );
         $this->assertNotNull(
-            $this->em->getRepository('UnitedCMSCoreBundle:DomainInvitation')->find($invitation->getId())
+            $this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId())
         );
 
         // Try to create a new, invalid user (full validation is tested somewhere else)
@@ -211,7 +211,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertCount(0, $crawler->filter('form'));
 
         // User should be created.
-        $user = $this->em->getRepository('UnitedCMSCoreBundle:User')->findOneBy(['email' => $invitation->getEmail()]);
+        $user = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(['email' => $invitation->getEmail()]);
         $this->assertNotNull($user);
 
         // Check all user fields that should be filled upon registration.
@@ -227,7 +227,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertTrue($this->container->get('security.password_encoder')->isPasswordValid($user, 'password1'));
 
         // Also make sure, that the invitation got deleted.
-        $this->assertNull($this->em->getRepository('UnitedCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
+        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
     }
 
     /**
@@ -292,7 +292,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Make sure, that the invitation exists.
         $this->assertNotNull(
-            $this->em->getRepository('UnitedCMSCoreBundle:DomainInvitation')->find($invitation->getId())
+            $this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId())
         );
 
         // Try to submit the form with operation accept
@@ -304,7 +304,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertCount(0, $crawler->filter('form'));
 
         // Refresh user
-        $existingUser = $this->em->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+        $existingUser = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(
             ['email' => $this->users['domain_editor2']->getEmail()]
         );
 
@@ -318,7 +318,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertEquals($invitation->getRoles(), $existingUser->getDomains()->first()->getRoles());
 
         // Also make sure, that the invitation got deleted.
-        $this->assertNull($this->em->getRepository('UnitedCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
+        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
     }
 
     /**
@@ -342,7 +342,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Make sure, that the invitation exists.
         $this->assertNotNull(
-            $this->em->getRepository('UnitedCMSCoreBundle:DomainInvitation')->find($invitation->getId())
+            $this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId())
         );
 
         // Try to submit the form with operation reject
@@ -354,7 +354,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertCount(0, $crawler->filter('form'));
 
         // Refresh user
-        $existingUser = $this->em->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+        $existingUser = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(
             ['email' => $this->users['domain_editor2']->getEmail()]
         );
 
@@ -362,6 +362,6 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertCount(0, $existingUser->getDomains());
 
         // Also make sure, that the invitation got deleted.
-        $this->assertNull($this->em->getRepository('UnitedCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
+        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
     }
 }

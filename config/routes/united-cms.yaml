@@ -1,8 +1,8 @@
 
-united_cms_core:
-  resource: "@UnitedCMSCoreBundle/Resources/config/routing.yml"
+unite_cms_core:
+  resource: "@UniteCMSCoreBundle/Resources/config/routing.yml"
   prefix:   /
 
-united_cms_storage:
-  resource: "@UnitedCMSStorageBundle/Resources/config/routing.yml"
+unite_cms_storage:
+  resource: "@UniteCMSStorageBundle/Resources/config/routing.yml"
   prefix:   /

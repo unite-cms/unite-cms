@@ -1,10 +1,10 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Subscriber;
+namespace UniteCMS\CoreBundle\Subscriber;
 
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 
 class AddMember
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Types;
+namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use Doctrine\ORM\EntityManager;
 use GraphQL\Error\UserError;
@@ -11,14 +11,14 @@ use Knp\Component\Pager\Paginator;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Form\FieldableFormBuilder;
-use UnitedCMS\CoreBundle\Security\ContentVoter;
-use UnitedCMS\CoreBundle\Security\SettingVoter;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UnitedCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
+use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\SettingVoter;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 
 class QueryType extends AbstractType
 {
@@ -35,9 +35,9 @@ class QueryType extends AbstractType
     private $entityManager;
 
     /**
-     * @var UnitedCMSManager $unitedCMSManager
+     * @var UniteCMSManager $uniteCMSManager
      */
-    private $unitedCMSManager;
+    private $uniteCMSManager;
 
     /**
      * @var AuthorizationChecker $authorizationChecker
@@ -52,13 +52,13 @@ class QueryType extends AbstractType
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
         EntityManager $entityManager,
-        UnitedCMSManager $unitedCMSManager,
+        UniteCMSManager $uniteCMSManager,
         AuthorizationChecker $authorizationChecker,
         Paginator $paginator
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->entityManager = $entityManager;
-        $this->unitedCMSManager = $unitedCMSManager;
+        $this->uniteCMSManager = $uniteCMSManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->paginator = $paginator;
         parent::__construct();
@@ -106,10 +106,10 @@ class QueryType extends AbstractType
         ];
 
         // Append Content types.
-        foreach ($this->unitedCMSManager->getDomain()->getContentTypes() as $contentType) {
+        foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
             $key = ucfirst($contentType->getIdentifier());
             $fields['get' . $key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->unitedCMSManager->getDomain()),
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
                 'args' => [
                     'id' => [
                         'type' => Type::nonNull(Type::id()),
@@ -119,7 +119,7 @@ class QueryType extends AbstractType
             ];
 
             $fields['find' . $key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key . 'ContentResult', $this->unitedCMSManager->getDomain()),
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'ContentResult', $this->uniteCMSManager->getDomain()),
                 'args' => [
                     'limit' => [
                         'type' => Type::int(),
@@ -149,10 +149,10 @@ class QueryType extends AbstractType
         }
 
         // Append Setting types.
-        foreach ($this->unitedCMSManager->getDomain()->getSettingTypes() as $settingType) {
+        foreach ($this->uniteCMSManager->getDomain()->getSettingTypes() as $settingType) {
             $key = ucfirst($settingType->getIdentifier()) . 'Setting';
             $fields[$key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key, $this->unitedCMSManager->getDomain()),
+                'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
             ];
         }
 
@@ -178,7 +178,7 @@ class QueryType extends AbstractType
 
             $id = $args['id'];
 
-            if(!$content = $this->entityManager->getRepository('UnitedCMSCoreBundle:Content')->find($id)) {
+            if(!$content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id)) {
                 throw new UserError("Content with id '$id' was not found.");
             }
 
@@ -194,7 +194,7 @@ class QueryType extends AbstractType
 
             $identifier = strtolower(substr($info->fieldName, 0, -strlen('Setting')));
 
-            if (!$settingType = $this->entityManager->getRepository('UnitedCMSCoreBundle:SettingType')->findOneBy(['domain' => $this->unitedCMSManager->getDomain(), 'identifier' => $identifier])) {
+            if (!$settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->findOneBy(['domain' => $this->uniteCMSManager->getDomain(), 'identifier' => $identifier])) {
                 throw new UserError("SettingType '$identifier' was not found in domain.");
             }
 
@@ -243,7 +243,7 @@ class QueryType extends AbstractType
 
         // Get all requested contentTypes, the user can access.
         $contentTypes = [];
-        foreach($this->entityManager->getRepository('UnitedCMSCoreBundle:ContentType')->findBy([
+        foreach($this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findBy([
             'identifier' => $args['types'],
         ]) as $contentType) {
             if ($this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
@@ -255,7 +255,7 @@ class QueryType extends AbstractType
         // Get content from all contentTypes
         $contentEntityFields = $this->entityManager->getClassMetadata(Content::class)->getFieldNames();
         $contentQuery = $this->entityManager->getRepository(
-            'UnitedCMSCoreBundle:Content'
+            'UniteCMSCoreBundle:Content'
         )->createQueryBuilder('c')
             ->select('c')
             ->where('c.contentType IN (:contentTypes)')

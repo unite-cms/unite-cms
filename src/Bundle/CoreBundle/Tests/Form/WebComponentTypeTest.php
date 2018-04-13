@@ -1,13 +1,13 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Form;
+namespace UniteCMS\CoreBundle\Tests\Form;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormConfigBuilder;
 use Symfony\Component\Form\FormConfigInterface;
 use Symfony\Component\Form\FormView;
-use UnitedCMS\CoreBundle\Form\WebComponentType;
+use UniteCMS\CoreBundle\Form\WebComponentType;
 
 class WebComponentTypeTest extends TestCase {
 

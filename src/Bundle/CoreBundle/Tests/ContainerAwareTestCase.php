@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests;
+namespace UniteCMS\CoreBundle\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;

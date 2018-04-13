@@ -1,17 +1,17 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Factories;
+namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class SettingTypeFactory implements SchemaTypeFactoryInterface
 {
@@ -69,7 +69,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
     public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
     {
         if(!$domain) {
-            throw new \InvalidArgumentException('UnitedCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory::createSchemaType needs an domain as second argument');
+            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory::createSchemaType needs an domain as second argument');
         }
 
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
@@ -86,7 +86,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
 
         // Load the full settingType if it is not already loaded.
         if(!$this->entityManager->contains($settingType)) {
-            $settingType = $this->entityManager->getRepository('UnitedCMSCoreBundle:SettingType')->find(
+            $settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->find(
                 $settingType->getId()
             );
         }
@@ -102,7 +102,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
         $fieldTypes = [];
 
         /**
-         * @var \UnitedCMS\CoreBundle\Entity\SettingTypeField $field
+         * @var \UniteCMS\CoreBundle\Entity\SettingTypeField $field
          */
         foreach ($settingType->getFields() as $field) {
             $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());

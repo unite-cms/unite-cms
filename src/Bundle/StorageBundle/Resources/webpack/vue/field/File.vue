@@ -248,7 +248,7 @@
 <style lang="scss">
     @import "../../../../../CoreBundle/Resources/webpack/sass/base/variables";
 
-    united-cms-storage-file-field {
+    unite-cms-storage-file-field {
         padding: 5px 0;
         display: block;
 
