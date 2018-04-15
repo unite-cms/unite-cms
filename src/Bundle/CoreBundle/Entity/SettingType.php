@@ -134,9 +134,15 @@ class SettingType implements Fieldable
         $this->addDefaultPermissions();
     }
 
+    private function addDefaultPermissions()
+    {
+        $this->permissions[SettingVoter::VIEW] = [Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[SettingVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
+    }
+
     public function __toString()
     {
-        return '' . $this->title;
+        return ''.$this->title;
     }
 
     public function allowedPermissionRoles(): array
@@ -146,6 +152,27 @@ class SettingType implements Fieldable
         }
 
         return [];
+    }
+
+    /**
+     * @return Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param Domain $domain
+     *
+     * @return SettingType
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+        $domain->addSettingType($this);
+
+        return $this;
     }
 
     public function allowedPermissionKeys(): array
@@ -184,30 +211,6 @@ class SettingType implements Fieldable
         foreach (array_intersect($settingType->getFields()->getKeys(), $this->getFields()->getKeys()) as $field) {
             $this->getFields()->get($field)->setFromEntity($settingType->getFields()->get($field));
         }
-
-        return $this;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set id
-     *
-     * @param $id
-     *
-     * @return SettingType
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
 
         return $this;
     }
@@ -261,25 +264,20 @@ class SettingType implements Fieldable
     }
 
     /**
-     * Get description
-     *
-     * @return string
+     * @return int
      */
-    public function getDescription()
+    public function getWeight(): int
     {
-        return $this->description;
+        return $this->weight;
     }
 
     /**
-     * Set description
-     *
-     * @param string $description
-     *
+     * @param int $weight
      * @return SettingType
      */
-    public function setDescription($description)
+    public function setWeight($weight)
     {
-        $this->description = $description;
+        $this->weight = $weight;
 
         return $this;
     }
@@ -309,22 +307,70 @@ class SettingType implements Fieldable
     }
 
     /**
-     * @return Domain
+     * Get description
+     *
+     * @return string
      */
-    public function getDomain()
+    public function getDescription()
     {
-        return $this->domain;
+        return $this->description;
     }
 
     /**
-     * @param Domain $domain
+     * Set description
+     *
+     * @param string $description
      *
      * @return SettingType
      */
-    public function setDomain($domain)
+    public function setDescription($description)
     {
-        $this->domain = $domain;
-        $domain->addSettingType($this);
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLocales(): array
+    {
+        return $this->locales ?? [];
+    }
+
+    /**
+     * @param array $locales
+     *
+     * @return SettingType
+     */
+    public function setLocales(array $locales)
+    {
+        $this->locales = $locales;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPermissions()
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * @param array $permissions
+     *
+     * @return SettingType
+     */
+    public function setPermissions($permissions)
+    {
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        foreach ($permissions as $attribute => $roles) {
+            $this->addPermission($attribute, $roles);
+        }
 
         return $this;
     }
@@ -373,18 +419,57 @@ class SettingType implements Fieldable
     }
 
     /**
-     * @param Setting $setting
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
+     *
      * @return SettingType
      */
-    public function addSetting(Setting $setting)
+    public function setId($id)
     {
-
-        if (!$this->settings->contains($setting)) {
-            $this->settings->add($setting);
-            $setting->setSettingType($this);
-        }
+        $this->id = $id;
 
         return $this;
+    }
+
+    /**
+     * @return Setting
+     */
+    public function getSetting($locale = null)
+    {
+        if ($this->getSettings()->count() > 0) {
+
+            if (!$locale || empty($this->getLocales())) {
+                return $this->getSettings()->first();
+            }
+
+            if (in_array($locale, $this->getLocales())) {
+                $found = $this->getSettings()->filter(
+                    function (Setting $setting) use ($locale) {
+                        return $setting->getLocale() == $locale;
+                    }
+                );
+                if (!$found->isEmpty()) {
+                    return $found->first();
+                }
+            }
+        }
+
+        $setting = new Setting();
+        $setting->setLocale($locale);
+        $this->addSetting($setting);
+
+        return $setting;
     }
 
     /**
@@ -409,53 +494,15 @@ class SettingType implements Fieldable
     }
 
     /**
-     * @return Setting
-     */
-    public function getSetting($locale = null)
-    {
-        if ($this->getSettings()->count() > 0) {
-
-            if (!$locale || empty($this->getLocales())) {
-                return $this->getSettings()->first();
-            }
-
-            if (in_array($locale, $this->getLocales())) {
-                $found = $this->getSettings()->filter(function (Setting $setting) use ($locale) {
-                    return $setting->getLocale() == $locale;
-                });
-                if (!$found->isEmpty()) {
-                    return $found->first();
-                }
-            }
-        }
-
-        $setting = new Setting();
-        $setting->setLocale($locale);
-        $this->addSetting($setting);
-
-        return $setting;
-    }
-
-    /**
-     * @return array
-     */
-    public function getPermissions()
-    {
-        return $this->permissions;
-    }
-
-    /**
-     * @param array $permissions
-     *
+     * @param Setting $setting
      * @return SettingType
      */
-    public function setPermissions($permissions)
+    public function addSetting(Setting $setting)
     {
-        $this->permissions = [];
-        $this->addDefaultPermissions();
 
-        foreach ($permissions as $attribute => $roles) {
-            $this->addPermission($attribute, $roles);
+        if (!$this->settings->contains($setting)) {
+            $this->settings->add($setting);
+            $setting->setSettingType($this);
         }
 
         return $this;
@@ -464,45 +511,6 @@ class SettingType implements Fieldable
     public function addPermission($attribute, array $roles)
     {
         $this->permissions[$attribute] = $roles;
-    }
-
-    /**
-     * @return array
-     */
-    public function getLocales(): array
-    {
-        return $this->locales ?? [];
-    }
-
-    /**
-     * @param array $locales
-     *
-     * @return SettingType
-     */
-    public function setLocales(array $locales)
-    {
-        $this->locales = $locales;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getWeight(): int
-    {
-        return $this->weight;
-    }
-
-    /**
-     * @param int $weight
-     * @return SettingType
-     */
-    public function setWeight($weight)
-    {
-        $this->weight = $weight;
-
-        return $this;
     }
 
     /**
@@ -527,12 +535,6 @@ class SettingType implements Fieldable
     public function getParentEntity()
     {
         return null;
-    }
-
-    private function addDefaultPermissions()
-    {
-        $this->permissions[SettingVoter::VIEW] = [Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[SettingVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
     }
 }
 

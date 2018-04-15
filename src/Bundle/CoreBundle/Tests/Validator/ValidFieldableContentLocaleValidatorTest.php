@@ -67,7 +67,10 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
 
         $errors = $this->validate('en', new ValidFieldableContentLocaleValidator(), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('This locale is not supported by this content type', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'This locale is not supported by this content type',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testEmptyEntityLocales()
@@ -87,7 +90,10 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
 
         $errors = $this->validate('en', new ValidFieldableContentLocaleValidator(), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('This locale is not supported by this content type', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'This locale is not supported by this content type',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testEmptyLocale()
@@ -120,7 +126,10 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
 
         $errors = $this->validate('en', new ValidFieldableContentLocaleValidator(), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('This locale is not supported by this content type', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'This locale is not supported by this content type',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
 
         $errors = $this->validate('de', new ValidFieldableContentLocaleValidator(), null, $object);
         $this->assertCount(0, $errors->getViolations());

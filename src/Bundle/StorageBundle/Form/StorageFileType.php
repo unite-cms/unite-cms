@@ -32,10 +32,12 @@ class StorageFileType extends WebComponentType
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
-        $resolver->setDefaults([
-            'tag' => 'unite-cms-storage-file-field',
-            'file-types' => '*',
-        ]);
+        $resolver->setDefaults(
+            [
+                'tag' => 'unite-cms-storage-file-field',
+                'file-types' => '*',
+            ]
+        );
         $resolver->setRequired(['file-types']);
     }
 }

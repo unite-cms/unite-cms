@@ -66,10 +66,16 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-    {
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        int $nestingLevel,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
         if (!$domain) {
-            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory::createSchemaType needs an domain as second argument');
+            throw new \InvalidArgumentException(
+                'UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory::createSchemaType needs an domain as second argument'
+            );
         }
 
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
@@ -106,12 +112,16 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
          */
         foreach ($settingType->getFields() as $field) {
             $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
-            $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
+            $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType(
+                $field,
+                $schemaTypeManager,
+                $nestingLevel + 1
+            );
         }
 
         return new ObjectType(
             [
-                'name' => ucfirst($identifier) . 'Setting' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                'name' => ucfirst($identifier).'Setting'.($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                 'fields' => array_merge(
                     [
                         'type' => Type::string(),
@@ -123,7 +133,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                     $fieldTypes
                 ) {
                     if (!$value instanceof Setting) {
-                        throw new \InvalidArgumentException('Value must be instance of ' . Setting::class . '.');
+                        throw new \InvalidArgumentException('Value must be instance of '.Setting::class.'.');
                     }
 
                     switch ($info->fieldName) {
@@ -135,8 +145,12 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                                 return null;
                             }
 
-                            $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData()[$info->fieldName] : null;
-                            $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($settingType->getFields()->get($info->fieldName), $fieldData);
+                            $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData(
+                            )[$info->fieldName] : null;
+                            $data = $fieldTypes[$info->fieldName]->resolveGraphQLData(
+                                $settingType->getFields()->get($info->fieldName),
+                                $fieldData
+                            );
 
                             return $data;
                     }

@@ -48,21 +48,33 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
         $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
         $fieldTypeManagerMock->expects($this->any())
             ->method('validateFieldSettings')
-            ->willReturn([
-                new ConstraintViolation('m1', 'm1', [], 'root', 'root', 'i1'),
-                new ConstraintViolation('m2', 'm2', [], 'root', 'root', 'i2'),
-            ]);
+            ->willReturn(
+                [
+                    new ConstraintViolation('m1', 'm1', [], 'root', 'root', 'i1'),
+                    new ConstraintViolation('m2', 'm2', [], 'root', 'root', 'i2'),
+                ]
+            );
         $fieldTypeManagerMock->expects($this->any())
             ->method('hasFieldType')
             ->willReturn(true);
 
         // Validate value.
-        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, new ContentTypeField());
+        $context = $this->validate(
+            new FieldableFieldSettings(),
+            new ValidFieldSettingsValidator($fieldTypeManagerMock),
+            null,
+            new ContentTypeField()
+        );
         $this->assertCount(2, $context->getViolations());
         $this->assertEquals('m1', $context->getViolations()->get(0)->getMessageTemplate());
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
 
-        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, new SettingTypeField());
+        $context = $this->validate(
+            new FieldableFieldSettings(),
+            new ValidFieldSettingsValidator($fieldTypeManagerMock),
+            null,
+            new SettingTypeField()
+        );
         $this->assertCount(2, $context->getViolations());
         $this->assertEquals('m1', $context->getViolations()->get(0)->getMessageTemplate());
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
@@ -81,10 +93,20 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
             ->willReturn(true);
 
         // Validate value.
-        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, new ContentTypeField());
+        $context = $this->validate(
+            new FieldableFieldSettings(),
+            new ValidFieldSettingsValidator($fieldTypeManagerMock),
+            null,
+            new ContentTypeField()
+        );
         $this->assertCount(0, $context->getViolations());
 
-        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, new SettingTypeField());
+        $context = $this->validate(
+            new FieldableFieldSettings(),
+            new ValidFieldSettingsValidator($fieldTypeManagerMock),
+            null,
+            new SettingTypeField()
+        );
         $this->assertCount(0, $context->getViolations());
     }
 }

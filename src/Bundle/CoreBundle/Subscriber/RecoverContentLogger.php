@@ -32,16 +32,24 @@ class RecoverContentLogger
                 $changeSet = $uow->getEntityChangeSet($entity);
 
                 // If the content was deleted and is no recovered, create log entry.
-                if (array_key_exists('deleted', $changeSet) && $changeSet['deleted'][0] !== null && $changeSet['deleted'][1] === null) {
+                if (array_key_exists(
+                        'deleted',
+                        $changeSet
+                    ) && $changeSet['deleted'][0] !== null && $changeSet['deleted'][1] === null) {
 
                     // Create log entry for recovering.
-                    $logEntries = $args->getEntityManager()->getRepository('GedmoLoggable:LogEntry')->getLogEntries($entity);
+                    $logEntries = $args->getEntityManager()->getRepository('GedmoLoggable:LogEntry')->getLogEntries(
+                        $entity
+                    );
                     $logEntry = new LogEntry();
                     $logEntry->setData(['data' => $entity->getData()]);
                     $logEntry->setAction('recover');
                     $logEntry->setObjectId($entity->getId());
                     $logEntry->setObjectClass(get_class($entity));
-                    $logEntry->setUsername($this->securityTokenStorage->getToken() ? $this->securityTokenStorage->getToken()->getUser() : 'Anonymous');
+                    $logEntry->setUsername(
+                        $this->securityTokenStorage->getToken() ? $this->securityTokenStorage->getToken()->getUser(
+                        ) : 'Anonymous'
+                    );
                     $logEntry->setLoggedAt();
                     $logEntry->setVersion($logEntries[0]->getVersion() + 1);
                     $args->getEntityManager()->persist($logEntry);

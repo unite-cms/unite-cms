@@ -31,6 +31,7 @@ abstract class FieldTypeTestCase extends DatabaseAwareTestCase
             ->getOrganization()
             ->setTitle($this->generateRandomMachineName(100))
             ->setIdentifier($this->generateRandomMachineName(100));
+
         return $field;
     }
 
@@ -53,6 +54,7 @@ abstract class FieldTypeTestCase extends DatabaseAwareTestCase
             ->getOrganization()
             ->setTitle($this->generateRandomMachineName(100))
             ->setIdentifier($this->generateRandomMachineName(100));
+
         return $field;
     }
 }

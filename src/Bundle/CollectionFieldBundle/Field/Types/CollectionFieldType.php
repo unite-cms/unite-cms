@@ -32,24 +32,14 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     private $collectionFieldTypeFactory;
     private $fieldTypeManager;
 
-    function __construct(ValidatorInterface $validator, CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager)
-    {
+    function __construct(
+        ValidatorInterface $validator,
+        CollectionFieldTypeFactory $collectionFieldTypeFactory,
+        FieldTypeManager $fieldTypeManager
+    ) {
         $this->validator = $validator;
         $this->collectionFieldTypeFactory = $collectionFieldTypeFactory;
         $this->fieldTypeManager = $fieldTypeManager;
-    }
-
-    /**
-     * @param FieldableField $field
-     * @return Collection
-     */
-    static function getNestableFieldable(FieldableField $field): Fieldable
-    {
-        return new Collection(
-            isset($field->getSettings()->fields) ? $field->getSettings()->fields : [],
-            $field->getIdentifier(),
-            $field->getEntity()
-        );
     }
 
     /**
@@ -76,19 +66,35 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         }
 
         // Configure the collection from type.
-        return array_merge(parent::getFormOptions($field), [
-            'allow_add' => true,
-            'allow_delete' => true,
-            'delete_empty' => true,
-            'prototype_name' => '__' . str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')) . 'Name__',
-            'attr' => [
-                'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
-                'min-rows' => $settings->min_rows ?? 0,
-                'max-rows' => $settings->max_rows ?? 0,
-            ],
-            'entry_type' => FieldableFormType::class,
-            'entry_options' => $options,
-        ]);
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'allow_add' => true,
+                'allow_delete' => true,
+                'delete_empty' => true,
+                'prototype_name' => '__'.str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')).'Name__',
+                'attr' => [
+                    'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
+                    'min-rows' => $settings->min_rows ?? 0,
+                    'max-rows' => $settings->max_rows ?? 0,
+                ],
+                'entry_type' => FieldableFormType::class,
+                'entry_options' => $options,
+            ]
+        );
+    }
+
+    /**
+     * @param FieldableField $field
+     * @return Collection
+     */
+    static function getNestableFieldable(FieldableField $field): Fieldable
+    {
+        return new Collection(
+            isset($field->getSettings()->fields) ? $field->getSettings()->fields : [],
+            $field->getIdentifier(),
+            $field->getEntity()
+        );
     }
 
     /**
@@ -142,6 +148,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 $violations[] = $violation;
             }
         }
+
         return $violations;
     }
 
@@ -168,6 +175,58 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         // Validate min_rows
         if (count($data) < $min_rows) {
             $violations[] = $this->createViolation($field, 'validation.too_few_rows');
+        }
+
+        return $violations;
+    }
+
+    /**
+     * Recursively validate all fields in this collection.
+     *
+     * @param array $data
+     * @param FieldableField $field
+     *
+     * @return array
+     */
+    private function validateNestedFields($data, FieldableField $field)
+    {
+
+        $violations = [];
+        $collection = self::getNestableFieldable($field);
+
+        // Make sure, that there is no additional data in content that is not in settings.
+        foreach ($data as $row) {
+            foreach (array_keys($row) as $data_key) {
+
+                // If the field does not exists, add an error.
+                if (!$collection->getFields()->containsKey($data_key)) {
+                    $violations[] = new ConstraintViolation(
+                        'validation.additional_data',
+                        'validation.additional_data',
+                        [],
+                        $row,
+                        join(
+                            '.',
+                            [
+                                $field->getEntity()->getIdentifierPath('.'),
+                                $field->getIdentifier(),
+                                $data_key,
+                            ]
+                        ),
+                        $row
+                    );
+
+                    // If the field exists, let the fieldTypeManager validate it.
+                } else {
+                    $violations = array_merge(
+                        $violations,
+                        $this->fieldTypeManager->validateFieldData(
+                            $collection->getFields()->get($data_key),
+                            $row[$data_key]
+                        )
+                    );
+                }
+            }
         }
 
         return $violations;
@@ -207,8 +266,13 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
      * @param EntityRepository $repository
      * @param $data
      */
-    public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data)
-    {
+    public function onUpdate(
+        FieldableField $field,
+        FieldableContent $content,
+        EntityRepository $repository,
+        $old_data,
+        &$data
+    ) {
 
         // If child field implements onUpdate, call it!
         foreach (self::getNestableFieldable($field)->getFields() as $subField) {
@@ -221,7 +285,8 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 // Call hook for all available data.
                 if (!empty($data[$field->getIdentifier()])) {
                     foreach ($data[$field->getIdentifier()] as $key => $subData) {
-                        $subOldData = isset($old_data[$field->getIdentifier()][$key]) ? $old_data[$field->getIdentifier()][$key] : [];
+                        $subOldData = isset($old_data[$field->getIdentifier()][$key]) ? $old_data[$field->getIdentifier(
+                        )][$key] : [];
                         $fieldType->onUpdate($subField, $content, $repository, $subOldData, $subData);
                         $data[$field->getIdentifier()][$key] = $subData;
                         $keys_used[] = $key;
@@ -232,7 +297,8 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 if (!empty($old_data[$field->getIdentifier()])) {
                     foreach ($old_data[$field->getIdentifier()] as $key => $subOldData) {
                         if (!in_array($key, $keys_used)) {
-                            $subData = isset($data[$field->getIdentifier()][$key]) ? $data[$field->getIdentifier()][$key] : [];
+                            $subData = isset($data[$field->getIdentifier()][$key]) ? $data[$field->getIdentifier(
+                            )][$key] : [];
                             $fieldType->onUpdate($subField, $content, $repository, $subOldData, $subData);
                             $data[$field->getIdentifier()][$key] = $subData;
                         }
@@ -290,51 +356,5 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 }
             }
         }
-    }
-
-    /**
-     * Recursively validate all fields in this collection.
-     *
-     * @param array $data
-     * @param FieldableField $field
-     *
-     * @return array
-     */
-    private function validateNestedFields($data, FieldableField $field)
-    {
-
-        $violations = [];
-        $collection = self::getNestableFieldable($field);
-
-        // Make sure, that there is no additional data in content that is not in settings.
-        foreach ($data as $row) {
-            foreach (array_keys($row) as $data_key) {
-
-                // If the field does not exists, add an error.
-                if (!$collection->getFields()->containsKey($data_key)) {
-                    $violations[] = new ConstraintViolation(
-                        'validation.additional_data',
-                        'validation.additional_data',
-                        [],
-                        $row,
-                        join('.', [
-                            $field->getEntity()->getIdentifierPath('.'),
-                            $field->getIdentifier(),
-                            $data_key
-                        ]),
-                        $row
-                    );
-
-                    // If the field exists, let the fieldTypeManager validate it.
-                } else {
-                    $violations = array_merge(
-                        $violations,
-                        $this->fieldTypeManager->validateFieldData($collection->getFields()->get($data_key), $row[$data_key])
-                    );
-                }
-            }
-        }
-
-        return $violations;
     }
 }

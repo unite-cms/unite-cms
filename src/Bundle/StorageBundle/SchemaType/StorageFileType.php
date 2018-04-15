@@ -15,6 +15,28 @@ use UniteCMS\CoreBundle\SchemaType\Types\AbstractType;
 class StorageFileType extends AbstractType
 {
     /**
+     * Resolve fields for this type.
+     * Returns the object or scalar value for the field, define in $info.
+     *
+     * @param mixed $value
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
+     *
+     * @return mixed
+     */
+    protected function resolveField($value, array $args, $context, ResolveInfo $info)
+    {
+        if (is_array($value) && array_key_exists(
+                $info->fieldName,
+                $this->fields()
+            ) && isset($value[$info->fieldName])) {
+            return $value[$info->fieldName];
+        }
+        throw new \InvalidArgumentException('Unknown fieldName "'.$info->fieldName.'"');
+    }
+
+    /**
      * Define all fields of this type.
      *
      * @return array
@@ -28,24 +50,5 @@ class StorageFileType extends AbstractType
             'id' => Type::id(),
             'url' => Type::string(),
         ];
-    }
-
-    /**
-     * Resolve fields for this type.
-     * Returns the object or scalar value for the field, define in $info.
-     *
-     * @param mixed $value
-     * @param array $args
-     * @param $context
-     * @param ResolveInfo $info
-     *
-     * @return mixed
-     */
-    protected function resolveField($value, array $args, $context, ResolveInfo $info)
-    {
-        if (is_array($value) && array_key_exists($info->fieldName, $this->fields()) && isset($value[$info->fieldName])) {
-            return $value[$info->fieldName];
-        }
-        throw new \InvalidArgumentException('Unknown fieldName "' . $info->fieldName . '"');
     }
 }

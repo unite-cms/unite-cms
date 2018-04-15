@@ -99,7 +99,11 @@ class DomainUserController extends Controller
             ->add(
                 'roles',
                 ChoiceType::class,
-                ['label' => 'domain.user.create.form.roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions()]
+                [
+                    'label' => 'domain.user.create.form.roles',
+                    'multiple' => true,
+                    'choices' => $domain->getAvailableRolesAsOptions(),
+                ]
             )
             ->add('submit', SubmitType::class, ['label' => 'domain.user.create.form.submit'])
             ->getForm();
@@ -129,7 +133,11 @@ class DomainUserController extends Controller
             ->add(
                 'roles',
                 ChoiceType::class,
-                ['label' => 'domain.user.invite.form.roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions()]
+                [
+                    'label' => 'domain.user.invite.form.roles',
+                    'multiple' => true,
+                    'choices' => $domain->getAvailableRolesAsOptions(),
+                ]
             )
             ->add('submit', SubmitType::class, ['label' => 'domain.user.invite.form.submit'])
             ->getForm();
@@ -298,10 +306,13 @@ class DomainUserController extends Controller
         Domain $domain,
         DomainInvitation $invite,
         Request $request
-    )
-    {
+    ) {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'domain.user.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']])->getForm();
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'domain.user.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

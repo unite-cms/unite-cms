@@ -22,11 +22,13 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
     {
 
         $application = new Application(self::$kernel);
-        $application->add(new CreateDomainCommand(
-            $this->container->get('doctrine.orm.default_entity_manager'),
-            $this->container->get('validator'),
-            $this->container->get('unite.cms.domain_definition_parser')
-        ));
+        $application->add(
+            new CreateDomainCommand(
+                $this->container->get('doctrine.orm.default_entity_manager'),
+                $this->container->get('validator'),
+                $this->container->get('unite.cms.domain_definition_parser')
+            )
+        );
 
         $command = $application->find('unite:domain:create');
         $commandTester = new CommandTester($command);

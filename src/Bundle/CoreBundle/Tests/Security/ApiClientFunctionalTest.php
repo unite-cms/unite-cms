@@ -119,43 +119,87 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
     {
 
         // Try to access without token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
-            'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
-        ], Router::ABSOLUTE_URL), [], [], [
-            'CONTENT_TYPE' => 'application/json',
-        ], json_encode(['query' => '{}']));
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_core_api',
+                [
+                    'domain' => $this->domain->getIdentifier(),
+                    'organization' => $this->organization->getIdentifier(),
+                ],
+                Router::ABSOLUTE_URL
+            ),
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            json_encode(['query' => '{}'])
+        );
 
         $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
 
         // Try to access with wrong token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
-            'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
-            'token' => $this->apiClient2->getToken(),
-        ], Router::ABSOLUTE_URL), [], [], [
-            'CONTENT_TYPE' => 'application/json',
-        ], json_encode(['query' => '{}']));
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_core_api',
+                [
+                    'domain' => $this->domain->getIdentifier(),
+                    'organization' => $this->organization->getIdentifier(),
+                    'token' => $this->apiClient2->getToken(),
+                ],
+                Router::ABSOLUTE_URL
+            ),
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            json_encode(['query' => '{}'])
+        );
 
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
         // Try to access with valid token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
-            'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
-            'token' => $this->apiClient1->getToken(),
-        ], Router::ABSOLUTE_URL), [], [], ['CONTENT_TYPE' => 'application/json'], json_encode(['query' => '{}']));
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_core_api',
+                [
+                    'domain' => $this->domain->getIdentifier(),
+                    'organization' => $this->organization->getIdentifier(),
+                    'token' => $this->apiClient1->getToken(),
+                ],
+                Router::ABSOLUTE_URL
+            ),
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['query' => '{}'])
+        );
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Try to access with fallback but no user loggedin.
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
-            'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
-        ], Router::ABSOLUTE_URL), [], [], [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_AUTHENTICATION_FALLBACK' => 'true',
-        ], json_encode(['query' => '{}']));
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_core_api',
+                [
+                    'domain' => $this->domain->getIdentifier(),
+                    'organization' => $this->organization->getIdentifier(),
+                ],
+                Router::ABSOLUTE_URL
+            ),
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHENTICATION_FALLBACK' => 'true',
+            ],
+            json_encode(['query' => '{}'])
+        );
 
         // Redirect to login page
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
@@ -172,13 +216,24 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $session->save();
         $cookie = new Cookie($session->getName(), $session->getId());
         $this->client->getCookieJar()->set($cookie);
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
-            'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
-        ], Router::ABSOLUTE_URL), [], [], [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_AUTHENTICATION_FALLBACK' => 'true',
-        ], json_encode(['query' => '{}']));
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_core_api',
+                [
+                    'domain' => $this->domain->getIdentifier(),
+                    'organization' => $this->organization->getIdentifier(),
+                ],
+                Router::ABSOLUTE_URL
+            ),
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHENTICATION_FALLBACK' => 'true',
+            ],
+            json_encode(['query' => '{}'])
+        );
 
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
@@ -195,13 +250,24 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $session->save();
         $cookie = new Cookie($session->getName(), $session->getId());
         $this->client->getCookieJar()->set($cookie);
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
-            'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
-        ], Router::ABSOLUTE_URL), [], [], [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_AUTHENTICATION_FALLBACK' => 'true',
-        ], json_encode(['query' => '{}']));
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_core_api',
+                [
+                    'domain' => $this->domain->getIdentifier(),
+                    'organization' => $this->organization->getIdentifier(),
+                ],
+                Router::ABSOLUTE_URL
+            ),
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHENTICATION_FALLBACK' => 'true',
+            ],
+            json_encode(['query' => '{}'])
+        );
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
     }
 }

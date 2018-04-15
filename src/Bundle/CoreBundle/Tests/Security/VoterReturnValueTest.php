@@ -43,7 +43,10 @@ class VoterReturnValueTest extends SecurityVoterTestCase
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
-        $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $contentVoter->voteWithoutCheck($this->token, (object)[], ''));
+        $this->assertEquals(
+            VoterInterface::ACCESS_ABSTAIN,
+            $contentVoter->voteWithoutCheck($this->token, (object)[], '')
+        );
 
         $deleteContentVoter = new class extends DeletedContentVoter
         {
@@ -52,7 +55,10 @@ class VoterReturnValueTest extends SecurityVoterTestCase
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
-        $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $deleteContentVoter->voteWithoutCheck($this->token, (object)[], ''));
+        $this->assertEquals(
+            VoterInterface::ACCESS_ABSTAIN,
+            $deleteContentVoter->voteWithoutCheck($this->token, (object)[], '')
+        );
 
         $domainVoter = new class extends DomainVoter
         {
@@ -61,7 +67,10 @@ class VoterReturnValueTest extends SecurityVoterTestCase
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
-        $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $domainVoter->voteWithoutCheck($this->token, (object)[], ''));
+        $this->assertEquals(
+            VoterInterface::ACCESS_ABSTAIN,
+            $domainVoter->voteWithoutCheck($this->token, (object)[], '')
+        );
 
         $organizationVoter = new class extends OrganizationVoter
         {
@@ -70,7 +79,10 @@ class VoterReturnValueTest extends SecurityVoterTestCase
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
-        $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $organizationVoter->voteWithoutCheck($this->token, (object)[], ''));
+        $this->assertEquals(
+            VoterInterface::ACCESS_ABSTAIN,
+            $organizationVoter->voteWithoutCheck($this->token, (object)[], '')
+        );
 
         $settingVoter = new class extends SettingVoter
         {
@@ -79,7 +91,10 @@ class VoterReturnValueTest extends SecurityVoterTestCase
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
-        $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $settingVoter->voteWithoutCheck($this->token, (object)[], ''));
+        $this->assertEquals(
+            VoterInterface::ACCESS_ABSTAIN,
+            $settingVoter->voteWithoutCheck($this->token, (object)[], '')
+        );
     }
 
     public function testContentVoterReturnsAbstainForDeletedContent()
@@ -96,7 +111,10 @@ class VoterReturnValueTest extends SecurityVoterTestCase
         $reflector = new \ReflectionProperty(Content::class, 'deleted');
         $reflector->setAccessible(true);
         $reflector->setValue($value, new \DateTime());
-        $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $contentVoter->voteWithoutCheck($this->token, $value, 'any'));
+        $this->assertEquals(
+            VoterInterface::ACCESS_ABSTAIN,
+            $contentVoter->voteWithoutCheck($this->token, $value, 'any')
+        );
     }
 
     /**
@@ -159,7 +177,10 @@ class VoterReturnValueTest extends SecurityVoterTestCase
         $member = new OrganizationMember();
         $member->setOrganization($value)->setRoles(['any_unknown_role']);
         $user->addOrganization($member);
-        $this->assertEquals(VoterInterface::ACCESS_DENIED, $organizationVoter->voteWithoutCheck($this->token, $value, OrganizationVoter::VIEW));
+        $this->assertEquals(
+            VoterInterface::ACCESS_DENIED,
+            $organizationVoter->voteWithoutCheck($this->token, $value, OrganizationVoter::VIEW)
+        );
     }
 
 }

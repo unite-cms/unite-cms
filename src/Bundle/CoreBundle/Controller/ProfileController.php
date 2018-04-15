@@ -60,7 +60,11 @@ class ProfileController extends Controller
             $changePassword,
             ['validation_groups' => 'UPDATE']
         )
-            ->add('currentPassword', PasswordType::class, ['label' => 'profile.change_password.form.current_password', 'required' => true])
+            ->add(
+                'currentPassword',
+                PasswordType::class,
+                ['label' => 'profile.change_password.form.current_password', 'required' => true]
+            )
             ->add(
                 'newPassword',
                 RepeatedType::class,

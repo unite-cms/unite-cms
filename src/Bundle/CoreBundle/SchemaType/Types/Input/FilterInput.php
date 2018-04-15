@@ -33,7 +33,7 @@ class FilterInput extends InputObjectType
                         'value' => [
                             'type' => Type::string(),
                             'description' => 'Set the field value',
-                        ]
+                        ],
                     ];
                 },
             ]

@@ -43,9 +43,11 @@ class ValidContentTranslationsValidator extends ConstraintValidator
         $content = $this->context->getObject();
 
         // There cannot be a duplicated locale in the translations.
-        $found_locales = $value->map(function (Content $content) {
-            return $content->getLocale();
-        })->toArray();
+        $found_locales = $value->map(
+            function (Content $content) {
+                return $content->getLocale();
+            }
+        )->toArray();
         $found_locales[] = $content->getLocale();
 
         if (count(array_unique($found_locales)) < count($found_locales)) {

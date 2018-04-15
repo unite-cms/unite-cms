@@ -31,8 +31,13 @@ class SortIndexFieldType extends FieldType
         $data[$field->getIdentifier()] = $repository->count(['contentType' => $content->getContentType()]);
     }
 
-    public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data)
-    {
+    public function onUpdate(
+        FieldableField $field,
+        FieldableContent $content,
+        EntityRepository $repository,
+        $old_data,
+        &$data
+    ) {
         if ($content instanceof Content) {
 
             // if we recover a deleted content, it's like we are moving the item from the end of the list to its original position.
@@ -55,12 +60,14 @@ class SortIndexFieldType extends FieldType
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) +1 AS int))")
                     ->where('c.contentType = :contentType')
                     ->andWhere("JSON_EXTRACT(c.data, :identifier) BETWEEN :first AND :last")
-                    ->setParameters([
-                        'identifier' => $field->getJsonExtractIdentifier(),
-                        ':contentType' => $content->getContentType(),
-                        ':first' => $updatedPosition,
-                        ':last' => $originalPosition - 1,
-                    ])
+                    ->setParameters(
+                        [
+                            'identifier' => $field->getJsonExtractIdentifier(),
+                            ':contentType' => $content->getContentType(),
+                            ':first' => $updatedPosition,
+                            ':last' => $originalPosition - 1,
+                        ]
+                    )
                     ->getQuery()->execute();
 
             }
@@ -73,12 +80,14 @@ class SortIndexFieldType extends FieldType
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) -1 AS int))")
                     ->where('c.contentType = :contentType')
                     ->andWhere("JSON_EXTRACT(c.data, :identifier) BETWEEN :first AND :last")
-                    ->setParameters([
-                        'identifier' => $field->getJsonExtractIdentifier(),
-                        ':contentType' => $content->getContentType(),
-                        ':first' => $originalPosition + 1,
-                        ':last' => $updatedPosition,
-                    ])
+                    ->setParameters(
+                        [
+                            'identifier' => $field->getJsonExtractIdentifier(),
+                            ':contentType' => $content->getContentType(),
+                            ':first' => $originalPosition + 1,
+                            ':last' => $updatedPosition,
+                        ]
+                    )
                     ->getQuery()->execute();
             }
 
@@ -90,11 +99,13 @@ class SortIndexFieldType extends FieldType
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) +1 AS int))")
                     ->where('c.contentType = :contentType')
                     ->andWhere("JSON_EXTRACT(c.data, :identifier) >= :first")
-                    ->setParameters([
-                        'identifier' => $field->getJsonExtractIdentifier(),
-                        ':contentType' => $content->getContentType(),
-                        ':first' => $updatedPosition,
-                    ])
+                    ->setParameters(
+                        [
+                            'identifier' => $field->getJsonExtractIdentifier(),
+                            ':contentType' => $content->getContentType(),
+                            ':first' => $updatedPosition,
+                        ]
+                    )
                     ->getQuery()->execute();
             }
 
@@ -110,11 +121,13 @@ class SortIndexFieldType extends FieldType
             ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) -1 AS int))")
             ->where('c.contentType = :contentType')
             ->andWhere("JSON_EXTRACT(c.data, :identifier) > :last")
-            ->setParameters([
-                'identifier' => $field->getJsonExtractIdentifier(),
-                ':contentType' => $content->getContentType(),
-                ':last' => $data[$field->getIdentifier()],
-            ])
+            ->setParameters(
+                [
+                    'identifier' => $field->getJsonExtractIdentifier(),
+                    ':contentType' => $content->getContentType(),
+                    ':last' => $data[$field->getIdentifier()],
+                ]
+            )
             ->getQuery()->execute();
     }
 }

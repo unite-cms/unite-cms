@@ -21,18 +21,27 @@ class WebComponentTypeTest extends TestCase
             ->method('getData')
             ->willReturn(null);
 
-        $formType->buildView($formView, $form, [
-            'empty_data' => [
-                'foo' => 'baa',
-                'foo2' => ['baa'],
-            ],
-        ]);
+        $formType->buildView(
+            $formView,
+            $form,
+            [
+                'empty_data' => [
+                    'foo' => 'baa',
+                    'foo2' => ['baa'],
+                ],
+            ]
+        );
 
         $this->assertEquals('undefined-tag', $formView->vars['tag']);
-        $this->assertEquals(json_encode([
-            'foo' => 'baa',
-            'foo2' => ['baa'],
-        ]), $formView->vars['value']);
+        $this->assertEquals(
+            json_encode(
+                [
+                    'foo' => 'baa',
+                    'foo2' => ['baa'],
+                ]
+            ),
+            $formView->vars['value']
+        );
     }
 
     public function testDataTransformer()

@@ -19,7 +19,7 @@ class FieldTypeManagerTest extends TestCase
 
             public function getTitle(FieldableField $field): string
             {
-                return 'custom_prefix_' . parent::getTitle($field);
+                return 'custom_prefix_'.parent::getTitle($field);
             }
         };
 

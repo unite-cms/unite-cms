@@ -41,11 +41,6 @@ class SchemaTypeManager
         return $this->schemaTypeFactories;
     }
 
-    public function hasSchemaType($key): bool
-    {
-        return array_key_exists($key, $this->schemaTypes);
-    }
-
     /**
      * Returns the named schema type. If schema type was not found all registered factories get asked if they can
      * create the schema. If no schema was found and no schema could be created, an \InvalidArgumentException will be
@@ -60,7 +55,7 @@ class SchemaTypeManager
     public function getSchemaType($key, Domain $domain = null, $nestingLevel = 0)
     {
         if ($nestingLevel > self::MAXIMUM_NESTING_LEVEL) {
-            throw new \InvalidArgumentException("Maximum nesting level: " . self::MAXIMUM_NESTING_LEVEL . " reached.");
+            throw new \InvalidArgumentException("Maximum nesting level: ".self::MAXIMUM_NESTING_LEVEL." reached.");
         }
 
         if ($nestingLevel == self::MAXIMUM_NESTING_LEVEL) {
@@ -70,7 +65,9 @@ class SchemaTypeManager
         if (!$this->hasSchemaType($key)) {
             foreach ($this->schemaTypeFactories as $schemaTypeFactory) {
                 if ($schemaTypeFactory->supports($key)) {
-                    $this->registerSchemaType($schemaTypeFactory->createSchemaType($this, $nestingLevel, $domain, $key));
+                    $this->registerSchemaType(
+                        $schemaTypeFactory->createSchemaType($this, $nestingLevel, $domain, $key)
+                    );
                     break;
                 }
             }
@@ -83,6 +80,11 @@ class SchemaTypeManager
         return $this->schemaTypes[$key];
     }
 
+    public function hasSchemaType($key): bool
+    {
+        return array_key_exists($key, $this->schemaTypes);
+    }
+
     /**
      * @param Type $schemaType
      *
@@ -92,7 +94,7 @@ class SchemaTypeManager
     {
         if (!$schemaType instanceof InputObjectType && !$schemaType instanceof ObjectType && !$schemaType instanceof InterfaceType && !$schemaType instanceof UnionType && !$schemaType instanceof ListOfType) {
             throw new \InvalidArgumentException(
-                'Schema type must be of type ' . ObjectType::class . ' or ' . InputObjectType::class . ' or ' . InterfaceType::class . ' or ' . UnionType::class . ' or ' . ListOfType::class
+                'Schema type must be of type '.ObjectType::class.' or '.InputObjectType::class.' or '.InterfaceType::class.' or '.UnionType::class.' or '.ListOfType::class
             );
         }
 

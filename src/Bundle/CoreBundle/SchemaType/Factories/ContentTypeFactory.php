@@ -73,10 +73,16 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-    {
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        int $nestingLevel,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
         if (!$domain) {
-            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument');
+            throw new \InvalidArgumentException(
+                'UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument'
+            );
         }
 
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
@@ -119,30 +125,41 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
             // If we want to create an InputObjectType, get GraphQLInputType.
             if ($isInputType) {
-                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
+                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType(
+                    $field,
+                    $schemaTypeManager,
+                    $nestingLevel + 1
+                );
             } else {
-                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
+                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType(
+                    $field,
+                    $schemaTypeManager,
+                    $nestingLevel + 1
+                );
             }
         }
 
         if ($isInputType) {
 
             if (count($contentType->getLocales()) > 0) {
-                $fields = array_merge([
-                    'locale' => Type::nonNull(Type::string())
-                ], $fields);
+                $fields = array_merge(
+                    [
+                        'locale' => Type::nonNull(Type::string()),
+                    ],
+                    $fields
+                );
             }
 
             return new InputObjectType(
                 [
-                    'name' => ucfirst($identifier) . 'ContentInput' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                    'name' => ucfirst($identifier).'ContentInput'.($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                     'fields' => $fields,
                 ]
             );
         } else {
             return new ObjectType(
                 [
-                    'name' => ucfirst($identifier) . 'Content' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                    'name' => ucfirst($identifier).'Content'.($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                     'fields' => array_merge(
                         [
                             'id' => Type::id(),
@@ -160,7 +177,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
                         if (!$value instanceof Content) {
                             throw new \InvalidArgumentException(
-                                'Value must be instance of ' . Content::class . '.'
+                                'Value must be instance of '.Content::class.'.'
                             );
                         }
 
@@ -185,7 +202,10 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                     $info->fieldName,
                                     $value->getData()
                                 ) ? $value->getData()[$info->fieldName] : null;
-                                $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($contentType->getFields()->get($info->fieldName), $fieldData);
+                                $data = $fieldTypes[$info->fieldName]->resolveGraphQLData(
+                                    $contentType->getFields()->get($info->fieldName),
+                                    $fieldData
+                                );
 
                                 return $data;
                         }

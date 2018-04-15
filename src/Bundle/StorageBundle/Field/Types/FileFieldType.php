@@ -30,8 +30,12 @@ class FileFieldType extends FieldType
     private $storageService;
     private $csrfTokenManager;
 
-    public function __construct(Router $router, string $secret, StorageService $storageService, CsrfTokenManager $csrfTokenManager)
-    {
+    public function __construct(
+        Router $router,
+        string $secret,
+        StorageService $storageService,
+        CsrfTokenManager $csrfTokenManager
+    ) {
         $this->router = $router;
         $this->secret = $secret;
         $this->storageService = $storageService;
@@ -49,17 +53,27 @@ class FileFieldType extends FieldType
         $fieldable = $field->getEntity()->getRootEntity();
 
         if ($fieldable instanceof ContentType) {
-            $url = $this->router->generate('unitecms_storage_sign_uploadcontenttype', [
-                'organization' => $fieldable->getDomain()->getOrganization()->getIdentifier(),
-                'domain' => $fieldable->getDomain()->getIdentifier(),
-                'content_type' => $fieldable->getIdentifier(),
-            ], Router::ABSOLUTE_URL);
-        } else if ($fieldable instanceof SettingType) {
-            $url = $this->router->generate('unitecms_storage_sign_uploadsettingtype', [
-                'organization' => $fieldable->getDomain()->getOrganization()->getIdentifier(),
-                'domain' => $fieldable->getDomain()->getIdentifier(),
-                'content_type' => $fieldable->getIdentifier(),
-            ], Router::ABSOLUTE_URL);
+            $url = $this->router->generate(
+                'unitecms_storage_sign_uploadcontenttype',
+                [
+                    'organization' => $fieldable->getDomain()->getOrganization()->getIdentifier(),
+                    'domain' => $fieldable->getDomain()->getIdentifier(),
+                    'content_type' => $fieldable->getIdentifier(),
+                ],
+                Router::ABSOLUTE_URL
+            );
+        } else {
+            if ($fieldable instanceof SettingType) {
+                $url = $this->router->generate(
+                    'unitecms_storage_sign_uploadsettingtype',
+                    [
+                        'organization' => $fieldable->getDomain()->getOrganization()->getIdentifier(),
+                        'domain' => $fieldable->getDomain()->getIdentifier(),
+                        'content_type' => $fieldable->getIdentifier(),
+                    ],
+                    Router::ABSOLUTE_URL
+                );
+            }
         }
 
         // Use the identifier path part, but exclude root entity and include field identifier.
@@ -67,15 +81,18 @@ class FileFieldType extends FieldType
         array_shift($identifier_path_parts);
         $identifier_path_parts[] = $field->getIdentifier();
 
-        return array_merge(parent::getFormOptions($field), [
-            'attr' => [
-                'file-types' => $field->getSettings()->file_types,
-                'field-path' => join('/', $identifier_path_parts),
-                'endpoint' => $field->getSettings()->bucket['endpoint'] . '/' . $field->getSettings()->bucket['bucket'],
-                'upload-sign-url' => $url,
-                'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
-            ],
-        ]);
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'attr' => [
+                    'file-types' => $field->getSettings()->file_types,
+                    'field-path' => join('/', $identifier_path_parts),
+                    'endpoint' => $field->getSettings()->bucket['endpoint'].'/'.$field->getSettings()->bucket['bucket'],
+                    'upload-sign-url' => $url,
+                    'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
+                ],
+            ]
+        );
     }
 
     /**
@@ -100,7 +117,9 @@ class FileFieldType extends FieldType
     function resolveGraphQLData(FieldableField $field, $value)
     {
         // Create full URL to file.
-        $value['url'] = $field->getSettings()->bucket['endpoint'] . '/' . $field->getSettings()->bucket['bucket'] . '/' . $value['id'] . '/' . $value['name'];
+        $value['url'] = $field->getSettings()->bucket['endpoint'].'/'.$field->getSettings(
+            )->bucket['bucket'].'/'.$value['id'].'/'.$value['name'];
+
         return $value;
     }
 
@@ -151,7 +170,7 @@ class FileFieldType extends FieldType
                         'validation.required',
                         [],
                         $settings->bucket,
-                        'bucket.' . $required_field,
+                        'bucket.'.$required_field,
                         $settings->bucket
                     );
                 }
@@ -183,8 +202,13 @@ class FileFieldType extends FieldType
      * @param $old_data
      * @param $data
      */
-    public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data)
-    {
+    public function onUpdate(
+        FieldableField $field,
+        FieldableContent $content,
+        EntityRepository $repository,
+        $old_data,
+        &$data
+    ) {
 
         if (isset($old_data[$field->getIdentifier()])) {
 

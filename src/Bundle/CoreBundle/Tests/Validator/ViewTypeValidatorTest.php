@@ -20,7 +20,10 @@ class ViewTypeValidatorTest extends ConstraintValidatorTestCase
         // Validate value.
         $context = $this->validate('any_wrong_value', new ViewTypeValidator($viewTypeManagerMock));
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('This type is not a registered view type.', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'This type is not a registered view type.',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testValidValue()
@@ -49,6 +52,9 @@ class ViewTypeValidatorTest extends ConstraintValidatorTestCase
         // Validate value.
         $context = $this->validate(1, new ViewTypeValidator($viewTypeManagerMock));
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('This type is not a registered view type.', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'This type is not a registered view type.',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 }

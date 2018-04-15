@@ -16,7 +16,10 @@ class DefaultViewTypeValidatorTest extends ConstraintValidatorTestCase
     {
         $context = $this->validate([]);
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('The default view type is missing', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'The default view type is missing',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testValidViewValue()
@@ -33,6 +36,9 @@ class DefaultViewTypeValidatorTest extends ConstraintValidatorTestCase
         $c->setIdentifier('any_other');
         $context = $this->validate([$c]);
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('The default view type is missing', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'The default view type is missing',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 }

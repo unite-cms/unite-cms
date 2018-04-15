@@ -69,7 +69,9 @@ class ContentController extends Controller
         }
 
         if ($request->query->has('translation_of')) {
-            $translationOf = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->find($request->query->get('translation_of'));
+            $translationOf = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->find(
+                $request->query->get('translation_of')
+            );
             if ($translationOf) {
                 $content->setTranslationOf($translationOf);
             }
@@ -222,14 +224,18 @@ class ContentController extends Controller
     {
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'content.delete.submit', 'attr' => ['class' => 'uk-button-danger']])
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'content.delete.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )
             ->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, NULL, ['DELETE']);
+            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -286,10 +292,12 @@ class ContentController extends Controller
             $em->getFilters()->disable('gedmo_softdeleteable');
         }
 
-        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-            'id' => $content,
-            'contentType' => $view->getContentType(),
-        ]);
+        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            [
+                'id' => $content,
+                'contentType' => $view->getContentType(),
+            ]
+        );
 
         if ($em instanceof EntityManager) {
             $em->getFilters()->enable('gedmo_softdeleteable');
@@ -308,14 +316,18 @@ class ContentController extends Controller
         }
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'content.delete_definitely.submit', 'attr' => ['class' => 'uk-button-danger']])
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'content.delete_definitely.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )
             ->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, NULL, ['DELETE']);
+            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -378,10 +390,12 @@ class ContentController extends Controller
             $em->getFilters()->disable('gedmo_softdeleteable');
         }
 
-        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-            'id' => $content,
-            'contentType' => $view->getContentType(),
-        ]);
+        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            [
+                'id' => $content,
+                'contentType' => $view->getContentType(),
+            ]
+        );
 
         if ($em instanceof EntityManager) {
             $em->getFilters()->enable('gedmo_softdeleteable');
@@ -407,7 +421,7 @@ class ContentController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, NULL, ['DELETE']);
+            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -462,8 +476,14 @@ class ContentController extends Controller
 
         if (!empty($content->getTranslationOf())) {
             // Check if the translationOf content was soft deleted.
-            if (!$this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['id' => $content->getTranslationOf()->getId()])) {
-                $this->addFlash('warning', 'You cannot manage translations for this content, because it is a translation of soft-deleted content.');
+            if (!$this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+                ['id' => $content->getTranslationOf()->getId()]
+            )) {
+                $this->addFlash(
+                    'warning',
+                    'You cannot manage translations for this content, because it is a translation of soft-deleted content.'
+                );
+
                 return $this->redirectToRoute(
                     'unitecms_core_content_index',
                     [
@@ -503,36 +523,44 @@ class ContentController extends Controller
     {
 
         $form = $this->createFormBuilder()
-            ->add('translation', WebComponentType::class, [
-                'tag' => 'unite-cms-core-reference-field',
-                'empty_data' => [
-                    'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                    'content_type' => $view->getContentType()->getIdentifier(),
-                ],
-                'attr' => [
-                    'base-url' => '/' . $view->getContentType()->getDomain()->getOrganization() . '/',
-                    'content-label' => '#{id}',
-                    'modal-html' => $this->render(
-                        $this->get('unite.cms.view_type_manager')->getViewType($view->getType())::getTemplate(),
-                        [
-                            'view' => $view,
-                            'parameters' => $this->get('unite.cms.view_type_manager')
-                                ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
-                                ->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form')),
-                        ]
-                    ),
-                ],
-            ])
+            ->add(
+                'translation',
+                WebComponentType::class,
+                [
+                    'tag' => 'unite-cms-core-reference-field',
+                    'empty_data' => [
+                        'domain' => $view->getContentType()->getDomain()->getIdentifier(),
+                        'content_type' => $view->getContentType()->getIdentifier(),
+                    ],
+                    'attr' => [
+                        'base-url' => '/'.$view->getContentType()->getDomain()->getOrganization().'/',
+                        'content-label' => '#{id}',
+                        'modal-html' => $this->render(
+                            $this->get('unite.cms.view_type_manager')->getViewType($view->getType())::getTemplate(),
+                            [
+                                'view' => $view,
+                                'parameters' => $this->get('unite.cms.view_type_manager')
+                                    ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
+                                    ->setCsrfToken(
+                                        $this->get('security.csrf.token_manager')->getToken('fieldable_form')
+                                    ),
+                            ]
+                        ),
+                    ],
+                ]
+            )
             ->add('submit', SubmitType::class, ['label' => 'content.translations.add_existing.submit'])->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             foreach ($form->getData() as $key => $translation_identifier) {
                 if (!empty($translation_identifier['content'])) {
-                    $translation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-                        'id' => $translation_identifier['content'],
-                        'translationOf' => NULL,
-                    ]);
+                    $translation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+                        [
+                            'id' => $translation_identifier['content'],
+                            'translationOf' => null,
+                        ]
+                    );
                     if (!$translation) {
 
                         $form->addError(
@@ -557,10 +585,12 @@ class ContentController extends Controller
                         } else {
                             $this->getDoctrine()->getManager()->flush();
                             $this->addFlash('success', 'Translation added.');
+
                             return $this->redirectToRoute(
                                 'unitecms_core_content_translations',
                                 [
-                                    'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                                    'organization' => $view->getContentType()->getDomain()->getOrganization(
+                                    )->getIdentifier(),
                                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                                     'content_type' => $view->getContentType()->getIdentifier(),
                                     'view' => $view->getIdentifier(),
@@ -602,9 +632,11 @@ class ContentController extends Controller
      */
     public function removeTranslationAction(View $view, Content $content, String $locale, Request $request)
     {
-        $translations = $content->getTranslations()->filter(function (Content $content) use ($locale) {
-            return $content->getLocale() == $locale;
-        });
+        $translations = $content->getTranslations()->filter(
+            function (Content $content) use ($locale) {
+                return $content->getLocale() == $locale;
+            }
+        );
 
         if (empty($translations)) {
             throw $this->createNotFoundException();
@@ -616,7 +648,11 @@ class ContentController extends Controller
         $translation = $translations->first();
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'content.translations.remove.submit', 'attr' => ['class' => 'uk-button-danger']])
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'content.translations.remove.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )
             ->getForm();
 
         $form->handleRequest($request);
@@ -672,7 +708,9 @@ class ContentController extends Controller
                 'view' => $view,
                 'contentType' => $view->getContentType(),
                 'content' => $content,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository('GedmoLoggable:LogEntry')->getLogEntries($content),
+                'revisions' => $this->getDoctrine()->getManager()->getRepository(
+                    'GedmoLoggable:LogEntry'
+                )->getLogEntries($content),
             ]
         );
     }

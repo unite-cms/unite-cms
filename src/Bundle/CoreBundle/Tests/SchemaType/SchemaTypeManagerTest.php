@@ -19,11 +19,21 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase
 
         // Check that core schemaTypes and factories are already registered via compiler pass.
         $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('Query'));
-        $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResult'));
-        $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentInterface'));
-        $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResultInterface'));
-        $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResult'));
-        $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('SettingInterface'));
+        $this->assertTrue(
+            $this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResult')
+        );
+        $this->assertTrue(
+            $this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentInterface')
+        );
+        $this->assertTrue(
+            $this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResultInterface')
+        );
+        $this->assertTrue(
+            $this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResult')
+        );
+        $this->assertTrue(
+            $this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('SettingInterface')
+        );
         $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FilterInput'));
         $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('SortInput'));
 
@@ -47,23 +57,43 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase
                 return false;
             }
 
-            public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-            {
+            public function createSchemaType(
+                SchemaTypeManager $schemaTypeManager,
+                int $nestingLevel,
+                Domain $domain = null,
+                string $schemaTypeName
+            ): Type {
                 return new ObjectType([]);
             }
         };
 
-        $this->assertNotContains($schemaType, $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypes());
-        $this->assertNotContains($schemaTypeFactory, $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypeFactories());
-        $this->assertFalse($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('my_anonymous_type'));
+        $this->assertNotContains(
+            $schemaType,
+            $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypes()
+        );
+        $this->assertNotContains(
+            $schemaTypeFactory,
+            $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypeFactories()
+        );
+        $this->assertFalse(
+            $this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('my_anonymous_type')
+        );
 
         // Now register the schemaType an the schemaTypeFactory as service.
         $this->container->get('unite.cms.graphql.schema_type_manager')->registerSchemaType($schemaType);
         $this->container->get('unite.cms.graphql.schema_type_manager')->registerSchemaTypeFactory($schemaTypeFactory);
 
-        $this->assertContains($schemaType, $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypes());
-        $this->assertContains($schemaTypeFactory, $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypeFactories());
-        $this->assertTrue($this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('my_anonymous_type'));
+        $this->assertContains(
+            $schemaType,
+            $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypes()
+        );
+        $this->assertContains(
+            $schemaTypeFactory,
+            $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypeFactories()
+        );
+        $this->assertTrue(
+            $this->container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('my_anonymous_type')
+        );
     }
 
     /**
@@ -113,8 +143,12 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase
                 return $schemaTypeName === 'factory_type';
             }
 
-            public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-            {
+            public function createSchemaType(
+                SchemaTypeManager $schemaTypeManager,
+                int $nestingLevel,
+                Domain $domain = null,
+                string $schemaTypeName
+            ): Type {
                 return new ObjectType(['name' => 'factory_type']);
             }
         };

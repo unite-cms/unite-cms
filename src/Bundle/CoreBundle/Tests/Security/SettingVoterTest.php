@@ -106,25 +106,34 @@ class SettingVoterTest extends SecurityVoterTestCase
         };
 
         // Try with invalid token.
-        $this->assertNotEquals(VoterInterface::ACCESS_GRANTED, $voter->vote(
-            new UsernamePasswordToken($invalidUser, '', 'main', []),
-            $this->settingType1,
-            [SettingVoter::VIEW]
-        ));
+        $this->assertNotEquals(
+            VoterInterface::ACCESS_GRANTED,
+            $voter->vote(
+                new UsernamePasswordToken($invalidUser, '', 'main', []),
+                $this->settingType1,
+                [SettingVoter::VIEW]
+            )
+        );
 
         // Try with invalid subject.
-        $this->assertNotEquals(VoterInterface::ACCESS_GRANTED, $voter->vote(
-            $this->u['domain_admin'],
-            (object)[],
-            [SettingVoter::VIEW]
-        ));
+        $this->assertNotEquals(
+            VoterInterface::ACCESS_GRANTED,
+            $voter->vote(
+                $this->u['domain_admin'],
+                (object)[],
+                [SettingVoter::VIEW]
+            )
+        );
 
         // Try with invalid attribute.
-        $this->assertNotEquals(VoterInterface::ACCESS_GRANTED, $voter->vote(
-            $this->u['domain_admin'],
-            $this->settingType1,
-            ['any']
-        ));
+        $this->assertNotEquals(
+            VoterInterface::ACCESS_GRANTED,
+            $voter->vote(
+                $this->u['domain_admin'],
+                $this->settingType1,
+                ['any']
+            )
+        );
     }
 
     public function testCRUDActions()

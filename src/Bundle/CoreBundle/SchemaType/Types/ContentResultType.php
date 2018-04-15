@@ -46,8 +46,7 @@ class ContentResultType extends AbstractType
         UniteCMSManager $uniteCMSManager = null,
         Domain $domain = null,
         $contentSchemaType = 'ContentInterface'
-    )
-    {
+    ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->domain = $domain ? $domain : $uniteCMSManager->getDomain();
@@ -94,7 +93,7 @@ class ContentResultType extends AbstractType
     {
 
         if (!$value instanceof AbstractPagination) {
-            throw new \InvalidArgumentException('Value must be instance of ' . AbstractPagination::class . '.');
+            throw new \InvalidArgumentException('Value must be instance of '.AbstractPagination::class.'.');
         }
 
         switch ($info->fieldName) {
@@ -109,7 +108,7 @@ class ContentResultType extends AbstractType
                         $items[] = $item;
 
                         // Create content schema type for current domain.
-                        $type = ucfirst($item->getContentType()->getIdentifier()) . 'Content';
+                        $type = ucfirst($item->getContentType()->getIdentifier()).'Content';
                         $this->schemaTypeManager->getSchemaType($type, $this->domain);
                     }
                 }

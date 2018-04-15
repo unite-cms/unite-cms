@@ -135,7 +135,9 @@ class SettingController extends Controller
             [
                 'settingType' => $settingType,
                 'setting' => $setting,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository('GedmoLoggable:LogEntry')->getLogEntries($setting),
+                'revisions' => $this->getDoctrine()->getManager()->getRepository(
+                    'GedmoLoggable:LogEntry'
+                )->getLogEntries($setting),
             ]
         );
     }

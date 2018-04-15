@@ -21,19 +21,27 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.required', $errors->get(0)->getMessage());
 
-        $field->setSettings(new FieldableFieldSettings([
-            'file_types' => 'txt',
-            'bucket' => [],
-            'foo' => 'baa',
-        ]));
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [],
+                    'foo' => 'baa',
+                ]
+            )
+        );
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
 
-        $field->setSettings(new FieldableFieldSettings([
-            'file_types' => 'txt',
-            'bucket' => [],
-        ]));
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [],
+                ]
+            )
+        );
 
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(4, $errors);
@@ -46,30 +54,38 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('settings.bucket.bucket', $errors->get(3)->getPropertyPath());
         $this->assertEquals('validation.required', $errors->get(3)->getMessage());
 
-        $field->setSettings(new FieldableFieldSettings([
-            'file_types' => 'txt',
-            'bucket' => [
-                'endpoint' => 'example.com',
-                'key' => 'XXX',
-                'secret' => 'XXX',
-                'bucket' => 'foo',
-            ],
-        ]));
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [
+                        'endpoint' => 'example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                    ],
+                ]
+            )
+        );
 
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.absolute_url', $errors->get(0)->getMessage());
 
-        $field->setSettings(new FieldableFieldSettings([
-            'file_types' => 'txt',
-            'bucket' => [
-                'endpoint' => 'https://example.com',
-                'key' => 'XXX',
-                'secret' => 'XXX',
-                'bucket' => 'foo',
-            ],
-        ]));
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                    ],
+                ]
+            )
+        );
 
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(0, $errors);
@@ -81,15 +97,19 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $field = $this->createContentTypeField('file');
         $field->setIdentifier('f1');
         $field->getContentType()->setIdentifier('ct1');
-        $field->setSettings(new FieldableFieldSettings([
-            'file_types' => '*',
-            'bucket' => [
-                'endpoint' => 'https://example.com',
-                'key' => 'XXX',
-                'secret' => 'XXX',
-                'bucket' => 'foo',
-            ],
-        ]));
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => '*',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                    ],
+                ]
+            )
+        );
 
         $this->em->persist($field->getContentType()->getDomain()->getOrganization());
         $this->em->persist($field->getContentType()->getDomain());
@@ -105,8 +125,11 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $d->setAccessible(true);
         $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
 
-        $key = ucfirst($field->getContentType()->getIdentifier()) . 'Content';
-        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType($key, $field->getContentType()->getDomain());
+        $key = ucfirst($field->getContentType()->getIdentifier()).'Content';
+        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
+            $key,
+            $field->getContentType()->getDomain()
+        );
         $this->assertInstanceOf(ObjectType::class, $type);
 
         // Check file field structure.
@@ -130,15 +153,19 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $field = $this->createContentTypeField('file');
         $field->setIdentifier('f1');
         $field->getContentType()->setIdentifier('ct1');
-        $field->setSettings(new FieldableFieldSettings([
-            'file_types' => '*',
-            'bucket' => [
-                'endpoint' => 'https://example.com',
-                'key' => 'XXX',
-                'secret' => 'XXX',
-                'bucket' => 'foo',
-            ],
-        ]));
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => '*',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                    ],
+                ]
+            )
+        );
         $this->em->persist($field->getContentType()->getDomain()->getOrganization());
         $this->em->persist($field->getContentType()->getDomain());
         $this->em->persist($field->getContentType());
@@ -157,7 +184,9 @@ class FileFieldTypeTest extends FieldTypeTestCase
         // In this test, we don't care about access checking.
         $admin = new User();
         $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($admin, null, 'api', $admin->getRoles()));
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($admin, null, 'api', $admin->getRoles())
+        );
 
         // Create GraphQL Schema
         $schemaTypeManager = $this->container->get('unite.cms.graphql.schema_type_manager');
@@ -172,7 +201,9 @@ class FileFieldTypeTest extends FieldTypeTestCase
             ]
         );
 
-        $result = GraphQL::executeQuery($schema, 'mutation { 
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
       createCt1(
         data: {
           f1: {
@@ -193,7 +224,8 @@ class FileFieldTypeTest extends FieldTypeTestCase
           url
         }
        }
-    }');
+    }'
+        );
         $result = json_decode(json_encode($result->toArray(true)));
 
         // Checksum should be invalid.
@@ -202,7 +234,9 @@ class FileFieldTypeTest extends FieldTypeTestCase
         // Try with valid checksum.
         $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');
 
-        $result = GraphQL::executeQuery($schema, 'mutation { 
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
       createCt1(
         data: {
           f1: {
@@ -210,7 +244,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             size: 12345,
             type: "image/jpeg",
             id: "XXX-YYY-ZZZ",
-            checksum: "' . $preSignedUrl->sign($this->container->getParameter('kernel.secret')) . '"
+            checksum: "'.$preSignedUrl->sign($this->container->getParameter('kernel.secret')).'"
           }
         }
       ) {
@@ -223,7 +257,8 @@ class FileFieldTypeTest extends FieldTypeTestCase
           url
         }
        }
-    }');
+    }'
+        );
         $result = json_decode(json_encode($result->toArray(true)));
 
         $this->assertNotEmpty($result->data->createCt1->id);
@@ -243,23 +278,34 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $field = $this->createContentTypeField('file');
         $field->setIdentifier('f1');
         $field->getContentType()->setIdentifier('ct1');
-        $field->setSettings(new FieldableFieldSettings([
-            'file_types' => '*',
-            'bucket' => [
-                'endpoint' => 'https://example.com',
-                'key' => 'XXX',
-                'secret' => 'XXX',
-                'bucket' => 'foo',
-            ],
-        ]));
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => '*',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                    ],
+                ]
+            )
+        );
         $content = new Content();
-        $content->setData(['f1' => [
-            'name' => "cat.jpg",
-            'size' => 12345,
-            'type' => "image/jpeg",
-            'id' => "XXX-YYY-ZZZ",
-        ]])->setContentType($field->getContentType());
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($field->getContentType(), $content);
+        $content->setData(
+            [
+                'f1' => [
+                    'name' => "cat.jpg",
+                    'size' => 12345,
+                    'type' => "image/jpeg",
+                    'id' => "XXX-YYY-ZZZ",
+                ],
+            ]
+        )->setContentType($field->getContentType());
+        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm(
+            $field->getContentType(),
+            $content
+        );
         $formView = $form->createView();
 
         // Check root file field.

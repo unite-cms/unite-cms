@@ -63,7 +63,11 @@ class ValidFieldableContentDataValidator extends ConstraintValidator
 
         foreach ($value as $field_key => $field_value) {
             $field = $content->getEntity()->getFields()->get($field_key);
-            foreach ($this->fieldTypeManager->validateFieldData($field, $field_value, strtoupper($this->context->getGroup())) as $violation) {
+            foreach ($this->fieldTypeManager->validateFieldData(
+                $field,
+                $field_value,
+                strtoupper($this->context->getGroup())
+            ) as $violation) {
                 $this->addDataViolation($violation);
             }
         }

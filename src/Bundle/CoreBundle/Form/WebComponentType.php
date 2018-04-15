@@ -19,10 +19,12 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setRequired('tag');
-        $resolver->setDefaults([
-            'compound' => false,
-            'label' => false,
-        ]);
+        $resolver->setDefaults(
+            [
+                'compound' => false,
+                'label' => false,
+            ]
+        );
     }
 
     /**
@@ -45,14 +47,6 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
-    {
-        return 'unite_cms_web_component';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function transform($data)
     {
         if (!is_string($data) && null !== $data) {
@@ -61,6 +55,14 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
 
         // Model data should not be transformed
         return $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBlockPrefix()
+    {
+        return 'unite_cms_web_component';
     }
 
     /**

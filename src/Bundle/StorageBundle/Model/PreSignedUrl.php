@@ -62,7 +62,13 @@ class PreSignedUrl implements \JsonSerializable
     public function sign(string $secret)
     {
         $this->checksum = $this->computeHash($secret);
+
         return $this->checksum;
+    }
+
+    private function computeHash($secret)
+    {
+        return urlencode(base64_encode(hash_hmac('sha256', $this->uuid.'/'.$this->filename, $secret, true)));
     }
 
     /**
@@ -76,6 +82,24 @@ class PreSignedUrl implements \JsonSerializable
     public function check(string $secret)
     {
         return $this->checksum === $this->computeHash($secret);
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     *
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'pre_signed_url' => $this->getPreSignedUrl(),
+            'uuid' => $this->getUuid(),
+            'filename' => $this->getFilename(),
+            'checksum' => $this->getChecksum(),
+        ];
     }
 
     /**
@@ -108,28 +132,5 @@ class PreSignedUrl implements \JsonSerializable
     public function getChecksum(): string
     {
         return $this->checksum;
-    }
-
-    /**
-     * Specify data which should be serialized to JSON
-     *
-     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed data which can be serialized by <b>json_encode</b>,
-     * which is a value of any type other than a resource.
-     * @since 5.4.0
-     */
-    public function jsonSerialize()
-    {
-        return [
-            'pre_signed_url' => $this->getPreSignedUrl(),
-            'uuid' => $this->getUuid(),
-            'filename' => $this->getFilename(),
-            'checksum' => $this->getChecksum(),
-        ];
-    }
-
-    private function computeHash($secret)
-    {
-        return urlencode(base64_encode(hash_hmac('sha256', $this->uuid . '/' . $this->filename, $secret, true)));
     }
 }

@@ -260,7 +260,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
     }
   ],
   "setting_types": []
-}'
+}',
         ],
         'baa_organization' => [
             '{
@@ -492,7 +492,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
     }
   ],
   "setting_types": []
-}'
+}',
         ],
     ];
     protected $roles = ['ROLE_PUBLIC', 'ROLE_EDITOR'];
@@ -531,12 +531,12 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 $this->em->flush($domain);
 
                 foreach ($this->roles as $role) {
-                    $this->users[$domain->getIdentifier() . '_' . $role] = new ApiClient();
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setName(ucfirst($role))->setRoles([$role]);
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setDomain($domain);
+                    $this->users[$domain->getIdentifier().'_'.$role] = new ApiClient();
+                    $this->users[$domain->getIdentifier().'_'.$role]->setName(ucfirst($role))->setRoles([$role]);
+                    $this->users[$domain->getIdentifier().'_'.$role]->setDomain($domain);
 
-                    $this->em->persist($this->users[$domain->getIdentifier() . '_' . $role]);
-                    $this->em->flush($this->users[$domain->getIdentifier() . '_' . $role]);
+                    $this->em->persist($this->users[$domain->getIdentifier().'_'.$role]);
+                    $this->em->flush($this->users[$domain->getIdentifier().'_'.$role]);
                 }
 
                 // For each content type create some views and test content.
@@ -560,7 +560,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                                     $content_data[$field->getIdentifier()] = $this->generateRandomMachineName(100);
                                     break;
                                 case 'textarea':
-                                    $content_data[$field->getIdentifier()] = '<p>' . $this->generateRandomMachineName(100) . '</p>';
+                                    $content_data[$field->getIdentifier()] = '<p>'.$this->generateRandomMachineName(
+                                            100
+                                        ).'</p>';
                                     break;
                             }
                         }
@@ -583,78 +585,165 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
     public function testAccessingAPI()
     {
-        $this->assertApiResponse([
-            'data' => [
-                'findNews' => [
-                    'page' => 1
-                ]
-            ]
-        ], $this->api(
-            $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'findNews' => [
+                        'page' => 1,
+                    ],
+                ],
+            ],
+            $this->api(
+                $this->domains['marketing'],
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
                 findNews {
                     page
                 }
-            }')
+            }'
+            )
         );
 
-        $this->assertApiResponse([
-            'data' => [
-                'findNews' => [
-                    'page' => 1
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'findNews' => [
+                        'page' => 1,
+                    ],
+                    'findNews_category' => [
+                        'page' => 1,
+                    ],
                 ],
-                'findNews_category' => [
-                    'page' => 1
-                ]
-            ]
-        ], $this->api(
-            $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            ],
+            $this->api(
+                $this->domains['marketing'],
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
                 findNews {
                     page
                 },
                 findNews_category {
                     page
                 }
-            }')
+            }'
+            )
         );
+    }
+
+    private function assertApiResponse($expected, $actual)
+    {
+
+        if (!is_string($expected)) {
+            $expected = json_encode($expected);
+        }
+
+        $this->assertEquals(json_decode($expected), $actual);
+    }
+
+    private function api(
+        Domain $domain,
+        UserInterface $user,
+        string $query,
+        array $variables = [],
+        $set_csrf_token = false,
+        $firewall = 'api'
+    ) {
+
+        // Fake a real HTTP request.
+        $request = new Request(
+            [], [], [
+            'organization' => $domain->getOrganization(),
+            'domain' => $domain,
+        ], [], [], [
+            'REQUEST_METHOD' => 'POST',
+        ], json_encode(['query' => $query, 'variables' => $variables])
+        );
+
+
+        // For each request, initialize the cms manager.
+        $requestStack = new RequestStack();
+        $requestStack->push(
+            new Request(
+                [], [], [
+                    'organization' => $domain->getOrganization()->getIdentifier(),
+                    'domain' => $domain->getIdentifier(),
+                ]
+            )
+        );
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+
+        $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
+        $reflector->setAccessible(true);
+        $reflector->invoke($this->container->get('unite.cms.manager'));
+
+        // If we fallback to the statefull main firewall, we need to add a csrf-token with the request.
+        if ($set_csrf_token) {
+            $request->headers->set(
+                'X-CSRF-TOKEN',
+                $this->container->get('security.csrf.token_manager')->getToken(
+                    StringUtil::fqcnToBlockPrefix(FieldableFormType::class)
+                )->getValue()
+            );
+        }
+
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, null, $firewall, $user->getRoles())
+        );
+
+        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
+
+        return json_decode($response->getContent());
     }
 
     public function testSpecialOperations()
     {
-        $this->assertApiResponse([
-            'data' => [
-                'findNews' => [
-                    'total' => 0
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'findNews' => [
+                        'total' => 0,
+                    ],
                 ],
             ],
-        ], $this->api(
-            $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->api(
+                $this->domains['marketing'],
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
             findNews(filter: { field: "title", operator: "IS NULL" }) {
                 total
             }
-        }'));
-        $this->assertApiResponse([
-            'data' => [
-                'findNews' => [
-                    'total' => 60
+        }'
+            )
+        );
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'findNews' => [
+                        'total' => 60,
+                    ],
                 ],
             ],
-        ], $this->api(
-            $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->api(
+                $this->domains['marketing'],
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
             findNews(filter: { field: "title", operator: "IS NOT NULL" }) {
                 total
             }
-        }'));
+        }'
+            )
+        );
     }
 
     public function testGenericApiFindMethod()
     {
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
           find(limit: 500, types: ["news", "news_category"]) {
             total,
             result {
@@ -670,7 +759,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
               }
             }
           }
-        }');
+        }'
+        );
 
         // Result should contain 60x news and other 40x news_category
         $count_news = 0;
@@ -695,7 +785,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // First get all news
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 100) {
                     total,
                     result {
@@ -704,7 +795,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         content
                     }
                 }
-            }');
+            }'
+        );
 
         // Get title and content partial strings from any random content.
         $content1 = $news->data->findNews->result[rand(1, $news->data->findNews->total - 1)];
@@ -715,7 +807,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Filter by exact title.
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query($value: String) {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query($value: String) {
                 findNews(filter: { field: "title", operator: "=", value: $value }) {
                     total,
                     result {
@@ -724,8 +817,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         content
                     }
                 }
-            }', [
-                'value' => $content1->title
+            }',
+            [
+                'value' => $content1->title,
             ]
         );
 
@@ -740,7 +834,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Filter by exact title and exact content.
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query($title: String, $content: String) {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query($title: String, $content: String) {
                 findNews(filter: { AND: [
                     { field: "title", operator: "=", value: $title },
                     { field: "content", operator: "=", value: $content }
@@ -752,7 +847,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         content
                     }
                 }
-            }', [
+            }',
+            [
                 'title' => $content1->title,
                 'content' => $content1->content,
             ]
@@ -769,7 +865,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Filter by part title or part content.
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query($title: String, $content: String) {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query($title: String, $content: String) {
                 findNews(filter: { OR: [
                     { field: "title", operator: "LIKE", value: $title },
                     { field: "content", operator: "LIKE", value: $content }
@@ -781,9 +878,10 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         content
                     }
                 }
-            }', [
-                'title' => '%' . $content1_title_part . '%',
-                'content' => '%' . $content2_content_part . '%',
+            }',
+            [
+                'title' => '%'.$content1_title_part.'%',
+                'content' => '%'.$content2_content_part.'%',
             ]
         );
 
@@ -798,21 +896,25 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $reflector->setAccessible(true);
         foreach ($this->domains['marketing']->getContentTypes()->first()->getContent() as $c) {
             $time = new \DateTime();
-            $time->add(new \DateInterval('PT' . $i . 'S'));
+            $time->add(new \DateInterval('PT'.$i.'S'));
             $reflector->setValue($c, $time);
 
             if ($i == 1) {
-                $c->setData([
-                    'title' => 'test_nested_sorting',
-                    'content' => 'AAA',
-                ]);
+                $c->setData(
+                    [
+                        'title' => 'test_nested_sorting',
+                        'content' => 'AAA',
+                    ]
+                );
             }
 
             if ($i == 2) {
-                $c->setData([
-                    'title' => 'test_nested_sorting',
-                    'content' => 'ZZZ',
-                ]);
+                $c->setData(
+                    [
+                        'title' => 'test_nested_sorting',
+                        'content' => 'ZZZ',
+                    ]
+                );
             }
 
             $i++;
@@ -826,35 +928,40 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // First get all news
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 2, sort: { field: "created", order: "ASC" }) {
                     total,
                     result {
                         created
                     }
                 }
-            }');
+            }'
+        );
 
         $this->assertGreaterThan(0, $news->data->findNews->total);
         $this->assertTrue(($news->data->findNews->result[0]->created < $news->data->findNews->result[1]->created));
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 2, sort: { field: "created", order: "DESC" }) {
                     total,
                     result {
                         created
                     }
                 }
-            }');
+            }'
+        );
 
         $this->assertGreaterThan(0, $news->data->findNews->total);
         $this->assertTrue(($news->data->findNews->result[0]->created > $news->data->findNews->result[1]->created));
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 2, 
                     filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
                     sort: { field: "content", order: "ASC" }) {
@@ -864,7 +971,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         content
                     }
                 }
-            }');
+            }'
+        );
 
         $this->assertEquals(2, $news->data->findNews->total);
         $this->assertEquals('AAA', $news->data->findNews->result[0]->content);
@@ -872,7 +980,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 2, 
                     filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
                     sort: { field: "content", order: "DESC" }) {
@@ -882,7 +991,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         content
                     }
                 }
-            }');
+            }'
+        );
 
         $this->assertEquals(2, $news->data->findNews->total);
         $this->assertEquals('ZZZ', $news->data->findNews->result[0]->content);
@@ -890,7 +1000,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 2, 
                     filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
                     sort: [
@@ -903,7 +1014,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         content
                     }
                 }
-            }');
+            }'
+        );
 
         $this->assertEquals(2, $news->data->findNews->total);
         $this->assertEquals('AAA', $news->data->findNews->result[0]->content);
@@ -911,7 +1023,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 2, 
                     filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
                     sort: [
@@ -924,7 +1037,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         content
                     }
                 }
-            }');
+            }'
+        );
 
         $this->assertEquals(2, $news->data->findNews->total);
         $this->assertEquals('ZZZ', $news->data->findNews->result[0]->content);
@@ -937,37 +1051,42 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $category = $this->domains['marketing']->getContentTypes()->last()->getContent()->get(0);
         $news = $this->domains['marketing']->getContentTypes()->first()->getContent()->get(0);
 
-        $news->setData([
-            'title' => 'with_category',
-            'category' => [
-                'domain' => 'marketing',
-                'content_type' => 'news_category',
-                'content' => $category->getId(),
-            ],
-        ]);
+        $news->setData(
+            [
+                'title' => 'with_category',
+                'category' => [
+                    'domain' => 'marketing',
+                    'content_type' => 'news_category',
+                    'content' => $category->getId(),
+                ],
+            ]
+        );
 
         $this->em->flush();
         $this->em->refresh($this->domains['marketing']->getContentTypes()->first());
         $this->em->refresh($this->domains['marketing']);
 
-        $this->assertApiResponse([
-            'data' => [
-                'findNews' => [
-                    'total' => 1,
-                    'result' => [
-                        [
-                            'id' => $news->getId(),
-                            'category' => [
-                                'id' => $category->getId(),
-                                'name' => $category->getData()['name'],
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'findNews' => [
+                        'total' => 1,
+                        'result' => [
+                            [
+                                'id' => $news->getId(),
+                                'category' => [
+                                    'id' => $category->getId(),
+                                    'name' => $category->getData()['name'],
+                                ],
                             ],
                         ],
                     ],
                 ],
             ],
-        ], $this->api(
-            $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->api(
+                $this->domains['marketing'],
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
                 findNews(limit: 1, filter: { field: "title", operator: "=", value: "with_category" }) {
                     total,
                     result {
@@ -978,17 +1097,21 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         }
                     }
                 }
-            }'));
+            }'
+            )
+        );
     }
 
     public function testGetContentAndSetting()
     {
 
         $setting = $this->domains['marketing']->getSettingTypes()->first()->getSetting();
-        $setting->setData([
-            'title' => $this->generateRandomMachineName(100),
-            'imprint' => $this->generateRandomMachineName(100)
-        ]);
+        $setting->setData(
+            [
+                'title' => $this->generateRandomMachineName(100),
+                'imprint' => $this->generateRandomMachineName(100),
+            ]
+        );
 
         $this->em->persist($setting);
         $this->em->flush();
@@ -998,7 +1121,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query($newsID: ID!) {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query($newsID: ID!) {
                 getNews(id: $newsID) {
                     id,
                     title,
@@ -1008,23 +1132,28 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                     title,
                     imprint
                 }
-            }', [
-            'newsID' => $content->getId(),
-        ]);
+            }',
+            [
+                'newsID' => $content->getId(),
+            ]
+        );
 
-        $this->assertApiResponse([
-            'data' => [
-                'getNews' => [
-                    'id' => $content->getId(),
-                    'title' => $content->getData()['title'],
-                    'content' => $content->getData()['content']
-                ],
-                'WebsiteSetting' => [
-                    'title' => $setting->getData()['title'],
-                    'imprint' => $setting->getData()['imprint']
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'getNews' => [
+                        'id' => $content->getId(),
+                        'title' => $content->getData()['title'],
+                        'content' => $content->getData()['content'],
+                    ],
+                    'WebsiteSetting' => [
+                        'title' => $setting->getData()['title'],
+                        'imprint' => $setting->getData()['imprint'],
+                    ],
                 ],
             ],
-        ], $response);
+            $response
+        );
     }
 
     public function testContentPagination()
@@ -1034,14 +1163,16 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $ids = [];
         $all_news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 100) {
                     total,
                     result {
                         id
                     }
                 }
-            }');
+            }'
+        );
 
         foreach ($all_news->data->findNews->result as $content) {
             $ids[] = $content->id;
@@ -1050,34 +1181,45 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Test pagination with limit 0 and page 0.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews(limit: 0, page: 1) { total, result { id } }
-            }');
+            }'
+        );
         $this->assertNull($response->data->findNews);
         $this->assertGreaterThan(0, count($response->errors));
 
         // Test pagination with too big offset.
-        $this->assertApiResponse([
-            'data' => ['findNews' => ['total' => 60, 'result' => []]]
-        ], $this->api(
-            $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+        $this->assertApiResponse(
+            [
+                'data' => ['findNews' => ['total' => 60, 'result' => []]],
+            ],
+            $this->api(
+                $this->domains['marketing'],
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
                 findNews(page: 1000) { total, result { id } }
-            }'));
+            }'
+            )
+        );
 
         // Test pagination with negative page should be the same as with page 1.
         $this->assertEquals(
 
             $this->api(
                 $this->domains['marketing'],
-                $this->users['marketing_ROLE_PUBLIC'], 'query {
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
                     findNews(page: 1) { total, result { id } }
-                }'),
+                }'
+            ),
             $this->api(
                 $this->domains['marketing'],
-                $this->users['marketing_ROLE_PUBLIC'], 'query {
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
                     findNews(page: -5) { total, result { id } }
-                }')
+                }'
+            )
         );
 
 
@@ -1088,9 +1230,12 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $page_ids = [];
             $response = $this->api(
                 $this->domains['marketing'],
-                $this->users['marketing_ROLE_PUBLIC'], 'query($page: Int, $limit: Int) {
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query($page: Int, $limit: Int) {
                     findNews(page: $page, limit: $limit) { total, result { id } }
-                }', ['page' => $page, 'limit' => $page_size]);
+                }',
+                ['page' => $page, 'limit' => $page_size]
+            );
 
             foreach ($response->data->findNews->result as $content) {
                 $page_ids[] = $content->id;
@@ -1108,25 +1253,32 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Try to create content without permissions.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'mutation {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'mutation {
                 createNews_category(data: { name: "First Category" }) {
                     id, 
                     name
                 }
-            }');
+            }'
+        );
 
         $this->assertNotEmpty($response->errors);
-        $this->assertEquals("You are not allowed to create content in content type 'News Category'.", $response->errors[0]->message);
+        $this->assertEquals(
+            "You are not allowed to create content in content type 'News Category'.",
+            $response->errors[0]->message
+        );
 
         // Try to create content with permissions.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation {
                 createNews_category(data: { name: "First Category" }) {
                     id, 
                     name
                 }
-            }');
+            }'
+        );
 
         $this->assertTrue(empty($response->errors));
         $category = $response->data->createNews_category;
@@ -1136,7 +1288,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Now create a news content with invalid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($category: ReferenceFieldTypeInput) {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation($category: ReferenceFieldTypeInput) {
                 createNews(data: { title: "First News", content: "<p>Hello World</p>", category: $category }) {
                     id, 
                     title,
@@ -1146,13 +1299,15 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                       name
                     }
                 }
-            }', [
-            'category' => [
-                'domain' => 'marketing',
-                'content_type' => 'news_category',
-                'content' => 'foo',
+            }',
+            [
+                'category' => [
+                    'domain' => 'marketing',
+                    'content_type' => 'news_category',
+                    'content' => 'foo',
+                ],
             ]
-        ]);
+        );
 
         $this->assertNotEmpty($response->errors);
         $this->assertContains("ERROR: validation.wrong_definition", $response->errors[0]->message);
@@ -1160,7 +1315,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Now create a news content with valid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($category: ReferenceFieldTypeInput) {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation($category: ReferenceFieldTypeInput) {
                 createNews(data: { title: "First News", content: "<p>Hello World</p>", category: $category }) {
                     id, 
                     title,
@@ -1170,13 +1326,15 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                       name
                     }
                 }
-            }', [
-            'category' => [
-                'domain' => 'marketing',
-                'content_type' => 'news_category',
-                'content' => $category->id,
+            }',
+            [
+                'category' => [
+                    'domain' => 'marketing',
+                    'content_type' => 'news_category',
+                    'content' => $category->id,
+                ],
             ]
-        ]);
+        );
 
         $news = $response->data->createNews;
         $this->assertTrue(empty($response->errors));
@@ -1189,36 +1347,49 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Update the category, but with wrong user.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'mutation($id: ID!) {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'mutation($id: ID!) {
                 updateNews_category(id: $id, data: { name: "Updated Category Title" }) {
                     id, 
                     name
                 }
-            }', ['id' => $category->id]);
+            }',
+            ['id' => $category->id]
+        );
 
         $this->assertNotEmpty($response->errors);
-        $this->assertEquals("You are not allowed to update content with id '" . $category->id . "'.", $response->errors[0]->message);
+        $this->assertEquals(
+            "You are not allowed to update content with id '".$category->id."'.",
+            $response->errors[0]->message
+        );
 
         // Update the category with right user.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation($id: ID!) {
                 updateNews_category(id: $id, data: { name: "Updated Category Title" }) {
                     id, 
                     name
                 }
-            }', ['id' => $category->id]);
+            }',
+            ['id' => $category->id]
+        );
 
         $this->assertTrue(empty($response->errors));
-        $this->assertEquals((object)[
-            'id' => $category->id,
-            'name' => 'Updated Category Title',
-        ], $response->data->updateNews_category);
+        $this->assertEquals(
+            (object)[
+                'id' => $category->id,
+                'name' => 'Updated Category Title',
+            ],
+            $response->data->updateNews_category
+        );
 
         // Update a news content with invalid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
                 updateNews(id: $id, data: { title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
                     id, 
                     title,
@@ -1228,14 +1399,16 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                       name
                     }
                 }
-            }', [
-            'id' => $news->id,
-            'category' => [
-                'domain' => 'marketing',
-                'content_type' => 'news_category',
-                'content' => 'foo',
+            }',
+            [
+                'id' => $news->id,
+                'category' => [
+                    'domain' => 'marketing',
+                    'content_type' => 'news_category',
+                    'content' => 'foo',
+                ],
             ]
-        ]);
+        );
 
         $this->assertNotEmpty($response->errors);
         $this->assertContains("ERROR: validation.wrong_definition", $response->errors[0]->message);
@@ -1243,7 +1416,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // update a news content with valid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
                 updateNews(id: $id, data: { title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
                     id, 
                     title,
@@ -1253,10 +1427,12 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                       name
                     }
                 }
-            }', [
-            'id' => $news->id,
-            'category' => null
-        ]);
+            }',
+            [
+                'id' => $news->id,
+                'category' => null,
+            ]
+        );
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals($news->id, $response->data->updateNews->id);
@@ -1267,7 +1443,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // update partial news content with valid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation($id: ID!) {
                 updateNews(id: $id, data: { title: "Updated News2" }) {
                     id, 
                     title,
@@ -1277,10 +1454,12 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                       name
                     }
                 }
-            }', [
-            'id' => $news->id,
-            'category' => null
-        ]);
+            }',
+            [
+                'id' => $news->id,
+                'category' => null,
+            ]
+        );
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals($news->id, $response->data->updateNews->id);
@@ -1296,59 +1475,86 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // we also need to provide a CSRF token with the request.
 
         // Try READ without csrf token
-        $this->assertApiResponse([
-            'data' => [
-                'findNews' => [
-                    'page' => 1
-                ]
-            ]
-        ], $this->api(
-            $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'findNews' => [
+                        'page' => 1,
+                    ],
+                ],
+            ],
+            $this->api(
+                $this->domains['marketing'],
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
                 findNews {
                     page
                 }
-            }', [], false, 'main')
+            }',
+                [],
+                false,
+                'main'
+            )
         );
 
         // Try READ with csrf token
-        $this->assertApiResponse([
-            'data' => [
-                'findNews' => [
-                    'page' => 1
-                ]
-            ]
-        ], $this->api(
-            $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'findNews' => [
+                        'page' => 1,
+                    ],
+                ],
+            ],
+            $this->api(
+                $this->domains['marketing'],
+                $this->users['marketing_ROLE_PUBLIC'],
+                'query {
                 findNews {
                     page
                 }
-            }', [], true, 'main')
+            }',
+                [],
+                true,
+                'main'
+            )
         );
 
         // Try Create without csrf token
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation {
                 createNews(data: { title: "First News" }) {
                     id, 
                     title
                 }
-            }', [], false, 'main');
+            }',
+            [],
+            false,
+            'main'
+        );
 
         $this->assertNotEmpty($response->errors);
-        $this->assertStringStartsWith('ERROR: The CSRF token is invalid. Please try to resubmit the form.', $response->errors[0]->message);
+        $this->assertStringStartsWith(
+            'ERROR: The CSRF token is invalid. Please try to resubmit the form.',
+            $response->errors[0]->message
+        );
 
         // Try Create with csrf token
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation {
                 createNews(data: { title: "First News" }) {
                     id, 
                     title
                 }
-            }', [], true, 'main');
+            }',
+            [],
+            true,
+            'main'
+        );
 
         $this->assertNotNull($response->data->createNews->id);
         $this->assertEquals('First News', $response->data->createNews->title);
@@ -1356,76 +1562,41 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Try Update
         $responseUpdate = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation($id: ID!) {
                 updateNews(id: $id, data: { title: "Updated News" }) { 
                     title
                 }
-            }', [
-            'id' => $response->data->createNews->id,
-        ], false, 'main');
+            }',
+            [
+                'id' => $response->data->createNews->id,
+            ],
+            false,
+            'main'
+        );
 
         $this->assertNotEmpty($responseUpdate->errors);
-        $this->assertStringStartsWith("ERROR: The CSRF token is invalid. Please try to resubmit the form.", $responseUpdate->errors[0]->message);
+        $this->assertStringStartsWith(
+            "ERROR: The CSRF token is invalid. Please try to resubmit the form.",
+            $responseUpdate->errors[0]->message
+        );
 
         $responseUpdate = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+            $this->users['marketing_ROLE_EDITOR'],
+            'mutation($id: ID!) {
                 updateNews(id: $id, data: { title: "Updated News" }) { 
                     title
                 }
-            }', [
-            'id' => $response->data->createNews->id,
-        ], true, 'main');
+            }',
+            [
+                'id' => $response->data->createNews->id,
+            ],
+            true,
+            'main'
+        );
 
         $this->assertEquals('Updated News', $responseUpdate->data->updateNews->title);
 
-    }
-
-    private function api(Domain $domain, UserInterface $user, string $query, array $variables = [], $set_csrf_token = FALSE, $firewall = 'api')
-    {
-
-        // Fake a real HTTP request.
-        $request = new Request([], [], [
-            'organization' => $domain->getOrganization(),
-            'domain' => $domain,
-        ], [], [], [
-            'REQUEST_METHOD' => 'POST',
-        ], json_encode(['query' => $query, 'variables' => $variables]));
-
-
-        // For each request, initialize the cms manager.
-        $requestStack = new RequestStack();
-        $requestStack->push(new Request([], [], [
-            'organization' => $domain->getOrganization()->getIdentifier(),
-            'domain' => $domain->getIdentifier(),
-        ]));
-
-        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
-        $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
-
-        $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
-        $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('unite.cms.manager'));
-
-        // If we fallback to the statefull main firewall, we need to add a csrf-token with the request.
-        if ($set_csrf_token) {
-            $request->headers->set('X-CSRF-TOKEN', $this->container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))->getValue());
-        }
-
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, $firewall, $user->getRoles()));
-
-        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
-        return json_decode($response->getContent());
-    }
-
-    private function assertApiResponse($expected, $actual)
-    {
-
-        if (!is_string($expected)) {
-            $expected = json_encode($expected);
-        }
-
-        $this->assertEquals(json_decode($expected), $actual);
     }
 }

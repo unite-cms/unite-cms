@@ -63,6 +63,26 @@ class DomainMember
         return [];
     }
 
+    /**
+     * @return Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param Domain $domain
+     *
+     * @return DomainMember
+     */
+    public function setDomain(Domain $domain)
+    {
+        $this->domain = $domain;
+
+        return $this;
+    }
+
     public function allowedDomains(): array
     {
         $domains = [];
@@ -71,7 +91,28 @@ class DomainMember
                 $domains = array_merge($domains, $organizationMember->getOrganization()->getDomains()->toArray());
             }
         }
+
         return $domains;
+    }
+
+    /**
+     * @return User
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param User $user
+     *
+     * @return DomainMember
+     */
+    public function setUser(User $user)
+    {
+        $this->user = $user;
+
+        return $this;
     }
 
     /**
@@ -110,46 +151,6 @@ class DomainMember
     public function setRoles(array $roles)
     {
         $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
-     * @return Domain
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
-
-    /**
-     * @param Domain $domain
-     *
-     * @return DomainMember
-     */
-    public function setDomain(Domain $domain)
-    {
-        $this->domain = $domain;
-
-        return $this;
-    }
-
-    /**
-     * @return User
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param User $user
-     *
-     * @return DomainMember
-     */
-    public function setUser(User $user)
-    {
-        $this->user = $user;
 
         return $this;
     }

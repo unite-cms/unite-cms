@@ -18,12 +18,15 @@ class RangeFieldType extends FieldType
 
     function getFormOptions(FieldableField $field): array
     {
-        return array_merge(parent::getFormOptions($field), [
-            'attr' => [
-                'min' => $field->getSettings()->min ?? 0,
-                'max' => $field->getSettings()->max ?? 100,
-                'step' => $field->getSettings()->step ?? 1
-            ],
-        ]);
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'attr' => [
+                    'min' => $field->getSettings()->min ?? 0,
+                    'max' => $field->getSettings()->max ?? 100,
+                    'step' => $field->getSettings()->step ?? 1,
+                ],
+            ]
+        );
     }
 }

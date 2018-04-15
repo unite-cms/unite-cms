@@ -42,7 +42,7 @@ class UserEntityTest extends DatabaseAwareTestCase
         $user->addOrganization($organizationMember);
         $user->setLastname($this->generateRandomUTF8String(256))->setFirstname(
             $this->generateRandomUTF8String(256)
-        )->setEmail($this->generateRandomMachineName(256) . '@example.com')->setPassword(
+        )->setEmail($this->generateRandomMachineName(256).'@example.com')->setPassword(
             $this->generateRandomUTF8String(256)
         );
         $errors = $this->container->get('validator')->validate($user);
@@ -241,7 +241,7 @@ class UserEntityTest extends DatabaseAwareTestCase
 
 
         // Validate invalid token characters.
-        $user->setResetToken('   ' . $this->generateRandomUTF8String(150));
+        $user->setResetToken('   '.$this->generateRandomUTF8String(150));
 
         $errors = [];
 

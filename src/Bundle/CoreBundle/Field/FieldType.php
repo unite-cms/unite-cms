@@ -67,6 +67,14 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
+    function getTitle(FieldableField $field): string
+    {
+        return $field->getTitle();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
         return Type::string();
@@ -86,22 +94,6 @@ abstract class FieldType implements FieldTypeInterface
     function resolveGraphQLData(FieldableField $field, $value)
     {
         return (string)$value;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    function getTitle(FieldableField $field): string
-    {
-        return $field->getTitle();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    function getIdentifier(FieldableField $field): string
-    {
-        return $field->getIdentifier();
     }
 
     /**
@@ -159,17 +151,41 @@ abstract class FieldType implements FieldTypeInterface
         return [];
     }
 
-    protected function createViolation($field, $message, $messageTemplate = null, $parameters = [], $root = null, string $propertyPath = null, $invalidValue = null, $plural = null)
-    {
+    protected function createViolation(
+        $field,
+        $message,
+        $messageTemplate = null,
+        $parameters = [],
+        $root = null,
+        string $propertyPath = null,
+        $invalidValue = null,
+        $plural = null
+    ) {
 
         if (!$messageTemplate) {
             $messageTemplate = $message;
         }
 
         if (!$propertyPath) {
-            $propertyPath = '[' . $this->getIdentifier($field) . ']';
+            $propertyPath = '['.$this->getIdentifier($field).']';
         }
 
-        return new ConstraintViolation($message, $messageTemplate, $parameters, $root, $propertyPath, $invalidValue, $plural);
+        return new ConstraintViolation(
+            $message,
+            $messageTemplate,
+            $parameters,
+            $root,
+            $propertyPath,
+            $invalidValue,
+            $plural
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getIdentifier(FieldableField $field): string
+    {
+        return $field->getIdentifier();
     }
 }

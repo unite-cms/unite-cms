@@ -30,43 +30,45 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
         {
             public function getFields()
             {
-                return [new class implements FieldableField
-                {
-                    public function getEntity()
+                return [
+                    new class implements FieldableField
                     {
-                        return $this->entity;
-                    }
+                        public function getEntity()
+                        {
+                            return $this->entity;
+                        }
 
-                    public function setEntity($entity)
-                    {
-                        $this->entity = $entity;
-                    }
+                        public function setEntity($entity)
+                        {
+                            $this->entity = $entity;
+                        }
 
-                    public function getType()
-                    {
-                        return 'text';
-                    }
+                        public function getType()
+                        {
+                            return 'text';
+                        }
 
-                    public function getIdentifier()
-                    {
-                        return 'field1';
-                    }
+                        public function getIdentifier()
+                        {
+                            return 'field1';
+                        }
 
-                    public function getTitle()
-                    {
-                        return 'Field 1';
-                    }
+                        public function getTitle()
+                        {
+                            return 'Field 1';
+                        }
 
-                    public function getSettings()
-                    {
-                        return [];
-                    }
+                        public function getSettings()
+                        {
+                            return [];
+                        }
 
-                    public function getJsonExtractIdentifier()
-                    {
-                        return '$.' . $this->getIdentifier();
-                    }
-                }];
+                        public function getJsonExtractIdentifier()
+                        {
+                            return '$.'.$this->getIdentifier();
+                        }
+                    },
+                ];
             }
 
             public function setFields($fields)
@@ -184,12 +186,14 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             'field2' => [
                 ['title' => 'Row 1'],
                 ['title' => 'Row 2'],
-            ]
+            ],
         ];
-        $options = ['fields' => [
-            new FieldableFormField($ft1, $ft1Field),
-            new FieldableFormField($ft2, $ft2Field),
-        ]];
+        $options = [
+            'fields' => [
+                new FieldableFormField($ft1, $ft1Field),
+                new FieldableFormField($ft2, $ft2Field),
+            ],
+        ];
 
         $form = $this->container->get('form.factory')->create(FieldableFormType::class, $data, $options);
 

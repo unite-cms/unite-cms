@@ -31,8 +31,10 @@ class ViewSettingsSerializationHandler
             }
 
             return $visitor->endVisitingObject($classMetadata, $data, array('name' => ViewSettings::class), $context);
-        } else if ($context->getDirection() == GraphNavigator::DIRECTION_DESERIALIZATION) {
-            return new ViewSettings((array)$data);
+        } else {
+            if ($context->getDirection() == GraphNavigator::DIRECTION_DESERIALIZATION) {
+                return new ViewSettings((array)$data);
+            }
         }
     }
 }

@@ -36,8 +36,11 @@ class CreatePlatformAdminCommand extends Command
     /**
      * {@inheritdoc}
      */
-    public function __construct(EntityManager $em, ValidatorInterface $validator, UserPasswordEncoderInterface $password_encoder)
-    {
+    public function __construct(
+        EntityManager $em,
+        ValidatorInterface $validator,
+        UserPasswordEncoderInterface $password_encoder
+    ) {
         $this->em = $em;
         $this->validator = $validator;
         $this->password_encoder = $password_encoder;
@@ -93,15 +96,18 @@ class CreatePlatformAdminCommand extends Command
             ->setEmail($email)
             ->setRoles([User::ROLE_PLATFORM_ADMIN]);
 
-        $user->setPassword($this->password_encoder->encodePassword(
-            $user,
-            $password
-        ));
+        $user->setPassword(
+            $this->password_encoder->encodePassword(
+                $user,
+                $password
+            )
+        );
 
-        $password = NULL;
+        $password = null;
 
         $question = new ConfirmationQuestion(
-            '<info>Should the user "' . $user->getFirstname() . ' ' . $user->getFirstname() . '" with email "' . $user->getEmail() . '" be created</info>? [<comment>Y/n</comment>] ',
+            '<info>Should the user "'.$user->getFirstname().' '.$user->getFirstname().'" with email "'.$user->getEmail(
+            ).'" be created</info>? [<comment>Y/n</comment>] ',
             true,
             '/^(y|j)/i'
         );

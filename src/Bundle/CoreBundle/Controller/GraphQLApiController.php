@@ -34,7 +34,9 @@ class GraphQLApiController extends Controller
         $schema = new Schema(
             [
                 'query' => $schemaTypeManager->getSchemaType('Query'),
-                'mutation' => ($domain->hasContentOrSettingTypes()) ? $schemaTypeManager->getSchemaType('Mutation') : NULL,
+                'mutation' => ($domain->hasContentOrSettingTypes()) ? $schemaTypeManager->getSchemaType(
+                    'Mutation'
+                ) : null,
                 'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
                     return $schemaTypeManager->getSchemaType($name, $domain);
                 },
@@ -42,11 +44,13 @@ class GraphQLApiController extends Controller
         );
 
         $server = new StandardServer(
-            ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug(true)->setContext(function () use ($request) {
-                return [
-                    'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
-                ];
-            })
+            ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug(true)->setContext(
+                function () use ($request) {
+                    return [
+                        'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
+                    ];
+                }
+            )
         );
         $serverHelper = new Helper();
 
@@ -60,6 +64,7 @@ class GraphQLApiController extends Controller
             );
         } catch (RequestError $e) {
             $this->get('logger')->critical($e->getMessage(), ['exception' => $e]);
+
             return new JsonResponse([], 500);
         }
 

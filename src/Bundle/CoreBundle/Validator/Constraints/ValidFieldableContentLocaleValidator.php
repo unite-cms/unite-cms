@@ -22,7 +22,8 @@ class ValidFieldableContentLocaleValidator extends ConstraintValidator
             );
         }
 
-        if (!empty($this->context->getObject()->getEntity()) && !$this->context->getObject()->getEntity() instanceof Fieldable) {
+        if (!empty($this->context->getObject()->getEntity()) && !$this->context->getObject()->getEntity(
+                ) instanceof Fieldable) {
             throw new InvalidArgumentException(
                 'The ValidFieldableContentLocaleValidator constraint expects object->getEntity() to return a UniteCMS\CoreBundle\Entity\Fieldable object.'
             );
@@ -41,6 +42,7 @@ class ValidFieldableContentLocaleValidator extends ConstraintValidator
                     ->atPath('[locale]')
                     ->addViolation();
             }
+
             return;
         }
 

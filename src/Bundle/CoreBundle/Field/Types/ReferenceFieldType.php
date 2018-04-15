@@ -37,8 +37,15 @@ class ReferenceFieldType extends FieldType
     private $templating;
     private $csrfTokenManager;
 
-    function __construct(ValidatorInterface $validator, AuthorizationChecker $authorizationChecker, UniteCMSManager $uniteCMSManager, EntityManager $entityManager, ViewTypeManager $viewTypeManager, TwigEngine $templating, CsrfTokenManager $csrfTokenManager)
-    {
+    function __construct(
+        ValidatorInterface $validator,
+        AuthorizationChecker $authorizationChecker,
+        UniteCMSManager $uniteCMSManager,
+        EntityManager $entityManager,
+        ViewTypeManager $viewTypeManager,
+        TwigEngine $templating,
+        CsrfTokenManager $csrfTokenManager
+    ) {
         $this->validator = $validator;
         $this->authorizationChecker = $authorizationChecker;
         $this->uniteCMSManager = $uniteCMSManager;
@@ -63,39 +70,106 @@ class ReferenceFieldType extends FieldType
         }
 
         // Get view.
-        $view = $contentType->getViews()->filter(function (View $view) use ($settings) {
-            return $view->getIdentifier() == $settings->view;
-        })->first();
+        $view = $contentType->getViews()->filter(
+            function (View $view) use ($settings) {
+                return $view->getIdentifier() == $settings->view;
+            }
+        )->first();
         if (!$view) {
-            throw new InvalidArgumentException("No view with identifier '{$settings->view}' was found for this organization, domain and content type.");
+            throw new InvalidArgumentException(
+                "No view with identifier '{$settings->view}' was found for this organization, domain and content type."
+            );
         }
 
         // Reload the full view object.
-        $view = $this->entityManager->getRepository('UniteCMSCoreBundle:View')->findOneBy([
-            'contentType' => $contentType,
-            'id' => $view->getId(),
-        ]);
+        $view = $this->entityManager->getRepository('UniteCMSCoreBundle:View')->findOneBy(
+            [
+                'contentType' => $contentType,
+                'id' => $view->getId(),
+            ]
+        );
 
         // Pass the rendered view HTML and other parameters as a form option.
-        return array_merge(parent::getFormOptions($field), [
-            'empty_data' => [
-                'domain' => $contentType->getDomain()->getIdentifier(),
-                'content_type' => $contentType->getIdentifier(),
-            ],
-            'attr' => [
-                'base-url' => '/' . $this->uniteCMSManager->getOrganization()->getIdentifier() . '/',
-                'content-label' => $settings->content_label ?? (empty($contentType->getContentLabel()) ? (string)$contentType . ' #{id}' : $contentType->getContentLabel()),
-                'modal-html' => $this->templating->render(
-                    $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
-                    [
-                        'view' => $view,
-                        'parameters' => $this->viewTypeManager
-                            ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
-                            ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form')),
-                    ]
-                ),
-            ],
-        ]);
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'empty_data' => [
+                    'domain' => $contentType->getDomain()->getIdentifier(),
+                    'content_type' => $contentType->getIdentifier(),
+                ],
+                'attr' => [
+                    'base-url' => '/'.$this->uniteCMSManager->getOrganization()->getIdentifier().'/',
+                    'content-label' => $settings->content_label ?? (empty(
+                        $contentType->getContentLabel()
+                        ) ? (string)$contentType.' #{id}' : $contentType->getContentLabel()),
+                    'modal-html' => $this->templating->render(
+                        $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
+                        [
+                            'view' => $view,
+                            'parameters' => $this->viewTypeManager
+                                ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
+                                ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form')),
+                        ]
+                    ),
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Resolves an content type and checks permission for the domain.
+     *
+     * @param string $domain_identifier
+     * @param string $content_type_identifier
+     * @return ContentType
+     */
+    private function resolveContentType($domain_identifier, $content_type_identifier): ContentType
+    {
+
+        if (!$domain_identifier || !$content_type_identifier) {
+            throw new InvalidArgumentException("You must pass a domain and content_type identifier.");
+        }
+
+        // Only allow to resolve a content type from the same organization.
+        $organization = $this->uniteCMSManager->getOrganization();
+
+        $domain = $organization->getDomains()->filter(
+            function (Domain $domain) use ($domain_identifier) {
+                return $domain->getIdentifier() == $domain_identifier;
+            }
+        )->first();
+
+        if (!$domain) {
+            throw new InvalidArgumentException(
+                "No domain with identifier '{$domain_identifier}' was found in this organization."
+            );
+        }
+
+        // We need to reload the full domain. uniteCMSManager only holds infos for the current domain.
+        $domain = $this->entityManager->getRepository('UniteCMSCoreBundle:Domain')->findOneBy(
+            [
+                'organization' => $organization,
+                'id' => $domain->getId(),
+            ]
+        );
+
+        if (!$this->authorizationChecker->isGranted(DomainVoter::VIEW, $domain)) {
+            throw new InvalidArgumentException("You are not allowed to view this domain.");
+        }
+
+        $contentType = $domain->getContentTypes()->filter(
+            function (ContentType $contentType) use ($content_type_identifier) {
+                return $contentType->getIdentifier() == $content_type_identifier;
+            }
+        )->first();
+
+        if (!$contentType) {
+            throw new InvalidArgumentException(
+                "No content_type with identifier '{$content_type_identifier}' was found for this organization and domain."
+            );
+        }
+
+        return $contentType;
     }
 
     /**
@@ -110,10 +184,10 @@ class ReferenceFieldType extends FieldType
             throw new InvalidArgumentException("You are not allowed to view this content_type.");
         }
 
-        $name = ucfirst($field->getSettings()->content_type . 'Content');
+        $name = ucfirst($field->getSettings()->content_type.'Content');
 
         if ($nestingLevel > 0) {
-            $name .= 'Level' . $nestingLevel;
+            $name .= 'Level'.$nestingLevel;
         }
 
         // We use the default content factory to build the type.
@@ -133,35 +207,6 @@ class ReferenceFieldType extends FieldType
         }
 
         return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $contentType->getDomain(), $nestingLevel);
-    }
-
-    /**
-     * Resolve reference data. This means getting the referenced entity, checking access and returning it.
-     *
-     * @param FieldableField $field
-     * @param array $value
-     * @return null|Content
-     */
-    function resolveGraphQLData(FieldableField $field, $value)
-    {
-        if (empty($value)) {
-            return null;
-        }
-
-        $contentType = $this->resolveContentType($value['domain'], $value['content_type']);
-
-        // Find content for this content type.
-        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['contentType' => $contentType, 'id' => $value['content']]);
-        if (!$content) {
-            throw new InvalidArgumentException("No content with id '{$value['content']}' was found.");
-        }
-
-        // Check access to view content.
-        if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
-            throw new InvalidArgumentException("You are not allowed to view this content.");
-        }
-
-        return $content;
     }
 
     /**
@@ -198,48 +243,33 @@ class ReferenceFieldType extends FieldType
     }
 
     /**
-     * Resolves an content type and checks permission for the domain.
+     * Resolve reference data. This means getting the referenced entity, checking access and returning it.
      *
-     * @param string $domain_identifier
-     * @param string $content_type_identifier
-     * @return ContentType
+     * @param FieldableField $field
+     * @param array $value
+     * @return null|Content
      */
-    private function resolveContentType($domain_identifier, $content_type_identifier): ContentType
+    function resolveGraphQLData(FieldableField $field, $value)
     {
-
-        if (!$domain_identifier || !$content_type_identifier) {
-            throw new InvalidArgumentException("You must pass a domain and content_type identifier.");
+        if (empty($value)) {
+            return null;
         }
 
-        // Only allow to resolve a content type from the same organization.
-        $organization = $this->uniteCMSManager->getOrganization();
+        $contentType = $this->resolveContentType($value['domain'], $value['content_type']);
 
-        $domain = $organization->getDomains()->filter(function (Domain $domain) use ($domain_identifier) {
-            return $domain->getIdentifier() == $domain_identifier;
-        })->first();
-
-        if (!$domain) {
-            throw new InvalidArgumentException("No domain with identifier '{$domain_identifier}' was found in this organization.");
+        // Find content for this content type.
+        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            ['contentType' => $contentType, 'id' => $value['content']]
+        );
+        if (!$content) {
+            throw new InvalidArgumentException("No content with id '{$value['content']}' was found.");
         }
 
-        // We need to reload the full domain. uniteCMSManager only holds infos for the current domain.
-        $domain = $this->entityManager->getRepository('UniteCMSCoreBundle:Domain')->findOneBy([
-            'organization' => $organization,
-            'id' => $domain->getId(),
-        ]);
-
-        if (!$this->authorizationChecker->isGranted(DomainVoter::VIEW, $domain)) {
-            throw new InvalidArgumentException("You are not allowed to view this domain.");
+        // Check access to view content.
+        if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
+            throw new InvalidArgumentException("You are not allowed to view this content.");
         }
 
-        $contentType = $domain->getContentTypes()->filter(function (ContentType $contentType) use ($content_type_identifier) {
-            return $contentType->getIdentifier() == $content_type_identifier;
-        })->first();
-
-        if (!$contentType) {
-            throw new InvalidArgumentException("No content_type with identifier '{$content_type_identifier}' was found for this organization and domain.");
-        }
-
-        return $contentType;
+        return $content;
     }
 }

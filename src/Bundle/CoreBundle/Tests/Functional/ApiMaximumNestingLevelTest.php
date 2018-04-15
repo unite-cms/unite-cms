@@ -170,7 +170,9 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
       "locales": []
     }
   ]
-}']];
+}',
+        ],
+    ];
 
     protected $roles = ['ROLE_PUBLIC', 'ROLE_EDITOR'];
 
@@ -208,12 +210,12 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
                 $this->em->flush($domain);
 
                 foreach ($this->roles as $role) {
-                    $this->users[$domain->getIdentifier() . '_' . $role] = new ApiClient();
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setName(ucfirst($role))->setRoles([$role]);
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setDomain($domain);
+                    $this->users[$domain->getIdentifier().'_'.$role] = new ApiClient();
+                    $this->users[$domain->getIdentifier().'_'.$role]->setName(ucfirst($role))->setRoles([$role]);
+                    $this->users[$domain->getIdentifier().'_'.$role]->setDomain($domain);
 
-                    $this->em->persist($this->users[$domain->getIdentifier() . '_' . $role]);
-                    $this->em->flush($this->users[$domain->getIdentifier() . '_' . $role]);
+                    $this->em->persist($this->users[$domain->getIdentifier().'_'.$role]);
+                    $this->em->flush($this->users[$domain->getIdentifier().'_'.$role]);
                 }
             }
         }
@@ -236,8 +238,24 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         $this->em->refresh($this->domains['marketing']->getContentTypes()->first());
         $this->em->refresh($this->domains['marketing']);
 
-        $news->setData(['category' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'news_category', 'content' => $category->getId()]]);
-        $category->setData(['news' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'news', 'content' => $news->getId()]]);
+        $news->setData(
+            [
+                'category' => [
+                    'domain' => $this->domains['marketing']->getIdentifier(),
+                    'content_type' => 'news_category',
+                    'content' => $category->getId(),
+                ],
+            ]
+        );
+        $category->setData(
+            [
+                'news' => [
+                    'domain' => $this->domains['marketing']->getIdentifier(),
+                    'content_type' => 'news',
+                    'content' => $news->getId(),
+                ],
+            ]
+        );
 
         $this->em->flush();
         $this->em->refresh($this->domains['marketing']->getContentTypes()->first());
@@ -246,7 +264,8 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
 
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_ROLE_PUBLIC'],
+            'query {
                 findNews {
                     result {
                       category {
@@ -262,27 +281,33 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
                       }
                     }
                   }
-            }');
+            }'
+        );
 
-        $this->assertApiResponse([
-            'data' => [
-                'findNews' => [
-                    'result' => [[
-                        'category' => [
-                            'news' => [
+        $this->assertApiResponse(
+            [
+                'data' => [
+                    'findNews' => [
+                        'result' => [
+                            [
                                 'category' => [
                                     'news' => [
                                         'category' => [
-                                            'message' => 'Maximum nesting level of 5 reached.',
+                                            'news' => [
+                                                'category' => [
+                                                    'message' => 'Maximum nesting level of 5 reached.',
+                                                ],
+                                            ],
                                         ],
-                                    ]
+                                    ],
                                 ],
                             ],
                         ],
-                    ]],
-                ]
-            ]
-        ], $result);
+                    ],
+                ],
+            ],
+            $result
+        );
     }
 
     private function api(Domain $domain, UserInterface $user, string $query, array $variables = [])
@@ -297,15 +322,20 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         $reflector->setAccessible(true);
         $reflector->setValue($this->container->get('unite.cms.manager'), true);
 
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'api', $user->getRoles()));
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, null, 'api', $user->getRoles())
+        );
 
-        $request = new Request([], [], [
+        $request = new Request(
+            [], [], [
             'organization' => $domain->getOrganization(),
             'domain' => $domain,
         ], [], [], [
             'REQUEST_METHOD' => 'POST',
-        ], json_encode(['query' => $query, 'variables' => $variables]));
+        ], json_encode(['query' => $query, 'variables' => $variables])
+        );
         $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
+
         return json_decode($response->getContent());
     }
 

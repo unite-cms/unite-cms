@@ -109,50 +109,7 @@ class View
 
     public function __toString()
     {
-        return '' . $this->getTitle();
-    }
-
-    /**
-     * This function sets all structure fields from the given entity.
-     *
-     * @param View $view
-     * @return View
-     */
-    public function setFromEntity(View $view)
-    {
-        $this
-            ->setTitle($view->getTitle())
-            ->setIdentifier($view->getIdentifier())
-            ->setType($view->getType())
-            ->setDescription($view->getDescription())
-            ->setIcon($view->getIcon())
-            ->setSettings($view->getSettings());
-
-        return $this;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set id
-     *
-     * @param $id
-     *
-     * @return View
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
+        return ''.$this->getTitle();
     }
 
     /**
@@ -175,6 +132,25 @@ class View
     public function setTitle($title)
     {
         $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * This function sets all structure fields from the given entity.
+     *
+     * @param View $view
+     * @return View
+     */
+    public function setFromEntity(View $view)
+    {
+        $this
+            ->setTitle($view->getTitle())
+            ->setIdentifier($view->getIdentifier())
+            ->setType($view->getType())
+            ->setDescription($view->getDescription())
+            ->setIcon($view->getIcon())
+            ->setSettings($view->getSettings());
 
         return $this;
     }
@@ -272,27 +248,6 @@ class View
     }
 
     /**
-     * @return ContentType
-     */
-    public function getContentType(): ContentType
-    {
-        return $this->contentType;
-    }
-
-    /**
-     * @param ContentType $contentType
-     *
-     * @return View
-     */
-    public function setContentType(ContentType $contentType)
-    {
-        $this->contentType = $contentType;
-        $contentType->addView($this);
-
-        return $this;
-    }
-
-    /**
      * Get settings
      *
      * @return ViewSettings
@@ -312,6 +267,51 @@ class View
     public function setSettings($settings)
     {
         $this->settings = $settings;
+
+        return $this;
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
+     *
+     * @return View
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * @return ContentType
+     */
+    public function getContentType(): ContentType
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * @param ContentType $contentType
+     *
+     * @return View
+     */
+    public function setContentType(ContentType $contentType)
+    {
+        $this->contentType = $contentType;
+        $contentType->addView($this);
 
         return $this;
     }

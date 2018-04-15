@@ -61,7 +61,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/login');
         $form = $crawler->filter('form')->form();
-        $form['_username'] = $user->getEmail() . 'invalid';
+        $form['_username'] = $user->getEmail().'invalid';
         $form['_password'] = $password;
         $this->client->submit($form);
         $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/login'));
@@ -85,7 +85,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->request('GET', '/login');
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail();
-        $form['_password'] = $password . 'invalid';
+        $form['_password'] = $password.'invalid';
         $this->client->submit($form);
         $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/login'));
         $crawler = $this->client->followRedirect();

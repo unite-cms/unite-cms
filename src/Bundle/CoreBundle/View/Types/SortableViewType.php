@@ -35,7 +35,10 @@ class SortableViewType extends ViewType
         if (empty($columns)) {
             if ($fields->containsKey('title') && in_array($fields->get('title')->getType(), $possible_field_types)) {
                 $columns['title'] = 'Title';
-            } elseif ($fields->containsKey('name') && in_array($fields->get('name')->getType(), $possible_field_types)) {
+            } elseif ($fields->containsKey('name') && in_array(
+                    $fields->get('name')->getType(),
+                    $possible_field_types
+                )) {
                 $columns['name'] = 'Name';
             } else {
                 $columns['id'] = 'ID';
@@ -83,7 +86,7 @@ class SortableViewType extends ViewType
         if (!empty($settings->columns)) {
             foreach ($settings->columns as $field => $label) {
                 if (!$this->content_type_contains_field($field)) {
-                    $violations[] = $this->createUnknownColumnConstraint($settings, 'columns.' . $field);
+                    $violations[] = $this->createUnknownColumnConstraint($settings, 'columns.'.$field);
                 }
             }
         }
@@ -110,6 +113,15 @@ class SortableViewType extends ViewType
         );
     }
 
+    private function content_type_contains_field($field)
+    {
+        if (in_array($field, ['id', 'locale', 'created', 'updated', 'deleted'])) {
+            return true;
+        }
+
+        return $this->view->getContentType()->getFields()->containsKey($field);
+    }
+
     private function createUnknownColumnConstraint($settings, $property_path)
     {
         return new ConstraintViolation(
@@ -120,13 +132,5 @@ class SortableViewType extends ViewType
             $property_path,
             $settings
         );
-    }
-
-    private function content_type_contains_field($field)
-    {
-        if (in_array($field, ['id', 'locale', 'created', 'updated', 'deleted'])) {
-            return true;
-        }
-        return $this->view->getContentType()->getFields()->containsKey($field);
     }
 }

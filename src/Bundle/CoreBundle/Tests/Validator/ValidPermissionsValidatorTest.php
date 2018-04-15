@@ -29,10 +29,17 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
             }
         };
 
-        $this->validate([], null, new ValidPermissions([
-            'callbackRoles' => 'getRoles',
-            'callbackAttributes' => 'baa',
-        ]), $object);
+        $this->validate(
+            [],
+            null,
+            new ValidPermissions(
+                [
+                    'callbackRoles' => 'getRoles',
+                    'callbackAttributes' => 'baa',
+                ]
+            ),
+            $object
+        );
     }
 
     /**
@@ -53,10 +60,17 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
             }
         };
 
-        $this->validate([], null, new ValidPermissions([
-            'callbackRoles' => 'foo',
-            'callbackAttributes' => 'getAttributes',
-        ]), $object);
+        $this->validate(
+            [],
+            null,
+            new ValidPermissions(
+                [
+                    'callbackRoles' => 'foo',
+                    'callbackAttributes' => 'getAttributes',
+                ]
+            ),
+            $object
+        );
     }
 
     /**
@@ -77,10 +91,17 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
             }
         };
 
-        $this->validate(['a' => 'a', 'b' => 'b'], null, new ValidPermissions([
-            'callbackRoles' => 'getRoles',
-            'callbackAttributes' => 'getAttributes',
-        ]), $object);
+        $this->validate(
+            ['a' => 'a', 'b' => 'b'],
+            null,
+            new ValidPermissions(
+                [
+                    'callbackRoles' => 'getRoles',
+                    'callbackAttributes' => 'getAttributes',
+                ]
+            ),
+            $object
+        );
     }
 
     public function testInvalidValue()
@@ -98,19 +119,39 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
             }
         };
 
-        $context = $this->validate(['a' => ['b']], null, new ValidPermissions([
-            'callbackRoles' => 'getRoles',
-            'callbackAttributes' => 'getAttributes',
-        ]), $object);
+        $context = $this->validate(
+            ['a' => ['b']],
+            null,
+            new ValidPermissions(
+                [
+                    'callbackRoles' => 'getRoles',
+                    'callbackAttributes' => 'getAttributes',
+                ]
+            ),
+            $object
+        );
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('Invalid permissions or roles where selected.', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'Invalid permissions or roles where selected.',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
 
-        $context = $this->validate(['b' => ['a']], null, new ValidPermissions([
-            'callbackRoles' => 'getRoles',
-            'callbackAttributes' => 'getAttributes',
-        ]), $object);
+        $context = $this->validate(
+            ['b' => ['a']],
+            null,
+            new ValidPermissions(
+                [
+                    'callbackRoles' => 'getRoles',
+                    'callbackAttributes' => 'getAttributes',
+                ]
+            ),
+            $object
+        );
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('Invalid permissions or roles where selected.', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'Invalid permissions or roles where selected.',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testValueStructure()
@@ -128,10 +169,17 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
             }
         };
 
-        $context = $this->validate(['a' => ['a', 'b'], 'b' => ['a', 'b']], null, new ValidPermissions([
-            'callbackRoles' => 'getRoles',
-            'callbackAttributes' => 'getAttributes',
-        ]), $object);
+        $context = $this->validate(
+            ['a' => ['a', 'b'], 'b' => ['a', 'b']],
+            null,
+            new ValidPermissions(
+                [
+                    'callbackRoles' => 'getRoles',
+                    'callbackAttributes' => 'getAttributes',
+                ]
+            ),
+            $object
+        );
         $this->assertCount(0, $context->getViolations());
     }
 }

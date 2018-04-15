@@ -93,7 +93,7 @@ class ChangePasswordTest extends DatabaseAwareTestCase
         $this->assertCount(2, $crawler->filter('form[name="change_password"] div.uk-alert-danger'));
 
         // Try to update the password with valid password but not current password.
-        $new_RandPassword = 'valid_password' . time();
+        $new_RandPassword = 'valid_password'.time();
         $form['change_password[newPassword][first]'] = $new_RandPassword;
         $form['change_password[newPassword][second]'] = $new_RandPassword;
         $crawler = $this->client->submit($form);
@@ -103,7 +103,7 @@ class ChangePasswordTest extends DatabaseAwareTestCase
         $this->assertCount(1, $crawler->filter('form[name="change_password"] div.uk-alert-danger'));
 
         // Try to update the password with valid password.
-        $new_RandPassword = 'valid_password' . time();
+        $new_RandPassword = 'valid_password'.time();
         $form['change_password[newPassword][first]'] = $new_RandPassword;
         $form['change_password[newPassword][second]'] = $new_RandPassword;
         $form['change_password[currentPassword]'] = $this->userPassword;

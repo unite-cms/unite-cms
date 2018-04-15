@@ -99,7 +99,7 @@ class SettingTypeField implements FieldableField
 
     public function __toString()
     {
-        return '' . $this->title;
+        return ''.$this->title;
     }
 
     /**
@@ -116,30 +116,6 @@ class SettingTypeField implements FieldableField
             ->setType($field->getType())
             ->setSettings($field->getSettings())
             ->setWeight($field->getWeight());
-
-        return $this;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set id
-     *
-     * @param $id
-     *
-     * @return SettingTypeField
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
 
         return $this;
     }
@@ -193,15 +169,6 @@ class SettingTypeField implements FieldableField
     }
 
     /**
-     * Returns the identifier, used for mysql's json_extract function.
-     * @return string
-     */
-    public function getJsonExtractIdentifier()
-    {
-        return '$.' . $this->getIdentifier();
-    }
-
-    /**
      * Get type
      *
      * @return string
@@ -250,27 +217,6 @@ class SettingTypeField implements FieldableField
     }
 
     /**
-     * @return SettingType
-     */
-    public function getSettingType()
-    {
-        return $this->settingType;
-    }
-
-    /**
-     * @param SettingType $settingType
-     *
-     * @return SettingTypeField
-     */
-    public function setSettingType(SettingType $settingType)
-    {
-        $this->settingType = $settingType;
-        $settingType->addField($this);
-
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getWeight(): int
@@ -290,11 +236,65 @@ class SettingTypeField implements FieldableField
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
+     *
+     * @return SettingTypeField
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Returns the identifier, used for mysql's json_extract function.
+     * @return string
+     */
+    public function getJsonExtractIdentifier()
+    {
+        return '$.'.$this->getIdentifier();
+    }
+
+    /**
      * @return Fieldable
      */
     public function getEntity()
     {
         return $this->getSettingType();
+    }
+
+    /**
+     * @return SettingType
+     */
+    public function getSettingType()
+    {
+        return $this->settingType;
+    }
+
+    /**
+     * @param SettingType $settingType
+     *
+     * @return SettingTypeField
+     */
+    public function setSettingType(SettingType $settingType)
+    {
+        $this->settingType = $settingType;
+        $settingType->addField($this);
+
+        return $this;
     }
 
     /**

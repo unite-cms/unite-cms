@@ -117,12 +117,16 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
             public $softDeleteString = [];
             public $hardDeleteString = [];
 
-            public function createCompareAbleString(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data)
-            {
+            public function createCompareAbleString(
+                FieldableField $field,
+                FieldableContent $content,
+                EntityRepository $repository,
+                $data
+            ) {
                 return
-                    $field->getJsonExtractIdentifier() .
-                    $content->getEntity()->getIdentifier() .
-                    $repository->getClassName() .
+                    $field->getJsonExtractIdentifier().
+                    $content->getEntity()->getIdentifier().
+                    $repository->getClassName().
                     $data;
             }
 
@@ -130,22 +134,47 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
             public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data)
             {
-                $data[$field->getIdentifier()] = $this->createCompareAbleString($field, $content, $repository, $data[$field->getIdentifier()]);
+                $data[$field->getIdentifier()] = $this->createCompareAbleString(
+                    $field,
+                    $content,
+                    $repository,
+                    $data[$field->getIdentifier()]
+                );
             }
 
-            public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data)
-            {
-                $data[$field->getIdentifier()] = $this->createCompareAbleString($field, $content, $repository, $data[$field->getIdentifier()]);
+            public function onUpdate(
+                FieldableField $field,
+                FieldableContent $content,
+                EntityRepository $repository,
+                $old_data,
+                &$data
+            ) {
+                $data[$field->getIdentifier()] = $this->createCompareAbleString(
+                    $field,
+                    $content,
+                    $repository,
+                    $data[$field->getIdentifier()]
+                );
             }
 
             public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
             {
-                $this->softDeleteString[$field->getJsonExtractIdentifier()] = $this->createCompareAbleString($field, $content, $repository, 'soft_delete');
+                $this->softDeleteString[$field->getJsonExtractIdentifier()] = $this->createCompareAbleString(
+                    $field,
+                    $content,
+                    $repository,
+                    'soft_delete'
+                );
             }
 
             public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
             {
-                $this->hardDeleteString[$field->getJsonExtractIdentifier()] = $this->createCompareAbleString($field, $content, $repository, 'hard_delete');
+                $this->hardDeleteString[$field->getJsonExtractIdentifier()] = $this->createCompareAbleString(
+                    $field,
+                    $content,
+                    $repository,
+                    'hard_delete'
+                );
             }
         };
 
@@ -153,78 +182,114 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         $content = new Content();
         $content->setContentType($this->domain->getContentTypes()->first());
-        $content->setData([
-            'n1' => [
-                [
-                    'n2' => [
-                        ['test' => 'foo'],
-                        ['test' => 'baa'],
-                    ]
+        $content->setData(
+            [
+                'n1' => [
+                    [
+                        'n2' => [
+                            ['test' => 'foo'],
+                            ['test' => 'baa'],
+                        ],
+                    ],
+                    [
+                        'n2' => [
+                            ['test' => 'luu'],
+                            ['test' => 'laa'],
+                        ],
+                    ],
                 ],
-                [
-                    'n2' => [
-                        ['test' => 'luu'],
-                        ['test' => 'laa'],
-                    ]
-                ],
-            ],
-        ]);
+            ]
+        );
 
         $this->em->persist($content);
         $this->em->flush($content);
         $this->em->refresh($content);
 
         // Make sure, that nested create event was fired on mock.
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'foo', $content->getData()['n1'][0]['n2'][0]['test']);
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'baa', $content->getData()['n1'][0]['n2'][1]['test']);
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'luu', $content->getData()['n1'][1]['n2'][0]['test']);
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'laa', $content->getData()['n1'][1]['n2'][1]['test']);
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'foo',
+            $content->getData()['n1'][0]['n2'][0]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'baa',
+            $content->getData()['n1'][0]['n2'][1]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'luu',
+            $content->getData()['n1'][1]['n2'][0]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'laa',
+            $content->getData()['n1'][1]['n2'][1]['test']
+        );
 
         // Update content
-        $content->setData([
-            'n1' => [
-                [
-                    'n2' => [
-                        ['test' => 'updated_foo'],
-                        ['test' => 'updated_baa'],
-                    ]
+        $content->setData(
+            [
+                'n1' => [
+                    [
+                        'n2' => [
+                            ['test' => 'updated_foo'],
+                            ['test' => 'updated_baa'],
+                        ],
+                    ],
+                    [
+                        'n2' => [
+                            ['test' => 'updated_luu'],
+                            ['test' => 'updated_laa'],
+                        ],
+                    ],
                 ],
-                [
-                    'n2' => [
-                        ['test' => 'updated_luu'],
-                        ['test' => 'updated_laa'],
-                    ]
-                ],
-            ],
-        ]);
+            ]
+        );
 
         $this->em->flush($content);
 
         // Make sure, that nested create event was fired on mock.
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'updated_foo', $content->getData()['n1'][0]['n2'][0]['test']);
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'updated_baa', $content->getData()['n1'][0]['n2'][1]['test']);
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'updated_luu', $content->getData()['n1'][1]['n2'][0]['test']);
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'updated_laa', $content->getData()['n1'][1]['n2'][1]['test']);
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'updated_foo',
+            $content->getData()['n1'][0]['n2'][0]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'updated_baa',
+            $content->getData()['n1'][0]['n2'][1]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'updated_luu',
+            $content->getData()['n1'][1]['n2'][0]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'updated_laa',
+            $content->getData()['n1'][1]['n2'][1]['test']
+        );
 
         // Soft delete content
         $this->em->remove($content);
         $this->em->flush();
 
         // softDelete should be invoked.
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'soft_delete', $mock->softDeleteString['$.n1[*].n2[*].test']);
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'soft_delete',
+            $mock->softDeleteString['$.n1[*].n2[*].test']
+        );
 
         // Remove it for real.
         $this->em->getFilters()->disable('gedmo_softdeleteable');
 
-        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-            'contentType' => $this->domain->getContentTypes()->first(),
-        ]);
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            [
+                'contentType' => $this->domain->getContentTypes()->first(),
+            ]
+        );
 
         $this->em->remove($content);
         $this->em->flush();
         $this->em->getFilters()->enable('gedmo_softdeleteable');
 
         // hardDelete should be invoked.
-        $this->assertEquals('$.n1[*].n2[*].testct1' . Content::class . 'hard_delete', $mock->hardDeleteString['$.n1[*].n2[*].test']);
+        $this->assertEquals(
+            '$.n1[*].n2[*].testct1'.Content::class.'hard_delete',
+            $mock->hardDeleteString['$.n1[*].n2[*].test']
+        );
     }
 }

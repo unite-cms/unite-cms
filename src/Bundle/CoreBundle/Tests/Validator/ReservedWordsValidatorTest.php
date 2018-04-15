@@ -17,7 +17,10 @@ class ReservedWordsValidatorTest extends ConstraintValidatorTestCase
         $constraint = new ReservedWords(['reserved' => ['reserved']]);
         $context = $this->validate('reserved', null, $constraint);
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('The value is in the list of reserved words.', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'The value is in the list of reserved words.',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testValidValue()
@@ -33,15 +36,18 @@ class ReservedWordsValidatorTest extends ConstraintValidatorTestCase
 
     public function testInvalidConstValue()
     {
-        $constraint = new ReservedWords(['reserved' => self::class . '::' . 'RESERVED']);
+        $constraint = new ReservedWords(['reserved' => self::class.'::'.'RESERVED']);
         $context = $this->validate('const_reserved', null, $constraint);
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('The value is in the list of reserved words.', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'The value is in the list of reserved words.',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testValidConstValue()
     {
-        $constraint = new ReservedWords(['reserved' => self::class . '::' . 'RESERVED']);
+        $constraint = new ReservedWords(['reserved' => self::class.'::'.'RESERVED']);
         $context = $this->validate('other', null, $constraint);
         $this->assertCount(0, $context->getViolations());
     }

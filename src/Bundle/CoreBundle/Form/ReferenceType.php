@@ -32,13 +32,15 @@ class ReferenceType extends WebComponentType implements DataTransformerInterface
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
-        $resolver->setDefaults([
-            'tag' => 'unite-cms-core-reference-field',
-            'empty_data' => [
-                'domain' => null,
-                'content_type' => null,
-            ],
-        ]);
+        $resolver->setDefaults(
+            [
+                'tag' => 'unite-cms-core-reference-field',
+                'empty_data' => [
+                    'domain' => null,
+                    'content_type' => null,
+                ],
+            ]
+        );
     }
 
     /**

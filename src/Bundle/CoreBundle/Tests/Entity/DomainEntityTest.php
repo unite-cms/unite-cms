@@ -59,7 +59,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         // Try to test invalid identifier.
         $domain1
             ->setTitle($this->generateRandomUTF8String(255))
-            ->setIdentifier($this->generateRandomMachineName(254) . ':');
+            ->setIdentifier($this->generateRandomMachineName(254).':');
         $errors = $this->container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
 
@@ -350,10 +350,10 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $updateDomain->setIdentifier('domain')->setTitle('New Title');
         for ($i = 1; $i <= 3; $i++) {
             $ct = new ContentType();
-            $ct->setIdentifier('ct' . $i)->setTitle('Ct' . $i);
+            $ct->setIdentifier('ct'.$i)->setTitle('Ct'.$i);
             $ct->setDomain($updateDomain);
             $st = new SettingType();
-            $st->setIdentifier('st' . $i)->setTitle('St' . $i);
+            $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
         }
 
@@ -382,6 +382,66 @@ class DomainEntityTest extends DatabaseAwareTestCase
 
     // Case 1: Domain have an additional ContentType and SettingType
 
+    private function setUpOriginDomain()
+    {
+        $org = new Organization();
+        $org->setTitle('Org')->setIdentifier('org');
+        $domain = new Domain();
+        $domain->setOrganization($org)->setTitle('Domain')->setIdentifier('domain');
+        $st1 = new SettingType();
+        $st1->setIdentifier('st1')->setTitle('St1');
+        $st1->setDomain($domain);
+        $st2 = new SettingType();
+        $st2->setIdentifier('st2')->setTitle('St2');
+        $st2->setDomain($domain);
+
+        $ct1 = new ContentType();
+        $ct1->setIdentifier('ct1')->setTitle('Ct1');
+        $ct1->setDomain($domain);
+        $ct2 = new ContentType();
+        $ct2->setIdentifier('ct2')->setTitle('Ct2');
+        $ct2->setDomain($domain);
+
+        $field1 = new ContentTypeField();
+        $field1->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($ct1);
+        $field2 = new ContentTypeField();
+        $field2->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($ct2);
+        $field3 = new ContentTypeField();
+        $field3->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($ct2);
+        $field4 = new ContentTypeField();
+        $field4->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($ct1);
+
+        $field11 = new SettingTypeField();
+        $field11->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($st1);
+        $field12 = new SettingTypeField();
+        $field12->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($st2);
+        $field13 = new SettingTypeField();
+        $field13->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($st2);
+        $field14 = new SettingTypeField();
+        $field14->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($st1);
+
+        $this->em->persist($org);
+        $this->em->persist($domain);
+        $this->em->flush();
+        $this->em->refresh($domain);
+
+        $content1 = new Content();
+        $content1->setEntity($ct1);
+        $setting1 = new Setting();
+        $setting1->setEntity($st1);
+
+        $this->em->persist($content1);
+        $this->em->persist($setting1);
+        $this->em->flush();
+        $this->em->refresh($content1);
+        $this->em->refresh($setting1);
+        $this->em->refresh($domain);
+
+        return $domain;
+    }
+
+    // Case 2: Domain have the same ContentTypes and SettingTypes
+
     public function testSetIdsFromOriginWithSameContentTypes()
     {
 
@@ -391,16 +451,16 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $updateDomain->setIdentifier('domain')->setTitle('New Title');
         for ($i = 1; $i <= 2; $i++) {
             $ct = new ContentType();
-            $ct->setIdentifier('ct' . $i)->setTitle('Ct' . $i);
+            $ct->setIdentifier('ct'.$i)->setTitle('Ct'.$i);
             $ct->setDomain($updateDomain);
             $st = new SettingType();
-            $st->setIdentifier('st' . $i)->setTitle('St' . $i);
+            $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
             for ($k = 1; $k <= 2; $k++) {
                 $field1 = new ContentTypeField();
-                $field1->setTitle('F' . $k)->setIdentifier('f' . $k)->setType('text')->setEntity($ct);
+                $field1->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($ct);
                 $field2 = new SettingTypeField();
-                $field2->setTitle('F' . $k)->setIdentifier('f' . $k)->setType('text')->setEntity($st);
+                $field2->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($st);
             }
         }
 
@@ -433,7 +493,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $this->assertEquals($domainIds->st1f2, $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId());
     }
 
-    // Case 2: Domain have the same ContentTypes and SettingTypes
+    // Case 3: Domain have the same ContentTypes and SettingTypes but additional fields
 
     public function testSetIdsFromOriginWithMoreFields()
     {
@@ -443,17 +503,17 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $updateDomain->setIdentifier('domain')->setTitle('New Title');
         for ($i = 1; $i <= 2; $i++) {
             $ct = new ContentType();
-            $ct->setIdentifier('ct' . $i)->setTitle('Ct' . $i);
+            $ct->setIdentifier('ct'.$i)->setTitle('Ct'.$i);
             $ct->setDomain($updateDomain);
             $st = new SettingType();
-            $st->setIdentifier('st' . $i)->setTitle('St' . $i);
+            $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
 
             for ($k = 1; $k <= 3; $k++) {
                 $field1 = new ContentTypeField();
-                $field1->setTitle('F' . $k)->setIdentifier('f' . $k)->setType('text')->setEntity($ct);
+                $field1->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($ct);
                 $field2 = new SettingTypeField();
-                $field2->setTitle('F' . $k)->setIdentifier('f' . $k)->setType('text')->setEntity($st);
+                $field2->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($st);
             }
         }
 
@@ -487,7 +547,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $this->assertEquals($domainIds->st1f2, $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId());
     }
 
-    // Case 3: Domain have the same ContentTypes and SettingTypes but additional fields
+    // Case 4: Domain have the same ContentTypes and SettingTypes but less fields
 
     public function testSetIdsFromOriginWithLessFields()
     {
@@ -497,17 +557,17 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $updateDomain->setIdentifier('domain')->setTitle('New Title');
         for ($i = 1; $i <= 2; $i++) {
             $ct = new ContentType();
-            $ct->setIdentifier('ct' . $i)->setTitle('Ct' . $i);
+            $ct->setIdentifier('ct'.$i)->setTitle('Ct'.$i);
             $ct->setDomain($updateDomain);
             $st = new SettingType();
-            $st->setIdentifier('st' . $i)->setTitle('St' . $i);
+            $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
 
             for ($k = 1; $k <= 1; $k++) {
                 $field1 = new ContentTypeField();
-                $field1->setTitle('F' . $k)->setIdentifier('f' . $k)->setType('text')->setEntity($ct);
+                $field1->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($ct);
                 $field2 = new SettingTypeField();
-                $field2->setTitle('F' . $k)->setIdentifier('f' . $k)->setType('text')->setEntity($st);
+                $field2->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($st);
             }
         }
 
@@ -539,7 +599,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $this->assertEquals($domainIds->st1f1, $domain->getSettingTypes()->get('st1')->getFields()->get('f1')->getId());
     }
 
-    // Case 4: Domain have the same ContentTypes and SettingTypes but less fields
+    // Case 5: Domain have the less ContentTypes and SettingTypes
 
     public function testSetIdsFromOriginWithLessContentTypes()
     {
@@ -549,10 +609,10 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $updateDomain->setIdentifier('domain')->setTitle('New Title');
         for ($i = 1; $i <= 1; $i++) {
             $ct = new ContentType();
-            $ct->setIdentifier('ct' . $i)->setTitle('Ct' . $i);
+            $ct->setIdentifier('ct'.$i)->setTitle('Ct'.$i);
             $ct->setDomain($updateDomain);
             $st = new SettingType();
-            $st->setIdentifier('st' . $i)->setTitle('St' . $i);
+            $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
         }
 
@@ -577,8 +637,6 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $this->assertEquals($domainIds->ct1, $domain->getContentTypes()->get('ct1')->getId());
         $this->assertEquals($domainIds->st1, $domain->getSettingTypes()->get('st1')->getId());
     }
-
-    // Case 5: Domain have the less ContentTypes and SettingTypes
 
     public function testValidateDomainInvite()
     {
@@ -631,7 +689,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $this->assertEquals($errors['token'], 'validation.too_long');
 
         // Validate invalid token characters.
-        $invite1->setToken('   ' . $this->generateRandomUTF8String(150));
+        $invite1->setToken('   '.$this->generateRandomUTF8String(150));
 
         $errors = [];
 
@@ -707,63 +765,5 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
-    }
-
-    private function setUpOriginDomain()
-    {
-        $org = new Organization();
-        $org->setTitle('Org')->setIdentifier('org');
-        $domain = new Domain();
-        $domain->setOrganization($org)->setTitle('Domain')->setIdentifier('domain');
-        $st1 = new SettingType();
-        $st1->setIdentifier('st1')->setTitle('St1');
-        $st1->setDomain($domain);
-        $st2 = new SettingType();
-        $st2->setIdentifier('st2')->setTitle('St2');
-        $st2->setDomain($domain);
-
-        $ct1 = new ContentType();
-        $ct1->setIdentifier('ct1')->setTitle('Ct1');
-        $ct1->setDomain($domain);
-        $ct2 = new ContentType();
-        $ct2->setIdentifier('ct2')->setTitle('Ct2');
-        $ct2->setDomain($domain);
-
-        $field1 = new ContentTypeField();
-        $field1->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($ct1);
-        $field2 = new ContentTypeField();
-        $field2->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($ct2);
-        $field3 = new ContentTypeField();
-        $field3->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($ct2);
-        $field4 = new ContentTypeField();
-        $field4->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($ct1);
-
-        $field11 = new SettingTypeField();
-        $field11->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($st1);
-        $field12 = new SettingTypeField();
-        $field12->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($st2);
-        $field13 = new SettingTypeField();
-        $field13->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($st2);
-        $field14 = new SettingTypeField();
-        $field14->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($st1);
-
-        $this->em->persist($org);
-        $this->em->persist($domain);
-        $this->em->flush();
-        $this->em->refresh($domain);
-
-        $content1 = new Content();
-        $content1->setEntity($ct1);
-        $setting1 = new Setting();
-        $setting1->setEntity($st1);
-
-        $this->em->persist($content1);
-        $this->em->persist($setting1);
-        $this->em->flush();
-        $this->em->refresh($content1);
-        $this->em->refresh($setting1);
-        $this->em->refresh($domain);
-
-        return $domain;
     }
 }

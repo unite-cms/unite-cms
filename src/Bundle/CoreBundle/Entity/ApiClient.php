@@ -80,19 +80,29 @@ class ApiClient implements UserInterface, \Serializable
         return [];
     }
 
-    public function __toString()
+    /**
+     * @return Domain
+     */
+    public function getDomain()
     {
-        return '' . $this->getName();
+        return $this->domain;
     }
 
     /**
-     * Get id
+     * @param Domain
      *
-     * @return int
+     * @return ApiClient
      */
-    public function getId()
+    public function setDomain($domain)
     {
-        return $this->id;
+        $this->domain = $domain;
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return ''.$this->getName();
     }
 
     /**
@@ -120,6 +130,16 @@ class ApiClient implements UserInterface, \Serializable
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Returns the roles granted to the client.
      *
      * @return Role[]|string[] The API client roles
@@ -137,6 +157,7 @@ class ApiClient implements UserInterface, \Serializable
     public function setRoles(array $roles)
     {
         $this->roles = $roles;
+
         return $this;
     }
 
@@ -221,26 +242,6 @@ class ApiClient implements UserInterface, \Serializable
             $this->roles,
             $this->domain,
             ) = unserialize($serialized);
-    }
-
-    /**
-     * @return Domain
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
-
-    /**
-     * @param Domain
-     *
-     * @return ApiClient
-     */
-    public function setDomain($domain)
-    {
-        $this->domain = $domain;
-
-        return $this;
     }
 
     /**

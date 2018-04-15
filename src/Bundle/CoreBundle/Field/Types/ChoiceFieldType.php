@@ -24,8 +24,11 @@ class ChoiceFieldType extends FieldType
 
     function getFormOptions(FieldableField $field): array
     {
-        return array_merge(parent::getFormOptions($field), [
-            'choices' => $field->getSettings()->choices,
-        ]);
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'choices' => $field->getSettings()->choices,
+            ]
+        );
     }
 }

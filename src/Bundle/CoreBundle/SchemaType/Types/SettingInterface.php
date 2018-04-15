@@ -22,10 +22,10 @@ class SettingInterface extends InterfaceType
                 },
                 'resolveType' => function ($value) use ($schemaTypeManager) {
                     if (!$value instanceof Setting) {
-                        throw new \InvalidArgumentException('Value must be instance of ' . Setting::class . '.');
+                        throw new \InvalidArgumentException('Value must be instance of '.Setting::class.'.');
                     }
 
-                    $type = ucfirst($value->getSettingType()->getIdentifier()) . 'Setting';
+                    $type = ucfirst($value->getSettingType()->getIdentifier()).'Setting';
 
                     return $schemaTypeManager->getSchemaType($type);
                 },

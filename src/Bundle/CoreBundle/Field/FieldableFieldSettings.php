@@ -22,12 +22,14 @@ class FieldableFieldSettings
         if (isset($this->$name)) {
             return $this->$name;
         }
+
         return null;
     }
 
     public function __set($name, $value)
     {
         $this->$name = $value;
+
         return $this;
     }
 

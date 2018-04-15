@@ -94,11 +94,13 @@ class ContentVoter extends Voter
         foreach ($token->getUser()->getOrganizations() as $organizationMember) {
             if (in_array(Organization::ROLE_ADMINISTRATOR, $organizationMember->getRoles())) {
 
-                if ($subject instanceof ContentType && $subject->getDomain()->getOrganization()->getId() === $organizationMember->getOrganization()->getId()) {
+                if ($subject instanceof ContentType && $subject->getDomain()->getOrganization()->getId(
+                    ) === $organizationMember->getOrganization()->getId()) {
                     return self::ACCESS_GRANTED;
                 }
 
-                if ($subject instanceof Content && $subject->getContentType()->getDomain()->getOrganization()->getId() === $organizationMember->getOrganization()->getId()) {
+                if ($subject instanceof Content && $subject->getContentType()->getDomain()->getOrganization()->getId(
+                    ) === $organizationMember->getOrganization()->getId()) {
                     return self::ACCESS_GRANTED;
                 }
             }
@@ -106,10 +108,18 @@ class ContentVoter extends Voter
 
         // Check bundle and entity actions on ContentType or Content objects.
         if ($subject instanceof ContentType) {
-            return $this->checkPermission($attribute, $subject, $token->getUser()->getDomainRoles($subject->getDomain()));
+            return $this->checkPermission(
+                $attribute,
+                $subject,
+                $token->getUser()->getDomainRoles($subject->getDomain())
+            );
         }
         if ($subject instanceof Content) {
-            return $this->checkPermission($attribute, $subject->getContentType(), $token->getUser()->getDomainRoles($subject->getContentType()->getDomain()));
+            return $this->checkPermission(
+                $attribute,
+                $subject->getContentType(),
+                $token->getUser()->getDomainRoles($subject->getContentType()->getDomain())
+            );
         }
 
         return self::ACCESS_ABSTAIN;

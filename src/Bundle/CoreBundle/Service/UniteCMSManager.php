@@ -62,21 +62,6 @@ class UniteCMSManager
     }
 
     /**
-     * Get the current domain.
-     *
-     * @return \UniteCMS\CoreBundle\Entity\Domain
-     */
-    public function getDomain()
-    {
-
-        if (!$this->initialized) {
-            $this->initialize();
-        }
-
-        return $this->domain;
-    }
-
-    /**
      * Loads the core information (id, title, identifier) of the current
      * organization, domain and domain's content and setting types. Only loads
      * the data once per request.
@@ -173,7 +158,9 @@ class UniteCMSManager
 
             foreach ($data as $row) {
                 $contentType = new ContentType();
-                $contentType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setContentLabel($row['contentLabel'])->setIcon($row['icon'])->setPermissions($row['permissions']);
+                $contentType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle(
+                    $row['title']
+                )->setContentLabel($row['contentLabel'])->setIcon($row['icon'])->setPermissions($row['permissions']);
 
                 // Get views for this contentType.
                 $viewData = $this->em->createQueryBuilder()
@@ -188,7 +175,9 @@ class UniteCMSManager
 
                 foreach ($viewData as $viewRow) {
                     $view = new View();
-                    $view->setId($viewRow['id'])->setIdentifier($viewRow['identifier'])->setTitle($viewRow['title'])->setType($viewRow['type'])->setIcon($viewRow['icon']);
+                    $view->setId($viewRow['id'])->setIdentifier($viewRow['identifier'])->setTitle(
+                        $viewRow['title']
+                    )->setType($viewRow['type'])->setIcon($viewRow['icon']);
                     $contentType->addView($view);
                 }
 
@@ -206,10 +195,27 @@ class UniteCMSManager
 
             foreach ($data as $row) {
                 $settingType = new SettingType();
-                $settingType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon($row['icon'])->setPermissions($row['permissions']);
+                $settingType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon(
+                    $row['icon']
+                )->setPermissions($row['permissions']);
                 $this->domain->addSettingType($settingType);
             }
         }
+    }
+
+    /**
+     * Get the current domain.
+     *
+     * @return \UniteCMS\CoreBundle\Entity\Domain
+     */
+    public function getDomain()
+    {
+
+        if (!$this->initialized) {
+            $this->initialize();
+        }
+
+        return $this->domain;
     }
 
 }

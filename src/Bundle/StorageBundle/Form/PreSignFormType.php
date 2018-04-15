@@ -42,14 +42,22 @@ class PreSignFormType extends AbstractType implements DataTransformerInterface
     {
         $builder->addModelTransformer($this);
         $builder
-            ->add('field', TextType::class, [
-                'required' => true,
-                'constraints' => [new NotBlank()]
-            ])
-            ->add('filename', TextType::class, [
-                'required' => true,
-                'constraints' => [new NotBlank()]
-            ]);
+            ->add(
+                'field',
+                TextType::class,
+                [
+                    'required' => true,
+                    'constraints' => [new NotBlank()],
+                ]
+            )
+            ->add(
+                'filename',
+                TextType::class,
+                [
+                    'required' => true,
+                    'constraints' => [new NotBlank()],
+                ]
+            );
     }
 
     /**
@@ -76,6 +84,7 @@ class PreSignFormType extends AbstractType implements DataTransformerInterface
             // Remove all except alpha-numeric and underscore characters.
             $data['filename'] = preg_replace('/[^a-z0-9_\.]+/', '', $data['filename']);
         }
+
         return $data;
     }
 }

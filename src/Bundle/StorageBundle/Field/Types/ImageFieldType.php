@@ -25,6 +25,7 @@ class ImageFieldType extends FileFieldType
         $options = parent::getFormOptions($field);
         $options['attr']['thumbnail-url'] = $field->getSettings()->file_types ?? '{endpoint}/{id}/{name}';
         $options['attr']['file-types'] = 'png,gif,jpeg,jpg';
+
         return $options;
     }
 }

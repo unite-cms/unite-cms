@@ -80,7 +80,10 @@ class ValidContentTranslationOfValidatorTest extends ConstraintValidatorTestCase
 
         $errors = $this->validate($value, new ValidContentTranslationOfValidator($this->em), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('There are two ore more translations in the same language.', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'There are two ore more translations in the same language.',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
 
         $object->setLocale('en');
         $errors = $this->validate($value, new ValidContentTranslationOfValidator($this->em), null, $object);

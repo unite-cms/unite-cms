@@ -56,8 +56,7 @@ class MutationType extends AbstractType
         AuthorizationChecker $authorizationChecker,
         ValidatorInterface $validator,
         FieldableFormBuilder $fieldableFormBuilder
-    )
-    {
+    ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->entityManager = $entityManager;
         $this->uniteCMSManager = $uniteCMSManager;
@@ -80,12 +79,12 @@ class MutationType extends AbstractType
         foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
             $key = ucfirst($contentType->getIdentifier());
 
-            $fields['create' . $key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
+            $fields['create'.$key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key.'Content', $this->uniteCMSManager->getDomain()),
             ];
 
-            $fields['update' . $key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
+            $fields['update'.$key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key.'Content', $this->uniteCMSManager->getDomain()),
                 'args' => [
                     'id' => [
                         'type' => Type::nonNull(Type::id()),
@@ -95,14 +94,26 @@ class MutationType extends AbstractType
             ];
 
             // If this content type has defined fields, we can create and update content with data.
-            $fullContentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find($contentType->getId());
+            $fullContentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find(
+                $contentType->getId()
+            );
             if ($fullContentType->getFields()->count() > 0) {
-                $fields['create' . $key]['args']['data'] = [
-                    'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'ContentInput', $this->uniteCMSManager->getDomain())),
+                $fields['create'.$key]['args']['data'] = [
+                    'type' => Type::nonNull(
+                        $this->schemaTypeManager->getSchemaType(
+                            $key.'ContentInput',
+                            $this->uniteCMSManager->getDomain()
+                        )
+                    ),
                     'description' => 'The content data to save.',
                 ];
-                $fields['update' . $key]['args']['data'] = [
-                    'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'ContentInput', $this->uniteCMSManager->getDomain())),
+                $fields['update'.$key]['args']['data'] = [
+                    'type' => Type::nonNull(
+                        $this->schemaTypeManager->getSchemaType(
+                            $key.'ContentInput',
+                            $this->uniteCMSManager->getDomain()
+                        )
+                    ),
                     'description' => 'The content data to save.',
                 ];
             }
@@ -130,13 +141,19 @@ class MutationType extends AbstractType
         if (substr($info->fieldName, 0, 6) == 'create') {
             return $this->resolveCreateContent(
                 strtolower(substr($info->fieldName, 6)),
-                $value, $args, $context, $info
+                $value,
+                $args,
+                $context,
+                $info
             );
         } // Resolve update content type
         elseif (substr($info->fieldName, 0, 6) == 'update') {
             return $this->resolveUpdateContent(
                 strtolower(substr($info->fieldName, 6, -strlen('Content'))),
-                $value, $args, $context, $info
+                $value,
+                $args,
+                $context,
+                $info
             );
         }
 
@@ -278,6 +295,7 @@ class MutationType extends AbstractType
                 // If content is valid.
             } else {
                 $this->entityManager->flush();
+
                 return $content;
             }
         }

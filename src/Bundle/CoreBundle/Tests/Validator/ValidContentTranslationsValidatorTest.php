@@ -62,7 +62,10 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
         $translations->get(1)->setLocale('de')->setTranslationof($object);
         $errors = $this->validate($translations, new ValidContentTranslationsValidator(), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('There are two ore more translations in the same language.', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'There are two ore more translations in the same language.',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
 
         $translations->get(1)->setLocale('en')->setTranslationof($object);
         $errors = $this->validate($translations, new ValidContentTranslationsValidator(), null, $object);
@@ -72,17 +75,25 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
         $object->setLocale('en');
         $errors = $this->validate($translations, new ValidContentTranslationsValidator(), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('There are two ore more translations in the same language.', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'There are two ore more translations in the same language.',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testNestedTranslations()
     {
         $object = $this->createMock(Content::class);
         $translations = new ArrayCollection([new Content()]);
-        $translations->get(0)->setLocale('de')->setTranslationof($object)->setTranslations(new ArrayCollection([new Content()]));
+        $translations->get(0)->setLocale('de')->setTranslationof($object)->setTranslations(
+            new ArrayCollection([new Content()])
+        );
         $errors = $this->validate($translations, new ValidContentTranslationsValidator(), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('Translations cannot have other content as translation.', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'Translations cannot have other content as translation.',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testInvalidTranslationOf()
@@ -92,7 +103,10 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
         $translations->get(0)->setLocale('de')->setTranslationof(new Content());
         $errors = $this->validate($translations, new ValidContentTranslationsValidator(), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('Translations cannot have other content as translation.', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'Translations cannot have other content as translation.',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testValidTranslations()

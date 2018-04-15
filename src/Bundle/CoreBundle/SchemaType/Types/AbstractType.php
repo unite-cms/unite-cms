@@ -20,7 +20,7 @@ abstract class AbstractType extends ObjectType
                 },
                 'interfaces' => function () {
                     return $this->interfaces();
-                }
+                },
             ]
         );
     }
@@ -31,16 +31,6 @@ abstract class AbstractType extends ObjectType
      * @return array
      */
     abstract protected function fields();
-
-    /**
-     * Define all interfaces, this type implements.
-     *
-     * @return array
-     */
-    protected function interfaces()
-    {
-        return [];
-    }
 
     /**
      * Resolve fields for this type.
@@ -54,5 +44,15 @@ abstract class AbstractType extends ObjectType
      * @return mixed
      */
     abstract protected function resolveField($value, array $args, $context, ResolveInfo $info);
+
+    /**
+     * Define all interfaces, this type implements.
+     *
+     * @return array
+     */
+    protected function interfaces()
+    {
+        return [];
+    }
 
 }

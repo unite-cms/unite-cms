@@ -33,12 +33,13 @@ class ApiClientUserProviderTest extends TestCase
             {
             }
 
-            public function findOneBy(array $criteria, array $orderBy = NULL)
+            public function findOneBy(array $criteria, array $orderBy = null)
             {
                 if ($criteria['token'] === 'ThisIsMyToken') {
                     $client = new ApiClient();
                     $client->setDomain($criteria['domain']);
                     $client->setToken($criteria['token']);
+
                     return $client;
                 }
 
@@ -87,12 +88,13 @@ class ApiClientUserProviderTest extends TestCase
             {
             }
 
-            public function findOneBy(array $criteria, array $orderBy = NULL)
+            public function findOneBy(array $criteria, array $orderBy = null)
             {
                 if ($criteria['token'] === 'ThisIsMyToken') {
                     $client = new ApiClient();
                     $client->setDomain($criteria['domain']);
                     $client->setToken($criteria['token']);
+
                     return $client;
                 }
 

@@ -75,7 +75,7 @@ class CollectionField implements FieldableField
 
     public function __toString()
     {
-        return '' . $this->title;
+        return ''.$this->title;
     }
 
     /**
@@ -98,30 +98,6 @@ class CollectionField implements FieldableField
     public function setTitle($title)
     {
         $this->title = $title;
-
-        return $this;
-    }
-
-    /**
-     * Get identifier
-     *
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * Set identifier
-     *
-     * @param string $identifier
-     *
-     * @return CollectionField
-     */
-    public function setIdentifier($identifier)
-    {
-        $this->identifier = $identifier;
 
         return $this;
     }
@@ -175,14 +151,6 @@ class CollectionField implements FieldableField
     }
 
     /**
-     * @return Fieldable
-     */
-    public function getEntity()
-    {
-        return $this->collection;
-    }
-
-    /**
      * @param Fieldable $entity
      *
      * @return FieldableField
@@ -190,6 +158,7 @@ class CollectionField implements FieldableField
     public function setEntity($entity)
     {
         $this->collection = $entity;
+
         return $this;
     }
 
@@ -208,6 +177,38 @@ class CollectionField implements FieldableField
         // add this identifier.
         $pathParts[] = $this->getIdentifier();
 
-        return '$.' . join('[*].', $pathParts);
+        return '$.'.join('[*].', $pathParts);
+    }
+
+    /**
+     * @return Fieldable
+     */
+    public function getEntity()
+    {
+        return $this->collection;
+    }
+
+    /**
+     * Get identifier
+     *
+     * @return string
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * Set identifier
+     *
+     * @param string $identifier
+     *
+     * @return CollectionField
+     */
+    public function setIdentifier($identifier)
+    {
+        $this->identifier = $identifier;
+
+        return $this;
     }
 }

@@ -33,6 +33,6 @@ class MaximumNestingLevelType extends AbstractType
      */
     protected function resolveField($value, array $args, $context, ResolveInfo $info)
     {
-        return 'Maximum nesting level of ' . SchemaTypeManager::MAXIMUM_NESTING_LEVEL . ' reached.';
+        return 'Maximum nesting level of '.SchemaTypeManager::MAXIMUM_NESTING_LEVEL.' reached.';
     }
 }

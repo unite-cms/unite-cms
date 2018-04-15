@@ -55,8 +55,7 @@ class QueryType extends AbstractType
         UniteCMSManager $uniteCMSManager,
         AuthorizationChecker $authorizationChecker,
         Paginator $paginator
-    )
-    {
+    ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->entityManager = $entityManager;
         $this->uniteCMSManager = $uniteCMSManager;
@@ -109,8 +108,8 @@ class QueryType extends AbstractType
         // Append Content types.
         foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
             $key = ucfirst($contentType->getIdentifier());
-            $fields['get' . $key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
+            $fields['get'.$key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key.'Content', $this->uniteCMSManager->getDomain()),
                 'args' => [
                     'id' => [
                         'type' => Type::nonNull(Type::id()),
@@ -119,8 +118,11 @@ class QueryType extends AbstractType
                 ],
             ];
 
-            $fields['find' . $key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key . 'ContentResult', $this->uniteCMSManager->getDomain()),
+            $fields['find'.$key] = [
+                'type' => $this->schemaTypeManager->getSchemaType(
+                    $key.'ContentResult',
+                    $this->uniteCMSManager->getDomain()
+                ),
                 'args' => [
                     'limit' => [
                         'type' => Type::int(),
@@ -151,7 +153,7 @@ class QueryType extends AbstractType
 
         // Append Setting types.
         foreach ($this->uniteCMSManager->getDomain()->getSettingTypes() as $settingType) {
-            $key = ucfirst($settingType->getIdentifier()) . 'Setting';
+            $key = ucfirst($settingType->getIdentifier()).'Setting';
             $fields[$key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
             ];
@@ -193,7 +195,9 @@ class QueryType extends AbstractType
 
             $identifier = strtolower(substr($info->fieldName, 0, -strlen('Setting')));
 
-            if (!$settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->findOneBy(['domain' => $this->uniteCMSManager->getDomain(), 'identifier' => $identifier])) {
+            if (!$settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->findOneBy(
+                ['domain' => $this->uniteCMSManager->getDomain(), 'identifier' => $identifier]
+            )) {
                 throw new UserError("SettingType '$identifier' was not found in domain.");
             }
 
@@ -206,7 +210,14 @@ class QueryType extends AbstractType
         } // Resolve list content type.
         elseif (substr($info->fieldName, 0, 4) == 'find' && strlen($info->fieldName) > 4) {
             $args['types'] = [strtolower(substr($info->fieldName, 4))];
-            return $this->resolvefindContent(substr($info->fieldName, 4) . 'ContentResult', $value, $args, $context, $info);
+
+            return $this->resolvefindContent(
+                substr($info->fieldName, 4).'ContentResult',
+                $value,
+                $args,
+                $context,
+                $info
+            );
         } // Resolve generic find type
         elseif (substr($info->fieldName, 0, 4) == 'find' && strlen($info->fieldName) == 4) {
             return $this->resolvefindContent('ContentResult', $value, $args, $context, $info);
@@ -227,8 +238,13 @@ class QueryType extends AbstractType
      * @return mixed
      * @throws \Doctrine\Common\Persistence\Mapping\MappingException
      */
-    private function resolvefindContent($resultType, $value, array $args, $context, ResolveInfo $info): AbstractPagination
-    {
+    private function resolvefindContent(
+        $resultType,
+        $value,
+        array $args,
+        $context,
+        ResolveInfo $info
+    ): AbstractPagination {
 
         $args['types'] = $args['types'] ?? [];
         $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
@@ -238,9 +254,11 @@ class QueryType extends AbstractType
 
         // Get all requested contentTypes, the user can access.
         $contentTypes = [];
-        foreach ($this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findBy([
-            'identifier' => $args['types'],
-        ]) as $contentType) {
+        foreach ($this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findBy(
+            [
+                'identifier' => $args['types'],
+            ]
+        ) as $contentType) {
             if ($this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
                 $contentTypes[] = $contentType;
             }
@@ -265,7 +283,7 @@ class QueryType extends AbstractType
 
                 // if we sort by a content field.
                 if (in_array($key, $contentEntityFields)) {
-                    $contentQuery->addOrderBy('c.' . $key, $order);
+                    $contentQuery->addOrderBy('c.'.$key, $order);
 
                     // if we sort by a nested content data field.
                 } else {
@@ -295,7 +313,12 @@ class QueryType extends AbstractType
         }
 
         // Get all content in one request for all contentTypes.
-        $pagination = $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], ['alias' => $resultType]);
+        $pagination = $this->paginator->paginate(
+            $contentQuery,
+            $args['page'],
+            $args['limit'],
+            ['alias' => $resultType]
+        );
 
         if ($args['deleted']) {
             // We need to clear content cache, so deleted entities will not be shown on next turn.

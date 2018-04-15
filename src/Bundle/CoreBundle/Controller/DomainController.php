@@ -60,7 +60,8 @@ class DomainController extends Controller
         )
             ->add(
                 'definition',
-                WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor']
+                WebComponentType::class,
+                ['tag' => 'unite-cms-core-domaineditor']
             )->getForm()
             ->add('submit', SubmitType::class, ['attr' => ['class' => 'uk-button uk-button-primary']]);
         $form->handleRequest($request);
@@ -93,7 +94,7 @@ class DomainController extends Controller
                     );
                 } else {
                     foreach ($errors as $error) {
-                        $this->addFlash('danger', $error->getPropertyPath() . ': ' . $error->getMessage());
+                        $this->addFlash('danger', $error->getPropertyPath().': '.$error->getMessage());
                     }
                 }
             }
@@ -153,7 +154,8 @@ class DomainController extends Controller
         )
             ->add(
                 'definition',
-                WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor']
+                WebComponentType::class,
+                ['tag' => 'unite-cms-core-domaineditor']
             )->getForm()
             ->add('submit', SubmitType::class, ['attr' => ['class' => 'uk-button uk-button-primary']]);
         $form->handleRequest($request);
@@ -197,7 +199,7 @@ class DomainController extends Controller
                 } else {
                     foreach ($errors as $error) {
 
-                        $this->addFlash('danger', $error->getPropertyPath() . ': ' . $error->getMessage());
+                        $this->addFlash('danger', $error->getPropertyPath().': '.$error->getMessage());
                     }
                 }
             }

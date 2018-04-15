@@ -47,16 +47,23 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
         $viewTypeManagerMock = $this->createMock(ViewTypeManager::class);
         $viewTypeManagerMock->expects($this->any())
             ->method('validateViewSettings')
-            ->willReturn([
-                new ConstraintViolation('m1', 'm1', [], 'root', 'root', 'i1'),
-                new ConstraintViolation('m2', 'm2', [], 'root', 'root', 'i2'),
-            ]);
+            ->willReturn(
+                [
+                    new ConstraintViolation('m1', 'm1', [], 'root', 'root', 'i1'),
+                    new ConstraintViolation('m2', 'm2', [], 'root', 'root', 'i2'),
+                ]
+            );
         $viewTypeManagerMock->expects($this->any())
             ->method('hasViewType')
             ->willReturn(true);
 
         // Validate value.
-        $context = $this->validate(new ViewSettings(), new ValidViewSettingsValidator($viewTypeManagerMock), null, new View());
+        $context = $this->validate(
+            new ViewSettings(),
+            new ValidViewSettingsValidator($viewTypeManagerMock),
+            null,
+            new View()
+        );
         $this->assertCount(2, $context->getViolations());
         $this->assertEquals('m1', $context->getViolations()->get(0)->getMessageTemplate());
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
@@ -75,7 +82,12 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
             ->willReturn(true);
 
         // Validate value.
-        $context = $this->validate(new ViewSettings(), new ValidViewSettingsValidator($viewTypeManagerMock), null, new View());
+        $context = $this->validate(
+            new ViewSettings(),
+            new ValidViewSettingsValidator($viewTypeManagerMock),
+            null,
+            new View()
+        );
         $this->assertCount(0, $context->getViolations());
     }
 }

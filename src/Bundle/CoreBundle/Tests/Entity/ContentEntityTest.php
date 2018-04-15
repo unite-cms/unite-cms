@@ -199,15 +199,17 @@ class ContentEntityTest extends DatabaseAwareTestCase
         $contentType->setContentLabel("#{id}");
         $this->assertEquals('#XXX-YYY-ZZZ', (string)$content);
 
-        $content->setData([
-            'title' => 'My title',
-            'foo' => 'baa',
-            'nested' => [
-                'lu' => [
-                    'la' => 'value',
-                ]
-            ],
-        ]);
+        $content->setData(
+            [
+                'title' => 'My title',
+                'foo' => 'baa',
+                'nested' => [
+                    'lu' => [
+                        'la' => 'value',
+                    ],
+                ],
+            ]
+        );
 
         $contentType->setContentLabel("{title}");
         $this->assertEquals('My title', (string)$content);

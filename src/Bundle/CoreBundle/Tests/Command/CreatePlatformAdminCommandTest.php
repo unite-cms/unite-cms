@@ -35,7 +35,7 @@ class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
 
         $firstName = $this->generateRandomMachineName(10);
         $lastName = $this->generateRandomMachineName(10);
-        $email = $this->generateRandomMachineName(10) . '@' . $this->generateRandomMachineName(10) . '.com';
+        $email = $this->generateRandomMachineName(10).'@'.$this->generateRandomMachineName(10).'.com';
         $password = $this->generateRandomMachineName(10);
 
         $commandTester->setInputs(array($firstName, $lastName, $email, $password, 'Y'));

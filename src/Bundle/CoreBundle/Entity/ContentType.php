@@ -160,9 +160,46 @@ class ContentType implements Fieldable
         $this->addDefaultPermissions();
     }
 
+    /**
+     * Each ContentType must have a "all" view. This function adds it to the ArrayCollection.
+     */
+    private function addDefaultView()
+    {
+        $defaultView = new View();
+        $defaultView
+            ->setType(TableViewType::getType())
+            ->setTitle('All')
+            ->setIdentifier(View::DEFAULT_VIEW_IDENTIFIER);
+        $this->addView($defaultView);
+    }
+
+    /**
+     * @param View $view
+     *
+     * @return ContentType
+     */
+    public function addView(View $view)
+    {
+        if (!$this->views->containsKey($view->getIdentifier())) {
+            $this->views->set($view->getIdentifier(), $view);
+            $view->setContentType($this);
+        }
+
+        return $this;
+    }
+
+    private function addDefaultPermissions()
+    {
+        $this->permissions[ContentVoter::VIEW] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[ContentVoter::LIST] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[ContentVoter::CREATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[ContentVoter::UPDATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[ContentVoter::DELETE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+    }
+
     public function __toString()
     {
-        return '' . $this->title;
+        return ''.$this->title;
     }
 
     public function allowedPermissionRoles(): array
@@ -172,6 +209,27 @@ class ContentType implements Fieldable
         }
 
         return [];
+    }
+
+    /**
+     * @return Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param Domain $domain
+     *
+     * @return ContentType
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+        $domain->addContentType($this);
+
+        return $this;
     }
 
     public function allowedPermissionKeys(): array
@@ -241,30 +299,6 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set id
-     *
-     * @param $id
-     *
-     * @return ContentType
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
      * Get title
      *
      * @return string
@@ -313,25 +347,20 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get description
-     *
-     * @return string
+     * @return int
      */
-    public function getDescription()
+    public function getWeight(): int
     {
-        return $this->description;
+        return $this->weight;
     }
 
     /**
-     * Set description
-     *
-     * @param string $description
-     *
+     * @param int $weight
      * @return ContentType
      */
-    public function setDescription($description)
+    public function setWeight($weight)
     {
-        $this->description = $description;
+        $this->weight = $weight;
 
         return $this;
     }
@@ -381,22 +410,70 @@ class ContentType implements Fieldable
     }
 
     /**
-     * @return Domain
+     * @return array
      */
-    public function getDomain()
+    public function getPermissions()
     {
-        return $this->domain;
+        return $this->permissions;
     }
 
     /**
-     * @param Domain $domain
+     * @param array $permissions
      *
      * @return ContentType
      */
-    public function setDomain($domain)
+    public function setPermissions($permissions)
     {
-        $this->domain = $domain;
-        $domain->addContentType($this);
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        foreach ($permissions as $attribute => $roles) {
+            $this->addPermission($attribute, $roles);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return ContentType
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLocales(): array
+    {
+        return $this->locales ?? [];
+    }
+
+    /**
+     * @param array $locales
+     *
+     * @return ContentType
+     */
+    public function setLocales(array $locales)
+    {
+        $this->locales = $locales;
 
         return $this;
     }
@@ -481,6 +558,30 @@ class ContentType implements Fieldable
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
+     *
+     * @return ContentType
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
      * @param $key
      * @return View
      */
@@ -495,88 +596,9 @@ class ContentType implements Fieldable
         throw new \InvalidArgumentException("View with key '$key' was not found.");
     }
 
-    /**
-     * @param View $view
-     *
-     * @return ContentType
-     */
-    public function addView(View $view)
-    {
-        if (!$this->views->containsKey($view->getIdentifier())) {
-            $this->views->set($view->getIdentifier(), $view);
-            $view->setContentType($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getPermissions()
-    {
-        return $this->permissions;
-    }
-
-    /**
-     * @param array $permissions
-     *
-     * @return ContentType
-     */
-    public function setPermissions($permissions)
-    {
-        $this->permissions = [];
-        $this->addDefaultPermissions();
-
-        foreach ($permissions as $attribute => $roles) {
-            $this->addPermission($attribute, $roles);
-        }
-
-        return $this;
-    }
-
     public function addPermission($attribute, array $roles)
     {
         $this->permissions[$attribute] = $roles;
-    }
-
-    /**
-     * @return array
-     */
-    public function getLocales(): array
-    {
-        return $this->locales ?? [];
-    }
-
-    /**
-     * @param array $locales
-     *
-     * @return ContentType
-     */
-    public function setLocales(array $locales)
-    {
-        $this->locales = $locales;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getWeight(): int
-    {
-        return $this->weight;
-    }
-
-    /**
-     * @param int $weight
-     * @return ContentType
-     */
-    public function setWeight($weight)
-    {
-        $this->weight = $weight;
-
-        return $this;
     }
 
     /**
@@ -609,28 +631,6 @@ class ContentType implements Fieldable
     public function getParentEntity()
     {
         return null;
-    }
-
-    /**
-     * Each ContentType must have a "all" view. This function adds it to the ArrayCollection.
-     */
-    private function addDefaultView()
-    {
-        $defaultView = new View();
-        $defaultView
-            ->setType(TableViewType::getType())
-            ->setTitle('All')
-            ->setIdentifier(View::DEFAULT_VIEW_IDENTIFIER);
-        $this->addView($defaultView);
-    }
-
-    private function addDefaultPermissions()
-    {
-        $this->permissions[ContentVoter::VIEW] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::LIST] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::CREATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::UPDATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::DELETE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
     }
 }
 

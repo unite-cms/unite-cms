@@ -28,7 +28,12 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
         $context = $this->validate(null, new ValidFieldableContentDataValidator($fieldTypeManager), null, $object);
         $this->assertCount(0, $context->getViolations());
 
-        $context = $this->validate((object)[], new ValidFieldableContentDataValidator($fieldTypeManager), null, $object);
+        $context = $this->validate(
+            (object)[],
+            new ValidFieldableContentDataValidator($fieldTypeManager),
+            null,
+            $object
+        );
         $this->assertCount(0, $context->getViolations());
 
         $context = $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager));
@@ -72,9 +77,17 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
         $content->setContentType($ct);
 
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
-        $context = $this->validate(['f1' => 'foo', 'f2' => 'baa'], new ValidFieldableContentDataValidator($fieldTypeManager), null, $content);
+        $context = $this->validate(
+            ['f1' => 'foo', 'f2' => 'baa'],
+            new ValidFieldableContentDataValidator($fieldTypeManager),
+            null,
+            $content
+        );
         $this->assertCount(1, $context->getViolations());
-        $this->assertEquals('The content unit contains invalid additional data.', $context->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'The content unit contains invalid additional data.',
+            $context->getViolations()->get(0)->getMessageTemplate()
+        );
     }
 
     public function testInvalidDataValue()
@@ -90,12 +103,19 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
         $fieldTypeManager->expects($this->any())
             ->method('validateFieldData')
-            ->willReturn([
-                new ConstraintViolation('m1', 'm1', [], 'root', 'root', 'i1'),
-                new ConstraintViolation('m2', 'm2', [], 'root', 'root', 'i2'),
-            ]);
+            ->willReturn(
+                [
+                    new ConstraintViolation('m1', 'm1', [], 'root', 'root', 'i1'),
+                    new ConstraintViolation('m2', 'm2', [], 'root', 'root', 'i2'),
+                ]
+            );
 
-        $context = $this->validate(['f1' => 'foo'], new ValidFieldableContentDataValidator($fieldTypeManager), null, $content);
+        $context = $this->validate(
+            ['f1' => 'foo'],
+            new ValidFieldableContentDataValidator($fieldTypeManager),
+            null,
+            $content
+        );
         $this->assertCount(2, $context->getViolations());
         $this->assertEquals('m1', $context->getViolations()->get(0)->getMessageTemplate());
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
@@ -116,7 +136,12 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
             ->method('validateFieldData')
             ->willReturn([]);
 
-        $context = $this->validate(['f1' => 'foo'], new ValidFieldableContentDataValidator($fieldTypeManager), null, $content);
+        $context = $this->validate(
+            ['f1' => 'foo'],
+            new ValidFieldableContentDataValidator($fieldTypeManager),
+            null,
+            $content
+        );
         $this->assertCount(0, $context->getViolations());
     }
 }

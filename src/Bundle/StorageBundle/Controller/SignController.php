@@ -44,12 +44,15 @@ class SignController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $preSignedUrl = $this->container->get('unite.cms.storage.service')->createPreSignedUploadUrlForFieldPath(
+                $preSignedUrl = $this->container->get(
+                    'unite.cms.storage.service'
+                )->createPreSignedUploadUrlForFieldPath(
                     $form->getData()['filename'],
                     $contentType,
                     $form->getData()['field']
                 );
                 $preSignedUrl->sign($this->container->getParameter('kernel.secret'));
+
                 return new JsonResponse($preSignedUrl);
 
             } catch (\InvalidArgumentException $e) {
@@ -79,12 +82,15 @@ class SignController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $preSignedUrl = $this->container->get('unite.cms.storage.service')->createPreSignedUploadUrlForFieldPath(
+                $preSignedUrl = $this->container->get(
+                    'unite.cms.storage.service'
+                )->createPreSignedUploadUrlForFieldPath(
                     $form->getData()['filename'],
                     $settingType,
                     $form->getData()['field']
                 );
                 $preSignedUrl->sign($this->container->getParameter('kernel.secret'));
+
                 return new JsonResponse($preSignedUrl);
 
             } catch (\InvalidArgumentException $e) {

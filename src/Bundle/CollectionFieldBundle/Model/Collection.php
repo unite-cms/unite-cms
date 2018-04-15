@@ -83,6 +83,37 @@ class Collection implements Fieldable
     }
 
     /**
+     * @return array
+     */
+    public function getLocales(): array
+    {
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIdentifierPath($delimiter = '/')
+    {
+
+        $path = '';
+
+        if ($this->getParentEntity()) {
+            $path = $this->getParentEntity()->getIdentifierPath($delimiter).$delimiter;
+        }
+
+        return $path.$this->getIdentifier();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getParentEntity()
+    {
+        return $this->parent;
+    }
+
+    /**
      * @return string
      */
     public function getIdentifier()
@@ -100,37 +131,6 @@ class Collection implements Fieldable
         $this->identifier = $identifier;
 
         return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getLocales(): array
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParentEntity()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getIdentifierPath($delimiter = '/')
-    {
-
-        $path = '';
-
-        if ($this->getParentEntity()) {
-            $path = $this->getParentEntity()->getIdentifierPath($delimiter) . $delimiter;
-        }
-
-        return $path . $this->getIdentifier();
     }
 
     /**

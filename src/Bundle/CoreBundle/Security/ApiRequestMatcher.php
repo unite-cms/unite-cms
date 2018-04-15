@@ -23,6 +23,9 @@ class ApiRequestMatcher extends RequestMatcher
      */
     public function matches(Request $request)
     {
-        return parent::matches($request) && (!$request->headers->has('Authentication-Fallback') || !filter_var($request->headers->get('Authentication-Fallback'), FILTER_VALIDATE_BOOLEAN));
+        return parent::matches($request) && (!$request->headers->has('Authentication-Fallback') || !filter_var(
+                    $request->headers->get('Authentication-Fallback'),
+                    FILTER_VALIDATE_BOOLEAN
+                ));
     }
 }

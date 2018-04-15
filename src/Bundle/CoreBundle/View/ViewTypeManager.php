@@ -31,9 +31,23 @@ class ViewTypeManager
         return $this->viewTypes;
     }
 
-    public function hasViewType($key): bool
-    {
-        return array_key_exists($key, $this->viewTypes);
+    /**
+     * Get template render parameters for the given view.
+     * @param View $view
+     * @param string $select_mode
+     *
+     * @return ViewParameterBag
+     */
+    public function getTemplateRenderParameters(
+        View $view,
+        $select_mode = ViewTypeInterface::SELECT_MODE_NONE
+    ): ViewParameterBag {
+        $viewType = $this->getViewType($view->getType());
+        $viewType->setEntity($view);
+        $settings = $viewType->getTemplateRenderParameters($select_mode);
+        $viewType->unsetEntity();
+
+        return ViewParameterBag::createFromView($view, $this->urlGenerator, $select_mode, $settings ?? []);
     }
 
     public function getViewType($key): ViewTypeInterface
@@ -45,21 +59,9 @@ class ViewTypeManager
         return $this->viewTypes[$key];
     }
 
-    /**
-     * Get template render parameters for the given view.
-     * @param View $view
-     * @param string $select_mode
-     *
-     * @return ViewParameterBag
-     */
-    public function getTemplateRenderParameters(View $view, $select_mode = ViewTypeInterface::SELECT_MODE_NONE): ViewParameterBag
+    public function hasViewType($key): bool
     {
-        $viewType = $this->getViewType($view->getType());
-        $viewType->setEntity($view);
-        $settings = $viewType->getTemplateRenderParameters($select_mode);
-        $viewType->unsetEntity();
-
-        return ViewParameterBag::createFromView($view, $this->urlGenerator, $select_mode, $settings ?? []);
+        return array_key_exists($key, $this->viewTypes);
     }
 
     /**

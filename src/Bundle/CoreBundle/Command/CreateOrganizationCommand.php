@@ -59,7 +59,7 @@ class CreateOrganizationCommand extends Command
         $name = $this->titleToMachineName($title);
 
         $question = new Question(
-            '<info>Please enter the identifier of the organization</info> [<comment>' . $name . '</comment>]: ', $name
+            '<info>Please enter the identifier of the organization</info> [<comment>'.$name.'</comment>]: ', $name
         );
         $question->setAutocompleterValues([$name]);
         $identifier = $helper->ask($input, $output, $question);
@@ -68,7 +68,8 @@ class CreateOrganizationCommand extends Command
         $organization->setTitle($title)->setIdentifier($identifier);
 
         $question = new ConfirmationQuestion(
-            '<info>Should the organization with title: "' . $organization->getTitle() . '" and identifier: "' . $identifier . '" be created</info>? [<comment>Y/n</comment>] ',
+            '<info>Should the organization with title: "'.$organization->getTitle(
+            ).'" and identifier: "'.$identifier.'" be created</info>? [<comment>Y/n</comment>] ',
             true,
             '/^(y|j)/i'
         );

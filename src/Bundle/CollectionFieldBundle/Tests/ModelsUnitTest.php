@@ -47,6 +47,9 @@ class ModelsUnitTest extends TestCase
         $this->assertEquals('F5', (string)$collection3->getFields()->get('f5'));
 
         $this->assertEquals($collection3, $collection3->getFields()->get('f2')->getEntity());
-        $this->assertEquals(new FieldableFieldSettings(['foo' => 'baa', 'baa' => 'foo']), $collection3->getFields()->get('f5')->getSettings());
+        $this->assertEquals(
+            new FieldableFieldSettings(['foo' => 'baa', 'baa' => 'foo']),
+            $collection3->getFields()->get('f5')->getSettings()
+        );
     }
 }
