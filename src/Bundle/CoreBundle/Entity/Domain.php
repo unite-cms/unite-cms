@@ -140,14 +140,14 @@ class Domain
     /**
      *  checks if current domain has content types or settings types and returns true if so
      *
-     *  @return boolean
+     * @return boolean
      */
     public function hasContentOrSettingTypes()
     {
-        if ($this->getContentTypes()->count() > 0 or $this->getSettingTypes()->count() > 0)
-        {
+        if ($this->getContentTypes()->count() > 0 or $this->getSettingTypes()->count() > 0) {
             return true;
         }
+
         return false;
     }
 
@@ -353,7 +353,7 @@ class Domain
     {
         $available_roles = array_flip($this->getRoles());
 
-        if(!$include_anonymous) {
+        if (!$include_anonymous) {
             unset($available_roles[Domain::ROLE_PUBLIC]);
         }
 

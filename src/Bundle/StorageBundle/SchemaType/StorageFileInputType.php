@@ -16,30 +16,30 @@ class StorageFileInputType extends InputObjectType
     public function __construct()
     {
         parent::__construct(
-          [
-            'fields' => [
-              'name' => [
-                'type' => Type::nonNull(Type::string()),
-                'description' => 'The filename (with filetype suffix)',
-              ],
-              'size' => [
-                'type' => Type::nonNull(Type::int()),
-                'description' => 'The filesize in bytes',
-              ],
-              'type' => [
-                'type' => Type::nonNull(Type::string()),
-                'description' => 'The MIME type',
-              ],
-              'id' => [
-                'type' => Type::nonNull(Type::id()),
-                'description' => 'An UUID identifier for this file',
-              ],
-              'checksum' => [
-                'type' => Type::nonNull(Type::string()),
-                'description' => 'A checksum for uuid and filename, created by unite CMS.',
-              ],
-            ],
-          ]
+            [
+                'fields' => [
+                    'name' => [
+                        'type' => Type::nonNull(Type::string()),
+                        'description' => 'The filename (with filetype suffix)',
+                    ],
+                    'size' => [
+                        'type' => Type::nonNull(Type::int()),
+                        'description' => 'The filesize in bytes',
+                    ],
+                    'type' => [
+                        'type' => Type::nonNull(Type::string()),
+                        'description' => 'The MIME type',
+                    ],
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'An UUID identifier for this file',
+                    ],
+                    'checksum' => [
+                        'type' => Type::nonNull(Type::string()),
+                        'description' => 'A checksum for uuid and filename, created by unite CMS.',
+                    ],
+                ],
+            ]
         );
     }
 }

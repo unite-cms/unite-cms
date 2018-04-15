@@ -24,27 +24,28 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 use UniteCMS\StorageBundle\Form\PreSignFormType;
 use UniteCMS\StorageBundle\Model\PreSignedUrl;
 
-class ControllerTest extends DatabaseAwareTestCase {
+class ControllerTest extends DatabaseAwareTestCase
+{
 
-  /**
-   * @var Client $client
-   */
-  private $client;
+    /**
+     * @var Client $client
+     */
+    private $client;
 
-  /**
-   * @var $token
-   */
-  private $csrf_token;
+    /**
+     * @var $token
+     */
+    private $csrf_token;
 
     /**
      * @var User $user
      */
     private $user;
 
-  /**
-   * @var string
-   */
-  private $domainConfiguration = '{
+    /**
+     * @var string
+     */
+    private $domainConfiguration = '{
     "title": "Domain 1",
     "identifier": "d1", 
     "content_types": [
@@ -113,313 +114,454 @@ class ControllerTest extends DatabaseAwareTestCase {
     ]
   }';
 
-  /**
-   * @var Organization $org1
-   */
-  private $org1;
+    /**
+     * @var Organization $org1
+     */
+    private $org1;
 
-  /**
-   * @var Domain $domain1
-   */
-  private $domain1;
+    /**
+     * @var Domain $domain1
+     */
+    private $domain1;
 
-  public function setUp()
-  {
-    parent::setUp();
+    public function setUp()
+    {
+        parent::setUp();
 
-    $this->org1 = new Organization();
-    $this->org1->setIdentifier('org1')->setTitle('org1');
-    $this->em->persist($this->org1);
-    $this->em->flush($this->org1);
+        $this->org1 = new Organization();
+        $this->org1->setIdentifier('org1')->setTitle('org1');
+        $this->em->persist($this->org1);
+        $this->em->flush($this->org1);
 
-    $this->domain1 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
-    $this->domain1->setOrganization($this->org1);
-    $this->em->persist($this->domain1);
-    $this->em->flush($this->domain1);
+        $this->domain1 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain1->setOrganization($this->org1);
+        $this->em->persist($this->domain1);
+        $this->em->flush($this->domain1);
 
-    $editor = new User();
-    $editor->setEmail('editor@example.com')->setFirstname('Editor')->setLastname('Editor')->setPassword('XXX')->setRoles([User::ROLE_USER]);
-    $editorMember = new OrganizationMember();
-    $editorMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org1);
-    $editorDomainMember = new DomainMember();
-    $editorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
-    $editor->addOrganization($editorMember);
-    $editor->addDomain($editorDomainMember);
-    $this->em->persist($editor);
-    $this->em->flush($editor);
-    $this->user = $editor;
+        $editor = new User();
+        $editor->setEmail('editor@example.com')->setFirstname('Editor')->setLastname('Editor')->setPassword(
+            'XXX'
+        )->setRoles([User::ROLE_USER]);
+        $editorMember = new OrganizationMember();
+        $editorMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org1);
+        $editorDomainMember = new DomainMember();
+        $editorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
+        $editor->addOrganization($editorMember);
+        $editor->addDomain($editorDomainMember);
+        $this->em->persist($editor);
+        $this->em->flush($editor);
+        $this->user = $editor;
 
-    $this->client = $this->container->get('test.client');
-    $this->client->followRedirects(false);
+        $this->client = $this->container->get('test.client');
+        $this->client->followRedirects(false);
 
-  }
-
-  public function testPreSignFileUploadWithApiFirewall() {
-
-      $apiClient = new ApiClient();
-      $apiClient
-          ->setRoles([Domain::ROLE_EDITOR])
-          ->setName('API Client 1')
-          ->setDomain($this->domain1)
-          ->setToken('abc');
-      $this->em->persist($apiClient);
-      $this->em->flush($apiClient);
-
-      $route_uri = $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
-           'domain' => $this->domain1->getIdentifier(),
-           'organization' => $this->org1->getIdentifier(),
-           'content_type' => 'ct1',
-           'token' => $apiClient->getToken()
-      ], Router::ABSOLUTE_URL);
-
-      $parameters = [
-          'pre_sign_form' => [
-              'field' => 'file',
-              'filename' => 'ö Aä.*#ä+ .txt'
-          ],
-      ];
-
-      $this->client->request('POST', $route_uri, $parameters, [], ['CONTENT_TYPE' => 'application/json'], json_encode(['query' => '{}']));
-      $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-  }
-
-  public function testPreSignFileUploadWithMainFirewall() {
-
-      $token = new UsernamePasswordToken($this->user, null, 'main', $this->user->getRoles());
-
-      # generate new csrf_token
-      $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(PreSignFormType::class));
-
-      $session = $this->client->getContainer()->get('session');
-      $session->set('_security_main', serialize($token));
-      $session->save();
-      $cookie = new Cookie($session->getName(), $session->getId());
-      $this->client->getCookieJar()->set($cookie);
-      $this->client->setServerParameter('HTTP_Authentication-Fallback', true);
-
-    // Try to access with invalid method.
-    $baseUrl = $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']);
-    $this->client->request('GET', $baseUrl);
-    $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
-    $this->client->request('PUT', $baseUrl);
-    $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
-    $this->client->request('DELETE', $baseUrl);
-    $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
-
-    $baseUrl = $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo']);
-    $this->client->request('GET', $baseUrl);
-    $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
-    $this->client->request('PUT', $baseUrl);
-    $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
-    $this->client->request('DELETE', $baseUrl);
-    $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
-
-    // Try to pre sign for invalid organization domain content type and setting type.
-    foreach([
-      ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo'],
-      ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'content_type' => 'foo'],
-      ['organization' => $this->org1->getIdentifier(), 'domain' => $this->domain1->getIdentifier(), 'content_type' => 'foo'],
-    ] as $params) {
-
-      $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params), []);
-      $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
-    foreach([
-              ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo'],
-              ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'setting_type' => 'foo'],
-              ['organization' => $this->org1->getIdentifier(), 'domain' => $this->domain1->getIdentifier(), 'setting_type' => 'foo'],
-            ] as $params) {
-      $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params), []);
-      $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
+    public function testPreSignFileUploadWithApiFirewall()
+    {
+
+        $apiClient = new ApiClient();
+        $apiClient
+            ->setRoles([Domain::ROLE_EDITOR])
+            ->setName('API Client 1')
+            ->setDomain($this->domain1)
+            ->setToken('abc');
+        $this->em->persist($apiClient);
+        $this->em->flush($apiClient);
+
+        $route_uri = $this->container->get('router')->generate(
+            'unitecms_storage_sign_uploadcontenttype',
+            [
+                'domain' => $this->domain1->getIdentifier(),
+                'organization' => $this->org1->getIdentifier(),
+                'content_type' => 'ct1',
+                'token' => $apiClient->getToken(),
+            ],
+            Router::ABSOLUTE_URL
+        );
+
+        $parameters = [
+            'pre_sign_form' => [
+                'field' => 'file',
+                'filename' => 'ö Aä.*#ä+ .txt',
+            ],
+        ];
+
+        $this->client->request(
+            'POST',
+            $route_uri,
+            $parameters,
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['query' => '{}'])
+        );
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
     }
 
-    // Try to pre sign without CREATE permission.
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'content_type' => 'ct2',
-    ]));
-    $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
+    public function testPreSignFileUploadWithMainFirewall()
+    {
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'setting_type' => 'st2',
-    ]));
-    $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
+        $token = new UsernamePasswordToken($this->user, null, 'main', $this->user->getRoles());
 
-    // Try to pre sign for invalid content type field.
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'content_type' => 'ct1',
-    ]), [
-        'pre_sign_form' => ['field' => 'foo'],
-    ]);
-    $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+        # generate new csrf_token
+        $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(
+            StringUtil::fqcnToBlockPrefix(PreSignFormType::class)
+        );
 
-    // Try to pre sign for invalid setting type field.
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'setting_type' => 'st1',
-    ]), [
-        'pre_sign_form' => ['field' => 'foo'],
-    ]);
-    $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+        $session = $this->client->getContainer()->get('session');
+        $session->set('_security_main', serialize($token));
+        $session->save();
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $this->client->getCookieJar()->set($cookie);
+        $this->client->setServerParameter('HTTP_Authentication-Fallback', true);
 
-    // Try to pre sign for invalid content type nested field.
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'content_type' => 'ct1',
-    ]), [
-        'pre_sign_form' => ['field' => 'foo/baa'],
-    ]);
-    $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+        // Try to access with invalid method.
+        $baseUrl = $this->container->get('router')->generate(
+            'unitecms_storage_sign_uploadcontenttype',
+            ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']
+        );
+        $this->client->request('GET', $baseUrl);
+        $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
+        $this->client->request('PUT', $baseUrl);
+        $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
+        $this->client->request('DELETE', $baseUrl);
+        $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'content_type' => 'ct1',
-    ]), [
-      'pre_sign_form' => ['field' => 'nested/baa'],
-    ]);
-    $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+        $baseUrl = $this->container->get('router')->generate(
+            'unitecms_storage_sign_uploadsettingtype',
+            ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo']
+        );
+        $this->client->request('GET', $baseUrl);
+        $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
+        $this->client->request('PUT', $baseUrl);
+        $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
+        $this->client->request('DELETE', $baseUrl);
+        $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
 
-    // Try to pre sign for invalid setting type nested field.
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'setting_type' => 'st1',
-    ]), [
-        'pre_sign_form' => ['field' => 'foo/baa'],
-    ]);
-    $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+        // Try to pre sign for invalid organization domain content type and setting type.
+        foreach ([
+                     ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo'],
+                     ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'content_type' => 'foo'],
+                     [
+                         'organization' => $this->org1->getIdentifier(),
+                         'domain' => $this->domain1->getIdentifier(),
+                         'content_type' => 'foo',
+                     ],
+                 ] as $params) {
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'setting_type' => 'st1',
-    ]), [
-        'pre_sign_form' => ['field' => 'nested/baa'],
-    ]);
-    $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+            $this->client->request(
+                'POST',
+                $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params),
+                []
+            );
+            $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
+        }
 
-    // Try to pre sign invalid file type.
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'content_type' => 'ct1',
-    ]), [
-        'pre_sign_form' => [
-          'field' => 'file',
-          'filename' => 'unsupported.unsupported',
-        ]
-    ]);
-    $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+        foreach ([
+                     ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo'],
+                     ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'setting_type' => 'foo'],
+                     [
+                         'organization' => $this->org1->getIdentifier(),
+                         'domain' => $this->domain1->getIdentifier(),
+                         'setting_type' => 'foo',
+                     ],
+                 ] as $params) {
+            $this->client->request(
+                'POST',
+                $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params),
+                []
+            );
+            $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
+        }
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'setting_type' => 'st1',
-    ]), [
-        'pre_sign_form' => [
-          'field' => 'file',
-          'filename' => 'unsupported.unsupported',
-        ],
-    ]);
-    $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+        // Try to pre sign without CREATE permission.
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadcontenttype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'content_type' => 'ct2',
+                ]
+            )
+        );
+        $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
-    // Try to pre sign filename with special chars.
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadsettingtype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'setting_type' => 'st2',
+                ]
+            )
+        );
+        $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'content_type' => 'ct1',
-    ]), [
-        'pre_sign_form' => [
-          'field' => 'file',
-          'filename' => 'ö Aä.*#ä+ .txt',
-            '_token' => $this->csrf_token->getValue()
-        ],
-    ]);
-    $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        // Try to pre sign for invalid content type field.
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadcontenttype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'content_type' => 'ct1',
+                ]
+            ),
+            [
+                'pre_sign_form' => ['field' => 'foo'],
+            ]
+        );
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $response = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
+        // Try to pre sign for invalid setting type field.
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadsettingtype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'setting_type' => 'st1',
+                ]
+            ),
+            [
+                'pre_sign_form' => ['field' => 'foo'],
+            ]
+        );
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    // Check checksum.
-    $preSignedUrl = new PreSignedUrl($response->pre_signed_url, $response->uuid, $response->filename, $response->checksum);
-    $this->assertNotNull($preSignedUrl->getChecksum());
-    $this->assertTrue($preSignedUrl->check($this->container->getParameter('kernel.secret')));
+        // Try to pre sign for invalid content type nested field.
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadcontenttype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'content_type' => 'ct1',
+                ]
+            ),
+            [
+                'pre_sign_form' => ['field' => 'foo/baa'],
+            ]
+        );
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $s3Client = new S3Client([
-      'version' => 'latest',
-      'region'  => 'us-east-1',
-      'endpoint' => 'https://example.com',
-      'use_path_style_endpoint' => true,
-      'credentials' => [
-        'key'    => 'XXX',
-        'secret' => 'XXX',
-      ],
-    ]);
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadcontenttype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'content_type' => 'ct1',
+                ]
+            ),
+            [
+                'pre_sign_form' => ['field' => 'nested/baa'],
+            ]
+        );
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $command = $s3Client->getCommand('PutObject', [
-      'Bucket' => 'foo',
-      'Key'    => $preSignedUrl->getUuid() . '/_a._.txt'
-    ]);
+        // Try to pre sign for invalid setting type nested field.
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadsettingtype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'setting_type' => 'st1',
+                ]
+            ),
+            [
+                'pre_sign_form' => ['field' => 'foo/baa'],
+            ]
+        );
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $presignedRequest = $s3Client->createPresignedRequest($command, '+5 minutes');
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadsettingtype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'setting_type' => 'st1',
+                ]
+            ),
+            [
+                'pre_sign_form' => ['field' => 'nested/baa'],
+            ]
+        );
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $newResponse = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
+        // Try to pre sign invalid file type.
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadcontenttype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'content_type' => 'ct1',
+                ]
+            ),
+            [
+                'pre_sign_form' => [
+                    'field' => 'file',
+                    'filename' => 'unsupported.unsupported',
+                ],
+            ]
+        );
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $generatedParts = explode('&X-Amz-Date==', $newResponse->pre_signed_url);
-    $actualParts = explode('&X-Amz-Date==', (string)$presignedRequest->getUri());
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadsettingtype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'setting_type' => 'st1',
+                ]
+            ),
+            [
+                'pre_sign_form' => [
+                    'field' => 'file',
+                    'filename' => 'unsupported.unsupported',
+                ],
+            ]
+        );
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
 
-    $this->assertEquals($actualParts[0], $generatedParts[0]);
+        // Try to pre sign filename with special chars.
 
-    $this->client->request('POST', $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
-      'organization' => $this->org1->getIdentifier(),
-      'domain' => $this->domain1->getIdentifier(),
-      'setting_type' => 'st1',
-    ]), [
-        'pre_sign_form' => [
-          'field' => 'file',
-          'filename' => 'ö Aä.*#ä+ .txt',
-            '_token' => $this->csrf_token->getValue()
-        ],
-    ]);
-    $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadcontenttype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'content_type' => 'ct1',
+                ]
+            ),
+            [
+                'pre_sign_form' => [
+                    'field' => 'file',
+                    'filename' => 'ö Aä.*#ä+ .txt',
+                    '_token' => $this->csrf_token->getValue(),
+                ],
+            ]
+        );
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
-    $response = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
+        $response = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
 
-    $preSignedUrl = new PreSignedUrl($response->pre_signed_url, $response->uuid, $response->filename, $response->checksum);
-    $this->assertNotNull($preSignedUrl->getChecksum());
-    $this->assertTrue($preSignedUrl->check($this->container->getParameter('kernel.secret')));
+        // Check checksum.
+        $preSignedUrl = new PreSignedUrl(
+            $response->pre_signed_url,
+            $response->uuid,
+            $response->filename,
+            $response->checksum
+        );
+        $this->assertNotNull($preSignedUrl->getChecksum());
+        $this->assertTrue($preSignedUrl->check($this->container->getParameter('kernel.secret')));
 
-    $s3Client = new S3Client([
-      'version' => 'latest',
-      'region'  => 'us-east-1',
-      'endpoint' => 'https://example.com',
-      'use_path_style_endpoint' => true,
-      'credentials' => [
-        'key'    => 'XXX',
-        'secret' => 'XXX',
-      ],
-    ]);
+        $s3Client = new S3Client(
+            [
+                'version' => 'latest',
+                'region' => 'us-east-1',
+                'endpoint' => 'https://example.com',
+                'use_path_style_endpoint' => true,
+                'credentials' => [
+                    'key' => 'XXX',
+                    'secret' => 'XXX',
+                ],
+            ]
+        );
 
-    $command = $s3Client->getCommand('PutObject', [
-      'Bucket' => 'foo',
-      'Key'    => $preSignedUrl->getUuid() . '/_a._.txt'
-    ]);
+        $command = $s3Client->getCommand(
+            'PutObject',
+            [
+                'Bucket' => 'foo',
+                'Key' => $preSignedUrl->getUuid().'/_a._.txt',
+            ]
+        );
 
-    $presignedRequest = $s3Client->createPresignedRequest($command, '+5 minutes');
-    $newResponse = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
+        $presignedRequest = $s3Client->createPresignedRequest($command, '+5 minutes');
 
-    $generatedParts = explode('&X-Amz-Date=', $newResponse->pre_signed_url);
-    $actualParts = explode('&X-Amz-Date=', (string)$presignedRequest->getUri());
+        $newResponse = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
 
-    $this->assertEquals($actualParts[0], $generatedParts[0]);
-  }
+        $generatedParts = explode('&X-Amz-Date==', $newResponse->pre_signed_url);
+        $actualParts = explode('&X-Amz-Date==', (string)$presignedRequest->getUri());
+
+        $this->assertEquals($actualParts[0], $generatedParts[0]);
+
+        $this->client->request(
+            'POST',
+            $this->container->get('router')->generate(
+                'unitecms_storage_sign_uploadsettingtype',
+                [
+                    'organization' => $this->org1->getIdentifier(),
+                    'domain' => $this->domain1->getIdentifier(),
+                    'setting_type' => 'st1',
+                ]
+            ),
+            [
+                'pre_sign_form' => [
+                    'field' => 'file',
+                    'filename' => 'ö Aä.*#ä+ .txt',
+                    '_token' => $this->csrf_token->getValue(),
+                ],
+            ]
+        );
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        $response = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
+
+        $preSignedUrl = new PreSignedUrl(
+            $response->pre_signed_url,
+            $response->uuid,
+            $response->filename,
+            $response->checksum
+        );
+        $this->assertNotNull($preSignedUrl->getChecksum());
+        $this->assertTrue($preSignedUrl->check($this->container->getParameter('kernel.secret')));
+
+        $s3Client = new S3Client(
+            [
+                'version' => 'latest',
+                'region' => 'us-east-1',
+                'endpoint' => 'https://example.com',
+                'use_path_style_endpoint' => true,
+                'credentials' => [
+                    'key' => 'XXX',
+                    'secret' => 'XXX',
+                ],
+            ]
+        );
+
+        $command = $s3Client->getCommand(
+            'PutObject',
+            [
+                'Bucket' => 'foo',
+                'Key' => $preSignedUrl->getUuid().'/_a._.txt',
+            ]
+        );
+
+        $presignedRequest = $s3Client->createPresignedRequest($command, '+5 minutes');
+        $newResponse = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
+
+        $generatedParts = explode('&X-Amz-Date=', $newResponse->pre_signed_url);
+        $actualParts = explode('&X-Amz-Date=', (string)$presignedRequest->getUri());
+
+        $this->assertEquals($actualParts[0], $generatedParts[0]);
+    }
 }

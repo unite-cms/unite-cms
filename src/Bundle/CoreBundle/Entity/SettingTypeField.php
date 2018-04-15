@@ -198,7 +198,7 @@ class SettingTypeField implements FieldableField
      */
     public function getJsonExtractIdentifier()
     {
-        return '$.' . $this->getIdentifier();
+        return '$.'.$this->getIdentifier();
     }
 
     /**

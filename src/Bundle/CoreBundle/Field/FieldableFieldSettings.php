@@ -12,24 +12,29 @@ class FieldableFieldSettings
 {
     public function __construct(array $settings = [])
     {
-        foreach($settings as $key => $value) {
+        foreach ($settings as $key => $value) {
             $this->$key = $value;
         }
     }
 
-    public function __set($name, $value) {
+    public function __set($name, $value)
+    {
         $this->$name = $value;
+
         return $this;
     }
 
-    public function __get($name) {
-        if(isset($this->$name)) {
+    public function __get($name)
+    {
+        if (isset($this->$name)) {
             return $this->$name;
         }
+
         return null;
     }
 
-    public function __isset($name) {
+    public function __isset($name)
+    {
         return isset($this->$name);
     }
 }

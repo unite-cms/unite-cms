@@ -24,10 +24,10 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class ReferenceFieldType extends FieldType
 {
-    const TYPE                      = "reference";
-    const FORM_TYPE                 = ReferenceType::class;
-    const SETTINGS                  = ['domain', 'content_type', 'view', 'content_label'];
-    const REQUIRED_SETTINGS         = ['domain', 'content_type'];
+    const TYPE = "reference";
+    const FORM_TYPE = ReferenceType::class;
+    const SETTINGS = ['domain', 'content_type', 'view', 'content_label'];
+    const REQUIRED_SETTINGS = ['domain', 'content_type'];
 
     private $validator;
     private $authorizationChecker;
@@ -37,7 +37,15 @@ class ReferenceFieldType extends FieldType
     private $templating;
     private $csrfTokenManager;
 
-    function __construct(ValidatorInterface $validator, AuthorizationChecker $authorizationChecker, UniteCMSManager $uniteCMSManager, EntityManager $entityManager, ViewTypeManager $viewTypeManager, TwigEngine $templating, CsrfTokenManager $csrfTokenManager) {
+    function __construct(
+        ValidatorInterface $validator,
+        AuthorizationChecker $authorizationChecker,
+        UniteCMSManager $uniteCMSManager,
+        EntityManager $entityManager,
+        ViewTypeManager $viewTypeManager,
+        TwigEngine $templating,
+        CsrfTokenManager $csrfTokenManager
+    ) {
         $this->validator = $validator;
         $this->authorizationChecker = $authorizationChecker;
         $this->uniteCMSManager = $uniteCMSManager;
@@ -54,35 +62,50 @@ class ReferenceFieldType extends FieldType
      * @param string $content_type_identifier
      * @return ContentType
      */
-    private function resolveContentType($domain_identifier, $content_type_identifier) : ContentType {
+    private function resolveContentType($domain_identifier, $content_type_identifier): ContentType
+    {
 
-        if(!$domain_identifier || !$content_type_identifier) {
+        if (!$domain_identifier || !$content_type_identifier) {
             throw new InvalidArgumentException("You must pass a domain and content_type identifier.");
         }
 
         // Only allow to resolve a content type from the same organization.
         $organization = $this->uniteCMSManager->getOrganization();
 
-        $domain = $organization->getDomains()->filter(function( Domain $domain ) use($domain_identifier) { return $domain->getIdentifier() == $domain_identifier; })->first();
+        $domain = $organization->getDomains()->filter(
+            function (Domain $domain) use ($domain_identifier) {
+                return $domain->getIdentifier() == $domain_identifier;
+            }
+        )->first();
 
-        if(!$domain) {
-            throw new InvalidArgumentException("No domain with identifier '{$domain_identifier}' was found in this organization.");
+        if (!$domain) {
+            throw new InvalidArgumentException(
+                "No domain with identifier '{$domain_identifier}' was found in this organization."
+            );
         }
 
         // We need to reload the full domain. uniteCMSManager only holds infos for the current domain.
-        $domain = $this->entityManager->getRepository('UniteCMSCoreBundle:Domain')->findOneBy([
-            'organization' => $organization,
-            'id' => $domain->getId(),
-        ]);
+        $domain = $this->entityManager->getRepository('UniteCMSCoreBundle:Domain')->findOneBy(
+            [
+                'organization' => $organization,
+                'id' => $domain->getId(),
+            ]
+        );
 
-        if(!$this->authorizationChecker->isGranted(DomainVoter::VIEW, $domain)) {
+        if (!$this->authorizationChecker->isGranted(DomainVoter::VIEW, $domain)) {
             throw new InvalidArgumentException("You are not allowed to view this domain.");
         }
 
-        $contentType = $domain->getContentTypes()->filter(function( ContentType $contentType ) use($content_type_identifier) { return $contentType->getIdentifier() == $content_type_identifier; })->first();
+        $contentType = $domain->getContentTypes()->filter(
+            function (ContentType $contentType) use ($content_type_identifier) {
+                return $contentType->getIdentifier() == $content_type_identifier;
+            }
+        )->first();
 
-        if(!$contentType) {
-            throw new InvalidArgumentException("No content_type with identifier '{$content_type_identifier}' was found for this organization and domain.");
+        if (!$contentType) {
+            throw new InvalidArgumentException(
+                "No content_type with identifier '{$content_type_identifier}' was found for this organization and domain."
+            );
         }
 
         return $contentType;
@@ -98,59 +121,73 @@ class ReferenceFieldType extends FieldType
 
         // Get content type and check if we have access to it.
         $contentType = $this->resolveContentType($settings->domain, $settings->content_type);
-        if(!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+        if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
             throw new InvalidArgumentException("You are not allowed to view this content_type.");
         }
 
         // Get view.
-        $view = $contentType->getViews()->filter(function( View $view) use($settings) { return $view->getIdentifier() == $settings->view; })->first();
-        if(!$view) {
-            throw new InvalidArgumentException("No view with identifier '{$settings->view}' was found for this organization, domain and content type.");
+        $view = $contentType->getViews()->filter(
+            function (View $view) use ($settings) {
+                return $view->getIdentifier() == $settings->view;
+            }
+        )->first();
+        if (!$view) {
+            throw new InvalidArgumentException(
+                "No view with identifier '{$settings->view}' was found for this organization, domain and content type."
+            );
         }
 
         // Reload the full view object.
-        $view = $this->entityManager->getRepository('UniteCMSCoreBundle:View')->findOneBy([
-            'contentType' => $contentType,
-            'id' => $view->getId(),
-        ]);
+        $view = $this->entityManager->getRepository('UniteCMSCoreBundle:View')->findOneBy(
+            [
+                'contentType' => $contentType,
+                'id' => $view->getId(),
+            ]
+        );
 
         // Pass the rendered view HTML and other parameters as a form option.
-        return array_merge(parent::getFormOptions($field), [
-            'empty_data' => [
-                'domain' => $contentType->getDomain()->getIdentifier(),
-                'content_type' => $contentType->getIdentifier(),
-            ],
-            'attr' => [
-                'base-url' => '/' . $this->uniteCMSManager->getOrganization()->getIdentifier() . '/',
-                'content-label' => $settings->content_label ?? (empty($contentType->getContentLabel()) ? (string)$contentType . ' #{id}' : $contentType->getContentLabel()),
-                'modal-html' => $this->templating->render(
-                    $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
-                    [
-                        'view' => $view,
-                        'parameters' => $this->viewTypeManager
-                            ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
-                            ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form')),
-                    ]
-                ),
-            ],
-        ]);
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'empty_data' => [
+                    'domain' => $contentType->getDomain()->getIdentifier(),
+                    'content_type' => $contentType->getIdentifier(),
+                ],
+                'attr' => [
+                    'base-url' => '/'.$this->uniteCMSManager->getOrganization()->getIdentifier().'/',
+                    'content-label' => $settings->content_label ?? (empty(
+                        $contentType->getContentLabel()
+                        ) ? (string)$contentType.' #{id}' : $contentType->getContentLabel()),
+                    'modal-html' => $this->templating->render(
+                        $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
+                        [
+                            'view' => $view,
+                            'parameters' => $this->viewTypeManager
+                                ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
+                                ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form')),
+                        ]
+                    ),
+                ],
+            ]
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
 
         // Get content type and check if we have access to it.
         $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
-        if(!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+        if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
             throw new InvalidArgumentException("You are not allowed to view this content_type.");
         }
 
-        $name = ucfirst($field->getSettings()->content_type . 'Content');
+        $name = ucfirst($field->getSettings()->content_type.'Content');
 
-        if($nestingLevel > 0) {
-            $name .= 'Level' . $nestingLevel;
+        if ($nestingLevel > 0) {
+            $name .= 'Level'.$nestingLevel;
         }
 
         // We use the default content factory to build the type.
@@ -160,11 +197,12 @@ class ReferenceFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
 
         // Get content type and check if we have access to it.
         $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
-        if(!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+        if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
             throw new InvalidArgumentException("You are not allowed to view this content_type.");
         }
 
@@ -178,21 +216,24 @@ class ReferenceFieldType extends FieldType
      * @param array $value
      * @return null|Content
      */
-    function resolveGraphQLData(FieldableField $field, $value) {
-        if(empty($value)) {
+    function resolveGraphQLData(FieldableField $field, $value)
+    {
+        if (empty($value)) {
             return null;
         }
 
         $contentType = $this->resolveContentType($value['domain'], $value['content_type']);
 
         // Find content for this content type.
-        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['contentType' => $contentType, 'id' => $value['content']]);
-        if(!$content) {
+        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            ['contentType' => $contentType, 'id' => $value['content']]
+        );
+        if (!$content) {
             throw new InvalidArgumentException("No content with id '{$value['content']}' was found.");
         }
 
         // Check access to view content.
-        if(!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
+        if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
             throw new InvalidArgumentException("You are not allowed to view this content.");
         }
 
@@ -202,31 +243,30 @@ class ReferenceFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array {
+    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+    {
 
         // When deleting content, we don't need to validate data.
-        if($validation_group === 'DELETE') {
+        if ($validation_group === 'DELETE') {
             return [];
         }
 
         $violations = [];
 
         // Only validate available data.
-        if(empty($data)) {
+        if (empty($data)) {
             return $violations;
         }
 
         // Make sure, that all required fields are set.
-        if(empty($data['domain']) || empty($data['content_type']) || empty($data['content'])) {
-            $violations[] = $this->createViolation($field,'validation.missing_definition');
-        }
-
-        // Try to resolve the data to check if the current user is allowed to access it.
+        if (empty($data['domain']) || empty($data['content_type']) || empty($data['content'])) {
+            $violations[] = $this->createViolation($field, 'validation.missing_definition');
+        } // Try to resolve the data to check if the current user is allowed to access it.
         else {
             try {
                 $this->resolveGraphQLData($field, $data);
             } catch (InvalidArgumentException $e) {
-                $violations[] = $this->createViolation($field,'validation.wrong_definition');
+                $violations[] = $this->createViolation($field, 'validation.wrong_definition');
             }
         }
 

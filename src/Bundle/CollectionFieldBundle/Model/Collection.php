@@ -52,12 +52,12 @@ class Collection implements Fieldable
      */
     public function setFields($fields)
     {
-        foreach($fields as $field) {
-          if($field instanceof  CollectionField) {
-            $this->addField($field);
-          } elseif(is_array($field)) {
-            $this->addField(new CollectionField($field));
-          }
+        foreach ($fields as $field) {
+            if ($field instanceof CollectionField) {
+                $this->addField($field);
+            } elseif (is_array($field)) {
+                $this->addField(new CollectionField($field));
+            }
         }
 
         return $this;
@@ -85,7 +85,8 @@ class Collection implements Fieldable
     /**
      * @return string
      */
-    public function getIdentifier() {
+    public function getIdentifier()
+    {
         return $this->identifier;
     }
 
@@ -94,7 +95,8 @@ class Collection implements Fieldable
      *
      * @return Collection
      */
-    public function setIdentifier(string $identifier) {
+    public function setIdentifier(string $identifier)
+    {
         $this->identifier = $identifier;
 
         return $this;
@@ -119,21 +121,23 @@ class Collection implements Fieldable
     /**
      * {@inheritdoc}
      */
-    public function getIdentifierPath($delimiter = '/') {
+    public function getIdentifierPath($delimiter = '/')
+    {
 
         $path = '';
 
-        if($this->getParentEntity()) {
-            $path = $this->getParentEntity()->getIdentifierPath($delimiter) . $delimiter;
+        if ($this->getParentEntity()) {
+            $path = $this->getParentEntity()->getIdentifierPath($delimiter).$delimiter;
         }
 
-        return $path . $this->getIdentifier();
+        return $path.$this->getIdentifier();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRootEntity(): Fieldable {
+    public function getRootEntity(): Fieldable
+    {
         return $this->getParentEntity() ? $this->parent->getRootEntity() : $this;
     }
 }

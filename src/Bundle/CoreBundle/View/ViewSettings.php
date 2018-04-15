@@ -12,7 +12,7 @@ class ViewSettings
 {
     public function __construct(array $settings = [])
     {
-        foreach($settings as $key => $value) {
+        foreach ($settings as $key => $value) {
             $this->$key = $value;
         }
     }

@@ -20,21 +20,31 @@ class FieldableFieldSettingsSerializationHandler
         /**
          * @see \JMS\Serializer\Handler\StdClassHandler
          */
-        if($context->getDirection() == GraphNavigator::DIRECTION_SERIALIZATION) {
+        if ($context->getDirection() == GraphNavigator::DIRECTION_SERIALIZATION) {
 
             $classMetadata = $context->getMetadataFactory()->getMetadataForClass(FieldableFieldSettings::class);
-            $visitor->startVisitingObject($classMetadata, $data, array('name' => FieldableFieldSettings::class), $context);
+            $visitor->startVisitingObject(
+                $classMetadata,
+                $data,
+                array('name' => FieldableFieldSettings::class),
+                $context
+            );
 
             foreach ((array)$data as $name => $value) {
                 $metadata = new StaticPropertyMetadata(FieldableFieldSettings::class, $name, $value);
                 $visitor->visitProperty($metadata, $value, $context);
             }
 
-            return $visitor->endVisitingObject($classMetadata, $data, array('name' => FieldableFieldSettings::class), $context);
-        }
-
-        else if($context->getDirection() == GraphNavigator::DIRECTION_DESERIALIZATION) {
-            return new FieldableFieldSettings((array)$data);
+            return $visitor->endVisitingObject(
+                $classMetadata,
+                $data,
+                array('name' => FieldableFieldSettings::class),
+                $context
+            );
+        } else {
+            if ($context->getDirection() == GraphNavigator::DIRECTION_DESERIALIZATION) {
+                return new FieldableFieldSettings((array)$data);
+            }
         }
     }
 }

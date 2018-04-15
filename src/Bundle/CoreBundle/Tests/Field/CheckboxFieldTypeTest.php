@@ -6,14 +6,16 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class CheckboxFieldTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings() {
+    public function testContentTypeFieldTypeWithEmptySettings()
+    {
 
         // Content Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('checkbox');
         $this->assertCount(0, $this->container->get('validator')->validate($ctField));
     }
 
-    public function testContentTypeFieldTypeWithInvalidSettings() {
+    public function testContentTypeFieldTypeWithInvalidSettings()
+    {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('checkbox');
@@ -24,14 +26,16 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
     }
 
-    public function testSettingTypeFieldTypeWithEmptySettings() {
+    public function testSettingTypeFieldTypeWithEmptySettings()
+    {
 
         // Setting Type Field with empty settings should be valid.
         $stField = $this->createSettingTypeField('checkbox');
         $this->assertCount(0, $this->container->get('validator')->validate($stField));
     }
 
-    public function testSettingTypeFieldTypeWithInvalidSettings() {
+    public function testSettingTypeFieldTypeWithInvalidSettings()
+    {
 
         // Setting Type Field with invalid settings should not be valid.
         $stField = $this->createSettingTypeField('checkbox');

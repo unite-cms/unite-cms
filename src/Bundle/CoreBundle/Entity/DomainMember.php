@@ -71,6 +71,7 @@ class DomainMember
                 $domains = array_merge($domains, $organizationMember->getOrganization()->getDomains()->toArray());
             }
         }
+
         return $domains;
     }
 

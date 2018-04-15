@@ -60,7 +60,11 @@ class ProfileController extends Controller
             $changePassword,
             ['validation_groups' => 'UPDATE']
         )
-            ->add('currentPassword', PasswordType::class, ['label' => 'profile.change_password.form.current_password', 'required' => true])
+            ->add(
+                'currentPassword',
+                PasswordType::class,
+                ['label' => 'profile.change_password.form.current_password', 'required' => true]
+            )
             ->add(
                 'newPassword',
                 RepeatedType::class,
@@ -289,7 +293,7 @@ class ProfileController extends Controller
                         $newUser = false;
 
                         // If no user is logged in, redirect the user to the login page
-                        if(!$this->getUser()) {
+                        if (!$this->getUser()) {
                             throw $this->createAccessDeniedException();
                         }
 

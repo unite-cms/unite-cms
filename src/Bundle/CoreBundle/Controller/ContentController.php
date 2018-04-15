@@ -64,13 +64,15 @@ class ContentController extends Controller
         $content = new Content();
 
         // Allow to set locale and translation of via GET parameters.
-        if($request->query->has('locale')) {
+        if ($request->query->has('locale')) {
             $content->setLocale($request->query->get('locale'));
         }
 
-        if($request->query->has('translation_of')) {
-            $translationOf = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->find($request->query->get('translation_of'));
-            if($translationOf) {
+        if ($request->query->has('translation_of')) {
+            $translationOf = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->find(
+                $request->query->get('translation_of')
+            );
+            if ($translationOf) {
                 $content->setTranslationOf($translationOf);
             }
         }
@@ -86,7 +88,7 @@ class ContentController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            if(isset($data['locale'])) {
+            if (isset($data['locale'])) {
                 $content->setLocale($data['locale']);
                 unset($data['locale']);
             }
@@ -99,11 +101,11 @@ class ContentController extends Controller
             $violations = $this->get('validator')->validate($content);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
-                foreach($violations as $violation) {
+                foreach ($violations as $violation) {
                     $violationMapper->mapViolation($violation, $form);
                 }
 
-            // If content is valid.
+                // If content is valid.
             } else {
                 $this->getDoctrine()->getManager()->persist($content);
                 $this->getDoctrine()->getManager()->flush();
@@ -113,8 +115,7 @@ class ContentController extends Controller
                 return $this->redirectToRoute(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
-                        ),
+                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -161,7 +162,7 @@ class ContentController extends Controller
 
             $data = $form->getData();
 
-            if(isset($data['locale'])) {
+            if (isset($data['locale'])) {
                 $content->setLocale($data['locale']);
                 unset($data['locale']);
             }
@@ -172,7 +173,7 @@ class ContentController extends Controller
             $violations = $this->get('validator')->validate($content);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
-                foreach($violations as $violation) {
+                foreach ($violations as $violation) {
                     $violationMapper->mapViolation($violation, $form);
                 }
 
@@ -185,8 +186,7 @@ class ContentController extends Controller
                 return $this->redirectToRoute(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
-                        ),
+                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -224,21 +224,25 @@ class ContentController extends Controller
     {
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'content.delete.submit', 'attr' => ['class' => 'uk-button-danger']])
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'content.delete.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )
             ->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, NULL, ['DELETE']);
+            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
-                foreach($violations as $violation) {
+                foreach ($violations as $violation) {
                     $violationMapper->mapViolation($violation, $form);
                 }
 
-            // If content is valid.
+                // If content is valid.
             } else {
                 $this->getDoctrine()->getManager()->remove($content);
                 $this->getDoctrine()->getManager()->flush();
@@ -248,8 +252,7 @@ class ContentController extends Controller
                 return $this->redirectToRoute(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
-                        ),
+                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -285,51 +288,57 @@ class ContentController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        if($em instanceof EntityManager) {
+        if ($em instanceof EntityManager) {
             $em->getFilters()->disable('gedmo_softdeleteable');
         }
 
-        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-            'id' => $content,
-            'contentType' => $view->getContentType(),
-        ]);
+        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            [
+                'id' => $content,
+                'contentType' => $view->getContentType(),
+            ]
+        );
 
-        if($em instanceof EntityManager) {
+        if ($em instanceof EntityManager) {
             $em->getFilters()->enable('gedmo_softdeleteable');
         }
 
-        if(!$content) {
+        if (!$content) {
             throw $this->createNotFoundException();
         }
 
-        if(!$this->isGranted(ContentVoter::UPDATE, $content)) {
+        if (!$this->isGranted(ContentVoter::UPDATE, $content)) {
             throw $this->createAccessDeniedException();
         }
 
-        if($content->getDeleted() == null) {
+        if ($content->getDeleted() == null) {
             throw $this->createNotFoundException();
         }
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'content.delete_definitely.submit', 'attr' => ['class' => 'uk-button-danger']])
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'content.delete_definitely.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )
             ->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, NULL, ['DELETE']);
+            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
-                foreach($violations as $violation) {
+                foreach ($violations as $violation) {
                     $violationMapper->mapViolation($violation, $form);
                 }
 
-            // If content is valid.
+                // If content is valid.
             } else {
 
                 // Get log entries and delete them.
-                foreach($em->getRepository('GedmoLoggable:LogEntry')->getLogEntries($content) as $logEntry) {
+                foreach ($em->getRepository('GedmoLoggable:LogEntry')->getLogEntries($content) as $logEntry) {
                     $em->remove($logEntry);
                 }
 
@@ -342,8 +351,7 @@ class ContentController extends Controller
                 return $this->redirectToRoute(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
-                        ),
+                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -378,28 +386,30 @@ class ContentController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        if($em instanceof EntityManager) {
+        if ($em instanceof EntityManager) {
             $em->getFilters()->disable('gedmo_softdeleteable');
         }
 
-        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-            'id' => $content,
-            'contentType' => $view->getContentType(),
-        ]);
+        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            [
+                'id' => $content,
+                'contentType' => $view->getContentType(),
+            ]
+        );
 
-        if($em instanceof EntityManager) {
+        if ($em instanceof EntityManager) {
             $em->getFilters()->enable('gedmo_softdeleteable');
         }
 
-        if(!$content) {
+        if (!$content) {
             throw $this->createNotFoundException();
         }
 
-        if(!$this->isGranted(ContentVoter::UPDATE, $content)) {
+        if (!$this->isGranted(ContentVoter::UPDATE, $content)) {
             throw $this->createAccessDeniedException();
         }
 
-        if($content->getDeleted() == null) {
+        if ($content->getDeleted() == null) {
             throw $this->createNotFoundException();
         }
 
@@ -411,14 +421,14 @@ class ContentController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, NULL, ['DELETE']);
+            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
-                foreach($violations as $violation) {
+                foreach ($violations as $violation) {
                     $violationMapper->mapViolation($violation, $form);
                 }
 
-            // If content is valid.
+                // If content is valid.
             } else {
                 $content->recoverDeleted();
                 $this->getDoctrine()->getManager()->flush();
@@ -427,8 +437,7 @@ class ContentController extends Controller
                 return $this->redirectToRoute(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
-                        ),
+                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -465,15 +474,20 @@ class ContentController extends Controller
     public function translationsAction(View $view, Content $content, Request $request)
     {
 
-        if(!empty($content->getTranslationOf())) {
+        if (!empty($content->getTranslationOf())) {
             // Check if the translationOf content was soft deleted.
-            if(!$this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['id' => $content->getTranslationOf()->getId()])) {
-                $this->addFlash('warning', 'You cannot manage translations for this content, because it is a translation of soft-deleted content.');
+            if (!$this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+                ['id' => $content->getTranslationOf()->getId()]
+            )) {
+                $this->addFlash(
+                    'warning',
+                    'You cannot manage translations for this content, because it is a translation of soft-deleted content.'
+                );
+
                 return $this->redirectToRoute(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
-                        ),
+                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -509,14 +523,17 @@ class ContentController extends Controller
     {
 
         $form = $this->createFormBuilder()
-            ->add('translation', WebComponentType::class, [
+            ->add(
+                'translation',
+                WebComponentType::class,
+                [
                     'tag' => 'unite-cms-core-reference-field',
                     'empty_data' => [
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                     ],
                     'attr' => [
-                        'base-url' => '/' . $view->getContentType()->getDomain()->getOrganization() . '/',
+                        'base-url' => '/'.$view->getContentType()->getDomain()->getOrganization().'/',
                         'content-label' => '#{id}',
                         'modal-html' => $this->render(
                             $this->get('unite.cms.view_type_manager')->getViewType($view->getType())::getTemplate(),
@@ -524,22 +541,27 @@ class ContentController extends Controller
                                 'view' => $view,
                                 'parameters' => $this->get('unite.cms.view_type_manager')
                                     ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
-                                    ->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form')),
+                                    ->setCsrfToken(
+                                        $this->get('security.csrf.token_manager')->getToken('fieldable_form')
+                                    ),
                             ]
                         ),
                     ],
-                ])
+                ]
+            )
             ->add('submit', SubmitType::class, ['label' => 'content.translations.add_existing.submit'])->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach($form->getData() as $key => $translation_identifier) {
-                if(!empty($translation_identifier['content'])) {
-                    $translation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-                        'id' => $translation_identifier['content'],
-                        'translationOf' => NULL,
-                    ]);
-                    if(!$translation) {
+            foreach ($form->getData() as $key => $translation_identifier) {
+                if (!empty($translation_identifier['content'])) {
+                    $translation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+                        [
+                            'id' => $translation_identifier['content'],
+                            'translationOf' => null,
+                        ]
+                    );
+                    if (!$translation) {
 
                         $form->addError(
                             new FormError(
@@ -555,14 +577,15 @@ class ContentController extends Controller
                         $violations = $this->get('validator')->validate($content);
                         if (count($violations) > 0) {
                             $violationMapper = new ViolationMapper();
-                            foreach($violations as $violation) {
+                            foreach ($violations as $violation) {
                                 $violationMapper->mapViolation($violation, $form);
                             }
 
-                        // If content is valid.
+                            // If content is valid.
                         } else {
                             $this->getDoctrine()->getManager()->flush();
                             $this->addFlash('success', 'Translation added.');
+
                             return $this->redirectToRoute(
                                 'unitecms_core_content_translations',
                                 [
@@ -609,9 +632,13 @@ class ContentController extends Controller
      */
     public function removeTranslationAction(View $view, Content $content, String $locale, Request $request)
     {
-        $translations = $content->getTranslations()->filter(function(Content $content) use ($locale) { return $content->getLocale() == $locale; });
+        $translations = $content->getTranslations()->filter(
+            function (Content $content) use ($locale) {
+                return $content->getLocale() == $locale;
+            }
+        );
 
-        if(empty($translations)) {
+        if (empty($translations)) {
             throw $this->createNotFoundException();
         }
 
@@ -621,7 +648,11 @@ class ContentController extends Controller
         $translation = $translations->first();
 
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'content.translations.remove.submit', 'attr' => ['class' => 'uk-button-danger']])
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'content.translations.remove.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )
             ->getForm();
 
         $form->handleRequest($request);
@@ -634,8 +665,7 @@ class ContentController extends Controller
             return $this->redirectToRoute(
                 'unitecms_core_content_translations',
                 [
-                    'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
-                    ),
+                    'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                     'content_type' => $view->getContentType()->getIdentifier(),
                     'view' => $view->getIdentifier(),
@@ -678,7 +708,9 @@ class ContentController extends Controller
                 'view' => $view,
                 'contentType' => $view->getContentType(),
                 'content' => $content,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository('GedmoLoggable:LogEntry')->getLogEntries($content),
+                'revisions' => $this->getDoctrine()->getManager()->getRepository(
+                    'GedmoLoggable:LogEntry'
+                )->getLogEntries($content),
             ]
         );
     }

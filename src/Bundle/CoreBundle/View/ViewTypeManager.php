@@ -52,8 +52,10 @@ class ViewTypeManager
      *
      * @return ViewParameterBag
      */
-    public function getTemplateRenderParameters(View $view, $select_mode = ViewTypeInterface::SELECT_MODE_NONE): ViewParameterBag
-    {
+    public function getTemplateRenderParameters(
+        View $view,
+        $select_mode = ViewTypeInterface::SELECT_MODE_NONE
+    ): ViewParameterBag {
         $viewType = $this->getViewType($view->getType());
         $viewType->setEntity($view);
         $settings = $viewType->getTemplateRenderParameters($select_mode);

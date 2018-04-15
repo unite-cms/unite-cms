@@ -59,7 +59,7 @@ class SettingVoter extends Voter
         // This voter can decide on a Content subject for APIClients.
         if ($token->getUser() instanceof ApiClient && ($subject instanceof Setting)) {
 
-            if($subject->getSettingType()->getDomain() !== $token->getUser()->getDomain()) {
+            if ($subject->getSettingType()->getDomain() !== $token->getUser()->getDomain()) {
                 return self::ACCESS_ABSTAIN;
             }
 
@@ -80,8 +80,8 @@ class SettingVoter extends Voter
         foreach ($token->getUser()->getOrganizations() as $organizationMember) {
             if (in_array(Organization::ROLE_ADMINISTRATOR, $organizationMember->getRoles())) {
 
-                if ($subject instanceof Setting && $subject->getSettingType()->getDomain()->getOrganization(
-                    )->getId() === $organizationMember->getOrganization()->getId()) {
+                if ($subject instanceof Setting && $subject->getSettingType()->getDomain()->getOrganization()->getId(
+                    ) === $organizationMember->getOrganization()->getId()) {
                     return self::ACCESS_GRANTED;
                 }
             }
@@ -89,7 +89,11 @@ class SettingVoter extends Voter
 
         // Check entity actions on Setting objects.
         if ($subject instanceof Setting) {
-            return $this->checkPermission($attribute, $subject->getSettingType(), $token->getUser()->getDomainRoles($subject->getSettingType()->getDomain()));
+            return $this->checkPermission(
+                $attribute,
+                $subject->getSettingType(),
+                $token->getUser()->getDomainRoles($subject->getSettingType()->getDomain())
+            );
         }
 
         return self::ACCESS_ABSTAIN;

@@ -421,13 +421,17 @@ class SettingType implements Fieldable
     {
         if ($this->getSettings()->count() > 0) {
 
-            if(!$locale || empty($this->getLocales())) {
+            if (!$locale || empty($this->getLocales())) {
                 return $this->getSettings()->first();
             }
 
-            if(in_array($locale, $this->getLocales())) {
-                $found = $this->getSettings()->filter(function(Setting $setting) use ($locale) { return $setting->getLocale() == $locale; });
-                if(!$found->isEmpty()) {
+            if (in_array($locale, $this->getLocales())) {
+                $found = $this->getSettings()->filter(
+                    function (Setting $setting) use ($locale) {
+                        return $setting->getLocale() == $locale;
+                    }
+                );
+                if (!$found->isEmpty()) {
                     return $found->first();
                 }
             }
@@ -512,21 +516,24 @@ class SettingType implements Fieldable
     /**
      * {@inheritdoc}
      */
-    public function getRootEntity() : Fieldable {
+    public function getRootEntity(): Fieldable
+    {
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getIdentifierPath($delimiter = '/') {
+    public function getIdentifierPath($delimiter = '/')
+    {
         return $this->getIdentifier();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getParentEntity() {
+    public function getParentEntity()
+    {
         return null;
     }
 }
