@@ -16,7 +16,8 @@ class ApiClientUserProviderTest extends TestCase
     /**
      * Test load user form ApiClientUserProvider
      */
-    public function testLoadValidUser() {
+    public function testLoadValidUser()
+    {
 
         $token = 'ThisIsMyToken';
         $domain = new Domain();
@@ -26,13 +27,19 @@ class ApiClientUserProviderTest extends TestCase
             ->method('getDomain')
             ->willReturn($domain);
 
-        $entityRepository = new class extends EntityRepository {
-            public function __construct() {}
-            public function findOneBy(array $criteria, array $orderBy = NULL) {
-                if($criteria['token'] === 'ThisIsMyToken') {
+        $entityRepository = new class extends EntityRepository
+        {
+            public function __construct()
+            {
+            }
+
+            public function findOneBy(array $criteria, array $orderBy = null)
+            {
+                if ($criteria['token'] === 'ThisIsMyToken') {
                     $client = new ApiClient();
                     $client->setDomain($criteria['domain']);
                     $client->setToken($criteria['token']);
+
                     return $client;
                 }
 
@@ -64,7 +71,8 @@ class ApiClientUserProviderTest extends TestCase
      *
      * @expectedException \Symfony\Component\Security\Core\Exception\TokenNotFoundException
      */
-    public function testLoadInValidUser() {
+    public function testLoadInValidUser()
+    {
 
         $token = 'OtherToken';
         $domain = new Domain();
@@ -74,13 +82,19 @@ class ApiClientUserProviderTest extends TestCase
             ->method('getDomain')
             ->willReturn($domain);
 
-        $entityRepository = new class extends EntityRepository {
-            public function __construct() {}
-            public function findOneBy(array $criteria, array $orderBy = NULL) {
-                if($criteria['token'] === 'ThisIsMyToken') {
+        $entityRepository = new class extends EntityRepository
+        {
+            public function __construct()
+            {
+            }
+
+            public function findOneBy(array $criteria, array $orderBy = null)
+            {
+                if ($criteria['token'] === 'ThisIsMyToken') {
                     $client = new ApiClient();
                     $client->setDomain($criteria['domain']);
                     $client->setToken($criteria['token']);
+
                     return $client;
                 }
 
@@ -105,7 +119,8 @@ class ApiClientUserProviderTest extends TestCase
      *
      * @expectedException \Symfony\Component\Security\Core\Exception\UnsupportedUserException
      */
-    public function testRefreshInvalidUser() {
+    public function testRefreshInvalidUser()
+    {
         $cmsManager = $this->createMock(UniteCMSManager::class);
         $entityManager = $this->createMock(EntityManager::class);
         $provider = new ApiClientUserProvider($cmsManager, $entityManager);

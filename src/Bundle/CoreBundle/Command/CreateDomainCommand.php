@@ -35,8 +35,11 @@ class CreateDomainCommand extends Command
     /**
      * {@inheritdoc}
      */
-    public function __construct(EntityManager $em, ValidatorInterface $validator, DomainDefinitionParser $definiton_parser)
-    {
+    public function __construct(
+        EntityManager $em,
+        ValidatorInterface $validator,
+        DomainDefinitionParser $definiton_parser
+    ) {
         $this->em = $em;
         $this->validator = $validator;
         $this->definiton_parser = $definiton_parser;
@@ -125,7 +128,7 @@ class CreateDomainCommand extends Command
         }
 
         $errors = $this->validator->validate($domain);
-        if(count($errors) > 0) {
+        if (count($errors) > 0) {
             $output->writeln("<error>\n\nThere was an error while creating the domain\n \n$errors\n</error>");
         } else {
             $this->em->persist($domain);

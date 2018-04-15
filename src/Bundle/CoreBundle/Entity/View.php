@@ -113,6 +113,30 @@ class View
     }
 
     /**
+     * Get title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set title
+     *
+     * @param string $title
+     *
+     * @return View
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
      * This function sets all structure fields from the given entity.
      *
      * @param View $view
@@ -132,51 +156,13 @@ class View
     }
 
     /**
-     * Set id
-     *
-     * @param $id
-     *
-     * @return View
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set title
-     *
-     * @param string $title
-     *
-     * @return View
-     */
-    public function setTitle($title)
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -191,16 +177,6 @@ class View
         $this->identifier = $identifier;
 
         return $this;
-    }
-
-    /**
-     * Get identifier
-     *
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
     }
 
     /**
@@ -224,6 +200,16 @@ class View
     }
 
     /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
      * Set description
      *
      * @param string $description
@@ -238,13 +224,13 @@ class View
     }
 
     /**
-     * Get description
+     * Get icon
      *
      * @return string
      */
-    public function getDescription()
+    public function getIcon()
     {
-        return $this->description;
+        return $this->icon;
     }
 
     /**
@@ -262,13 +248,51 @@ class View
     }
 
     /**
-     * Get icon
+     * Get settings
      *
-     * @return string
+     * @return ViewSettings
      */
-    public function getIcon()
+    public function getSettings()
     {
-        return $this->icon;
+        return $this->settings;
+    }
+
+    /**
+     * Set settings
+     *
+     * @param ViewSettings $settings
+     *
+     * @return View
+     */
+    public function setSettings($settings)
+    {
+        $this->settings = $settings;
+
+        return $this;
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
+     *
+     * @return View
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     /**
@@ -290,30 +314,6 @@ class View
         $contentType->addView($this);
 
         return $this;
-    }
-
-    /**
-     * Set settings
-     *
-     * @param ViewSettings $settings
-     *
-     * @return View
-     */
-    public function setSettings($settings)
-    {
-        $this->settings = $settings;
-
-        return $this;
-    }
-
-    /**
-     * Get settings
-     *
-     * @return ViewSettings
-     */
-    public function getSettings()
-    {
-        return $this->settings;
     }
 }
 

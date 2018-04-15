@@ -13,7 +13,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 class TableViewTypeTest extends DatabaseAwareTestCase
 {
 
-    public function testTableViewWithoutSettings() {
+    public function testTableViewWithoutSettings()
+    {
 
         // Create TableView instance.
         $view = new View();
@@ -23,16 +24,16 @@ class TableViewTypeTest extends DatabaseAwareTestCase
             ->setIdentifier('new_view')
             ->setContentType(new ContentType())
             ->getContentType()
-                ->setTitle('ct')
-                ->setIdentifier('ct')
-                ->setDomain(new Domain())
-                ->getDomain()
-                    ->setTitle('D1')
-                    ->setIdentifier('d1')
-                    ->setOrganization(new Organization())
-                    ->getOrganization()
-                        ->setTitle('O1')
-                        ->setIdentifier('o1');
+            ->setTitle('ct')
+            ->setIdentifier('ct')
+            ->setDomain(new Domain())
+            ->getDomain()
+            ->setTitle('D1')
+            ->setIdentifier('d1')
+            ->setOrganization(new Organization())
+            ->getOrganization()
+            ->setTitle('O1')
+            ->setIdentifier('o1');
 
         // View should be valid.
         $this->assertCount(0, $this->container->get('validator')->validate($view));
@@ -40,18 +41,25 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         // Test templateRenderParameters.
         $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
         $this->assertTrue($parameters->isSelectModeNone());
-        $this->assertEquals([
-            'created' => 'Created',
-            'updated' => 'Updated',
-            'id' => 'ID',
-        ],$parameters->get('columns'));
-        $this->assertEquals([
-            'field' => 'updated',
-            'asc' => false,
-        ],$parameters->get('sort'));
+        $this->assertEquals(
+            [
+                'created' => 'Created',
+                'updated' => 'Updated',
+                'id' => 'ID',
+            ],
+            $parameters->get('columns')
+        );
+        $this->assertEquals(
+            [
+                'field' => 'updated',
+                'asc' => false,
+            ],
+            $parameters->get('sort')
+        );
     }
 
-    public function testTableViewWithInvalidSettings() {
+    public function testTableViewWithInvalidSettings()
+    {
 
         // Create TableView instance.
         $view = new View();
@@ -76,9 +84,13 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $field->setType('text')->setIdentifier('f1')->setTitle('F1');
         $view->getContentType()->addField($field);
 
-        $view->setSettings(new ViewSettings([
-            'foo' => 'baa',
-        ]));
+        $view->setSettings(
+            new ViewSettings(
+                [
+                    'foo' => 'baa',
+                ]
+            )
+        );
 
         // View should not be valid.
         $errors = $this->container->get('validator')->validate($view);
@@ -159,14 +171,17 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $this->assertEquals('validation.invalid_filter_definition', $errors->get(0)->getMessage());
         $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
 
-        $view->setSettings(new ViewSettings(['filter' => ['operator' => '=', 'field' => 'f1', 'value' => 'baa', 'foo' => 'baa']]));
+        $view->setSettings(
+            new ViewSettings(['filter' => ['operator' => '=', 'field' => 'f1', 'value' => 'baa', 'foo' => 'baa']])
+        );
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.invalid_filter_definition', $errors->get(0)->getMessage());
         $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
     }
 
-    public function testTableViewWithValidSettings() {
+    public function testTableViewWithValidSettings()
+    {
 
         // Create TableView instance.
         $view = new View();
@@ -191,23 +206,31 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $field->setType('text')->setIdentifier('f1')->setTitle('F1');
         $view->getContentType()->addField($field);
 
-        $filter = ['AND' => [
-            ['OR' => [
-                ['field' => 'f1', 'operator' => 'LIKE', 'value' => 'Foo'],
-                ['field' => 'f1', 'operator' => 'LIKE', 'value' => 'Baa'],
-            ]],
-            ['field' => 'id', 'operator' => '=', 'value' => 'XXX-XXX-XXX'],
-        ]];
-
-        $view->setSettings(new ViewSettings([
-            'columns' => [
-                'f1' => 'Title',
-                'id' => 'baa',
+        $filter = [
+            'AND' => [
+                [
+                    'OR' => [
+                        ['field' => 'f1', 'operator' => 'LIKE', 'value' => 'Foo'],
+                        ['field' => 'f1', 'operator' => 'LIKE', 'value' => 'Baa'],
+                    ],
+                ],
+                ['field' => 'id', 'operator' => '=', 'value' => 'XXX-XXX-XXX'],
             ],
-            'filter' => $filter,
-            'sort_field' => 'f1',
-            'sort_asc' => true,
-        ]));
+        ];
+
+        $view->setSettings(
+            new ViewSettings(
+                [
+                    'columns' => [
+                        'f1' => 'Title',
+                        'id' => 'baa',
+                    ],
+                    'filter' => $filter,
+                    'sort_field' => 'f1',
+                    'sort_asc' => true,
+                ]
+            )
+        );
 
         // View should be valid.
         $this->assertCount(0, $this->container->get('validator')->validate($view));
@@ -215,14 +238,20 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         // Test templateRenderParameters.
         $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
         $this->assertTrue($parameters->isSelectModeNone());
-        $this->assertEquals([
-            'f1' => 'Title',
-            'id' => 'baa',
-        ],$parameters->get('columns'));
-        $this->assertEquals([
-            'field' => 'f1',
-            'asc' => true,
-        ],$parameters->get('sort'));
+        $this->assertEquals(
+            [
+                'f1' => 'Title',
+                'id' => 'baa',
+            ],
+            $parameters->get('columns')
+        );
+        $this->assertEquals(
+            [
+                'field' => 'f1',
+                'asc' => true,
+            ],
+            $parameters->get('sort')
+        );
         $this->assertEquals($filter, $parameters->get('filter'));
     }
 }

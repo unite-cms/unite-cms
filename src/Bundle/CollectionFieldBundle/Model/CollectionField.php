@@ -58,15 +58,15 @@ class CollectionField implements FieldableField
 
     public function __construct($field)
     {
-        if(isset($field['title'])) {
+        if (isset($field['title'])) {
             $this->setTitle($field['title']);
         }
 
-        if(isset($field['identifier'])) {
+        if (isset($field['identifier'])) {
             $this->setIdentifier($field['identifier']);
         }
 
-        if(isset($field['type'])) {
+        if (isset($field['type'])) {
             $this->setType($field['type']);
         }
 
@@ -76,6 +76,16 @@ class CollectionField implements FieldableField
     public function __toString()
     {
         return ''.$this->title;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
     }
 
     /**
@@ -93,37 +103,13 @@ class CollectionField implements FieldableField
     }
 
     /**
-     * Get title
+     * Get type
      *
      * @return string
      */
-    public function getTitle()
+    public function getType()
     {
-        return $this->title;
-    }
-
-    /**
-     * Set identifier
-     *
-     * @param string $identifier
-     *
-     * @return CollectionField
-     */
-    public function setIdentifier($identifier)
-    {
-        $this->identifier = $identifier;
-
-        return $this;
-    }
-
-    /**
-     * Get identifier
-     *
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
+        return $this->type;
     }
 
     /**
@@ -141,13 +127,13 @@ class CollectionField implements FieldableField
     }
 
     /**
-     * Get type
+     * Get settings
      *
-     * @return string
+     * @return FieldableFieldSettings
      */
-    public function getType()
+    public function getSettings()
     {
-        return $this->type;
+        return $this->settings;
     }
 
     /**
@@ -165,24 +151,6 @@ class CollectionField implements FieldableField
     }
 
     /**
-     * Get settings
-     *
-     * @return FieldableFieldSettings
-     */
-    public function getSettings()
-    {
-        return $this->settings;
-    }
-
-    /**
-     * @return Fieldable
-     */
-    public function getEntity()
-    {
-        return $this->collection;
-    }
-
-    /**
      * @param Fieldable $entity
      *
      * @return FieldableField
@@ -190,6 +158,7 @@ class CollectionField implements FieldableField
     public function setEntity($entity)
     {
         $this->collection = $entity;
+
         return $this;
     }
 
@@ -208,6 +177,38 @@ class CollectionField implements FieldableField
         // add this identifier.
         $pathParts[] = $this->getIdentifier();
 
-        return '$.' . join('[*].', $pathParts);
+        return '$.'.join('[*].', $pathParts);
+    }
+
+    /**
+     * @return Fieldable
+     */
+    public function getEntity()
+    {
+        return $this->collection;
+    }
+
+    /**
+     * Get identifier
+     *
+     * @return string
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * Set identifier
+     *
+     * @param string $identifier
+     *
+     * @return CollectionField
+     */
+    public function setIdentifier($identifier)
+    {
+        $this->identifier = $identifier;
+
+        return $this;
     }
 }

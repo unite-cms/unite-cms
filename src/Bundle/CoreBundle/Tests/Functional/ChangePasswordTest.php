@@ -72,16 +72,6 @@ class ChangePasswordTest extends DatabaseAwareTestCase
         }
     }
 
-    private function login(User $user)
-    {
-        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
-        $session = $this->client->getContainer()->get('session');
-        $session->set('_security_main', serialize($token));
-        $session->save();
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->client->getCookieJar()->set($cookie);
-    }
-
     public function testChangePasswordAction()
     {
 
@@ -132,5 +122,15 @@ class ChangePasswordTest extends DatabaseAwareTestCase
                 $new_RandPassword
             )
         );
+    }
+
+    private function login(User $user)
+    {
+        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
+        $session = $this->client->getContainer()->get('session');
+        $session->set('_security_main', serialize($token));
+        $session->save();
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $this->client->getCookieJar()->set($cookie);
     }
 }

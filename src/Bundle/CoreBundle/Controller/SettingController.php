@@ -31,18 +31,18 @@ class SettingController extends Controller
      */
     public function indexAction(SettingType $settingType, $locale, Request $request)
     {
-        if(!$locale && !empty($settingType->getLocales())) {
+        if (!$locale && !empty($settingType->getLocales())) {
             $locale = $settingType->getLocales()[0];
         }
 
         $setting = $settingType->getSetting($locale);
 
-        if(!$setting) {
+        if (!$setting) {
             throw $this->createNotFoundException();
         }
 
         // If this setting was not saved before, do now
-        if(!$this->getDoctrine()->getManager()->contains($setting)) {
+        if (!$this->getDoctrine()->getManager()->contains($setting)) {
             $this->getDoctrine()->getManager()->persist($setting);
             $this->getDoctrine()->getManager()->flush();
         }
@@ -59,13 +59,13 @@ class SettingController extends Controller
 
             $data = $form->getData();
 
-            if(isset($data['locale'])) {
+            if (isset($data['locale'])) {
                 $setting->setLocale($data['locale']);
                 unset($data['locale']);
             }
 
             // Only set data if it has changed
-            if($data != $setting->getData()) {
+            if ($data != $setting->getData()) {
                 $setting->setData($data);
             }
 
@@ -73,11 +73,11 @@ class SettingController extends Controller
             $violations = $this->get('validator')->validate($setting);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
-                foreach($violations as $violation) {
+                foreach ($violations as $violation) {
                     $violationMapper->mapViolation($violation, $form);
                 }
 
-            // If content is valid.
+                // If content is valid.
             } else {
                 $this->getDoctrine()->getManager()->flush();
             }
@@ -135,7 +135,9 @@ class SettingController extends Controller
             [
                 'settingType' => $settingType,
                 'setting' => $setting,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository('GedmoLoggable:LogEntry')->getLogEntries($setting),
+                'revisions' => $this->getDoctrine()->getManager()->getRepository(
+                    'GedmoLoggable:LogEntry'
+                )->getLogEntries($setting),
             ]
         );
     }

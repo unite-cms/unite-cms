@@ -122,11 +122,6 @@ class Domain
      */
     private $apiClients;
 
-    public function __toString()
-    {
-        return ''.$this->title;
-    }
-
     public function __construct()
     {
         $this->roles = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
@@ -137,66 +132,101 @@ class Domain
         $this->apiClients = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return ''.$this->title;
+    }
+
     /**
      *  checks if current domain has content types or settings types and returns true if so
      *
-     *  @return boolean
+     * @return boolean
      */
     public function hasContentOrSettingTypes()
     {
-        if ($this->getContentTypes()->count() > 0 or $this->getSettingTypes()->count() > 0)
-        {
+        if ($this->getContentTypes()->count() > 0 or $this->getSettingTypes()->count() > 0) {
             return true;
         }
+
         return false;
     }
 
     /**
-     * Returns contentTypes that are present in this domain but not in $domain.
-     *
-     * @param Domain $domain
-     * @param bool $objects , return keys or objects
-     *
-     * @return ContentType[]
+     * @return ContentType[]|ArrayCollection
      */
-    public function getContentTypesDiff(Domain $domain, $objects = false)
+    public function getContentTypes()
     {
-        $keys = array_diff($this->getContentTypes()->getKeys(), $domain->getContentTypes()->getKeys());
-
-        if (!$objects) {
-            return $keys;
-        }
-
-        $objects = [];
-        foreach ($keys as $key) {
-            $objects[] = $this->getContentTypes()->get($key);
-        }
-
-        return $objects;
+        return $this->contentTypes;
     }
 
     /**
-     * Returns settingTypes that are present in this domain but not in $domain.
+     * @param ContentType[] $contentTypes
      *
-     * @param Domain $domain
-     * @param bool $objects , return keys or objects
-     *
-     * @return \UniteCMS\CoreBundle\Entity\SettingType[]
+     * @return Domain
      */
-    public function getSettingTypesDiff(Domain $domain, $objects = false)
+    public function setContentTypes($contentTypes)
     {
-        $keys = array_diff($this->getSettingTypes()->getKeys(), $domain->getSettingTypes()->getKeys());
-
-        if (!$objects) {
-            return $keys;
+        $this->contentTypes->clear();
+        foreach ($contentTypes as $contentType) {
+            $this->addContentType($contentType);
         }
 
-        $objects = [];
-        foreach ($keys as $key) {
-            $objects[] = $this->getSettingTypes()->get($key);
+        return $this;
+    }
+
+    /**
+     * @return SettingType[]|ArrayCollection
+     */
+    public function getSettingTypes()
+    {
+        return $this->settingTypes;
+    }
+
+    /**
+     * @param SettingType[] $settingTypes
+     *
+     * @return Domain
+     */
+    public function setSettingTypes($settingTypes)
+    {
+        $this->settingTypes->clear();
+        foreach ($settingTypes as $settingType) {
+            $this->addSettingType($settingType);
         }
 
-        return $objects;
+        return $this;
+    }
+
+    /**
+     * @param SettingType $settingType
+     *
+     * @return Domain
+     */
+    public function addSettingType(SettingType $settingType)
+    {
+        if (!$this->settingTypes->contains($settingType)) {
+            $this->settingTypes->set($settingType->getIdentifier(), $settingType);
+            $settingType->setDomain($this);
+            $settingType->setWeight($this->settingTypes->count() - 1);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ContentType $contentType
+     *
+     * @return Domain
+     */
+    public function addContentType(ContentType $contentType)
+    {
+        if (!$this->contentTypes->contains($contentType)) {
+            $this->contentTypes->set($contentType->getIdentifier(), $contentType);
+            $contentType->setDomain($this);
+            $contentType->setWeight($this->contentTypes->count() - 1);
+        }
+
+        return $this;
     }
 
     /**
@@ -248,27 +278,13 @@ class Domain
     }
 
     /**
-     * Set id
+     * Get title
      *
-     * @param $id
-     *
-     * @return Domain
+     * @return string
      */
-    public function setId($id)
+    public function getTitle()
     {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -286,13 +302,13 @@ class Domain
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -310,13 +326,13 @@ class Domain
     }
 
     /**
-     * Get identifier
+     * Get roles
      *
-     * @return string
+     * @return array
      */
-    public function getIdentifier()
+    public function getRoles()
     {
-        return $this->identifier;
+        return $this->roles;
     }
 
     /**
@@ -334,13 +350,75 @@ class Domain
     }
 
     /**
-     * Get roles
+     * Returns contentTypes that are present in this domain but not in $domain.
      *
-     * @return array
+     * @param Domain $domain
+     * @param bool $objects , return keys or objects
+     *
+     * @return ContentType[]
      */
-    public function getRoles()
+    public function getContentTypesDiff(Domain $domain, $objects = false)
     {
-        return $this->roles;
+        $keys = array_diff($this->getContentTypes()->getKeys(), $domain->getContentTypes()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getContentTypes()->get($key);
+        }
+
+        return $objects;
+    }
+
+    /**
+     * Returns settingTypes that are present in this domain but not in $domain.
+     *
+     * @param Domain $domain
+     * @param bool $objects , return keys or objects
+     *
+     * @return \UniteCMS\CoreBundle\Entity\SettingType[]
+     */
+    public function getSettingTypesDiff(Domain $domain, $objects = false)
+    {
+        $keys = array_diff($this->getSettingTypes()->getKeys(), $domain->getSettingTypes()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getSettingTypes()->get($key);
+        }
+
+        return $objects;
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
+     *
+     * @return Domain
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     /**
@@ -353,7 +431,7 @@ class Domain
     {
         $available_roles = array_flip($this->getRoles());
 
-        if(!$include_anonymous) {
+        if (!$include_anonymous) {
             unset($available_roles[Domain::ROLE_PUBLIC]);
         }
 
@@ -381,84 +459,6 @@ class Domain
     {
         $this->organization = $organization;
         $organization->addDomain($this);
-
-        return $this;
-    }
-
-    /**
-     * @return ContentType[]|ArrayCollection
-     */
-    public function getContentTypes()
-    {
-        return $this->contentTypes;
-    }
-
-    /**
-     * @param ContentType[] $contentTypes
-     *
-     * @return Domain
-     */
-    public function setContentTypes($contentTypes)
-    {
-        $this->contentTypes->clear();
-        foreach ($contentTypes as $contentType) {
-            $this->addContentType($contentType);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param ContentType $contentType
-     *
-     * @return Domain
-     */
-    public function addContentType(ContentType $contentType)
-    {
-        if (!$this->contentTypes->contains($contentType)) {
-            $this->contentTypes->set($contentType->getIdentifier(), $contentType);
-            $contentType->setDomain($this);
-            $contentType->setWeight($this->contentTypes->count() - 1);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return SettingType[]|ArrayCollection
-     */
-    public function getSettingTypes()
-    {
-        return $this->settingTypes;
-    }
-
-    /**
-     * @param SettingType[] $settingTypes
-     *
-     * @return Domain
-     */
-    public function setSettingTypes($settingTypes)
-    {
-        $this->settingTypes->clear();
-        foreach ($settingTypes as $settingType) {
-            $this->addSettingType($settingType);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param SettingType $settingType
-     *
-     * @return Domain
-     */
-    public function addSettingType(SettingType $settingType)
-    {
-        if (!$this->settingTypes->contains($settingType)) {
-            $this->settingTypes->set($settingType->getIdentifier(), $settingType);
-            $settingType->setDomain($this);
-            $settingType->setWeight($this->settingTypes->count() - 1);
-        }
 
         return $this;
     }

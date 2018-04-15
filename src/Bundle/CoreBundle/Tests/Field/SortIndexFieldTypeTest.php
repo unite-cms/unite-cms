@@ -11,14 +11,16 @@ use UniteCMS\CoreBundle\Entity\Organization;
 
 class SortIndexFieldTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings() {
+    public function testContentTypeFieldTypeWithEmptySettings()
+    {
 
         // Empty settings can be valid.
         $ctField = $this->createContentTypeField('sortindex');
         $this->assertCount(0, $this->container->get('validator')->validate($ctField));
     }
 
-    public function testAutoUpdateSortIndexOnInsertUpdateDelete() {
+    public function testAutoUpdateSortIndexOnInsertUpdateDelete()
+    {
 
         $contentType = new ContentType();
         $contentType->setTitle('ct')
@@ -47,12 +49,12 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
 
         // Create content for this content type.
         $content = [];
-        for($i = 0; $i < 4; $i++) {
-            $content['C' . ($i + 1)] = new Content();
-            $content['C' . ($i + 1)]
-                ->setData(['position' => 0, 'label' => 'C' . ($i + 1)])
+        for ($i = 0; $i < 4; $i++) {
+            $content['C'.($i + 1)] = new Content();
+            $content['C'.($i + 1)]
+                ->setData(['position' => 0, 'label' => 'C'.($i + 1)])
                 ->setContentType($contentType);
-            $this->em->persist($content['C' . ($i + 1)]);
+            $this->em->persist($content['C'.($i + 1)]);
             $this->em->flush();
         }
 
@@ -140,10 +142,12 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
 
         // Now restore the content element, it should get it's old position.
         $this->em->getFilters()->disable('gedmo_softdeleteable');
-        $deletedContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-            'contentType' => $contentType,
-            'id' => $deletedContentId,
-        ]);
+        $deletedContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            [
+                'contentType' => $contentType,
+                'id' => $deletedContentId,
+            ]
+        );
         $this->em->getFilters()->enable('gedmo_softdeleteable');
         $deletedContent->recoverDeleted();
         $this->em->flush();

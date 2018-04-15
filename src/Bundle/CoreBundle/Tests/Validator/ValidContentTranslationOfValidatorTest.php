@@ -35,15 +35,16 @@ class ValidContentTranslationOfValidatorTest extends ConstraintValidatorTestCase
         $filtersMock = $this->createMock(FilterCollection::class);
         $this->em = $this->createMock(EntityManager::class);
         $this->em->expects($this->any())
-                ->method('getFilters')
-                ->willReturn($filtersMock);
+            ->method('getFilters')
+            ->willReturn($filtersMock);
     }
 
     /**
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidContentTranslationOfValidator constraint expects a UniteCMS\CoreBundle\Entity\Content object.
      */
-    public function testInvalidObject() {
+    public function testInvalidObject()
+    {
         $object = new \stdClass();
         $this->validate((object)[], new ValidContentTranslationOfValidator($this->em), null, $object);
     }
@@ -52,12 +53,14 @@ class ValidContentTranslationOfValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidContentTranslationOfValidator constraint expects a UniteCMS\CoreBundle\Entity\Content value.
      */
-    public function testInvalidValue() {
+    public function testInvalidValue()
+    {
         $object = new Content();
         $this->validate((object)[], new ValidContentTranslationOfValidator($this->em), null, $object);
     }
 
-    public function testEmptyObjectAndContextObject() {
+    public function testEmptyObjectAndContextObject()
+    {
         $object = new Content();
 
         // When validating an empty value or don't provide a context object, the validator just skips this.
@@ -68,7 +71,8 @@ class ValidContentTranslationOfValidatorTest extends ConstraintValidatorTestCase
         $this->assertCount(0, $context->getViolations());
     }
 
-    public function testDuplicatedLocale() {
+    public function testDuplicatedLocale()
+    {
         $object = new Content();
         $object->setLocale('de');
         $value = new Content();
@@ -76,7 +80,10 @@ class ValidContentTranslationOfValidatorTest extends ConstraintValidatorTestCase
 
         $errors = $this->validate($value, new ValidContentTranslationOfValidator($this->em), null, $object);
         $this->assertCount(1, $errors->getViolations());
-        $this->assertEquals('There are two ore more translations in the same language.', $errors->getViolations()->get(0)->getMessageTemplate());
+        $this->assertEquals(
+            'There are two ore more translations in the same language.',
+            $errors->getViolations()->get(0)->getMessageTemplate()
+        );
 
         $object->setLocale('en');
         $errors = $this->validate($value, new ValidContentTranslationOfValidator($this->em), null, $object);

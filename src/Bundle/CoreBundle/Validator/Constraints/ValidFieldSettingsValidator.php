@@ -22,6 +22,30 @@ class ValidFieldSettingsValidator extends ConstraintValidator
         $this->fieldTypeManager = $fieldTypeManager;
     }
 
+    public function validate($value, Constraint $constraint)
+    {
+        if (!$value instanceof FieldableFieldSettings) {
+            throw new InvalidArgumentException(
+                'The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Field\FieldableFieldSettings value.'
+            );
+        }
+
+        if (!$this->context->getObject() instanceof FieldableField) {
+            throw new InvalidArgumentException(
+                'The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableField object.'
+            );
+        }
+
+        if ($this->fieldTypeManager->hasFieldType($this->context->getObject()->getType())) {
+            foreach ($this->fieldTypeManager->validateFieldSettings(
+                $this->context->getObject(),
+                $value
+            ) as $violation) {
+                $this->addDataViolation($violation);
+            }
+        }
+    }
+
     /**
      * Adds a new ConstraintViolation to the current context. Takes the violation and only modify the propertyPath to
      * make the violation a child of this field.
@@ -43,29 +67,5 @@ class ValidFieldSettingsValidator extends ConstraintValidator
                 $violation->getConstraint()
             )
         );
-    }
-
-    public function validate($value, Constraint $constraint)
-    {
-        if (!$value instanceof FieldableFieldSettings) {
-            throw new InvalidArgumentException(
-                'The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Field\FieldableFieldSettings value.'
-            );
-        }
-
-        if (!$this->context->getObject() instanceof FieldableField) {
-            throw new InvalidArgumentException(
-                'The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableField object.'
-            );
-        }
-
-        if($this->fieldTypeManager->hasFieldType($this->context->getObject()->getType())) {
-            foreach ($this->fieldTypeManager->validateFieldSettings(
-                $this->context->getObject(),
-                $value
-            ) as $violation) {
-                $this->addDataViolation($violation);
-            }
-        }
     }
 }

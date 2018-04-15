@@ -59,8 +59,9 @@ class ContentResultType extends AbstractType
      *
      * @return array
      */
-    protected function interfaces() {
-        return [ $this->schemaTypeManager->getSchemaType('ContentResultInterface') ];
+    protected function interfaces()
+    {
+        return [$this->schemaTypeManager->getSchemaType('ContentResultInterface')];
     }
 
     /**

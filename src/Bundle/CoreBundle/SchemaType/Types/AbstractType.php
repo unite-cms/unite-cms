@@ -8,21 +8,29 @@ use GraphQL\Type\Definition\ResolveInfo;
 abstract class AbstractType extends ObjectType
 {
 
+    public function __construct()
+    {
+        parent::__construct(
+            [
+                'fields' => function () {
+                    return $this->fields();
+                },
+                'resolveField' => function ($value, array $args, $context, ResolveInfo $info) {
+                    return $this->resolveField($value, $args, $context, $info);
+                },
+                'interfaces' => function () {
+                    return $this->interfaces();
+                },
+            ]
+        );
+    }
+
     /**
      * Define all fields of this type.
      *
      * @return array
      */
     abstract protected function fields();
-
-    /**
-     * Define all interfaces, this type implements.
-     *
-     * @return array
-     */
-    protected function interfaces() {
-        return [];
-    }
 
     /**
      * Resolve fields for this type.
@@ -37,21 +45,14 @@ abstract class AbstractType extends ObjectType
      */
     abstract protected function resolveField($value, array $args, $context, ResolveInfo $info);
 
-    public function __construct()
+    /**
+     * Define all interfaces, this type implements.
+     *
+     * @return array
+     */
+    protected function interfaces()
     {
-        parent::__construct(
-            [
-                'fields' => function () {
-                    return $this->fields();
-                },
-                'resolveField' => function ($value, array $args, $context, ResolveInfo $info) {
-                    return $this->resolveField($value, $args, $context, $info);
-                },
-                'interfaces' => function() {
-                    return $this->interfaces();
-                }
-            ]
-        );
+        return [];
     }
 
 }

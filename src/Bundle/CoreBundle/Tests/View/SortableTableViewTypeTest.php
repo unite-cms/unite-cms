@@ -13,10 +13,32 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 class SortableTableViewTypeTest extends DatabaseAwareTestCase
 {
 
+    public function testSortableViewWithPositionSetting()
+    {
+        $view = $this->createInstance();
+
+        // View should be valid.
+        $this->assertCount(0, $this->container->get('validator')->validate($view));
+
+        // Test templateRenderParameters.
+        $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
+        $this->assertTrue($parameters->isSelectModeNone());
+        $this->assertEquals(
+            [
+                'created' => 'Created',
+                'updated' => 'Updated',
+                'id' => 'ID',
+            ],
+            $parameters->get('columns')
+        );
+        $this->assertEquals('position', $parameters->get('sort_field'));
+    }
+
     /**
      * @return View
      */
-    private function createInstance() {
+    private function createInstance()
+    {
         $view = new View();
         $view
             ->setType('sortable')
@@ -43,24 +65,8 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         return $view;
     }
 
-    public function testSortableViewWithPositionSetting() {
-        $view = $this->createInstance();
-
-        // View should be valid.
-        $this->assertCount(0, $this->container->get('validator')->validate($view));
-
-        // Test templateRenderParameters.
-        $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
-        $this->assertTrue($parameters->isSelectModeNone());
-        $this->assertEquals([
-            'created' => 'Created',
-            'updated' => 'Updated',
-            'id' => 'ID',
-        ],$parameters->get('columns'));
-        $this->assertEquals('position', $parameters->get('sort_field'));
-    }
-
-    public function testSortableViewWithInvalidSettings() {
+    public function testSortableViewWithInvalidSettings()
+    {
         $view = $this->createInstance();
         $view->setSettings(new ViewSettings());
 
@@ -69,10 +75,14 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.required', $errors->get(0)->getMessage());
 
-        $view->setSettings(new ViewSettings([
-            'sort_field' => 'position',
-            'foo' => 'baa',
-        ]));
+        $view->setSettings(
+            new ViewSettings(
+                [
+                    'sort_field' => 'position',
+                    'foo' => 'baa',
+                ]
+            )
+        );
 
         // View should not be valid.
         $errors = $this->container->get('validator')->validate($view);
@@ -86,7 +96,9 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertEquals('validation.invalid_columns_definition', $errors->get(0)->getMessage());
         $this->assertEquals('settings.columns', $errors->get(0)->getPropertyPath());
 
-        $view->setSettings(new ViewSettings(['columns' => ['foo' => 'Foo', 'baa' => 'Baa'], 'sort_field' => 'position']));
+        $view->setSettings(
+            new ViewSettings(['columns' => ['foo' => 'Foo', 'baa' => 'Baa'], 'sort_field' => 'position'])
+        );
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(2, $errors);
         $this->assertEquals('validation.unknown_column', $errors->get(0)->getMessage());
@@ -108,15 +120,20 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
     }
 
-    public function testSortableViewWithValidSettings() {
+    public function testSortableViewWithValidSettings()
+    {
         $view = $this->createInstance();
-        $view->setSettings(new ViewSettings([
-            'columns' => [
-                'id' => 'ID',
-                'position' => 'Position',
-            ],
-            'sort_field' => 'position',
-        ]));
+        $view->setSettings(
+            new ViewSettings(
+                [
+                    'columns' => [
+                        'id' => 'ID',
+                        'position' => 'Position',
+                    ],
+                    'sort_field' => 'position',
+                ]
+            )
+        );
 
         $field = new ContentTypeField();
         $field->setType('text')->setIdentifier('position')->setTitle('Position');
@@ -128,10 +145,13 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         // Test templateRenderParameters.
         $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
         $this->assertTrue($parameters->isSelectModeNone());
-        $this->assertEquals([
-            'id' => 'ID',
-            'position' => 'Position',
-        ],$parameters->get('columns'));
+        $this->assertEquals(
+            [
+                'id' => 'ID',
+                'position' => 'Position',
+            ],
+            $parameters->get('columns')
+        );
         $this->assertEquals('position', $parameters->get('sort_field'));
     }
 }

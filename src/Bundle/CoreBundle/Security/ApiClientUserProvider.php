@@ -30,29 +30,6 @@ class ApiClientUserProvider implements UserProviderInterface
     }
 
     /**
-     * Loads the user for the given username.
-     *
-     * This method must throw UsernameNotFoundException if the user is not
-     * found.
-     *
-     * @param string $username The username
-     *
-     * @return UserInterface|ApiClient
-     *
-     * @throws TokenNotFoundException if the token is not found
-     */
-    public function loadUserByUsername($username)
-    {
-        if(($domain = $this->uniteCMSManager->getDomain()) && ($token = $this->entityManager->getRepository('UniteCMSCoreBundle:ApiClient')->findOneBy([
-            'token' => $username,
-            'domain' => $domain,
-        ]))) {
-            return $token;
-        }
-        throw new TokenNotFoundException("An API Client with token $username was not found for the current domain");
-    }
-
-    /**
      * Refreshes the user.
      *
      * It is up to the implementation to decide if the user data should be
@@ -68,11 +45,38 @@ class ApiClientUserProvider implements UserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        if(!$user instanceof ApiClient) {
+        if (!$user instanceof ApiClient) {
             throw new UnsupportedUserException('This provider ony supports API Clients');
         }
 
         return $this->loadUserByUsername($user->getToken());
+    }
+
+    /**
+     * Loads the user for the given username.
+     *
+     * This method must throw UsernameNotFoundException if the user is not
+     * found.
+     *
+     * @param string $username The username
+     *
+     * @return UserInterface|ApiClient
+     *
+     * @throws TokenNotFoundException if the token is not found
+     */
+    public function loadUserByUsername($username)
+    {
+        if (($domain = $this->uniteCMSManager->getDomain()) && ($token = $this->entityManager->getRepository(
+                'UniteCMSCoreBundle:ApiClient'
+            )->findOneBy(
+                [
+                    'token' => $username,
+                    'domain' => $domain,
+                ]
+            ))) {
+            return $token;
+        }
+        throw new TokenNotFoundException("An API Client with token $username was not found for the current domain");
     }
 
     /**

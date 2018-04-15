@@ -23,46 +23,49 @@ class ContentEventDispatcher
         $this->fieldTypeManager = $fieldTypeManager;
     }
 
-    public function prePersist(LifecycleEventArgs $args) {
+    public function prePersist(LifecycleEventArgs $args)
+    {
 
         $entity = $args->getObject();
 
         // Notify all field types about an insert event.
         if ($entity instanceof Content) {
-            foreach($entity->getContentType()->getFields() as $field) {
+            foreach ($entity->getContentType()->getFields() as $field) {
                 $this->fieldTypeManager->onContentInsert($field, $entity, $args);
             }
         }
 
     }
 
-    public function preUpdate(PreUpdateEventArgs $args) {
+    public function preUpdate(PreUpdateEventArgs $args)
+    {
 
         $entity = $args->getObject();
 
         // Notify all field types about an update event.
         if ($entity instanceof Content) {
-            foreach($entity->getContentType()->getFields() as $field) {
+            foreach ($entity->getContentType()->getFields() as $field) {
                 $this->fieldTypeManager->onContentUpdate($field, $entity, $args);
             }
         }
 
         // Notify all field types about an update event.
         if ($entity instanceof Setting) {
-            foreach($entity->getSettingType()->getFields() as $field) {
+            foreach ($entity->getSettingType()->getFields() as $field) {
                 $this->fieldTypeManager->onSettingUpdate($field, $entity, $args);
             }
         }
 
     }
 
-    public function preRemove(LifecycleEventArgs $args) {
+    public function preRemove(LifecycleEventArgs $args)
+    {
 
         $entity = $args->getObject();
 
         // Notify all field types about a remove event.
         if ($entity instanceof Content) {
-            foreach($entity->getContentType()->getFields() as $field) {
+            foreach ($entity->getContentType()->getFields() as $field) {
                 $this->fieldTypeManager->onContentRemove($field, $entity, $args);
             }
         }

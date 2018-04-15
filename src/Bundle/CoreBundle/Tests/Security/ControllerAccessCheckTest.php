@@ -176,80 +176,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->refresh($this->apiClient1);
     }
 
-    private function assertAccess($route, $canAccess, $substitutions = [], $methods = ['GET'], $parameters = [])
-    {
-
-        $route = 'http://localhost'.$route;
-
-        foreach ($substitutions as $substitution => $value) {
-            $route = str_replace($substitution, $value, $route);
-        }
-
-        foreach ($methods as $method) {
-            $this->client->request($method, $route, $parameters);
-
-            if ($canAccess) {
-
-                // Only check redirection if it is redirecting to another route.
-                if (!$this->client->getResponse()->isRedirect($route) && !$this->client->getResponse()->isRedirect(
-                        $route.'/'
-                    )) {
-                    $this->assertFalse($this->client->getResponse()->isRedirect('http://localhost/login'));
-                }
-                $this->assertFalse($this->client->getResponse()->isForbidden());
-                $this->assertFalse($this->client->getResponse()->isServerError());
-                $this->assertFalse($this->client->getResponse()->isClientError());
-            } else {
-                $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect(
-                        'http://localhost/login'
-                    )));
-                $this->assertTrue($forbidden);
-            }
-        }
-
-        // Check, that all other methods are not allowed (Http 405).
-        // This check does not works for the login action, because this action will
-        // redirect the user to the invalid route login/ if method is not GET or POST.
-        if ($canAccess && $route != 'http://localhost/login') {
-            $methodsAvailable = ['GET', 'POST', 'PUT', 'DELETE'];
-            foreach (array_diff($methodsAvailable, $methods) as $method) {
-                $this->client->request($method, $route);
-                if (!$this->client->getResponse()->isRedirect()) {
-                    $this->assertEquals(
-                        405,
-                        $this->client->getResponse()
-                            ->getStatusCode()
-                    );
-                }
-            }
-        }
-    }
-
-    private function assertRedirect($route, $destination, $substitutions = [], $methods = ['GET'])
-    {
-        $route = 'http://localhost'.$route;
-
-        foreach ($substitutions as $substitution => $value) {
-            $route = str_replace($substitution, $value, $route);
-        }
-
-        foreach ($methods as $method) {
-            $this->client->request($method, $route);
-            $this->assertTrue($this->client->getResponse()->isRedirect($destination));
-        }
-    }
-
-    private function login(User $user)
-    {
-
-        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
-        $session = $this->client->getContainer()->get('session');
-        $session->set('_security_main', serialize($token));
-        $session->save();
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->client->getCookieJar()->set($cookie);
-    }
-
     public function testControllerActionAccessForAnonymous()
     {
         $substitutions = [
@@ -265,10 +191,16 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         ];
 
         $this->assertAccess('/', false, $substitutions);
-        $this->assertAccess('/login', true, $substitutions, ['GET', 'POST'], [
-            '_username' => '',
-            '_password' => '',
-        ]);
+        $this->assertAccess(
+            '/login',
+            true,
+            $substitutions,
+            ['GET', 'POST'],
+            [
+                '_username' => '',
+                '_password' => '',
+            ]
+        );
         $this->assertAccess('/profile/reset-password', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/reset-password-confirm', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
@@ -320,6 +252,55 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             ['GET', 'POST']
         );
         $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
+    }
+
+    private function assertAccess($route, $canAccess, $substitutions = [], $methods = ['GET'], $parameters = [])
+    {
+
+        $route = 'http://localhost'.$route;
+
+        foreach ($substitutions as $substitution => $value) {
+            $route = str_replace($substitution, $value, $route);
+        }
+
+        foreach ($methods as $method) {
+            $this->client->request($method, $route, $parameters);
+
+            if ($canAccess) {
+
+                // Only check redirection if it is redirecting to another route.
+                if (!$this->client->getResponse()->isRedirect($route) && !$this->client->getResponse()->isRedirect(
+                        $route.'/'
+                    )) {
+                    $this->assertFalse($this->client->getResponse()->isRedirect('http://localhost/login'));
+                }
+                $this->assertFalse($this->client->getResponse()->isForbidden());
+                $this->assertFalse($this->client->getResponse()->isServerError());
+                $this->assertFalse($this->client->getResponse()->isClientError());
+            } else {
+                $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect(
+                        'http://localhost/login'
+                    )));
+                $this->assertTrue($forbidden);
+            }
+        }
+
+        // Check, that all other methods are not allowed (Http 405).
+        // This check does not works for the login action, because this action will
+        // redirect the user to the invalid route login/ if method is not GET or POST.
+        if ($canAccess && $route != 'http://localhost/login') {
+            $methodsAvailable = ['GET', 'POST', 'PUT', 'DELETE'];
+            foreach (array_diff($methodsAvailable, $methods) as $method) {
+                $this->client->request($method, $route);
+                if (!$this->client->getResponse()->isRedirect()) {
+                    $this->assertEquals(
+                        405,
+                        $this->client->getResponse()
+                            ->getStatusCode()
+                    );
+                }
+            }
+        }
     }
 
     public function testControllerActionAccessForDomainEditor()
@@ -460,6 +441,31 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             ['GET', 'POST']
         );
         $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
+    }
+
+    private function login(User $user)
+    {
+
+        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
+        $session = $this->client->getContainer()->get('session');
+        $session->set('_security_main', serialize($token));
+        $session->save();
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $this->client->getCookieJar()->set($cookie);
+    }
+
+    private function assertRedirect($route, $destination, $substitutions = [], $methods = ['GET'])
+    {
+        $route = 'http://localhost'.$route;
+
+        foreach ($substitutions as $substitution => $value) {
+            $route = str_replace($substitution, $value, $route);
+        }
+
+        foreach ($methods as $method) {
+            $this->client->request($method, $route);
+            $this->assertTrue($this->client->getResponse()->isRedirect($destination));
+        }
     }
 
     public function testControllerActionAccessForDomainAdmin()

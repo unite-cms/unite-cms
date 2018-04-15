@@ -8,7 +8,8 @@ use Symfony\Component\HttpFoundation\RequestMatcher;
 class ApiRequestMatcher extends RequestMatcher
 {
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct('^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/.+|$)');
     }
 
@@ -22,6 +23,9 @@ class ApiRequestMatcher extends RequestMatcher
      */
     public function matches(Request $request)
     {
-        return parent::matches($request) && (!$request->headers->has('Authentication-Fallback') || !filter_var($request->headers->get('Authentication-Fallback'), FILTER_VALIDATE_BOOLEAN));
+        return parent::matches($request) && (!$request->headers->has('Authentication-Fallback') || !filter_var(
+                    $request->headers->get('Authentication-Fallback'),
+                    FILTER_VALIDATE_BOOLEAN
+                ));
     }
 }

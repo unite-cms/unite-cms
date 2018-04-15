@@ -20,40 +20,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 class DomainInvitation
 {
     const INVITATION_RESET_TTL = 2592000; // Default to two one month
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="bigint")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
-
-    /**
-     * @var array
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="validation.invalid_selection")
-     * @ORM\Column(name="roles", type="array")
-     */
-    private $roles;
-
-    /**
-     * @var Domain
-     * @Assert\Valid()
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="invites")
-     */
-    private $domain;
-
-    /**
-     * @var User
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Email(message="validation.invalid_email")
-     * @ORM\Column(name="email", type="string")
-     */
-    private $email;
-
     /**
      * @var string
      * @Assert\Length(max="180", maxMessage="validation.too_long")
@@ -62,13 +28,41 @@ class DomainInvitation
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;
-
     /**
      * @var \DateTime
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\Column(name="requested_at", type="datetime", nullable=true)
      */
     protected $requestedAt;
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="bigint")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+    /**
+     * @var array
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="validation.invalid_selection")
+     * @ORM\Column(name="roles", type="array")
+     */
+    private $roles;
+    /**
+     * @var Domain
+     * @Assert\Valid()
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="invites")
+     */
+    private $domain;
+    /**
+     * @var User
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\Email(message="validation.invalid_email")
+     * @ORM\Column(name="email", type="string")
+     */
+    private $email;
 
     public function __construct()
     {
@@ -80,6 +74,26 @@ class DomainInvitation
         return $this->getEmail();
     }
 
+    /**
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param string $email
+     *
+     * @return DomainInvitation
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
     public function allowedRoles(): array
     {
         if (!$this->getDomain()) {
@@ -87,6 +101,26 @@ class DomainInvitation
         }
 
         return $this->getDomain()->getAvailableRolesAsOptions();
+    }
+
+    /**
+     * @return Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param Domain $domain
+     *
+     * @return DomainInvitation
+     */
+    public function setDomain(Domain $domain)
+    {
+        $this->domain = $domain;
+
+        return $this;
     }
 
     public function emailNotAlreadyTaken(ExecutionContextInterface $context)
@@ -144,46 +178,6 @@ class DomainInvitation
     }
 
     /**
-     * @return Domain
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
-
-    /**
-     * @param Domain $domain
-     *
-     * @return DomainInvitation
-     */
-    public function setDomain(Domain $domain)
-    {
-        $this->domain = $domain;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    /**
-     * @param string $email
-     *
-     * @return DomainInvitation
-     */
-    public function setEmail($email)
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getToken()
@@ -199,26 +193,6 @@ class DomainInvitation
     public function setToken(string $token)
     {
         $this->token = $token;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getRequestedAt()
-    {
-        return $this->requestedAt;
-    }
-
-    /**
-     * @param \DateTime $requestedAt
-     *
-     * @return DomainInvitation
-     */
-    public function setRequestedAt(\DateTime $requestedAt)
-    {
-        $this->requestedAt = \DateTime::createFromFormat('d/m/Y H:i:s', $requestedAt->format('d/m/Y H:i:s'));
 
         return $this;
     }
@@ -254,5 +228,25 @@ class DomainInvitation
         $ttl = $ttl ?? self::INVITATION_RESET_TTL;
 
         return ($this->getRequestedAt()->getTimestamp() + $ttl) <= $now->getTimestamp();
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getRequestedAt()
+    {
+        return $this->requestedAt;
+    }
+
+    /**
+     * @param \DateTime $requestedAt
+     *
+     * @return DomainInvitation
+     */
+    public function setRequestedAt(\DateTime $requestedAt)
+    {
+        $this->requestedAt = \DateTime::createFromFormat('d/m/Y H:i:s', $requestedAt->format('d/m/Y H:i:s'));
+
+        return $this;
     }
 }

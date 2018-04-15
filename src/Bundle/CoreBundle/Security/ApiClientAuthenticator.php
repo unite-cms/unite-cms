@@ -22,7 +22,8 @@ class ApiClientAuthenticator extends AbstractGuardAuthenticator
      *
      * @return bool
      */
-    public function supports(Request $request) {
+    public function supports(Request $request)
+    {
         return $request->headers->has('Authentication') || $request->query->has('token');
     }
 
@@ -35,7 +36,7 @@ class ApiClientAuthenticator extends AbstractGuardAuthenticator
         // Try to get the token from authentication header.
         if ($authentication = $request->headers->get('Authentication')) {
             $prefix = 'Bearer ';
-            if(substr($authentication, 0, strlen($prefix)) === $prefix) {
+            if (substr($authentication, 0, strlen($prefix)) === $prefix) {
                 return substr($authentication, strlen($prefix));
             }
 
@@ -44,7 +45,7 @@ class ApiClientAuthenticator extends AbstractGuardAuthenticator
         }
 
         // Try to get the token from query get parameter.
-        if($request->query->has('token')) {
+        if ($request->query->has('token')) {
             return $request->query->get('token');
         }
 
@@ -92,7 +93,7 @@ class ApiClientAuthenticator extends AbstractGuardAuthenticator
     {
         $data = array(
             // you might translate this message
-            'message' => 'Authentication Required'
+            'message' => 'Authentication Required',
         );
 
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);

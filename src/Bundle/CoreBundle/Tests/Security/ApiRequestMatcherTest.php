@@ -11,7 +11,8 @@ class ApiRequestMatcherTest extends TestCase
     /**
      * Test, that the request matcher matches any api route.
      */
-    public function testApiRequestMatcherForApiRoute() {
+    public function testApiRequestMatcherForApiRoute()
+    {
 
         $matcher = new ApiRequestMatcher();
 
@@ -33,7 +34,8 @@ class ApiRequestMatcherTest extends TestCase
     /**
      * Test, that the request matcher will mot match any api route if a fallback flag is provided.
      */
-    public function testApiRequestMatcherForApiRouteWithFallbackFlagRoute() {
+    public function testApiRequestMatcherForApiRouteWithFallbackFlagRoute()
+    {
 
         $matcher = new ApiRequestMatcher();
 
@@ -98,8 +100,6 @@ class ApiRequestMatcherTest extends TestCase
         $this->assertTrue($matcher->matches($request));
 
 
-
-
         $request = Request::create('/org1/domain1/api');
         $request->headers->set('Authentication-Fallback', true);
         $this->assertFalse($matcher->matches($request));
@@ -153,7 +153,8 @@ class ApiRequestMatcherTest extends TestCase
     /**
      * Test, that the request matcher will not match for any non api route.
      */
-    public function testApiRequestMatcherForOtherRoute() {
+    public function testApiRequestMatcherForOtherRoute()
+    {
         $matcher = new ApiRequestMatcher();
 
         $this->assertFalse($matcher->matches(Request::create('/org1/domain1/api1')));

@@ -52,12 +52,12 @@ class Collection implements Fieldable
      */
     public function setFields($fields)
     {
-        foreach($fields as $field) {
-          if($field instanceof  CollectionField) {
-            $this->addField($field);
-          } elseif(is_array($field)) {
-            $this->addField(new CollectionField($field));
-          }
+        foreach ($fields as $field) {
+            if ($field instanceof CollectionField) {
+                $this->addField($field);
+            } elseif (is_array($field)) {
+                $this->addField(new CollectionField($field));
+            }
         }
 
         return $this;
@@ -83,29 +83,26 @@ class Collection implements Fieldable
     }
 
     /**
-     * @return string
-     */
-    public function getIdentifier() {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     *
-     * @return Collection
-     */
-    public function setIdentifier(string $identifier) {
-        $this->identifier = $identifier;
-
-        return $this;
-    }
-
-    /**
      * @return array
      */
     public function getLocales(): array
     {
         return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIdentifierPath($delimiter = '/')
+    {
+
+        $path = '';
+
+        if ($this->getParentEntity()) {
+            $path = $this->getParentEntity()->getIdentifierPath($delimiter).$delimiter;
+        }
+
+        return $path.$this->getIdentifier();
     }
 
     /**
@@ -117,23 +114,30 @@ class Collection implements Fieldable
     }
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public function getIdentifierPath($delimiter = '/') {
+    public function getIdentifier()
+    {
+        return $this->identifier;
+    }
 
-        $path = '';
+    /**
+     * @param string $identifier
+     *
+     * @return Collection
+     */
+    public function setIdentifier(string $identifier)
+    {
+        $this->identifier = $identifier;
 
-        if($this->getParentEntity()) {
-            $path = $this->getParentEntity()->getIdentifierPath($delimiter) . $delimiter;
-        }
-
-        return $path . $this->getIdentifier();
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRootEntity(): Fieldable {
+    public function getRootEntity(): Fieldable
+    {
         return $this->getParentEntity() ? $this->parent->getRootEntity() : $this;
     }
 }

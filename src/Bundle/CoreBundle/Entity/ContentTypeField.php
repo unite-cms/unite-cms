@@ -121,27 +121,13 @@ class ContentTypeField implements FieldableField
     }
 
     /**
-     * Set id
+     * Get title
      *
-     * @param $id
-     *
-     * @return ContentTypeField
+     * @return string
      */
-    public function setId($id)
+    public function getTitle()
     {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -159,13 +145,13 @@ class ContentTypeField implements FieldableField
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -183,22 +169,13 @@ class ContentTypeField implements FieldableField
     }
 
     /**
-     * Get identifier
+     * Get type
      *
      * @return string
      */
-    public function getIdentifier()
+    public function getType()
     {
-        return $this->identifier;
-    }
-
-    /**
-     * Returns the identifier, used for mysql's json_extract function.
-     * @return string
-     */
-    public function getJsonExtractIdentifier()
-    {
-        return '$.' . $this->getIdentifier();
+        return $this->type;
     }
 
     /**
@@ -216,13 +193,13 @@ class ContentTypeField implements FieldableField
     }
 
     /**
-     * Get type
+     * Get settings
      *
-     * @return string
+     * @return FieldableFieldSettings
      */
-    public function getType()
+    public function getSettings()
     {
-        return $this->type;
+        return $this->settings;
     }
 
     /**
@@ -237,37 +214,6 @@ class ContentTypeField implements FieldableField
         $this->settings = $settings;
 
         return $this;
-    }
-
-    /**
-     * Get settings
-     *
-     * @return FieldableFieldSettings
-     */
-    public function getSettings()
-    {
-        return $this->settings;
-    }
-
-    /**
-     * @param ContentType $contentType
-     *
-     * @return ContentTypeField
-     */
-    public function setContentType(ContentType $contentType)
-    {
-        $this->contentType = $contentType;
-        $contentType->addField($this);
-
-        return $this;
-    }
-
-    /**
-     * @return ContentType
-     */
-    public function getContentType()
-    {
-        return $this->contentType;
     }
 
     /**
@@ -290,11 +236,65 @@ class ContentTypeField implements FieldableField
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
+     *
+     * @return ContentTypeField
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Returns the identifier, used for mysql's json_extract function.
+     * @return string
+     */
+    public function getJsonExtractIdentifier()
+    {
+        return '$.'.$this->getIdentifier();
+    }
+
+    /**
      * @return Fieldable
      */
     public function getEntity()
     {
         return $this->getContentType();
+    }
+
+    /**
+     * @return ContentType
+     */
+    public function getContentType()
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * @param ContentType $contentType
+     *
+     * @return ContentTypeField
+     */
+    public function setContentType(ContentType $contentType)
+    {
+        $this->contentType = $contentType;
+        $contentType->addField($this);
+
+        return $this;
     }
 
     /**

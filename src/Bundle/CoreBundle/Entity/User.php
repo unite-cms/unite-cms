@@ -23,7 +23,18 @@ class User implements UserInterface, \Serializable
     const PASSWORD_RESET_TTL = 14400; // Default to 4h
     const ROLE_USER = "ROLE_USER";
     const ROLE_PLATFORM_ADMIN = "ROLE_PLATFORM_ADMIN";
-
+    /**
+     * @var string
+     * @Assert\Length(max="180", maxMessage="validation.too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="validation.invalid_characters")
+     * @ORM\Column(name="reset_token", type="string", length=180, unique=true, nullable=true)
+     */
+    protected $resetToken;
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="reset_requested_at", type="datetime", nullable=true)
+     */
+    protected $resetRequestedAt;
     /**
      * @var int
      *
@@ -32,7 +43,6 @@ class User implements UserInterface, \Serializable
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
@@ -41,7 +51,6 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(name="email", type="string", length=255)
      */
     private $email;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
@@ -49,7 +58,6 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(name="firstname", type="string", length=255)
      */
     private $firstname;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
@@ -57,7 +65,6 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(name="lastname", type="string", length=255)
      */
     private $lastname;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank", groups={"CREATE"})
@@ -65,41 +72,24 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(name="password", type="string", length=255)
      */
     private $password;
-
     /**
      * @var array
      *
      * @ORM\Column(name="roles", type="array")
      */
     private $roles;
-
     /**
      * @var OrganizationMember[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"})
      */
     private $organizations;
-
     /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="user", cascade={"persist", "remove", "merge"})
      */
     private $domains;
-
-    /**
-     * @var string
-     * @Assert\Length(max="180", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="validation.invalid_characters")
-     * @ORM\Column(name="reset_token", type="string", length=180, unique=true, nullable=true)
-     */
-    protected $resetToken;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="reset_requested_at", type="datetime", nullable=true)
-     */
-    protected $resetRequestedAt;
 
     public function __construct()
     {
@@ -114,37 +104,13 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set email
-     *
-     * @param string $email
-     *
-     * @return User
-     */
-    public function setEmail($email)
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    /**
-     * Get email
+     * Get firstname
      *
      * @return string
      */
-    public function getEmail()
+    public function getFirstname()
     {
-        return $this->email;
+        return $this->firstname;
     }
 
     /**
@@ -162,13 +128,13 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Get firstname
+     * Get lastname
      *
      * @return string
      */
-    public function getFirstname()
+    public function getLastname()
     {
-        return $this->firstname;
+        return $this->lastname;
     }
 
     /**
@@ -186,13 +152,23 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Get lastname
+     * Get id
      *
-     * @return string
+     * @return int
      */
-    public function getLastname()
+    public function getId()
     {
-        return $this->lastname;
+        return $this->id;
+    }
+
+    /**
+     * Returns the roles granted to the user.
+     *
+     * @return Role[]|string[] The user roles
+     */
+    public function getRoles()
+    {
+        return $this->roles;
     }
 
     /**
@@ -224,16 +200,6 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Returns the roles granted to the user.
-     *
-     * @return Role[]|string[] The user roles
-     */
-    public function getRoles()
-    {
-        return $this->roles;
-    }
-
-    /**
      * Returns the roles of the user for a given domain.
      *
      * @param Domain $domain
@@ -251,6 +217,44 @@ class User implements UserInterface, \Serializable
     }
 
     /**
+     * @return DomainMember[]|ArrayCollection
+     */
+    public function getDomains()
+    {
+        return $this->domains;
+    }
+
+    /**
+     * @param DomainMember[] $domains
+     *
+     * @return User
+     */
+    public function setDomains($domains)
+    {
+        $this->domains->clear();
+        foreach ($domains as $domain) {
+            $this->addDomain($domain);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param DomainMember $domain
+     *
+     * @return User
+     */
+    public function addDomain(DomainMember $domain)
+    {
+        if (!$this->domains->contains($domain)) {
+            $this->domains->add($domain);
+            $domain->setUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
      * Returns the roles of the user for a given organization.
      *
      * @param Organization $organization
@@ -265,6 +269,44 @@ class User implements UserInterface, \Serializable
         }
 
         return [];
+    }
+
+    /**
+     * @return OrganizationMember[]|ArrayCollection
+     */
+    public function getOrganizations()
+    {
+        return $this->organizations;
+    }
+
+    /**
+     * @param OrganizationMember[] $organizations
+     *
+     * @return User
+     */
+    public function setOrganizations($organizations)
+    {
+        $this->organizations->clear();
+        foreach ($organizations as $organization) {
+            $this->addOrganization($organization);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param OrganizationMember $organization
+     *
+     * @return User
+     */
+    public function addOrganization(OrganizationMember $organization)
+    {
+        if (!$this->organizations->contains($organization)) {
+            $this->organizations->add($organization);
+            $organization->setUser($this);
+        }
+
+        return $this;
     }
 
     /**
@@ -312,6 +354,30 @@ class User implements UserInterface, \Serializable
     public function getUsername()
     {
         return $this->getEmail();
+    }
+
+    /**
+     * Get email
+     *
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * Set email
+     *
+     * @param string $email
+     *
+     * @return User
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+
+        return $this;
     }
 
     /**
@@ -366,82 +432,6 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * @return OrganizationMember[]|ArrayCollection
-     */
-    public function getOrganizations()
-    {
-        return $this->organizations;
-    }
-
-    /**
-     * @param OrganizationMember[] $organizations
-     *
-     * @return User
-     */
-    public function setOrganizations($organizations)
-    {
-        $this->organizations->clear();
-        foreach ($organizations as $organization) {
-            $this->addOrganization($organization);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param OrganizationMember $organization
-     *
-     * @return User
-     */
-    public function addOrganization(OrganizationMember $organization)
-    {
-        if (!$this->organizations->contains($organization)) {
-            $this->organizations->add($organization);
-            $organization->setUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return DomainMember[]|ArrayCollection
-     */
-    public function getDomains()
-    {
-        return $this->domains;
-    }
-
-    /**
-     * @param DomainMember[] $domains
-     *
-     * @return User
-     */
-    public function setDomains($domains)
-    {
-        $this->domains->clear();
-        foreach ($domains as $domain) {
-            $this->addDomain($domain);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param DomainMember $domain
-     *
-     * @return User
-     */
-    public function addDomain(DomainMember $domain)
-    {
-        if (!$this->domains->contains($domain)) {
-            $this->domains->add($domain);
-            $domain->setUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getResetToken()
@@ -457,26 +447,6 @@ class User implements UserInterface, \Serializable
     public function setResetToken(string $resetToken)
     {
         $this->resetToken = $resetToken;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getResetRequestedAt()
-    {
-        return $this->resetRequestedAt;
-    }
-
-    /**
-     * @param \DateTime $resetRequestedAt
-     *
-     * @return User
-     */
-    public function setResetRequestedAt(\DateTime $resetRequestedAt)
-    {
-        $this->resetRequestedAt = \DateTime::createFromFormat('d/m/Y H:i:s', $resetRequestedAt->format('d/m/Y H:i:s'));
 
         return $this;
     }
@@ -512,6 +482,26 @@ class User implements UserInterface, \Serializable
         $ttl = $ttl ?? self::PASSWORD_RESET_TTL;
 
         return ($this->getResetRequestedAt()->getTimestamp() + $ttl) <= $now->getTimestamp();
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getResetRequestedAt()
+    {
+        return $this->resetRequestedAt;
+    }
+
+    /**
+     * @param \DateTime $resetRequestedAt
+     *
+     * @return User
+     */
+    public function setResetRequestedAt(\DateTime $resetRequestedAt)
+    {
+        $this->resetRequestedAt = \DateTime::createFromFormat('d/m/Y H:i:s', $resetRequestedAt->format('d/m/Y H:i:s'));
+
+        return $this;
     }
 }
 

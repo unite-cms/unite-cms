@@ -101,7 +101,7 @@ interface FieldTypeInterface
      *
      * @param FieldableField $field
      * @param array $data
-     * @param $validation_group, This can be "DEFAULT" (content and settings) or "DELETE" (only for content).
+     * @param $validation_group , This can be "DEFAULT" (content and settings) or "DELETE" (only for content).
      *
      * @return ConstraintViolation[]
      */

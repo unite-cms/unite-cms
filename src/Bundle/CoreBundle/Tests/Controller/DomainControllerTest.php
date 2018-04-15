@@ -56,13 +56,17 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->refresh($this->organization);
 
         $this->admin = new User();
-        $this->admin->setEmail('admin@example.com')->setFirstname('Domain Admin')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->admin->setEmail('admin@example.com')->setFirstname('Domain Admin')->setLastname('Example')->setRoles(
+            [User::ROLE_USER]
+        )->setPassword('XXX');
         $domainAdminOrgMember = new OrganizationMember();
         $domainAdminOrgMember->setRoles([Organization::ROLE_ADMINISTRATOR])->setOrganization($this->organization);
         $this->admin->addOrganization($domainAdminOrgMember);
 
         $this->editor = new User();
-        $this->editor->setEmail('editor@example.com')->setFirstname('Domain Editor')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->editor->setEmail('editor@example.com')->setFirstname('Domain Editor')->setLastname('Example')->setRoles(
+            [User::ROLE_USER]
+        )->setPassword('XXX');
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $this->editor->addOrganization($domainEditorOrgMember);
@@ -74,27 +78,27 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->refresh($this->editor);
     }
 
-    private function login(User $user) {
-        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
-        $session = $this->client->getContainer()->get('session');
-        $session->set('_security_main', serialize($token));
-        $session->save();
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->client->getCookieJar()->set($cookie);
-    }
-
-    public function testCRUDActionsAsAdmin() {
+    public function testCRUDActionsAsAdmin()
+    {
 
         $this->login($this->admin);
 
         // List all domains.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
-        ]));
+        $crawler = $this->client->request(
+            'GET',
+            $this->container->get('router')->generate(
+                'unitecms_core_domain_index',
+                [
+                    'organization' => $this->organization->getIdentifier(),
+                ]
+            )
+        );
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Check that there is a add domain button.
-        $addButton = $crawler->filter('a:contains("' . $this->container->get('translator')->trans('organization.menu.domains.add') . '")');
+        $addButton = $crawler->filter(
+            'a:contains("'.$this->container->get('translator')->trans('organization.menu.domains.add').'")'
+        );
         $this->assertGreaterThanOrEqual(1, $addButton->count());
         $crawler = $this->client->click($addButton->first()->link());
 
@@ -110,7 +114,10 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->assertFalse($this->client->getResponse()->isRedirect());
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("Could not parse domain definition JSON.")'));
+        $this->assertCount(
+            1,
+            $crawler->filter('.uk-alert-danger p:contains("Could not parse domain definition JSON.")')
+        );
 
         // Submit invalid Domain definition.
         $form = $crawler->filter('form');
@@ -128,12 +135,21 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form->disableValidation();
         $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1" }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => $this->organization->getIdentifier(),
-            'domain' => 'd1',
-        ])));
+        $this->assertTrue(
+            $this->client->getResponse()->isRedirect(
+                $this->container->get('router')->generate(
+                    'unitecms_core_domain_view',
+                    [
+                        'organization' => $this->organization->getIdentifier(),
+                        'domain' => 'd1',
+                    ]
+                )
+            )
+        );
         $crawler = $this->client->followRedirect();
-        $updateButton = $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")');
+        $updateButton = $crawler->filter(
+            'a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.update').'")'
+        );
         $this->assertGreaterThanOrEqual(1, $updateButton->count());
         $crawler = $this->client->click($updateButton->first()->link());
 
@@ -149,7 +165,10 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->assertFalse($this->client->getResponse()->isRedirect());
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("Could not parse domain definition JSON.")'));
+        $this->assertCount(
+            1,
+            $crawler->filter('.uk-alert-danger p:contains("Could not parse domain definition JSON.")')
+        );
 
         // Submit invalid Domain definition.
         $form = $crawler->filter('form');
@@ -172,23 +191,35 @@ class DomainControllerTest extends DatabaseAwareTestCase
             "ROLE_FOO"
         ] }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => $this->organization->getIdentifier(),
-            'domain' => 'd1',
-        ])));
+        $this->assertTrue(
+            $this->client->getResponse()->isRedirect(
+                $this->container->get('router')->generate(
+                    'unitecms_core_domain_view',
+                    [
+                        'organization' => $this->organization->getIdentifier(),
+                        'domain' => 'd1',
+                    ]
+                )
+            )
+        );
         $crawler = $this->client->followRedirect();
 
         // make sure, that the domain was updated.
         $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll()[0];
-        $this->assertEquals([
-            'ROLE_PUBLIC',
-            'ROLE_EDITOR',
-            'ROLE_ADMINISTRATOR',
-            'ROLE_FOO',
-        ], $domain->getRoles());
+        $this->assertEquals(
+            [
+                'ROLE_PUBLIC',
+                'ROLE_EDITOR',
+                'ROLE_ADMINISTRATOR',
+                'ROLE_FOO',
+            ],
+            $domain->getRoles()
+        );
 
         // Click on domain delete.
-        $deleteButton = $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")');
+        $deleteButton = $crawler->filter(
+            'a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.trash').'")'
+        );
         $this->assertGreaterThanOrEqual(1, $deleteButton->count());
         $crawler = $this->client->click($deleteButton->first()->link());
 
@@ -203,11 +234,16 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("The CSRF token is invalid. Please try to resubmit the form.")'));
+        $this->assertCount(
+            1,
+            $crawler->filter('.uk-alert-danger:contains("The CSRF token is invalid. Please try to resubmit the form.")')
+        );
 
         // Test delete domain not allowed.
         $domainUser = new User();
-        $domainUser->setEmail('example@example.com')->setFirstname('Example')->setLastname('Example')->setPassword('XXX');
+        $domainUser->setEmail('example@example.com')->setFirstname('Example')->setLastname('Example')->setPassword(
+            'XXX'
+        );
         $domainUserOrg = new OrganizationMember();
         $domainUserOrg->setUser($domainUser)->setOrganization($domain->getOrganization());
         $domainUserDomain = new DomainMember();
@@ -235,16 +271,34 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->client->submit($form);
 
         // Assert redirect to index.
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
-        ])));
+        $this->assertTrue(
+            $this->client->getResponse()->isRedirect(
+                $this->container->get('router')->generate(
+                    'unitecms_core_domain_index',
+                    [
+                        'organization' => $this->organization->getIdentifier(),
+                    ]
+                )
+            )
+        );
         $this->client->followRedirect();
 
         // Assert domain was deleted.
         $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
     }
 
-    public function testCRUDActionsAsEditor() {
+    private function login(User $user)
+    {
+        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
+        $session = $this->client->getContainer()->get('session');
+        $session->set('_security_main', serialize($token));
+        $session->save();
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $this->client->getCookieJar()->set($cookie);
+    }
+
+    public function testCRUDActionsAsEditor()
+    {
 
         $this->login($this->editor);
 
@@ -258,16 +312,27 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->flush($domain);
 
         // List all domains.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
-        ]));
+        $crawler = $this->client->request(
+            'GET',
+            $this->container->get('router')->generate(
+                'unitecms_core_domain_index',
+                [
+                    'organization' => $this->organization->getIdentifier(),
+                ]
+            )
+        );
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // org editors are not automatically domain editors.
         $this->assertCount(0, $crawler->filter('a .uk-margin-small-right[data-feather="globe"]'));
 
         // Org editors are not allowed to add new domains.
-        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('organization.menu.domains.add') . '")'));
+        $this->assertCount(
+            0,
+            $crawler->filter(
+                'a:contains("'.$this->container->get('translator')->trans('organization.menu.domains.add').'")'
+            )
+        );
 
         // Add this editor to the domain as admin.
         $domainMember = new DomainMember();
@@ -284,26 +349,60 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->click($domainIcon->parents()->first()->link());
 
         // org editors are not allowed to edit domains.
-        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")'));
-        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));
-        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.user') .'")'));
-        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.api_clients') .'")'));
+        $this->assertCount(
+            0,
+            $crawler->filter(
+                'a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.update').'")'
+            )
+        );
+        $this->assertCount(
+            0,
+            $crawler->filter('a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.trash').'")')
+        );
+        $this->assertCount(
+            0,
+            $crawler->filter('a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.user').'")')
+        );
+        $this->assertCount(
+            0,
+            $crawler->filter(
+                'a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.api_clients').'")'
+            )
+        );
 
         // Make this domain member an domain administrator.
-        $domainMember = $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy([
-            'domain' => $domain,
-            'user' => $this->editor,
-        ]);
+        $domainMember = $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy(
+            [
+                'domain' => $domain,
+                'user' => $this->editor,
+            ]
+        );
         $domainMember->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR]);
         $this->em->flush($domainMember);
         $crawler = $this->client->reload();
 
         // org editors, that are domain admins are allowed to edit domain.
-        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")'));
-        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.user') .'")'));
-        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.api_clients') .'")'));
+        $this->assertCount(
+            1,
+            $crawler->filter(
+                'a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.update').'")'
+            )
+        );
+        $this->assertCount(
+            1,
+            $crawler->filter('a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.user').'")')
+        );
+        $this->assertCount(
+            1,
+            $crawler->filter(
+                'a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.api_clients').'")'
+            )
+        );
 
         // but are not allowed to delete the domain.
-        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));
+        $this->assertCount(
+            0,
+            $crawler->filter('a:contains("'.$this->container->get('translator')->trans('domain.menu.manage.trash').'")')
+        );
     }
 }

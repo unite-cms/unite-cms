@@ -15,22 +15,6 @@ use UniteCMS\CoreBundle\SchemaType\Types\AbstractType;
 class StorageFileType extends AbstractType
 {
     /**
-     * Define all fields of this type.
-     *
-     * @return array
-     */
-    protected function fields()
-    {
-        return [
-          'name' => Type::string(),
-          'size' => Type::int(),
-          'type' => Type::string(),
-          'id' => Type::id(),
-          'url' => Type::string(),
-        ];
-    }
-
-    /**
      * Resolve fields for this type.
      * Returns the object or scalar value for the field, define in $info.
      *
@@ -43,9 +27,28 @@ class StorageFileType extends AbstractType
      */
     protected function resolveField($value, array $args, $context, ResolveInfo $info)
     {
-        if(is_array($value) && array_key_exists($info->fieldName, $this->fields()) && isset($value[$info->fieldName])) {
+        if (is_array($value) && array_key_exists(
+                $info->fieldName,
+                $this->fields()
+            ) && isset($value[$info->fieldName])) {
             return $value[$info->fieldName];
         }
-        throw new \InvalidArgumentException('Unknown fieldName "' . $info->fieldName . '"');
+        throw new \InvalidArgumentException('Unknown fieldName "'.$info->fieldName.'"');
+    }
+
+    /**
+     * Define all fields of this type.
+     *
+     * @return array
+     */
+    protected function fields()
+    {
+        return [
+            'name' => Type::string(),
+            'size' => Type::int(),
+            'type' => Type::string(),
+            'id' => Type::id(),
+            'url' => Type::string(),
+        ];
     }
 }

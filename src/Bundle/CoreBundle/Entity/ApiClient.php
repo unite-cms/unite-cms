@@ -21,23 +21,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 class ApiClient implements UserInterface, \Serializable
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="bigint")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
-
-    /**
-     * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @ORM\Column(name="name", type="string", length=255)
-     */
-    private $name;
-
-    /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="180", maxMessage="validation.too_long")
@@ -45,7 +28,21 @@ class ApiClient implements UserInterface, \Serializable
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;
-
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="bigint")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+    /**
+     * @var string
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @ORM\Column(name="name", type="string", length=255)
+     */
+    private $name;
     /**
      * @var \DateTime $created
      *
@@ -83,19 +80,39 @@ class ApiClient implements UserInterface, \Serializable
         return [];
     }
 
+    /**
+     * @return Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param Domain
+     *
+     * @return ApiClient
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+
+        return $this;
+    }
+
     public function __toString()
     {
         return ''.$this->getName();
     }
 
     /**
-     * Get id
+     * Get name
      *
-     * @return int
+     * @return string
      */
-    public function getId()
+    public function getName()
     {
-        return $this->id;
+        return $this->name;
     }
 
     /**
@@ -113,24 +130,13 @@ class ApiClient implements UserInterface, \Serializable
     }
 
     /**
-     * Get name
+     * Get id
      *
-     * @return string
+     * @return int
      */
-    public function getName()
+    public function getId()
     {
-        return $this->name;
-    }
-
-    /**
-     * @param array $roles
-     *
-     * @return ApiClient
-     */
-    public function setRoles(array $roles)
-    {
-        $this->roles = $roles;
-        return $this;
+        return $this->id;
     }
 
     /**
@@ -141,6 +147,18 @@ class ApiClient implements UserInterface, \Serializable
     public function getRoles()
     {
         return $this->roles;
+    }
+
+    /**
+     * @param array $roles
+     *
+     * @return ApiClient
+     */
+    public function setRoles(array $roles)
+    {
+        $this->roles = $roles;
+
+        return $this;
     }
 
     /**
@@ -224,26 +242,6 @@ class ApiClient implements UserInterface, \Serializable
             $this->roles,
             $this->domain,
             ) = unserialize($serialized);
-    }
-
-    /**
-     * @return Domain
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
-
-    /**
-     * @param Domain
-     *
-     * @return ApiClient
-     */
-    public function setDomain($domain)
-    {
-        $this->domain = $domain;
-
-        return $this;
     }
 
     /**

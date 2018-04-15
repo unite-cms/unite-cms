@@ -18,14 +18,17 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
 {
     private $validDomain = '{ "title": "Test controller access check domain", "identifier": "access_check", "content_types": [{"title": "CT 1", "identifier": "ct1"}], "setting_types": [{"title": "ST 1", "identifier": "st1"}] }';
 
-    public function testCreateOrganizationCommand() {
+    public function testCreateOrganizationCommand()
+    {
 
         $application = new Application(self::$kernel);
-        $application->add(new CreateDomainCommand(
-            $this->container->get('doctrine.orm.default_entity_manager'),
-            $this->container->get('validator'),
-            $this->container->get('unite.cms.domain_definition_parser')
-        ));
+        $application->add(
+            new CreateDomainCommand(
+                $this->container->get('doctrine.orm.default_entity_manager'),
+                $this->container->get('validator'),
+                $this->container->get('unite.cms.domain_definition_parser')
+            )
+        );
 
         $command = $application->find('unite:domain:create');
         $commandTester = new CommandTester($command);

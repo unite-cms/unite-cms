@@ -41,21 +41,19 @@ class DeletedContentVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
-        if(!$subject instanceof Content) {
+        if (!$subject instanceof Content) {
             return self::ACCESS_ABSTAIN;
         }
 
         // This voter can decide on a Content subject for APIClients of the same domain.
         if ($token->getUser() instanceof ApiClient) {
 
-            if($subject->getContentType()->getDomain()->getId() !== $token->getUser()->getDomain()->getId()) {
+            if ($subject->getContentType()->getDomain()->getId() !== $token->getUser()->getDomain()->getId()) {
                 return self::ACCESS_ABSTAIN;
             }
 
             $roles = $token->getRoles();
-        }
-
-        // If the token is not an ApiClient it must be an User.
+        } // If the token is not an ApiClient it must be an User.
         elseif ($token->getUser() instanceof User) {
             $roles = $token->getUser()->getDomainRoles($subject->getContentType()->getDomain());
 
@@ -68,14 +66,13 @@ class DeletedContentVoter extends Voter
             foreach ($token->getUser()->getOrganizations() as $organizationMember) {
                 if (in_array(Organization::ROLE_ADMINISTRATOR, $organizationMember->getRoles())) {
 
-                    if ($subject->getContentType()->getDomain()->getOrganization()->getId() === $organizationMember->getOrganization()->getId()) {
+                    if ($subject->getContentType()->getDomain()->getOrganization()->getId(
+                        ) === $organizationMember->getOrganization()->getId()) {
                         return self::ACCESS_GRANTED;
                     }
                 }
             }
-        }
-
-        else {
+        } else {
             return self::ACCESS_ABSTAIN;
         }
 

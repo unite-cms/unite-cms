@@ -1,29 +1,33 @@
 {
-    "name": "unite-cms/storage-bundle",
-    "type": "symfony-bundle",
-    "description": "Provides fields and views for managing files and images in a S3 storage.",
-    "require": {
-        "unite-cms/core-bundle": "0@dev",
-        "aws/aws-sdk-php": "^3.52",
-        "ramsey/uuid": "^3.7"
+  "name": "unite-cms/storage-bundle",
+  "type": "symfony-bundle",
+  "description": "Provides fields and views for managing files and images in a S3 storage.",
+  "require": {
+    "unite-cms/core-bundle": "0@dev",
+    "aws/aws-sdk-php": "^3.52",
+    "ramsey/uuid": "^3.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "UniteCMS\\StorageBundle\\": ""
     },
-    "autoload": {
-        "psr-4": { "UniteCMS\\StorageBundle\\": "" },
-        "exclude-from-classmap": [
-            "/Tests/"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": { "Tests\\app\\": "Tests/app/" }
-    },
-    "authors": [
-        {
-            "name": "Franz Wilding",
-            "email": "franz@unite.co.at"
-        },
-        {
-            "name": "Stefan Kamsker",
-            "email": "stefan@unite.co.at"
-        }
+    "exclude-from-classmap": [
+      "/Tests/"
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\app\\": "Tests/app/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Franz Wilding",
+      "email": "franz@unite.co.at"
+    },
+    {
+      "name": "Stefan Kamsker",
+      "email": "stefan@unite.co.at"
+    }
+  ]
 }

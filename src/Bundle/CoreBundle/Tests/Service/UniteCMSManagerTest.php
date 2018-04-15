@@ -77,53 +77,68 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $this->em->refresh($this->domain);
     }
 
-    public function testGettingOrgAndDomainWithoutRequest() {
+    public function testGettingOrgAndDomainWithoutRequest()
+    {
         // cms manager should silently return null if it could not find an organization or domain
         $this->assertNull($this->container->get('unite.cms.manager')->getOrganization());
         $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
 
-        $this->container->get('request_stack')->push(new Request(
-            [], [], [
-                'organization' => 'foo',
-                'domain' => 'baa',
-            ]
-        ));
+        $this->container->get('request_stack')->push(
+            new Request(
+                [], [], [
+                    'organization' => 'foo',
+                    'domain' => 'baa',
+                ]
+            )
+        );
     }
 
-    public function testGettingOrgAndDomainWithInvalidOrganizationIdentifier() {
-        $this->container->get('request_stack')->push(new Request(
-            [], [], [
-                'organization' => 'foo',
-                'domain' => 'baa',
-            ]
-        ));
+    public function testGettingOrgAndDomainWithInvalidOrganizationIdentifier()
+    {
+        $this->container->get('request_stack')->push(
+            new Request(
+                [], [], [
+                    'organization' => 'foo',
+                    'domain' => 'baa',
+                ]
+            )
+        );
         $this->assertNull($this->container->get('unite.cms.manager')->getOrganization());
         $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
     }
 
-    public function testGettingOrgAndDomainWithInvalidDomainIdentifier() {
-        $this->container->get('request_stack')->push(new Request(
-            [], [], [
-                'organization' => $this->organization,
-                'domain' => 'baa',
-            ]
-        ));
-        $this->assertEquals($this->organization->getIdentifier(), $this->container->get('unite.cms.manager')->getOrganization()->getIdentifier());
+    public function testGettingOrgAndDomainWithInvalidDomainIdentifier()
+    {
+        $this->container->get('request_stack')->push(
+            new Request(
+                [], [], [
+                    'organization' => $this->organization,
+                    'domain' => 'baa',
+                ]
+            )
+        );
+        $this->assertEquals(
+            $this->organization->getIdentifier(),
+            $this->container->get('unite.cms.manager')->getOrganization()->getIdentifier()
+        );
         $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
     }
 
-    public function testGettingOriginalDomainFromManager() {
+    public function testGettingOriginalDomainFromManager()
+    {
 
         $title = $this->domain->getTitle();
         $cTitle = $this->domain->getContentTypes()->first()->getTitle();
         $sTitle = $this->domain->getSettingTypes()->first()->getTitle();
 
-        $this->container->get('request_stack')->push(new Request(
-            [], [], [
-                'organization' => $this->organization,
-                'domain' => $this->domain,
-            ]
-        ));
+        $this->container->get('request_stack')->push(
+            new Request(
+                [], [], [
+                    'organization' => $this->organization,
+                    'domain' => $this->domain,
+                ]
+            )
+        );
         $originalDomain = $this->container->get('unite.cms.manager')->getDomain();
 
         // Change domain and content type title on loaded domain
@@ -141,11 +156,18 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $this->assertEquals($sTitle, $originalDomain->getSettingTypes()->first()->getTitle());
 
         $this->assertEquals($this->organization->getId(), $originalDomain->getOrganization()->getId());
-        $this->assertEquals($this->domain->getContentTypes()->first()->getId(), $originalDomain->getContentTypes()->first()->getId());
-        $this->assertEquals($this->domain->getSettingTypes()->first()->getId(), $originalDomain->getSettingTypes()->first()->getId());
+        $this->assertEquals(
+            $this->domain->getContentTypes()->first()->getId(),
+            $originalDomain->getContentTypes()->first()->getId()
+        );
+        $this->assertEquals(
+            $this->domain->getSettingTypes()->first()->getId(),
+            $originalDomain->getSettingTypes()->first()->getId()
+        );
     }
 
-    public function testTryingToUpdateShouldNotWork() {
+    public function testTryingToUpdateShouldNotWork()
+    {
 
         $oTitle = $this->organization->getTitle();
         $dTitle = $this->domain->getTitle();
@@ -162,12 +184,14 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
 
         $uEmail = $user->getEmail();
 
-        $this->container->get('request_stack')->push(new Request(
-            [], [], [
-                'organization' => $this->organization,
-                'domain' => $this->domain,
-            ]
-        ));
+        $this->container->get('request_stack')->push(
+            new Request(
+                [], [], [
+                    'organization' => $this->organization,
+                    'domain' => $this->domain,
+                ]
+            )
+        );
         $originalOrganization = $this->container->get('unite.cms.manager')->getOrganization();
         $originalDomain = $this->container->get('unite.cms.manager')->getDomain();
 
@@ -195,7 +219,6 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
 
         $this->em->refresh($this->domain->getContentTypes()->first());
         $this->assertEquals($cTitle, $this->domain->getContentTypes()->first()->getTitle());
-
 
 
         $originalDomain->getSettingTypes()->first()->setTitle('new Title');

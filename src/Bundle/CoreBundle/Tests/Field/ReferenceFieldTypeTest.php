@@ -21,7 +21,8 @@ use UniteCMS\CoreBundle\View\ViewParameterBag;
 
 class ReferenceFieldTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings() {
+    public function testContentTypeFieldTypeWithEmptySettings()
+    {
 
         // Content Type Field with empty settings should not be valid.
         $ctField = $this->createContentTypeField('reference');
@@ -33,39 +34,50 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $this->assertContains('settings.content_type', $errors->get(1)->getPropertyPath());
     }
 
-    public function testContentTypeFieldTypeWithInvalidSettings() {
+    public function testContentTypeFieldTypeWithInvalidSettings()
+    {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('reference');
-        $ctField->setSettings(new FieldableFieldSettings([
-            'domain' => 'foo',
-            'content_type' => 'baa',
-            'view' => 'foo',
-            'content_label' => 'laa',
-            'foo' => 'baa'
-        ]));
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => 'foo',
+                    'content_type' => 'baa',
+                    'view' => 'foo',
+                    'content_label' => 'laa',
+                    'foo' => 'baa',
+                ]
+            )
+        );
 
         $errors = $this->container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
     }
 
-    public function testContentTypeFieldTypeWithValidSettings() {
+    public function testContentTypeFieldTypeWithValidSettings()
+    {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('reference');
-        $ctField->setSettings(new FieldableFieldSettings([
-            'domain' => 'foo',
-            'content_type' => 'baa',
-            'view' => 'foo',
-            'content_label' => 'laa',
-        ]));
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => 'foo',
+                    'content_type' => 'baa',
+                    'view' => 'foo',
+                    'content_label' => 'laa',
+                ]
+            )
+        );
 
         $errors = $this->container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
     }
 
-    public function testContentTypeFieldContentLabelFallback() {
+    public function testContentTypeFieldContentLabelFallback()
+    {
 
         $ctField = $this->createContentTypeField('reference');
         $ctField->getContentType()->getDomain()->setIdentifier('foo');
@@ -76,75 +88,101 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
         $o1->setAccessible(true);
-        $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
+        $authMock = $this->createMock(AuthorizationCheckerInterface::class);
         $authMock->expects($this->any())->method('isGranted')->willReturn(true);
         $o1->setValue($fieldType, $authMock);
 
         $o2 = new \ReflectionProperty($fieldType, 'uniteCMSManager');
         $o2->setAccessible(true);
         $cmsManager = $this->createMock(UniteCMSManager::class);
-        $cmsManager->expects($this->any())->method('getOrganization')->willReturn($ctField->getContentType()->getDomain()->getOrganization());
+        $cmsManager->expects($this->any())->method('getOrganization')->willReturn(
+            $ctField->getContentType()->getDomain()->getOrganization()
+        );
         $cmsManager->expects($this->any())->method('getDomain')->willReturn($ctField->getContentType()->getDomain());
         $o2->setValue($fieldType, $cmsManager);
 
         $o3 = new \ReflectionProperty($fieldType, 'entityManager');
         $o3->setAccessible(true);
         $viewRepositoryMock = $this->createMock(EntityRepository::class);
-        $viewRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getView('all'));
+        $viewRepositoryMock->expects($this->any())->method('findOneBy')->willReturn(
+            $ctField->getContentType()->getView('all')
+        );
         $domainRepositoryMock = $this->createMock(EntityRepository::class);
-        $domainRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getDomain());
+        $domainRepositoryMock->expects($this->any())->method('findOneBy')->willReturn(
+            $ctField->getContentType()->getDomain()
+        );
 
         $cmsManager = $this->createMock(EntityManager::class);
-        $cmsManager->expects($this->any())->method('getRepository')->will($this->returnValueMap([
-            ['UniteCMSCoreBundle:View', $viewRepositoryMock],
-            ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
-        ]));
+        $cmsManager->expects($this->any())->method('getRepository')->will(
+            $this->returnValueMap(
+                [
+                    ['UniteCMSCoreBundle:View', $viewRepositoryMock],
+                    ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
+                ]
+            )
+        );
         $o3->setValue($fieldType, $cmsManager);
-
 
 
         // No content_label fallback and no content_label set.
         $ctField->getContentType()->setContentLabel('');
-        $ctField->setSettings(new FieldableFieldSettings([
-            'domain' => 'foo',
-            'content_type' => 'baa',
-            'view' => 'all',
-        ]));
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => 'foo',
+                    'content_type' => 'baa',
+                    'view' => 'all',
+                ]
+            )
+        );
 
         $options = $fieldType->getFormOptions($ctField);
-        $this->assertEquals((string)$ctField->getContentType() . ' #{id}', $options['attr']['content-label']);
+        $this->assertEquals((string)$ctField->getContentType().' #{id}', $options['attr']['content-label']);
 
         // No content_label empty and fallback present
         $ctField->getContentType()->setContentLabel('foo');
-        $ctField->setSettings(new FieldableFieldSettings([
-            'domain' => 'foo',
-            'content_type' => 'baa',
-            'view' => 'all',
-        ]));
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => 'foo',
+                    'content_type' => 'baa',
+                    'view' => 'all',
+                ]
+            )
+        );
 
         $options = $fieldType->getFormOptions($ctField);
         $this->assertEquals('foo', $options['attr']['content-label']);
 
         // content_label present and fallback present
         $ctField->getContentType()->setContentLabel('foo');
-        $ctField->setSettings(new FieldableFieldSettings([
-            'domain' => 'foo',
-            'content_type' => 'baa',
-            'content_label' => 'baa',
-            'view' => 'all',
-        ]));
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => 'foo',
+                    'content_type' => 'baa',
+                    'content_label' => 'baa',
+                    'view' => 'all',
+                ]
+            )
+        );
 
         $options = $fieldType->getFormOptions($ctField);
         $this->assertEquals('baa', $options['attr']['content-label']);
     }
 
-    public function testReferenceToAnotherDomain() {
+    public function testReferenceToAnotherDomain()
+    {
 
         $ctField = $this->createContentTypeField('reference');
-        $ctField->setSettings(new FieldableFieldSettings([
-            'domain' => 'domain2',
-            'content_type' => 'ct2',
-        ]));
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => 'domain2',
+                    'content_type' => 'ct2',
+                ]
+            )
+        );
         $ctField->getContentType()->setIdentifier('ct1');
         $ctField->getContentType()->getDomain()->getContentTypes()->clear();
         $ctField->getContentType()->getDomain()->addContentType($ctField->getContentType());
@@ -164,10 +202,14 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         // Inject current domain and org in unite.cms.manager.
         $requestStack = new RequestStack();
-        $requestStack->push(new Request([], [], [
-            'organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier(),
-            'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
-        ]));
+        $requestStack->push(
+            new Request(
+                [], [], [
+                    'organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                    'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+                ]
+            )
+        );
 
         $user = new User();
         $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
@@ -177,7 +219,9 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $userInDomain2 = new DomainMember();
         $userInDomain2->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($domain2);
         $user->addDomain($userInDomain2);
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'main', $user->getRoles()));
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, null, 'main', $user->getRoles())
+        );
 
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
@@ -188,7 +232,9 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $reflector->invoke($this->container->get('unite.cms.manager'));
 
         $contentSchemaType = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
-            ucfirst($ctField->getContentType()->getIdentifier()) . 'Content', $ctField->getContentType()->getDomain());
+            ucfirst($ctField->getContentType()->getIdentifier()).'Content',
+            $ctField->getContentType()->getDomain()
+        );
 
         // If we can get reach this line, no exceptions where thrown during content schema creation.
         $this->assertTrue(true);

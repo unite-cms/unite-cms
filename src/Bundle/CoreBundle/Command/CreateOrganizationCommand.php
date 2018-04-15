@@ -79,7 +79,7 @@ class CreateOrganizationCommand extends Command
         }
 
         $errors = $this->validator->validate($organization);
-        if(count($errors) > 0) {
+        if (count($errors) > 0) {
             $output->writeln("<error>\n\nThere was an error while creating the organization\n \n$errors\n</error>");
         } else {
             $this->em->persist($organization);

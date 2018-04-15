@@ -31,11 +31,11 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
     {
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
 
-        if(count($nameParts) !== 3) {
+        if (count($nameParts) !== 3) {
             return false;
         }
 
-        if($nameParts[1] !== 'Content' && $nameParts[2] !== 'Result') {
+        if ($nameParts[1] !== 'Content' && $nameParts[2] !== 'Result') {
             return false;
         }
 
@@ -50,10 +50,16 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-    {
-        if(!$domain) {
-            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory::createSchemaType needs an domain as second argument');
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        int $nestingLevel,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
+        if (!$domain) {
+            throw new \InvalidArgumentException(
+                'UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory::createSchemaType needs an domain as second argument'
+            );
         }
 
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
@@ -73,9 +79,10 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
             $this->authorizationChecker,
             null,
             $domain,
-            ucfirst($identifier) . 'Content'
+            ucfirst($identifier).'Content'
         );
-        $type->name = ucfirst($identifier) . 'ContentResult';
+        $type->name = ucfirst($identifier).'ContentResult';
+
         return $type;
     }
 }

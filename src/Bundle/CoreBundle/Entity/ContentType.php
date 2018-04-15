@@ -160,11 +160,6 @@ class ContentType implements Fieldable
         $this->addDefaultPermissions();
     }
 
-    public function __toString()
-    {
-        return ''.$this->title;
-    }
-
     /**
      * Each ContentType must have a "all" view. This function adds it to the ArrayCollection.
      */
@@ -178,6 +173,21 @@ class ContentType implements Fieldable
         $this->addView($defaultView);
     }
 
+    /**
+     * @param View $view
+     *
+     * @return ContentType
+     */
+    public function addView(View $view)
+    {
+        if (!$this->views->containsKey($view->getIdentifier())) {
+            $this->views->set($view->getIdentifier(), $view);
+            $view->setContentType($this);
+        }
+
+        return $this;
+    }
+
     private function addDefaultPermissions()
     {
         $this->permissions[ContentVoter::VIEW] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
@@ -187,6 +197,11 @@ class ContentType implements Fieldable
         $this->permissions[ContentVoter::DELETE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
     }
 
+    public function __toString()
+    {
+        return ''.$this->title;
+    }
+
     public function allowedPermissionRoles(): array
     {
         if ($this->getDomain()) {
@@ -194,6 +209,27 @@ class ContentType implements Fieldable
         }
 
         return [];
+    }
+
+    /**
+     * @return Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param Domain $domain
+     *
+     * @return ContentType
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+        $domain->addContentType($this);
+
+        return $this;
     }
 
     public function allowedPermissionKeys(): array
@@ -263,27 +299,13 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Set id
+     * Get title
      *
-     * @param $id
-     *
-     * @return ContentType
+     * @return string
      */
-    public function setId($id)
+    public function getTitle()
     {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -301,13 +323,13 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -325,37 +347,32 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get identifier
-     *
-     * @return string
+     * @return int
      */
-    public function getIdentifier()
+    public function getWeight(): int
     {
-        return $this->identifier;
+        return $this->weight;
     }
 
     /**
-     * Set description
-     *
-     * @param string $description
-     *
+     * @param int $weight
      * @return ContentType
      */
-    public function setDescription($description)
+    public function setWeight($weight)
     {
-        $this->description = $description;
+        $this->weight = $weight;
 
         return $this;
     }
 
     /**
-     * Get description
+     * Get icon
      *
      * @return string
      */
-    public function getDescription()
+    public function getIcon()
     {
-        return $this->description;
+        return $this->icon;
     }
 
     /**
@@ -373,13 +390,11 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get icon
-     *
      * @return string
      */
-    public function getIcon()
+    public function getContentLabel()
     {
-        return $this->icon;
+        return $this->contentLabel;
     }
 
     /**
@@ -395,30 +410,70 @@ class ContentType implements Fieldable
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getContentLabel()
+    public function getPermissions()
     {
-        return $this->contentLabel;
+        return $this->permissions;
     }
 
     /**
-     * @return Domain
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
-
-    /**
-     * @param Domain $domain
+     * @param array $permissions
      *
      * @return ContentType
      */
-    public function setDomain($domain)
+    public function setPermissions($permissions)
     {
-        $this->domain = $domain;
-        $domain->addContentType($this);
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        foreach ($permissions as $attribute => $roles) {
+            $this->addPermission($attribute, $roles);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return ContentType
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLocales(): array
+    {
+        return $this->locales ?? [];
+    }
+
+    /**
+     * @param array $locales
+     *
+     * @return ContentType
+     */
+    public function setLocales(array $locales)
+    {
+        $this->locales = $locales;
 
         return $this;
     }
@@ -475,21 +530,6 @@ class ContentType implements Fieldable
     }
 
     /**
-     * @param $key
-     * @return View
-     */
-    public function getView($key)
-    {
-        foreach ($this->getViews() as $view) {
-            if ($view->getIdentifier() === $key) {
-                return $view;
-            }
-        }
-
-        throw new \InvalidArgumentException("View with key '$key' was not found.");
-    }
-
-    /**
      * @param View[]|ArrayCollection $views
      *
      * @return ContentType
@@ -518,87 +558,47 @@ class ContentType implements Fieldable
     }
 
     /**
-     * @param View $view
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
      *
      * @return ContentType
      */
-    public function addView(View $view)
+    public function setId($id)
     {
-        if (!$this->views->containsKey($view->getIdentifier())) {
-            $this->views->set($view->getIdentifier(), $view);
-            $view->setContentType($this);
-        }
+        $this->id = $id;
 
         return $this;
     }
 
     /**
-     * @return array
+     * @param $key
+     * @return View
      */
-    public function getPermissions()
+    public function getView($key)
     {
-        return $this->permissions;
-    }
-
-    /**
-     * @param array $permissions
-     *
-     * @return ContentType
-     */
-    public function setPermissions($permissions)
-    {
-        $this->permissions = [];
-        $this->addDefaultPermissions();
-
-        foreach ($permissions as $attribute => $roles) {
-            $this->addPermission($attribute, $roles);
+        foreach ($this->getViews() as $view) {
+            if ($view->getIdentifier() === $key) {
+                return $view;
+            }
         }
 
-        return $this;
+        throw new \InvalidArgumentException("View with key '$key' was not found.");
     }
 
     public function addPermission($attribute, array $roles)
     {
         $this->permissions[$attribute] = $roles;
-    }
-
-    /**
-     * @return array
-     */
-    public function getLocales(): array
-    {
-        return $this->locales ?? [];
-    }
-
-    /**
-     * @param array $locales
-     *
-     * @return ContentType
-     */
-    public function setLocales(array $locales)
-    {
-        $this->locales = $locales;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getWeight(): int
-    {
-        return $this->weight;
-    }
-
-    /**
-     * @param int $weight
-     * @return ContentType
-     */
-    public function setWeight($weight)
-    {
-        $this->weight = $weight;
-
-        return $this;
     }
 
     /**
@@ -612,21 +612,24 @@ class ContentType implements Fieldable
     /**
      * {@inheritdoc}
      */
-    public function getRootEntity() : Fieldable {
+    public function getRootEntity(): Fieldable
+    {
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getIdentifierPath($delimiter = '/') {
+    public function getIdentifierPath($delimiter = '/')
+    {
         return $this->getIdentifier();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getParentEntity() {
+    public function getParentEntity()
+    {
         return null;
     }
 }

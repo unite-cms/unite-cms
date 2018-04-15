@@ -82,6 +82,14 @@ class Setting implements FieldableContent
     }
 
     /**
+     * @return SettingType
+     */
+    public function getSettingType()
+    {
+        return $this->settingType;
+    }
+
+    /**
      * @param SettingType $settingType
      *
      * @return Setting
@@ -92,14 +100,6 @@ class Setting implements FieldableContent
         $settingType->addSetting($this);
 
         return $this;
-    }
-
-    /**
-     * @return SettingType
-     */
-    public function getSettingType()
-    {
-        return $this->settingType;
     }
 
     /**
@@ -123,6 +123,16 @@ class Setting implements FieldableContent
     }
 
     /**
+     * Get data
+     *
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
      * Set data
      *
      * @param array $data
@@ -134,16 +144,6 @@ class Setting implements FieldableContent
         $this->data = $data;
 
         return $this;
-    }
-
-    /**
-     * Get data
-     *
-     * @return array
-     */
-    public function getData() : array
-    {
-        return $this->data;
     }
 }
 

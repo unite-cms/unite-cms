@@ -36,8 +36,11 @@ class CreatePlatformAdminCommand extends Command
     /**
      * {@inheritdoc}
      */
-    public function __construct(EntityManager $em, ValidatorInterface $validator, UserPasswordEncoderInterface $password_encoder)
-    {
+    public function __construct(
+        EntityManager $em,
+        ValidatorInterface $validator,
+        UserPasswordEncoderInterface $password_encoder
+    ) {
         $this->em = $em;
         $this->validator = $validator;
         $this->password_encoder = $password_encoder;
@@ -49,8 +52,9 @@ class CreatePlatformAdminCommand extends Command
      * This function can be called to disable hiding of the password input. This can be useful if this feature is not
      * supported (for example for phpunit tests this can be the case).
      */
-    public function disableHidePasswordInput() {
-       $this->hidePasswordInput = false;
+    public function disableHidePasswordInput()
+    {
+        $this->hidePasswordInput = false;
     }
 
     /**
@@ -92,15 +96,18 @@ class CreatePlatformAdminCommand extends Command
             ->setEmail($email)
             ->setRoles([User::ROLE_PLATFORM_ADMIN]);
 
-        $user->setPassword($this->password_encoder->encodePassword(
-            $user,
-            $password
-        ));
+        $user->setPassword(
+            $this->password_encoder->encodePassword(
+                $user,
+                $password
+            )
+        );
 
-        $password = NULL;
+        $password = null;
 
         $question = new ConfirmationQuestion(
-            '<info>Should the user "' . $user->getFirstname() . ' ' . $user->getFirstname() . '" with email "' . $user->getEmail() . '" be created</info>? [<comment>Y/n</comment>] ',
+            '<info>Should the user "'.$user->getFirstname().' '.$user->getFirstname().'" with email "'.$user->getEmail(
+            ).'" be created</info>? [<comment>Y/n</comment>] ',
             true,
             '/^(y|j)/i'
         );
@@ -110,7 +117,7 @@ class CreatePlatformAdminCommand extends Command
         }
 
         $errors = $this->validator->validate($user);
-        if(count($errors) == 0) {
+        if (count($errors) == 0) {
             $this->em->persist($user);
             $this->em->flush();
             $output->writeln('<info>Platform Admin was created!</info>');

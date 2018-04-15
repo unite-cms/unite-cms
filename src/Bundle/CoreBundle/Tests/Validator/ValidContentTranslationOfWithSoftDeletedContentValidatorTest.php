@@ -12,7 +12,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 class ValidContentTranslationOfWithSoftDeletedContentValidatorTest extends DatabaseAwareTestCase
 {
 
-    public function testSoftDeletedValue() {
+    public function testSoftDeletedValue()
+    {
 
         $org = new Organization();
         $org->setIdentifier('any')->setTitle('any');

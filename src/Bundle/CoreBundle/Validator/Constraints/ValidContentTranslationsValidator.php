@@ -13,11 +13,11 @@ class ValidContentTranslationsValidator extends ConstraintValidator
 {
     public function validate($value, Constraint $constraint)
     {
-        if($this->context->getObject() == null) {
+        if ($this->context->getObject() == null) {
             return;
         }
 
-        if($value == null) {
+        if ($value == null) {
             return;
         }
 
@@ -27,7 +27,7 @@ class ValidContentTranslationsValidator extends ConstraintValidator
             );
         }
 
-        if(is_array($value)) {
+        if (is_array($value)) {
             $value = new ArrayCollection($value);
         }
 
@@ -43,10 +43,14 @@ class ValidContentTranslationsValidator extends ConstraintValidator
         $content = $this->context->getObject();
 
         // There cannot be a duplicated locale in the translations.
-        $found_locales = $value->map(function(Content $content){ return $content->getLocale(); })->toArray();
+        $found_locales = $value->map(
+            function (Content $content) {
+                return $content->getLocale();
+            }
+        )->toArray();
         $found_locales[] = $content->getLocale();
 
-        if(count(array_unique($found_locales)) < count($found_locales)) {
+        if (count(array_unique($found_locales)) < count($found_locales)) {
             $this->context->buildViolation($constraint->uniqueLocaleMessage)
                 ->setInvalidValue(null)
                 ->atPath('[translations]')
@@ -54,10 +58,9 @@ class ValidContentTranslationsValidator extends ConstraintValidator
         }
 
 
-
         // Translations cannot have other translations and their translationOf must be this content.
-        foreach($value as $translation) {
-            if($translation->getTranslations()->count() > 0 || $translation->getTranslationOf() != $content) {
+        foreach ($value as $translation) {
+            if ($translation->getTranslations()->count() > 0 || $translation->getTranslationOf() != $content) {
                 $this->context->buildViolation($constraint->nestedTranslationMessage)
                     ->setInvalidValue(null)
                     ->atPath('[translations]')

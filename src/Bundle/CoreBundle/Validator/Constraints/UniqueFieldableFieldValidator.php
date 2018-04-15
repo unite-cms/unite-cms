@@ -20,7 +20,7 @@ class UniqueFieldableFieldValidator extends ConstraintValidator
             );
         }
 
-        if($value->getEntity()) {
+        if ($value->getEntity()) {
             $identifier = $value->getIdentifier();
             foreach ($value->getEntity()->getFields() as $field) {
                 if ($field->getIdentifier() == $identifier && $field !== $value) {

@@ -52,11 +52,122 @@ class GraphQLDoctrineFilterQueryBuilder
     }
 
     /**
+     * Build the nested doctrine filter object.
+     *
+     * @param array $filterInput
+     * @return Andx|Comparison|Orx|string
+     * @throws QueryException
+     */
+    private function getQueryBuilderComposite(array $filterInput)
+    {
+
+        // filterInput can contain AND, OR or a direct expression
+
+        if (!empty($filterInput['AND'])) {
+
+            $filters = [];
+            foreach ($filterInput['AND'] as $filter) {
+
+                if (!is_array($filter)) {
+                    throw new \InvalidArgumentException('AND operator expects an array of filters.');
+                }
+
+                $filters[] = $this->getQueryBuilderComposite($filter);
+            }
+
+            return new Andx($filters);
+        } else {
+            if (!empty($filterInput['OR'])) {
+
+                $filters = [];
+                foreach ($filterInput['OR'] as $filter) {
+
+                    if (!is_array($filter)) {
+                        throw new \InvalidArgumentException('OR operator expects an array of filters.');
+                    }
+
+                    $filters[] = $this->getQueryBuilderComposite($filter);
+                }
+
+                return new Orx($filters);
+            } else {
+                if (!empty($filterInput['operator']) && !empty($filterInput['field'])) {
+
+                    $rightSide = null;
+                    $parameter_name = null;
+
+                    if (!empty($filterInput['value']) && !in_array(
+                            $filterInput['operator'],
+                            ['IS NULL', 'IS NOT NULL']
+                        )) {
+                        $this->parameterCount++;
+                        $parameter_name = 'graphql_filter_builder_parameter'.$this->parameterCount;
+                        $this->parameters[$parameter_name] = $filterInput['value'];
+                        $rightSide = ':'.$parameter_name;
+                    }
+
+                    // if we filter by a content field.
+                    if (in_array($filterInput['field'], $this->contentEntityFields)) {
+                        $leftSide = $this->contentEntityPrefix.'.'.$filterInput['field'];
+
+                        // if we filter by a nested content data field.
+                    } else {
+                        $leftSide = "JSON_EXTRACT(".$this->contentEntityPrefix.".data, '$.".$filterInput['field']."')";
+                    }
+
+
+                    // Support for special Operator, using ex Expr builder. This should be extended in the future.
+                    switch ($filterInput['operator']) {
+                        case 'IS NULL':
+                            return $this->expr->isNull($leftSide);
+                        case 'IS NOT NULL':
+                            return $this->expr->isNotNull($leftSide);
+                        case 'LIKE':
+                            return $this->expr->like($leftSide, $rightSide);
+                        default:
+                            if (in_array(
+                                $filterInput['operator'],
+                                [
+                                    Comparison::EQ,
+                                    Comparison::GT,
+                                    Comparison::GTE,
+                                    Comparison::LT,
+                                    Comparison::LTE,
+                                    Comparison::NEQ,
+                                ]
+                            )) {
+                                return new Comparison($leftSide, $filterInput['operator'], $rightSide);
+                            } else {
+                                $expected = join(
+                                    ',',
+                                    [
+                                        Comparison::EQ,
+                                        Comparison::GT,
+                                        Comparison::GTE,
+                                        Comparison::LT,
+                                        Comparison::LTE,
+                                        Comparison::NEQ,
+                                    ]
+                                );
+                                throw QueryException::syntaxError(
+                                    "Invalid filter operator. Expected one of '{$expected}', got '".$filterInput['operator']."'"
+                                );
+                            }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Returns the doctrine filter object.
      *
      * @return Comparison|Orx|Andx|string|null
      */
-    public function getFilter() {
+    public function getFilter()
+    {
         return $this->filter;
     }
 
@@ -65,87 +176,9 @@ class GraphQLDoctrineFilterQueryBuilder
      *
      * @return string[]
      */
-    public function getParameters() {
+    public function getParameters()
+    {
         return $this->parameters;
-    }
-
-    /**
-     * Build the nested doctrine filter object.
-     *
-     * @param array $filterInput
-     * @return Andx|Comparison|Orx|string
-     * @throws QueryException
-     */
-    private function getQueryBuilderComposite(array $filterInput) {
-
-        // filterInput can contain AND, OR or a direct expression
-
-        if(!empty($filterInput['AND'])) {
-
-            $filters = [];
-            foreach($filterInput['AND'] as $filter) {
-
-                if(!is_array($filter)) {
-                    throw new \InvalidArgumentException('AND operator expects an array of filters.');
-                }
-
-                $filters[] = $this->getQueryBuilderComposite($filter);
-            }
-            return new Andx($filters);
-        }
-
-        else if(!empty($filterInput['OR'])) {
-
-            $filters = [];
-            foreach($filterInput['OR'] as $filter) {
-
-                if(!is_array($filter)) {
-                    throw new \InvalidArgumentException('OR operator expects an array of filters.');
-                }
-
-                $filters[] = $this->getQueryBuilderComposite($filter);
-            }
-            return new Orx($filters);
-        }
-
-        else if(!empty($filterInput['operator']) && !empty($filterInput['field'])) {
-
-            $rightSide = null;
-            $parameter_name = null;
-
-            if(!empty($filterInput['value']) && !in_array($filterInput['operator'], ['IS NULL', 'IS NOT NULL'])) {
-                $this->parameterCount++;
-                $parameter_name = 'graphql_filter_builder_parameter' . $this->parameterCount;
-                $this->parameters[$parameter_name] = $filterInput['value'];
-                $rightSide = ':' . $parameter_name;
-            }
-
-            // if we filter by a content field.
-            if (in_array($filterInput['field'], $this->contentEntityFields)) {
-                $leftSide = $this->contentEntityPrefix . '.' . $filterInput['field'];
-
-                // if we filter by a nested content data field.
-            } else {
-                $leftSide = "JSON_EXTRACT(" . $this->contentEntityPrefix . ".data, '$." . $filterInput['field'] . "')";
-            }
-
-
-            // Support for special Operator, using ex Expr builder. This should be extended in the future.
-            switch ($filterInput['operator']) {
-                case 'IS NULL': return $this->expr->isNull($leftSide);
-                case 'IS NOT NULL': return $this->expr->isNotNull($leftSide);
-                case 'LIKE': return $this->expr->like($leftSide, $rightSide);
-                default:
-                    if(in_array($filterInput['operator'], [Comparison::EQ, Comparison::GT, Comparison::GTE, Comparison::LT, Comparison::LTE, Comparison::NEQ])) {
-                        return new Comparison($leftSide, $filterInput['operator'], $rightSide);
-                    } else {
-                        $expected = join(',', [Comparison::EQ, Comparison::GT, Comparison::GTE, Comparison::LT, Comparison::LTE, Comparison::NEQ]);
-                        throw QueryException::syntaxError("Invalid filter operator. Expected one of '{$expected}', got '" . $filterInput['operator'] . "'");
-                    }
-            }
-        }
-
-        return null;
     }
 
 }

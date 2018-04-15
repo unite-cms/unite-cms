@@ -15,11 +15,15 @@ use UniteCMS\CoreBundle\Entity\Organization;
 class ViewTypeManagerTest extends TestCase
 {
 
-    public function testRegisterViews() {
+    public function testRegisterViews()
+    {
 
-        $view = new class extends ViewType{
+        $view = new class extends ViewType
+        {
             const TYPE = "test_register_view_test_type";
-            function getTemplateRenderParameters(string $selectMode = self::SELECT_MODE_NONE): array {
+
+            function getTemplateRenderParameters(string $selectMode = self::SELECT_MODE_NONE): array
+            {
                 return [
                     'foo' => 'baa',
                 ];
@@ -46,16 +50,16 @@ class ViewTypeManagerTest extends TestCase
             ->setIdentifier('new_view')
             ->setContentType(new ContentType())
             ->getContentType()
-                ->setTitle('ct')
-                ->setIdentifier('ct')
-                ->setDomain(new Domain())
-                ->getDomain()
-                    ->setTitle('D1')
-                    ->setIdentifier('d1')
-                    ->setOrganization(new Organization())
-                    ->getOrganization()
-                        ->setTitle('O1')
-                        ->setIdentifier('o1');
+            ->setTitle('ct')
+            ->setIdentifier('ct')
+            ->setDomain(new Domain())
+            ->getDomain()
+            ->setTitle('D1')
+            ->setIdentifier('d1')
+            ->setOrganization(new Organization())
+            ->getOrganization()
+            ->setTitle('O1')
+            ->setIdentifier('o1');
 
         $view->setType('test_register_view_test_type');
 

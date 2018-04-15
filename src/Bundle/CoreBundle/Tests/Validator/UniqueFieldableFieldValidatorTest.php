@@ -15,7 +15,8 @@ class UniqueFieldableFieldValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The UniqueFieldableFieldValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableField value.
      */
-    public function testInvalidValue() {
+    public function testInvalidValue()
+    {
         // Validate value.
         $this->validate((object)[], new UniqueFieldableFieldValidator());
     }

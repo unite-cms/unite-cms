@@ -19,10 +19,12 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setRequired('tag');
-        $resolver->setDefaults([
-            'compound' => false,
-            'label' => false,
-        ]);
+        $resolver->setDefaults(
+            [
+                'compound' => false,
+                'label' => false,
+            ]
+        );
     }
 
     /**
@@ -35,11 +37,24 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
         $view->vars['tag'] = str_replace('_', '-', $view->vars['tag']);
         $view->vars['tag'] = preg_replace("/[^a-z0-9-]+/", "", $view->vars['tag']);
 
-        if(empty($form->getData()) && !empty($options['empty_data'])) {
+        if (empty($form->getData()) && !empty($options['empty_data'])) {
             $view->vars['value'] = $options['empty_data'];
         }
 
         $view->vars['value'] = $this->transform($view->vars['value']);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transform($data)
+    {
+        if (!is_string($data) && null !== $data) {
+            return json_encode($data);
+        }
+
+        // Model data should not be transformed
+        return $data;
     }
 
     /**
@@ -53,22 +68,9 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
     /**
      * {@inheritdoc}
      */
-    public function transform($data)
-    {
-        if(!is_string($data) && null !== $data) {
-            return json_encode($data);
-        }
-
-        // Model data should not be transformed
-        return $data;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function reverseTransform($data)
     {
-        if(empty($data)) {
+        if (empty($data)) {
             return null;
         }
 

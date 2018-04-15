@@ -44,20 +44,20 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
 
         // If this has an Level Suffix, we need to remove it first.
-        if(substr($nameParts[count($nameParts) - 1], 0, strlen('Level')) == 'Level') {
+        if (substr($nameParts[count($nameParts) - 1], 0, strlen('Level')) == 'Level') {
             array_pop($nameParts);
         }
 
         // Support for content type.
-        if(count($nameParts) == 2) {
-            if($nameParts[1] == 'Content') {
+        if (count($nameParts) == 2) {
+            if ($nameParts[1] == 'Content') {
                 return true;
             }
         }
 
         // Support for content input type.
-        if(count($nameParts) == 3) {
-            if($nameParts[1] == 'Content' && $nameParts[2] == 'Input') {
+        if (count($nameParts) == 3) {
+            if ($nameParts[1] == 'Content' && $nameParts[2] == 'Input') {
                 return true;
             }
         }
@@ -73,10 +73,16 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-    {
-        if(!$domain) {
-            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument');
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        int $nestingLevel,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
+        if (!$domain) {
+            throw new \InvalidArgumentException(
+                'UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument'
+            );
         }
 
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
@@ -95,7 +101,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
         }
 
         // Load the full contentType if it is not already loaded.
-        if(!$this->entityManager->contains($contentType)) {
+        if (!$this->entityManager->contains($contentType)) {
             $contentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find(
                 $contentType->getId()
             );
@@ -118,31 +124,42 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
             $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
 
             // If we want to create an InputObjectType, get GraphQLInputType.
-            if($isInputType) {
-                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
+            if ($isInputType) {
+                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType(
+                    $field,
+                    $schemaTypeManager,
+                    $nestingLevel + 1
+                );
             } else {
-                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
+                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType(
+                    $field,
+                    $schemaTypeManager,
+                    $nestingLevel + 1
+                );
             }
         }
 
-        if($isInputType) {
+        if ($isInputType) {
 
-            if(count($contentType->getLocales()) > 0) {
-                $fields = array_merge([
-                    'locale' => Type::nonNull(Type::string())
-                ], $fields);
+            if (count($contentType->getLocales()) > 0) {
+                $fields = array_merge(
+                    [
+                        'locale' => Type::nonNull(Type::string()),
+                    ],
+                    $fields
+                );
             }
 
             return new InputObjectType(
                 [
-                    'name' => ucfirst($identifier) . 'ContentInput' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                    'name' => ucfirst($identifier).'ContentInput'.($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                     'fields' => $fields,
                 ]
             );
         } else {
             return new ObjectType(
                 [
-                    'name' => ucfirst($identifier) . 'Content' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                    'name' => ucfirst($identifier).'Content'.($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                     'fields' => array_merge(
                         [
                             'id' => Type::id(),
@@ -160,7 +177,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
                         if (!$value instanceof Content) {
                             throw new \InvalidArgumentException(
-                                'Value must be instance of ' . Content::class . '.'
+                                'Value must be instance of '.Content::class.'.'
                             );
                         }
 
@@ -185,7 +202,10 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                     $info->fieldName,
                                     $value->getData()
                                 ) ? $value->getData()[$info->fieldName] : null;
-                                $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($contentType->getFields()->get($info->fieldName), $fieldData);
+                                $data = $fieldTypes[$info->fieldName]->resolveGraphQLData(
+                                    $contentType->getFields()->get($info->fieldName),
+                                    $fieldData
+                                );
 
                                 return $data;
                         }

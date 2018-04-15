@@ -120,16 +120,6 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         }
     }
 
-    private function login(User $user)
-    {
-        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
-        $session = $this->client->getContainer()->get('session');
-        $session->set('_security_main', serialize($token));
-        $session->save();
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->client->getCookieJar()->set($cookie);
-    }
-
     /**
      * An invitation for a user cannot be accepted if no invitation token is present.
      */
@@ -138,11 +128,17 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation');
         $this->assertCount(1, $crawler->filter('div.uk-alert-danger'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.token_missing'), trim($crawler->filter('div.uk-alert-danger')->text()));
+        $this->assertEquals(
+            $this->container->get('translator')->trans('profile.accept_invitation.token_missing'),
+            trim($crawler->filter('div.uk-alert-danger')->text())
+        );
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation?token=XXX');
         $this->assertCount(1, $crawler->filter('div.uk-alert-danger'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.token_not_found'), trim($crawler->filter('div.uk-alert-danger')->text()));
+        $this->assertEquals(
+            $this->container->get('translator')->trans('profile.accept_invitation.token_not_found'),
+            trim($crawler->filter('div.uk-alert-danger')->text())
+        );
     }
 
     /**
@@ -162,7 +158,20 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
+        $this->assertEquals(
+            $this->container->get('translator')->trans('profile.accept_invitation.wrong_user'),
+            trim($crawler->filter('div.uk-alert-warning')->text())
+        );
+    }
+
+    private function login(User $user)
+    {
+        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
+        $session = $this->client->getContainer()->get('session');
+        $session->set('_security_main', serialize($token));
+        $session->save();
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $this->client->getCookieJar()->set($cookie);
     }
 
     /**
@@ -247,7 +256,10 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
+        $this->assertEquals(
+            $this->container->get('translator')->trans('profile.accept_invitation.wrong_user'),
+            trim($crawler->filter('div.uk-alert-warning')->text())
+        );
     }
 
     /**
@@ -268,7 +280,10 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.already_member'), trim($crawler->filter('div.uk-alert-warning')->text()));
+        $this->assertEquals(
+            $this->container->get('translator')->trans('profile.accept_invitation.already_member'),
+            trim($crawler->filter('div.uk-alert-warning')->text())
+        );
     }
 
     /**

@@ -23,8 +23,8 @@ class ReferenceFieldTypeInput extends InputObjectType
                     'content' => [
                         'type' => Type::nonNull(Type::id()),
                         'description' => 'The content to reference.',
-                    ]
-                ]
+                    ],
+                ],
             ]
         );
     }
