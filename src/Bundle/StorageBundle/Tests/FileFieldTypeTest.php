@@ -14,7 +14,8 @@ use UniteCMS\StorageBundle\Model\PreSignedUrl;
 
 class FileFieldTypeTest extends FieldTypeTestCase
 {
-    public function testAllowedFieldSettings() {
+    public function testAllowedFieldSettings()
+    {
         $field = $this->createContentTypeField('file');
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
@@ -74,7 +75,8 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
     }
 
-    public function testGettingGraphQLData() {
+    public function testGettingGraphQLData()
+    {
 
         $field = $this->createContentTypeField('file');
         $field->setIdentifier('f1');
@@ -122,54 +124,55 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('String', $type->getField('f1')->getType()->getField('url')->getType()->name);
     }
 
-  public function testWritingGraphQLData() {
+    public function testWritingGraphQLData()
+    {
 
-    $field = $this->createContentTypeField('file');
-    $field->setIdentifier('f1');
-    $field->getContentType()->setIdentifier('ct1');
-    $field->setSettings(new FieldableFieldSettings([
-      'file_types' => '*',
-      'bucket' => [
-        'endpoint' => 'https://example.com',
-        'key' => 'XXX',
-        'secret' => 'XXX',
-        'bucket' => 'foo',
-      ],
-    ]));
-    $this->em->persist($field->getContentType()->getDomain()->getOrganization());
-    $this->em->persist($field->getContentType()->getDomain());
-    $this->em->persist($field->getContentType());
-    $this->em->flush();
+        $field = $this->createContentTypeField('file');
+        $field->setIdentifier('f1');
+        $field->getContentType()->setIdentifier('ct1');
+        $field->setSettings(new FieldableFieldSettings([
+            'file_types' => '*',
+            'bucket' => [
+                'endpoint' => 'https://example.com',
+                'key' => 'XXX',
+                'secret' => 'XXX',
+                'bucket' => 'foo',
+            ],
+        ]));
+        $this->em->persist($field->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($field->getContentType()->getDomain());
+        $this->em->persist($field->getContentType());
+        $this->em->flush();
 
-    $this->em->refresh($field->getContentType()->getDomain());
-    $this->em->refresh($field->getContentType());
-    $this->em->refresh($field);
+        $this->em->refresh($field->getContentType()->getDomain());
+        $this->em->refresh($field->getContentType());
+        $this->em->refresh($field);
 
-    // Inject created domain into untied.cms.manager.
-    $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
-    $d->setAccessible(true);
-    $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
-    $domain = $field->getContentType()->getDomain();
+        // Inject created domain into untied.cms.manager.
+        $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
+        $d->setAccessible(true);
+        $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+        $domain = $field->getContentType()->getDomain();
 
-    // In this test, we don't care about access checking.
-    $admin = new User();
-    $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
-    $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($admin, null, 'api', $admin->getRoles()));
+        // In this test, we don't care about access checking.
+        $admin = new User();
+        $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($admin, null, 'api', $admin->getRoles()));
 
-    // Create GraphQL Schema
-    $schemaTypeManager = $this->container->get('unite.cms.graphql.schema_type_manager');
+        // Create GraphQL Schema
+        $schemaTypeManager = $this->container->get('unite.cms.graphql.schema_type_manager');
 
-    $schema = new Schema(
-      [
-        'query' => $schemaTypeManager->getSchemaType('Query'),
-        'mutation' => $schemaTypeManager->getSchemaType('Mutation'),
-        'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
-          return $schemaTypeManager->getSchemaType($name, $domain);
-        },
-      ]
-    );
+        $schema = new Schema(
+            [
+                'query' => $schemaTypeManager->getSchemaType('Query'),
+                'mutation' => $schemaTypeManager->getSchemaType('Mutation'),
+                'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
+                    return $schemaTypeManager->getSchemaType($name, $domain);
+                },
+            ]
+        );
 
-    $result = GraphQL::executeQuery($schema, 'mutation { 
+        $result = GraphQL::executeQuery($schema, 'mutation { 
       createCt1(
         data: {
           f1: {
@@ -191,15 +194,15 @@ class FileFieldTypeTest extends FieldTypeTestCase
         }
        }
     }');
-    $result = json_decode(json_encode($result->toArray(true)));
+        $result = json_decode(json_encode($result->toArray(true)));
 
-    // Checksum should be invalid.
-    $this->assertEquals('ERROR: validation.invalid_checksum', trim($result->errors[0]->message));
+        // Checksum should be invalid.
+        $this->assertEquals('ERROR: validation.invalid_checksum', trim($result->errors[0]->message));
 
-    // Try with valid checksum.
-    $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');
+        // Try with valid checksum.
+        $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');
 
-      $result = GraphQL::executeQuery($schema, 'mutation { 
+        $result = GraphQL::executeQuery($schema, 'mutation { 
       createCt1(
         data: {
           f1: {
@@ -221,20 +224,21 @@ class FileFieldTypeTest extends FieldTypeTestCase
         }
        }
     }');
-    $result = json_decode(json_encode($result->toArray(true)));
+        $result = json_decode(json_encode($result->toArray(true)));
 
-    $this->assertNotEmpty($result->data->createCt1->id);
-    $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($result->data->createCt1->id);
-    $this->assertNotNull($content);
-    $this->assertNotNull($result->data->createCt1->f1);
-    $this->assertEquals('cat.jpg', $result->data->createCt1->f1->name);
-    $this->assertEquals(12345, $result->data->createCt1->f1->size);
-    $this->assertEquals('image/jpeg', $result->data->createCt1->f1->type);
-    $this->assertEquals('XXX-YYY-ZZZ', $result->data->createCt1->f1->id);
-    $this->assertEquals('https://example.com/foo/XXX-YYY-ZZZ/cat.jpg', $result->data->createCt1->f1->url);
-  }
+        $this->assertNotEmpty($result->data->createCt1->id);
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($result->data->createCt1->id);
+        $this->assertNotNull($content);
+        $this->assertNotNull($result->data->createCt1->f1);
+        $this->assertEquals('cat.jpg', $result->data->createCt1->f1->name);
+        $this->assertEquals(12345, $result->data->createCt1->f1->size);
+        $this->assertEquals('image/jpeg', $result->data->createCt1->f1->type);
+        $this->assertEquals('XXX-YYY-ZZZ', $result->data->createCt1->f1->id);
+        $this->assertEquals('https://example.com/foo/XXX-YYY-ZZZ/cat.jpg', $result->data->createCt1->f1->url);
+    }
 
-    public function testFormBuild() {
+    public function testFormBuild()
+    {
 
         $field = $this->createContentTypeField('file');
         $field->setIdentifier('f1');

@@ -21,7 +21,7 @@ class OrganizationController extends Controller
         /**
          * Platform admins are allowed to view all organizations.
          */
-        if($this->isGranted(User::ROLE_PLATFORM_ADMIN)) {
+        if ($this->isGranted(User::ROLE_PLATFORM_ADMIN)) {
             $organizations = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Organization')->findAll();
         } else {
             $organizations = $this->getUser()->getOrganizations()->map(
@@ -42,7 +42,7 @@ class OrganizationController extends Controller
         // Otherwise display all organizations, the user has access to.
         $allowedOrganizations = [];
         foreach ($organizations as $organization) {
-            if($this->isGranted(OrganizationVoter::VIEW, $organization)) {
+            if ($this->isGranted(OrganizationVoter::VIEW, $organization)) {
                 $allowedOrganizations[] = $organization;
             }
         }

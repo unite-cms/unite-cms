@@ -136,13 +136,7 @@ class SettingType implements Fieldable
 
     public function __toString()
     {
-        return ''.$this->title;
-    }
-
-    private function addDefaultPermissions()
-    {
-        $this->permissions[SettingVoter::VIEW] = [Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[SettingVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
+        return '' . $this->title;
     }
 
     public function allowedPermissionRoles(): array
@@ -195,6 +189,16 @@ class SettingType implements Fieldable
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Set id
      *
      * @param $id
@@ -209,13 +213,13 @@ class SettingType implements Fieldable
     }
 
     /**
-     * Get id
+     * Get title
      *
-     * @return int
+     * @return string
      */
-    public function getId()
+    public function getTitle()
     {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -233,13 +237,13 @@ class SettingType implements Fieldable
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -257,13 +261,13 @@ class SettingType implements Fieldable
     }
 
     /**
-     * Get identifier
+     * Get description
      *
      * @return string
      */
-    public function getIdentifier()
+    public function getDescription()
     {
-        return $this->identifier;
+        return $this->description;
     }
 
     /**
@@ -281,13 +285,13 @@ class SettingType implements Fieldable
     }
 
     /**
-     * Get description
+     * Get icon
      *
      * @return string
      */
-    public function getDescription()
+    public function getIcon()
     {
-        return $this->description;
+        return $this->icon;
     }
 
     /**
@@ -302,16 +306,6 @@ class SettingType implements Fieldable
         $this->icon = $icon;
 
         return $this;
-    }
-
-    /**
-     * Get icon
-     *
-     * @return string
-     */
-    public function getIcon()
-    {
-        return $this->icon;
     }
 
     /**
@@ -394,6 +388,14 @@ class SettingType implements Fieldable
     }
 
     /**
+     * @return ArrayCollection|Setting[]
+     */
+    public function getSettings()
+    {
+        return $this->settings;
+    }
+
+    /**
      * @param $settings
      * @return SettingType
      */
@@ -407,27 +409,21 @@ class SettingType implements Fieldable
     }
 
     /**
-     * @return ArrayCollection|Setting[]
-     */
-    public function getSettings()
-    {
-        return $this->settings;
-    }
-
-    /**
      * @return Setting
      */
     public function getSetting($locale = null)
     {
         if ($this->getSettings()->count() > 0) {
 
-            if(!$locale || empty($this->getLocales())) {
+            if (!$locale || empty($this->getLocales())) {
                 return $this->getSettings()->first();
             }
 
-            if(in_array($locale, $this->getLocales())) {
-                $found = $this->getSettings()->filter(function(Setting $setting) use ($locale) { return $setting->getLocale() == $locale; });
-                if(!$found->isEmpty()) {
+            if (in_array($locale, $this->getLocales())) {
+                $found = $this->getSettings()->filter(function (Setting $setting) use ($locale) {
+                    return $setting->getLocale() == $locale;
+                });
+                if (!$found->isEmpty()) {
                     return $found->first();
                 }
             }
@@ -512,22 +508,31 @@ class SettingType implements Fieldable
     /**
      * {@inheritdoc}
      */
-    public function getRootEntity() : Fieldable {
+    public function getRootEntity(): Fieldable
+    {
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getIdentifierPath($delimiter = '/') {
+    public function getIdentifierPath($delimiter = '/')
+    {
         return $this->getIdentifier();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getParentEntity() {
+    public function getParentEntity()
+    {
         return null;
+    }
+
+    private function addDefaultPermissions()
+    {
+        $this->permissions[SettingVoter::VIEW] = [Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[SettingVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
     }
 }
 

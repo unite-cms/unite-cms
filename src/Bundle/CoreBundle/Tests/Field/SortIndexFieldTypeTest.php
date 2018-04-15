@@ -11,14 +11,16 @@ use UniteCMS\CoreBundle\Entity\Organization;
 
 class SortIndexFieldTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings() {
+    public function testContentTypeFieldTypeWithEmptySettings()
+    {
 
         // Empty settings can be valid.
         $ctField = $this->createContentTypeField('sortindex');
         $this->assertCount(0, $this->container->get('validator')->validate($ctField));
     }
 
-    public function testAutoUpdateSortIndexOnInsertUpdateDelete() {
+    public function testAutoUpdateSortIndexOnInsertUpdateDelete()
+    {
 
         $contentType = new ContentType();
         $contentType->setTitle('ct')
@@ -47,7 +49,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
 
         // Create content for this content type.
         $content = [];
-        for($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 4; $i++) {
             $content['C' . ($i + 1)] = new Content();
             $content['C' . ($i + 1)]
                 ->setData(['position' => 0, 'label' => 'C' . ($i + 1)])

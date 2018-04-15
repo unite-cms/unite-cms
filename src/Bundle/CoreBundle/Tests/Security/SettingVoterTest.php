@@ -93,11 +93,16 @@ class SettingVoterTest extends SecurityVoterTestCase
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', $user->getRoles());
     }
 
-    public function testFallbackForNotSupportedArguments() {
+    public function testFallbackForNotSupportedArguments()
+    {
         $voter = new SettingVoter();
 
-        $invalidUser = new class {
-            public function __toString() { return 'any'; }
+        $invalidUser = new class
+        {
+            public function __toString()
+            {
+                return 'any';
+            }
         };
 
         // Try with invalid token.

@@ -12,7 +12,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 abstract class FieldTypeTestCase extends DatabaseAwareTestCase
 {
-    protected function createContentTypeField(string $type) : ContentTypeField {
+    protected function createContentTypeField(string $type): ContentTypeField
+    {
         $field = new ContentTypeField();
         $field
             ->setType($type)
@@ -33,7 +34,8 @@ abstract class FieldTypeTestCase extends DatabaseAwareTestCase
         return $field;
     }
 
-    protected function createSettingTypeField(string $type) : SettingTypeField {
+    protected function createSettingTypeField(string $type): SettingTypeField
+    {
         $field = new SettingTypeField();
         $field
             ->setType($type)

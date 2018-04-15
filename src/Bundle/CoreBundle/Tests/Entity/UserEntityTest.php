@@ -42,7 +42,7 @@ class UserEntityTest extends DatabaseAwareTestCase
         $user->addOrganization($organizationMember);
         $user->setLastname($this->generateRandomUTF8String(256))->setFirstname(
             $this->generateRandomUTF8String(256)
-        )->setEmail($this->generateRandomMachineName(256).'@example.com')->setPassword(
+        )->setEmail($this->generateRandomMachineName(256) . '@example.com')->setPassword(
             $this->generateRandomUTF8String(256)
         );
         $errors = $this->container->get('validator')->validate($user);
@@ -222,7 +222,8 @@ class UserEntityTest extends DatabaseAwareTestCase
         $this->assertEquals('validation.domain_organization', $errors->get(0)->getMessage());
     }
 
-    public function testTokenValidation() {
+    public function testTokenValidation()
+    {
 
         $user = new User();
 

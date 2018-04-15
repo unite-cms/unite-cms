@@ -24,7 +24,7 @@ class ContentResultInterface extends InterfaceType
                 },
                 'resolveType' => function ($value) use ($schemaTypeManager, $uniteCMSManager) {
                     if (!$value instanceof AbstractPagination) {
-                        throw new \InvalidArgumentException('Value must be instance of '.AbstractPagination::class.'.');
+                        throw new \InvalidArgumentException('Value must be instance of ' . AbstractPagination::class . '.');
                     }
                     return $schemaTypeManager->getSchemaType($value->getPaginatorOption('alias'), $uniteCMSManager->getDomain());
                 },

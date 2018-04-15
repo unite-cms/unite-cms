@@ -162,29 +162,7 @@ class ContentType implements Fieldable
 
     public function __toString()
     {
-        return ''.$this->title;
-    }
-
-    /**
-     * Each ContentType must have a "all" view. This function adds it to the ArrayCollection.
-     */
-    private function addDefaultView()
-    {
-        $defaultView = new View();
-        $defaultView
-            ->setType(TableViewType::getType())
-            ->setTitle('All')
-            ->setIdentifier(View::DEFAULT_VIEW_IDENTIFIER);
-        $this->addView($defaultView);
-    }
-
-    private function addDefaultPermissions()
-    {
-        $this->permissions[ContentVoter::VIEW] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::LIST] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::CREATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::UPDATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::DELETE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        return '' . $this->title;
     }
 
     public function allowedPermissionRoles(): array
@@ -263,6 +241,16 @@ class ContentType implements Fieldable
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Set id
      *
      * @param $id
@@ -277,13 +265,13 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get id
+     * Get title
      *
-     * @return int
+     * @return string
      */
-    public function getId()
+    public function getTitle()
     {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -301,13 +289,13 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -325,13 +313,13 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get identifier
+     * Get description
      *
      * @return string
      */
-    public function getIdentifier()
+    public function getDescription()
     {
-        return $this->identifier;
+        return $this->description;
     }
 
     /**
@@ -349,13 +337,13 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get description
+     * Get icon
      *
      * @return string
      */
-    public function getDescription()
+    public function getIcon()
     {
-        return $this->description;
+        return $this->icon;
     }
 
     /**
@@ -373,13 +361,11 @@ class ContentType implements Fieldable
     }
 
     /**
-     * Get icon
-     *
      * @return string
      */
-    public function getIcon()
+    public function getContentLabel()
     {
-        return $this->icon;
+        return $this->contentLabel;
     }
 
     /**
@@ -392,14 +378,6 @@ class ContentType implements Fieldable
         $this->contentLabel = $contentLabel;
 
         return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getContentLabel()
-    {
-        return $this->contentLabel;
     }
 
     /**
@@ -475,21 +453,6 @@ class ContentType implements Fieldable
     }
 
     /**
-     * @param $key
-     * @return View
-     */
-    public function getView($key)
-    {
-        foreach ($this->getViews() as $view) {
-            if ($view->getIdentifier() === $key) {
-                return $view;
-            }
-        }
-
-        throw new \InvalidArgumentException("View with key '$key' was not found.");
-    }
-
-    /**
      * @param View[]|ArrayCollection $views
      *
      * @return ContentType
@@ -515,6 +478,21 @@ class ContentType implements Fieldable
         }
 
         return $this;
+    }
+
+    /**
+     * @param $key
+     * @return View
+     */
+    public function getView($key)
+    {
+        foreach ($this->getViews() as $view) {
+            if ($view->getIdentifier() === $key) {
+                return $view;
+            }
+        }
+
+        throw new \InvalidArgumentException("View with key '$key' was not found.");
     }
 
     /**
@@ -612,22 +590,47 @@ class ContentType implements Fieldable
     /**
      * {@inheritdoc}
      */
-    public function getRootEntity() : Fieldable {
+    public function getRootEntity(): Fieldable
+    {
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getIdentifierPath($delimiter = '/') {
+    public function getIdentifierPath($delimiter = '/')
+    {
         return $this->getIdentifier();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getParentEntity() {
+    public function getParentEntity()
+    {
         return null;
+    }
+
+    /**
+     * Each ContentType must have a "all" view. This function adds it to the ArrayCollection.
+     */
+    private function addDefaultView()
+    {
+        $defaultView = new View();
+        $defaultView
+            ->setType(TableViewType::getType())
+            ->setTitle('All')
+            ->setIdentifier(View::DEFAULT_VIEW_IDENTIFIER);
+        $this->addView($defaultView);
+    }
+
+    private function addDefaultPermissions()
+    {
+        $this->permissions[ContentVoter::VIEW] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[ContentVoter::LIST] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[ContentVoter::CREATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[ContentVoter::UPDATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[ContentVoter::DELETE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
     }
 }
 

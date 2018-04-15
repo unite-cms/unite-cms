@@ -31,11 +31,11 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
     {
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
 
-        if(count($nameParts) !== 3) {
+        if (count($nameParts) !== 3) {
             return false;
         }
 
-        if($nameParts[1] !== 'Content' && $nameParts[2] !== 'Result') {
+        if ($nameParts[1] !== 'Content' && $nameParts[2] !== 'Result') {
             return false;
         }
 
@@ -52,7 +52,7 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
      */
     public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
     {
-        if(!$domain) {
+        if (!$domain) {
             throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory::createSchemaType needs an domain as second argument');
         }
 

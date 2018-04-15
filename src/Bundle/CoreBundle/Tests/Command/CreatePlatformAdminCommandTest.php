@@ -16,7 +16,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
 {
-    public function testCreateOrganizationCommand() {
+    public function testCreateOrganizationCommand()
+    {
 
         $application = new Application(self::$kernel);
         $command = new CreatePlatformAdminCommand(

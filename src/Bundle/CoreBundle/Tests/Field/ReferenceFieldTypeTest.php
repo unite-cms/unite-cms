@@ -21,7 +21,8 @@ use UniteCMS\CoreBundle\View\ViewParameterBag;
 
 class ReferenceFieldTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings() {
+    public function testContentTypeFieldTypeWithEmptySettings()
+    {
 
         // Content Type Field with empty settings should not be valid.
         $ctField = $this->createContentTypeField('reference');
@@ -33,7 +34,8 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $this->assertContains('settings.content_type', $errors->get(1)->getPropertyPath());
     }
 
-    public function testContentTypeFieldTypeWithInvalidSettings() {
+    public function testContentTypeFieldTypeWithInvalidSettings()
+    {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('reference');
@@ -50,7 +52,8 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
     }
 
-    public function testContentTypeFieldTypeWithValidSettings() {
+    public function testContentTypeFieldTypeWithValidSettings()
+    {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('reference');
@@ -65,7 +68,8 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
     }
 
-    public function testContentTypeFieldContentLabelFallback() {
+    public function testContentTypeFieldContentLabelFallback()
+    {
 
         $ctField = $this->createContentTypeField('reference');
         $ctField->getContentType()->getDomain()->setIdentifier('foo');
@@ -76,7 +80,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
         $o1->setAccessible(true);
-        $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
+        $authMock = $this->createMock(AuthorizationCheckerInterface::class);
         $authMock->expects($this->any())->method('isGranted')->willReturn(true);
         $o1->setValue($fieldType, $authMock);
 
@@ -100,7 +104,6 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
             ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
         ]));
         $o3->setValue($fieldType, $cmsManager);
-
 
 
         // No content_label fallback and no content_label set.
@@ -138,7 +141,8 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('baa', $options['attr']['content-label']);
     }
 
-    public function testReferenceToAnotherDomain() {
+    public function testReferenceToAnotherDomain()
+    {
 
         $ctField = $this->createContentTypeField('reference');
         $ctField->setSettings(new FieldableFieldSettings([

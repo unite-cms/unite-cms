@@ -18,7 +18,8 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
 {
     private $validDomain = '{ "title": "Test controller access check domain", "identifier": "access_check", "content_types": [{"title": "CT 1", "identifier": "ct1"}], "setting_types": [{"title": "ST 1", "identifier": "st1"}] }';
 
-    public function testCreateOrganizationCommand() {
+    public function testCreateOrganizationCommand()
+    {
 
         $application = new Application(self::$kernel);
         $application->add(new CreateDomainCommand(

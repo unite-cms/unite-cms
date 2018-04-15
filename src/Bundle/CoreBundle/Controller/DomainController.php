@@ -93,7 +93,7 @@ class DomainController extends Controller
                     );
                 } else {
                     foreach ($errors as $error) {
-                        $this->addFlash('danger', $error->getPropertyPath().': '.$error->getMessage());
+                        $this->addFlash('danger', $error->getPropertyPath() . ': ' . $error->getMessage());
                     }
                 }
             }
@@ -197,7 +197,7 @@ class DomainController extends Controller
                 } else {
                     foreach ($errors as $error) {
 
-                        $this->addFlash('danger', $error->getPropertyPath().': '.$error->getMessage());
+                        $this->addFlash('danger', $error->getPropertyPath() . ': ' . $error->getMessage());
                     }
                 }
             }

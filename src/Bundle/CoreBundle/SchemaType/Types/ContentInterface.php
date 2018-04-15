@@ -26,11 +26,11 @@ class ContentInterface extends InterfaceType
                 'resolveType' => function ($value) use ($schemaTypeManager) {
                     if (!$value instanceof Content) {
                         throw new \InvalidArgumentException(
-                            'Value must be instance of '.Content::class.'.'
+                            'Value must be instance of ' . Content::class . '.'
                         );
                     }
 
-                    $type = ucfirst($value->getContentType()->getIdentifier()).'Content';
+                    $type = ucfirst($value->getContentType()->getIdentifier()) . 'Content';
 
                     return $schemaTypeManager->getSchemaType($type);
                 },

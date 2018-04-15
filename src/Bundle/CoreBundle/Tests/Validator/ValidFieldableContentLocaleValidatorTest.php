@@ -23,12 +23,14 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidFieldableContentLocaleValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableContent object.
      */
-    public function testInvalidObject() {
+    public function testInvalidObject()
+    {
         $object = new \stdClass();
         $this->validate((object)[], new ValidFieldableContentLocaleValidator(), null, $object);
     }
 
-    public function testEmptyObjectAndContextObject() {
+    public function testEmptyObjectAndContextObject()
+    {
         $object = new Content();
 
         // When validating an empty value or don't provide a context object, the validator just skips this.
@@ -43,7 +45,8 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidFieldableContentLocaleValidator constraint expects object->getEntity() to return a UniteCMS\CoreBundle\Entity\Fieldable object.
      */
-    public function testInvalidObjectReference() {
+    public function testInvalidObjectReference()
+    {
         $object = $this->createMock(FieldableContent::class);
         $object->expects($this->any())
             ->method('getEntity')
@@ -52,7 +55,8 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
         $this->validate('', new ValidFieldableContentLocaleValidator(), null, $object);
     }
 
-    public function testEmptyEntity() {
+    public function testEmptyEntity()
+    {
         $object = $this->createMock(FieldableContent::class);
         $object->expects($this->any())
             ->method('getEntity')
@@ -66,7 +70,8 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
         $this->assertEquals('This locale is not supported by this content type', $errors->getViolations()->get(0)->getMessageTemplate());
     }
 
-    public function testEmptyEntityLocales() {
+    public function testEmptyEntityLocales()
+    {
         $entity = $this->createMock(Fieldable::class);
         $entity->expects($this->any())
             ->method('getLocales')
@@ -85,7 +90,8 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
         $this->assertEquals('This locale is not supported by this content type', $errors->getViolations()->get(0)->getMessageTemplate());
     }
 
-    public function testEmptyLocale() {
+    public function testEmptyLocale()
+    {
         $entity = $this->createMock(Fieldable::class);
         $entity->expects($this->any())
             ->method('getLocales')
@@ -100,7 +106,8 @@ class ValidFieldableContentLocaleValidatorTest extends ConstraintValidatorTestCa
         $this->assertCount(0, $errors->getViolations());
     }
 
-    public function testInvalidLocale() {
+    public function testInvalidLocale()
+    {
         $entity = $this->createMock(Fieldable::class);
         $entity->expects($this->any())
             ->method('getLocales')

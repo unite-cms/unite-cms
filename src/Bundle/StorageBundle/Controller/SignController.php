@@ -21,74 +21,77 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\StorageBundle\Form\PreSignFormType;
 
-class SignController extends Controller {
+class SignController extends Controller
+{
 
 
-  /**
-   * @Route("/content/{content_type}/upload")
-   * @Method({"POST"})
-   * @Entity("contentType", expr="repository.findByIdentifiers(organization, domain, content_type)")
-   * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::CREATE'), contentType)")
-   *
-   * @param ContentType $contentType
-   * @param Request $request
-   *
-   * @return Response
-   */
-  public function uploadContentTypeAction(ContentType $contentType, Request $request) {
+    /**
+     * @Route("/content/{content_type}/upload")
+     * @Method({"POST"})
+     * @Entity("contentType", expr="repository.findByIdentifiers(organization, domain, content_type)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::CREATE'), contentType)")
+     *
+     * @param ContentType $contentType
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public function uploadContentTypeAction(ContentType $contentType, Request $request)
+    {
 
-    $form = $this->createForm(PreSignFormType::class, null);
-    $form->handleRequest($request);
+        $form = $this->createForm(PreSignFormType::class, null);
+        $form->handleRequest($request);
 
-    if($form->isSubmitted() && $form->isValid()) {
-      try {
-          $preSignedUrl = $this->container->get('unite.cms.storage.service')->createPreSignedUploadUrlForFieldPath(
-            $form->getData()['filename'],
-            $contentType,
-            $form->getData()['field']
-          );
-          $preSignedUrl->sign($this->container->getParameter('kernel.secret'));
-          return new JsonResponse($preSignedUrl);
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $preSignedUrl = $this->container->get('unite.cms.storage.service')->createPreSignedUploadUrlForFieldPath(
+                    $form->getData()['filename'],
+                    $contentType,
+                    $form->getData()['field']
+                );
+                $preSignedUrl->sign($this->container->getParameter('kernel.secret'));
+                return new JsonResponse($preSignedUrl);
 
-      } catch (\InvalidArgumentException $e) {
-        throw new BadRequestHttpException($e->getMessage());
-      }
+            } catch (\InvalidArgumentException $e) {
+                throw new BadRequestHttpException($e->getMessage());
+            }
+        }
+
+        throw new BadRequestHttpException($form->getErrors(true, true));
     }
 
-    throw new BadRequestHttpException($form->getErrors(true, true));
-  }
+    /**
+     * @Route("/setting/{setting_type}/upload")
+     * @Method({"POST"})
+     * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), settingType)")
+     *
+     * @param SettingType $settingType
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public function uploadSettingTypeAction(SettingType $settingType, Request $request)
+    {
 
-  /**
-   * @Route("/setting/{setting_type}/upload")
-   * @Method({"POST"})
-   * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
-   * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), settingType)")
-   *
-   * @param SettingType $settingType
-   * @param Request $request
-   *
-   * @return Response
-   */
-  public function uploadSettingTypeAction(SettingType $settingType, Request $request) {
+        $form = $this->createForm(PreSignFormType::class, null);
+        $form->handleRequest($request);
 
-    $form = $this->createForm(PreSignFormType::class, null);
-    $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $preSignedUrl = $this->container->get('unite.cms.storage.service')->createPreSignedUploadUrlForFieldPath(
+                    $form->getData()['filename'],
+                    $settingType,
+                    $form->getData()['field']
+                );
+                $preSignedUrl->sign($this->container->getParameter('kernel.secret'));
+                return new JsonResponse($preSignedUrl);
 
-    if($form->isSubmitted() && $form->isValid()) {
-      try {
-          $preSignedUrl = $this->container->get('unite.cms.storage.service')->createPreSignedUploadUrlForFieldPath(
-            $form->getData()['filename'],
-            $settingType,
-            $form->getData()['field']
-          );
-          $preSignedUrl->sign($this->container->getParameter('kernel.secret'));
-          return new JsonResponse($preSignedUrl);
+            } catch (\InvalidArgumentException $e) {
+                throw new BadRequestHttpException($e->getMessage());
+            }
+        }
 
-      } catch (\InvalidArgumentException $e) {
-        throw new BadRequestHttpException($e->getMessage());
-      }
+        throw new BadRequestHttpException($form->getErrors(true, true));
     }
-
-    throw new BadRequestHttpException($form->getErrors(true, true));
-  }
 }

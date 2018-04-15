@@ -84,9 +84,9 @@ class CreateDomainCommand extends Command
         $domain->setOrganization($organization);
 
         $output->writeln(['', '', '<info>*****Domain definition*****</info>', '']);
-        $output->writeln('Title</>: <comment>'.$domain->getTitle().'</comment>');
-        $output->writeln('Identifier: <comment>'.$domain->getIdentifier().'</comment>');
-        $output->writeln('Roles: [<comment>'.join(', ', $domain->getRoles()).'</comment>]');
+        $output->writeln('Title</>: <comment>' . $domain->getTitle() . '</comment>');
+        $output->writeln('Identifier: <comment>' . $domain->getIdentifier() . '</comment>');
+        $output->writeln('Roles: [<comment>' . join(', ', $domain->getRoles()) . '</comment>]');
         $output->writeln('ContentTypes: [');
 
         foreach ($domain->getContentTypes() as $contentType) {
@@ -103,19 +103,19 @@ class CreateDomainCommand extends Command
             }
 
             $output->writeln('    {');
-            $output->writeln('      Title: <comment>'.$contentType->getTitle().'</comment>');
-            $output->writeln('      Identifier: <comment>'.$contentType->getIdentifier().'</comment>');
-            $output->writeln('      Icon: <comment>'.$contentType->getIcon().'</comment>');
-            $output->writeln('      Description: <comment>'.$contentType->getDescription().'</comment>');
-            $output->writeln('      Fields: [<comment>'.join(', ', $fields).'</comment>]');
-            $output->writeln('      Views: [<comment>'.join(', ', $views).'</comment>]');
+            $output->writeln('      Title: <comment>' . $contentType->getTitle() . '</comment>');
+            $output->writeln('      Identifier: <comment>' . $contentType->getIdentifier() . '</comment>');
+            $output->writeln('      Icon: <comment>' . $contentType->getIcon() . '</comment>');
+            $output->writeln('      Description: <comment>' . $contentType->getDescription() . '</comment>');
+            $output->writeln('      Fields: [<comment>' . join(', ', $fields) . '</comment>]');
+            $output->writeln('      Views: [<comment>' . join(', ', $views) . '</comment>]');
             $output->writeln('    }');
         }
 
         $output->writeln(['', '']);
 
         $question = new ConfirmationQuestion(
-            '<info>Should the domain for the organization: "'.$organization.'" be created</info>? [<comment>Y/n</comment>] ',
+            '<info>Should the domain for the organization: "' . $organization . '" be created</info>? [<comment>Y/n</comment>] ',
             true,
             '/^(y|j)/i'
         );
@@ -125,7 +125,7 @@ class CreateDomainCommand extends Command
         }
 
         $errors = $this->validator->validate($domain);
-        if(count($errors) > 0) {
+        if (count($errors) > 0) {
             $output->writeln("<error>\n\nThere was an error while creating the domain\n \n$errors\n</error>");
         } else {
             $this->em->persist($domain);

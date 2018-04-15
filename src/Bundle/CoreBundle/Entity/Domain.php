@@ -122,11 +122,6 @@ class Domain
      */
     private $apiClients;
 
-    public function __toString()
-    {
-        return ''.$this->title;
-    }
-
     public function __construct()
     {
         $this->roles = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
@@ -137,15 +132,19 @@ class Domain
         $this->apiClients = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return '' . $this->title;
+    }
+
     /**
      *  checks if current domain has content types or settings types and returns true if so
      *
-     *  @return boolean
+     * @return boolean
      */
     public function hasContentOrSettingTypes()
     {
-        if ($this->getContentTypes()->count() > 0 or $this->getSettingTypes()->count() > 0)
-        {
+        if ($this->getContentTypes()->count() > 0 or $this->getSettingTypes()->count() > 0) {
             return true;
         }
         return false;
@@ -248,6 +247,16 @@ class Domain
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Set id
      *
      * @param $id
@@ -262,13 +271,13 @@ class Domain
     }
 
     /**
-     * Get id
+     * Get title
      *
-     * @return int
+     * @return string
      */
-    public function getId()
+    public function getTitle()
     {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -286,13 +295,13 @@ class Domain
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -310,13 +319,13 @@ class Domain
     }
 
     /**
-     * Get identifier
+     * Get roles
      *
-     * @return string
+     * @return array
      */
-    public function getIdentifier()
+    public function getRoles()
     {
-        return $this->identifier;
+        return $this->roles;
     }
 
     /**
@@ -334,16 +343,6 @@ class Domain
     }
 
     /**
-     * Get roles
-     *
-     * @return array
-     */
-    public function getRoles()
-    {
-        return $this->roles;
-    }
-
-    /**
      * Returns all available roles for this domain.
      *
      * @param bool $include_anonymous Should the anonymous role should be returned?
@@ -353,7 +352,7 @@ class Domain
     {
         $available_roles = array_flip($this->getRoles());
 
-        if(!$include_anonymous) {
+        if (!$include_anonymous) {
             unset($available_roles[Domain::ROLE_PUBLIC]);
         }
 

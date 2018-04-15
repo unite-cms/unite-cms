@@ -20,7 +20,7 @@ class ViewSettingsSerializationHandler
         /**
          * @see \JMS\Serializer\Handler\StdClassHandler
          */
-        if($context->getDirection() == GraphNavigator::DIRECTION_SERIALIZATION) {
+        if ($context->getDirection() == GraphNavigator::DIRECTION_SERIALIZATION) {
 
             $classMetadata = $context->getMetadataFactory()->getMetadataForClass(ViewSettings::class);
             $visitor->startVisitingObject($classMetadata, $data, array('name' => ViewSettings::class), $context);
@@ -31,9 +31,7 @@ class ViewSettingsSerializationHandler
             }
 
             return $visitor->endVisitingObject($classMetadata, $data, array('name' => ViewSettings::class), $context);
-        }
-
-        else if($context->getDirection() == GraphNavigator::DIRECTION_DESERIALIZATION) {
+        } else if ($context->getDirection() == GraphNavigator::DIRECTION_DESERIALIZATION) {
             return new ViewSettings((array)$data);
         }
     }

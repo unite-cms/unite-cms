@@ -35,7 +35,7 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
         $view->vars['tag'] = str_replace('_', '-', $view->vars['tag']);
         $view->vars['tag'] = preg_replace("/[^a-z0-9-]+/", "", $view->vars['tag']);
 
-        if(empty($form->getData()) && !empty($options['empty_data'])) {
+        if (empty($form->getData()) && !empty($options['empty_data'])) {
             $view->vars['value'] = $options['empty_data'];
         }
 
@@ -55,7 +55,7 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
      */
     public function transform($data)
     {
-        if(!is_string($data) && null !== $data) {
+        if (!is_string($data) && null !== $data) {
             return json_encode($data);
         }
 
@@ -68,7 +68,7 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
      */
     public function reverseTransform($data)
     {
-        if(empty($data)) {
+        if (empty($data)) {
             return null;
         }
 

@@ -7,6 +7,7 @@
  */
 
 namespace UniteCMS\CoreBundle\Field;
+
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 
@@ -21,5 +22,5 @@ interface NestableFieldTypeInterface extends FieldTypeInterface
      * @param FieldableField $field
      * @return Fieldable
      */
-    static function getNestableFieldable(FieldableField $field) : Fieldable;
+    static function getNestableFieldable(FieldableField $field): Fieldable;
 }

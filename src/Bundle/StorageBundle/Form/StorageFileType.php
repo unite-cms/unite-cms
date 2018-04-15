@@ -16,18 +16,21 @@ class StorageFileType extends WebComponentType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix() {
+    public function getBlockPrefix()
+    {
         return 'unite_cms_storage_file';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getParent() {
+    public function getParent()
+    {
         return WebComponentType::class;
     }
 
-    public function configureOptions(OptionsResolver $resolver) {
+    public function configureOptions(OptionsResolver $resolver)
+    {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
             'tag' => 'unite-cms-storage-file-field',

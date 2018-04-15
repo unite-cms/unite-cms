@@ -109,7 +109,7 @@ class View
 
     public function __toString()
     {
-        return ''.$this->getTitle();
+        return '' . $this->getTitle();
     }
 
     /**
@@ -132,6 +132,16 @@ class View
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Set id
      *
      * @param $id
@@ -146,13 +156,13 @@ class View
     }
 
     /**
-     * Get id
+     * Get title
      *
-     * @return int
+     * @return string
      */
-    public function getId()
+    public function getTitle()
     {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -170,13 +180,13 @@ class View
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -191,16 +201,6 @@ class View
         $this->identifier = $identifier;
 
         return $this;
-    }
-
-    /**
-     * Get identifier
-     *
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
     }
 
     /**
@@ -224,6 +224,16 @@ class View
     }
 
     /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
      * Set description
      *
      * @param string $description
@@ -238,13 +248,13 @@ class View
     }
 
     /**
-     * Get description
+     * Get icon
      *
      * @return string
      */
-    public function getDescription()
+    public function getIcon()
     {
-        return $this->description;
+        return $this->icon;
     }
 
     /**
@@ -259,16 +269,6 @@ class View
         $this->icon = $icon;
 
         return $this;
-    }
-
-    /**
-     * Get icon
-     *
-     * @return string
-     */
-    public function getIcon()
-    {
-        return $this->icon;
     }
 
     /**
@@ -293,6 +293,16 @@ class View
     }
 
     /**
+     * Get settings
+     *
+     * @return ViewSettings
+     */
+    public function getSettings()
+    {
+        return $this->settings;
+    }
+
+    /**
      * Set settings
      *
      * @param ViewSettings $settings
@@ -304,16 +314,6 @@ class View
         $this->settings = $settings;
 
         return $this;
-    }
-
-    /**
-     * Get settings
-     *
-     * @return ViewSettings
-     */
-    public function getSettings()
-    {
-        return $this->settings;
     }
 }
 

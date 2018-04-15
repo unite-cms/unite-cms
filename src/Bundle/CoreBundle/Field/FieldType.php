@@ -35,21 +35,24 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    static function getType(): string {
+    static function getType(): string
+    {
         return static::TYPE;
     }
 
     /**
      * {@inheritdoc}
      */
-    function getFormType(FieldableField $field): string {
+    function getFormType(FieldableField $field): string
+    {
         return static::FORM_TYPE;
     }
 
     /**
      * {@inheritdoc}
      */
-    function getFormOptions(FieldableField $field): array {
+    function getFormOptions(FieldableField $field): array
+    {
         return [
             'label' => $this->getTitle($field),
             'required' => false,
@@ -64,35 +67,40 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
         return Type::string();
     }
 
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
         return Type::string();
     }
 
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value) {
+    function resolveGraphQLData(FieldableField $field, $value)
+    {
         return (string)$value;
     }
 
     /**
      * {@inheritdoc}
      */
-    function getTitle(FieldableField $field): string {
+    function getTitle(FieldableField $field): string
+    {
         return $field->getTitle();
     }
 
     /**
      * {@inheritdoc}
      */
-    function getIdentifier(FieldableField $field): string {
+    function getIdentifier(FieldableField $field): string
+    {
         return $field->getIdentifier();
     }
 
@@ -108,13 +116,13 @@ abstract class FieldType implements FieldTypeInterface
     {
         $violations = [];
 
-        if(is_object($settings)) {
+        if (is_object($settings)) {
             $settings = get_object_vars($settings);
         }
 
         // Check that only allowed settings are present.
         foreach (array_keys($settings) as $setting) {
-            if(!in_array($setting, static::SETTINGS)) {
+            if (!in_array($setting, static::SETTINGS)) {
                 $violations[] = new ConstraintViolation(
                     'validation.additional_data',
                     'validation.additional_data',
@@ -128,7 +136,7 @@ abstract class FieldType implements FieldTypeInterface
 
         // Check that all required settings are present.
         foreach (static::REQUIRED_SETTINGS as $setting) {
-            if(!isset($settings[$setting])) {
+            if (!isset($settings[$setting])) {
                 $violations[] = new ConstraintViolation(
                     'validation.required',
                     'validation.required',
@@ -146,17 +154,19 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array {
+    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+    {
         return [];
     }
 
-    protected function createViolation($field, $message, $messageTemplate = null, $parameters = [], $root = null, string $propertyPath = null, $invalidValue = null, $plural = null) {
+    protected function createViolation($field, $message, $messageTemplate = null, $parameters = [], $root = null, string $propertyPath = null, $invalidValue = null, $plural = null)
+    {
 
-        if(!$messageTemplate) {
+        if (!$messageTemplate) {
             $messageTemplate = $message;
         }
 
-        if(!$propertyPath) {
+        if (!$propertyPath) {
             $propertyPath = '[' . $this->getIdentifier($field) . ']';
         }
 

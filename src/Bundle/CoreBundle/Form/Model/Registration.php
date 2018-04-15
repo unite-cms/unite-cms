@@ -55,6 +55,16 @@ class Registration
     }
 
     /**
+     * Get firstname
+     *
+     * @return string
+     */
+    public function getFirstname()
+    {
+        return $this->firstname;
+    }
+
+    /**
      * Set firstname
      *
      * @param string $firstname
@@ -69,13 +79,13 @@ class Registration
     }
 
     /**
-     * Get firstname
+     * Get lastname
      *
      * @return string
      */
-    public function getFirstname()
+    public function getLastname()
     {
-        return $this->firstname;
+        return $this->lastname;
     }
 
     /**
@@ -90,15 +100,5 @@ class Registration
         $this->lastname = $lastname;
 
         return $this;
-    }
-
-    /**
-     * Get lastname
-     *
-     * @return string
-     */
-    public function getLastname()
-    {
-        return $this->lastname;
     }
 }

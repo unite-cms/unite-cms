@@ -10,10 +10,13 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 class FieldTypeManagerTest extends TestCase
 {
 
-    public function testRegisterFields() {
+    public function testRegisterFields()
+    {
 
-        $fieldType = new class extends FieldType {
+        $fieldType = new class extends FieldType
+        {
             const TYPE = "test_register_field_test_type";
+
             public function getTitle(FieldableField $field): string
             {
                 return 'custom_prefix_' . parent::getTitle($field);

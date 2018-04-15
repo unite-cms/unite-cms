@@ -16,7 +16,8 @@ class RecoverContentLogger
      */
     private $securityTokenStorage;
 
-    public function __construct(TokenStorage $tokenStorage) {
+    public function __construct(TokenStorage $tokenStorage)
+    {
         $this->securityTokenStorage = $tokenStorage;
     }
 
@@ -31,7 +32,7 @@ class RecoverContentLogger
                 $changeSet = $uow->getEntityChangeSet($entity);
 
                 // If the content was deleted and is no recovered, create log entry.
-                if(array_key_exists('deleted', $changeSet) && $changeSet['deleted'][0] !== null && $changeSet['deleted'][1] === null) {
+                if (array_key_exists('deleted', $changeSet) && $changeSet['deleted'][0] !== null && $changeSet['deleted'][1] === null) {
 
                     // Create log entry for recovering.
                     $logEntries = $args->getEntityManager()->getRepository('GedmoLoggable:LogEntry')->getLogEntries($entity);

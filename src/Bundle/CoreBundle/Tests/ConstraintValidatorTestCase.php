@@ -22,7 +22,8 @@ abstract class ConstraintValidatorTestCase extends TestCase
      * @param null|mixed $object
      * @return ExecutionContext
      */
-    protected function validate($value = null, ConstraintValidator $constraintValidator = null, Constraint $constraint = null, $object = null) {
+    protected function validate($value = null, ConstraintValidator $constraintValidator = null, Constraint $constraint = null, $object = null)
+    {
         $translator = $this->getMockBuilder('Symfony\Component\Translation\TranslatorInterface')->getMock();
         $validator = $this->getMockBuilder('Symfony\Component\Validator\Validator\ValidatorInterface')->getMock();
         $context = new ExecutionContext($validator, 'root', $translator);

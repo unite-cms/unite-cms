@@ -20,7 +20,8 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Field\FieldableFieldSettings value.
      */
-    public function testNonContentValue() {
+    public function testNonContentValue()
+    {
         // Create validator with mocked FieldTypeManager.
         $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
 
@@ -32,7 +33,8 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableField object.
      */
-    public function testInvalidContextObject() {
+    public function testInvalidContextObject()
+    {
         // Create validator with mocked FieldTypeManager.
         $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
 
@@ -40,7 +42,8 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
         $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock));
     }
 
-    public function testInvalidValue() {
+    public function testInvalidValue()
+    {
         // Create validator with mocked FieldTypeManager.
         $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
         $fieldTypeManagerMock->expects($this->any())
@@ -65,7 +68,8 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
     }
 
-    public function testValidValue() {
+    public function testValidValue()
+    {
         // Create validator with mocked FieldTypeManager.
         $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
         $fieldTypeManagerMock->expects($this->any())

@@ -43,15 +43,15 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
 
         // If this has an Level Suffix, we need to remove it first.
-        if(substr($nameParts[count($nameParts) - 1], 0, strlen('Level')) == 'Level') {
+        if (substr($nameParts[count($nameParts) - 1], 0, strlen('Level')) == 'Level') {
             array_pop($nameParts);
         }
 
-        if(count($nameParts) !== 2) {
+        if (count($nameParts) !== 2) {
             return false;
         }
 
-        if($nameParts[1] !== 'Setting') {
+        if ($nameParts[1] !== 'Setting') {
             return false;
         }
 
@@ -68,7 +68,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
      */
     public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
     {
-        if(!$domain) {
+        if (!$domain) {
             throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory::createSchemaType needs an domain as second argument');
         }
 
@@ -85,7 +85,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
         }
 
         // Load the full settingType if it is not already loaded.
-        if(!$this->entityManager->contains($settingType)) {
+        if (!$this->entityManager->contains($settingType)) {
             $settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->find(
                 $settingType->getId()
             );
@@ -111,7 +111,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
 
         return new ObjectType(
             [
-                'name' => ucfirst($identifier).'Setting'  . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                'name' => ucfirst($identifier) . 'Setting' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
                 'fields' => array_merge(
                     [
                         'type' => Type::string(),
@@ -123,7 +123,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                     $fieldTypes
                 ) {
                     if (!$value instanceof Setting) {
-                        throw new \InvalidArgumentException('Value must be instance of '.Setting::class.'.');
+                        throw new \InvalidArgumentException('Value must be instance of ' . Setting::class . '.');
                     }
 
                     switch ($info->fieldName) {
@@ -135,8 +135,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                                 return null;
                             }
 
-                            $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData(
-                            )[$info->fieldName] : null;
+                            $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData()[$info->fieldName] : null;
                             $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($settingType->getFields()->get($info->fieldName), $fieldData);
 
                             return $data;

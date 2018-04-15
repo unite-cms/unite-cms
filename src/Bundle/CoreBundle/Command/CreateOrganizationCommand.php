@@ -59,7 +59,7 @@ class CreateOrganizationCommand extends Command
         $name = $this->titleToMachineName($title);
 
         $question = new Question(
-            '<info>Please enter the identifier of the organization</info> [<comment>'.$name.'</comment>]: ', $name
+            '<info>Please enter the identifier of the organization</info> [<comment>' . $name . '</comment>]: ', $name
         );
         $question->setAutocompleterValues([$name]);
         $identifier = $helper->ask($input, $output, $question);
@@ -68,8 +68,7 @@ class CreateOrganizationCommand extends Command
         $organization->setTitle($title)->setIdentifier($identifier);
 
         $question = new ConfirmationQuestion(
-            '<info>Should the organization with title: "'.$organization->getTitle(
-            ).'" and identifier: "'.$identifier.'" be created</info>? [<comment>Y/n</comment>] ',
+            '<info>Should the organization with title: "' . $organization->getTitle() . '" and identifier: "' . $identifier . '" be created</info>? [<comment>Y/n</comment>] ',
             true,
             '/^(y|j)/i'
         );
@@ -79,7 +78,7 @@ class CreateOrganizationCommand extends Command
         }
 
         $errors = $this->validator->validate($organization);
-        if(count($errors) > 0) {
+        if (count($errors) > 0) {
             $output->writeln("<error>\n\nThere was an error while creating the organization\n \n$errors\n</error>");
         } else {
             $this->em->persist($organization);

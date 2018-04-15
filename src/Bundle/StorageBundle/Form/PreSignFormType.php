@@ -33,8 +33,7 @@ class PreSignFormType extends AbstractType implements DataTransformerInterface
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        if ($this->tokenStorage->getToken() && $this->tokenStorage->getToken()->getProviderKey() == "api")
-        {
+        if ($this->tokenStorage->getToken() && $this->tokenStorage->getToken()->getProviderKey() == "api") {
             $resolver->setDefault('csrf_protection', false);
         }
     }
@@ -43,14 +42,14 @@ class PreSignFormType extends AbstractType implements DataTransformerInterface
     {
         $builder->addModelTransformer($this);
         $builder
-          ->add('field', TextType::class, [
-            'required' => true,
-            'constraints' => [ new NotBlank() ]
-          ])
-          ->add('filename', TextType::class, [
-            'required' => true,
-            'constraints' => [ new NotBlank() ]
-          ]);
+            ->add('field', TextType::class, [
+                'required' => true,
+                'constraints' => [new NotBlank()]
+            ])
+            ->add('filename', TextType::class, [
+                'required' => true,
+                'constraints' => [new NotBlank()]
+            ]);
     }
 
     /**
@@ -66,16 +65,16 @@ class PreSignFormType extends AbstractType implements DataTransformerInterface
      */
     public function reverseTransform($data)
     {
-        if(!empty($data['filename'])) {
+        if (!empty($data['filename'])) {
 
-          // Make filename lowercase.
-          $data['filename'] = strtolower($data['filename']);
-          // Replace spaces, underscores, and dashes with underscores.
-          $data['filename'] = preg_replace('/(\s|_+|-+)+/', '_', $data['filename']);
-          // Trim underscores from the ends.
-          $data['filename'] = trim($data['filename'], '_');
-          // Remove all except alpha-numeric and underscore characters.
-          $data['filename'] = preg_replace('/[^a-z0-9_\.]+/', '', $data['filename']);
+            // Make filename lowercase.
+            $data['filename'] = strtolower($data['filename']);
+            // Replace spaces, underscores, and dashes with underscores.
+            $data['filename'] = preg_replace('/(\s|_+|-+)+/', '_', $data['filename']);
+            // Trim underscores from the ends.
+            $data['filename'] = trim($data['filename'], '_');
+            // Remove all except alpha-numeric and underscore characters.
+            $data['filename'] = preg_replace('/[^a-z0-9_\.]+/', '', $data['filename']);
         }
         return $data;
     }

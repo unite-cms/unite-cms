@@ -115,7 +115,8 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->em->refresh($this->apiClient2);
     }
 
-    public function testAccessAPIEndpoint() {
+    public function testAccessAPIEndpoint()
+    {
 
         // Try to access without token.
         $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [

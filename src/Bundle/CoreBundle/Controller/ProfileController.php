@@ -289,7 +289,7 @@ class ProfileController extends Controller
                         $newUser = false;
 
                         // If no user is logged in, redirect the user to the login page
-                        if(!$this->getUser()) {
+                        if (!$this->getUser()) {
                             throw $this->createAccessDeniedException();
                         }
 

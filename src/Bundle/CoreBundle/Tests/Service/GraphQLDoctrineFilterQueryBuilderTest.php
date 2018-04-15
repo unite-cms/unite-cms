@@ -10,14 +10,16 @@ use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 
 class GraphQLDoctrineFilterQueryBuilderTest extends TestCase
 {
-    public function testBuildingEmpty() {
+    public function testBuildingEmpty()
+    {
         $builder = new GraphQLDoctrineFilterQueryBuilder([], ['id', 'locale'], 'c');
 
         $this->assertEquals([], $builder->getParameters());
         $this->assertEquals(null, $builder->getFilter());
     }
 
-    public function testBuildingSimpleORandANDFilter() {
+    public function testBuildingSimpleORandANDFilter()
+    {
 
         $builder = new GraphQLDoctrineFilterQueryBuilder(['field' => 'id', 'operator' => '=', 'value' => 123], ['id', 'locale'], 'c');
 
@@ -52,7 +54,8 @@ class GraphQLDoctrineFilterQueryBuilderTest extends TestCase
         $this->assertEquals("c.id = :graphql_filter_builder_parameter1 AND JSON_EXTRACT(c.data, '$.any_field') LIKE :graphql_filter_builder_parameter2", (string)$filter);
     }
 
-    public function testBuildingComplexNestedFilter() {
+    public function testBuildingComplexNestedFilter()
+    {
 
         $builder = new GraphQLDoctrineFilterQueryBuilder([
             'AND' => [

@@ -35,13 +35,9 @@ class SortableViewType extends ViewType
         if (empty($columns)) {
             if ($fields->containsKey('title') && in_array($fields->get('title')->getType(), $possible_field_types)) {
                 $columns['title'] = 'Title';
-            }
-
-            elseif ($fields->containsKey('name') && in_array($fields->get('name')->getType(), $possible_field_types)) {
+            } elseif ($fields->containsKey('name') && in_array($fields->get('name')->getType(), $possible_field_types)) {
                 $columns['name'] = 'Name';
-            }
-
-            else {
+            } else {
                 $columns['id'] = 'ID';
             }
 
@@ -66,25 +62,25 @@ class SortableViewType extends ViewType
         $violations = parent::validateSettings($settings);
 
         // Only continue, if all required settings are available and there are no additional settings.
-        if(!empty($violations)) {
+        if (!empty($violations)) {
             return $violations;
         }
 
         // validate setting structure.
-        if(!empty($settings->columns) && !is_array($settings->columns)) {
-            $violations[] = $this->createInvalidSettingDefinitionConstraint($settings,'columns');
+        if (!empty($settings->columns) && !is_array($settings->columns)) {
+            $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'columns');
         }
-        if(!empty($settings->sort_field) && !is_string($settings->sort_field)) {
-            $violations[] = $this->createInvalidSettingDefinitionConstraint($settings,'sort_field');
+        if (!empty($settings->sort_field) && !is_string($settings->sort_field)) {
+            $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'sort_field');
         }
 
         // Only continue, if all setting properties have correct type.
-        if(!empty($violations)) {
+        if (!empty($violations)) {
             return $violations;
         }
 
         // Validate column fields.
-        if(!empty($settings->columns)) {
+        if (!empty($settings->columns)) {
             foreach ($settings->columns as $field => $label) {
                 if (!$this->content_type_contains_field($field)) {
                     $violations[] = $this->createUnknownColumnConstraint($settings, 'columns.' . $field);
@@ -93,8 +89,8 @@ class SortableViewType extends ViewType
         }
 
         // Validate sort_field.
-        if(!empty($settings->sort_field)) {
-            if(!$this->content_type_contains_field($settings->sort_field)) {
+        if (!empty($settings->sort_field)) {
+            if (!$this->content_type_contains_field($settings->sort_field)) {
                 $violations[] = $this->createUnknownColumnConstraint($settings, 'sort_field');
             }
         }
@@ -102,7 +98,8 @@ class SortableViewType extends ViewType
         return $violations;
     }
 
-    private function createInvalidSettingDefinitionConstraint($settings, $property) {
+    private function createInvalidSettingDefinitionConstraint($settings, $property)
+    {
         return new ConstraintViolation(
             "validation.invalid_{$property}_definition",
             "validation.invalid_{$property}_definition",
@@ -113,7 +110,8 @@ class SortableViewType extends ViewType
         );
     }
 
-    private function createUnknownColumnConstraint($settings, $property_path) {
+    private function createUnknownColumnConstraint($settings, $property_path)
+    {
         return new ConstraintViolation(
             "validation.unknown_column",
             "validation.unknown_column",
@@ -124,8 +122,9 @@ class SortableViewType extends ViewType
         );
     }
 
-    private function content_type_contains_field($field) {
-        if(in_array($field, ['id', 'locale', 'created', 'updated', 'deleted'])) {
+    private function content_type_contains_field($field)
+    {
+        if (in_array($field, ['id', 'locale', 'created', 'updated', 'deleted'])) {
             return true;
         }
         return $this->view->getContentType()->getFields()->containsKey($field);

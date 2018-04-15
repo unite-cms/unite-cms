@@ -168,7 +168,8 @@ class ContentEntityTest extends DatabaseAwareTestCase
         $this->assertCount(0, $this->container->get('validator')->validate($content));
     }
 
-    public function testContentEntityToStringMethod() {
+    public function testContentEntityToStringMethod()
+    {
 
         // Empty content should be printed as "".
         $this->assertEquals('Content', (string)new Content());

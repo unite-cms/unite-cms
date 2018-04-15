@@ -20,40 +20,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 class DomainInvitation
 {
     const INVITATION_RESET_TTL = 2592000; // Default to two one month
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="bigint")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
-
-    /**
-     * @var array
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="validation.invalid_selection")
-     * @ORM\Column(name="roles", type="array")
-     */
-    private $roles;
-
-    /**
-     * @var Domain
-     * @Assert\Valid()
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="invites")
-     */
-    private $domain;
-
-    /**
-     * @var User
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Email(message="validation.invalid_email")
-     * @ORM\Column(name="email", type="string")
-     */
-    private $email;
-
     /**
      * @var string
      * @Assert\Length(max="180", maxMessage="validation.too_long")
@@ -62,13 +28,41 @@ class DomainInvitation
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;
-
     /**
      * @var \DateTime
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\Column(name="requested_at", type="datetime", nullable=true)
      */
     protected $requestedAt;
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="bigint")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+    /**
+     * @var array
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="validation.invalid_selection")
+     * @ORM\Column(name="roles", type="array")
+     */
+    private $roles;
+    /**
+     * @var Domain
+     * @Assert\Valid()
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="invites")
+     */
+    private $domain;
+    /**
+     * @var User
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\Email(message="validation.invalid_email")
+     * @ORM\Column(name="email", type="string")
+     */
+    private $email;
 
     public function __construct()
     {

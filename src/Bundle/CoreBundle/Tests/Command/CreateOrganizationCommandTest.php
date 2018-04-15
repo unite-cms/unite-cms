@@ -16,7 +16,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class CreateOrganizationCommandTest extends DatabaseAwareTestCase
 {
-    public function testCreateOrganizationCommand() {
+    public function testCreateOrganizationCommand()
+    {
 
         $application = new Application(self::$kernel);
         $application->add(new CreateOrganizationCommand(

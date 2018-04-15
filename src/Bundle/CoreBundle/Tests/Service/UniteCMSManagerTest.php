@@ -77,7 +77,8 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $this->em->refresh($this->domain);
     }
 
-    public function testGettingOrgAndDomainWithoutRequest() {
+    public function testGettingOrgAndDomainWithoutRequest()
+    {
         // cms manager should silently return null if it could not find an organization or domain
         $this->assertNull($this->container->get('unite.cms.manager')->getOrganization());
         $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
@@ -90,7 +91,8 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         ));
     }
 
-    public function testGettingOrgAndDomainWithInvalidOrganizationIdentifier() {
+    public function testGettingOrgAndDomainWithInvalidOrganizationIdentifier()
+    {
         $this->container->get('request_stack')->push(new Request(
             [], [], [
                 'organization' => 'foo',
@@ -101,7 +103,8 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
     }
 
-    public function testGettingOrgAndDomainWithInvalidDomainIdentifier() {
+    public function testGettingOrgAndDomainWithInvalidDomainIdentifier()
+    {
         $this->container->get('request_stack')->push(new Request(
             [], [], [
                 'organization' => $this->organization,
@@ -112,7 +115,8 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
     }
 
-    public function testGettingOriginalDomainFromManager() {
+    public function testGettingOriginalDomainFromManager()
+    {
 
         $title = $this->domain->getTitle();
         $cTitle = $this->domain->getContentTypes()->first()->getTitle();
@@ -145,7 +149,8 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $this->assertEquals($this->domain->getSettingTypes()->first()->getId(), $originalDomain->getSettingTypes()->first()->getId());
     }
 
-    public function testTryingToUpdateShouldNotWork() {
+    public function testTryingToUpdateShouldNotWork()
+    {
 
         $oTitle = $this->organization->getTitle();
         $dTitle = $this->domain->getTitle();
@@ -195,7 +200,6 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
 
         $this->em->refresh($this->domain->getContentTypes()->first());
         $this->assertEquals($cTitle, $this->domain->getContentTypes()->first()->getTitle());
-
 
 
         $originalDomain->getSettingTypes()->first()->setTitle('new Title');

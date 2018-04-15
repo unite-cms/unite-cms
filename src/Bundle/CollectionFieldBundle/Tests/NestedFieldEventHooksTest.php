@@ -108,32 +108,43 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->em->flush($this->domain);
     }
 
-    public function testNestedEvents() {
+    public function testNestedEvents()
+    {
 
-        $mock = new class extends FieldType {
+        $mock = new class extends FieldType
+        {
 
             public $softDeleteString = [];
             public $hardDeleteString = [];
 
-            public function createCompareAbleString(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
+            public function createCompareAbleString(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data)
+            {
                 return
-                  $field->getJsonExtractIdentifier() .
-                  $content->getEntity()->getIdentifier() .
-                  $repository->getClassName() .
-                  $data;
+                    $field->getJsonExtractIdentifier() .
+                    $content->getEntity()->getIdentifier() .
+                    $repository->getClassName() .
+                    $data;
             }
 
             const TYPE = 'testeventhook';
-            public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data) {
+
+            public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data)
+            {
                 $data[$field->getIdentifier()] = $this->createCompareAbleString($field, $content, $repository, $data[$field->getIdentifier()]);
             }
-            public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
+
+            public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data)
+            {
                 $data[$field->getIdentifier()] = $this->createCompareAbleString($field, $content, $repository, $data[$field->getIdentifier()]);
             }
-            public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+
+            public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
+            {
                 $this->softDeleteString[$field->getJsonExtractIdentifier()] = $this->createCompareAbleString($field, $content, $repository, 'soft_delete');
             }
-            public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+
+            public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
+            {
                 $this->hardDeleteString[$field->getJsonExtractIdentifier()] = $this->createCompareAbleString($field, $content, $repository, 'hard_delete');
             }
         };
@@ -143,20 +154,20 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $content = new Content();
         $content->setContentType($this->domain->getContentTypes()->first());
         $content->setData([
-          'n1' => [
-            [
-              'n2' => [
-                ['test' => 'foo'],
-                ['test' => 'baa'],
-              ]
+            'n1' => [
+                [
+                    'n2' => [
+                        ['test' => 'foo'],
+                        ['test' => 'baa'],
+                    ]
+                ],
+                [
+                    'n2' => [
+                        ['test' => 'luu'],
+                        ['test' => 'laa'],
+                    ]
+                ],
             ],
-            [
-              'n2' => [
-                ['test' => 'luu'],
-                ['test' => 'laa'],
-              ]
-            ],
-          ],
         ]);
 
         $this->em->persist($content);
@@ -171,20 +182,20 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Update content
         $content->setData([
-          'n1' => [
-            [
-              'n2' => [
-                ['test' => 'updated_foo'],
-                ['test' => 'updated_baa'],
-              ]
+            'n1' => [
+                [
+                    'n2' => [
+                        ['test' => 'updated_foo'],
+                        ['test' => 'updated_baa'],
+                    ]
+                ],
+                [
+                    'n2' => [
+                        ['test' => 'updated_luu'],
+                        ['test' => 'updated_laa'],
+                    ]
+                ],
             ],
-            [
-              'n2' => [
-                ['test' => 'updated_luu'],
-                ['test' => 'updated_laa'],
-              ]
-            ],
-          ],
         ]);
 
         $this->em->flush($content);
@@ -206,7 +217,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->em->getFilters()->disable('gedmo_softdeleteable');
 
         $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-          'contentType' => $this->domain->getContentTypes()->first(),
+            'contentType' => $this->domain->getContentTypes()->first(),
         ]);
 
         $this->em->remove($content);

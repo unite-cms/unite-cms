@@ -58,15 +58,15 @@ class CollectionField implements FieldableField
 
     public function __construct($field)
     {
-        if(isset($field['title'])) {
+        if (isset($field['title'])) {
             $this->setTitle($field['title']);
         }
 
-        if(isset($field['identifier'])) {
+        if (isset($field['identifier'])) {
             $this->setIdentifier($field['identifier']);
         }
 
-        if(isset($field['type'])) {
+        if (isset($field['type'])) {
             $this->setType($field['type']);
         }
 
@@ -75,7 +75,17 @@ class CollectionField implements FieldableField
 
     public function __toString()
     {
-        return ''.$this->title;
+        return '' . $this->title;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
     }
 
     /**
@@ -93,13 +103,13 @@ class CollectionField implements FieldableField
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -117,13 +127,13 @@ class CollectionField implements FieldableField
     }
 
     /**
-     * Get identifier
+     * Get type
      *
      * @return string
      */
-    public function getIdentifier()
+    public function getType()
     {
-        return $this->identifier;
+        return $this->type;
     }
 
     /**
@@ -141,13 +151,13 @@ class CollectionField implements FieldableField
     }
 
     /**
-     * Get type
+     * Get settings
      *
-     * @return string
+     * @return FieldableFieldSettings
      */
-    public function getType()
+    public function getSettings()
     {
-        return $this->type;
+        return $this->settings;
     }
 
     /**
@@ -162,16 +172,6 @@ class CollectionField implements FieldableField
         $this->settings = $settings;
 
         return $this;
-    }
-
-    /**
-     * Get settings
-     *
-     * @return FieldableFieldSettings
-     */
-    public function getSettings()
-    {
-        return $this->settings;
     }
 
     /**

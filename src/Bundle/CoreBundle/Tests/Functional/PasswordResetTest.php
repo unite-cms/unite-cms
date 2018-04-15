@@ -132,7 +132,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
     {
         $crawler = $this->client->request(
             'GET',
-            '/profile/reset-password-confirm?token='.rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=')
+            '/profile/reset-password-confirm?token=' . rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=')
         );
         $this->assertCount(0, $crawler->filter('form'));
     }
@@ -144,12 +144,12 @@ class PasswordResetTest extends DatabaseAwareTestCase
             rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=')
         )->getResetToken();
         $this->users['domain_editor']->setResetRequestedAt(new \DateTime())->getResetRequestedAt()->sub(
-            new \DateInterval('PT'.User::PASSWORD_RESET_TTL.'S')
+            new \DateInterval('PT' . User::PASSWORD_RESET_TTL . 'S')
         );
         $this->assertTrue($this->users['domain_editor']->isResetRequestExpired());
         $this->em->flush($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', '/profile/reset-password-confirm?token='.$resetToken);
+        $crawler = $this->client->request('GET', '/profile/reset-password-confirm?token=' . $resetToken);
         $this->assertCount(0, $crawler->filter('form'));
     }
 
@@ -162,7 +162,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $this->users['domain_editor']->setResetRequestedAt(new \DateTime());
         $this->em->flush($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', '/profile/reset-password-confirm?token='.$resetToken);
+        $crawler = $this->client->request('GET', '/profile/reset-password-confirm?token=' . $resetToken);
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 
@@ -177,7 +177,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $this->assertCount(1, $crawler->filter('form div.uk-alert-danger'));
 
         // Try to update the password with valid password.
-        $new_RandPassword = 'valid_password'.time();
+        $new_RandPassword = 'valid_password' . time();
         $form['change_password[newPassword][first]'] = $new_RandPassword;
         $form['change_password[newPassword][second]'] = $new_RandPassword;
         $crawler = $this->client->submit($form);

@@ -34,47 +34,61 @@ class VoterReturnValueTest extends SecurityVoterTestCase
         $this->token = new UsernamePasswordToken(new User(), 'password', 'main', ['ROLE_USER']);
     }
 
-    public function testVoteReturnsAlwaysValidValues() {
-        $contentVoter = new class extends ContentVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+    public function testVoteReturnsAlwaysValidValues()
+    {
+        $contentVoter = new class extends ContentVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
         $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $contentVoter->voteWithoutCheck($this->token, (object)[], ''));
 
-        $deleteContentVoter = new class extends DeletedContentVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+        $deleteContentVoter = new class extends DeletedContentVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
         $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $deleteContentVoter->voteWithoutCheck($this->token, (object)[], ''));
 
-        $domainVoter = new class extends DomainVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+        $domainVoter = new class extends DomainVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
         $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $domainVoter->voteWithoutCheck($this->token, (object)[], ''));
 
-        $organizationVoter = new class extends OrganizationVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+        $organizationVoter = new class extends OrganizationVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
         $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $organizationVoter->voteWithoutCheck($this->token, (object)[], ''));
 
-        $settingVoter = new class extends SettingVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+        $settingVoter = new class extends SettingVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
         $this->assertEquals(VoterInterface::ACCESS_ABSTAIN, $settingVoter->voteWithoutCheck($this->token, (object)[], ''));
     }
 
-    public function testContentVoterReturnsAbstainForDeletedContent() {
+    public function testContentVoterReturnsAbstainForDeletedContent()
+    {
 
-        $contentVoter = new class extends ContentVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+        $contentVoter = new class extends ContentVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
@@ -89,9 +103,12 @@ class VoterReturnValueTest extends SecurityVoterTestCase
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Permission 'unsupported' was not found in ContentType 'any'
      */
-    public function testContentVoterWrongAttributeException() {
-        $contentVoter = new class extends ContentVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+    public function testContentVoterWrongAttributeException()
+    {
+        $contentVoter = new class extends ContentVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
@@ -107,9 +124,12 @@ class VoterReturnValueTest extends SecurityVoterTestCase
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Permission 'unsupported' was not found in SettingType 'any'
      */
-    public function testSettingVoterWrongAttributeException() {
-        $contentVoter = new class extends SettingVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+    public function testSettingVoterWrongAttributeException()
+    {
+        $contentVoter = new class extends SettingVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };
@@ -121,9 +141,12 @@ class VoterReturnValueTest extends SecurityVoterTestCase
         $contentVoter->voteWithoutCheck($this->token, $value, 'unsupported');
     }
 
-    public function testOrganizationVoterUnknownOrganizationRole() {
-        $organizationVoter = new class extends OrganizationVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
+    public function testOrganizationVoterUnknownOrganizationRole()
+    {
+        $organizationVoter = new class extends OrganizationVoter
+        {
+            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute)
+            {
                 return $this->voteOnAttribute($attribute, $subject, $token);
             }
         };

@@ -15,7 +15,8 @@ use UniteCMS\CoreBundle\Entity\Organization;
 class ViewParameterBagTest extends TestCase
 {
 
-    public function testGetterAndSetter() {
+    public function testGetterAndSetter()
+    {
         $bag = new ViewParameterBag();
         $this->assertEquals(['foo' => 'baa', 'foo2' => ['baa']], $bag->setSettings(['foo' => 'baa', 'foo2' => ['baa']])->getSettings());
         $this->assertEquals('baa', $bag->get('foo'));
@@ -68,7 +69,8 @@ class ViewParameterBagTest extends TestCase
         ]), json_encode($bag));
     }
 
-    public function testSelectModeIndicator() {
+    public function testSelectModeIndicator()
+    {
         $bag = new ViewParameterBag();
         $bag->setSelectMode(ViewTypeInterface::SELECT_MODE_SINGLE);
         $this->assertTrue($bag->isSelectModeSingle());
@@ -79,16 +81,24 @@ class ViewParameterBagTest extends TestCase
         $this->assertTrue($bag->isSelectModeNone());
     }
 
-    public function testCreateFromView() {
+    public function testCreateFromView()
+    {
 
         $view = new View();
         $view->setIdentifier('co1')->setContentType(new ContentType())->getContentType()
             ->setIdentifier('ct1')->setLocales(['de', 'en'])->setDomain(new Domain())->getDomain()
             ->setIdentifier('d1')->setOrganization(new Organization())->getOrganization()
             ->setIdentifier('o1');
-        $generator = new Class implements UrlGeneratorInterface {
-            public function setContext(RequestContext $context) {}
-            public function getContext() {}
+        $generator = new Class implements UrlGeneratorInterface
+        {
+            public function setContext(RequestContext $context)
+            {
+            }
+
+            public function getContext()
+            {
+            }
+
             public function generate($name, $parameters = array(), $referenceType = self::ABSOLUTE_PATH)
             {
                 return $name . '_' . implode(',', $parameters);

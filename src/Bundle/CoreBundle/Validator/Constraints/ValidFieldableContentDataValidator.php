@@ -23,29 +23,6 @@ class ValidFieldableContentDataValidator extends ConstraintValidator
         $this->fieldTypeManager = $fieldTypeManager;
     }
 
-    /**
-     * Adds a new ConstraintViolation to the current context. Takes the violation and only modify the propertyPath to
-     * make the violation a child of this field.
-     *
-     * @param ConstraintViolation $violation
-     */
-    private function addDataViolation(ConstraintViolation $violation)
-    {
-        $this->context->getViolations()->add(
-            new ConstraintViolation(
-                $violation->getMessage(),
-                $violation->getMessageTemplate(),
-                $violation->getParameters(),
-                $violation->getRoot(),
-                $this->context->getPropertyPath($violation->getPropertyPath()),
-                $violation->getInvalidValue(),
-                $violation->getPlural(),
-                $violation->getCode(),
-                $violation->getConstraint()
-            )
-        );
-    }
-
     public function validate($value, Constraint $constraint)
     {
         if (!is_array($value) || !$this->context->getObject()) {
@@ -90,5 +67,28 @@ class ValidFieldableContentDataValidator extends ConstraintValidator
                 $this->addDataViolation($violation);
             }
         }
+    }
+
+    /**
+     * Adds a new ConstraintViolation to the current context. Takes the violation and only modify the propertyPath to
+     * make the violation a child of this field.
+     *
+     * @param ConstraintViolation $violation
+     */
+    private function addDataViolation(ConstraintViolation $violation)
+    {
+        $this->context->getViolations()->add(
+            new ConstraintViolation(
+                $violation->getMessage(),
+                $violation->getMessageTemplate(),
+                $violation->getParameters(),
+                $violation->getRoot(),
+                $this->context->getPropertyPath($violation->getPropertyPath()),
+                $violation->getInvalidValue(),
+                $violation->getPlural(),
+                $violation->getCode(),
+                $violation->getConstraint()
+            )
+        );
     }
 }

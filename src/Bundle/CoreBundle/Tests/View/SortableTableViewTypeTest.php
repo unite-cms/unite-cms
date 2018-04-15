@@ -13,37 +13,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 class SortableTableViewTypeTest extends DatabaseAwareTestCase
 {
 
-    /**
-     * @return View
-     */
-    private function createInstance() {
-        $view = new View();
-        $view
-            ->setType('sortable')
-            ->setTitle('New View')
-            ->setIdentifier('new_view')
-            ->setSettings(new ViewSettings(['sort_field' => 'position']))
-            ->setContentType(new ContentType())
-            ->getContentType()
-            ->setTitle('ct')
-            ->setIdentifier('ct')
-            ->setDomain(new Domain())
-            ->getDomain()
-            ->setTitle('D1')
-            ->setIdentifier('d1')
-            ->setOrganization(new Organization())
-            ->getOrganization()
-            ->setTitle('O1')
-            ->setIdentifier('o1');
-
-        $field = new ContentTypeField();
-        $field->setType('text')->setIdentifier('position')->setTitle('Position');
-        $view->getContentType()->addField($field);
-
-        return $view;
-    }
-
-    public function testSortableViewWithPositionSetting() {
+    public function testSortableViewWithPositionSetting()
+    {
         $view = $this->createInstance();
 
         // View should be valid.
@@ -56,11 +27,12 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
             'created' => 'Created',
             'updated' => 'Updated',
             'id' => 'ID',
-        ],$parameters->get('columns'));
+        ], $parameters->get('columns'));
         $this->assertEquals('position', $parameters->get('sort_field'));
     }
 
-    public function testSortableViewWithInvalidSettings() {
+    public function testSortableViewWithInvalidSettings()
+    {
         $view = $this->createInstance();
         $view->setSettings(new ViewSettings());
 
@@ -108,7 +80,8 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
     }
 
-    public function testSortableViewWithValidSettings() {
+    public function testSortableViewWithValidSettings()
+    {
         $view = $this->createInstance();
         $view->setSettings(new ViewSettings([
             'columns' => [
@@ -131,7 +104,38 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertEquals([
             'id' => 'ID',
             'position' => 'Position',
-        ],$parameters->get('columns'));
+        ], $parameters->get('columns'));
         $this->assertEquals('position', $parameters->get('sort_field'));
+    }
+
+    /**
+     * @return View
+     */
+    private function createInstance()
+    {
+        $view = new View();
+        $view
+            ->setType('sortable')
+            ->setTitle('New View')
+            ->setIdentifier('new_view')
+            ->setSettings(new ViewSettings(['sort_field' => 'position']))
+            ->setContentType(new ContentType())
+            ->getContentType()
+            ->setTitle('ct')
+            ->setIdentifier('ct')
+            ->setDomain(new Domain())
+            ->getDomain()
+            ->setTitle('D1')
+            ->setIdentifier('d1')
+            ->setOrganization(new Organization())
+            ->getOrganization()
+            ->setTitle('O1')
+            ->setIdentifier('o1');
+
+        $field = new ContentTypeField();
+        $field->setType('text')->setIdentifier('position')->setTitle('Position');
+        $view->getContentType()->addField($field);
+
+        return $view;
     }
 }

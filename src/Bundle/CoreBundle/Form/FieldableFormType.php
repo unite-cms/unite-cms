@@ -25,16 +25,16 @@ class FieldableFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // Handle content locales
-        if(!empty($options['locales'])) {
+        if (!empty($options['locales'])) {
 
             // if this fieldable has exactly one possible locale, add it as hidden field.
-            if(count($options['locales']) == 1) {
+            if (count($options['locales']) == 1) {
                 $builder->add('locale', HiddenType::class, ['data' => $options['locales'][0]]);
 
-            // if this fieldable has more than one possible locale, render a selection list.
+                // if this fieldable has more than one possible locale, render a selection list.
             } else {
                 $choices = [];
-                foreach($options['locales'] as $locale) {
+                foreach ($options['locales'] as $locale) {
                     $choices[Intl::getLocaleBundle()->getLocaleName($locale)] = $locale;
                 }
                 $builder->add('locale', ChoiceType::class, ['choices' => $choices]);
@@ -57,8 +57,7 @@ class FieldableFormType extends AbstractType
     {
         $resolver->setRequired('fields');
         $resolver->setDefined('locales');
-        if ($this->tokenStorage->getToken() && $this->tokenStorage->getToken()->getProviderKey() == "api")
-        {
+        if ($this->tokenStorage->getToken() && $this->tokenStorage->getToken()->getProviderKey() == "api") {
             $resolver->setDefault('csrf_protection', false);
         }
     }

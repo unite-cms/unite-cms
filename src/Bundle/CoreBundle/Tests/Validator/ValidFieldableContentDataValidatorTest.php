@@ -19,7 +19,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
     protected $constraintClass = ValidFieldableContentData::class;
 
 
-    public function testEmptyObjectAndContextObject() {
+    public function testEmptyObjectAndContextObject()
+    {
         $object = new \stdClass();
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
 
@@ -38,7 +39,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidFieldableContentDataValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableContent object.
      */
-    public function testInvalidObject() {
+    public function testInvalidObject()
+    {
         $object = new \stdClass();
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
         $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager), null, $object);
@@ -48,7 +50,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidFieldableContentDataValidator constraint expects object->getEntity() to return a UniteCMS\CoreBundle\Entity\Fieldable object.
      */
-    public function testInvalidObjectReference() {
+    public function testInvalidObjectReference()
+    {
         $object = $this->createMock(FieldableContent::class);
         $object->expects($this->any())
             ->method('getEntity')
@@ -58,7 +61,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
         $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager), null, $object);
     }
 
-    public function testInvalidAdditionalValue() {
+    public function testInvalidAdditionalValue()
+    {
 
         $ct = new ContentType();
         $f1 = new ContentTypeField();
@@ -73,7 +77,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('The content unit contains invalid additional data.', $context->getViolations()->get(0)->getMessageTemplate());
     }
 
-    public function testInvalidDataValue() {
+    public function testInvalidDataValue()
+    {
 
         $ct = new ContentType();
         $f1 = new ContentTypeField();
@@ -96,7 +101,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
     }
 
-    public function testValidDataValue() {
+    public function testValidDataValue()
+    {
 
         $ct = new ContentType();
         $f1 = new ContentTypeField();

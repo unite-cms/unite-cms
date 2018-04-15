@@ -21,23 +21,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 class ApiClient implements UserInterface, \Serializable
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="bigint")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
-
-    /**
-     * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @ORM\Column(name="name", type="string", length=255)
-     */
-    private $name;
-
-    /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="180", maxMessage="validation.too_long")
@@ -45,7 +28,21 @@ class ApiClient implements UserInterface, \Serializable
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;
-
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="bigint")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+    /**
+     * @var string
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @ORM\Column(name="name", type="string", length=255)
+     */
+    private $name;
     /**
      * @var \DateTime $created
      *
@@ -85,7 +82,7 @@ class ApiClient implements UserInterface, \Serializable
 
     public function __toString()
     {
-        return ''.$this->getName();
+        return '' . $this->getName();
     }
 
     /**
@@ -96,6 +93,16 @@ class ApiClient implements UserInterface, \Serializable
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -113,13 +120,13 @@ class ApiClient implements UserInterface, \Serializable
     }
 
     /**
-     * Get name
+     * Returns the roles granted to the client.
      *
-     * @return string
+     * @return Role[]|string[] The API client roles
      */
-    public function getName()
+    public function getRoles()
     {
-        return $this->name;
+        return $this->roles;
     }
 
     /**
@@ -131,16 +138,6 @@ class ApiClient implements UserInterface, \Serializable
     {
         $this->roles = $roles;
         return $this;
-    }
-
-    /**
-     * Returns the roles granted to the client.
-     *
-     * @return Role[]|string[] The API client roles
-     */
-    public function getRoles()
-    {
-        return $this->roles;
     }
 
     /**

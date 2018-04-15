@@ -34,7 +34,7 @@ interface Fieldable
     /**
      * @return array
      */
-    public function getLocales() : array;
+    public function getLocales(): array;
 
     /**
      * Returns the identifier of this fieldable.
@@ -63,5 +63,5 @@ interface Fieldable
      *
      * @return Fieldable
      */
-    public function getRootEntity() : Fieldable;
+    public function getRootEntity(): Fieldable;
 }

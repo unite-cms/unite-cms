@@ -65,15 +65,25 @@ class Organization
      */
     private $users;
 
-    public function __toString()
-    {
-        return ''.$this->title;
-    }
-
     public function __construct()
     {
         $this->domains = new ArrayCollection();
         $this->users = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return '' . $this->title;
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
     }
 
     /**
@@ -91,13 +101,13 @@ class Organization
     }
 
     /**
-     * Get id
+     * Get title
      *
-     * @return int
+     * @return string
      */
-    public function getId()
+    public function getTitle()
     {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -115,13 +125,13 @@ class Organization
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -136,16 +146,6 @@ class Organization
         $this->identifier = $identifier;
 
         return $this;
-    }
-
-    /**
-     * Get identifier
-     *
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
     }
 
     /**

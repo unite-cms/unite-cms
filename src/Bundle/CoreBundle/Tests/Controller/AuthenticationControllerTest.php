@@ -9,7 +9,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 /**
  * @group slow
  */
-class AuthenticationControllerTest extends DatabaseAwareTestCase {
+class AuthenticationControllerTest extends DatabaseAwareTestCase
+{
 
     /**
      * @var Client $client
@@ -23,7 +24,8 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->client->followRedirects(false);
     }
 
-    public function testLoginWithValidUser() {
+    public function testLoginWithValidUser()
+    {
 
         $password = 'password';
 
@@ -44,7 +46,8 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/'));
     }
 
-    public function testLoginWithInValidUser() {
+    public function testLoginWithInValidUser()
+    {
         $password = 'password';
 
         $user = new User();
@@ -66,7 +69,8 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("Invalid credentials.")'));
     }
 
-    public function testLoginWithInValidPassword() {
+    public function testLoginWithInValidPassword()
+    {
         $password = 'password';
 
         $user = new User();

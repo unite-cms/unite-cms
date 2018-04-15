@@ -14,10 +14,19 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
     /**
      * @expectedException \Symfony\Component\Validator\Exception\ConstraintDefinitionException
      */
-    public function testInvalidAttributesCallback() {
-        $object = new class {
-            public function getRoles() { return[]; }
-            public function getAttributes() { return[]; }
+    public function testInvalidAttributesCallback()
+    {
+        $object = new class
+        {
+            public function getRoles()
+            {
+                return [];
+            }
+
+            public function getAttributes()
+            {
+                return [];
+            }
         };
 
         $this->validate([], null, new ValidPermissions([
@@ -29,10 +38,19 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
     /**
      * @expectedException \Symfony\Component\Validator\Exception\ConstraintDefinitionException
      */
-    public function testInvalidRolesCallback() {
-        $object = new class {
-            public function getRoles() { return[]; }
-            public function getAttributes() { return[]; }
+    public function testInvalidRolesCallback()
+    {
+        $object = new class
+        {
+            public function getRoles()
+            {
+                return [];
+            }
+
+            public function getAttributes()
+            {
+                return [];
+            }
         };
 
         $this->validate([], null, new ValidPermissions([
@@ -44,10 +62,19 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
     /**
      * @expectedException InvalidArgumentException
      */
-    public function testInvalidValueStructure() {
-        $object = new class {
-            public function getRoles() { return ['a', 'b']; }
-            public function getAttributes() { return ['a', 'b']; }
+    public function testInvalidValueStructure()
+    {
+        $object = new class
+        {
+            public function getRoles()
+            {
+                return ['a', 'b'];
+            }
+
+            public function getAttributes()
+            {
+                return ['a', 'b'];
+            }
         };
 
         $this->validate(['a' => 'a', 'b' => 'b'], null, new ValidPermissions([
@@ -56,10 +83,19 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
         ]), $object);
     }
 
-    public function testInvalidValue() {
-        $object = new class {
-            public function getRoles() { return ['a']; }
-            public function getAttributes() { return ['a']; }
+    public function testInvalidValue()
+    {
+        $object = new class
+        {
+            public function getRoles()
+            {
+                return ['a'];
+            }
+
+            public function getAttributes()
+            {
+                return ['a'];
+            }
         };
 
         $context = $this->validate(['a' => ['b']], null, new ValidPermissions([
@@ -77,10 +113,19 @@ class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('Invalid permissions or roles where selected.', $context->getViolations()->get(0)->getMessageTemplate());
     }
 
-    public function testValueStructure() {
-        $object = new class {
-            public function getRoles() { return ['a', 'b']; }
-            public function getAttributes() { return ['a', 'b']; }
+    public function testValueStructure()
+    {
+        $object = new class
+        {
+            public function getRoles()
+            {
+                return ['a', 'b'];
+            }
+
+            public function getAttributes()
+            {
+                return ['a', 'b'];
+            }
         };
 
         $context = $this->validate(['a' => ['a', 'b'], 'b' => ['a', 'b']], null, new ValidPermissions([

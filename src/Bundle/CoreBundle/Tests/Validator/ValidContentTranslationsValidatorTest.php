@@ -26,7 +26,8 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidContentTranslationsValidator constraint expects a UniteCMS\CoreBundle\Entity\Content object.
      */
-    public function testInvalidObject() {
+    public function testInvalidObject()
+    {
         $object = new \stdClass();
         $this->validate((object)[], new ValidContentTranslationsValidator(), null, $object);
     }
@@ -35,12 +36,14 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidContentTranslationsValidator constraint expects an array or a Doctrine\Common\Collections\Collection value.
      */
-    public function testInvalidValue() {
+    public function testInvalidValue()
+    {
         $object = new Content();
         $this->validate((object)[], new ValidContentTranslationsValidator(), null, $object);
     }
 
-    public function testEmptyObjectAndContextObject() {
+    public function testEmptyObjectAndContextObject()
+    {
         $object = new Content();
 
         // When validating an empty value or don't provide a context object, the validator just skips this.
@@ -51,7 +54,8 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
         $this->assertCount(0, $context->getViolations());
     }
 
-    public function testDuplicatedLocaleInTranslations() {
+    public function testDuplicatedLocaleInTranslations()
+    {
         $object = new Content();
         $translations = new ArrayCollection([new Content(), new Content()]);
         $translations->get(0)->setLocale('de')->setTranslationof($object);
@@ -71,7 +75,8 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('There are two ore more translations in the same language.', $errors->getViolations()->get(0)->getMessageTemplate());
     }
 
-    public function testNestedTranslations() {
+    public function testNestedTranslations()
+    {
         $object = $this->createMock(Content::class);
         $translations = new ArrayCollection([new Content()]);
         $translations->get(0)->setLocale('de')->setTranslationof($object)->setTranslations(new ArrayCollection([new Content()]));
@@ -80,7 +85,8 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('Translations cannot have other content as translation.', $errors->getViolations()->get(0)->getMessageTemplate());
     }
 
-    public function testInvalidTranslationOf() {
+    public function testInvalidTranslationOf()
+    {
         $object = $this->createMock(Content::class);
         $translations = new ArrayCollection([new Content()]);
         $translations->get(0)->setLocale('de')->setTranslationof(new Content());
@@ -89,7 +95,8 @@ class ValidContentTranslationsValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('Translations cannot have other content as translation.', $errors->getViolations()->get(0)->getMessageTemplate());
     }
 
-    public function testValidTranslations() {
+    public function testValidTranslations()
+    {
         $object = new Content();
         $object->setLocale('de');
         $translations = new ArrayCollection([new Content(), new Content()]);

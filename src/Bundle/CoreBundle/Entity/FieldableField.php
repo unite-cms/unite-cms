@@ -1,6 +1,7 @@
 <?php
 
 namespace UniteCMS\CoreBundle\Entity;
+
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 /**

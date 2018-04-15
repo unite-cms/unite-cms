@@ -223,7 +223,8 @@ class ContentTypeEntityTest extends DatabaseAwareTestCase
         $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
     }
 
-    public function testFindByIdentifiers() {
+    public function testFindByIdentifiers()
+    {
         $org = new Organization();
         $org->setTitle('Org')->setIdentifier('org');
         $this->em->persist($org);
@@ -252,7 +253,8 @@ class ContentTypeEntityTest extends DatabaseAwareTestCase
         $this->assertEquals($contentType, $repo->findByIdentifiers('org', 'domain', 'ct1'));
     }
 
-    public function testContentLabelProperty() {
+    public function testContentLabelProperty()
+    {
         $ct = new ContentType();
         $this->assertEquals('{type} #{id}', $ct->getContentLabel());
         $this->assertEquals('Foo', $ct->setContentLabel('Foo')->getContentLabel());

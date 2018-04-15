@@ -13,7 +13,8 @@ class ApiClientAuthenticatorTest extends TestCase
     /**
      * Test getting credentials from request.
      */
-    public function testGettingCredentialsFromRequest() {
+    public function testGettingCredentialsFromRequest()
+    {
 
         $authenticator = new ApiClientAuthenticator();
 
@@ -46,7 +47,8 @@ class ApiClientAuthenticatorTest extends TestCase
     /**
      * Test getting User from UserProvider.
      */
-    public function testGettingUser() {
+    public function testGettingUser()
+    {
 
         $userProvider = $this->createMock(UserProviderInterface::class);
         $userProvider->expects($this->any())

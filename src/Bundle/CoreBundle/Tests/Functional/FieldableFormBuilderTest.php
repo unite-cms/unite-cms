@@ -17,40 +17,119 @@ use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 class FieldableFormBuilderTest extends ContainerAwareTestCase
 {
 
-    public function testFormBuilderAvailable() {
+    public function testFormBuilderAvailable()
+    {
         $this->assertTrue($this->container->has('unite.cms.fieldable_form_builder'));
         $this->assertInstanceOf(FieldableFormBuilder::class, $this->container->get('unite.cms.fieldable_form_builder'));
     }
 
-    public function testFormBuilderBuildForm() {
+    public function testFormBuilderBuildForm()
+    {
 
-        $fieldable = new class implements Fieldable {
-            public function getFields() {
-                return [new class implements FieldableField {
-                    public function getEntity() { return $this->entity; }
-                    public function setEntity($entity) { $this->entity = $entity; }
-                    public function getType() { return 'text'; }
-                    public function getIdentifier() { return 'field1'; }
-                    public function getTitle() { return 'Field 1'; }
-                    public function getSettings() { return []; }
-                    public function getJsonExtractIdentifier() { return '$.' . $this->getIdentifier(); }
+        $fieldable = new class implements Fieldable
+        {
+            public function getFields()
+            {
+                return [new class implements FieldableField
+                {
+                    public function getEntity()
+                    {
+                        return $this->entity;
+                    }
+
+                    public function setEntity($entity)
+                    {
+                        $this->entity = $entity;
+                    }
+
+                    public function getType()
+                    {
+                        return 'text';
+                    }
+
+                    public function getIdentifier()
+                    {
+                        return 'field1';
+                    }
+
+                    public function getTitle()
+                    {
+                        return 'Field 1';
+                    }
+
+                    public function getSettings()
+                    {
+                        return [];
+                    }
+
+                    public function getJsonExtractIdentifier()
+                    {
+                        return '$.' . $this->getIdentifier();
+                    }
                 }];
             }
-            public function setFields($fields) {}
-            public function addField(FieldableField $field) {}
-            public function getLocales(): array { return []; }
-            public function getIdentifier() { return ''; }
-            public function getIdentifierPath($delimiter = '/') { return $this->getIdentifier(); }
-            public function getParentEntity() { return null; }
-            public function getRootEntity(): Fieldable { return $this; }
+
+            public function setFields($fields)
+            {
+            }
+
+            public function addField(FieldableField $field)
+            {
+            }
+
+            public function getLocales(): array
+            {
+                return [];
+            }
+
+            public function getIdentifier()
+            {
+                return '';
+            }
+
+            public function getIdentifierPath($delimiter = '/')
+            {
+                return $this->getIdentifier();
+            }
+
+            public function getParentEntity()
+            {
+                return null;
+            }
+
+            public function getRootEntity(): Fieldable
+            {
+                return $this;
+            }
         };
-        $content = new class implements FieldableContent {
+        $content = new class implements FieldableContent
+        {
             private $data = ['field1' => 'Any Value'];
-            public function setData(array $data) { $this->data = $data; }
-            public function getData() : array { return $this->data; }
-            public function getEntity() { return $this->entity; }
-            public function setEntity(Fieldable $entity) { $this->entity = $entity; }
-            public function getLocale() { return null; }
+
+            public function setData(array $data)
+            {
+                $this->data = $data;
+            }
+
+            public function getData(): array
+            {
+                return $this->data;
+            }
+
+            public function getEntity()
+            {
+                return $this->entity;
+            }
+
+            public function setEntity(Fieldable $entity)
+            {
+                $this->entity = $entity;
+            }
+
+            public function getLocale()
+            {
+                return null;
+            }
         };
 
         $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($fieldable, $content);
@@ -61,7 +140,8 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
         $this->assertEquals('Any Value', $form->get('field1')->getData());
     }
 
-    public function testEmptyFormType() {
+    public function testEmptyFormType()
+    {
         $data = [];
         $options = ['fields' => []];
         $form = $this->container->get('form.factory')->create(FieldableFormType::class, $data, $options);
@@ -70,7 +150,8 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
         $this->assertCount(0, $form);
     }
 
-    public function testFormTypeWithNestedFields() {
+    public function testFormTypeWithNestedFields()
+    {
 
         $ft1 = $this->createMock(FieldTypeInterface::class);
         $ft1->expects($this->any())
@@ -101,8 +182,8 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
         $data = [
             'field1' => 'Just Text',
             'field2' => [
-                [ 'title' => 'Row 1' ],
-                [ 'title' => 'Row 2' ],
+                ['title' => 'Row 1'],
+                ['title' => 'Row 2'],
             ]
         ];
         $options = ['fields' => [

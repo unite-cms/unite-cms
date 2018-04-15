@@ -47,6 +47,36 @@ class UniteCMSManager
     }
 
     /**
+     * Get the current organization.
+     *
+     * @return \UniteCMS\CoreBundle\Entity\Organization
+     */
+    public function getOrganization()
+    {
+
+        if (!$this->initialized) {
+            $this->initialize();
+        }
+
+        return $this->organization;
+    }
+
+    /**
+     * Get the current domain.
+     *
+     * @return \UniteCMS\CoreBundle\Entity\Domain
+     */
+    public function getDomain()
+    {
+
+        if (!$this->initialized) {
+            $this->initialize();
+        }
+
+        return $this->domain;
+    }
+
+    /**
      * Loads the core information (id, title, identifier) of the current
      * organization, domain and domain's content and setting types. Only loads
      * the data once per request.
@@ -60,7 +90,7 @@ class UniteCMSManager
 
         $request = $this->requestStack->getCurrentRequest();
 
-        if(!$request) {
+        if (!$request) {
             return;
         }
 
@@ -70,7 +100,7 @@ class UniteCMSManager
 
         if ($requestOrganization instanceof Organization) {
             $requestOrganizationOriginal = $this->em->getUnitOfWork()->getOriginalEntityData($requestOrganization);
-            if(!empty($requestOrganizationOriginal['identifier'])) {
+            if (!empty($requestOrganizationOriginal['identifier'])) {
                 $organizationIdentifier = $requestOrganizationOriginal['identifier'];
             } else {
                 $organizationIdentifier = $requestOrganization->getIdentifier();
@@ -81,7 +111,7 @@ class UniteCMSManager
 
         if ($requestDomain instanceof Domain) {
             $requestDomainOriginal = $this->em->getUnitOfWork()->getOriginalEntityData($requestDomain);
-            if(!empty($requestOrganizationOriginal['identifier'])) {
+            if (!empty($requestOrganizationOriginal['identifier'])) {
                 $domainIdentifier = $requestDomainOriginal['identifier'];
             } else {
                 $domainIdentifier = $requestDomain->getIdentifier();
@@ -156,7 +186,7 @@ class UniteCMSManager
                 // Remove the default 'all' view from the contentType so it can be replaced with persisted views.
                 $contentType->getViews()->clear();
 
-                foreach($viewData as $viewRow) {
+                foreach ($viewData as $viewRow) {
                     $view = new View();
                     $view->setId($viewRow['id'])->setIdentifier($viewRow['identifier'])->setTitle($viewRow['title'])->setType($viewRow['type'])->setIcon($viewRow['icon']);
                     $contentType->addView($view);
@@ -180,36 +210,6 @@ class UniteCMSManager
                 $this->domain->addSettingType($settingType);
             }
         }
-    }
-
-    /**
-     * Get the current organization.
-     *
-     * @return \UniteCMS\CoreBundle\Entity\Organization
-     */
-    public function getOrganization()
-    {
-
-        if (!$this->initialized) {
-            $this->initialize();
-        }
-
-        return $this->organization;
-    }
-
-    /**
-     * Get the current domain.
-     *
-     * @return \UniteCMS\CoreBundle\Entity\Domain
-     */
-    public function getDomain()
-    {
-
-        if (!$this->initialized) {
-            $this->initialize();
-        }
-
-        return $this->domain;
     }
 
 }

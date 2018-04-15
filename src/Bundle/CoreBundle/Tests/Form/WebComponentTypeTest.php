@@ -9,9 +9,11 @@ use Symfony\Component\Form\FormConfigInterface;
 use Symfony\Component\Form\FormView;
 use UniteCMS\CoreBundle\Form\WebComponentType;
 
-class WebComponentTypeTest extends TestCase {
+class WebComponentTypeTest extends TestCase
+{
 
-    public function testBuildViewWithEmptyData() {
+    public function testBuildViewWithEmptyData()
+    {
         $formType = new WebComponentType();
         $formView = new FormView();
         $form = $this->createMock(Form::class);
@@ -33,7 +35,8 @@ class WebComponentTypeTest extends TestCase {
         ]), $formView->vars['value']);
     }
 
-    public function testDataTransformer() {
+    public function testDataTransformer()
+    {
         $formType = new WebComponentType();
         $this->assertEquals(json_encode(['foo' => 'baa']), $formType->transform(['foo' => 'baa']));
         $this->assertEquals(null, $formType->reverseTransform(''));

@@ -6,7 +6,8 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class TextAreaTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings() {
+    public function testContentTypeFieldTypeWithEmptySettings()
+    {
 
         // Content Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('textarea');
@@ -14,7 +15,8 @@ class TextAreaTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
     }
 
-    public function testContentTypeFieldTypeWithInvalidSettings() {
+    public function testContentTypeFieldTypeWithInvalidSettings()
+    {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('textarea');

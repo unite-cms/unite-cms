@@ -298,7 +298,8 @@ class DomainUserController extends Controller
         Domain $domain,
         DomainInvitation $invite,
         Request $request
-    ) {
+    )
+    {
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, ['label' => 'domain.user.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']])->getForm();
         $form->handleRequest($request);

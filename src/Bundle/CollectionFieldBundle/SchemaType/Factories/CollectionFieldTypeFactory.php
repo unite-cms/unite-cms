@@ -40,13 +40,13 @@ class CollectionFieldTypeFactory
         $schemaTypeName = str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')) . 'CollectionField';
         $schemaTypeRowName = $schemaTypeName . 'Row';
 
-        if($isInputType) {
-          $schemaTypeName .= 'Input';
-          $schemaTypeRowName .= 'Input';
+        if ($isInputType) {
+            $schemaTypeName .= 'Input';
+            $schemaTypeRowName .= 'Input';
         }
 
-        if(!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
-            if(!$schemaTypeManager->hasSchemaType($schemaTypeRowName)) {
+        if (!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
+            if (!$schemaTypeManager->hasSchemaType($schemaTypeRowName)) {
 
                 /**
                  * @var FieldableField[] $fields
@@ -62,42 +62,42 @@ class CollectionFieldTypeFactory
                  * @var FieldTypeInterface[] $fieldTypes
                  */
                 $fieldTypes = [];
-                foreach($collection->getFields() as $field) {
+                foreach ($collection->getFields() as $field) {
                     $fields[$field->getIdentifier()] = $field;
                     $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
 
-                    if($isInputType) {
-                      $fieldsSchemaTypes[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
+                    if ($isInputType) {
+                        $fieldsSchemaTypes[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
                     } else {
-                      $fieldsSchemaTypes[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
+                        $fieldsSchemaTypes[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
                     }
                 }
 
-                if($isInputType) {
-                  $schemaTypeManager->registerSchemaType(new InputObjectType([
-                    'name' => $schemaTypeRowName,
-                    'fields' => function() use($fieldsSchemaTypes){
-                      return $fieldsSchemaTypes;
-                    }
-                  ]));
+                if ($isInputType) {
+                    $schemaTypeManager->registerSchemaType(new InputObjectType([
+                        'name' => $schemaTypeRowName,
+                        'fields' => function () use ($fieldsSchemaTypes) {
+                            return $fieldsSchemaTypes;
+                        }
+                    ]));
                 } else {
-                  $schemaTypeManager->registerSchemaType(new ObjectType([
-                    'name' => $schemaTypeRowName,
-                    'fields' => function() use($fieldsSchemaTypes){
-                      return $fieldsSchemaTypes;
-                    },
-                    'resolveField' => function($value, array $args, $context, ResolveInfo $info) use ($fields, $fieldTypes) {
+                    $schemaTypeManager->registerSchemaType(new ObjectType([
+                        'name' => $schemaTypeRowName,
+                        'fields' => function () use ($fieldsSchemaTypes) {
+                            return $fieldsSchemaTypes;
+                        },
+                        'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use ($fields, $fieldTypes) {
 
-                      if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$info->fieldName])) {
-                        return null;
-                      }
+                            if (!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$info->fieldName])) {
+                                return null;
+                            }
 
-                      $return_value = null;
-                      $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName]);
-                      return $return_value;
-                    }
-                  ]));
+                            $return_value = null;
+                            $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
+                            $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName]);
+                            return $return_value;
+                        }
+                    ]));
                 }
             }
             $newSchemaType = new ListOfType($schemaTypeManager->getSchemaType($schemaTypeRowName));

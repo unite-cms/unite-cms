@@ -19,7 +19,8 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidViewSettingsValidator constraint expects a UniteCMS\CoreBundle\View\ViewSettings value.
      */
-    public function testNonContentValue() {
+    public function testNonContentValue()
+    {
         // Create validator with mocked ViewTypeManager.
         $viewTypeManagerMock = $this->createMock(ViewTypeManager::class);
 
@@ -31,7 +32,8 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage The ValidViewSettingsValidator constraint expects a UniteCMS\CoreBundle\Entity\View object.
      */
-    public function testNonContextObject() {
+    public function testNonContextObject()
+    {
         // Create validator with mocked ViewTypeManager.
         $viewTypeManagerMock = $this->createMock(ViewTypeManager::class);
 
@@ -39,7 +41,8 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
         $this->validate(new ViewSettings(), new ValidViewSettingsValidator($viewTypeManagerMock));
     }
 
-    public function testInvalidValue() {
+    public function testInvalidValue()
+    {
         // Create validator with mocked ViewTypeManager.
         $viewTypeManagerMock = $this->createMock(ViewTypeManager::class);
         $viewTypeManagerMock->expects($this->any())
@@ -59,7 +62,8 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
     }
 
-    public function testValidValue() {
+    public function testValidValue()
+    {
         // Create validator with mocked ViewTypeManager.
         $viewTypeManagerMock = $this->createMock(ViewTypeManager::class);
         $viewTypeManagerMock->expects($this->any())

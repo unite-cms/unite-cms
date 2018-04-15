@@ -41,7 +41,7 @@ class OrganizationEntityTest extends DatabaseAwareTestCase
         // Try to test invalid identifier.
         $org1
             ->setTitle($this->generateRandomUTF8String(255))
-            ->setIdentifier($this->generateRandomMachineName(254).':');
+            ->setIdentifier($this->generateRandomMachineName(254) . ':');
         $errors = $this->container->get('validator')->validate($org1);
         $this->assertCount(1, $errors);
 

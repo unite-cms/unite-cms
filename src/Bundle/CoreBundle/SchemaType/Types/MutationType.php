@@ -56,7 +56,8 @@ class MutationType extends AbstractType
         AuthorizationChecker $authorizationChecker,
         ValidatorInterface $validator,
         FieldableFormBuilder $fieldableFormBuilder
-    ) {
+    )
+    {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->entityManager = $entityManager;
         $this->uniteCMSManager = $uniteCMSManager;
@@ -95,7 +96,7 @@ class MutationType extends AbstractType
 
             // If this content type has defined fields, we can create and update content with data.
             $fullContentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find($contentType->getId());
-            if($fullContentType->getFields()->count() > 0) {
+            if ($fullContentType->getFields()->count() > 0) {
                 $fields['create' . $key]['args']['data'] = [
                     'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'ContentInput', $this->uniteCMSManager->getDomain())),
                     'description' => 'The content data to save.',
@@ -126,15 +127,13 @@ class MutationType extends AbstractType
     protected function resolveField($value, array $args, $context, ResolveInfo $info)
     {
         // Resolve create content type
-        if(substr($info->fieldName, 0, 6) == 'create') {
+        if (substr($info->fieldName, 0, 6) == 'create') {
             return $this->resolveCreateContent(
                 strtolower(substr($info->fieldName, 6)),
                 $value, $args, $context, $info
             );
-        }
-
-        // Resolve update content type
-        elseif(substr($info->fieldName, 0, 6) == 'update') {
+        } // Resolve update content type
+        elseif (substr($info->fieldName, 0, 6) == 'update') {
             return $this->resolveUpdateContent(
                 strtolower(substr($info->fieldName, 6, -strlen('Content'))),
                 $value, $args, $context, $info
@@ -158,7 +157,8 @@ class MutationType extends AbstractType
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function resolveCreateContent($identifier, $value, $args, $context, ResolveInfo $info) {
+    private function resolveCreateContent($identifier, $value, $args, $context, ResolveInfo $info)
+    {
 
         if (!$contentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findOneBy(
             [
@@ -177,7 +177,7 @@ class MutationType extends AbstractType
         $form = $this->fieldableFormBuilder->createForm($contentType, $content);
 
         // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
-        if(is_array($args['data']) && !empty($context['csrf_token'])) {
+        if (is_array($args['data']) && !empty($context['csrf_token'])) {
             $args['data']['_token'] = $context['csrf_token'];
         }
 
@@ -205,7 +205,7 @@ class MutationType extends AbstractType
                     $violationMapper->mapViolation($violation, $form);
                 }
 
-            // If content is valid.
+                // If content is valid.
             } else {
                 $this->entityManager->persist($content);
                 $this->entityManager->flush();
@@ -230,12 +230,13 @@ class MutationType extends AbstractType
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function resolveUpdateContent($identifier, $value, $args, $context, ResolveInfo $info) {
+    private function resolveUpdateContent($identifier, $value, $args, $context, ResolveInfo $info)
+    {
 
         $id = $args['id'];
         $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id);
 
-        if(!$content) {
+        if (!$content) {
             throw new UserError("Content was not found.");
         }
 
@@ -249,7 +250,7 @@ class MutationType extends AbstractType
         $args['data'] = array_replace($content->getData(), $args['data']);
 
         // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
-        if(is_array($args['data']) && !empty($context['csrf_token'])) {
+        if (is_array($args['data']) && !empty($context['csrf_token'])) {
             $args['data']['_token'] = $context['csrf_token'];
         }
 
@@ -274,7 +275,7 @@ class MutationType extends AbstractType
                     $violationMapper->mapViolation($violation, $form);
                 }
 
-            // If content is valid.
+                // If content is valid.
             } else {
                 $this->entityManager->flush();
                 return $content;

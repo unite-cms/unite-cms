@@ -120,16 +120,6 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         }
     }
 
-    private function login(User $user)
-    {
-        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
-        $session = $this->client->getContainer()->get('session');
-        $session->set('_security_main', serialize($token));
-        $session->save();
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->client->getCookieJar()->set($cookie);
-    }
-
     /**
      * An invitation for a user cannot be accepted if no invitation token is present.
      */
@@ -160,7 +150,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', '/profile/accept-invitation?token=' . $invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
         $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
@@ -178,7 +168,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->em->persist($invitation);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', '/profile/accept-invitation?token=' . $invitation->getToken());
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
@@ -245,7 +235,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', '/profile/accept-invitation?token=' . $invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
         $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
@@ -266,7 +256,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', '/profile/accept-invitation?token=' . $invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
         $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.already_member'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
@@ -286,7 +276,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', '/profile/accept-invitation?token=' . $invitation->getToken());
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
 
@@ -336,7 +326,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', '/profile/accept-invitation?token=' . $invitation->getToken());
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
 
@@ -363,5 +353,15 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
+    }
+
+    private function login(User $user)
+    {
+        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
+        $session = $this->client->getContainer()->get('session');
+        $session->set('_security_main', serialize($token));
+        $session->save();
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $this->client->getCookieJar()->set($cookie);
     }
 }

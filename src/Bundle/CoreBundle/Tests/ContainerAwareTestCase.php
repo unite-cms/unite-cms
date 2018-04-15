@@ -13,6 +13,18 @@ abstract class ContainerAwareTestCase extends KernelTestCase
      */
     protected $container;
 
+    public function setUp()
+    {
+        $kernel = static::bootKernel(['debug' => false]);
+        $this->container = $kernel->getContainer();
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+        $this->container = null;
+    }
+
     protected function generateRandomMachineName($count = 0)
     {
         $allowed = str_split('abcdefghijklmnopqrstuvwxyz0123456789_');
@@ -27,17 +39,5 @@ abstract class ContainerAwareTestCase extends KernelTestCase
     protected function generateRandomUTF8String($count = 0)
     {
         return substr(base64_encode(random_bytes($count)), 0, $count);
-    }
-
-    public function setUp()
-    {
-        $kernel = static::bootKernel(['debug' => false]);
-        $this->container = $kernel->getContainer();
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
-        $this->container = null;
     }
 }

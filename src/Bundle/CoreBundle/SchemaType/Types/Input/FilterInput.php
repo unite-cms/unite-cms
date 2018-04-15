@@ -12,7 +12,7 @@ class FilterInput extends InputObjectType
     {
         parent::__construct(
             [
-                'fields' => function() use ($schemaTypeManager) {
+                'fields' => function () use ($schemaTypeManager) {
                     return [
                         'AND' => [
                             'type' => Type::listOf($schemaTypeManager->getSchemaType('FilterInput')),

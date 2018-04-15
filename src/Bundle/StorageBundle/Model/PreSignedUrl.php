@@ -43,16 +43,12 @@ class PreSignedUrl implements \JsonSerializable
      */
     private $checksum;
 
-    public function __construct(string $preSignedUrl, string $uuid, string $filename, string $checksum = null) {
+    public function __construct(string $preSignedUrl, string $uuid, string $filename, string $checksum = null)
+    {
         $this->preSignedUrl = $preSignedUrl;
         $this->uuid = $uuid;
         $this->filename = $filename;
         $this->checksum = $checksum;
-    }
-
-    private function computeHash($secret)
-    {
-        return urlencode(base64_encode(hash_hmac('sha256', $this->uuid . '/' . $this->filename, $secret, true)));
     }
 
     /**
@@ -63,7 +59,8 @@ class PreSignedUrl implements \JsonSerializable
      *
      * @return string
      */
-    public function sign(string $secret) {
+    public function sign(string $secret)
+    {
         $this->checksum = $this->computeHash($secret);
         return $this->checksum;
     }
@@ -76,7 +73,8 @@ class PreSignedUrl implements \JsonSerializable
      *
      * @return bool
      */
-    public function check(string $secret) {
+    public function check(string $secret)
+    {
         return $this->checksum === $this->computeHash($secret);
     }
 
@@ -123,10 +121,15 @@ class PreSignedUrl implements \JsonSerializable
     public function jsonSerialize()
     {
         return [
-          'pre_signed_url' => $this->getPreSignedUrl(),
-          'uuid' => $this->getUuid(),
-          'filename' => $this->getFilename(),
-          'checksum' => $this->getChecksum(),
+            'pre_signed_url' => $this->getPreSignedUrl(),
+            'uuid' => $this->getUuid(),
+            'filename' => $this->getFilename(),
+            'checksum' => $this->getChecksum(),
         ];
+    }
+
+    private function computeHash($secret)
+    {
+        return urlencode(base64_encode(hash_hmac('sha256', $this->uuid . '/' . $this->filename, $secret, true)));
     }
 }

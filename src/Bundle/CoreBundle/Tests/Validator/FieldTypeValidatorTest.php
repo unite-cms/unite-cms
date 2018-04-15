@@ -11,7 +11,8 @@ class FieldTypeValidatorTest extends ConstraintValidatorTestCase
 {
     protected $constraintClass = FieldType::class;
 
-    public function testInvalidValue() {
+    public function testInvalidValue()
+    {
 
         // Create validator with mocked fieldTypeManager.
         $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
@@ -22,7 +23,8 @@ class FieldTypeValidatorTest extends ConstraintValidatorTestCase
         $this->assertEquals('This type is not a registered field type.', $context->getViolations()->get(0)->getMessageTemplate());
     }
 
-    public function testValidValue() {
+    public function testValidValue()
+    {
 
         // Create validator with mocked fieldTypeManager.
         $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
@@ -35,7 +37,8 @@ class FieldTypeValidatorTest extends ConstraintValidatorTestCase
         $this->assertCount(0, $context->getViolations());
     }
 
-    public function testNonStringValue() {
+    public function testNonStringValue()
+    {
 
         // Create validator with mocked fieldTypeManager.
         $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);

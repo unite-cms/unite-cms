@@ -99,7 +99,7 @@ class SettingTypeField implements FieldableField
 
     public function __toString()
     {
-        return ''.$this->title;
+        return '' . $this->title;
     }
 
     /**
@@ -121,6 +121,16 @@ class SettingTypeField implements FieldableField
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Set id
      *
      * @param $id
@@ -135,13 +145,13 @@ class SettingTypeField implements FieldableField
     }
 
     /**
-     * Get id
+     * Get title
      *
-     * @return int
+     * @return string
      */
-    public function getId()
+    public function getTitle()
     {
-        return $this->id;
+        return $this->title;
     }
 
     /**
@@ -159,13 +169,13 @@ class SettingTypeField implements FieldableField
     }
 
     /**
-     * Get title
+     * Get identifier
      *
      * @return string
      */
-    public function getTitle()
+    public function getIdentifier()
     {
-        return $this->title;
+        return $this->identifier;
     }
 
     /**
@@ -183,22 +193,22 @@ class SettingTypeField implements FieldableField
     }
 
     /**
-     * Get identifier
-     *
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
-    }
-
-    /**
      * Returns the identifier, used for mysql's json_extract function.
      * @return string
      */
     public function getJsonExtractIdentifier()
     {
         return '$.' . $this->getIdentifier();
+    }
+
+    /**
+     * Get type
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**
@@ -216,13 +226,13 @@ class SettingTypeField implements FieldableField
     }
 
     /**
-     * Get type
+     * Get settings
      *
-     * @return string
+     * @return FieldableFieldSettings
      */
-    public function getType()
+    public function getSettings()
     {
-        return $this->type;
+        return $this->settings;
     }
 
     /**
@@ -240,13 +250,11 @@ class SettingTypeField implements FieldableField
     }
 
     /**
-     * Get settings
-     *
-     * @return FieldableFieldSettings
+     * @return SettingType
      */
-    public function getSettings()
+    public function getSettingType()
     {
-        return $this->settings;
+        return $this->settingType;
     }
 
     /**
@@ -260,14 +268,6 @@ class SettingTypeField implements FieldableField
         $settingType->addField($this);
 
         return $this;
-    }
-
-    /**
-     * @return SettingType
-     */
-    public function getSettingType()
-    {
-        return $this->settingType;
     }
 
     /**

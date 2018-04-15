@@ -19,11 +19,11 @@ class ValidContentTranslationOfValidator extends ConstraintValidator
 
     public function validate($value, Constraint $constraint)
     {
-        if($value == null) {
+        if ($value == null) {
             return;
         }
 
-        if($this->context->getObject() == null) {
+        if ($this->context->getObject() == null) {
             return;
         }
 
@@ -47,7 +47,7 @@ class ValidContentTranslationOfValidator extends ConstraintValidator
         // We also want to check uniqueness, even if translationOf was soft deleted.
         $this->entityManager->getFilters()->disable('gedmo_softdeleteable');
 
-        if($value->getLocale() === $content->getLocale()) {
+        if ($value->getLocale() === $content->getLocale()) {
             $this->context->buildViolation($constraint->uniqueLocaleMessage)
                 ->setInvalidValue(null)
                 ->atPath('[translationOf]')

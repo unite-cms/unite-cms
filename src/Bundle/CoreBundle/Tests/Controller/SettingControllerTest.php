@@ -18,7 +18,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 /**
  * @group slow
  */
-class SettingControllerTest extends DatabaseAwareTestCase {
+class SettingControllerTest extends DatabaseAwareTestCase
+{
 
     /**
      * @var Client $client
@@ -122,7 +123,8 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->client->getCookieJar()->set($cookie);
     }
 
-    public function testCRUDActions() {
+    public function testCRUDActions()
+    {
 
         $url_list = $this->container->get('router')->generate('unitecms_core_setting_index', [
             'organization' => $this->organization->getIdentifier(),
@@ -167,7 +169,8 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals('b', $setting->getData()['f2']);
     }
 
-    public function testSettingValidation() {
+    public function testSettingValidation()
+    {
 
         // Create setting.
         $setting = new Setting();
@@ -219,7 +222,8 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("validation.wrong_definition")'));
     }
 
-    public function testTranslateActions() {
+    public function testTranslateActions()
+    {
 
         // Create setting.
         $setting = new Setting();
@@ -250,7 +254,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Create english translation.
-        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('setting.translations.create.button', ['%locale%' => $this->client->getRequest()->getLocale()]) .'")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('setting.translations.create.button', ['%locale%' => $this->client->getRequest()->getLocale()]) . '")')->link());
 
         // Assert add form
         $form = $crawler->filter('form');
@@ -296,7 +300,8 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(0, $crawler->filter('a.uk-button:contains("Add translation")'));
     }
 
-    public function testRevisionActions() {
+    public function testRevisionActions()
+    {
 
         // Create setting.
         $setting = new Setting();
@@ -340,7 +345,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(2, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Revert to version 1.
-        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('setting.revisions.revert.button') .'")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('setting.revisions.revert.button') . '")')->link());
 
         // Assert form
         $form = $crawler->filter('form');

@@ -18,7 +18,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 /**
  * @group slow
  */
-class ContentControllerTest extends DatabaseAwareTestCase {
+class ContentControllerTest extends DatabaseAwareTestCase
+{
 
     /**
      * @var Client $client
@@ -115,7 +116,8 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->client->getCookieJar()->set($cookie);
     }
 
-    public function testCRUDActions() {
+    public function testCRUDActions()
+    {
 
         $url_other_list = $this->container->get('router')->generate('unitecms_core_content_index', [
             'organization' => $this->organization->getIdentifier(),
@@ -178,7 +180,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Since the view list is rendered in js, we can't check creation via DOM. But we can see, if we can edit
         // the content.
-        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([ 'contentType' => $this->domain->getContentTypes()->first(), ], [ 'created' => 'DESC', ]);
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['contentType' => $this->domain->getContentTypes()->first(),], ['created' => 'DESC',]);
         $this->assertNotNull($content);
         $this->assertEquals('Field value 1', $content->getData()['f1']);
         $this->assertEquals('a', $content->getData()['f2']);
@@ -295,7 +297,8 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->em->getFilters()->enable('gedmo_softdeleteable');
     }
 
-    public function testContentValidation() {
+    public function testContentValidation()
+    {
 
         $content = new Content();
         $content->setContentType($this->domain->getContentTypes()->first())->setData(['f1' => 'la', 'f2' => 'b'])->setLocale('de');
@@ -391,7 +394,8 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("validation.wrong_definition")'));
     }
 
-    public function testDeleteDefinitelyAction() {
+    public function testDeleteDefinitelyAction()
+    {
 
         // Create content.
         $content = new Content();
@@ -498,7 +502,8 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
     }
 
-    public function testDeleteRecoverAction() {
+    public function testDeleteRecoverAction()
+    {
 
         // Create content.
         $content = new Content();
@@ -599,7 +604,8 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Content')->findAll());
     }
 
-    public function testTranslateActions() {
+    public function testTranslateActions()
+    {
 
         // Create content.
         $content = new Content();
@@ -770,7 +776,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertNull($translated_content->getTranslationOf());
 
         // Link existing content was translation.
-        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('content.translations.add_existing.button') .'")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('content.translations.add_existing.button') . '")')->link());
 
         // Assert add form
         $form = $crawler->filter('form');
@@ -817,7 +823,8 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals($translated_content->getId(), $content->getTranslations()->first()->getId());
     }
 
-    public function testRevisionActions() {
+    public function testRevisionActions()
+    {
 
         // Create content.
         $content = new Content();
@@ -863,7 +870,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(2, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Revert to version 1.
-        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') . '")')->link());
 
         // Assert form
         $form = $crawler->filter('form');
@@ -901,7 +908,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->em->clear();
 
         $this->em->getFilters()->disable('gedmo_softdeleteable');
-        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['id' => $content->getId(), 'contentType' => $content->getContentType() ]);
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['id' => $content->getId(), 'contentType' => $content->getContentType()]);
         $this->em->getFilters()->enable('gedmo_softdeleteable');
 
         // Recover content.
@@ -916,10 +923,10 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $crawler->filter('.unite-card-table table tbody td:contains("recover")'));
 
         // And delete should not have a recover action.
-        $this->assertCount(1, $crawler->filter('tr:nth-child(5) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
-        $this->assertCount(1, $crawler->filter('tr:nth-child(4) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
-        $this->assertCount(1, $crawler->filter('tr:nth-child(3) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
-        $this->assertCount(0, $crawler->filter('tr:nth-child(2) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
-        $this->assertCount(0, $crawler->filter('tr:nth-child(1) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') .'")'));
+        $this->assertCount(1, $crawler->filter('tr:nth-child(5) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') . '")'));
+        $this->assertCount(1, $crawler->filter('tr:nth-child(4) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') . '")'));
+        $this->assertCount(1, $crawler->filter('tr:nth-child(3) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') . '")'));
+        $this->assertCount(0, $crawler->filter('tr:nth-child(2) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') . '")'));
+        $this->assertCount(0, $crawler->filter('tr:nth-child(1) a:contains("' . $this->container->get('translator')->trans('content.revisions.revert.button') . '")'));
     }
 }

@@ -22,11 +22,11 @@ class StorageFileType extends AbstractType
     protected function fields()
     {
         return [
-          'name' => Type::string(),
-          'size' => Type::int(),
-          'type' => Type::string(),
-          'id' => Type::id(),
-          'url' => Type::string(),
+            'name' => Type::string(),
+            'size' => Type::int(),
+            'type' => Type::string(),
+            'id' => Type::id(),
+            'url' => Type::string(),
         ];
     }
 
@@ -43,7 +43,7 @@ class StorageFileType extends AbstractType
      */
     protected function resolveField($value, array $args, $context, ResolveInfo $info)
     {
-        if(is_array($value) && array_key_exists($info->fieldName, $this->fields()) && isset($value[$info->fieldName])) {
+        if (is_array($value) && array_key_exists($info->fieldName, $this->fields()) && isset($value[$info->fieldName])) {
             return $value[$info->fieldName];
         }
         throw new \InvalidArgumentException('Unknown fieldName "' . $info->fieldName . '"');

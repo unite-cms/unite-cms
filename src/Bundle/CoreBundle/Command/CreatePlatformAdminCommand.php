@@ -49,8 +49,9 @@ class CreatePlatformAdminCommand extends Command
      * This function can be called to disable hiding of the password input. This can be useful if this feature is not
      * supported (for example for phpunit tests this can be the case).
      */
-    public function disableHidePasswordInput() {
-       $this->hidePasswordInput = false;
+    public function disableHidePasswordInput()
+    {
+        $this->hidePasswordInput = false;
     }
 
     /**
@@ -110,7 +111,7 @@ class CreatePlatformAdminCommand extends Command
         }
 
         $errors = $this->validator->validate($user);
-        if(count($errors) == 0) {
+        if (count($errors) == 0) {
             $this->em->persist($user);
             $this->em->flush();
             $output->writeln('<info>Platform Admin was created!</info>');

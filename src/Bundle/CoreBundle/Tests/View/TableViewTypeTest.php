@@ -13,7 +13,8 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 class TableViewTypeTest extends DatabaseAwareTestCase
 {
 
-    public function testTableViewWithoutSettings() {
+    public function testTableViewWithoutSettings()
+    {
 
         // Create TableView instance.
         $view = new View();
@@ -23,16 +24,16 @@ class TableViewTypeTest extends DatabaseAwareTestCase
             ->setIdentifier('new_view')
             ->setContentType(new ContentType())
             ->getContentType()
-                ->setTitle('ct')
-                ->setIdentifier('ct')
-                ->setDomain(new Domain())
-                ->getDomain()
-                    ->setTitle('D1')
-                    ->setIdentifier('d1')
-                    ->setOrganization(new Organization())
-                    ->getOrganization()
-                        ->setTitle('O1')
-                        ->setIdentifier('o1');
+            ->setTitle('ct')
+            ->setIdentifier('ct')
+            ->setDomain(new Domain())
+            ->getDomain()
+            ->setTitle('D1')
+            ->setIdentifier('d1')
+            ->setOrganization(new Organization())
+            ->getOrganization()
+            ->setTitle('O1')
+            ->setIdentifier('o1');
 
         // View should be valid.
         $this->assertCount(0, $this->container->get('validator')->validate($view));
@@ -44,14 +45,15 @@ class TableViewTypeTest extends DatabaseAwareTestCase
             'created' => 'Created',
             'updated' => 'Updated',
             'id' => 'ID',
-        ],$parameters->get('columns'));
+        ], $parameters->get('columns'));
         $this->assertEquals([
             'field' => 'updated',
             'asc' => false,
-        ],$parameters->get('sort'));
+        ], $parameters->get('sort'));
     }
 
-    public function testTableViewWithInvalidSettings() {
+    public function testTableViewWithInvalidSettings()
+    {
 
         // Create TableView instance.
         $view = new View();
@@ -166,7 +168,8 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
     }
 
-    public function testTableViewWithValidSettings() {
+    public function testTableViewWithValidSettings()
+    {
 
         // Create TableView instance.
         $view = new View();
@@ -218,11 +221,11 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $this->assertEquals([
             'f1' => 'Title',
             'id' => 'baa',
-        ],$parameters->get('columns'));
+        ], $parameters->get('columns'));
         $this->assertEquals([
             'field' => 'f1',
             'asc' => true,
-        ],$parameters->get('sort'));
+        ], $parameters->get('sort'));
         $this->assertEquals($filter, $parameters->get('filter'));
     }
 }

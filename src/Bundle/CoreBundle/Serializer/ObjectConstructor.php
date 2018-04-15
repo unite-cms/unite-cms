@@ -30,7 +30,8 @@ class ObjectConstructor implements ObjectConstructorInterface
         $data,
         array $type,
         DeserializationContext $context
-    ) {
+    )
+    {
         $class = $metadata->name;
 
         return new $class();

@@ -6,7 +6,8 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class RangeFieldTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings() {
+    public function testContentTypeFieldTypeWithEmptySettings()
+    {
 
         // Content Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('range');
@@ -14,7 +15,8 @@ class RangeFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
     }
 
-    public function testContentTypeFieldTypeWithInvalidSettings() {
+    public function testContentTypeFieldTypeWithInvalidSettings()
+    {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('range');
@@ -25,7 +27,8 @@ class RangeFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
     }
 
-    public function testContentTypeFieldTypeWithValidSettings() {
+    public function testContentTypeFieldTypeWithValidSettings()
+    {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('range');

@@ -23,7 +23,18 @@ class User implements UserInterface, \Serializable
     const PASSWORD_RESET_TTL = 14400; // Default to 4h
     const ROLE_USER = "ROLE_USER";
     const ROLE_PLATFORM_ADMIN = "ROLE_PLATFORM_ADMIN";
-
+    /**
+     * @var string
+     * @Assert\Length(max="180", maxMessage="validation.too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="validation.invalid_characters")
+     * @ORM\Column(name="reset_token", type="string", length=180, unique=true, nullable=true)
+     */
+    protected $resetToken;
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="reset_requested_at", type="datetime", nullable=true)
+     */
+    protected $resetRequestedAt;
     /**
      * @var int
      *
@@ -32,7 +43,6 @@ class User implements UserInterface, \Serializable
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
@@ -41,7 +51,6 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(name="email", type="string", length=255)
      */
     private $email;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
@@ -49,7 +58,6 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(name="firstname", type="string", length=255)
      */
     private $firstname;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
@@ -57,7 +65,6 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(name="lastname", type="string", length=255)
      */
     private $lastname;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank", groups={"CREATE"})
@@ -65,41 +72,24 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(name="password", type="string", length=255)
      */
     private $password;
-
     /**
      * @var array
      *
      * @ORM\Column(name="roles", type="array")
      */
     private $roles;
-
     /**
      * @var OrganizationMember[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"})
      */
     private $organizations;
-
     /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="user", cascade={"persist", "remove", "merge"})
      */
     private $domains;
-
-    /**
-     * @var string
-     * @Assert\Length(max="180", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="validation.invalid_characters")
-     * @ORM\Column(name="reset_token", type="string", length=180, unique=true, nullable=true)
-     */
-    protected $resetToken;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="reset_requested_at", type="datetime", nullable=true)
-     */
-    protected $resetRequestedAt;
 
     public function __construct()
     {
@@ -110,7 +100,7 @@ class User implements UserInterface, \Serializable
 
     public function __toString()
     {
-        return ''.$this->getFirstname().' '.$this->getLastname();
+        return '' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
     /**
@@ -121,6 +111,16 @@ class User implements UserInterface, \Serializable
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get email
+     *
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
     }
 
     /**
@@ -138,13 +138,13 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Get email
+     * Get firstname
      *
      * @return string
      */
-    public function getEmail()
+    public function getFirstname()
     {
-        return $this->email;
+        return $this->firstname;
     }
 
     /**
@@ -162,13 +162,13 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Get firstname
+     * Get lastname
      *
      * @return string
      */
-    public function getFirstname()
+    public function getLastname()
     {
-        return $this->firstname;
+        return $this->lastname;
     }
 
     /**
@@ -186,13 +186,13 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Get lastname
+     * Returns the roles granted to the user.
      *
-     * @return string
+     * @return Role[]|string[] The user roles
      */
-    public function getLastname()
+    public function getRoles()
     {
-        return $this->lastname;
+        return $this->roles;
     }
 
     /**
@@ -221,16 +221,6 @@ class User implements UserInterface, \Serializable
         }
 
         return $this;
-    }
-
-    /**
-     * Returns the roles granted to the user.
-     *
-     * @return Role[]|string[] The user roles
-     */
-    public function getRoles()
-    {
-        return $this->roles;
     }
 
     /**

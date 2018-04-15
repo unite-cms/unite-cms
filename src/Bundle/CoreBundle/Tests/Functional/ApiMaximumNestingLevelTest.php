@@ -194,20 +194,20 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         parent::setUp();
 
         // Create a full unite CMS structure with different organizations, domains and users.
-        foreach($this->data as $id => $domains) {
+        foreach ($this->data as $id => $domains) {
             $org = new Organization();
             $org->setIdentifier($id)->setTitle(ucfirst($id));
             $this->em->persist($org);
             $this->em->flush($org);
 
-            foreach($domains as $domain_data) {
+            foreach ($domains as $domain_data) {
                 $domain = $this->container->get('unite.cms.domain_definition_parser')->parse($domain_data);
                 $domain->setOrganization($org);
                 $this->domains[$domain->getIdentifier()] = $domain;
                 $this->em->persist($domain);
                 $this->em->flush($domain);
 
-                foreach($this->roles as $role) {
+                foreach ($this->roles as $role) {
                     $this->users[$domain->getIdentifier() . '_' . $role] = new ApiClient();
                     $this->users[$domain->getIdentifier() . '_' . $role]->setName(ucfirst($role))->setRoles([$role]);
                     $this->users[$domain->getIdentifier() . '_' . $role]->setDomain($domain);
@@ -222,39 +222,8 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         $this->controller->setContainer($this->container);
     }
 
-    private function api(Domain $domain, UserInterface $user, string $query, array $variables = []) {
-        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'domain');
-        $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $domain);
-        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'organization');
-        $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $domain->getOrganization());
-        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'initialized');
-        $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), true);
-
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'api', $user->getRoles()));
-
-        $request = new Request([], [], [
-            'organization' => $domain->getOrganization(),
-            'domain' => $domain,
-        ], [], [], [
-            'REQUEST_METHOD' => 'POST',
-        ], json_encode(['query' => $query, 'variables' => $variables]));
-        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
-        return json_decode($response->getContent());
-    }
-
-    private function assertApiResponse($expected, $actual) {
-
-        if(!is_string($expected)) {
-            $expected = json_encode($expected);
-        }
-
-        $this->assertEquals(json_decode($expected), $actual);
-    }
-
-    public function testReachingMaximumNestingLevel() {
+    public function testReachingMaximumNestingLevel()
+    {
 
         $news = new Content();
         $category = new Content();
@@ -277,7 +246,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
 
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_ROLE_PUBLIC'], 'query {
                 findNews {
                     result {
                       category {
@@ -314,5 +283,39 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
                 ]
             ]
         ], $result);
+    }
+
+    private function api(Domain $domain, UserInterface $user, string $query, array $variables = [])
+    {
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'domain');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $domain);
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'organization');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $domain->getOrganization());
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'initialized');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), true);
+
+        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'api', $user->getRoles()));
+
+        $request = new Request([], [], [
+            'organization' => $domain->getOrganization(),
+            'domain' => $domain,
+        ], [], [], [
+            'REQUEST_METHOD' => 'POST',
+        ], json_encode(['query' => $query, 'variables' => $variables]));
+        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
+        return json_decode($response->getContent());
+    }
+
+    private function assertApiResponse($expected, $actual)
+    {
+
+        if (!is_string($expected)) {
+            $expected = json_encode($expected);
+        }
+
+        $this->assertEquals(json_decode($expected), $actual);
     }
 }
