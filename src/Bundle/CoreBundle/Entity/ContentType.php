@@ -612,21 +612,24 @@ class ContentType implements Fieldable
     /**
      * {@inheritdoc}
      */
-    public function getRootEntity() : Fieldable {
+    public function getRootEntity(): Fieldable
+    {
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getIdentifierPath($delimiter = '/') {
+    public function getIdentifierPath($delimiter = '/')
+    {
         return $this->getIdentifier();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getParentEntity() {
+    public function getParentEntity()
+    {
         return null;
     }
 }

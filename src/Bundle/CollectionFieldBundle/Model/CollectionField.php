@@ -58,15 +58,15 @@ class CollectionField implements FieldableField
 
     public function __construct($field)
     {
-        if(isset($field['title'])) {
+        if (isset($field['title'])) {
             $this->setTitle($field['title']);
         }
 
-        if(isset($field['identifier'])) {
+        if (isset($field['identifier'])) {
             $this->setIdentifier($field['identifier']);
         }
 
-        if(isset($field['type'])) {
+        if (isset($field['type'])) {
             $this->setType($field['type']);
         }
 
@@ -190,6 +190,7 @@ class CollectionField implements FieldableField
     public function setEntity($entity)
     {
         $this->collection = $entity;
+
         return $this;
     }
 
@@ -208,6 +209,6 @@ class CollectionField implements FieldableField
         // add this identifier.
         $pathParts[] = $this->getIdentifier();
 
-        return '$.' . join('[*].', $pathParts);
+        return '$.'.join('[*].', $pathParts);
     }
 }

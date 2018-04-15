@@ -59,18 +59,20 @@ class SchemaTypeManager
      */
     public function getSchemaType($key, Domain $domain = null, $nestingLevel = 0)
     {
-        if($nestingLevel > self::MAXIMUM_NESTING_LEVEL) {
-            throw new \InvalidArgumentException("Maximum nesting level: " . self::MAXIMUM_NESTING_LEVEL . " reached.");
+        if ($nestingLevel > self::MAXIMUM_NESTING_LEVEL) {
+            throw new \InvalidArgumentException("Maximum nesting level: ".self::MAXIMUM_NESTING_LEVEL." reached.");
         }
 
-        if($nestingLevel == self::MAXIMUM_NESTING_LEVEL) {
+        if ($nestingLevel == self::MAXIMUM_NESTING_LEVEL) {
             $key = 'MaximumNestingLevel';
         }
 
         if (!$this->hasSchemaType($key)) {
-            foreach($this->schemaTypeFactories as $schemaTypeFactory) {
-                if($schemaTypeFactory->supports($key)) {
-                    $this->registerSchemaType($schemaTypeFactory->createSchemaType($this, $nestingLevel, $domain, $key));
+            foreach ($this->schemaTypeFactories as $schemaTypeFactory) {
+                if ($schemaTypeFactory->supports($key)) {
+                    $this->registerSchemaType(
+                        $schemaTypeFactory->createSchemaType($this, $nestingLevel, $domain, $key)
+                    );
                     break;
                 }
             }
@@ -92,7 +94,7 @@ class SchemaTypeManager
     {
         if (!$schemaType instanceof InputObjectType && !$schemaType instanceof ObjectType && !$schemaType instanceof InterfaceType && !$schemaType instanceof UnionType && !$schemaType instanceof ListOfType) {
             throw new \InvalidArgumentException(
-                'Schema type must be of type ' . ObjectType::class . ' or ' . InputObjectType::class . ' or ' . InterfaceType::class . ' or ' . UnionType::class . ' or ' . ListOfType::class
+                'Schema type must be of type '.ObjectType::class.' or '.InputObjectType::class.' or '.InterfaceType::class.' or '.UnionType::class.' or '.ListOfType::class
             );
         }
 
@@ -110,7 +112,7 @@ class SchemaTypeManager
      */
     public function registerSchemaTypeFactory(SchemaTypeFactoryInterface $schemaTypeFactory)
     {
-        if(!in_array($schemaTypeFactory, $this->schemaTypeFactories)) {
+        if (!in_array($schemaTypeFactory, $this->schemaTypeFactories)) {
             $this->schemaTypeFactories[] = $schemaTypeFactory;
         }
 

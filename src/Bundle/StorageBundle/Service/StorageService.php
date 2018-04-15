@@ -64,12 +64,12 @@ class StorageService
         } else {
             // If this field is nestable, continue resolving.
             $nestedFieldType = $this->fieldTypeManager->getFieldType(
-              $field->getType()
+                $field->getType()
             );
             if ($nestedFieldType instanceof NestableFieldTypeInterface) {
                 return $this->resolveFileFieldPath(
-                  $nestedFieldType::getNestableFieldable($field),
-                  join('/', $parts)
+                    $nestedFieldType::getNestableFieldable($field),
+                    join('/', $parts)
                 );
             }
         }
@@ -87,13 +87,14 @@ class StorageService
      *
      * @return PreSignedUrl
      */
-    public function createPreSignedUploadUrl(string $filename, array $bucket_settings, string $allowed_file_types = '*') {
+    public function createPreSignedUploadUrl(string $filename, array $bucket_settings, string $allowed_file_types = '*')
+    {
 
         // Check if file type is allowed.
         $filenameparts = explode('.', $filename);
         if (count($filenameparts) < 2) {
             throw new \InvalidArgumentException(
-              'Filename must include a file type extension.'
+                'Filename must include a file type extension.'
             );
         }
 
@@ -102,8 +103,8 @@ class StorageService
         $filenameextension_supported = false;
 
         foreach (explode(
-                   ',',
-                   str_replace(' ', '', $allowed_file_types)
+                     ',',
+                     str_replace(' ', '', $allowed_file_types)
                  ) as $extension) {
             if ($extension === '*') {
                 $filenameextension_supported = true;
@@ -115,7 +116,7 @@ class StorageService
 
         if (!$filenameextension_supported) {
             throw new \InvalidArgumentException(
-              'File type "'.$filenameextension.'" not supported'
+                'File type "'.$filenameextension.'" not supported'
             );
         }
 
@@ -123,31 +124,31 @@ class StorageService
 
         // Return pre-signed url
         $s3Client = new S3Client(
-          [
-            'version' => 'latest',
-            'region' => 'us-east-1',
-            'endpoint' => $bucket_settings['endpoint'],
-            'use_path_style_endpoint' => true,
-            'credentials' => [
-              'key' => $bucket_settings['key'],
-              'secret' => $bucket_settings['secret'],
-            ],
-          ]
+            [
+                'version' => 'latest',
+                'region' => 'us-east-1',
+                'endpoint' => $bucket_settings['endpoint'],
+                'use_path_style_endpoint' => true,
+                'credentials' => [
+                    'key' => $bucket_settings['key'],
+                    'secret' => $bucket_settings['secret'],
+                ],
+            ]
         );
 
         $command = $s3Client->getCommand(
-          'PutObject',
-          [
-            'Bucket' => $bucket_settings['bucket'],
-            'Key' => $uuid.'/'.$filename,
-          ]
+            'PutObject',
+            [
+                'Bucket' => $bucket_settings['bucket'],
+                'Key' => $uuid.'/'.$filename,
+            ]
         );
 
         return new PreSignedUrl(
-          (string)$s3Client->createPresignedRequest($command, '+5 minutes')
-            ->getUri(),
-          $uuid,
-          $filename
+            (string)$s3Client->createPresignedRequest($command, '+5 minutes')
+                ->getUri(),
+            $uuid,
+            $filename
         );
     }
 
@@ -161,35 +162,36 @@ class StorageService
      *
      * @return PreSignedUrl
      */
-    public function createPreSignedUploadUrlForFieldPath(string $filename, Fieldable $fieldable, string $field_path) {
+    public function createPreSignedUploadUrlForFieldPath(string $filename, Fieldable $fieldable, string $field_path)
+    {
 
         if (!$field = $this->resolveFileFieldPath($fieldable, $field_path)) {
             throw new \InvalidArgumentException(
-              'Field "'.$field_path.'" not found in fieldable.'
+                'Field "'.$field_path.'" not found in fieldable.'
             );
         }
 
         // Check if config is available.
         if (!property_exists(
-            $field->getSettings(),
-            'bucket'
-          ) || empty($field->getSettings()->bucket)) {
+                $field->getSettings(),
+                'bucket'
+            ) || empty($field->getSettings()->bucket)) {
             throw new \InvalidArgumentException('Invalid field definition.');
         }
 
         // Check if config is available.
         $allowed_field_types = '*';
         if (property_exists(
-            $field->getSettings(),
-            'file_types'
-          ) && !empty($field->getSettings()->file_types)) {
+                $field->getSettings(),
+                'file_types'
+            ) && !empty($field->getSettings()->file_types)) {
             $allowed_field_types = $field->getSettings()->file_types;
         }
 
         return $this->createPreSignedUploadUrl(
-          $filename,
-          $field->getSettings()->bucket,
-          $allowed_field_types
+            $filename,
+            $field->getSettings()->bucket,
+            $allowed_field_types
         );
     }
 
@@ -202,23 +204,27 @@ class StorageService
      *
      * @return \Aws\Result
      */
-    public function deleteObject(string $id, string $filename, array $bucket_settings) {
+    public function deleteObject(string $id, string $filename, array $bucket_settings)
+    {
 
-        $s3Client = new S3Client([
-            'version' => 'latest',
-            'region' => 'us-east-1',
-          'endpoint' => $bucket_settings['endpoint'],
-          'use_path_style_endpoint' => true,
-          'credentials' => [
-            'key' => $bucket_settings['key'],
-            'secret' => $bucket_settings['secret'],
-          ],
-        ]);
+        $s3Client = new S3Client(
+            [
+                'version' => 'latest',
+                'region' => 'us-east-1',
+                'endpoint' => $bucket_settings['endpoint'],
+                'use_path_style_endpoint' => true,
+                'credentials' => [
+                    'key' => $bucket_settings['key'],
+                    'secret' => $bucket_settings['secret'],
+                ],
+            ]
+        );
 
-        return $s3Client->deleteObject([
-            'Bucket' => $bucket_settings['bucket'],
-            'Key' => $id . '/' . $filename,
-          ]
+        return $s3Client->deleteObject(
+            [
+                'Bucket' => $bucket_settings['bucket'],
+                'Key' => $id.'/'.$filename,
+            ]
         );
     }
 }

@@ -43,10 +43,14 @@ class ApiClientUserProvider implements UserProviderInterface
      */
     public function loadUserByUsername($username)
     {
-        if(($domain = $this->uniteCMSManager->getDomain()) && ($token = $this->entityManager->getRepository('UniteCMSCoreBundle:ApiClient')->findOneBy([
-            'token' => $username,
-            'domain' => $domain,
-        ]))) {
+        if (($domain = $this->uniteCMSManager->getDomain()) && ($token = $this->entityManager->getRepository(
+                'UniteCMSCoreBundle:ApiClient'
+            )->findOneBy(
+                [
+                    'token' => $username,
+                    'domain' => $domain,
+                ]
+            ))) {
             return $token;
         }
         throw new TokenNotFoundException("An API Client with token $username was not found for the current domain");
@@ -68,7 +72,7 @@ class ApiClientUserProvider implements UserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        if(!$user instanceof ApiClient) {
+        if (!$user instanceof ApiClient) {
             throw new UnsupportedUserException('This provider ony supports API Clients');
         }
 

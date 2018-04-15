@@ -74,14 +74,24 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->em->flush($this->domain);
     }
 
-    public function testContentCreateEvent() {
+    public function testContentCreateEvent()
+    {
 
-        $this->container->get('unite.cms.field_type_manager')->registerFieldType(new class extends FieldType {
-            const TYPE = 'testeventhook';
-            public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {
-                $data[$field->getIdentifier()] .= '_modified';
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType(
+            new class extends FieldType
+            {
+                const TYPE = 'testeventhook';
+
+                public function onCreate(
+                    FieldableField $field,
+                    FieldableContent $content,
+                    EntityRepository $repository,
+                    &$data
+                ) {
+                    $data[$field->getIdentifier()] .= '_modified';
+                }
             }
-        });
+        );
 
         $content = new Content();
         $content->setContentType($this->domain->getContentTypes()->first());
@@ -99,14 +109,25 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->assertEquals(['test' => 'foo_modified'], $content->getData());
     }
 
-    public function testContentUpdateEvent() {
+    public function testContentUpdateEvent()
+    {
 
-        $this->container->get('unite.cms.field_type_manager')->registerFieldType(new class extends FieldType {
-            const TYPE = 'testeventhook';
-            public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
-                $data[$field->getIdentifier()] .= '_' . $old_data[$field->getIdentifier()] . '_modified';
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType(
+            new class extends FieldType
+            {
+                const TYPE = 'testeventhook';
+
+                public function onUpdate(
+                    FieldableField $field,
+                    FieldableContent $content,
+                    EntityRepository $repository,
+                    $old_data,
+                    &$data
+                ) {
+                    $data[$field->getIdentifier()] .= '_'.$old_data[$field->getIdentifier()].'_modified';
+                }
             }
-        });
+        );
 
         $content = new Content();
         $content->setContentType($this->domain->getContentTypes()->first());
@@ -129,16 +150,30 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->assertEquals(['test' => 'baa_foo_modified'], $content->getData());
     }
 
-    public function testContentDeleteEvent() {
+    public function testContentDeleteEvent()
+    {
 
-        $mock = new class extends FieldType {
+        $mock = new class extends FieldType
+        {
             public $invokeSoftDeleteCounter = 0;
             public $invokeHardDeleteCounter = 0;
             const TYPE = 'testeventhook';
-            public function onSoftDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
+
+            public function onSoftDelete(
+                FieldableField $field,
+                FieldableContent $content,
+                EntityRepository $repository,
+                $data
+            ) {
                 $this->invokeSoftDeleteCounter++;
             }
-            public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
+
+            public function onHardDelete(
+                FieldableField $field,
+                FieldableContent $content,
+                EntityRepository $repository,
+                $data
+            ) {
                 $this->invokeHardDeleteCounter++;
             }
         };
@@ -163,9 +198,11 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         // Remove it for real.
         $this->em->getFilters()->disable('gedmo_softdeleteable');
 
-        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
-            'contentType' => $this->domain->getContentTypes()->first(),
-        ]);
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+            [
+                'contentType' => $this->domain->getContentTypes()->first(),
+            ]
+        );
 
         $this->em->remove($content);
         $this->em->flush();
@@ -176,25 +213,51 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->assertEquals(1, $mock->invokeHardDeleteCounter);
     }
 
-    public function testSettingUpdateEvent() {
+    public function testSettingUpdateEvent()
+    {
 
-        $mock = new class extends FieldType {
+        $mock = new class extends FieldType
+        {
             public $invokeCreateCounter = 0;
             public $invokeSoftDeleteCounter = 0;
             public $invokeHardDeleteCounter = 0;
             const TYPE = 'testeventhook';
 
-            public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
+            public function onCreate(
+                FieldableField $field,
+                FieldableContent $content,
+                EntityRepository $repository,
+                $data
+            ) {
                 $this->invokeCreateCounter++;
             }
-            public function onSoftDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
+
+            public function onSoftDelete(
+                FieldableField $field,
+                FieldableContent $content,
+                EntityRepository $repository,
+                $data
+            ) {
                 $this->invokeSoftDeleteCounter++;
             }
-            public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
+
+            public function onHardDelete(
+                FieldableField $field,
+                FieldableContent $content,
+                EntityRepository $repository,
+                $data
+            ) {
                 $this->invokeHardDeleteCounter++;
             }
-            public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
-                $data[$field->getIdentifier()] .= '_' . $old_data[$field->getIdentifier()] . '_modified';
+
+            public function onUpdate(
+                FieldableField $field,
+                FieldableContent $content,
+                EntityRepository $repository,
+                $old_data,
+                &$data
+            ) {
+                $data[$field->getIdentifier()] .= '_'.$old_data[$field->getIdentifier()].'_modified';
             }
         };
 

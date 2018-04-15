@@ -15,17 +15,20 @@ class ChoiceFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = [ 'choices' ];
+    const SETTINGS = ['choices'];
 
     /**
      * All required settings for this field type.
      */
-    const REQUIRED_SETTINGS = [ 'choices' ];
+    const REQUIRED_SETTINGS = ['choices'];
 
     function getFormOptions(FieldableField $field): array
     {
-        return array_merge(parent::getFormOptions($field), [
-            'choices' => $field->getSettings()->choices,
-        ]);
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'choices' => $field->getSettings()->choices,
+            ]
+        );
     }
 }

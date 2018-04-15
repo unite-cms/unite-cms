@@ -70,7 +70,11 @@ class DomainApiClientController extends Controller
             ->add(
                 'roles',
                 ChoiceType::class,
-                ['label' => 'domain.api_client.create.form.roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions(true)]
+                [
+                    'label' => 'domain.api_client.create.form.roles',
+                    'multiple' => true,
+                    'choices' => $domain->getAvailableRolesAsOptions(true),
+                ]
             )
             ->add('submit', SubmitType::class, ['label' => 'domain.api_client.create.form.submit'])
             ->getForm();
@@ -126,7 +130,11 @@ class DomainApiClientController extends Controller
             ->add(
                 'roles',
                 ChoiceType::class,
-                ['label' => 'domain.api_client.update.form.roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions(true)]
+                [
+                    'label' => 'domain.api_client.update.form.roles',
+                    'multiple' => true,
+                    'choices' => $domain->getAvailableRolesAsOptions(true),
+                ]
             )
             ->add('submit', SubmitType::class, ['label' => 'domain.api_client.update.form.submit'])
             ->getForm();
@@ -174,7 +182,11 @@ class DomainApiClientController extends Controller
     public function deleteAction(Organization $organization, Domain $domain, ApiClient $client, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'domain.api_client.delete.form.submit', 'attr' => ['class' => 'uk-button-danger']])->getForm();
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'domain.api_client.delete.form.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

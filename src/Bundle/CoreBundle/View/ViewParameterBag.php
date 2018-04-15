@@ -67,8 +67,12 @@ class ViewParameterBag implements \JsonSerializable
         $this->settings = $settings;
     }
 
-    public static function createFromView(View $view, UrlGeneratorInterface $generator, string $select_mode = ViewTypeInterface::SELECT_MODE_NONE, $settings = [])
-    {
+    public static function createFromView(
+        View $view,
+        UrlGeneratorInterface $generator,
+        string $select_mode = ViewTypeInterface::SELECT_MODE_NONE,
+        $settings = []
+    ) {
         $bag = new ViewParameterBag($settings);
 
         $urlParameter = [
@@ -85,15 +89,18 @@ class ViewParameterBag implements \JsonSerializable
         $bag->setUpdateUrlPattern($generator->generate('unitecms_core_content_update', $urlParameter));
         $bag->setDeleteUrlPattern($generator->generate('unitecms_core_content_delete', $urlParameter));
         $bag->setRecoverUrlPattern($generator->generate('unitecms_core_content_recover', $urlParameter));
-        $bag->setDeleteDefinitelyUrlPattern($generator->generate('unitecms_core_content_deletedefinitely', $urlParameter));
+        $bag->setDeleteDefinitelyUrlPattern(
+            $generator->generate('unitecms_core_content_deletedefinitely', $urlParameter)
+        );
 
-        if(count($view->getContentType()->getLocales()) > 1) {
+        if (count($view->getContentType()->getLocales()) > 1) {
             $bag->setTranslationsUrlPattern($generator->generate('unitecms_core_content_translations', $urlParameter));
         }
 
         $bag->setRevisionsUrlPattern($generator->generate('unitecms_core_content_revisions', $urlParameter));
 
         $bag->setSelectMode($select_mode);
+
         return $bag;
     }
 
@@ -133,8 +140,10 @@ class ViewParameterBag implements \JsonSerializable
      * @param string $pattern
      * @return ViewParameterBag
      */
-    public function setApiEndpointPattern(string $pattern) {
+    public function setApiEndpointPattern(string $pattern)
+    {
         $this->apiEndpointPattern = $pattern;
+
         return $this;
     }
 
@@ -142,8 +151,10 @@ class ViewParameterBag implements \JsonSerializable
      * @param string $pattern
      * @return ViewParameterBag
      */
-    public function setCreateUrlPattern(string $pattern) {
+    public function setCreateUrlPattern(string $pattern)
+    {
         $this->createUrlPattern = $pattern;
+
         return $this;
     }
 
@@ -151,8 +162,10 @@ class ViewParameterBag implements \JsonSerializable
      * @param string $pattern
      * @return ViewParameterBag
      */
-    public function setUpdateUrlPattern(string $pattern) {
+    public function setUpdateUrlPattern(string $pattern)
+    {
         $this->updateUrlPattern = $pattern;
+
         return $this;
     }
 
@@ -160,8 +173,10 @@ class ViewParameterBag implements \JsonSerializable
      * @param string $pattern
      * @return ViewParameterBag
      */
-    public function setDeleteUrlPattern(string $pattern) {
+    public function setDeleteUrlPattern(string $pattern)
+    {
         $this->deleteUrlPattern = $pattern;
+
         return $this;
     }
 
@@ -180,6 +195,7 @@ class ViewParameterBag implements \JsonSerializable
     public function setRecoverUrlPattern(string $recoverUrlPattern)
     {
         $this->recoverUrlPattern = $recoverUrlPattern;
+
         return $this;
     }
 
@@ -198,6 +214,7 @@ class ViewParameterBag implements \JsonSerializable
     public function setDeleteDefinitelyUrlPattern(string $deleteDefinitelyUrlPattern)
     {
         $this->deleteDefinitelyUrlPattern = $deleteDefinitelyUrlPattern;
+
         return $this;
     }
 
@@ -216,6 +233,7 @@ class ViewParameterBag implements \JsonSerializable
     public function setTranslationsUrlPattern(string $translationsUrlPattern)
     {
         $this->translationsUrlPattern = $translationsUrlPattern;
+
         return $this;
     }
 
@@ -234,13 +252,15 @@ class ViewParameterBag implements \JsonSerializable
     public function setRevisionsUrlPattern(string $revisionsUrlPattern)
     {
         $this->revisionsUrlPattern = $revisionsUrlPattern;
+
         return $this;
     }
 
     /**
      * @return array
      */
-    public function getSettings() {
+    public function getSettings()
+    {
         return $this->settings;
     }
 
@@ -251,13 +271,15 @@ class ViewParameterBag implements \JsonSerializable
     public function setSettings(array $settings)
     {
         $this->settings = $settings;
+
         return $this;
     }
 
     /**
      * @return string
      */
-    public function getCsrfToken() : string {
+    public function getCsrfToken(): string
+    {
         return $this->csrfToken;
     }
 
@@ -265,8 +287,10 @@ class ViewParameterBag implements \JsonSerializable
      * @param string $csrfToken
      * @return ViewParameterBag
      */
-    public function setCsrfToken($csrfToken) {
+    public function setCsrfToken($csrfToken)
+    {
         $this->csrfToken = $csrfToken;
+
         return $this;
     }
 
@@ -285,20 +309,23 @@ class ViewParameterBag implements \JsonSerializable
     public function setSelectMode(string $selectMode)
     {
         $this->selectMode = $selectMode;
+
         return $this;
     }
 
     /**
      * @return bool
      */
-    public function isSelectModeSingle() : bool {
+    public function isSelectModeSingle(): bool
+    {
         return $this->selectMode == ViewTypeInterface::SELECT_MODE_SINGLE;
     }
 
     /**
      * @return bool
      */
-    public function isSelectModeNone() : bool {
+    public function isSelectModeNone(): bool
+    {
         return $this->selectMode == ViewTypeInterface::SELECT_MODE_NONE;
     }
 
@@ -306,8 +333,9 @@ class ViewParameterBag implements \JsonSerializable
      * @param string $settingKey
      * @return mixed|null
      */
-    public function get(string $settingKey) {
-        if(!empty($this->settings[$settingKey])) {
+    public function get(string $settingKey)
+    {
+        if (!empty($this->settings[$settingKey])) {
             return $this->settings[$settingKey];
         }
 
@@ -318,37 +346,38 @@ class ViewParameterBag implements \JsonSerializable
      * @param string $url
      * @return null|string
      */
-    public function getUrl(string $url) {
+    public function getUrl(string $url)
+    {
 
-        if($url == 'api') {
+        if ($url == 'api') {
             return $this->getApiEndpointPattern();
         }
 
-        if($url == 'create') {
+        if ($url == 'create') {
             return $this->getCreateUrlPattern();
         }
 
-        if($url == 'update') {
+        if ($url == 'update') {
             return $this->getUpdateUrlPattern();
         }
 
-        if($url == 'delete') {
+        if ($url == 'delete') {
             return $this->getDeleteUrlPattern();
         }
 
-        if($url == 'recover') {
+        if ($url == 'recover') {
             return $this->getRecoverUrlPattern();
         }
 
-        if($url == 'delete_definitely') {
+        if ($url == 'delete_definitely') {
             return $this->getDeleteDefinitelyUrlPattern();
         }
 
-        if($url == 'translations') {
+        if ($url == 'translations') {
             return $this->getTranslationsUrlPattern();
         }
 
-        if($url == 'revisions') {
+        if ($url == 'revisions') {
             return $this->getRevisionsUrlPattern();
         }
 

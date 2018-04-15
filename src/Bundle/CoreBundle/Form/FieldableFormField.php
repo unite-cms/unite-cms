@@ -23,11 +23,13 @@ class FieldableFormField
         $this->fieldDefinition = $fieldDefinition;
     }
 
-    public function getFieldType() : FieldTypeInterface {
+    public function getFieldType(): FieldTypeInterface
+    {
         return $this->fieldType;
     }
 
-    public function getFieldDefinition() : FieldableField {
+    public function getFieldDefinition(): FieldableField
+    {
         return $this->fieldDefinition;
     }
 }

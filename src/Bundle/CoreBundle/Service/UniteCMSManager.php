@@ -60,7 +60,7 @@ class UniteCMSManager
 
         $request = $this->requestStack->getCurrentRequest();
 
-        if(!$request) {
+        if (!$request) {
             return;
         }
 
@@ -70,7 +70,7 @@ class UniteCMSManager
 
         if ($requestOrganization instanceof Organization) {
             $requestOrganizationOriginal = $this->em->getUnitOfWork()->getOriginalEntityData($requestOrganization);
-            if(!empty($requestOrganizationOriginal['identifier'])) {
+            if (!empty($requestOrganizationOriginal['identifier'])) {
                 $organizationIdentifier = $requestOrganizationOriginal['identifier'];
             } else {
                 $organizationIdentifier = $requestOrganization->getIdentifier();
@@ -81,7 +81,7 @@ class UniteCMSManager
 
         if ($requestDomain instanceof Domain) {
             $requestDomainOriginal = $this->em->getUnitOfWork()->getOriginalEntityData($requestDomain);
-            if(!empty($requestOrganizationOriginal['identifier'])) {
+            if (!empty($requestOrganizationOriginal['identifier'])) {
                 $domainIdentifier = $requestDomainOriginal['identifier'];
             } else {
                 $domainIdentifier = $requestDomain->getIdentifier();
@@ -143,7 +143,9 @@ class UniteCMSManager
 
             foreach ($data as $row) {
                 $contentType = new ContentType();
-                $contentType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setContentLabel($row['contentLabel'])->setIcon($row['icon'])->setPermissions($row['permissions']);
+                $contentType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle(
+                    $row['title']
+                )->setContentLabel($row['contentLabel'])->setIcon($row['icon'])->setPermissions($row['permissions']);
 
                 // Get views for this contentType.
                 $viewData = $this->em->createQueryBuilder()
@@ -156,9 +158,11 @@ class UniteCMSManager
                 // Remove the default 'all' view from the contentType so it can be replaced with persisted views.
                 $contentType->getViews()->clear();
 
-                foreach($viewData as $viewRow) {
+                foreach ($viewData as $viewRow) {
                     $view = new View();
-                    $view->setId($viewRow['id'])->setIdentifier($viewRow['identifier'])->setTitle($viewRow['title'])->setType($viewRow['type'])->setIcon($viewRow['icon']);
+                    $view->setId($viewRow['id'])->setIdentifier($viewRow['identifier'])->setTitle(
+                        $viewRow['title']
+                    )->setType($viewRow['type'])->setIcon($viewRow['icon']);
                     $contentType->addView($view);
                 }
 
@@ -176,7 +180,9 @@ class UniteCMSManager
 
             foreach ($data as $row) {
                 $settingType = new SettingType();
-                $settingType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon($row['icon'])->setPermissions($row['permissions']);
+                $settingType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon(
+                    $row['icon']
+                )->setPermissions($row['permissions']);
                 $this->domain->addSettingType($settingType);
             }
         }

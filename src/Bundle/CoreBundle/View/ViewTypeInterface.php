@@ -23,7 +23,7 @@ interface ViewTypeInterface
     function unsetEntity();
 
     /**
-     * @param string $selectMode, the select mode. Default's to none. But can also be single or multiple.
+     * @param string $selectMode , the select mode. Default's to none. But can also be single or multiple.
      *
      * @return array
      */
@@ -34,5 +34,5 @@ interface ViewTypeInterface
      *
      * @return ConstraintViolation[]
      */
-    function validateSettings(ViewSettings $settings) : array;
+    function validateSettings(ViewSettings $settings): array;
 }
