@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -9,10 +9,10 @@ use JMS\Serializer\Annotation\Accessor;
 use JMS\Serializer\Annotation\Type;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidContentTranslationOf;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidContentTranslations;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocale;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidContentTranslationOf;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidContentTranslations;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocale;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
 
 /**
  * Content
@@ -36,7 +36,7 @@ class Content implements FieldableContent
     /**
      * @var ContentType
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\ContentType", inversedBy="content", fetch="EXTRA_LAZY")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", inversedBy="content", fetch="EXTRA_LAZY")
      */
     protected $contentType;
 
@@ -58,16 +58,16 @@ class Content implements FieldableContent
 
     /**
      * @var Content[]
-     * @Type("ArrayCollection<UnitedCMS\CoreBundle\Entity\Content>")
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Content>")
      * @Accessor(getter="geTranslations",setter="setTranslations")
      * @ValidContentTranslations(uniqueLocaleMessage="validation.unique_translations", nestedTranslationMessage="validation.nested_translations")
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\Content", mappedBy="translationOf", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Content", mappedBy="translationOf", fetch="EXTRA_LAZY")
      */
     private $translations;
 
     /**
      * @var Content
-     * @Type("UnitedCMS\CoreBundle\Entity\Content")
+     * @Type("UniteCMS\CoreBundle\Entity\Content")
      * @Accessor(getter="geTranslationOf",setter="setTranslationOf")
      * @ORM\ManyToOne(targetEntity="Content", inversedBy="translations")
      * @ValidContentTranslationOf(uniqueLocaleMessage="validation.unique_translations")

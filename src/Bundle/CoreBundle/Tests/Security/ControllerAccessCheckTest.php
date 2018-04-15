@@ -1,20 +1,20 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Security;
+namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\DomainInvitation;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow
@@ -86,7 +86,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Test controller access check')->setIdentifier('access_check');
-        $this->domain = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
@@ -392,10 +392,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         );
         $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
 
-        $org = $this->em->getRepository('UnitedCMSCoreBundle:Organization')->findOneBy(
+        $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(
             ['identifier' => 'access_check',]
         );
-        $domain2 = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $domain2 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org);
 
         $content2 = new Content();
@@ -532,10 +532,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         );
         $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', true, $substitutions, ['GET', 'POST']);
 
-        $org = $this->em->getRepository('UnitedCMSCoreBundle:Organization')->findOneBy(
+        $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(
             ['identifier' => 'access_check',]
         );
-        $domain2 = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $domain2 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org);
 
         $content2 = new Content();
@@ -674,7 +674,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
         $org2 = new Organization();
         $org2->setTitle('Org 2')->setIdentifier('access_check2');
-        $domain2 = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $domain2 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org2);
 
         $content2 = new Content();
@@ -815,7 +815,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
         $org2 = new Organization();
         $org2->setTitle('Org 2')->setIdentifier('access_check2');
-        $domain2 = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $domain2 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org2);
 
         $content2 = new Content();

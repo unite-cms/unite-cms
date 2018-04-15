@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -37,7 +37,7 @@ class DomainMember
      * @var Domain
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Choice(callback="allowedDomains", strict=true, message="validation.domain_organization")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\Domain", inversedBy="users")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="users")
      */
     private $domain;
 
@@ -45,7 +45,7 @@ class DomainMember
      * @var User
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\User", inversedBy="domains")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\User", inversedBy="domains")
      */
     private $user;
 

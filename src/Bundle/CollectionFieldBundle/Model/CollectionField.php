@@ -1,15 +1,15 @@
 <?php
 
-namespace UnitedCMS\CollectionFieldBundle\Model;
+namespace UniteCMS\CollectionFieldBundle\Model;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
-use UnitedCMS\CoreBundle\Validator\Constraints\FieldType;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWords;
-use UnitedCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Validator\Constraints\FieldType;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
 
 /**
  * We use this model only for validation!
@@ -32,7 +32,7 @@ class CollectionField implements FieldableField
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
      * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UnitedCMS\CollectionFieldBundle\Model\CollectionField::RESERVED_IDENTIFIERS")
+     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CollectionFieldBundle\Model\CollectionField::RESERVED_IDENTIFIERS")
      */
     private $identifier;
 

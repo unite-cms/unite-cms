@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Field;
+namespace UniteCMS\CoreBundle\Field;
 
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 /**
  * An abstract base field type, that allows to easily implement custom field types.

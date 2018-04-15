@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 /**
  * Defines fieldable content.

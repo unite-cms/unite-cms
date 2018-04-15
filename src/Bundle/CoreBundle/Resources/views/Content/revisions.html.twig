@@ -1,12 +1,12 @@
-{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% extends '@UniteCMSCore/layout.html.twig' %}
 {% block title %}{% trans with {'%content%': content|escape } %}content.revisions.title{% endtrans %}{% endblock title %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
+{% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitedcms_core_content_index', {
-            domain: united.domain.identifier,
-            organization: united.organization.identifier,
+        <a class="back-button" href="{{ path('unitecms_core_content_index', {
+            domain: unite.domain.identifier,
+            organization: unite.organization.identifier,
             content_type: contentType.identifier,
             view: view.identifier
         }) }}"><i data-feather="arrow-left"></i></a>
@@ -43,9 +43,9 @@
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a href="{{ path('unitedcms_core_content_revisionsrevert', {
-                                            'organization': united.domain.organization.identifier,
-                                            'domain': united.domain.identifier,
+                                    <li><a href="{{ path('unitecms_core_content_revisionsrevert', {
+                                            'organization': unite.domain.organization.identifier,
+                                            'domain': unite.domain.identifier,
                                             'content_type': contentType.identifier,
                                             'view': view.identifier,
                                             'content': content.id,

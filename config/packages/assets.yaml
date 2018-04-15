@@ -1,12 +1,12 @@
 framework:
     assets:
         packages:
-            UnitedCMSCoreBundle:
-                json_manifest_path: "%kernel.project_dir%/public/bundles/unitedcmscore/manifest.json"
-                base_path: '/bundles/unitedcmscore'
-            UnitedCMSCollectionFieldBundle:
-                json_manifest_path: "%kernel.project_dir%/public/bundles/unitedcmscollectionfield/manifest.json"
-                base_path: '/bundles/unitedcmscollectionfield'
-            UnitedCMSStorageBundle:
-                json_manifest_path: "%kernel.project_dir%/public/bundles/unitedcmsstorage/manifest.json"
-                base_path: '/bundles/unitedcmsstorage'
+            UniteCMSCoreBundle:
+                json_manifest_path: "%kernel.project_dir%/public/bundles/unitecmscore/manifest.json"
+                base_path: '/bundles/unitecmscore'
+            UniteCMSCollectionFieldBundle:
+                json_manifest_path: "%kernel.project_dir%/public/bundles/unitecmscollectionfield/manifest.json"
+                base_path: '/bundles/unitecmscollectionfield'
+            UniteCMSStorageBundle:
+                json_manifest_path: "%kernel.project_dir%/public/bundles/unitecmsstorage/manifest.json"
+                base_path: '/bundles/unitecmsstorage'

@@ -234,7 +234,7 @@ export default {
                 this.selected.push(row);
 
                 // For the moment, we only support single element selection.
-                window.UnitedCMSEventBus.$emit('contentSelected', [ {
+                window.UniteCMSEventBus.$emit('contentSelected', [ {
                     contentType: this.contentType,
                     view: this.view,
                     row: row

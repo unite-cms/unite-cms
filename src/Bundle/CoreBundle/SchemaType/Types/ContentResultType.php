@@ -6,16 +6,16 @@
  * Time: 12:29
  */
 
-namespace UnitedCMS\CoreBundle\SchemaType\Types;
+namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Knp\Component\Pager\Pagination\AbstractPagination;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Security\ContentVoter;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class ContentResultType extends AbstractType
 {
@@ -43,13 +43,13 @@ class ContentResultType extends AbstractType
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
         AuthorizationChecker $authorizationChecker,
-        UnitedCMSManager $unitedCMSManager = null,
+        UniteCMSManager $uniteCMSManager = null,
         Domain $domain = null,
         $contentSchemaType = 'ContentInterface'
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->authorizationChecker = $authorizationChecker;
-        $this->domain = $domain ? $domain : $unitedCMSManager->getDomain();
+        $this->domain = $domain ? $domain : $uniteCMSManager->getDomain();
         $this->contentSchemaType = $contentSchemaType;
         parent::__construct();
     }
@@ -100,7 +100,7 @@ class ContentResultType extends AbstractType
                 $items = [];
 
                 /**
-                 * @var \UnitedCMS\CoreBundle\Entity\Content $item
+                 * @var \UniteCMS\CoreBundle\Entity\Content $item
                  */
                 foreach ($value->getItems() as $item) {
                     if ($this->authorizationChecker->isGranted(ContentVoter::VIEW, $item)) {

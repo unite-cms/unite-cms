@@ -6,7 +6,7 @@ Encore
     .setOutputPath('./Resources/public')
 
     // the public path used by the web server to access the previous directory
-    .setPublicPath('/bundles/unitedcmscore')
+    .setPublicPath('/bundles/unitecmscore')
 
     // Used as a prefix to the *keys* in manifest.json
     .setManifestKeyPrefix('')

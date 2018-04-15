@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,7 +13,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * User
  *
- * @ORM\Table(name="united_user")
+ * @ORM\Table(name="unite_user")
  * @ORM\Entity()
  * @UniqueEntity(fields={"email"}, message="validation.email_already_taken")
  * @UniqueEntity(fields={"resetToken"}, message="validation.reset_token_present")
@@ -76,14 +76,14 @@ class User implements UserInterface, \Serializable
     /**
      * @var OrganizationMember[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"})
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"})
      */
     private $organizations;
 
     /**
      * @var DomainMember[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\DomainMember", mappedBy="user", cascade={"persist", "remove", "merge"})
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="user", cascade={"persist", "remove", "merge"})
      */
     private $domains;
 

@@ -3,40 +3,40 @@ services:
 
   # For handling API authentication we use the Symfony Guard system and implement a custom Authenticator and
   # UserProvider.
-  united.cms.api_client_authenticator:
-    class: UnitedCMS\CoreBundle\Security\ApiClientAuthenticator
+  unite.cms.api_client_authenticator:
+    class: UniteCMS\CoreBundle\Security\ApiClientAuthenticator
     public: false
 
-  united.cms.api_client_provider:
-    class: UnitedCMS\CoreBundle\Security\ApiClientUserProvider
-    arguments: ['@united.cms.manager', '@doctrine.orm.default_entity_manager']
+  unite.cms.api_client_provider:
+    class: UniteCMS\CoreBundle\Security\ApiClientUserProvider
+    arguments: ['@unite.cms.manager', '@doctrine.orm.default_entity_manager']
     public: false
 
   # We implement a custom RequestMatcher for the API firewall that also handles fallback to the main firewall if a
   # special Header Flag is set. This allows logged in user to access the API (for example in the admin backend) without
   # the need of an access token.
-  united.cms.api_request_matcher:
-    class: UnitedCMS\CoreBundle\Security\ApiRequestMatcher
+  unite.cms.api_request_matcher:
+    class: UniteCMS\CoreBundle\Security\ApiRequestMatcher
     public: false
 
 
   # Security voters to check if a user can perform a certain action (like VIEW oder CREATE) on an object (like Content).
-  UnitedCMS\CoreBundle\Security\OrganizationVoter:
+  UniteCMS\CoreBundle\Security\OrganizationVoter:
     public: false
     tags: [security.voter]
 
-  UnitedCMS\CoreBundle\Security\DomainVoter:
+  UniteCMS\CoreBundle\Security\DomainVoter:
     public: false
     tags: [security.voter]
 
-  UnitedCMS\CoreBundle\Security\ContentVoter:
+  UniteCMS\CoreBundle\Security\ContentVoter:
     public: false
     tags: [security.voter]
 
-  UnitedCMS\CoreBundle\Security\DeletedContentVoter:
+  UniteCMS\CoreBundle\Security\DeletedContentVoter:
     public: false
     tags: [security.voter]
 
-  UnitedCMS\CoreBundle\Security\SettingVoter:
+  UniteCMS\CoreBundle\Security\SettingVoter:
     public: false
     tags: [security.voter]

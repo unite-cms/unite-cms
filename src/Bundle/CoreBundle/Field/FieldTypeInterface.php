@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Field;
+namespace UniteCMS\CoreBundle\Field;
 
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 interface FieldTypeInterface
 {
@@ -19,7 +19,7 @@ interface FieldTypeInterface
      *   return GraphQL\Type\Definition\Type::string();
      *
      * Example 2:
-     *   return $schemaTypeManager->getSchemaType('ReferenceFieldType', $this->unitedCMSManager->getDomain(), $nestingLevel);
+     *   return $schemaTypeManager->getSchemaType('ReferenceFieldType', $this->uniteCMSManager->getDomain(), $nestingLevel);
      *
      * @param FieldableField $field
      * @param SchemaTypeManager $schemaTypeManager
@@ -36,7 +36,7 @@ interface FieldTypeInterface
      *   return GraphQL\Type\Definition\Type::string();
      *
      * Example 2:
-     *   return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $this->unitedCMSManager->getDomain(), $nestingLevel);
+     *   return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $this->uniteCMSManager->getDomain(), $nestingLevel);
      *
      * @param FieldableField $field
      * @param SchemaTypeManager $schemaTypeManager

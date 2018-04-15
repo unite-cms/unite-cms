@@ -1,12 +1,12 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Validator\Constraints;
+namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Content;
 
 class ValidContentTranslationOfValidator extends ConstraintValidator
 {
@@ -29,13 +29,13 @@ class ValidContentTranslationOfValidator extends ConstraintValidator
 
         if (!$this->context->getObject() instanceof Content) {
             throw new InvalidArgumentException(
-                'The ValidContentTranslationOfValidator constraint expects a UnitedCMS\CoreBundle\Entity\Content object.'
+                'The ValidContentTranslationOfValidator constraint expects a UniteCMS\CoreBundle\Entity\Content object.'
             );
         }
 
         if (!$value instanceof Content) {
             throw new InvalidArgumentException(
-                'The ValidContentTranslationOfValidator constraint expects a UnitedCMS\CoreBundle\Entity\Content value.'
+                'The ValidContentTranslationOfValidator constraint expects a UniteCMS\CoreBundle\Entity\Content value.'
             );
         }
 

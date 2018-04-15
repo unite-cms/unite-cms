@@ -4,7 +4,7 @@
     <title>{{ block('title') }} - {{ site_name }}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% include '@UnitedCMSCore/_assets.html.twig' %}
+    {% include '@UniteCMSCore/_assets.html.twig' %}
 </head>
 <body>
 
@@ -15,7 +15,7 @@
 {% endif %}
 
     <section class="unite-main-section uk-flex-center uk-flex uk-flex-middle uk-flex-column" uk-height-viewport="offset-top: true; offset-bottom: true">
-        {% include '@UnitedCMSCore/_messages.html.twig' %}
+        {% include '@UniteCMSCore/_messages.html.twig' %}
         {{ block('content') }}
     </section>
 

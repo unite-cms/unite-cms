@@ -6,19 +6,19 @@
  * Time: 15:41
  */
 
-namespace UnitedCMS\CoreBundle\Tests\Field;
+namespace UniteCMS\CoreBundle\Tests\Field;
 
 
 use Doctrine\ORM\EntityRepository;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\Field\FieldTypeInterface;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeInterface;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class FieldEventHooksTest extends DatabaseAwareTestCase
 {
@@ -68,7 +68,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->em->persist($org);
         $this->em->flush($org);
 
-        $this->domain = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfig);
+        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfig);
         $this->domain->setOrganization($org);
         $this->em->persist($this->domain);
         $this->em->flush($this->domain);
@@ -76,7 +76,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
     public function testContentCreateEvent() {
 
-        $this->container->get('united.cms.field_type_manager')->registerFieldType(new class extends FieldType {
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType(new class extends FieldType {
             const TYPE = 'testeventhook';
             public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {
                 $data[$field->getIdentifier()] .= '_modified';
@@ -101,7 +101,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
     public function testContentUpdateEvent() {
 
-        $this->container->get('united.cms.field_type_manager')->registerFieldType(new class extends FieldType {
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType(new class extends FieldType {
             const TYPE = 'testeventhook';
             public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
                 $data[$field->getIdentifier()] .= '_' . $old_data[$field->getIdentifier()] . '_modified';
@@ -143,7 +143,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
             }
         };
 
-        $this->container->get('united.cms.field_type_manager')->registerFieldType($mock);
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType($mock);
 
         $content = new Content();
         $content->setContentType($this->domain->getContentTypes()->first());
@@ -163,7 +163,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         // Remove it for real.
         $this->em->getFilters()->disable('gedmo_softdeleteable');
 
-        $content = $this->em->getRepository('UnitedCMSCoreBundle:Content')->findOneBy([
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
             'contentType' => $this->domain->getContentTypes()->first(),
         ]);
 
@@ -198,7 +198,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
             }
         };
 
-        $this->container->get('united.cms.field_type_manager')->registerFieldType($mock);
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType($mock);
 
         $setting = new Setting();
         $setting->setSettingType($this->domain->getSettingTypes()->first());

@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Configuration;
@@ -8,20 +8,20 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\FilterCollection;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidContentTranslationOf;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidContentTranslationOfValidator;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidContentTranslations;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidContentTranslationsValidator;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentDataValidator;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocale;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocaleValidator;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidContentTranslationOf;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidContentTranslationOfValidator;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidContentTranslations;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidContentTranslationsValidator;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentDataValidator;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocale;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocaleValidator;
 
 class ValidContentTranslationOfValidatorTest extends ConstraintValidatorTestCase
 {
@@ -41,7 +41,7 @@ class ValidContentTranslationOfValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The ValidContentTranslationOfValidator constraint expects a UnitedCMS\CoreBundle\Entity\Content object.
+     * @expectedExceptionMessage The ValidContentTranslationOfValidator constraint expects a UniteCMS\CoreBundle\Entity\Content object.
      */
     public function testInvalidObject() {
         $object = new \stdClass();
@@ -50,7 +50,7 @@ class ValidContentTranslationOfValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The ValidContentTranslationOfValidator constraint expects a UnitedCMS\CoreBundle\Entity\Content value.
+     * @expectedExceptionMessage The ValidContentTranslationOfValidator constraint expects a UniteCMS\CoreBundle\Entity\Content value.
      */
     public function testInvalidValue() {
         $object = new Content();

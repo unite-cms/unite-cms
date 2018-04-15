@@ -1,7 +1,7 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
+namespace UniteCMS\CoreBundle\Entity;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 /**
  * Defines a fieldable entity.

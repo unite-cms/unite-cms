@@ -1,7 +1,7 @@
 <?php
 
 return [
-    UnitedCMS\CoreBundle\UnitedCMSCoreBundle::class => ['all' => true],
+    UniteCMS\CoreBundle\UniteCMSCoreBundle::class => ['all' => true],
 
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
@@ -15,8 +15,8 @@ return [
     Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle::class => ['all' => true],
     Knp\Bundle\PaginatorBundle\KnpPaginatorBundle::class => ['all' => true],
 
-    UnitedCMS\CollectionFieldBundle\UnitedCMSCollectionFieldBundle::class => ['all' => true],
-    UnitedCMS\StorageBundle\UnitedCMSStorageBundle::class => ['all' => true],
+    UniteCMS\CollectionFieldBundle\UniteCMSCollectionFieldBundle::class => ['all' => true],
+    UniteCMS\StorageBundle\UniteCMSStorageBundle::class => ['all' => true],
 
     Symfony\Bundle\DebugBundle\DebugBundle::class => ['dev' => true, 'test' => true],
     Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class => ['dev' => true],

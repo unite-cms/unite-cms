@@ -6,11 +6,11 @@
  * Time: 11:44
  */
 
-namespace UnitedCMS\StorageBundle\SchemaType;
+namespace UniteCMS\StorageBundle\SchemaType;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use UnitedCMS\CoreBundle\SchemaType\Types\AbstractType;
+use UniteCMS\CoreBundle\SchemaType\Types\AbstractType;
 
 class StorageFileType extends AbstractType
 {

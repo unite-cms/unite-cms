@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Field;
+namespace UniteCMS\CoreBundle\Tests\Field;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -9,15 +9,15 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
-use UnitedCMS\CoreBundle\View\ViewParameterBag;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\View\ViewParameterBag;
 
 class ReferenceFieldTypeTest extends FieldTypeTestCase
 {
@@ -72,7 +72,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $ctField->getContentType()->setIdentifier('baa');
 
         // Fake organization and domain
-        $fieldType = $this->container->get('united.cms.field_type_manager')->getFieldType($ctField->getType());
+        $fieldType = $this->container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
 
         $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
         $o1->setAccessible(true);
@@ -80,9 +80,9 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $authMock->expects($this->any())->method('isGranted')->willReturn(true);
         $o1->setValue($fieldType, $authMock);
 
-        $o2 = new \ReflectionProperty($fieldType, 'unitedCMSManager');
+        $o2 = new \ReflectionProperty($fieldType, 'uniteCMSManager');
         $o2->setAccessible(true);
-        $cmsManager = $this->createMock(UnitedCMSManager::class);
+        $cmsManager = $this->createMock(UniteCMSManager::class);
         $cmsManager->expects($this->any())->method('getOrganization')->willReturn($ctField->getContentType()->getDomain()->getOrganization());
         $cmsManager->expects($this->any())->method('getDomain')->willReturn($ctField->getContentType()->getDomain());
         $o2->setValue($fieldType, $cmsManager);
@@ -96,8 +96,8 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $cmsManager = $this->createMock(EntityManager::class);
         $cmsManager->expects($this->any())->method('getRepository')->will($this->returnValueMap([
-            ['UnitedCMSCoreBundle:View', $viewRepositoryMock],
-            ['UnitedCMSCoreBundle:Domain', $domainRepositoryMock],
+            ['UniteCMSCoreBundle:View', $viewRepositoryMock],
+            ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
         ]));
         $o3->setValue($fieldType, $cmsManager);
 
@@ -179,15 +179,15 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $user->addDomain($userInDomain2);
         $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'main', $user->getRoles()));
 
-        $reflector = new \ReflectionProperty(UnitedCMSManager::class, 'requestStack');
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('united.cms.manager'), $requestStack);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
 
-        $reflector = new \ReflectionMethod(UnitedCMSManager::class, 'initialize');
+        $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
         $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('united.cms.manager'));
+        $reflector->invoke($this->container->get('unite.cms.manager'));
 
-        $contentSchemaType = $this->container->get('united.cms.graphql.schema_type_manager')->getSchemaType(
+        $contentSchemaType = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
             ucfirst($ctField->getContentType()->getIdentifier()) . 'Content', $ctField->getContentType()->getDomain());
 
         // If we can get reach this line, no exceptions where thrown during content schema creation.

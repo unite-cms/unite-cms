@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,15 +12,15 @@ use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Type;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use UnitedCMS\CoreBundle\Security\SettingVoter;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWords;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidPermissions;
+use UniteCMS\CoreBundle\Security\SettingVoter;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
  * SettingType
  *
  * @ORM\Table(name="setting_type")
- * @ORM\Entity(repositoryClass="UnitedCMS\CoreBundle\Repository\SettingTypeRepository")
+ * @ORM\Entity(repositoryClass="UniteCMS\CoreBundle\Repository\SettingTypeRepository")
  * @UniqueEntity(fields={"identifier", "domain"}, message="validation.identifier_already_taken")
  * @ExclusionPolicy("all")
  */
@@ -49,7 +49,7 @@ class SettingType implements Fieldable
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
      * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UnitedCMS\CoreBundle\Entity\SettingType::RESERVED_IDENTIFIERS")
+     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\SettingType::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -76,16 +76,16 @@ class SettingType implements Fieldable
      * @var Domain
      * @Gedmo\SortableGroup
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\Domain", inversedBy="settingTypes")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="settingTypes")
      */
     private $domain;
 
     /**
      * @var SettingTypeField[]
      * @Assert\Valid()
-     * @Type("ArrayCollection<UnitedCMS\CoreBundle\Entity\SettingTypeField>")
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\SettingTypeField>")
      * @Accessor(getter="getFields",setter="setFields")
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier")
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
      */
@@ -93,9 +93,9 @@ class SettingType implements Fieldable
 
     /**
      * @var Setting[]|ArrayCollection
-     * @Type("ArrayCollection<UnitedCMS\CoreBundle\Entity\Setting>")
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Setting>")
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\Setting", mappedBy="settingType", cascade={"persist", "remove", "merge"})
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Setting", mappedBy="settingType", cascade={"persist", "remove", "merge"})
      */
     private $settings;
 

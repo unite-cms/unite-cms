@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Controller;
+namespace UniteCMS\CoreBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
@@ -14,11 +14,11 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\Translator;
-use UnitedCMS\CoreBundle\View\ViewTypeInterface;
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Form\WebComponentType;
-use UnitedCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\View\ViewTypeInterface;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Form\WebComponentType;
+use UniteCMS\CoreBundle\Security\ContentVoter;
 
 class ContentController extends Controller
 {
@@ -26,7 +26,7 @@ class ContentController extends Controller
      * @Route("/{content_type}/{view}")
      * @Method({"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::LIST'), view.getContentType())")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::LIST'), view.getContentType())")
      *
      * @param View $view
      * @return Response
@@ -34,15 +34,15 @@ class ContentController extends Controller
     public function indexAction(View $view)
     {
         return $this->render(
-            'UnitedCMSCoreBundle:Content:index.html.twig',
+            'UniteCMSCoreBundle:Content:index.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
                 'view' => $view,
-                'template' => $this->get('united.cms.view_type_manager')->getViewType(
+                'template' => $this->get('unite.cms.view_type_manager')->getViewType(
                     $view->getType()
                 )::getTemplate(),
-                'templateParameters' => $this->get('united.cms.view_type_manager')->getTemplateRenderParameters(
+                'templateParameters' => $this->get('unite.cms.view_type_manager')->getTemplateRenderParameters(
                     $view
                 )->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form')),
             ]
@@ -53,7 +53,7 @@ class ContentController extends Controller
      * @Route("/{content_type}/{view}/create")
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::CREATE'), view.getContentType())")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::CREATE'), view.getContentType())")
      *
      * @param View $view
      * @param Request $request
@@ -69,13 +69,13 @@ class ContentController extends Controller
         }
 
         if($request->query->has('translation_of')) {
-            $translationOf = $this->getDoctrine()->getRepository('UnitedCMSCoreBundle:Content')->find($request->query->get('translation_of'));
+            $translationOf = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->find($request->query->get('translation_of'));
             if($translationOf) {
                 $content->setTranslationOf($translationOf);
             }
         }
 
-        $form = $this->get('united.cms.fieldable_form_builder')->createForm(
+        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
             $view->getContentType(),
             $content,
             ['attr' => ['class' => 'uk-form-vertical']]
@@ -111,7 +111,7 @@ class ContentController extends Controller
                 $this->addFlash('success', 'Content created.');
 
                 return $this->redirectToRoute(
-                    'unitedcms_core_content_index',
+                    'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
                         ),
@@ -124,7 +124,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Content:create.html.twig',
+            'UniteCMSCoreBundle:Content:create.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -140,7 +140,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -149,7 +149,7 @@ class ContentController extends Controller
      */
     public function updateAction(View $view, Content $content, Request $request)
     {
-        $form = $this->get('united.cms.fieldable_form_builder')->createForm(
+        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
             $view->getContentType(),
             $content,
             ['attr' => ['class' => 'uk-form-vertical']]
@@ -183,7 +183,7 @@ class ContentController extends Controller
                 $this->addFlash('success', 'Content updated.');
 
                 return $this->redirectToRoute(
-                    'unitedcms_core_content_index',
+                    'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
                         ),
@@ -196,7 +196,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Content:update.html.twig',
+            'UniteCMSCoreBundle:Content:update.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -213,7 +213,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::DELETE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::DELETE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -246,7 +246,7 @@ class ContentController extends Controller
                 $this->addFlash('success', 'Content deleted.');
 
                 return $this->redirectToRoute(
-                    'unitedcms_core_content_index',
+                    'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
                         ),
@@ -259,7 +259,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Content:delete.html.twig',
+            'UniteCMSCoreBundle:Content:delete.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -289,7 +289,7 @@ class ContentController extends Controller
             $em->getFilters()->disable('gedmo_softdeleteable');
         }
 
-        $content = $em->getRepository('UnitedCMSCoreBundle:Content')->findOneBy([
+        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
             'id' => $content,
             'contentType' => $view->getContentType(),
         ]);
@@ -340,7 +340,7 @@ class ContentController extends Controller
                 $this->addFlash('success', 'Content deleted.');
 
                 return $this->redirectToRoute(
-                    'unitedcms_core_content_index',
+                    'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
                         ),
@@ -353,7 +353,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Content:deleteDefinitely.html.twig',
+            'UniteCMSCoreBundle:Content:deleteDefinitely.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -382,7 +382,7 @@ class ContentController extends Controller
             $em->getFilters()->disable('gedmo_softdeleteable');
         }
 
-        $content = $em->getRepository('UnitedCMSCoreBundle:Content')->findOneBy([
+        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
             'id' => $content,
             'contentType' => $view->getContentType(),
         ]);
@@ -425,7 +425,7 @@ class ContentController extends Controller
                 $this->addFlash('success', 'Deleted content was restored.');
 
                 return $this->redirectToRoute(
-                    'unitedcms_core_content_index',
+                    'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
                         ),
@@ -438,7 +438,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            '@UnitedCMSCore/Content/recover.html.twig',
+            '@UniteCMSCore/Content/recover.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -455,7 +455,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -467,10 +467,10 @@ class ContentController extends Controller
 
         if(!empty($content->getTranslationOf())) {
             // Check if the translationOf content was soft deleted.
-            if(!$this->getDoctrine()->getRepository('UnitedCMSCoreBundle:Content')->findOneBy(['id' => $content->getTranslationOf()->getId()])) {
+            if(!$this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(['id' => $content->getTranslationOf()->getId()])) {
                 $this->addFlash('warning', 'You cannot manage translations for this content, because it is a translation of soft-deleted content.');
                 return $this->redirectToRoute(
-                    'unitedcms_core_content_index',
+                    'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
                         ),
@@ -483,7 +483,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            '@UnitedCMSCore/Content/translations.html.twig',
+            '@UniteCMSCore/Content/translations.html.twig',
             [
                 'view' => $view,
                 'contentType' => $view->getContentType(),
@@ -497,7 +497,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -510,7 +510,7 @@ class ContentController extends Controller
 
         $form = $this->createFormBuilder()
             ->add('translation', WebComponentType::class, [
-                    'tag' => 'united-cms-core-reference-field',
+                    'tag' => 'unite-cms-core-reference-field',
                     'empty_data' => [
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
@@ -519,10 +519,10 @@ class ContentController extends Controller
                         'base-url' => '/' . $view->getContentType()->getDomain()->getOrganization() . '/',
                         'content-label' => '#{id}',
                         'modal-html' => $this->render(
-                            $this->get('united.cms.view_type_manager')->getViewType($view->getType())::getTemplate(),
+                            $this->get('unite.cms.view_type_manager')->getViewType($view->getType())::getTemplate(),
                             [
                                 'view' => $view,
-                                'parameters' => $this->get('united.cms.view_type_manager')
+                                'parameters' => $this->get('unite.cms.view_type_manager')
                                     ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
                                     ->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form')),
                             ]
@@ -535,7 +535,7 @@ class ContentController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             foreach($form->getData() as $key => $translation_identifier) {
                 if(!empty($translation_identifier['content'])) {
-                    $translation = $this->getDoctrine()->getRepository('UnitedCMSCoreBundle:Content')->findOneBy([
+                    $translation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
                         'id' => $translation_identifier['content'],
                         'translationOf' => NULL,
                     ]);
@@ -564,7 +564,7 @@ class ContentController extends Controller
                             $this->getDoctrine()->getManager()->flush();
                             $this->addFlash('success', 'Translation added.');
                             return $this->redirectToRoute(
-                                'unitedcms_core_content_translations',
+                                'unitecms_core_content_translations',
                                 [
                                     'organization' => $view->getContentType()->getDomain()->getOrganization(
                                     )->getIdentifier(),
@@ -581,7 +581,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Content:addTranslation.html.twig',
+            'UniteCMSCoreBundle:Content:addTranslation.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -599,7 +599,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -632,7 +632,7 @@ class ContentController extends Controller
             $this->addFlash('success', 'Translation removed.');
 
             return $this->redirectToRoute(
-                'unitedcms_core_content_translations',
+                'unitecms_core_content_translations',
                 [
                     'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(
                     ),
@@ -645,7 +645,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Content:removeTranslation.html.twig',
+            'UniteCMSCoreBundle:Content:removeTranslation.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -663,7 +663,7 @@ class ContentController extends Controller
      * @Method({"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -673,7 +673,7 @@ class ContentController extends Controller
     public function revisionsAction(View $view, Content $content, Request $request)
     {
         return $this->render(
-            '@UnitedCMSCore/Content/revisions.html.twig',
+            '@UniteCMSCore/Content/revisions.html.twig',
             [
                 'view' => $view,
                 'contentType' => $view->getContentType(),
@@ -688,7 +688,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -711,7 +711,7 @@ class ContentController extends Controller
             $this->addFlash('success', 'Content reverted.');
 
             return $this->redirectToRoute(
-                'unitedcms_core_content_revisions',
+                'unitecms_core_content_revisions',
                 [
                     'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
@@ -723,7 +723,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            '@UnitedCMSCore/Content/revertRevision.html.twig',
+            '@UniteCMSCore/Content/revertRevision.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                 'domain' => $view->getContentType()->getDomain()->getIdentifier(),

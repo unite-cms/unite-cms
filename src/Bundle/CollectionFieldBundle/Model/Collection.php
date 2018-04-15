@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CollectionFieldBundle\Model;
+namespace UniteCMS\CollectionFieldBundle\Model;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 
 /**
  * We use this model only for validation!

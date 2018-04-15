@@ -1,9 +1,9 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Field\Types;
+namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use UnitedCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldType;
 
 class TextFieldType extends FieldType
 {

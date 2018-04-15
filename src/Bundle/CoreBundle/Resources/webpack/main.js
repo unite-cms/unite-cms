@@ -18,13 +18,13 @@ require("./sass/unite.scss");
 // Use VueCustomElement
 Vue.use(vueCustomElement);
 
-window.UnitedCMSEventBus = new Vue();
+window.UniteCMSEventBus = new Vue();
 
 // Register View: Table
-Vue.customElement('united-cms-core-view-table', Table);
-Vue.customElement('united-cms-core-view-sortable', Sortable);
-Vue.customElement('united-cms-core-domaineditor', DomainEditor);
-Vue.customElement('united-cms-core-reference-field', Reference);
+Vue.customElement('unite-cms-core-view-table', Table);
+Vue.customElement('unite-cms-core-view-sortable', Sortable);
+Vue.customElement('unite-cms-core-domaineditor', DomainEditor);
+Vue.customElement('unite-cms-core-reference-field', Reference);
 
 
 window.onload = function(e) {

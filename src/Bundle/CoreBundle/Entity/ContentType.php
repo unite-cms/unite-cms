@@ -1,28 +1,28 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
-use UnitedCMS\CoreBundle\View\Types\TableViewType;
+use UniteCMS\CoreBundle\View\Types\TableViewType;
 use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Accessor;
-use UnitedCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\ContentVoter;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use UnitedCMS\CoreBundle\Validator\Constraints\DefaultViewType;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWords;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidPermissions;
+use UniteCMS\CoreBundle\Validator\Constraints\DefaultViewType;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
  * ContentType
  *
  * @ORM\Table(name="content_type")
- * @ORM\Entity(repositoryClass="UnitedCMS\CoreBundle\Repository\ContentTypeRepository")
+ * @ORM\Entity(repositoryClass="UniteCMS\CoreBundle\Repository\ContentTypeRepository")
  * @UniqueEntity(fields={"identifier", "domain"}, message="validation.identifier_already_taken")
  * @ExclusionPolicy("all")
  */
@@ -51,7 +51,7 @@ class ContentType implements Fieldable
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
      * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UnitedCMS\CoreBundle\Entity\ContentType::RESERVED_IDENTIFIERS")
+     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\ContentType::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -85,16 +85,16 @@ class ContentType implements Fieldable
      * @var Domain
      * @Gedmo\SortableGroup
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\Domain", inversedBy="contentTypes")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="contentTypes")
      */
     private $domain;
 
     /**
      * @var ContentTypeField[]
      * @Assert\Valid()
-     * @Type("ArrayCollection<UnitedCMS\CoreBundle\Entity\ContentTypeField>")
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\ContentTypeField>")
      * @Accessor(getter="getFields",setter="setFields")
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\ContentTypeField", mappedBy="contentType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\ContentTypeField", mappedBy="contentType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
      */
@@ -103,11 +103,11 @@ class ContentType implements Fieldable
     /**
      * @var View[]
      *
-     * @Type("ArrayCollection<UnitedCMS\CoreBundle\Entity\View>")
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\View>")
      * @Assert\Valid()
      * @DefaultViewType(message="validation.missing_default_view")
      * @Accessor(getter="getViews",setter="setViews")
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\View", mappedBy="contentType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\View", mappedBy="contentType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @Expose
      */
     private $views;
@@ -142,12 +142,12 @@ class ContentType implements Fieldable
     /**
      * @var Content[]|ArrayCollection
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
-     * @Type("ArrayCollection<UnitedCMS\CoreBundle\Entity\Content>")
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Content>")
      * @Assert\Valid()
      *
      * TODO: Checking that all the content is valid will become very expensive for large content sets. We most likely will need another approach.
      *
-     * @ORM\OneToMany(targetEntity="UnitedCMS\CoreBundle\Entity\Content", mappedBy="contentType", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Content", mappedBy="contentType", fetch="EXTRA_LAZY")
      */
     private $content;
 

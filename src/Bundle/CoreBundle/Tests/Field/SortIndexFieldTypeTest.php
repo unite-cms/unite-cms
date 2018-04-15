@@ -1,13 +1,13 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Field;
+namespace UniteCMS\CoreBundle\Tests\Field;
 
 
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
 
 class SortIndexFieldTypeTest extends FieldTypeTestCase
 {
@@ -57,7 +57,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
         }
 
         // Make sure, that content got an auto incremented position.
-        $getContent = $this->em->getRepository('UnitedCMSCoreBundle:Content')->createQueryBuilder('c')
+        $getContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
             ->select('c')
             ->where('c.contentType = :contentType')
             ->orderBy("JSON_EXTRACT(c.data, '$.position')", 'ASC')
@@ -76,7 +76,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
         $this->em->clear();
 
         // Make sure, that the content is in correct order.
-        $getContent = $this->em->getRepository('UnitedCMSCoreBundle:Content')->createQueryBuilder('c')
+        $getContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
             ->select('c')
             ->where('c.contentType = :contentType')->setParameter(':contentType', $contentType)
             ->addOrderBy("JSON_EXTRACT(c.data, '$.position')")
@@ -94,7 +94,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
         $this->em->clear();
 
         // Make sure, that the content is in correct order.
-        $getContent = $this->em->getRepository('UnitedCMSCoreBundle:Content')->createQueryBuilder('c')
+        $getContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
             ->select('c')
             ->where('c.contentType = :contentType')->setParameter(':contentType', $contentType)
             ->addOrderBy("JSON_EXTRACT(c.data, '$.position')")
@@ -111,7 +111,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
         $this->em->clear();
 
         // Make sure, that the content is in correct order.
-        $getContent = $this->em->getRepository('UnitedCMSCoreBundle:Content')->createQueryBuilder('c')
+        $getContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
             ->select('c')
             ->where('c.contentType = :contentType')->setParameter(':contentType', $contentType)
             ->addOrderBy("JSON_EXTRACT(c.data, '$.position')")
@@ -128,7 +128,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
         $this->em->flush($getContent[1]);
         $this->em->clear();
 
-        $getContent = $this->em->getRepository('UnitedCMSCoreBundle:Content')->createQueryBuilder('c')
+        $getContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
             ->select('c')
             ->where('c.contentType = :contentType')->setParameter(':contentType', $contentType)
             ->addOrderBy("JSON_EXTRACT(c.data, '$.position')")
@@ -140,7 +140,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
 
         // Now restore the content element, it should get it's old position.
         $this->em->getFilters()->disable('gedmo_softdeleteable');
-        $deletedContent = $this->em->getRepository('UnitedCMSCoreBundle:Content')->findOneBy([
+        $deletedContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->findOneBy([
             'contentType' => $contentType,
             'id' => $deletedContentId,
         ]);
@@ -150,7 +150,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
         $this->em->clear();
 
         // Make sure, that the content is in correct order.
-        $getContent = $this->em->getRepository('UnitedCMSCoreBundle:Content')->createQueryBuilder('c')
+        $getContent = $this->em->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
             ->select('c')
             ->where('c.contentType = :contentType')->setParameter(':contentType', $contentType)
             ->addOrderBy("JSON_EXTRACT(c.data, '$.position')")

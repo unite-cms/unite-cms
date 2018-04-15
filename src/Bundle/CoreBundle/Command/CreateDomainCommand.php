@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Command;
+namespace UniteCMS\CoreBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
@@ -11,8 +11,8 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Service\DomainDefinitionParser;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Service\DomainDefinitionParser;
 
 class CreateDomainCommand extends Command
 {
@@ -28,7 +28,7 @@ class CreateDomainCommand extends Command
     private $validator;
 
     /**
-     * @var \UnitedCMS\CoreBundle\Service\DomainDefinitionParser
+     * @var \UniteCMS\CoreBundle\Service\DomainDefinitionParser
      */
     private $definiton_parser;
 
@@ -50,7 +50,7 @@ class CreateDomainCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('united:domain:create')
+            ->setName('unite:domain:create')
             ->setDescription('Creates a new domain for an organization and saves it to the database.');
     }
 
@@ -59,7 +59,7 @@ class CreateDomainCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $organizations = $this->em->getRepository('UnitedCMSCoreBundle:Organization')->findAll();
+        $organizations = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll();
 
         $helper = $this->getHelper('question');
         $question = new ChoiceQuestion(

@@ -1,10 +1,10 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Controller;
+namespace UniteCMS\CoreBundle\Tests\Controller;
 
 use Symfony\Component\HttpKernel\Client;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow

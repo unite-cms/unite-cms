@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Types;
+namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use Doctrine\ORM\EntityManager;
 use GraphQL\Error\UserError;
@@ -9,11 +9,11 @@ use GraphQL\Type\Definition\Type;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Form\FieldableFormBuilder;
-use UnitedCMS\CoreBundle\Security\ContentVoter;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
+use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class MutationType extends AbstractType
 {
@@ -30,9 +30,9 @@ class MutationType extends AbstractType
     private $entityManager;
 
     /**
-     * @var UnitedCMSManager $unitedCMSManager
+     * @var UniteCMSManager $uniteCMSManager
      */
-    private $unitedCMSManager;
+    private $uniteCMSManager;
 
     /**
      * @var AuthorizationChecker $authorizationChecker
@@ -52,14 +52,14 @@ class MutationType extends AbstractType
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
         EntityManager $entityManager,
-        UnitedCMSManager $unitedCMSManager,
+        UniteCMSManager $uniteCMSManager,
         AuthorizationChecker $authorizationChecker,
         ValidatorInterface $validator,
         FieldableFormBuilder $fieldableFormBuilder
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->entityManager = $entityManager;
-        $this->unitedCMSManager = $unitedCMSManager;
+        $this->uniteCMSManager = $uniteCMSManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->validator = $validator;
         $this->fieldableFormBuilder = $fieldableFormBuilder;
@@ -76,15 +76,15 @@ class MutationType extends AbstractType
         $fields = [];
 
         // Append Content types.
-        foreach ($this->unitedCMSManager->getDomain()->getContentTypes() as $contentType) {
+        foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
             $key = ucfirst($contentType->getIdentifier());
 
             $fields['create' . $key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->unitedCMSManager->getDomain()),
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
             ];
 
             $fields['update' . $key] = [
-                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->unitedCMSManager->getDomain()),
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
                 'args' => [
                     'id' => [
                         'type' => Type::nonNull(Type::id()),
@@ -94,14 +94,14 @@ class MutationType extends AbstractType
             ];
 
             // If this content type has defined fields, we can create and update content with data.
-            $fullContentType = $this->entityManager->getRepository('UnitedCMSCoreBundle:ContentType')->find($contentType->getId());
+            $fullContentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find($contentType->getId());
             if($fullContentType->getFields()->count() > 0) {
                 $fields['create' . $key]['args']['data'] = [
-                    'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'ContentInput', $this->unitedCMSManager->getDomain())),
+                    'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'ContentInput', $this->uniteCMSManager->getDomain())),
                     'description' => 'The content data to save.',
                 ];
                 $fields['update' . $key]['args']['data'] = [
-                    'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'ContentInput', $this->unitedCMSManager->getDomain())),
+                    'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'ContentInput', $this->uniteCMSManager->getDomain())),
                     'description' => 'The content data to save.',
                 ];
             }
@@ -160,9 +160,9 @@ class MutationType extends AbstractType
      */
     private function resolveCreateContent($identifier, $value, $args, $context, ResolveInfo $info) {
 
-        if (!$contentType = $this->entityManager->getRepository('UnitedCMSCoreBundle:ContentType')->findOneBy(
+        if (!$contentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findOneBy(
             [
-                'domain' => $this->unitedCMSManager->getDomain(),
+                'domain' => $this->uniteCMSManager->getDomain(),
                 'identifier' => $identifier,
             ]
         )) {
@@ -233,7 +233,7 @@ class MutationType extends AbstractType
     private function resolveUpdateContent($identifier, $value, $args, $context, ResolveInfo $info) {
 
         $id = $args['id'];
-        $content = $this->entityManager->getRepository('UnitedCMSCoreBundle:Content')->find($id);
+        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id);
 
         if(!$content) {
             throw new UserError("Content was not found.");

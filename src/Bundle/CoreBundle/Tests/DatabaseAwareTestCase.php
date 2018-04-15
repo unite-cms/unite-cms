@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests;
+namespace UniteCMS\CoreBundle\Tests;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;

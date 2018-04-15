@@ -1,15 +1,15 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Field;
+namespace UniteCMS\CoreBundle\Field;
 
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Entity\SettingTypeField;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\SettingTypeField;
 
 class FieldTypeManager
 {
@@ -73,7 +73,7 @@ class FieldTypeManager
         $fieldType = $this->getFieldType($field->getType());
         if(method_exists($fieldType, 'onCreate')) {
             $data = $content->getData();
-            $fieldType->onCreate($field, $content, $args->getObjectManager()->getRepository('UnitedCMSCoreBundle:Content'), $data);
+            $fieldType->onCreate($field, $content, $args->getObjectManager()->getRepository('UniteCMSCoreBundle:Content'), $data);
             $content->setData($data);
         }
     }
@@ -83,7 +83,7 @@ class FieldTypeManager
         if(method_exists($fieldType, 'onUpdate')) {
             $data = $content->getData();
             $old_data = $args->hasChangedField('data') ? $args->getOldValue('data') : [];
-            $fieldType->onUpdate($field, $content, $args->getObjectManager()->getRepository('UnitedCMSCoreBundle:Content'), $old_data, $data);
+            $fieldType->onUpdate($field, $content, $args->getObjectManager()->getRepository('UniteCMSCoreBundle:Content'), $old_data, $data);
             $content->setData($data);
         }
     }
@@ -92,7 +92,7 @@ class FieldTypeManager
         $fieldType = $this->getFieldType($field->getType());
         if(method_exists($fieldType, 'onUpdate')) {
             $data = $setting->getData();
-            $fieldType->onUpdate($field, $setting, $args->getObjectManager()->getRepository('UnitedCMSCoreBundle:Setting'), $args->getOldValue('data'), $data);
+            $fieldType->onUpdate($field, $setting, $args->getObjectManager()->getRepository('UniteCMSCoreBundle:Setting'), $args->getOldValue('data'), $data);
             $setting->setData($data);
         }
     }
@@ -101,11 +101,11 @@ class FieldTypeManager
         $fieldType = $this->getFieldType($field->getType());
 
         if(method_exists($fieldType, 'onSoftDelete') && !$content->getDeleted()) {
-            $fieldType->onSoftDelete($field, $content, $args->getObjectManager()->getRepository('UnitedCMSCoreBundle:Content'), $content->getData());
+            $fieldType->onSoftDelete($field, $content, $args->getObjectManager()->getRepository('UniteCMSCoreBundle:Content'), $content->getData());
         }
 
         if(method_exists($fieldType, 'onHardDelete') && $content->getDeleted()) {
-            $fieldType->onHardDelete($field, $content, $args->getObjectManager()->getRepository('UnitedCMSCoreBundle:Content'), $content->getData());
+            $fieldType->onHardDelete($field, $content, $args->getObjectManager()->getRepository('UniteCMSCoreBundle:Content'), $content->getData());
         }
     }
 

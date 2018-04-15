@@ -1,12 +1,12 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Service;
+namespace UniteCMS\CoreBundle\Tests\Service;
 
 use Doctrine\ORM\Query\Expr\Andx;
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\Query\Expr\Orx;
 use PHPUnit\Framework\TestCase;
-use UnitedCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
+use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 
 class GraphQLDoctrineFilterQueryBuilderTest extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -36,7 +36,7 @@ class OrganizationMember
     /**
      * @var Organization
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\Organization", inversedBy="users")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="users")
      * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $organization;
@@ -45,7 +45,7 @@ class OrganizationMember
      * @var User
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\User", inversedBy="organizations")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\User", inversedBy="organizations")
      */
     private $user;
 
@@ -100,7 +100,7 @@ class OrganizationMember
     }
 
     /**
-     * @return \UnitedCMS\CoreBundle\Entity\Organization
+     * @return \UniteCMS\CoreBundle\Entity\Organization
      */
     public function getOrganization()
     {

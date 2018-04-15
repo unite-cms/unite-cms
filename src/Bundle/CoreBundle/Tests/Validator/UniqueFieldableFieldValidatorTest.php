@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
-use UnitedCMS\CoreBundle\Validator\Constraints\UniqueFieldableFieldValidator;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
+use UniteCMS\CoreBundle\Validator\Constraints\UniqueFieldableFieldValidator;
 
 class UniqueFieldableFieldValidatorTest extends ConstraintValidatorTestCase
 {
@@ -13,7 +13,7 @@ class UniqueFieldableFieldValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The UniqueFieldableFieldValidator constraint expects a UnitedCMS\CoreBundle\Entity\FieldableField value.
+     * @expectedExceptionMessage The UniqueFieldableFieldValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableField value.
      */
     public function testInvalidValue() {
         // Validate value.

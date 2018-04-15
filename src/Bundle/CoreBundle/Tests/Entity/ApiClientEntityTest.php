@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class ApiClientEntityTest extends DatabaseAwareTestCase
 {

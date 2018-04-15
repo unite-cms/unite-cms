@@ -1,20 +1,20 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Security;
+namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Security\ContentVoter;
-use UnitedCMS\CoreBundle\Security\DeletedContentVoter;
-use UnitedCMS\CoreBundle\Tests\SecurityVoterTestCase;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\DeletedContentVoter;
+use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
 class ContentVoterTest extends SecurityVoterTestCase
 {

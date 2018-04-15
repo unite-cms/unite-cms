@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Service;
+namespace UniteCMS\CoreBundle\Service;
 
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Query\Expr;

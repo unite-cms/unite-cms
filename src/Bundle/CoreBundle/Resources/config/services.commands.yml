@@ -1,17 +1,17 @@
 # Register all commands as services
 services:
 
-    UnitedCMS\CoreBundle\Command\CreateDomainCommand:
-        arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@united.cms.domain_definition_parser']
+    UniteCMS\CoreBundle\Command\CreateDomainCommand:
+        arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@unite.cms.domain_definition_parser']
         tags:
-            - { name: 'console.command', command: 'united:domain:create' }
+            - { name: 'console.command', command: 'unite:domain:create' }
 
-    UnitedCMS\CoreBundle\Command\CreateOrganizationCommand:
+    UniteCMS\CoreBundle\Command\CreateOrganizationCommand:
         arguments: ['@doctrine.orm.default_entity_manager', '@validator']
         tags:
-            - { name: 'console.command', command: 'united:organization:create' }
+            - { name: 'console.command', command: 'unite:organization:create' }
 
-    UnitedCMS\CoreBundle\Command\CreatePlatformAdminCommand:
+    UniteCMS\CoreBundle\Command\CreatePlatformAdminCommand:
         arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@security.password_encoder']
         tags:
-            - { name: 'console.command', command: 'united:user:create' }
+            - { name: 'console.command', command: 'unite:user:create' }

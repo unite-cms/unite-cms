@@ -1,10 +1,10 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWords;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWordsValidator;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWordsValidator;
 
 class ReservedWordsValidatorTest extends ConstraintValidatorTestCase
 {

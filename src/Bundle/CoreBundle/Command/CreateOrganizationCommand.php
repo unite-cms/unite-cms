@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Command;
+namespace UniteCMS\CoreBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
-use UnitedCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\Organization;
 
 class CreateOrganizationCommand extends Command
 {
@@ -42,7 +42,7 @@ class CreateOrganizationCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('united:organization:create')
+            ->setName('unite:organization:create')
             ->setDescription('Creates a new organization and saves it to the database.');
     }
 

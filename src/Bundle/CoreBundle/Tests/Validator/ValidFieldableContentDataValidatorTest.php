@@ -1,18 +1,18 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldableContentDataValidator;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentDataValidator;
 
 class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
 {
@@ -36,7 +36,7 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The ValidFieldableContentDataValidator constraint expects a UnitedCMS\CoreBundle\Entity\FieldableContent object.
+     * @expectedExceptionMessage The ValidFieldableContentDataValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableContent object.
      */
     public function testInvalidObject() {
         $object = new \stdClass();
@@ -46,7 +46,7 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The ValidFieldableContentDataValidator constraint expects object->getEntity() to return a UnitedCMS\CoreBundle\Entity\Fieldable object.
+     * @expectedExceptionMessage The ValidFieldableContentDataValidator constraint expects object->getEntity() to return a UniteCMS\CoreBundle\Entity\Fieldable object.
      */
     public function testInvalidObjectReference() {
         $object = $this->createMock(FieldableContent::class);

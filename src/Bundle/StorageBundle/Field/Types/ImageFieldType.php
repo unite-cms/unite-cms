@@ -6,10 +6,10 @@
  * Time: 10:36
  */
 
-namespace UnitedCMS\StorageBundle\Field\Types;
+namespace UniteCMS\StorageBundle\Field\Types;
 
 
-use UnitedCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 
 class ImageFieldType extends FileFieldType
 {

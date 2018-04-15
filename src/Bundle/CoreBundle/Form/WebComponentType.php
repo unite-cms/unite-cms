@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Form;
+namespace UniteCMS\CoreBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;
@@ -47,7 +47,7 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
      */
     public function getBlockPrefix()
     {
-        return 'united_cms_web_component';
+        return 'unite_cms_web_component';
     }
 
     /**

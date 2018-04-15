@@ -6,16 +6,16 @@
  * Time: 09:15
  */
 
-namespace UnitedCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
 
 class OrganizationVoter extends Voter
 {
@@ -61,7 +61,7 @@ class OrganizationVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
-        // This voter can only decide for united users, because the decision is based on domain roles.
+        // This voter can only decide for unite users, because the decision is based on domain roles.
         if (!$token->getUser() instanceof User) {
             return self::ACCESS_ABSTAIN;
         }

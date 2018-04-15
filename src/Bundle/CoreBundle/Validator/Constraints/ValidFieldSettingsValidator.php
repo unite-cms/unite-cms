@@ -1,14 +1,14 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Validator\Constraints;
+namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class ValidFieldSettingsValidator extends ConstraintValidator
 {
@@ -49,13 +49,13 @@ class ValidFieldSettingsValidator extends ConstraintValidator
     {
         if (!$value instanceof FieldableFieldSettings) {
             throw new InvalidArgumentException(
-                'The ValidFieldSettingsValidator constraint expects a UnitedCMS\CoreBundle\Field\FieldableFieldSettings value.'
+                'The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Field\FieldableFieldSettings value.'
             );
         }
 
         if (!$this->context->getObject() instanceof FieldableField) {
             throw new InvalidArgumentException(
-                'The ValidFieldSettingsValidator constraint expects a UnitedCMS\CoreBundle\Entity\FieldableField object.'
+                'The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableField object.'
             );
         }
 

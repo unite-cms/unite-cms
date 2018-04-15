@@ -22,7 +22,7 @@
         "symfony/console": "^4.0"
     },
     "autoload": {
-        "psr-4": { "UnitedCMS\\CoreBundle\\": "" },
+        "psr-4": { "UniteCMS\\CoreBundle\\": "" },
         "exclude-from-classmap": [
             "/Tests/"
         ]

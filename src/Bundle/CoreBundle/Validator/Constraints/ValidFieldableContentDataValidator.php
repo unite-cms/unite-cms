@@ -1,15 +1,15 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Validator\Constraints;
+namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class ValidFieldableContentDataValidator extends ConstraintValidator
 {
@@ -54,7 +54,7 @@ class ValidFieldableContentDataValidator extends ConstraintValidator
 
         if (!$this->context->getObject() instanceof FieldableContent) {
             throw new InvalidArgumentException(
-                'The ValidFieldableContentDataValidator constraint expects a UnitedCMS\CoreBundle\Entity\FieldableContent object.'
+                'The ValidFieldableContentDataValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableContent object.'
             );
         }
 
@@ -64,7 +64,7 @@ class ValidFieldableContentDataValidator extends ConstraintValidator
 
         if (!$this->context->getObject()->getEntity() instanceof Fieldable) {
             throw new InvalidArgumentException(
-                'The ValidFieldableContentDataValidator constraint expects object->getEntity() to return a UnitedCMS\CoreBundle\Entity\Fieldable object.'
+                'The ValidFieldableContentDataValidator constraint expects object->getEntity() to return a UniteCMS\CoreBundle\Entity\Fieldable object.'
             );
         }
 

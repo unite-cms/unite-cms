@@ -1,16 +1,16 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\SettingTypeField;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidFieldSettingsValidator;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\SettingTypeField;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettingsValidator;
 
 class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
 {
@@ -18,7 +18,7 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The ValidFieldSettingsValidator constraint expects a UnitedCMS\CoreBundle\Field\FieldableFieldSettings value.
+     * @expectedExceptionMessage The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Field\FieldableFieldSettings value.
      */
     public function testNonContentValue() {
         // Create validator with mocked FieldTypeManager.
@@ -30,7 +30,7 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The ValidFieldSettingsValidator constraint expects a UnitedCMS\CoreBundle\Entity\FieldableField object.
+     * @expectedExceptionMessage The ValidFieldSettingsValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableField object.
      */
     public function testInvalidContextObject() {
         // Create validator with mocked FieldTypeManager.

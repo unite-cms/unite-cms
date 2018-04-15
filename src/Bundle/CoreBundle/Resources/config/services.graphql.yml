@@ -2,63 +2,63 @@
 services:
 
     # Schema Type Manager, that holds all schema types during one request
-    united.cms.graphql.schema_type_manager:
-        class: UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager
-        arguments: ['@united.cms.graphql.content_type_factory', '@united.cms.graphql.content_result_type_factory', '@united.cms.graphql.setting_type_factory']
+    unite.cms.graphql.schema_type_manager:
+        class: UniteCMS\CoreBundle\SchemaType\SchemaTypeManager
+        arguments: ['@unite.cms.graphql.content_type_factory', '@unite.cms.graphql.content_result_type_factory', '@unite.cms.graphql.setting_type_factory']
         public: true
 
     # SchemaTypeFactory implementations
-    united.cms.graphql.content_type_factory:
-        class: UnitedCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory
-        tags: [united_cms.graphql.schema_type_factory]
-        arguments: [ '@united.cms.field_type_manager', '@doctrine.orm.entity_manager']
+    unite.cms.graphql.content_type_factory:
+        class: UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory
+        tags: [unite_cms.graphql.schema_type_factory]
+        arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.entity_manager']
 
-    united.cms.graphql.content_result_type_factory:
-        class: UnitedCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory
-        tags: [united_cms.graphql.schema_type_factory]
+    unite.cms.graphql.content_result_type_factory:
+        class: UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory
+        tags: [unite_cms.graphql.schema_type_factory]
         arguments: [ '@security.authorization_checker']
 
-    united.cms.graphql.setting_type_factory:
-        class: UnitedCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory
-        tags: [united_cms.graphql.schema_type_factory]
-        arguments: [ '@united.cms.field_type_manager', '@doctrine.orm.default_entity_manager']
+    unite.cms.graphql.setting_type_factory:
+        class: UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory
+        tags: [unite_cms.graphql.schema_type_factory]
+        arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.default_entity_manager']
 
 
     # Query Type implementations, that get registered in the schema_type_manager.
-    UnitedCMS\CoreBundle\SchemaType\Types\QueryType:
-        tags: [united_cms.graphql.schema_type]
-        arguments: ['@united.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@united.cms.manager', '@security.authorization_checker', '@knp_paginator']
+    UniteCMS\CoreBundle\SchemaType\Types\QueryType:
+        tags: [unite_cms.graphql.schema_type]
+        arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@knp_paginator']
 
-    UnitedCMS\CoreBundle\SchemaType\Types\MutationType:
-        tags: [united_cms.graphql.schema_type]
-        arguments: ['@united.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@united.cms.manager', '@security.authorization_checker', '@validator', '@united.cms.fieldable_form_builder']
+    UniteCMS\CoreBundle\SchemaType\Types\MutationType:
+        tags: [unite_cms.graphql.schema_type]
+        arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@validator', '@unite.cms.fieldable_form_builder']
 
-    UnitedCMS\CoreBundle\SchemaType\Types\ContentResultInterface:
-        tags: [united_cms.graphql.schema_type]
-        arguments: ['@united.cms.graphql.schema_type_manager', '@united.cms.manager']
+    UniteCMS\CoreBundle\SchemaType\Types\ContentResultInterface:
+        tags: [unite_cms.graphql.schema_type]
+        arguments: ['@unite.cms.graphql.schema_type_manager', '@unite.cms.manager']
 
-    UnitedCMS\CoreBundle\SchemaType\Types\ContentResultType:
-        tags: [united_cms.graphql.schema_type]
-        arguments: ['@united.cms.graphql.schema_type_manager', '@security.authorization_checker', '@united.cms.manager']
+    UniteCMS\CoreBundle\SchemaType\Types\ContentResultType:
+        tags: [unite_cms.graphql.schema_type]
+        arguments: ['@unite.cms.graphql.schema_type_manager', '@security.authorization_checker', '@unite.cms.manager']
 
-    UnitedCMS\CoreBundle\SchemaType\Types\ContentInterface:
-        tags: [united_cms.graphql.schema_type]
-        arguments: ['@united.cms.graphql.schema_type_manager']
+    UniteCMS\CoreBundle\SchemaType\Types\ContentInterface:
+        tags: [unite_cms.graphql.schema_type]
+        arguments: ['@unite.cms.graphql.schema_type_manager']
 
-    UnitedCMS\CoreBundle\SchemaType\Types\SettingInterface:
-        tags: [united_cms.graphql.schema_type]
-        arguments: ['@united.cms.graphql.schema_type_manager']
+    UniteCMS\CoreBundle\SchemaType\Types\SettingInterface:
+        tags: [unite_cms.graphql.schema_type]
+        arguments: ['@unite.cms.graphql.schema_type_manager']
 
-    UnitedCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType:
-        tags: [united_cms.graphql.schema_type]
+    UniteCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType:
+        tags: [unite_cms.graphql.schema_type]
 
     # Input Type implementations, that get registered in the schema_type_manager.
-    UnitedCMS\CoreBundle\SchemaType\Types\Input\SortInput:
-        tags: [united_cms.graphql.schema_type]
+    UniteCMS\CoreBundle\SchemaType\Types\Input\SortInput:
+        tags: [unite_cms.graphql.schema_type]
 
-    UnitedCMS\CoreBundle\SchemaType\Types\Input\FilterInput:
-        tags: [united_cms.graphql.schema_type]
-        arguments: ['@united.cms.graphql.schema_type_manager']
+    UniteCMS\CoreBundle\SchemaType\Types\Input\FilterInput:
+        tags: [unite_cms.graphql.schema_type]
+        arguments: ['@unite.cms.graphql.schema_type_manager']
 
-    UnitedCMS\CoreBundle\SchemaType\Types\Input\ReferenceFieldTypeInput:
-        tags: [united_cms.graphql.schema_type]
+    UniteCMS\CoreBundle\SchemaType\Types\Input\ReferenceFieldTypeInput:
+        tags: [unite_cms.graphql.schema_type]

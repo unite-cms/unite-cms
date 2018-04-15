@@ -6,18 +6,18 @@
  * Time: 16:55
  */
 
-namespace UnitedCMS\CoreBundle\Tests\Functional;
+namespace UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
-use UnitedCMS\CoreBundle\Controller\GraphQLApiController;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Controller\GraphQLApiController;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow
@@ -193,7 +193,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
     {
         parent::setUp();
 
-        // Create a full united CMS structure with different organizations, domains and users.
+        // Create a full unite CMS structure with different organizations, domains and users.
         foreach($this->data as $id => $domains) {
             $org = new Organization();
             $org->setIdentifier($id)->setTitle(ucfirst($id));
@@ -201,7 +201,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
             $this->em->flush($org);
 
             foreach($domains as $domain_data) {
-                $domain = $this->container->get('united.cms.domain_definition_parser')->parse($domain_data);
+                $domain = $this->container->get('unite.cms.domain_definition_parser')->parse($domain_data);
                 $domain->setOrganization($org);
                 $this->domains[$domain->getIdentifier()] = $domain;
                 $this->em->persist($domain);
@@ -223,15 +223,15 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
     }
 
     private function api(Domain $domain, UserInterface $user, string $query, array $variables = []) {
-        $reflector = new \ReflectionProperty(UnitedCMSManager::class, 'domain');
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'domain');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('united.cms.manager'), $domain);
-        $reflector = new \ReflectionProperty(UnitedCMSManager::class, 'organization');
+        $reflector->setValue($this->container->get('unite.cms.manager'), $domain);
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'organization');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('united.cms.manager'), $domain->getOrganization());
-        $reflector = new \ReflectionProperty(UnitedCMSManager::class, 'initialized');
+        $reflector->setValue($this->container->get('unite.cms.manager'), $domain->getOrganization());
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'initialized');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('united.cms.manager'), true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), true);
 
         $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'api', $user->getRoles()));
 

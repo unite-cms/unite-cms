@@ -6,17 +6,17 @@
  * Time: 12:57
  */
 
-namespace UnitedCMS\CoreBundle\Tests\Controller;
+namespace UniteCMS\CoreBundle\Tests\Controller;
 
 
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class OrganizationControllerTest extends DatabaseAwareTestCase
 {
@@ -58,7 +58,7 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
 
     public function testIndexAction() {
 
-        $url = $this->container->get('router')->generate('unitedcms_core_organizations');
+        $url = $this->container->get('router')->generate('unitecms_core_organizations');
 
         // If there are no organizations for this user, the index action should display an info.
         $crawler = $this->client->request('GET', $url);
@@ -79,8 +79,8 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . $this->container->get('translator')->trans('organizations.error.no_organizations') .'")'));
 
         // Now invite the user to the organization.
-        $org1 = $this->em->getRepository('UnitedCMSCoreBundle:Organization')->findAll()[0];
-        $admin = $this->em->getRepository('UnitedCMSCoreBundle:User')->findAll()[0];
+        $org1 = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll()[0];
+        $admin = $this->em->getRepository('UniteCMSCoreBundle:User')->findAll()[0];
         $orgMember = new OrganizationMember();
         $orgMember->setUser($admin)->setOrganization($org1);
         $this->em->persist($orgMember);
@@ -88,7 +88,7 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
 
         // Index should now redirect to first organization.
         $crawler = $this->client->request('GET', $url);
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitedcms_core_domain_index', [
+        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $org1->getIdentifier(),
         ])));
 
@@ -100,13 +100,13 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
 
         // Should be the same result.
         $this->client->request('GET', $url);
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitedcms_core_domain_index', [
+        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $org1->getIdentifier(),
         ])));
 
         // Now invite the user to the 2nd organization.
-        $org2 = $this->em->getRepository('UnitedCMSCoreBundle:Organization')->findAll()[1];
-        $admin = $this->em->getRepository('UnitedCMSCoreBundle:User')->findAll()[0];
+        $org2 = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll()[1];
+        $admin = $this->em->getRepository('UniteCMSCoreBundle:User')->findAll()[0];
         $org2Member = new OrganizationMember();
         $org2Member->setUser($admin)->setOrganization($org2);
         $this->em->persist($org2Member);

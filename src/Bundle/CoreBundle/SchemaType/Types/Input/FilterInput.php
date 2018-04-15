@@ -1,10 +1,10 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Types\Input;
+namespace UniteCMS\CoreBundle\SchemaType\Types\Input;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class FilterInput extends InputObjectType
 {

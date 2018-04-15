@@ -1,9 +1,9 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Form;
+namespace UniteCMS\CoreBundle\Form;
 
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldTypeInterface;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 
 class FieldableFormField
 {

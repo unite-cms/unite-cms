@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\View;
+namespace UniteCMS\CoreBundle\Tests\View;
 
 use PHPUnit\Framework\TestCase;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class FieldTypeManagerTest extends TestCase
 {

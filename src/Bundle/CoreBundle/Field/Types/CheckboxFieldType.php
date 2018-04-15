@@ -1,9 +1,9 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Field\Types;
+namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use UnitedCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldType;
 
 class CheckboxFieldType extends FieldType
 {

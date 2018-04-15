@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\ExclusionPolicy;
@@ -9,17 +9,17 @@ use JMS\Serializer\Annotation\Type;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use UnitedCMS\CoreBundle\Validator\Constraints\ViewType;
-use UnitedCMS\CoreBundle\Validator\Constraints\ReservedWords;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidViewSettings;
-use UnitedCMS\CoreBundle\View\ViewSettings;
+use UniteCMS\CoreBundle\Validator\Constraints\ViewType;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidViewSettings;
+use UniteCMS\CoreBundle\View\ViewSettings;
 
 /**
  * View
  *
  * @UniqueEntity(fields={"identifier", "contentType"}, message="validation.identifier_already_taken")
  * @ORM\Table(name="view")
- * @ORM\Entity(repositoryClass="UnitedCMS\CoreBundle\Repository\ViewRepository")
+ * @ORM\Entity(repositoryClass="UniteCMS\CoreBundle\Repository\ViewRepository")
  * @ExclusionPolicy("all")
  */
 class View
@@ -50,7 +50,7 @@ class View
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
      * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UnitedCMS\CoreBundle\Entity\View::RESERVED_IDENTIFIERS")
+     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\View::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -87,7 +87,7 @@ class View
      * @var ContentType
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\ContentType", inversedBy="views", fetch="EXTRA_LAZY")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", inversedBy="views", fetch="EXTRA_LAZY")
      */
     private $contentType;
 
@@ -97,7 +97,7 @@ class View
      * @ORM\Column(name="settings", type="object", nullable=true)
      * @ValidViewSettings()
      * @Assert\NotNull(message="validation.not_null")
-     * @Type("UnitedCMS\CoreBundle\View\ViewSettings")
+     * @Type("UniteCMS\CoreBundle\View\ViewSettings")
      * @Expose
      */
     private $settings;

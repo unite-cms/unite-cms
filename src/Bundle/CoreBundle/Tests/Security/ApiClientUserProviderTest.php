@@ -1,15 +1,15 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Security;
+namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Security\ApiClientUserProvider;
-use UnitedCMS\CoreBundle\Service\UnitedCMSManager;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\ApiClientUserProvider;
+use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
 class ApiClientUserProviderTest extends TestCase
 {
@@ -21,7 +21,7 @@ class ApiClientUserProviderTest extends TestCase
         $token = 'ThisIsMyToken';
         $domain = new Domain();
         $domain->setIdentifier('my_domain');
-        $cmsManager = $this->createMock(UnitedCMSManager::class);
+        $cmsManager = $this->createMock(UniteCMSManager::class);
         $cmsManager->expects($this->any())
             ->method('getDomain')
             ->willReturn($domain);
@@ -69,7 +69,7 @@ class ApiClientUserProviderTest extends TestCase
         $token = 'OtherToken';
         $domain = new Domain();
         $domain->setIdentifier('my_domain');
-        $cmsManager = $this->createMock(UnitedCMSManager::class);
+        $cmsManager = $this->createMock(UniteCMSManager::class);
         $cmsManager->expects($this->any())
             ->method('getDomain')
             ->willReturn($domain);
@@ -106,7 +106,7 @@ class ApiClientUserProviderTest extends TestCase
      * @expectedException \Symfony\Component\Security\Core\Exception\UnsupportedUserException
      */
     public function testRefreshInvalidUser() {
-        $cmsManager = $this->createMock(UnitedCMSManager::class);
+        $cmsManager = $this->createMock(UniteCMSManager::class);
         $entityManager = $this->createMock(EntityManager::class);
         $provider = new ApiClientUserProvider($cmsManager, $entityManager);
 

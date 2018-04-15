@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CollectionFieldBundle\Form;
+namespace UniteCMS\CollectionFieldBundle\Form;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -24,7 +24,7 @@ class CollectionFormType extends CollectionType implements DataTransformerInterf
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
-        $view->vars['tag'] = 'united-cms-collection-field';
+        $view->vars['tag'] = 'unite-cms-collection-field';
     }
 
     /**
@@ -48,7 +48,7 @@ class CollectionFormType extends CollectionType implements DataTransformerInterf
      */
     public function getBlockPrefix()
     {
-        return 'united_cms_collection';
+        return 'unite_cms_collection';
     }
 
     /**

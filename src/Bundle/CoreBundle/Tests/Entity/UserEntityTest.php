@@ -1,13 +1,13 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class UserEntityTest extends DatabaseAwareTestCase
 {
@@ -158,10 +158,10 @@ class UserEntityTest extends DatabaseAwareTestCase
         $this->em->flush($org);
         $this->em->flush($user1);
 
-        $this->assertCount(1, $this->em->getRepository('UnitedCMSCoreBundle:User')->findAll());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:User')->findAll());
         $this->em->remove($org);
         $this->em->flush();
-        $this->assertCount(1, $this->em->getRepository('UnitedCMSCoreBundle:User')->findAll());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:User')->findAll());
     }
 
     public function testDefaultUserRole()

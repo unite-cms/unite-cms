@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Entity;
+namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -42,7 +42,7 @@ class DomainInvitation
      * @var Domain
      * @Assert\Valid()
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UnitedCMS\CoreBundle\Entity\Domain", inversedBy="invites")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="invites")
      */
     private $domain;
 

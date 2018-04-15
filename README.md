@@ -24,9 +24,9 @@ At the moment unite cms is based on the Symfony 4.0 and only requires PHP >= 7.1
 
 To get started create your first organization and a platform admin user:
 
-    bin/console united:organization:create
+    bin/console unite:organization:create
     
-    bin/console united:user:create 
+    bin/console unite:user:create 
     
 If you want to use the PHP development server execute: 
 
@@ -89,7 +89,7 @@ provide their own types by creating a Symfony bundle that includes their types:
     # MyBundle\Field\Types\MyFieldType.php 
     namespace MyBundle\Field\Types;
     
-    use UnitedCMS\CoreBundle\Field\FieldTypeInterface;
+    use UniteCMS\CoreBundle\Field\FieldTypeInterface;
     
     MyFieldType implements FieldTypeInterface {}
     
@@ -98,7 +98,7 @@ provide their own types by creating a Symfony bundle that includes their types:
     # MyBundle\Collection\Types\MyCollectionType.php
     namespace MyBundle\Collection\Types;
     
-    use UnitedCMS\CoreBundle\Collection\CollectionTypeInterface;
+    use UniteCMS\CoreBundle\Collection\CollectionTypeInterface;
     
     MyCollectionType implements CollectionTypeInterface {}
 
@@ -109,10 +109,10 @@ and register them as a service:
     services: 
     
         MyBundle\Field\Types\MyFieldType:
-            tags: [united_cms.field_type]    
+            tags: [unite_cms.field_type]    
             
         MyBundle\Collection\Types\MyCollectionType: 
-            tags: [united_cms.collection_type]
+            tags: [unite_cms.collection_type]
 
 
 ### unite CMS graphQL API

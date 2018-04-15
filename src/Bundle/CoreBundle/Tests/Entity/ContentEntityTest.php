@@ -1,14 +1,14 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldType;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class ContentEntityTest extends DatabaseAwareTestCase
 {
@@ -88,7 +88,7 @@ class ContentEntityTest extends DatabaseAwareTestCase
         };
 
         // Inject the field type
-        $this->container->get('united.cms.field_type_manager')->registerFieldType($mockedFieldType);
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType($mockedFieldType);
 
         $ct = new ContentType();
         $field = new ContentTypeField();
@@ -142,7 +142,7 @@ class ContentEntityTest extends DatabaseAwareTestCase
         };
 
         // Inject the field type
-        $this->container->get('united.cms.field_type_manager')->registerFieldType($mockedFieldType);
+        $this->container->get('unite.cms.field_type_manager')->registerFieldType($mockedFieldType);
 
         $ct = new ContentType();
         $field = new ContentTypeField();

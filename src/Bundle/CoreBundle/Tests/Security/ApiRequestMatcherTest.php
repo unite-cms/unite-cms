@@ -1,10 +1,10 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Security;
+namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use UnitedCMS\CoreBundle\Security\ApiRequestMatcher;
+use UniteCMS\CoreBundle\Security\ApiRequestMatcher;
 
 class ApiRequestMatcherTest extends TestCase
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Form;
+namespace UniteCMS\CoreBundle\Form;
 
 use Symfony\Component\Form\FormFactory;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class FieldableFormBuilder
 {

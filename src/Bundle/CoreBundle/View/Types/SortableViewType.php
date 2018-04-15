@@ -1,15 +1,15 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\View\Types;
+namespace UniteCMS\CoreBundle\View\Types;
 
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\View\ViewSettings;
-use UnitedCMS\CoreBundle\View\ViewType;
+use UniteCMS\CoreBundle\View\ViewSettings;
+use UniteCMS\CoreBundle\View\ViewType;
 
 class SortableViewType extends ViewType
 {
     const TYPE = "sortable";
-    const TEMPLATE = "UnitedCMSCoreBundle:Views:Sortable/index.html.twig";
+    const TEMPLATE = "UniteCMSCoreBundle:Views:Sortable/index.html.twig";
 
     const SETTINGS = [
         'columns',

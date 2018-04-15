@@ -4,16 +4,16 @@ security:
 
     # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
     providers:
-        united_core_user:
+        unite_core_user:
             entity:
-                class: UnitedCMSCoreBundle:User
+                class: UniteCMSCoreBundle:User
                 property: email
 
-        united_core_api_client:
-            id: united.cms.api_client_provider
+        unite_core_api_client:
+            id: unite.cms.api_client_provider
 
     encoders:
-        UnitedCMS\CoreBundle\Entity\User:
+        UniteCMS\CoreBundle\Entity\User:
             algorithm: bcrypt
             cost: 12
 
@@ -27,20 +27,20 @@ security:
         # If Authentication-Fallback header is present, this firewall gets skipped and the main firewall will be used.
         api:
             anonymous: false
-            provider: united_core_api_client
-            request_matcher: united.cms.api_request_matcher
+            provider: unite_core_api_client
+            request_matcher: unite.cms.api_request_matcher
             stateless: true
             guard:
                 authenticators:
-                    - united.cms.api_client_authenticator
+                    - unite.cms.api_client_authenticator
 
         # Main firewall for authentication via user or remember_me cookie.
         main:
             anonymous: ~
-            provider: united_core_user
+            provider: unite_core_user
             form_login:
-                login_path: unitedcms_core_authentication_login
-                check_path: unitedcms_core_authentication_login
+                login_path: unitecms_core_authentication_login
+                check_path: unitecms_core_authentication_login
             logout:
                 path:   /logout
                 target: /

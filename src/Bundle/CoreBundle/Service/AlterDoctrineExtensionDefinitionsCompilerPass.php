@@ -6,7 +6,7 @@
  * Time: 17:42
  */
 
-namespace UnitedCMS\CoreBundle\Service;
+namespace UniteCMS\CoreBundle\Service;
 
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;

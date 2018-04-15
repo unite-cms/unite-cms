@@ -7,7 +7,7 @@
 }
 
 // For the moment we just dump all custom css here. This must be refactored in the future.
-united-cms-core-domaineditor {
+unite-cms-core-domaineditor {
   position: relative;
   margin: -30px;
   display: block;
@@ -31,7 +31,7 @@ united-cms-core-domaineditor {
 }
 
 @media (min-width: $breakpoint-medium) {
-  united-cms-core-domaineditor {
+  unite-cms-core-domaineditor {
     margin: -40px;
 
     &:last-child { margin-bottom: -40px; }

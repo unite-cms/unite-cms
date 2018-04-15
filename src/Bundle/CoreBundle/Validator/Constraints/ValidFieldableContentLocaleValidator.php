@@ -1,12 +1,12 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Validator\Constraints;
+namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 
 class ValidFieldableContentLocaleValidator extends ConstraintValidator
 {
@@ -18,13 +18,13 @@ class ValidFieldableContentLocaleValidator extends ConstraintValidator
 
         if (!$this->context->getObject() instanceof FieldableContent) {
             throw new InvalidArgumentException(
-                'The ValidFieldableContentLocaleValidator constraint expects a UnitedCMS\CoreBundle\Entity\FieldableContent object.'
+                'The ValidFieldableContentLocaleValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableContent object.'
             );
         }
 
       if (!empty($this->context->getObject()->getEntity()) && !$this->context->getObject()->getEntity() instanceof Fieldable) {
         throw new InvalidArgumentException(
-          'The ValidFieldableContentLocaleValidator constraint expects object->getEntity() to return a UnitedCMS\CoreBundle\Entity\Fieldable object.'
+          'The ValidFieldableContentLocaleValidator constraint expects object->getEntity() to return a UniteCMS\CoreBundle\Entity\Fieldable object.'
         );
       }
 

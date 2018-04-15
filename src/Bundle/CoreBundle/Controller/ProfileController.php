@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Controller;
+namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -15,10 +15,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Form\Model\ChangePassword;
-use UnitedCMS\CoreBundle\Form\Model\Registration;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Form\Model\ChangePassword;
+use UniteCMS\CoreBundle\Form\Model\Registration;
 
 class ProfileController extends Controller
 {
@@ -35,7 +35,7 @@ class ProfileController extends Controller
     public function updateAction(Request $request)
     {
         /**
-         * @var \UnitedCMS\CoreBundle\Entity\User $user
+         * @var \UniteCMS\CoreBundle\Entity\User $user
          */
         $user = $this->getUser();
         $form = $this->get('form.factory')->createNamedBuilder('user', FormType::class, $user)
@@ -50,7 +50,7 @@ class ProfileController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('unitedcms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_organizations');
         }
 
         $changePassword = new ChangePassword();
@@ -86,11 +86,11 @@ class ProfileController extends Controller
             $changePassword->eraseCredentials();
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('unitedcms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_organizations');
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Profile:update.html.twig',
+            'UniteCMSCoreBundle:Profile:update.html.twig',
             [
                 'form' => $form->createView(),
                 'change_password_form' => $changePasswordForm->createView(),
@@ -109,7 +109,7 @@ class ProfileController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitedcms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_organizations');
         }
 
         $form = $this->createFormBuilder()
@@ -124,7 +124,7 @@ class ProfileController extends Controller
             $email = $form->getData()['username'];
 
             // check if there is a user for this email address.
-            if ($user = $this->getDoctrine()->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+            if ($user = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:User')->findOneBy(
                 ['email' => $email]
             )) {
 
@@ -146,10 +146,10 @@ class ProfileController extends Controller
                         ->setTo($user->getEmail())
                         ->setBody(
                             $this->renderView(
-                                '@UnitedCMSCore/Emails/reset-password.html.twig',
+                                '@UniteCMSCore/Emails/reset-password.html.twig',
                                 [
                                     'reset_url' => $this->generateUrl(
-                                        'unitedcms_core_profile_resetpasswordconfirm',
+                                        'unitecms_core_profile_resetpasswordconfirm',
                                         [
                                             'token' => $user->getResetToken(),
                                         ],
@@ -165,7 +165,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Profile:reset-password.html.twig',
+            'UniteCMSCoreBundle:Profile:reset-password.html.twig',
             array(
                 'form' => $form->createView(),
             )
@@ -183,7 +183,7 @@ class ProfileController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitedcms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_organizations');
         }
 
         $userFound = false;
@@ -192,7 +192,7 @@ class ProfileController extends Controller
         $token = $request->query->get('token');
 
         // check if there is a user for this token.
-        if ($user = $this->getDoctrine()->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+        if ($user = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:User')->findOneBy(
             ['resetToken' => $token]
         )) {
             $userFound = true;
@@ -242,7 +242,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Profile:reset-password-confirm.html.twig',
+            'UniteCMSCoreBundle:Profile:reset-password-confirm.html.twig',
             array(
                 'userFound' => $userFound,
                 'tokenExpired' => $tokenExpired,
@@ -273,7 +273,7 @@ class ProfileController extends Controller
         if (!empty($token = $request->query->get('token'))) {
             $tokenPresent = true;
 
-            if ($invitation = $this->getDoctrine()->getRepository('UnitedCMSCoreBundle:DomainInvitation')->findOneBy(
+            if ($invitation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:DomainInvitation')->findOneBy(
                 ['token' => $token]
             )) {
                 $tokenFound = true;
@@ -282,7 +282,7 @@ class ProfileController extends Controller
                     $tokenExpired = false;
 
                     // If the invited user is already member.
-                    if ($existingUser = $this->getDoctrine()->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+                    if ($existingUser = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:User')->findOneBy(
                         ['email' => $invitation->getEmail()]
                     )) {
 
@@ -431,7 +431,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UnitedCMSCoreBundle:Profile:accept-invitation.html.twig',
+            'UniteCMSCoreBundle:Profile:accept-invitation.html.twig',
             array(
                 'tokenPresent' => $tokenPresent,
                 'tokenFound' => $tokenFound,

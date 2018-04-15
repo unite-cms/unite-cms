@@ -1,13 +1,13 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Subscriber;
+namespace UniteCMS\CoreBundle\Subscriber;
 
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 
 class RecoverContentLogger
 {

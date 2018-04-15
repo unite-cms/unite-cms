@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType;
+namespace UniteCMS\CoreBundle\SchemaType;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InterfaceType;
@@ -8,8 +8,8 @@ use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\UnionType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
 
 class SchemaTypeManager
 {

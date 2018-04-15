@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\FieldType;
-use UnitedCMS\CoreBundle\Validator\Constraints\FieldTypeValidator;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\FieldType;
+use UniteCMS\CoreBundle\Validator\Constraints\FieldTypeValidator;
 
 class FieldTypeValidatorTest extends ConstraintValidatorTestCase
 {

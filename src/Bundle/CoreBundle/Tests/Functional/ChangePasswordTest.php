@@ -1,14 +1,14 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Functional;
+namespace src\UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @group slow
@@ -123,7 +123,7 @@ class ChangePasswordTest extends DatabaseAwareTestCase
         $this->assertCount(0, $crawler->filter('form'));
 
         // Password should be updated.
-        $this->users['domain_editor'] = $this->em->getRepository('UnitedCMSCoreBundle:User')->findOneBy(
+        $this->users['domain_editor'] = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(
             ['email' => $this->users['domain_editor']->getEmail()]
         );
         $this->assertTrue(

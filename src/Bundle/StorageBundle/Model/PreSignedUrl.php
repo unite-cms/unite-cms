@@ -6,12 +6,12 @@
  * Time: 10:01
  */
 
-namespace UnitedCMS\StorageBundle\Model;
+namespace UniteCMS\StorageBundle\Model;
 
 /**
  * Holds all parts of an presigned url.
  *
- * @package UnitedCMS\StorageBundle\Model
+ * @package UniteCMS\StorageBundle\Model
  */
 class PreSignedUrl implements \JsonSerializable
 {

@@ -1,22 +1,22 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\DomainInvitation;
-use UnitedCMS\CoreBundle\Entity\DomainMember;
-use UnitedCMS\CoreBundle\Entity\ContentTypeField;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\CoreBundle\Entity\SettingTypeField;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Security\ContentVoter;
-use UnitedCMS\CoreBundle\Security\SettingVoter;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\SettingTypeField;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\SettingVoter;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class DomainEntityTest extends DatabaseAwareTestCase
 {
@@ -430,7 +430,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $domain->setFromEntity($updateDomain);
         $this->assertCount(0, $this->container->get('validator')->validate($domain));
         $this->em->flush($domain);
-        $domain = $this->em->find('UnitedCMSCoreBundle:Domain', $domain->getId());
+        $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
         $this->assertCount(3, $domain->getContentTypes());
         $this->assertCount(3, $domain->getSettingTypes());
         $this->assertEquals($domainIds->ct1, $domain->getContentTypes()->get('ct1')->getId());
@@ -477,7 +477,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $domain->setFromEntity($updateDomain);
         $this->assertCount(0, $this->container->get('validator')->validate($domain));
         $this->em->flush($domain);
-        $domain = $this->em->find('UnitedCMSCoreBundle:Domain', $domain->getId());
+        $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
 
         $this->assertCount(2, $domain->getContentTypes());
         $this->assertCount(2, $domain->getSettingTypes());
@@ -528,7 +528,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $domain->setFromEntity($updateDomain);
         $this->assertCount(0, $this->container->get('validator')->validate($domain));
         $this->em->flush($domain);
-        $domain = $this->em->find('UnitedCMSCoreBundle:Domain', $domain->getId());
+        $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
 
         $this->assertCount(2, $domain->getContentTypes());
         $this->assertCount(2, $domain->getSettingTypes());
@@ -581,7 +581,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $domain->setFromEntity($updateDomain);
         $this->assertCount(0, $this->container->get('validator')->validate($domain));
         $this->em->flush($domain);
-        $domain = $this->em->find('UnitedCMSCoreBundle:Domain', $domain->getId());
+        $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
 
         $this->assertCount(2, $domain->getContentTypes());
         $this->assertCount(2, $domain->getSettingTypes());
@@ -625,7 +625,7 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $domain->setFromEntity($updateDomain);
         $this->assertCount(0, $this->container->get('validator')->validate($domain));
         $this->em->flush($domain);
-        $domain = $this->em->find('UnitedCMSCoreBundle:Domain', $domain->getId());
+        $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
 
         $this->assertCount(1, $updateDomain->getContentTypes());
         $this->assertCount(1, $updateDomain->getSettingTypes());

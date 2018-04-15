@@ -1,9 +1,9 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\View;
+namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Component\Validator\ConstraintViolation;
-use UnitedCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\View;
 
 abstract class ViewType implements ViewTypeInterface
 {

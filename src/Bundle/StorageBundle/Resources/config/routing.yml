@@ -1,6 +1,6 @@
 
-unitedcms_storage_sign:
-    resource: "@UnitedCMSStorageBundle/Controller/SignController.php"
+unitecms_storage_sign:
+    resource: "@UniteCMSStorageBundle/Controller/SignController.php"
     type:     annotation
     prefix:   /{organization}/{domain}/api/storage/sign
     requirements:

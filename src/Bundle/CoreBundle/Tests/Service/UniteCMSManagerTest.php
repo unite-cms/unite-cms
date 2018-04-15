@@ -6,16 +6,16 @@
  * Time: 10:28
  */
 
-namespace UnitedCMS\CoreBundle\Tests\Service;
+namespace UniteCMS\CoreBundle\Tests\Service;
 
 use Symfony\Component\HttpFoundation\Request;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Entity\OrganizationMember;
-use UnitedCMS\CoreBundle\Entity\User;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class UnitedCMSManagerTest extends DatabaseAwareTestCase
+class UniteCMSManagerTest extends DatabaseAwareTestCase
 {
 
     /**
@@ -32,8 +32,8 @@ class UnitedCMSManagerTest extends DatabaseAwareTestCase
      * @var string
      */
     private $domainConfiguration = '{
-    "title": "Test united CMS Manager load organization and dmoain",
-    "identifier": "united_cms_manager", 
+    "title": "Test unite CMS Manager load organization and dmoain",
+    "identifier": "unite_cms_manager", 
     "content_types": [
       {
         "title": "CT 1",
@@ -67,7 +67,7 @@ class UnitedCMSManagerTest extends DatabaseAwareTestCase
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Organization')->setIdentifier('org1');
-        $this->domain = $this->container->get('united.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
@@ -79,8 +79,8 @@ class UnitedCMSManagerTest extends DatabaseAwareTestCase
 
     public function testGettingOrgAndDomainWithoutRequest() {
         // cms manager should silently return null if it could not find an organization or domain
-        $this->assertNull($this->container->get('united.cms.manager')->getOrganization());
-        $this->assertNull($this->container->get('united.cms.manager')->getDomain());
+        $this->assertNull($this->container->get('unite.cms.manager')->getOrganization());
+        $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
 
         $this->container->get('request_stack')->push(new Request(
             [], [], [
@@ -97,8 +97,8 @@ class UnitedCMSManagerTest extends DatabaseAwareTestCase
                 'domain' => 'baa',
             ]
         ));
-        $this->assertNull($this->container->get('united.cms.manager')->getOrganization());
-        $this->assertNull($this->container->get('united.cms.manager')->getDomain());
+        $this->assertNull($this->container->get('unite.cms.manager')->getOrganization());
+        $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
     }
 
     public function testGettingOrgAndDomainWithInvalidDomainIdentifier() {
@@ -108,8 +108,8 @@ class UnitedCMSManagerTest extends DatabaseAwareTestCase
                 'domain' => 'baa',
             ]
         ));
-        $this->assertEquals($this->organization->getIdentifier(), $this->container->get('united.cms.manager')->getOrganization()->getIdentifier());
-        $this->assertNull($this->container->get('united.cms.manager')->getDomain());
+        $this->assertEquals($this->organization->getIdentifier(), $this->container->get('unite.cms.manager')->getOrganization()->getIdentifier());
+        $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
     }
 
     public function testGettingOriginalDomainFromManager() {
@@ -124,7 +124,7 @@ class UnitedCMSManagerTest extends DatabaseAwareTestCase
                 'domain' => $this->domain,
             ]
         ));
-        $originalDomain = $this->container->get('united.cms.manager')->getDomain();
+        $originalDomain = $this->container->get('unite.cms.manager')->getDomain();
 
         // Change domain and content type title on loaded domain
         $this->domain->setTitle('New Title');
@@ -135,7 +135,7 @@ class UnitedCMSManagerTest extends DatabaseAwareTestCase
         $this->assertNotEquals($cTitle, $this->domain->getContentTypes()->first()->getTitle());
         $this->assertNotEquals($sTitle, $this->domain->getSettingTypes()->first()->getTitle());
 
-        // Make sure, that united.cms.manager's original domain was not altered but ids should be present
+        // Make sure, that unite.cms.manager's original domain was not altered but ids should be present
         $this->assertEquals($title, $originalDomain->getTitle());
         $this->assertEquals($cTitle, $originalDomain->getContentTypes()->first()->getTitle());
         $this->assertEquals($sTitle, $originalDomain->getSettingTypes()->first()->getTitle());
@@ -168,10 +168,10 @@ class UnitedCMSManagerTest extends DatabaseAwareTestCase
                 'domain' => $this->domain,
             ]
         ));
-        $originalOrganization = $this->container->get('united.cms.manager')->getOrganization();
-        $originalDomain = $this->container->get('united.cms.manager')->getDomain();
+        $originalOrganization = $this->container->get('unite.cms.manager')->getOrganization();
+        $originalDomain = $this->container->get('unite.cms.manager')->getDomain();
 
-        // united.cms.manager will return cloned, un-managed objects, so updating or persisting them should not work.
+        // unite.cms.manager will return cloned, un-managed objects, so updating or persisting them should not work.
         $originalOrganization->setTitle('new Title');
         $this->assertFalse($this->em->contains($originalOrganization));
         $this->assertFalse($this->em->contains($originalOrganization->getDomains()->first()));

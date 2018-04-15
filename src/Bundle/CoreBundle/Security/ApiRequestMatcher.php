@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestMatcher;

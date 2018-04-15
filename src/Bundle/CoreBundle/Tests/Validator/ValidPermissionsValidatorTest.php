@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Validator;
+namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidPermissions;
-use UnitedCMS\CoreBundle\Validator\Constraints\ValidPermissionsValidator;
+use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissionsValidator;
 
 class ValidPermissionsValidatorTest extends ConstraintValidatorTestCase
 {

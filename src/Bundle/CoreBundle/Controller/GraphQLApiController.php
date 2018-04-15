@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Controller;
+namespace UniteCMS\CoreBundle\Controller;
 
 use GraphQL\Server\Helper;
 use GraphQL\Server\RequestError;
@@ -12,8 +12,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
 
 class GraphQLApiController extends Controller
 {
@@ -25,12 +25,12 @@ class GraphQLApiController extends Controller
      *
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UnitedCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain)")
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function indexAction(Organization $organization, Domain $domain, Request $request)
     {
-        $schemaTypeManager = $this->get('united.cms.graphql.schema_type_manager');
+        $schemaTypeManager = $this->get('unite.cms.graphql.schema_type_manager');
         $schema = new Schema(
             [
                 'query' => $schemaTypeManager->getSchemaType('Query'),

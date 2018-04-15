@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Form\Model;
+namespace UniteCMS\CoreBundle\Form\Model;
 
 use Symfony\Component\Validator\Constraints as Assert;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Validator\Constraints;
+namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class FieldTypeValidator extends ConstraintValidator
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Command;
+namespace UniteCMS\CoreBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
@@ -12,7 +12,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-use UnitedCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Entity\User;
 
 class CreatePlatformAdminCommand extends Command
 {
@@ -59,7 +59,7 @@ class CreatePlatformAdminCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('united:user:create')
+            ->setName('unite:user:create')
             ->setDescription('Creates a new Platform admin for this installation.');
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Types\Input;
+namespace UniteCMS\CoreBundle\SchemaType\Types\Input;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type;

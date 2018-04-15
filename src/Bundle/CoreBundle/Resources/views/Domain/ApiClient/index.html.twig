@@ -1,11 +1,11 @@
-{% extends '@UnitedCMSCore/layout.html.twig' %}
+{% extends '@UniteCMSCore/layout.html.twig' %}
 {% block title %}{% trans %}domain.api_client.title{% endtrans %}{% endblock title %}
-{% block navigation %}{{ include('@UnitedCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
+{% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <h2 class="uk-flex-1">{% trans %}domain.api_client.headline{% endtrans %}</h2>
-        <a href="{{ path('unitedcms_core_domainapiclient_create', {
+        <a href="{{ path('unitecms_core_domainapiclient_create', {
             domain: domain.identifier,
             organization: organization.identifier
         }) }}" class="uk-button uk-button-primary">
@@ -40,7 +40,7 @@
                         <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                             <ul class="uk-nav uk-dropdown-nav">
-                                <li><a href="{{ path('unitedcms_core_domainapiclient_update', {
+                                <li><a href="{{ path('unitecms_core_domainapiclient_update', {
                                     domain: domain.identifier,
                                     organization: organization.identifier,
                                     client: client.id
@@ -48,7 +48,7 @@
                                         <i class="uk-margin-small-right" data-feather="edit"></i>
                                         {% trans %}domain.api_client.update.button{% endtrans %}
                                     </a></li>
-                                <li><a class="uk-text-danger" href="{{ path('unitedcms_core_domainapiclient_delete', {
+                                <li><a class="uk-text-danger" href="{{ path('unitecms_core_domainapiclient_delete', {
                                     domain: domain.identifier,
                                     organization: organization.identifier,
                                     client: client.id

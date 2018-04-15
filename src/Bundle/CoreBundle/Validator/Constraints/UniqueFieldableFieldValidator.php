@@ -1,14 +1,14 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Validator\Constraints;
+namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldTypeManager;
-use UnitedCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class UniqueFieldableFieldValidator extends ConstraintValidator
 {
@@ -16,7 +16,7 @@ class UniqueFieldableFieldValidator extends ConstraintValidator
     {
         if (!$value instanceof FieldableField) {
             throw new InvalidArgumentException(
-                'The UniqueFieldableFieldValidator constraint expects a UnitedCMS\CoreBundle\Entity\FieldableField value.'
+                'The UniqueFieldableFieldValidator constraint expects a UniteCMS\CoreBundle\Entity\FieldableField value.'
             );
         }
 

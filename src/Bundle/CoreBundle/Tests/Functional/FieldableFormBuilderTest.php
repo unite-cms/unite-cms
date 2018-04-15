@@ -1,25 +1,25 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Functional;
+namespace UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableContent;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldTypeInterface;
-use UnitedCMS\CoreBundle\Form\FieldableFormBuilder;
-use UnitedCMS\CoreBundle\Form\FieldableFormField;
-use UnitedCMS\CoreBundle\Form\FieldableFormType;
-use UnitedCMS\CoreBundle\Tests\ContainerAwareTestCase;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeInterface;
+use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
+use UniteCMS\CoreBundle\Form\FieldableFormField;
+use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 
 class FieldableFormBuilderTest extends ContainerAwareTestCase
 {
 
     public function testFormBuilderAvailable() {
-        $this->assertTrue($this->container->has('united.cms.fieldable_form_builder'));
-        $this->assertInstanceOf(FieldableFormBuilder::class, $this->container->get('united.cms.fieldable_form_builder'));
+        $this->assertTrue($this->container->has('unite.cms.fieldable_form_builder'));
+        $this->assertInstanceOf(FieldableFormBuilder::class, $this->container->get('unite.cms.fieldable_form_builder'));
     }
 
     public function testFormBuilderBuildForm() {
@@ -53,7 +53,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             public function getLocale() { return null; }
         };
 
-        $form = $this->container->get('united.cms.fieldable_form_builder')->createForm($fieldable, $content);
+        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($fieldable, $content);
 
         $this->assertInstanceOf(FieldableFormType::class, $form->getConfig()->getType()->getInnerType());
         $this->assertTrue($form->has('field1'));

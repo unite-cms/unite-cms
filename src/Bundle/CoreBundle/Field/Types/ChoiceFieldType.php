@@ -1,11 +1,11 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Field\Types;
+namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use UnitedCMS\CoreBundle\Entity\Fieldable;
-use UnitedCMS\CoreBundle\Entity\FieldableField;
-use UnitedCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldType;
 
 class ChoiceFieldType extends FieldType
 {

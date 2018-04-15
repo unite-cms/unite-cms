@@ -1,14 +1,14 @@
 <?php
 
-namespace src\UnitedCMS\CoreBundle\Tests\Security;
+namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UnitedCMS\CoreBundle\Entity\ApiClient;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Setting;
-use UnitedCMS\CoreBundle\Entity\SettingType;
-use UnitedCMS\CoreBundle\Security\SettingVoter;
-use UnitedCMS\CoreBundle\Tests\SecurityVoterTestCase;
+use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Security\SettingVoter;
+use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
 class SettingVoterApiClientTest extends SecurityVoterTestCase
 {

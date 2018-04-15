@@ -1,13 +1,13 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
-use UnitedCMS\CoreBundle\Entity\View;
-use UnitedCMS\CoreBundle\Entity\Content;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\Entity\Organization;
-use UnitedCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class ViewEntityTest extends DatabaseAwareTestCase
 {

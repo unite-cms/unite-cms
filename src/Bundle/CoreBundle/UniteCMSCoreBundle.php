@@ -1,15 +1,15 @@
 <?php
 
-namespace UnitedCMS\CoreBundle;
+namespace UniteCMS\CoreBundle;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use UnitedCMS\CoreBundle\View\ViewTypeCompilerPass;
-use UnitedCMS\CoreBundle\Field\FieldTypeCompilerPass;
-use UnitedCMS\CoreBundle\Service\AlterDoctrineExtensionDefinitionsCompilerPass;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeCompilerPass;
+use UniteCMS\CoreBundle\View\ViewTypeCompilerPass;
+use UniteCMS\CoreBundle\Field\FieldTypeCompilerPass;
+use UniteCMS\CoreBundle\Service\AlterDoctrineExtensionDefinitionsCompilerPass;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeCompilerPass;
 
-class UnitedCMSCoreBundle extends Bundle
+class UniteCMSCoreBundle extends Bundle
 {
     public function build(ContainerBuilder $container)
     {

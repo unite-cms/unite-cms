@@ -1,13 +1,13 @@
 <?php
 
-namespace UnitedCMS\CoreBundle\SchemaType\Factories;
+namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
-use UnitedCMS\CoreBundle\Entity\ContentType;
-use UnitedCMS\CoreBundle\Entity\Domain;
-use UnitedCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UnitedCMS\CoreBundle\SchemaType\Types\ContentResultType;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\SchemaType\Types\ContentResultType;
 
 class ContentResultTypeFactory implements SchemaTypeFactoryInterface
 {
@@ -53,7 +53,7 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
     public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
     {
         if(!$domain) {
-            throw new \InvalidArgumentException('UnitedCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory::createSchemaType needs an domain as second argument');
+            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory::createSchemaType needs an domain as second argument');
         }
 
         $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
