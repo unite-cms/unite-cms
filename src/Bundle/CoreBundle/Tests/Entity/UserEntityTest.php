@@ -222,6 +222,92 @@ class UserEntityTest extends DatabaseAwareTestCase
         $this->assertEquals('validation.domain_organization', $errors->get(0)->getMessage());
     }
 
+    public function testSetDomainsToUser()
+    {
+        $org1 = new Organization();
+        $org1->setIdentifier('org1')->setTitle('Org 1');
+
+        $organizationMember1 = new OrganizationMember();
+        $organizationMember1->setOrganization($org1);
+
+        $domain1 = new Domain();
+        $domain1->setOrganization($org1)->setTitle('Domain1')->setIdentifier('domain1');
+
+        $domain2 = new Domain();
+        $domain2->setOrganization($org1)->setTitle('Domain2')->setIdentifier('domain2');
+
+        $this->em->persist($org1);
+        $this->em->persist($domain1);
+        $this->em->persist($domain2);
+        $this->em->flush();
+        $this->em->refresh($org1);
+
+        $user1 = new User();
+        $user1->setLastname('1')->setFirstname('User')->setEmail('user1@example.com')->setPassword(
+            'password'
+        )->addOrganization($organizationMember1);
+
+        // Add user to domain of org 1.
+        $member1 = new DomainMember();
+        $member1->setDomain($domain1);
+        $user1->addDomain($member1);
+
+        // Add user to domain of org 1.
+        $member2 = new DomainMember();
+        $member2->setDomain($domain2);
+        $user1->addDomain($member2);
+
+        $user1->setDomains(
+            [
+                $member1,
+                $member2
+            ]
+        );
+
+        $this->assertCount(2, $user1->getDomains());
+    }
+
+    public function testUserSetAndGetOrganizations()
+    {
+        $org1 = new Organization();
+        $org1->setIdentifier('org1')->setTitle('Org 1');
+
+        $org2 = new Organization();
+        $org2->setIdentifier('org2')->setTitle('Org 2');
+
+        $org3 = new Organization();
+        $org3->setIdentifier('org3')->setTitle('Org 3');
+
+        $organizationMember1 = new OrganizationMember();
+        $organizationMember1->setOrganization($org1);
+
+        $organizationMember2 = new OrganizationMember();
+        $organizationMember2->setOrganization($org2);
+
+        $organizationMember3 = new OrganizationMember();
+        $organizationMember3->setOrganization($org3);
+
+        $this->em->persist($org1);
+        $this->em->persist($org2);
+        $this->em->flush();
+        $this->em->refresh($org1);
+        $this->em->refresh($org2);
+
+        $user = new User();
+        $user->setLastname('1')
+             ->setFirstname('User')
+             ->setEmail('user1@example.com')
+             ->setPassword('password')
+             ->addOrganization($organizationMember1)
+             ->addOrganization($organizationMember2);
+
+        // check a valid domain
+        $this->assertCount(1, $user->getOrganizationRoles($org2));
+
+        // check an invalid domain
+        $this->assertCount(0, $user->getOrganizationRoles($org3));
+    }
+
     public function testTokenValidation() {
 
         $user = new User();
