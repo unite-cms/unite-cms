@@ -104,4 +104,56 @@ class ApiClientEntityTest extends DatabaseAwareTestCase
         $this->assertEquals('name', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.name_already_taken', $errors->get(0)->getMessage());
     }
+
+    public function testApiClientSerialization()
+    {
+        $apiClient = new ApiClient();
+
+        $org = new Organization();
+        $org->setIdentifier('org1')->setTitle('Org 1');
+
+        $domain = new Domain();
+        $domain->setOrganization($org)->setTitle('Domain1')->setIdentifier('domain1');
+
+        $this->em->persist($org);
+        $this->em->persist($domain);
+        $this->em->flush();
+
+        $datetime = \DateTime::createFromFormat('Y-m-d H:m:s', '2018-01-01 10:10:10');
+
+        $values = [
+            'id' => NULL,
+            'created' => $datetime,
+            'name' => 'my_api_client',
+            'token' => '12345',
+            'roles' => [Domain::ROLE_ADMINISTRATOR],
+            'domain' => $domain
+        ];
+
+        $apiClient
+            ->setCreated($values['created'])
+            ->setName($values['name'])
+            ->setToken($values['token'])
+            ->setRoles($values['roles'])
+            ->setDomain($values['domain']);
+
+        $this->em->persist($apiClient);
+        $this->em->flush();
+
+        # get saved serialized string
+        $serialized = $apiClient->serialize();
+
+        # add domain and set serialized values from array
+        $values['id'] = $apiClient->getId();
+        $apiClient->unserialize(serialize(array_values($values)));
+
+        # get new serialized string
+        $serialized_new = $apiClient->serialize();
+
+        # should be the same
+        $this->assertEquals($serialized, $serialized_new);
+
+        $this->assertEquals(NULL, $apiClient->getSalt());
+
+    }
 }

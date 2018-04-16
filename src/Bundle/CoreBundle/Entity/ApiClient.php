@@ -268,6 +268,18 @@ class ApiClient implements UserInterface, \Serializable
     }
 
     /**
+     * @param \DateTime $created
+     *
+     * @return  ApiClient
+     */
+    public function setCreated(\DateTime $created)
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    /**
      * @return \DateTime
      */
     public function getCreated()
