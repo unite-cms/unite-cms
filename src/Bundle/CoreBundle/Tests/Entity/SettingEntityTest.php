@@ -4,9 +4,11 @@ namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\SettingTypeField;
+use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -58,6 +60,11 @@ class SettingEntityTest extends DatabaseAwareTestCase
         $st->addField($field);
         $setting->setSettingType($st)->setData(['title' => 'Title']);
         $this->assertCount(0, $this->container->get('validator')->validate($setting));
+
+        // 6. Set wrong entity Type. => exception
+        $this->assertException(\ArgumentCountError::class, function($field) {
+            $field->setEntity(new Organization());
+        });
     }
 
     public function testValidateContentDataValidation()
@@ -107,5 +114,35 @@ class SettingEntityTest extends DatabaseAwareTestCase
         // 3. Create Setting that is valid with FieldType. => VALID
         $setting->setData(['invalid' => false]);
         $this->assertCount(0, $this->container->get('validator')->validate($setting));
+    }
+
+
+    public function testBasicOperationsSettingTypeField()
+    {
+        $settingType = new SettingType();
+        $settingType->setIdentifier('st')->setTitle('ST');
+        $org = new Organization();
+        $org->setTitle('Org')->setIdentifier('org');
+        $domain = new Domain();
+        $domain->setTitle('Domain')->setIdentifier('domain');
+        $settingType->setDomain($domain);
+
+        $field = new SettingTypeField();
+        $field->setTitle('Title')->setIdentifier('test123')->setType('text')->setEntity($settingType);
+
+        $this->em->persist($org);
+        $this->em->persist($domain);
+        $this->em->flush();
+        $this->em->refresh($field);
+
+        $this->assertEquals('Title', $field->__toString());
+        $this->assertEquals('$.test123', $field->getJsonExtractIdentifier());
+
+        $field->setId(300);
+        $this->em->persist($field);
+        $this->em->flush();
+
+        $this->assertEquals(300, $field->getId());
+
     }
 }

@@ -290,8 +290,8 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $org1->setTitle('Org1')->setIdentifier('org1');
         $domain1 = new Domain();
         $domain1->setTitle('Domain1')
-            ->setIdentifier('domain2')
-            ->setOrganization($org1);
+        ->setIdentifier('domain2')
+        ->setOrganization($org1);
         $user1->setEmail('user1d@example.com')
             ->setFirstname('User1')
             ->setLastname('User1')
@@ -323,6 +323,30 @@ class DomainEntityTest extends DatabaseAwareTestCase
             0,
             $this->container->get('validator')
                 ->validate($user1)
+        );
+    }
+
+    public function testEmptyDomainMemberRoles()
+    {
+        $user1MemberDomain1 = new DomainMember();
+
+        $this->assertCount(
+            0,
+            $user1MemberDomain1->allowedRoles()
+        );
+
+        $org1 = new Organization();
+        $org1->setTitle('Org1')->setIdentifier('org1');
+        $domain1 = new Domain();
+        $domain1->setTitle('Domain1')
+            ->setIdentifier('domain2')
+            ->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR])
+            ->setOrganization($org1);
+
+        $user1MemberDomain1->setDomain($domain1);
+        $this->assertCount(
+            2,
+            $user1MemberDomain1->allowedRoles()
         );
     }
 
@@ -744,17 +768,49 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.email_already_member', $errors->get(0)->getMessage());
+    }
 
-        // test token clear and expire function
-        $invite2->clearToken();
-        $this->assertEquals(true, $invite2->isExpired());
+    public function testDomainInviteIdChange()
+    {
+        $domain = $this->setUpOriginDomain();
+        $domain->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR, Domain::ROLE_PUBLIC, 'custom_role']);
+
+        $invite = new DomainInvitation();
+
+        $invite->setDomain($domain);
+        $invite->setEmail('user1@example.com');
+        $invite->setRoles([Domain::ROLE_EDITOR]);
+        $invite->setToken('XXX')->setRequestedAt(new \DateTime());
+
+        $this->em->persist($domain);
+        $this->em->persist($invite);
+        $this->em->flush($invite);
 
         // test id change
-        $invite1->setId(20);
-        $this->em->persist($invite1);
-        $this->em->flush($invite1);
-        $this->assertEquals(20, $invite1->getId());
+        $invite->setId(20);
+        $this->em->persist($invite);
+        $this->em->flush($invite);
+        $this->assertEquals(20, $invite->getId());
+    }
 
+    public function testDomainInviteClearToken()
+    {
+        $domain = $this->setUpOriginDomain();
+        $domain->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR, Domain::ROLE_PUBLIC, 'custom_role']);
+
+        $invite = new DomainInvitation();
+
+        $invite->setDomain($domain);
+        $invite->setEmail('user1@example.com');
+        $invite->setRoles([Domain::ROLE_EDITOR]);
+        $invite->setToken('XXX')->setRequestedAt(new \DateTime());
+
+        $this->em->persist($domain);
+        $this->em->persist($invite);
+        $this->em->flush($invite);
+
+        $invite->clearToken();
+        $this->assertEquals(true, $invite->isExpired());
     }
 
     public function testReservedIdentifiers()

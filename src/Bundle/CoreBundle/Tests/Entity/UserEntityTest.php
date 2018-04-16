@@ -308,6 +308,25 @@ class UserEntityTest extends DatabaseAwareTestCase
         $this->assertCount(0, $user->getOrganizationRoles($org3));
     }
 
+    public function testOrganizationMemberIdChange()
+    {
+        $org1 = new Organization();
+        $org1->setIdentifier('org1')->setTitle('Org 1');
+
+        $organizationMember1 = new OrganizationMember();
+        $organizationMember1->setOrganization($org1);
+
+        $this->em->persist($org1);
+        $this->em->persist($organizationMember1);
+        $this->em->flush();
+
+        // test id change
+        $organizationMember1->setId(20);
+        $this->em->persist($organizationMember1);
+        $this->em->flush($organizationMember1);
+        $this->assertEquals(20, $organizationMember1->getId());
+    }
+
     public function testTokenValidation() {
 
         $user = new User();
