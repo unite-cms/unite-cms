@@ -121,6 +121,74 @@ class OrganizationEntityTest extends DatabaseAwareTestCase
         $this->assertCount(0, $this->container->get('validator')->validate($user1));
     }
 
+    public function testSetUsersToOrganization()
+    {
+        $org1 = new Organization();
+        $org1->setTitle('Org1')->setIdentifier('org1');
+
+        $user1 = new User();
+        $user1->setEmail('user1d@example.com')->setFirstname('User1')->setLastname('User1')->setPassword('XXX');
+
+        $user2 = new User();
+        $user2->setEmail('user2d@example.com')->setFirstname('User2')->setLastname('User2')->setPassword('XXX');
+
+        $org1Member = new OrganizationMember();
+        $org1Member->setOrganization($org1);
+        $user1->addOrganization($org1Member);
+
+        $org2Member = new OrganizationMember();
+        $org2Member->setOrganization($org1);
+        $user2->addOrganization($org1Member);
+        
+        $this->em->persist($org1);
+        $this->em->persist($user1);
+        $this->em->persist($user2);
+        $this->em->flush($user1);
+        $this->em->flush($user2);
+
+        // add the 2 users to the organisation
+        $org1->setUsers(
+            [
+                $org1Member,
+                $org2Member
+            ]
+        );
+
+        // test if users where added
+        $this->assertCount(2, $org1->getUsers());
+    }
+
+    public function testSetDomainsToOrganization()
+    {
+        $org1 = new Organization();
+        $org1->setTitle('Org1')->setIdentifier('org1');
+
+        $domain1 = new Domain();
+        $domain1->setTitle('Domain1')
+            ->setIdentifier('domain1');
+
+        $domain2 = new Domain();
+        $domain2->setTitle('Domain2')
+            ->setIdentifier('domain2');
+
+        $this->em->persist($org1);
+        $this->em->persist($domain1);
+        $this->em->persist($domain2);
+        $this->em->flush($domain1);
+        $this->em->flush($domain2);
+
+        // add the 2 domains to the organisation
+        $org1->setDomains(
+            [
+                $domain1,
+                $domain2
+            ]
+        );
+
+        // test if those 2 domains were added
+        $this->assertCount(2, $org1->getDomains());
+    }
+
     public function testAllowedOrganizationMemberRoles()
     {
         $org1 = new Organization();
