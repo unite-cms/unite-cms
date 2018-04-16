@@ -744,6 +744,17 @@ class DomainEntityTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.email_already_member', $errors->get(0)->getMessage());
+
+        // test token clear and expire function
+        $invite2->clearToken();
+        $this->assertEquals(true, $invite2->isExpired());
+
+        // test id change
+        $invite1->setId(20);
+        $this->em->persist($invite1);
+        $this->em->flush($invite1);
+        $this->assertEquals(20, $invite1->getId());
+
     }
 
     public function testReservedIdentifiers()
