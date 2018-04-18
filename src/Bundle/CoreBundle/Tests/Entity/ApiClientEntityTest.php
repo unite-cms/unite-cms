@@ -2,18 +2,18 @@
 
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
+use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Entity\ApiClient;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 
-class ApiClientEntityTest extends ContainerAwareTestCase
+class ApiClientEntityTest extends TestCase
 {
     public function testBasicOperations()
     {
         $apiClient = new ApiClient();
 
         // test if salt returns null
-        $this->assertEquals(NULL, $apiClient->getSalt());
+        $this->assertEquals(null, $apiClient->getSalt());
     }
 
     public function testSerialization()
@@ -48,7 +48,7 @@ class ApiClientEntityTest extends ContainerAwareTestCase
                     'my_api_client',
                     '12345',
                     [Domain::ROLE_ADMINISTRATOR],
-                    new Domain()
+                    new Domain(),
                 ]
             )
         );

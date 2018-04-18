@@ -2,12 +2,12 @@
 
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
+use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 
-class OrganizationEntityTest extends ContainerAwareTestCase
+class OrganizationEntityTest extends TestCase
 {
     public function testSetUsersToOrganization()
     {
@@ -29,7 +29,7 @@ class OrganizationEntityTest extends ContainerAwareTestCase
         $org1->setUsers(
             [
                 $org1Member,
-                $org2Member
+                $org2Member,
             ]
         );
 

@@ -46,7 +46,7 @@ class ApiClientEntityPersistentTest extends DatabaseAwareTestCase
 
         // Validate invalid token.
         $apiClient
-            ->setToken('   ' . $this->generateRandomUTF8String(150))
+            ->setToken('   '.$this->generateRandomUTF8String(150))
             ->setName($this->generateRandomUTF8String(255));
 
         $errors = $this->container->get('validator')->validate($apiClient);

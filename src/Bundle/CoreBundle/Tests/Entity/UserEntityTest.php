@@ -2,14 +2,15 @@
 
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
+use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
+use Symfony\Component\Security\Core\Role\Role;
 
-class UserEntityTest extends ContainerAwareTestCase
+class UserEntityTest extends TestCase
 {
     public function testSetDomainsToUser()
     {
@@ -28,11 +29,27 @@ class UserEntityTest extends ContainerAwareTestCase
         $user1->setDomains(
             [
                 $member1,
-                $member2
+                $member2,
             ]
         );
 
         $this->assertCount(2, $user1->getDomains());
+    }
+
+    public function testExistingRole()
+    {
+        $user = new User();
+        $role = new Role('ROLE_USER');
+
+        $this->assertContains('ROLE_USER', $user->getRoles());
+
+        $ret_object = $user->setRoles(
+            [
+                $role,
+            ]
+        );
+
+        $this->assertEquals($user, $ret_object);
     }
 
     public function testUserSetAndGetOrganizations()
@@ -52,7 +69,7 @@ class UserEntityTest extends ContainerAwareTestCase
 
         $user = new User();
         $user->addOrganization($organizationMember1)
-             ->addOrganization($organizationMember2);
+            ->addOrganization($organizationMember2);
 
         // check a valid domain
         $this->assertCount(1, $user->getOrganizationRoles($org2));

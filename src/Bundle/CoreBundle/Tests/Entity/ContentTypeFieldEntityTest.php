@@ -2,11 +2,11 @@
 
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
+use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 
-class ContentTypeFieldEntityTest extends ContainerAwareTestCase
+class ContentTypeFieldEntityTest extends TestCase
 {
     public function testBasicOperations()
     {

@@ -168,7 +168,8 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(0, $this->container->get('validator')->validate($content));
     }
 
-    public function testContentEntityToStringMethod() {
+    public function testContentEntityToStringMethod()
+    {
 
         // Empty content should be printed as "".
         $this->assertEquals('Content', (string)new Content());
@@ -198,15 +199,17 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $contentType->setContentLabel("#{id}");
         $this->assertEquals('#XXX-YYY-ZZZ', (string)$content);
 
-        $content->setData([
-            'title' => 'My title',
-            'foo' => 'baa',
-            'nested' => [
-                'lu' => [
-                    'la' => 'value',
-                ]
-            ],
-        ]);
+        $content->setData(
+            [
+                'title' => 'My title',
+                'foo' => 'baa',
+                'nested' => [
+                    'lu' => [
+                        'la' => 'value',
+                    ],
+                ],
+            ]
+        );
 
         $contentType->setContentLabel("{title}");
         $this->assertEquals('My title', (string)$content);

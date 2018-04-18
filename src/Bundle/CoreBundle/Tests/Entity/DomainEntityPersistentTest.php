@@ -684,7 +684,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals($errors['token'], 'validation.too_long');
 
         // Validate invalid token characters.
-        $invite1->setToken('   ' . $this->generateRandomUTF8String(150));
+        $invite1->setToken('   '.$this->generateRandomUTF8String(150));
 
         $errors = [];
 

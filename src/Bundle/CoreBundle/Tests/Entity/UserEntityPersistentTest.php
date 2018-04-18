@@ -241,7 +241,8 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals(20, $organizationMember1->getId());
     }
 
-    public function testTokenValidation() {
+    public function testTokenValidation()
+    {
 
         $user = new User();
 
@@ -259,7 +260,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
 
 
         // Validate invalid token characters.
-        $user->setResetToken('   ' . $this->generateRandomUTF8String(150));
+        $user->setResetToken('   '.$this->generateRandomUTF8String(150));
 
         $errors = [];
 

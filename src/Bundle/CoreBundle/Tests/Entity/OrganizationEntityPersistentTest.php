@@ -144,7 +144,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $org1->setDomains(
             [
                 $domain1,
-                $domain2
+                $domain2,
             ]
         );
 
