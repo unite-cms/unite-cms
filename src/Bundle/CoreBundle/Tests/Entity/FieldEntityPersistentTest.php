@@ -160,7 +160,6 @@ class FieldEntityPersistentTest extends DatabaseAwareTestCase
         // 3. Set valid field settings.
         $field->setSettings(new FieldableFieldSettings(['other' => true]));
         $this->assertCount(0, $this->container->get('validator')->validate($field));
-
     }
 
     public function testContentFieldWeight()

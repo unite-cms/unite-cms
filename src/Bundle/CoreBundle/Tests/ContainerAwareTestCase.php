@@ -40,5 +40,4 @@ abstract class ContainerAwareTestCase extends KernelTestCase
         parent::tearDown();
         $this->container = null;
     }
-
 }
