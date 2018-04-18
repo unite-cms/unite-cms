@@ -5,8 +5,8 @@ namespace UniteCMS\CoreBundle\Tests\Entity;
 use PHPUnit\Framework\TestCase;
 
 use UniteCMS\CoreBundle\Entity\View;
-use UniteCMS\CoreBundle\Tests\FakeField;
 use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 
 class ContentTypeEntityTest extends TestCase
 {
@@ -69,7 +69,8 @@ class ContentTypeEntityTest extends TestCase
     public function testAddFieldException()
     {
         $content_type = new ContentType();
-        $content_type->addField(new FakeField());
+        $test_field = $this->createMock(FieldableField::class);
+        $content_type->addField($test_field);
     }
 
     /**

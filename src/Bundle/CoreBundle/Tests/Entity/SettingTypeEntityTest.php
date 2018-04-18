@@ -5,7 +5,7 @@ namespace UniteCMS\CoreBundle\Tests\Entity;
 use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Tests\FakeField;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 
 class SettingTypeEntityTest extends TestCase
 {
@@ -38,6 +38,7 @@ class SettingTypeEntityTest extends TestCase
     public function testAddFieldException()
     {
         $setting_type = new SettingType();
-        $setting_type->addField(new FakeField());
+        $test_field = $this->createMock(FieldableField::class);
+        $setting_type->addField($test_field);
     }
 }

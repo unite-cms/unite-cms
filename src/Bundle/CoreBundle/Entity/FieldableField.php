@@ -47,4 +47,9 @@ interface FieldableField
      * @return null|FieldableFieldSettings
      */
     public function getSettings();
+
+    /**
+     * @return string
+     */
+    public function __toString();
 }
