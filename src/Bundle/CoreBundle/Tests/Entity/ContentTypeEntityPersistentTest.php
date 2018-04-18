@@ -8,7 +8,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class ContentTypeEntityTest extends DatabaseAwareTestCase
+class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
 {
 
     public function testValidateContentType()

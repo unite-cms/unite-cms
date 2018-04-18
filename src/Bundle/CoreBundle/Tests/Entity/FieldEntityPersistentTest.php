@@ -14,7 +14,7 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class FieldEntityTest extends DatabaseAwareTestCase
+class FieldEntityPersistentTest extends DatabaseAwareTestCase
 {
 
     public function testValidateField()
@@ -107,12 +107,6 @@ class FieldEntityTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.identifier_already_taken', $errors->get(0)->getMessage());
-
-        //  Set invalid Entity Type
-        $this->assertException(\ArgumentCountError::class, function($field) {
-            $field->setEntity(new Organization());
-        });
-
     }
 
     public function testValidateFieldSettingsValidation()
@@ -167,36 +161,6 @@ class FieldEntityTest extends DatabaseAwareTestCase
         $field->setSettings(new FieldableFieldSettings(['other' => true]));
         $this->assertCount(0, $this->container->get('validator')->validate($field));
 
-    }
-
-    public function testBasicOperationsField()
-    {
-        $field = new ContentTypeField();
-        $field
-            ->setType('field_entity_test_mocked_field')
-            ->setIdentifier('invalid')
-            ->setTitle('Title')
-            ->setEntity(new ContentType())
-            ->getEntity()
-            ->setIdentifier('ct')->setTitle('ct')->setDomain(new Domain())
-            ->getDomain()->setTitle('domain')->setIdentifier('domain')->setOrganization(new Organization())
-            ->getOrganization()->setIdentifier('org')->setTitle('org');
-
-        $this->em->persist($field->getEntity()->getDomain()->getOrganization());
-        $this->em->persist($field->getEntity()->getDomain());
-        $this->em->persist($field);
-        $this->em->flush($field);
-        $this->em->refresh($field);
-
-        $field->setId(300);
-        $this->em->persist($field);
-        $this->em->flush($field);
-
-        // test if id was set
-        $this->assertEquals(300, $field->getId());
-
-        // test if title is correct
-        $this->assertEquals('Title', $field->__toString());
     }
 
     public function testContentFieldWeight()

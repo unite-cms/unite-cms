@@ -9,7 +9,7 @@ use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class ViewEntityTest extends DatabaseAwareTestCase
+class ViewEntityPersistentTest extends DatabaseAwareTestCase
 {
 
     public function testValidateView()

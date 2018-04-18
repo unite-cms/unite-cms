@@ -10,7 +10,7 @@ use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class ContentEntityTest extends DatabaseAwareTestCase
+class ContentEntityPersistentTest extends DatabaseAwareTestCase
 {
 
     public function testValidateContent()
