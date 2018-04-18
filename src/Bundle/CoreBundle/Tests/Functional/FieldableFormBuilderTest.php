@@ -27,6 +27,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
         $fieldable = new class implements Fieldable {
             public function getFields() {
                 return [new class implements FieldableField {
+                    public function __toString() { return "test"; }
                     public function getEntity() { return $this->entity; }
                     public function setEntity($entity) { $this->entity = $entity; }
                     public function getType() { return 'text'; }

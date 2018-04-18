@@ -14,7 +14,7 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class FieldEntityTest extends DatabaseAwareTestCase
+class FieldEntityPersistentTest extends DatabaseAwareTestCase
 {
 
     public function testValidateField()

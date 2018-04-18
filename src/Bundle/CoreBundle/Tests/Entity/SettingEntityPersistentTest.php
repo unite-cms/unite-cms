@@ -4,13 +4,15 @@ namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\SettingTypeField;
+use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class SettingEntityTest extends DatabaseAwareTestCase
+class SettingEntityPersistentTest extends DatabaseAwareTestCase
 {
 
     public function testValidateSetting()
@@ -108,4 +110,5 @@ class SettingEntityTest extends DatabaseAwareTestCase
         $setting->setData(['invalid' => false]);
         $this->assertCount(0, $this->container->get('validator')->validate($setting));
     }
+
 }
