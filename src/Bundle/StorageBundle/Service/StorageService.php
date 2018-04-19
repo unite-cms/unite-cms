@@ -126,7 +126,7 @@ class StorageService
         $s3Client = new S3Client(
             [
                 'version' => 'latest',
-                'region' => 'us-east-1',
+                'region' => $bucket_settings['region'] ?? 'us-east-1',
                 'endpoint' => $bucket_settings['endpoint'],
                 'use_path_style_endpoint' => true,
                 'credentials' => [
@@ -136,11 +136,22 @@ class StorageService
             ]
         );
 
+        // Set the upload file path to an optional path + uuid + filename.
+        $filePath = $uuid.'/'.$filename;
+
+        if (!empty($bucket_settings['path'])) {
+            $path = trim($bucket_settings['path'], "/ \t\n\r\0\x0B");
+
+            if (!empty($path)) {
+                $filePath = $path.'/'.$filePath;
+            }
+        }
+
         $command = $s3Client->getCommand(
             'PutObject',
             [
                 'Bucket' => $bucket_settings['bucket'],
-                'Key' => $uuid.'/'.$filename,
+                'Key' => $filePath,
             ]
         );
 

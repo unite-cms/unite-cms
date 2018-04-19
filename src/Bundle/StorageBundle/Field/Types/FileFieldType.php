@@ -69,11 +69,22 @@ class FileFieldType extends FieldType
         array_shift($identifier_path_parts);
         $identifier_path_parts[] = $field->getIdentifier();
 
+
+        $endpoint = $field->getSettings()->bucket['endpoint'].'/'.$field->getSettings()->bucket['bucket'];
+
+        if (!empty($field->getSettings()->bucket['path'])) {
+            $path = trim($field->getSettings()->bucket['path'], "/ \t\n\r\0\x0B");
+
+            if (!empty($path)) {
+                $endpoint = $endpoint.'/'.$path;
+            }
+        }
+
         return array_merge(parent::getFormOptions($field), [
           'attr' => [
             'file-types' => $field->getSettings()->file_types,
             'field-path' => join('/', $identifier_path_parts),
-            'endpoint' => $field->getSettings()->bucket['endpoint'] . '/' . $field->getSettings()->bucket['bucket'],
+            'endpoint' => $endpoint,
             'upload-sign-url' => $url,
             'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
           ],
@@ -142,7 +153,23 @@ class FileFieldType extends FieldType
         // Validate allowed and required settings.
         $violations = parent::validateSettings($field, $settings);
 
-        // Validate bucket configuration.
+        // Validate allowed bucket configuration.
+        if(empty($violations)) {
+            foreach($settings->bucket as $field => $value) {
+                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region'])) {
+                    $violations[] = new ConstraintViolation(
+                        'validation.additional_data',
+                        'validation.additional_data',
+                        [],
+                        $settings->bucket,
+                        'bucket.' . $field,
+                        $settings->bucket
+                    );
+                }
+            }
+        }
+
+        // Validate required bucket configuration.
         if(empty($violations)) {
             foreach(['endpoint', 'key', 'secret', 'bucket'] as $required_field) {
                 if(!isset($settings->bucket[$required_field])) {

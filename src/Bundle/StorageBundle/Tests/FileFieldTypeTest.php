@@ -82,6 +82,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'key' => 'XXX',
                         'secret' => 'XXX',
                         'bucket' => 'foo',
+                        "path" => "/any",
                     ],
                 ]
             )
@@ -89,6 +90,29 @@ class FileFieldTypeTest extends FieldTypeTestCase
 
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(0, $errors);
+
+        // Try saving additional data
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                        "region" => "east",
+                        "path" => "/any",
+                        'foo' => 'baa',
+                    ],
+                ]
+            )
+        );
+
+        $errors = $this->container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.bucket.foo', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
     }
 
     public function testGettingGraphQLData()
