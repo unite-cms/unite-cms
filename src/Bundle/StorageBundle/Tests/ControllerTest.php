@@ -15,6 +15,8 @@ use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -563,5 +565,49 @@ class ControllerTest extends DatabaseAwareTestCase
         $actualParts = explode('&X-Amz-Date=', (string)$presignedRequest->getUri());
 
         $this->assertEquals($actualParts[0], $generatedParts[0]);
+    }
+
+    public function testS3Settings() {
+
+        $contentType = new ContentType();
+        $field = new ContentTypeField();
+        $field
+            ->setIdentifier('file')
+            ->setType('file');
+        $contentType->addField($field);
+        $fieldSettings = $field->getSettings();
+
+        $service = $this->container->get('unite.cms.storage.service');
+
+
+        // Test setting endpoint and bucket
+        $fieldSettings->bucket = [
+            'endpoint' => 'https://foo.com',
+            'bucket' => 'baa',
+            'key' => 'XXX',
+            'secret' => 'XXX',
+        ];
+        $response = $service->createPreSignedUploadUrlForFieldPath('test.txt', $contentType, 'file');
+        $this->assertStringStartsWith('https://foo.com/baa/' . $response->getUuid() . '/' . $response->getFilename(), $response->getPreSignedUrl());
+
+        // Test setting path
+        $fieldSettings->bucket['path'] = 'any/subpath';
+        $response = $service->createPreSignedUploadUrlForFieldPath('test.txt', $contentType, 'file');
+        $this->assertStringStartsWith('https://foo.com/baa/any/subpath/' . $response->getUuid() . '/' . $response->getFilename(), $response->getPreSignedUrl());
+
+        // Test setting path
+        $fieldSettings->bucket['path'] = '/any/subpath/';
+        $response = $service->createPreSignedUploadUrlForFieldPath('test.txt', $contentType, 'file');
+        $this->assertStringStartsWith('https://foo.com/baa/any/subpath/' . $response->getUuid() . '/' . $response->getFilename(), $response->getPreSignedUrl());
+
+        // Test setting path
+        $fieldSettings->bucket['path'] = '/';
+        $response = $service->createPreSignedUploadUrlForFieldPath('test.txt', $contentType, 'file');
+        $this->assertStringStartsWith('https://foo.com/baa/' . $response->getUuid() . '/' . $response->getFilename(), $response->getPreSignedUrl());
+
+        $fieldSettings->bucket['region'] = 'any-region-12';
+        $response = $service->createPreSignedUploadUrlForFieldPath('test.txt', $contentType, 'file');
+        parse_str($response->getPreSignedUrl(), $params);
+        $this->assertContains('/any-region-12', $params['X-Amz-Credential']);
     }
 }
