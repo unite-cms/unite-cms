@@ -16,6 +16,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Security\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\View\ViewParameterBag;
 
@@ -193,5 +194,243 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         // If we can get reach this line, no exceptions where thrown during content schema creation.
         $this->assertTrue(true);
         $this->assertGreaterThan(0, $contentSchemaType->getFields());
+    }
+
+    /**
+     * @expectedException \App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException
+     * @expectedExceptionMessage A reference field was configured to reference to domain "foo". However "foo" does not exist, or you don't have access to it.
+     */
+    public function testDomainNotFoundException()
+    {
+        $ctField = $this->createContentTypeField('reference');
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => 'foo',
+                    'content_type' => 'baa',
+                ]
+            )
+        );
+        $ctField->getContentType()->setIdentifier('ct1');
+        $ctField->getContentType()->getDomain()->getContentTypes()->clear();
+        $ctField->getContentType()->getDomain()->addContentType($ctField->getContentType());
+
+        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($ctField->getContentType()->getDomain());
+        $this->em->persist($ctField->getContentType());
+        $this->em->persist($ctField);
+        $this->em->flush();
+
+        // Inject current domain and org in unite.cms.manager.
+        $requestStack = new RequestStack();
+        $requestStack->push(
+            new Request(
+                [], [], [
+                'organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+            ]
+            )
+        );
+
+        $user = new User();
+        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $userInDomain1 = new DomainMember();
+        $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
+        $user->addDomain($userInDomain1);
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, null, 'main', $user->getRoles())
+        );
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+
+        $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
+        $reflector->setAccessible(true);
+        $reflector->invoke($this->container->get('unite.cms.manager'));
+
+        $this->container
+            ->get('unite.cms.field_type_manager')
+            ->getFieldType('reference')
+            ->getGraphQLType($ctField, $this->container->get('unite.cms.graphql.schema_type_manager'));
+    }
+
+    /**
+     * @expectedException \App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException
+     * @expectedExceptionMessage A reference field was configured to reference to content type "baa" on domain "domain1". However "baa" does not exist.
+     */
+    public function testContentTypeNotFoundException()
+    {
+        $ctField = $this->createContentTypeField('reference');
+        $ctField->getContentType()->getDomain()->setIdentifier('domain1');
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+                    'content_type' => 'baa',
+                ]
+            )
+        );
+        $ctField->getContentType()->setIdentifier('ct1');
+        $ctField->getContentType()->getDomain()->getContentTypes()->clear();
+        $ctField->getContentType()->getDomain()->addContentType($ctField->getContentType());
+
+        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($ctField->getContentType()->getDomain());
+        $this->em->persist($ctField->getContentType());
+        $this->em->persist($ctField);
+        $this->em->flush();
+
+        // Inject current domain and org in unite.cms.manager.
+        $requestStack = new RequestStack();
+        $requestStack->push(
+            new Request(
+                [], [], [
+                    'organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                    'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+                ]
+            )
+        );
+
+        $user = new User();
+        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $userInDomain1 = new DomainMember();
+        $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
+        $user->addDomain($userInDomain1);
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, null, 'main', $user->getRoles())
+        );
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+
+        $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
+        $reflector->setAccessible(true);
+        $reflector->invoke($this->container->get('unite.cms.manager'));
+
+        $this->container
+            ->get('unite.cms.field_type_manager')
+            ->getFieldType('reference')
+            ->getGraphQLType($ctField, $this->container->get('unite.cms.graphql.schema_type_manager'));
+    }
+
+    /**
+     * @expectedException \App\Bundle\CoreBundle\Exception\DomainAccessDeniedException
+     * @expectedExceptionMessage A reference field was configured to reference to domain "domain1". However you are not allowed to access it.
+     */
+    public function testDomainNoAccess()
+    {
+        $ctField = $this->createContentTypeField('reference');
+        $ctField->getContentType()->getDomain()->setIdentifier('domain1');
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+                    'content_type' => 'ct1',
+                ]
+            )
+        );
+        $ctField->getContentType()->setIdentifier('ct1');
+        $ctField->getContentType()->getDomain()->getContentTypes()->clear();
+        $ctField->getContentType()->getDomain()->addContentType($ctField->getContentType());
+
+        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($ctField->getContentType()->getDomain());
+        $this->em->persist($ctField->getContentType());
+        $this->em->persist($ctField);
+        $this->em->flush();
+
+        // Inject current domain and org in unite.cms.manager.
+        $requestStack = new RequestStack();
+        $requestStack->push(
+            new Request(
+                [], [], [
+                    'organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                    'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+                ]
+            )
+        );
+
+        $user = new User();
+        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, null, 'main', $user->getRoles())
+        );
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+
+        $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
+        $reflector->setAccessible(true);
+        $reflector->invoke($this->container->get('unite.cms.manager'));
+
+        $this->container
+            ->get('unite.cms.field_type_manager')
+            ->getFieldType('reference')
+            ->getGraphQLType($ctField, $this->container->get('unite.cms.graphql.schema_type_manager'));
+    }
+
+    /**
+     * @expectedException \App\Bundle\CoreBundle\Exception\ContentTypeAccessDeniedException
+     * @expectedExceptionMessage You are not allowed to list content of content type "ct1" on domain "domain1".
+     */
+    public function testContentTypeNoAccess()
+    {
+        $ctField = $this->createContentTypeField('reference');
+        $ctField->getContentType()->getDomain()->setIdentifier('domain1');
+        $ctField->getContentType()->addPermission(ContentVoter::LIST, [Domain::ROLE_ADMINISTRATOR]);
+        $ctField->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+                    'content_type' => 'ct1',
+                ]
+            )
+        );
+        $ctField->getContentType()->setIdentifier('ct1');
+        $ctField->getContentType()->getDomain()->getContentTypes()->clear();
+        $ctField->getContentType()->getDomain()->addContentType($ctField->getContentType());
+
+        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($ctField->getContentType()->getDomain());
+        $this->em->persist($ctField->getContentType());
+        $this->em->persist($ctField);
+        $this->em->flush();
+
+        // Inject current domain and org in unite.cms.manager.
+        $requestStack = new RequestStack();
+        $requestStack->push(
+            new Request(
+                [], [], [
+                    'organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                    'domain' => $ctField->getContentType()->getDomain()->getIdentifier(),
+                ]
+            )
+        );
+
+        $user = new User();
+        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $userInDomain1 = new DomainMember();
+        $userInDomain1->setRoles([Domain::ROLE_PUBLIC])->setDomain($ctField->getContentType()->getDomain());
+        $user->addDomain($userInDomain1);
+
+        $this->container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, null, 'main', $user->getRoles())
+        );
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+
+        $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
+        $reflector->setAccessible(true);
+        $reflector->invoke($this->container->get('unite.cms.manager'));
+
+        $this->container
+            ->get('unite.cms.field_type_manager')
+            ->getFieldType('reference')
+            ->getGraphQLType($ctField, $this->container->get('unite.cms.graphql.schema_type_manager'));
     }
 }

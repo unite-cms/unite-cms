@@ -2,6 +2,8 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
+use App\Bundle\CoreBundle\Exception\AccessDeniedException;
+use App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
@@ -115,13 +117,32 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
          * @var \UniteCMS\CoreBundle\Entity\ContentTypeField $field
          */
         foreach ($contentType->getFields() as $field) {
-            $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
 
-            // If we want to create an InputObjectType, get GraphQLInputType.
-            if($isInputType) {
-                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
-            } else {
-                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
+            try {
+                $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
+
+                // If we want to create an InputObjectType, get GraphQLInputType.
+                if ($isInputType) {
+                    $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType(
+                        $field,
+                        $schemaTypeManager,
+                        $nestingLevel + 1
+                    );
+                } else {
+                    $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType(
+                        $field,
+                        $schemaTypeManager,
+                        $nestingLevel + 1
+                    );
+                }
+
+            // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
+            } catch (AccessDeniedException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+
+            // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
+            } catch (InvalidFieldConfigurationException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
             }
         }
 
