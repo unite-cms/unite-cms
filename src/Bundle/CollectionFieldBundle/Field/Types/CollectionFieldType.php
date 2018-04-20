@@ -2,7 +2,6 @@
 
 namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
