@@ -224,6 +224,7 @@ class TableViewTypeTest extends DatabaseAwareTestCase
                     'columns' => [
                         'f1' => 'Title',
                         'id' => 'baa',
+                        'f1.any_sub' => 'baa',
                     ],
                     'filter' => $filter,
                     'sort_field' => 'f1',
@@ -242,6 +243,7 @@ class TableViewTypeTest extends DatabaseAwareTestCase
             [
                 'f1' => 'Title',
                 'id' => 'baa',
+                'f1.any_sub' => 'baa',
             ],
             $parameters->get('columns')
         );
