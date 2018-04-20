@@ -2,7 +2,6 @@
 
 namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -249,40 +248,55 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
      * @param FieldableField $field
      * @param FieldableContent $content
      * @param EntityRepository $repository
+     * @param $old_data
      * @param $data
      */
     public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
 
-        // If child field implements onUpdate, call it!
+        // Depending on if the update adds, deletes, or modifies a row we need to call different hooks on each sub field.
         foreach(self::getNestableFieldable($field)->getFields() as $subField) {
             $fieldType = $this->fieldTypeManager->getFieldType($subField->getType());
 
-            if(method_exists($fieldType, 'onUpdate')) {
-
-                $keys_used = [];
-
-                // Call hook for all available data.
-                if(!empty($data[$field->getIdentifier()])) {
-                    foreach($data[$field->getIdentifier()] as $key => $subData) {
-                        $subOldData = isset($old_data[$field->getIdentifier()][$key]) ? $old_data[$field->getIdentifier()][$key] : [];
-                        $fieldType->onUpdate($subField, $content, $repository, $subOldData, $subData);
+            // Case 1: row was not present in old data but is present in data: CREATE
+            if(method_exists($fieldType, 'onCreate')) {
+                foreach($data[$field->getIdentifier()] as $key => $subData) {
+                    if(empty($old_data[$field->getIdentifier()][$key]) && !empty($data[$field->getIdentifier()][$key])) {
+                        $subData = $data[$field->getIdentifier()][$key];
+                        $fieldType->onCreate($subField, $content, $repository, $subData);
                         $data[$field->getIdentifier()][$key] = $subData;
-                        $keys_used[] = $key;
                     }
                 }
+            }
 
-                // Call hook for all available old data, but only if it was not called before.
-                if(!empty($old_data[$field->getIdentifier()])) {
-                    foreach($old_data[$field->getIdentifier()] as $key => $subOldData) {
-                        if(!in_array($key, $keys_used)) {
-                            $subData = isset($data[$field->getIdentifier()][$key]) ? $data[$field->getIdentifier()][$key] : [];
+            // Case 2: row was present in old data and is present in new data: UPDATE
+            if(method_exists($fieldType, 'onUpdate')) {
+                foreach($data[$field->getIdentifier()] as $key => $subData) {
+                    if(!empty($old_data[$field->getIdentifier()][$key]) && !empty($data[$field->getIdentifier()][$key])) {
+                        $subOldData = $old_data[$field->getIdentifier()][$key];
+                        $subData = $data[$field->getIdentifier()][$key];
+
+                        if($subOldData != $subData) {
                             $fieldType->onUpdate($subField, $content, $repository, $subOldData, $subData);
                             $data[$field->getIdentifier()][$key] = $subData;
                         }
                     }
                 }
             }
+
+            // Case 3: row was present in old data but is not present in new data: HARD DELETE
+            if(method_exists($fieldType, 'onHardDelete')) {
+                foreach($old_data[$field->getIdentifier()] as $key => $subOldData) {
+                    if(!empty($old_data[$field->getIdentifier()][$key]) && empty($data[$field->getIdentifier()][$key])) {
+                        $fieldType->onHardDelete($subField, $content, $repository, $subOldData);
+                    }
+                }
+            }
         }
+
+        // It can happen, that an index of data was deleted. However, when we store the data to the database, we want
+        // to make sure, that there is no missing index for the rows array. Otherwise it would be treated as object
+        // with numeric keys instead of an array.
+        $data[$field->getIdentifier()] = array_values($data[$field->getIdentifier()]);
     }
 
     /**

@@ -2,22 +2,12 @@
 
 namespace UniteCMS\CollectionFieldBundle\Form;
 
-use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-class CollectionFormType extends CollectionType implements DataTransformerInterface
+class CollectionFormType extends CollectionType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
-        $builder->addModelTransformer($this);
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -25,22 +15,6 @@ class CollectionFormType extends CollectionType implements DataTransformerInterf
     {
         parent::buildView($view, $form, $options);
         $view->vars['tag'] = 'unite-cms-collection-field';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function transform($data)
-    {
-        return $data;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function reverseTransform($data)
-    {
-        return array_values($data);
     }
 
     /**
