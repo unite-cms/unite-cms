@@ -169,6 +169,10 @@ class TableViewType extends ViewType
             return true;
         }
 
+        // At the moment we just check the root field. In the future we could also check nested field properties here.
+        $fieldParts = explode('.', $field);
+        $field = array_shift($fieldParts);
+
         return $this->view->getContentType()->getFields()->containsKey($field);
     }
 }

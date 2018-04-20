@@ -32,7 +32,7 @@
 
                     <div v-for="field in columnKeys">
                         <span v-if="field == 'created' || field == 'updated'">{{ formatDate(new Date(row[field] * 1000)) }}</span>
-                        <span v-else>{{ row[field] }}</span>
+                        <span v-else>{{ accessNestedValue(row, field) }}</span>
                     </div>
                     <div class="actions" v-if="!selectable">
                         <button class="uk-button uk-button-default actions-dropdown" type="button" v-html="feather.icons['more-horizontal'].toSvg()"></button>
@@ -178,6 +178,40 @@ export default {
             return date.getDate()  + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " +
                 date.getHours() + ":" + date.getMinutes();
         },
+
+        /**
+         * Access a (possible) nested field value of this row. Field key is in format root.nested.any.
+         *
+         * @param row
+         * @param field
+         * @return mixed
+         */
+        accessNestedValue: function(row, field) {
+            let nestedFieldParts = field.split('.');
+            if(nestedFieldParts.length > 1) {
+                let rootFieldPart = nestedFieldParts.shift();
+                return this.accessNestedValue(row[rootFieldPart], nestedFieldParts.join('.'));
+            }
+            return row[field];
+        },
+
+        /**
+         * Create a nested graphql field selector from a fields array. Fields are in format root.nested.any.
+         *
+         * @param fields
+         * @return string
+         */
+        createNestedFieldSelectors: function(fields){
+            return fields.map((field) => {
+                let nestedFieldParts = field.split('.');
+                if(nestedFieldParts.length > 1) {
+                    let rootFieldPart = nestedFieldParts.shift();
+                    return rootFieldPart + ' { ' + this.createNestedFieldSelectors([nestedFieldParts.join('.')])  + ' }';
+                }
+                return field;
+            }).join(',\n');
+        },
+
         loadData: function () {
             this.loaded = false;
             let queryMethod = 'find' + this.contentType.charAt(0).toUpperCase() + this.contentType.slice(1);
@@ -195,7 +229,7 @@ export default {
                     result {
                         id,
                         deleted,
-                        ` + this.columnKeys.join(',\n') + `
+                        ` + this.createNestedFieldSelectors(this.columnKeys) + `
                     }
                 }
               }`, {

@@ -129,6 +129,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
                     'columns' => [
                         'id' => 'ID',
                         'position' => 'Position',
+                        'position.any_sub' => 'baa',
                     ],
                     'sort_field' => 'position',
                 ]
@@ -149,6 +150,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
             [
                 'id' => 'ID',
                 'position' => 'Position',
+                'position.any_sub' => 'baa',
             ],
             $parameters->get('columns')
         );
