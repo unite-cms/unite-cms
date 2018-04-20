@@ -2,6 +2,10 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use App\Bundle\CoreBundle\Exception\ContentAccessDeniedException;
+use App\Bundle\CoreBundle\Exception\ContentTypeAccessDeniedException;
+use App\Bundle\CoreBundle\Exception\DomainAccessDeniedException;
+use App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
@@ -61,6 +65,8 @@ class ReferenceFieldType extends FieldType
      * @param string $domain_identifier
      * @param string $content_type_identifier
      * @return ContentType
+     * @throws InvalidFieldConfigurationException
+     * @throws DomainAccessDeniedException
      */
     private function resolveContentType($domain_identifier, $content_type_identifier): ContentType
     {
@@ -79,8 +85,8 @@ class ReferenceFieldType extends FieldType
         )->first();
 
         if (!$domain) {
-            throw new InvalidArgumentException(
-                "No domain with identifier '{$domain_identifier}' was found in this organization."
+            throw new InvalidFieldConfigurationException(
+                "A reference field was configured to reference to domain \"{$domain_identifier}\". However \"{$domain_identifier}\" does not exist, or you don't have access to it."
             );
         }
 
@@ -93,7 +99,9 @@ class ReferenceFieldType extends FieldType
         );
 
         if (!$this->authorizationChecker->isGranted(DomainVoter::VIEW, $domain)) {
-            throw new InvalidArgumentException("You are not allowed to view this domain.");
+            throw new DomainAccessDeniedException(
+                "A reference field was configured to reference to domain \"{$domain_identifier}\". However you are not allowed to access it."
+            );
         }
 
         $contentType = $domain->getContentTypes()->filter(
@@ -103,8 +111,8 @@ class ReferenceFieldType extends FieldType
         )->first();
 
         if (!$contentType) {
-            throw new InvalidArgumentException(
-                "No content_type with identifier '{$content_type_identifier}' was found for this organization and domain."
+            throw new InvalidFieldConfigurationException(
+                "A reference field was configured to reference to content type \"{$content_type_identifier}\" on domain \"{$domain_identifier}\". However \"{$content_type_identifier}\" does not exist."
             );
         }
 
@@ -113,6 +121,10 @@ class ReferenceFieldType extends FieldType
 
     /**
      * {@inheritdoc}
+     * @throws ContentTypeAccessDeniedException
+     * @throws InvalidFieldConfigurationException
+     * @throws \Twig\Error\Error
+     * @throws DomainAccessDeniedException
      */
     function getFormOptions(FieldableField $field): array
     {
@@ -122,7 +134,7 @@ class ReferenceFieldType extends FieldType
         // Get content type and check if we have access to it.
         $contentType = $this->resolveContentType($settings->domain, $settings->content_type);
         if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
-            throw new InvalidArgumentException("You are not allowed to view this content_type.");
+            throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$settings->content_type}\".");
         }
 
         // Get view.
@@ -132,7 +144,7 @@ class ReferenceFieldType extends FieldType
             }
         )->first();
         if (!$view) {
-            throw new InvalidArgumentException(
+            throw new InvalidFieldConfigurationException(
                 "No view with identifier '{$settings->view}' was found for this organization, domain and content type."
             );
         }
@@ -174,14 +186,18 @@ class ReferenceFieldType extends FieldType
 
     /**
      * {@inheritdoc}
+     * @throws InvalidFieldConfigurationException
+     * @throws ContentTypeAccessDeniedException
+     * @throws DomainAccessDeniedException
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
 
         // Get content type and check if we have access to it.
         $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
+
         if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
-            throw new InvalidArgumentException("You are not allowed to view this content_type.");
+            throw new ContentTypeAccessDeniedException("You are not allowed to list content of content type \"{$contentType->getIdentifier()}\" on domain \"{$contentType->getDomain()->getIdentifier()}\".");
         }
 
         $name = ucfirst($field->getSettings()->content_type.'Content');
@@ -196,6 +212,9 @@ class ReferenceFieldType extends FieldType
 
     /**
      * {@inheritdoc}
+     * @throws InvalidFieldConfigurationException
+     * @throws ContentTypeAccessDeniedException
+     * @throws DomainAccessDeniedException
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
@@ -203,7 +222,7 @@ class ReferenceFieldType extends FieldType
         // Get content type and check if we have access to it.
         $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
         if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
-            throw new InvalidArgumentException("You are not allowed to view this content_type.");
+            throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$contentType}\".");
         }
 
         return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $contentType->getDomain(), $nestingLevel);
@@ -215,6 +234,10 @@ class ReferenceFieldType extends FieldType
      * @param FieldableField $field
      * @param array $value
      * @return null|Content
+     *
+     * @throws InvalidFieldConfigurationException
+     * @throws ContentAccessDeniedException
+     * @throws DomainAccessDeniedException
      */
     function resolveGraphQLData(FieldableField $field, $value)
     {
@@ -234,7 +257,7 @@ class ReferenceFieldType extends FieldType
 
         // Check access to view content.
         if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
-            throw new InvalidArgumentException("You are not allowed to view this content.");
+            throw new ContentAccessDeniedException("You are not allowed to view this content.");
         }
 
         return $content;
@@ -242,6 +265,7 @@ class ReferenceFieldType extends FieldType
 
     /**
      * {@inheritdoc}
+     *
      */
     function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
     {
@@ -265,7 +289,7 @@ class ReferenceFieldType extends FieldType
         else {
             try {
                 $this->resolveGraphQLData($field, $data);
-            } catch (InvalidArgumentException $e) {
+            } catch (\Exception $e) {
                 $violations[] = $this->createViolation($field, 'validation.wrong_definition');
             }
         }

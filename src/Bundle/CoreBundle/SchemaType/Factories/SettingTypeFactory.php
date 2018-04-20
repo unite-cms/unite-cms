@@ -2,6 +2,8 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
+use App\Bundle\CoreBundle\Exception\AccessDeniedException;
+use App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -105,8 +107,22 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
          * @var \UniteCMS\CoreBundle\Entity\SettingTypeField $field
          */
         foreach ($settingType->getFields() as $field) {
-            $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
-            $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
+            try {
+                $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
+                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType(
+                    $field,
+                    $schemaTypeManager,
+                    $nestingLevel + 1
+                );
+
+            // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
+            } catch (AccessDeniedException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+
+            // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
+            } catch (InvalidFieldConfigurationException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+            }
         }
 
         return new ObjectType(
