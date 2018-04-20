@@ -2,13 +2,11 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
-use App\Bundle\CoreBundle\Exception\AccessDeniedException;
 use App\Bundle\CoreBundle\Exception\ContentAccessDeniedException;
 use App\Bundle\CoreBundle\Exception\ContentTypeAccessDeniedException;
 use App\Bundle\CoreBundle\Exception\DomainAccessDeniedException;
 use App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
-use GraphQL\Type\Definition\Type;
 use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
