@@ -1,0 +1,27 @@
+{
+    "name": "unite-cms/wysiwyg-field-bundle",
+    "type": "symfony-bundle",
+    "description": "Provides a WYSIWYG field type for unite cms",
+    "require": {
+        "unite-cms/core-bundle": "0@dev"
+    },
+    "autoload": {
+        "psr-4": { "UniteCMS\\WysiwygFieldBundle\\": "" },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\app\\": "Tests/app/" }
+    },
+    "authors": [
+        {
+            "name": "Franz Wilding",
+            "email": "franz@unite.co.at"
+        },
+        {
+            "name": "Stefan Kamsker",
+            "email": "stefan@unite.co.at"
+        }
+    ]
+}
