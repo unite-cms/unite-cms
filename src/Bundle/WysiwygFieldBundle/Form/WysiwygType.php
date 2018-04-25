@@ -35,7 +35,24 @@ class WysiwygType extends WebComponentType
         $resolver->setDefaults(
             [
                 'tag' => 'unite-cms-wysiwyg-field',
+                'empty_data' => '',
             ]
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transform($data)
+    {
+        return $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reverseTransform($data)
+    {
+        return $data;
     }
 }

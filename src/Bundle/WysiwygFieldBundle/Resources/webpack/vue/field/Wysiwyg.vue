@@ -1,20 +1,24 @@
 <template>
     <div>
-        <quill-editor v-model="value" :ref="id" :options="options">
+        <quill-editor v-model="content" :ref="id" :options="options">
         </quill-editor>
-        <input type="hidden" :name="name" :value="value" />
+        <input type="hidden" :name="name" :value="content" />
     </div>
 </template>
 
 <script>
-    import feather from 'feather-icons';
-    import Quill from 'quill';
     import { quillEditor } from 'vue-quill-editor';
 
     export default {
+        data: function() {
+            return {
+                'content': this.value,
+                'options': JSON.parse(this.dataOptions),
+            }
+        },
         props: [
             'value',
-            'options',
+            'dataOptions',
             'id',
             'name'
         ],
@@ -36,5 +40,13 @@
     unite-cms-wysiwyg-field {
         display: block;
         margin: 5px 0;
+
+        .ql-editor {
+            background: map-get($colors, white);
+        }
+
+        .ql-bubble {
+            border: 1px solid map-get($colors, grey-medium);
+        }
     }
 </style>
