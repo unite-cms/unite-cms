@@ -10,3 +10,6 @@ framework:
             UniteCMSStorageBundle:
                 json_manifest_path: "%kernel.project_dir%/public/bundles/unitecmsstorage/manifest.json"
                 base_path: '/bundles/unitecmsstorage'
+            UniteCMSWysiwygFieldBundle:
+                json_manifest_path: "%kernel.project_dir%/public/bundles/unitecmswysiwygfield/manifest.json"
+                base_path: '/bundles/unitecmswysiwygfield'

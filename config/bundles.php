@@ -17,6 +17,7 @@ return [
 
     UniteCMS\CollectionFieldBundle\UniteCMSCollectionFieldBundle::class => ['all' => true],
     UniteCMS\StorageBundle\UniteCMSStorageBundle::class => ['all' => true],
+    UniteCMS\WysiwygFieldBundle\UniteCMSWysiwygFieldBundle::class => ['all' => true],
 
     Symfony\Bundle\DebugBundle\DebugBundle::class => ['dev' => true, 'test' => true],
     Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class => ['dev' => true],

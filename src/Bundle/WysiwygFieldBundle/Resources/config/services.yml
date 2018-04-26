@@ -1,0 +1,5 @@
+services:
+
+  # A wysiwyg input field
+  UniteCMS\WysiwygFieldBundle\Field\Types\WysiwygFieldType:
+    tags: [unite_cms.field_type]

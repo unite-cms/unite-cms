@@ -34,12 +34,17 @@
         {
             "type": "path",
             "url": "./src/Bundle/StorageBundle"
+        },
+        {
+            "type": "path",
+            "url": "./src/Bundle/WysiwygFieldBundle"
         }
     ],
     "require": {
         "unite-cms/core-bundle": "0@dev",
         "unite-cms/collection-field-bundle": "0@dev",
-        "unite-cms/storage-bundle": "0@dev"
+        "unite-cms/storage-bundle": "0@dev",
+        "unite-cms/wysiwyg-field-bundle": "0@dev"
     },
     "require-dev": {
         "symfony/thanks": "^1.0",
