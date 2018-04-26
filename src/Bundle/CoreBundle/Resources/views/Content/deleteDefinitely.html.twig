@@ -12,6 +12,26 @@
         }) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.delete_definitely.headline{% endtrans %}</h2>
     </header>
-    {{ form(form) }}
+
+    <p class="uk-text-center">
+        <i data-feather="x-circle" width="100" height="100" style="display: block; margin: 50px auto 30px;"></i>
+        <br />
+        {% trans with {'%content%': content|escape } %}content.delete_definitely.text{% endtrans %}
+    </p>
+
+    {{ form_start(form) }}
+    <p class="uk-text-center">
+
+        <a class="uk-button" style="background: white; margin: 10px;" href="{{ path('unitecms_core_content_index', {
+            domain: domain.identifier,
+            organization: organization.identifier,
+            content_type: contentType.identifier,
+            view: view.identifier
+        }) }}">{% trans %}content.delete.cancel{% endtrans %}</a>
+
+        {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
+    </p>
+    {{ form_end(form) }}
+
 </article>
 {% endblock content %}
