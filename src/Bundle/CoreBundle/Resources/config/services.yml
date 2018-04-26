@@ -8,3 +8,4 @@ imports:
   - { resource: services.validators.yml }
   - { resource: services.doctrineListener.yml }
   - { resource: services.serialization.yml }
+  - { resource: services.twig.yml }

@@ -1,5 +1,9 @@
 {%- block unite_cms_wysiwyg_widget -%}
     <{{ tag }} {{ block('widget_attributes') }} value="{{ value }}"></{{ tag }}>
-    <link type="text/css" rel="stylesheet" href="{{ asset('main.css', 'UniteCMSWysiwygFieldBundle') }}">
-    <script type="text/javascript" src="{{ asset('main.js', 'UniteCMSWysiwygFieldBundle') }}"></script>
+
+    {% if not alreadyRendered('UniteCMSWysiwygFieldBundle') %}
+        <link type="text/css" rel="stylesheet" href="{{ asset('main.css', 'UniteCMSWysiwygFieldBundle') }}">
+        <script type="text/javascript" src="{{ asset('main.js', 'UniteCMSWysiwygFieldBundle') }}"></script>
+    {% endif %}
+
 {%- endblock unite_cms_wysiwyg_widget -%}

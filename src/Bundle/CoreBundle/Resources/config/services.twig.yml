@@ -1,0 +1,7 @@
+# Contains all twig extensions.
+services:
+
+    UniteCMS\CoreBundle\Twig\AlreadyRenderedExtension:
+        public: false
+        tags:
+            - { name: twig.extension }
