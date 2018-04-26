@@ -1,12 +1,9 @@
 
 import Vue from "vue";
-import 'document-register-element/build/document-register-element';
+import 'document-register-element';
 import vueCustomElement from 'vue-custom-element';
 
 import feather from 'feather-icons';
-
-import UIkit from 'uikit';
-//import Icons from 'uikit/dist/js/uikit-icons';
 
 import Table from "./vue/views/Table.vue";
 import Sortable from "./vue/views/Sortable.vue";
