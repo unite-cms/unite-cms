@@ -2,7 +2,9 @@
 
 namespace UniteCMS\WysiwygFieldBundle\Field\Types;
 
+use Symfony\Component\Validator\ConstraintViolation;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\WysiwygFieldBundle\Form\WysiwygType;
 
@@ -47,5 +49,38 @@ class WysiwygFieldType extends FieldType
                 ],
             ]
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
+    {
+        // Validate allowed and required settings.
+        $violations = parent::validateSettings($field, $settings);
+
+        // Only continue, if there are no violations yet.
+        if(!empty($violations)) {
+            return $violations;
+        }
+
+        // Check allowed theme.
+        if(!empty($settings->theme)) {
+            if(!in_array($settings->theme, self::ALLOWED_THEMES)) {
+                $violations[] = new ConstraintViolation(
+                    'validation.unknown_theme',
+                    'validation.unknown_theme',
+                    [],
+                    $settings,
+                    'theme',
+                    $settings
+                );
+            }
+        }
+
+        // Check allowed toolbar options.
+        // TODO
+
+        return $violations;
     }
 }
