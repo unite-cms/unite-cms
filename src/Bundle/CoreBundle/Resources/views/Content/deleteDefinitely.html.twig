@@ -13,6 +13,8 @@
         <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.delete_definitely.headline{% endtrans %}</h2>
     </header>
 
+    {{ form_errors(form) }}
+
     <p class="uk-text-center">
         <i data-feather="x-circle" width="100" height="100" style="display: block; margin: 50px auto 30px;"></i>
         <br />
@@ -31,7 +33,7 @@
 
         {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
     </p>
-    {{ form_end(form) }}
+    {{ form_rest(form) }}
 
 </article>
 {% endblock content %}
