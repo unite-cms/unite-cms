@@ -45,6 +45,14 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
 
+        // Toolbar must be an array
+        $field->setSettings(
+            new FieldableFieldSettings(['toolbar' => 'foo']));
+        $errors = $this->container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('validation.invalid_definition', $errors->get(0)->getMessage());
+
         // Fields can be set as direct toolbar child or in child groups
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => ['bold']]));

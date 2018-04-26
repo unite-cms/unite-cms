@@ -52,6 +52,28 @@ class WysiwygFieldType extends FieldType
     }
 
     /**
+     * Validates a toolbar option and returns a violation if it is not allowed.
+     * @param string $option
+     * @param $settings
+     * @return ConstraintViolation[]
+     */
+    protected function validateToolbarOption($option, $settings) : array {
+        $violations = [];
+
+        if(!in_array($option, self::ALLOWED_TOOLBAR_OPTIONS)) {
+            $violations[] = new ConstraintViolation(
+                'validation.unknown_toolbar_option',
+                'validation.unknown_toolbar_option',
+                [],
+                $settings,
+                'toolbar',
+                $settings
+            );
+        }
+        return $violations;
+    }
+
+    /**
      * {@inheritdoc}
      */
     function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
@@ -78,8 +100,44 @@ class WysiwygFieldType extends FieldType
             }
         }
 
-        // Check allowed toolbar options.
-        // TODO
+        // Check available toolbar options.
+        if(empty($settings->toolbar)) {
+            return [new ConstraintViolation(
+                'validation.not_blank',
+                'validation.not_blank',
+                [],
+                $settings,
+                'toolbar',
+                $settings
+            )];
+        }
+
+        if(!is_array($settings->toolbar)) {
+            return [new ConstraintViolation(
+                'validation.invalid_definition',
+                'validation.invalid_definition',
+                [],
+                $settings,
+                'toolbar',
+                $settings
+            )];
+        }
+
+        // Validate toolbar options
+        foreach($settings->toolbar as $option) {
+
+            // case 1: option is a option group
+            if(is_array($option) && count(array_filter(array_keys($option), 'is_string')) === 0) {
+                foreach($option as $child) {
+                    $violations = array_merge($violations, $this->validateToolbarOption($child, $settings));
+                }
+            }
+
+            // case 2: option is a string or object option
+            else {
+                $violations = array_merge($violations, $this->validateToolbarOption($option, $settings));
+            }
+        }
 
         return $violations;
     }
