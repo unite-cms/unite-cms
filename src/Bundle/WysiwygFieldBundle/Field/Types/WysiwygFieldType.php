@@ -2,11 +2,13 @@
 
 namespace UniteCMS\WysiwygFieldBundle\Field\Types;
 
+use Symfony\Component\Form\DataTransformerInterface;
+use Symfony\Component\Form\Exception\TransformationFailedException;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\WysiwygFieldBundle\Form\WysiwygType;
 
-class WysiwygFieldType extends FieldType
+class WysiwygFieldType extends FieldType implements DataTransformerInterface
 {
     const TYPE                      = "wysiwyg";
     const FORM_TYPE                 = WysiwygType::class;
@@ -47,5 +49,28 @@ class WysiwygFieldType extends FieldType
                 ],
             ]
         );
+    }
+
+    /**
+     * @param string $value The value in the original representation
+     *
+     * @return string The value in the transformed representation
+     * @throws TransformationFailedException when the transformation fails
+     */
+    public function transform($value)
+    {
+        return "transform." . $value;
+    }
+
+    /**
+     * @param string $value The value in the transformed representation
+     *
+     * @return string|null The value in the original representation
+     *
+     * @throws TransformationFailedException when the transformation fails
+     */
+    public function reverseTransform($value)
+    {
+        return "reverseTransform." . $value;
     }
 }

@@ -8,25 +8,26 @@
 
 namespace UniteCMS\WysiwygFieldBundle\Form;
 
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UniteCMS\CoreBundle\Form\WebComponentType;
+use voku\helper\AntiXSS;
 
 class WysiwygType extends WebComponentType
 {
     /**
-     * {@inheritdoc}
+     * @var AntiXSS $antiXss
      */
-    public function getBlockPrefix()
+    private $antiXss;
+
+    public function __construct()
     {
-        return 'unite_cms_wysiwyg';
+        $this->antiXss = new AntiXSS();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent()
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        return WebComponentType::class;
+        $builder->addModelTransformer($this);
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -53,6 +54,26 @@ class WysiwygType extends WebComponentType
      */
     public function reverseTransform($data)
     {
-        return $data;
+        if(empty($data)) {
+            return null;
+        }
+
+        return $this->antiXss->xss_clean($data);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBlockPrefix()
+    {
+        return 'unite_cms_wysiwyg';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getParent()
+    {
+        return WebComponentType::class;
     }
 }

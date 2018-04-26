@@ -3,7 +3,8 @@
     "type": "symfony-bundle",
     "description": "Provides a WYSIWYG field type for unite cms",
     "require": {
-        "unite-cms/core-bundle": "0@dev"
+        "unite-cms/core-bundle": "0@dev",
+        "voku/anti-xss": "^4.1"
     },
     "autoload": {
         "psr-4": { "UniteCMS\\WysiwygFieldBundle\\": "" },
