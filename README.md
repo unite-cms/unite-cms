@@ -4,20 +4,24 @@ unite cms
 [![Build Status](https://travis-ci.org/unite-cms/unite-cms.svg?branch=master)](https://travis-ci.org/unite-cms/unite-cms)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/59a0dce5677500c486a5/test_coverage)](https://codeclimate.com/github/unite-cms/unite-cms/test_coverage)
 
-unite cms is a decoupled content management system that allows you to manage all kind of content in a datacentred way by using an intuitv and simple userinterface.
+unite cms is a decoupled content management system that allows you to manage all kind of content in a datacentred way by using an intuit and simple user interface.
 
 Developers can access the content via a graphQL API to build all kind of websites, apps or IoT applications.   
 
 
 ## Installation
 
-With a single unite cms installation you can manage multiple separated units called *"Organizations"* which don't share any information with each other. 
-
-At the moment unite cms is based on the Symfony 4.0 and only requires PHP >= 7.1 and a MySQL >= 5.7.9 database.
+With a single unite cms installation you can manage multiple separated units called ***"Organizations"***, that don't share any information with each other. 
+At the moment unite cms is based on the Symfony 4 and only requires PHP >= 7.1 and a MySQL >= 5.7.9 database.
 
 ### Start a new project 
 
+If you want to start a project, based on unite cms, you can use our unite-cms/standard package, which is a standard 
+Symfony 4 application, and includes all core bundles and core configuration.
+
     composer create-project unite-cms/standard unitecms --stability dev
+    
+    cd unitecms
     
     # Now create the databse schema.
     bin/console doctrine:schema:update --force
@@ -28,35 +32,40 @@ To get started create your first organization and a platform admin user:
     
     bin/console unite:user:create 
     
-If you want to use the PHP development server execute: 
+If you want to use the Symfony development server execute: 
 
     bin/console serve:run
 
-To run unite cms content in production mode, execute:
+### Install unite cms for production
 
-    bin/console assets:install
+Before installing unite cms for production, make sure that all environment variables, defined in .env.dist are set.
+
+    composer create-project unite-cms/standard unitecms --stability dev --no-dev --no-scripts
+    
+    cd unitecms
+    
+    bin/console assets:install --env=prod
     bin/console doctrine:schema:update --force --env=prod
     bin/console cache:clear --env=prod    
 
 ## Development
+
+If you want to contribute to unite cms, clone this repository, it includes all core bundles under src/Bundle/. 
 
     git clone git@github.com:unite-cms/unite-cms.git
     composer install
 
 ## Testing
 
-unite cms and all it's bundles uses unit and functional tests by using the PHPUnit framework. To run integration tests, 
-execute: 
+unite cms and all it's bundles uses unit and functional tests by using the PHPUnit framework. Execute:
 
     phpunit
     
-in the root dir. Slow tests, that simulate HTTP requests for example are grouped in the "*slow*" group. Therefore you 
+in root dir. Slow tests (that simulate HTTP requests for example) are grouped in the "*slow*" group. Therefore you 
 can get a much faster response if you run this group at the end.
 
     phpunit --exclude-group slow
     phpunit --group slow 
-
-Tests for each bundle can be executed from the root directory of each unite cms core bundle.
 
 ## Architecture
 
