@@ -201,7 +201,12 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         // Reorder
         $reorderedDomain = new Domain();
         $reorderedDomain->setOrganization($org)->setTitle($domain->getTitle())->setIdentifier($domain->getIdentifier());
-        $reorderedDomain->addContentType(clone $ct2)->addContentType(clone $ct1);
+
+        $ct1_clone = clone $ct1;
+        $ct1_clone->setWeight(null);
+        $ct2_clone = clone $ct2;
+        $ct2_clone->setWeight(null);
+        $reorderedDomain->addContentType($ct2_clone)->addContentType($ct1_clone);
         $domain->setFromEntity($reorderedDomain);
 
         $this->em->flush($domain);

@@ -189,7 +189,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         // Try to delete non empty domain.
         $ct = new ContentType();
-        $ct->setTitle('New Content Type')->setIdentifier('domain_entity_test_new_ct');
+        $ct->setTitle('New Content Type')->setIdentifier('domain_entity_test_new_ct')->setWeight(0);
         $content = new Content();
         $content->setContentType($ct);
         $this->em->persist($ct);

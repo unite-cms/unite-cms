@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
+use JMS\Serializer\SerializerBuilder;
 use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\ContentType;

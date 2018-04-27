@@ -2,12 +2,12 @@
 
 namespace UniteCMS\CoreBundle\Repository;
 
-use Gedmo\Sortable\Entity\Repository\SortableRepository;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * ContentTypeRepository
  */
-class ContentTypeRepository extends SortableRepository
+class ContentTypeRepository extends EntityRepository
 {
     public function findByIdentifiers($organization, $domain, $contentType)
     {

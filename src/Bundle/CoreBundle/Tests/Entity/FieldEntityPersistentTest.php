@@ -193,7 +193,12 @@ class FieldEntityPersistentTest extends DatabaseAwareTestCase
         $reorderedContentType->setDomain($contentType->getDomain())->setTitle($contentType->getTitle())->setIdentifier(
             $contentType->getIdentifier()
         );
-        $reorderedContentType->addField(clone $field2)->addField(clone $field1);
+
+        $field1_clone = clone $field1;
+        $field1_clone->setWeight(null);
+        $field2_clone = clone $field2;
+        $field2_clone->setWeight(null);
+        $reorderedContentType->addField($field2_clone)->addField($field1_clone);
         $contentType->setFromEntity($reorderedContentType);
 
         $this->em->flush();
@@ -227,7 +232,11 @@ class FieldEntityPersistentTest extends DatabaseAwareTestCase
 
         // Reorder
         $settingType->getFields()->remove('f1');
+        $settingType->getFields()->get('f2')->setWeight(0);
+        $field1->setWeight(null);
+
         $settingType->addField($field1);
+
         $this->em->flush();
         $this->em->refresh($field1);
         $this->em->refresh($field2);
