@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Type;
@@ -248,6 +249,28 @@ class Domain
     }
 
     /**
+     * After deserializing a domain, content type and setting type weights must be initialized.
+     *
+     * @Serializer\PostDeserialize
+     */
+    public function initWeight() {
+
+       $weight = 0;
+
+       foreach($this->getContentTypes() as $contentType) {
+           $contentType->setWeight($weight);
+           $weight++;
+       }
+
+        $weight = 0;
+
+        foreach($this->getSettingTypes() as $settingType) {
+            $settingType->setWeight($weight);
+            $weight++;
+        }
+    }
+
+    /**
      * Set id
      *
      * @param $id
@@ -418,7 +441,10 @@ class Domain
         if (!$this->contentTypes->contains($contentType)) {
             $this->contentTypes->set($contentType->getIdentifier(), $contentType);
             $contentType->setDomain($this);
-            $contentType->setWeight($this->contentTypes->count() - 1);
+
+            if($contentType->getWeight() === null) {
+                $contentType->setWeight($this->contentTypes->count() - 1);
+            }
         }
 
         return $this;
@@ -457,7 +483,10 @@ class Domain
         if (!$this->settingTypes->contains($settingType)) {
             $this->settingTypes->set($settingType->getIdentifier(), $settingType);
             $settingType->setDomain($this);
-            $settingType->setWeight($this->settingTypes->count() - 1);
+
+            if($settingType->getWeight() === null) {
+                $settingType->setWeight($this->settingTypes->count() - 1);
+            }
         }
 
         return $this;

@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use UniteCMS\CoreBundle\View\Types\TableViewType;
@@ -11,7 +12,6 @@ use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Accessor;
 use UniteCMS\CoreBundle\Security\ContentVoter;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UniteCMS\CoreBundle\Validator\Constraints\DefaultViewType;
@@ -83,7 +83,6 @@ class ContentType implements Fieldable
 
     /**
      * @var Domain
-     * @Gedmo\SortableGroup
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="contentTypes")
      */
@@ -134,7 +133,6 @@ class ContentType implements Fieldable
 
     /**
      * @var int
-     * @Gedmo\SortablePosition
      * @ORM\Column(name="weight", type="integer")
      */
     private $weight;
@@ -260,6 +258,20 @@ class ContentType implements Fieldable
         }
 
         return $this;
+    }
+
+    /**
+     * After deserializing a content type, field weights must be initialized.
+     *
+     * @Serializer\PostDeserialize
+     */
+    public function initWeight() {
+        $weight = 0;
+
+        foreach($this->getFields() as $field) {
+            $field->setWeight($weight);
+            $weight++;
+        }
     }
 
     /**
@@ -460,7 +472,10 @@ class ContentType implements Fieldable
         if (!$this->fields->containsKey($field->getIdentifier())) {
             $this->fields->set($field->getIdentifier(), $field);
             $field->setContentType($this);
-            $field->setWeight($this->fields->count() - 1);
+
+            if($field->getWeight() === null) {
+                $field->setWeight($this->fields->count() - 1);
+            }
         }
 
         return $this;
@@ -583,9 +598,9 @@ class ContentType implements Fieldable
     }
 
     /**
-     * @return int
+     * @return null|int
      */
-    public function getWeight(): int
+    public function getWeight()
     {
         return $this->weight;
     }

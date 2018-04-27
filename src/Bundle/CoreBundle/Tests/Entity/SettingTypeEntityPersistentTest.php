@@ -150,7 +150,14 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         // Reorder
         $reorderedDomain = new Domain();
         $reorderedDomain->setOrganization($org)->setTitle($domain->getTitle())->setIdentifier($domain->getIdentifier());
-        $reorderedDomain->addSettingType(clone $st2)->addSettingType(clone $st1);
+
+        $st1_clone = clone $st1;
+        $st1_clone->setWeight(null);
+
+        $st2_clone = clone $st2;
+        $st2_clone->setWeight(null);
+
+        $reorderedDomain->addSettingType($st2_clone)->addSettingType($st1_clone);
         $domain->setFromEntity($reorderedDomain);
 
         $this->em->flush($domain);

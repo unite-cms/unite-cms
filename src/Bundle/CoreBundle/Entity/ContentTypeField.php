@@ -7,7 +7,6 @@ use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Type;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Validator\Constraints\FieldType;
@@ -19,7 +18,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
  * Field
  *
  * @ORM\Table(name="content_type_field")
- * @ORM\Entity(repositoryClass="Gedmo\Sortable\Entity\Repository\SortableRepository")
+ * @ORM\Entity
  * @UniqueFieldableField(message="validation.identifier_already_taken")
  * @ExclusionPolicy("all")
  */
@@ -79,7 +78,6 @@ class ContentTypeField implements FieldableField
 
     /**
      * @var ContentType
-     * @Gedmo\SortableGroup
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", inversedBy="fields")
      */
@@ -87,7 +85,6 @@ class ContentTypeField implements FieldableField
 
     /**
      * @var int
-     * @Gedmo\SortablePosition
      * @ORM\Column(name="weight", type="integer")
      */
     private $weight;
@@ -271,9 +268,9 @@ class ContentTypeField implements FieldableField
     }
 
     /**
-     * @return int
+     * @return null|int
      */
-    public function getWeight(): int
+    public function getWeight()
     {
         return $this->weight;
     }

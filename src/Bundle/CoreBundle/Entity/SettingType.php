@@ -5,7 +5,7 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
-use Gedmo\Mapping\Annotation as Gedmo;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Accessor;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
@@ -74,7 +74,6 @@ class SettingType implements Fieldable
 
     /**
      * @var Domain
-     * @Gedmo\SortableGroup
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="settingTypes")
      */
@@ -121,7 +120,6 @@ class SettingType implements Fieldable
 
     /**
      * @var int
-     * @Gedmo\SortablePosition
      * @ORM\Column(name="weight", type="integer")
      */
     private $weight;
@@ -192,6 +190,20 @@ class SettingType implements Fieldable
         }
 
         return $this;
+    }
+
+    /**
+     * After deserializing a content type, field weights must be initialized.
+     *
+     * @Serializer\PostDeserialize
+     */
+    public function initWeight() {
+        $weight = 0;
+
+        foreach($this->getFields() as $field) {
+            $field->setWeight($weight);
+            $weight++;
+        }
     }
 
     /**
@@ -372,7 +384,10 @@ class SettingType implements Fieldable
         if (!$this->fields->containsKey($field->getIdentifier())) {
             $this->fields->set($field->getIdentifier(), $field);
             $field->setSettingType($this);
-            $field->setWeight($this->fields->count() - 1);
+
+            if($field->getWeight() === null) {
+                $field->setWeight($this->fields->count() - 1);
+            }
         }
 
         return $this;
@@ -495,9 +510,9 @@ class SettingType implements Fieldable
     }
 
     /**
-     * @return int
+     * @return null|int
      */
-    public function getWeight(): int
+    public function getWeight()
     {
         return $this->weight;
     }

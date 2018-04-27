@@ -37,6 +37,5 @@ stof_doctrine_extensions:
     orm:
         default:
             softdeleteable: true
-            sortable: true
             timestampable: true
             loggable: true
