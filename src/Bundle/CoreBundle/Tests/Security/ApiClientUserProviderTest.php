@@ -5,10 +5,13 @@ namespace src\UniteCMS\CoreBundle\Tests\Security;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Security\ApiClientUserProvider;
+use UniteCMS\CoreBundle\Security\ApiKeyUserProvider;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
 class ApiClientUserProviderTest extends TestCase
@@ -19,44 +22,48 @@ class ApiClientUserProviderTest extends TestCase
     public function testLoadValidUser() {
 
         $token = 'ThisIsMyToken';
-        $domain = new Domain();
-        $domain->setIdentifier('my_domain');
+        $organization = new Organization();
+        $organization->setIdentifier('my_organization');
         $cmsManager = $this->createMock(UniteCMSManager::class);
         $cmsManager->expects($this->any())
-            ->method('getDomain')
-            ->willReturn($domain);
+            ->method('getOrganization')
+            ->willReturn($organization);
 
         $entityRepository = new class extends EntityRepository {
+            public $organization;
             public function __construct() {}
             public function findOneBy(array $criteria, array $orderBy = NULL) {
                 if($criteria['token'] === 'ThisIsMyToken') {
-                    $client = new ApiClient();
-                    $client->setDomain($criteria['domain']);
+                    $client = new ApiKey();
                     $client->setToken($criteria['token']);
+                    $orgMember = new OrganizationMember();
+                    $orgMember->setOrganization($this->organization);
+                    $client->addOrganization($orgMember);
                     return $client;
                 }
 
                 return null;
             }
         };
+        $entityRepository->organization = $organization;
 
         $entityManager = $this->createMock(EntityManager::class);
         $entityManager->expects($this->any())
             ->method('getRepository')
             ->willReturn($entityRepository);
 
-        $provider = new ApiClientUserProvider($cmsManager, $entityManager);
-        $this->assertTrue($provider->supportsClass(ApiClient::class));
+        $provider = new ApiKeyUserProvider($cmsManager, $entityManager);
+        $this->assertTrue($provider->supportsClass(ApiKey::class));
 
         // Try to load a user from the provider.
         $apiClient = $provider->loadUserByUsername($token);
         $this->assertEquals($token, $apiClient->getToken());
-        $this->assertEquals($domain, $apiClient->getDomain());
+        $this->assertEquals($organization, $apiClient->getOrganizations()->first()->getOrganization());
 
         // Try to reload a user from the provider.
         $apiClient = $provider->refreshUser($apiClient);
         $this->assertEquals($token, $apiClient->getToken());
-        $this->assertEquals($domain, $apiClient->getDomain());
+        $this->assertEquals($organization, $apiClient->getOrganizations()->first()->getOrganization());
     }
 
     /**
@@ -78,7 +85,7 @@ class ApiClientUserProviderTest extends TestCase
             public function __construct() {}
             public function findOneBy(array $criteria, array $orderBy = NULL) {
                 if($criteria['token'] === 'ThisIsMyToken') {
-                    $client = new ApiClient();
+                    $client = new ApiKey();
                     $client->setDomain($criteria['domain']);
                     $client->setToken($criteria['token']);
                     return $client;
@@ -93,8 +100,8 @@ class ApiClientUserProviderTest extends TestCase
             ->method('getRepository')
             ->willReturn($entityRepository);
 
-        $provider = new ApiClientUserProvider($cmsManager, $entityManager);
-        $this->assertTrue($provider->supportsClass(ApiClient::class));
+        $provider = new ApiKeyUserProvider($cmsManager, $entityManager);
+        $this->assertTrue($provider->supportsClass(ApiKey::class));
 
         // Try to load a user from the provider.
         $provider->loadUserByUsername($token);
@@ -108,7 +115,7 @@ class ApiClientUserProviderTest extends TestCase
     public function testRefreshInvalidUser() {
         $cmsManager = $this->createMock(UniteCMSManager::class);
         $entityManager = $this->createMock(EntityManager::class);
-        $provider = new ApiClientUserProvider($cmsManager, $entityManager);
+        $provider = new ApiKeyUserProvider($cmsManager, $entityManager);
 
         // Try to refresh an non ApiClient.
         $provider->refreshUser(new User());

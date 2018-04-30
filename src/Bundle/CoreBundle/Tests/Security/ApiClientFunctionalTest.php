@@ -7,8 +7,9 @@ use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
@@ -40,12 +41,12 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
     private $domain2;
 
     /**
-     * @var ApiClient $apiClient1
+     * @var ApiKey $apiClient1
      */
     private $apiClient1;
 
     /**
-     * @var ApiClient $apiClient2
+     * @var ApiKey $apiClient2
      */
     private $apiClient2;
 
@@ -93,19 +94,21 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->em->refresh($this->domain2);
 
         // Create Test API Client
-        $this->apiClient1 = new ApiClient();
+        $this->apiClient1 = new ApiKey();
+        $domainMember = new DomainMember();
+        $domainMember->setDomain($this->domain)->setRoles([Domain::ROLE_EDITOR]);
         $this->apiClient1
-            ->setRoles([Domain::ROLE_EDITOR])
             ->setName('API Client 1')
-            ->setDomain($this->domain)
-            ->setToken('xxx');
+            ->setToken('xxx')
+            ->addDomain($domainMember);
 
-        $this->apiClient2 = new ApiClient();
+        $this->apiClient2 = new ApiKey();
+        $domainMember = new DomainMember();
+        $domainMember->setDomain($this->domain2)->setRoles([Domain::ROLE_PUBLIC]);
         $this->apiClient2
-            ->setRoles([Domain::ROLE_PUBLIC])
             ->setName('API Client 2')
-            ->setDomain($this->domain2)
-            ->setToken('yyy');
+            ->setToken('yyy')
+            ->addDomain($domainMember);
 
         $this->em->persist($this->apiClient1);
         $this->em->persist($this->apiClient2);

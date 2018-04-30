@@ -59,11 +59,11 @@ class Organization
     private $domains;
 
     /**
-     * @var User[]
+     * @var Authenticated[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
-    private $users;
+    private $members;
 
     public function __toString()
     {
@@ -73,7 +73,7 @@ class Organization
     public function __construct()
     {
         $this->domains = new ArrayCollection();
-        $this->users = new ArrayCollection();
+        $this->members = new ArrayCollection();
     }
 
     /**
@@ -189,39 +189,55 @@ class Organization
     /**
      * @return OrganizationMember[]|ArrayCollection
      */
+    public function getMembers()
+    {
+        return $this->members;
+    }
+
+    /**
+     * @param OrganizationMember[]|ArrayCollection $members
+     *
+     * @return Organization
+     */
+    public function setMembers($members)
+    {
+        $this->members->clear();
+        foreach ($members as $member) {
+            $this->addMember($member);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param OrganizationMember $member
+     *
+     * @return Organization
+     */
+    public function addMember(OrganizationMember $member)
+    {
+        if (!$this->members->contains($member)) {
+            $this->members->add($member);
+            $member->setOrganization($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return OrganizationMember[]|ArrayCollection
+     */
     public function getUsers()
     {
-        return $this->users;
+        return $this->members->filter(function(OrganizationMember $member){ return $member->getAuthenticated() instanceof User; });
     }
 
     /**
-     * @param OrganizationMember[]|ArrayCollection $users
-     *
-     * @return Organization
+     * @return OrganizationMember[]|ArrayCollection
      */
-    public function setUsers($users)
+    public function getApiKeys()
     {
-        $this->users->clear();
-        foreach ($users as $user) {
-            $this->addUser($user);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param OrganizationMember $user
-     *
-     * @return Organization
-     */
-    public function addUser(OrganizationMember $user)
-    {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->setOrganization($this);
-        }
-
-        return $this;
+        return $this->members->filter(function(OrganizationMember $member){ return $member->getAuthenticated() instanceof ApiKey; });
     }
 }
 

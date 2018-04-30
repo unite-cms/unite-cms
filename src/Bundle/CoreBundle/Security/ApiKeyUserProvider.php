@@ -2,16 +2,15 @@
 
 namespace UniteCMS\CoreBundle\Security;
 
-
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
-class ApiClientUserProvider implements UserProviderInterface
+class ApiKeyUserProvider implements UserProviderInterface
 {
     /**
      * @var UniteCMSManager $uniteCMSManager
@@ -37,23 +36,20 @@ class ApiClientUserProvider implements UserProviderInterface
      *
      * @param string $username The username
      *
-     * @return UserInterface|ApiClient
+     * @return UserInterface|ApiKey
      *
      * @throws TokenNotFoundException if the token is not found
      */
     public function loadUserByUsername($username)
     {
-        if (($domain = $this->uniteCMSManager->getDomain()) && ($token = $this->entityManager->getRepository(
-                'UniteCMSCoreBundle:ApiClient'
-            )->findOneBy(
-                [
-                    'token' => $username,
-                    'domain' => $domain,
-                ]
-            ))) {
-            return $token;
+        if (($token = $this->entityManager->getRepository('UniteCMSCoreBundle:ApiKey')->findOneBy(['token' => $username]))) {
+            foreach($token->getOrganizations() as $oMember) {
+                if($this->uniteCMSManager->getOrganization() === $oMember->getOrganization()) {
+                    return $token;
+                }
+            }
         }
-        throw new TokenNotFoundException("An API Client with token $username was not found for the current domain");
+        throw new TokenNotFoundException("An API Key with token $username was not found for the current organization");
     }
 
     /**
@@ -72,8 +68,8 @@ class ApiClientUserProvider implements UserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof ApiClient) {
-            throw new UnsupportedUserException('This provider ony supports API Clients');
+        if (!$user instanceof ApiKey) {
+            throw new UnsupportedUserException('This provider ony supports API Key');
         }
 
         return $this->loadUserByUsername($user->getToken());
@@ -88,6 +84,6 @@ class ApiClientUserProvider implements UserProviderInterface
      */
     public function supportsClass($class)
     {
-        return $class === ApiClient::class;
+        return $class === ApiKey::class;
     }
 }

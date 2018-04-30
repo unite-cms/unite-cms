@@ -5,7 +5,8 @@ namespace UniteCMS\CoreBundle\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Role\Role;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
+use UniteCMS\CoreBundle\Entity\Authenticated;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
@@ -56,23 +57,13 @@ class SettingVoter extends Voter
             $subject = $subject->getSetting();
         }
 
-        // This voter can decide on a Content subject for APIClients.
-        if ($token->getUser() instanceof ApiClient && ($subject instanceof Setting)) {
-
-            if ($subject->getSettingType()->getDomain() !== $token->getUser()->getDomain()) {
-                return self::ACCESS_ABSTAIN;
-            }
-
-            return $this->checkPermission($attribute, $subject->getSettingType(), $token->getRoles());
-        }
-
         // If the token is not an ApiClient it must be an User.
-        if (!$token->getUser() instanceof User) {
+        if (!$token->getUser() instanceof Authenticated) {
             return self::ACCESS_ABSTAIN;
         }
 
         // Platform admins are allowed to preform all actions.
-        if (in_array(User::ROLE_PLATFORM_ADMIN, $token->getUser()->getRoles())) {
+        if ($token->getUser() instanceof User && in_array(User::ROLE_PLATFORM_ADMIN, $token->getUser()->getRoles())) {
             return self::ACCESS_GRANTED;
         }
 

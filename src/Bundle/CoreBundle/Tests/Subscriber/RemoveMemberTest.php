@@ -65,10 +65,10 @@ class RemoveMemberTest extends DatabaseAwareTestCase
         $this->em->refresh($domain1);
         $this->em->refresh($domain2);
 
-        $this->assertCount(0, $org1->getUsers());
-        $this->assertCount(1, $org2->getUsers());
-        $this->assertCount(0, $org1->getDomains()->first()->getUsers());
-        $this->assertCount(1, $org2->getDomains()->first()->getUsers());
+        $this->assertCount(0, $org1->getMembers());
+        $this->assertCount(1, $org2->getMembers());
+        $this->assertCount(0, $org1->getDomains()->first()->getMembers());
+        $this->assertCount(1, $org2->getDomains()->first()->getMembers());
         $this->assertCount(1, $user->getDomains());
         $this->assertCount(1, $user->getOrganizations());
     }

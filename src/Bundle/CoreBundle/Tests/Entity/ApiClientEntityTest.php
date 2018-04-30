@@ -3,14 +3,14 @@
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use PHPUnit\Framework\TestCase;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 
 class ApiClientEntityTest extends TestCase
 {
     public function testBasicOperations()
     {
-        $apiClient = new ApiClient();
+        $apiClient = new ApiKey();
 
         // test if salt returns null
         $this->assertEquals(null, $apiClient->getSalt());
@@ -18,7 +18,7 @@ class ApiClientEntityTest extends TestCase
 
     public function testSerialization()
     {
-        $apiClient = new ApiClient();
+        $apiClient = new ApiKey();
 
         $datetime = \DateTime::createFromFormat('Y-m-d H:m:s', '2018-01-01 10:10:10');
 
@@ -32,9 +32,7 @@ class ApiClientEntityTest extends TestCase
 
         $apiClient
             ->setName('my_api_client')
-            ->setToken('12345')
-            ->setRoles([Domain::ROLE_ADMINISTRATOR])
-            ->setDomain(new Domain());
+            ->setToken('12345');
 
         // get saved serialized string
         $serialized = $apiClient->serialize();
@@ -47,8 +45,6 @@ class ApiClientEntityTest extends TestCase
                     $datetime,
                     'my_api_client',
                     '12345',
-                    [Domain::ROLE_ADMINISTRATOR],
-                    new Domain(),
                 ]
             )
         );

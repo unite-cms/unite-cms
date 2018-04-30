@@ -10,7 +10,8 @@ namespace UniteCMS\CoreBundle\Security;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
+use UniteCMS\CoreBundle\Entity\Authenticated;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -60,18 +61,13 @@ class DomainVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
-        // This voter can decide on a Domain subject for APIClients.
-        if ($token->getUser() instanceof ApiClient && ($subject instanceof Domain)) {
-            return $this->checkPermission($attribute, $token->getRoles());
-        }
-
         // This voter can decide all permissions for unite users.
-        if (!$token->getUser() instanceof User) {
+        if (!$token->getUser() instanceof Authenticated) {
             return self::ACCESS_ABSTAIN;
         }
 
         // Platform admins are allowed to preform all actions.
-        if (in_array(User::ROLE_PLATFORM_ADMIN, $token->getUser()->getRoles())) {
+        if ($token->getUser() instanceof User && in_array(User::ROLE_PLATFORM_ADMIN, $token->getUser()->getRoles())) {
             return self::ACCESS_GRANTED;
         }
 

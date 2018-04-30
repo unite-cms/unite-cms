@@ -6,7 +6,7 @@ namespace src\UniteCMS\CoreBundle\Tests\Security;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
@@ -53,7 +53,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     private $invite1;
 
     /**
-     * @var ApiClient $apiClient1
+     * @var ApiKey $apiClient1
      */
     private $apiClient1;
 
@@ -161,12 +161,13 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->persist($this->invite1);
 
         // Create Test API Client
-        $this->apiClient1 = new ApiClient();
+        $this->apiClient1 = new ApiKey();
+        $domainEditor = new DomainMember();
+        $domainEditor->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain);
         $this->apiClient1
-            ->setRoles([Domain::ROLE_EDITOR])
             ->setName('API Client 1')
-            ->setDomain($this->domain)
-            ->setToken('xxx');
+            ->setToken('xxx')
+            ->addDomain($domainEditor);
 
         $this->em->persist($this->apiClient1);
 

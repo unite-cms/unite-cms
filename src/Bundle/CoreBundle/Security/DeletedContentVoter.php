@@ -5,7 +5,8 @@ namespace UniteCMS\CoreBundle\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Role\Role;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
+use UniteCMS\CoreBundle\Entity\Authenticated;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\User;
@@ -46,15 +47,7 @@ class DeletedContentVoter extends Voter
         }
 
         // This voter can decide on a Content subject for APIClients of the same domain.
-        if ($token->getUser() instanceof ApiClient) {
-
-            if ($subject->getContentType()->getDomain()->getId() !== $token->getUser()->getDomain()->getId()) {
-                return self::ACCESS_ABSTAIN;
-            }
-
-            $roles = $token->getRoles();
-        } // If the token is not an ApiClient it must be an User.
-        elseif ($token->getUser() instanceof User) {
+        if ($token->getUser() instanceof Authenticated) {
             $roles = $token->getUser()->getDomainRoles($subject->getContentType()->getDomain());
 
             // Platform admins are allowed to preform all actions.

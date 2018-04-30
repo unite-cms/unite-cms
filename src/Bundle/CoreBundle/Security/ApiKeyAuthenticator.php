@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
-class ApiClientAuthenticator extends AbstractGuardAuthenticator
+class ApiKeyAuthenticator extends AbstractGuardAuthenticator
 {
     /**
      * Does the authenticator support the given Request?
@@ -58,13 +58,13 @@ class ApiClientAuthenticator extends AbstractGuardAuthenticator
             return;
         }
 
-        // if a Api Client object, checkCredentials() is called
+        // if a Api key object, checkCredentials() is called
         return $userProvider->loadUserByUsername($credentials);
     }
 
     public function checkCredentials($credentials, UserInterface $user)
     {
-        // We do not have a password for Api clients.
+        // We do not have a password for Api key.
         return true;
     }
 

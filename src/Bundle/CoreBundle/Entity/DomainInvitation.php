@@ -92,9 +92,8 @@ class DomainInvitation
     public function emailNotAlreadyTaken(ExecutionContextInterface $context)
     {
         if ($this->getDomain() && $this->getDomain()->getOrganization()) {
-            foreach ($this->getDomain()->getOrganization()->getUsers() as $organizationMember) {
-                if ($organizationMember->getUser()
-                        ->getEmail() === $this->getEmail()) {
+            foreach ($this->getDomain()->getOrganization()->getMembers() as $organizationMember) {
+                if ($organizationMember->getAuthenticated() instanceof User && $organizationMember->getAuthenticated()->getEmail() === $this->getEmail()) {
                     $context->buildViolation('validation.email_already_member')
                         ->atPath('email')
                         ->addViolation();

@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="organization_member")
  * @ORM\Entity()
- * @UniqueEntity(fields={"organization", "user"}, message="validation.user_already_member_of_organization")
+ * @UniqueEntity(fields={"organization", "authenticated"}, message="validation.user_already_member_of_organization")
  */
 class OrganizationMember
 {
@@ -36,18 +36,18 @@ class OrganizationMember
     /**
      * @var Organization
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="users")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="members")
      * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $organization;
 
     /**
-     * @var User
+     * @var Authenticated
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\User", inversedBy="organizations")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Authenticated", inversedBy="organizations")
      */
-    private $user;
+    private $authenticated;
 
     public function __construct()
     {
@@ -120,21 +120,21 @@ class OrganizationMember
     }
 
     /**
-     * @return User
+     * @return Authenticated
      */
-    public function getUser()
+    public function getAuthenticated()
     {
-        return $this->user;
+        return $this->authenticated;
     }
 
     /**
-     * @param User $user
+     * @param Authenticated $authenticated
      *
      * @return OrganizationMember
      */
-    public function setUser(User $user)
+    public function setAuthenticated(Authenticated $authenticated)
     {
-        $this->user = $user;
+        $this->authenticated = $authenticated;
 
         return $this;
     }

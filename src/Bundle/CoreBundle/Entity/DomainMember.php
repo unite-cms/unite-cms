@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="domain_member")
  * @ORM\Entity()
- * @UniqueEntity(fields={"domain", "user"}, message="validation.user_already_member_of_domain")
+ * @UniqueEntity(fields={"domain", "authenticated"}, message="validation.user_already_member_of_domain")
  */
 class DomainMember
 {
@@ -37,17 +37,17 @@ class DomainMember
      * @var Domain
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Choice(callback="allowedDomains", strict=true, message="validation.domain_organization")
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="users")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="members")
      */
     private $domain;
 
     /**
-     * @var User
+     * @var Authenticated
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\User", inversedBy="domains")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Authenticated", inversedBy="domains")
      */
-    private $user;
+    private $authenticated;
 
     public function __construct()
     {
@@ -66,8 +66,8 @@ class DomainMember
     public function allowedDomains(): array
     {
         $domains = [];
-        if ($this->getUser()) {
-            foreach ($this->getUser()->getOrganizations() as $organizationMember) {
+        if ($this->getAuthenticated()) {
+            foreach ($this->getAuthenticated()->getOrganizations() as $organizationMember) {
                 $domains = array_merge($domains, $organizationMember->getOrganization()->getDomains()->toArray());
             }
         }
@@ -136,21 +136,21 @@ class DomainMember
     }
 
     /**
-     * @return User
+     * @return Authenticated
      */
-    public function getUser()
+    public function getAuthenticated()
     {
-        return $this->user;
+        return $this->authenticated;
     }
 
     /**
-     * @param User $user
+     * @param Authenticated $authenticated
      *
      * @return DomainMember
      */
-    public function setUser(User $user)
+    public function setAuthenticated(Authenticated $authenticated)
     {
-        $this->user = $user;
+        $this->authenticated = $authenticated;
 
         return $this;
     }

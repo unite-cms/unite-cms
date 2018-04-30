@@ -3,10 +3,11 @@
 namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Security\ContentVoter;
 use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
@@ -71,14 +72,16 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $this->content2 = new Content();
         $this->content2->setContentType($this->contentType2);
 
-        $admin = new ApiClient();
-        $admin->setRoles([Domain::ROLE_ADMINISTRATOR]);
-        $admin->setDomain($this->domain1);
+        $admin = new ApiKey();
+        $domainAdmin = new DomainMember();
+        $domainAdmin->setDomain($this->domain1)->setRoles([Domain::ROLE_ADMINISTRATOR]);
+        $admin->addDomain($domainAdmin);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', []);
 
-        $user = new ApiClient();
-        $user->setRoles([Domain::ROLE_EDITOR]);
-        $user->setDomain($this->domain1);
+        $user = new ApiKey();
+        $domainUser = new DomainMember();
+        $domainUser->setDomain($this->domain1)->setRoles([Domain::ROLE_EDITOR]);
+        $user->addDomain($domainUser);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', []);
     }
 

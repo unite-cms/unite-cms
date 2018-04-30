@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 
@@ -57,7 +57,7 @@ class DomainApiClientController extends Controller
      */
     public function createAction(Organization $organization, Domain $domain, Request $request)
     {
-        $apiClient = new ApiClient();
+        $apiClient = new ApiKey();
         $apiClient->setDomain($domain);
         $apiClient->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
 
@@ -114,12 +114,12 @@ class DomainApiClientController extends Controller
      *
      * @param Organization $organization
      * @param Domain $domain
-     * @param ApiClient $client
+     * @param ApiKey $client
      * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function updateAction(Organization $organization, Domain $domain, ApiClient $client, Request $request)
+    public function updateAction(Organization $organization, Domain $domain, ApiKey $client, Request $request)
     {
         $form = $this->createFormBuilder($client)
             ->add(
@@ -174,12 +174,12 @@ class DomainApiClientController extends Controller
      *
      * @param Organization $organization
      * @param Domain $domain
-     * @param ApiClient $client
+     * @param ApiKey $client
      * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function deleteAction(Organization $organization, Domain $domain, ApiClient $client, Request $request)
+    public function deleteAction(Organization $organization, Domain $domain, ApiKey $client, Request $request)
     {
         $form = $this->createFormBuilder()
             ->add(
