@@ -6,6 +6,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Security\SettingVoter;
@@ -70,12 +72,18 @@ class SettingVoterApiClientTest extends SecurityVoterTestCase
         $this->setting2->setSettingType($this->settingType2);
 
         $admin = new ApiKey();
+        $orgMember = new OrganizationMember();
+        $orgMember->setOrganization($this->org1)->setRoles([Organization::ROLE_USER]);
+        $admin->addOrganization($orgMember);
         $adminMember = new DomainMember();
         $adminMember->setRoles([Domain::ROLE_ADMINISTRATOR]);
         $admin->addDomain($adminMember);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', []);
 
         $user = new ApiKey();
+        $orgMember2 = new OrganizationMember();
+        $orgMember2->setOrganization($this->org1)->setRoles([Organization::ROLE_USER]);
+        $admin->addOrganization($orgMember2);
         $userMember = new DomainMember();
         $userMember->setRoles([Domain::ROLE_EDITOR]);
         $user->addDomain($userMember);

@@ -163,6 +163,9 @@ class ControllerTest extends DatabaseAwareTestCase
     {
 
         $apiClient = new ApiKey();
+        $orgMember = new OrganizationMember();
+        $orgMember->setOrganization($this->org1)->setRoles([Organization::ROLE_USER]);
+        $apiClient->addOrganization($orgMember);
         $domainMember = new DomainMember();
         $domainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
         $apiClient
