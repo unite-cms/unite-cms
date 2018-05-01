@@ -16,7 +16,7 @@ use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 
-class DomainApiClientController extends Controller
+class DomainApiKeyController extends Controller
 {
     /**
      * @Route("/")

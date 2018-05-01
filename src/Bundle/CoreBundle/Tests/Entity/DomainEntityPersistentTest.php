@@ -71,7 +71,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $organizationMember = new OrganizationMember();
         $organizationMember->setOrganization($org);
         $domainMember = new DomainMember();
-        $domainMember->setAuthenticated(new User())->getAuthenticated()->addOrganization($organizationMember)->setEmail(
+        $domainMember->setAccessor(new User())->getAccessor()->addOrganization($organizationMember)->setEmail(
             'example@example.com'
         );
         $domain1
@@ -145,7 +145,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             'password'
         )->addOrganization($organizationMember);
         $domainMember = new DomainMember();
-        $domainMember->setAuthenticated($user);
+        $domainMember->setAccessor($user);
         $domain1->setMembers([$domainMember]);
         $domain1->setOrganization($org);
         $errors = $this->container->get('validator')->validate($domain1);
@@ -735,7 +735,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $user1 = new User();
         $user1->setPassword('XXX')->setLastname('XXX')->setFirstname('XXX')->setEmail('org1user@example.com');
         $org1Member = new OrganizationMember();
-        $org1Member->setAuthenticated($user1);
+        $org1Member->setUser($user1);
         $domain->getOrganization()->addMember($org1Member);
 
         $invite2->setEmail('org1user@example.com');

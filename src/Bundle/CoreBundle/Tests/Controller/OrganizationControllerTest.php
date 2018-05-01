@@ -82,7 +82,7 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $org1 = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll()[0];
         $admin = $this->em->getRepository('UniteCMSCoreBundle:User')->findAll()[0];
         $orgMember = new OrganizationMember();
-        $orgMember->setAuthenticated($admin)->setOrganization($org1);
+        $orgMember->setUser($admin)->setOrganization($org1);
         $this->em->persist($orgMember);
         $this->em->flush();
 
@@ -108,7 +108,7 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $org2 = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll()[1];
         $admin = $this->em->getRepository('UniteCMSCoreBundle:User')->findAll()[0];
         $org2Member = new OrganizationMember();
-        $org2Member->setAuthenticated($admin)->setOrganization($org2);
+        $org2Member->setUser($admin)->setOrganization($org2);
         $this->em->persist($org2Member);
         $this->em->flush();
 

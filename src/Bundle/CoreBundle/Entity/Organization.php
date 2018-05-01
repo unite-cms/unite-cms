@@ -54,16 +54,23 @@ class Organization
      * @var Domain[]
      * @Assert\Valid()
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Domain", mappedBy="organization")
+     * @ORM\OneToMany(targetEntity="Domain", mappedBy="organization")
      */
     private $domains;
 
     /**
-     * @var Authenticated[]
+     * @var OrganizationMember[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="OrganizationMember", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $members;
+
+    /**
+     * @var ApiKey[]
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="ApiKey", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
+     */
+    private $apiKeys;
 
     public function __toString()
     {
@@ -74,6 +81,7 @@ class Organization
     {
         $this->domains = new ArrayCollection();
         $this->members = new ArrayCollection();
+        $this->apiKeys = new ArrayCollection();
     }
 
     /**
@@ -225,19 +233,41 @@ class Organization
     }
 
     /**
-     * @return OrganizationMember[]|ArrayCollection
-     */
-    public function getUsers()
-    {
-        return $this->members->filter(function(OrganizationMember $member){ return $member->getAuthenticated() instanceof User; });
-    }
-
-    /**
-     * @return OrganizationMember[]|ArrayCollection
+     * @return ApiKey[]|ArrayCollection
      */
     public function getApiKeys()
     {
-        return $this->members->filter(function(OrganizationMember $member){ return $member->getAuthenticated() instanceof ApiKey; });
+        return $this->apiKeys;
+    }
+
+    /**
+     * @param ApiKey[]|ArrayCollection $apiKeys
+     *
+     * @return Organization
+     */
+    public function setApiKeys($apiKeys)
+    {
+        $this->apiKeys->clear();
+        foreach ($apiKeys as $apiKey) {
+            $this->addApiKey($apiKey);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ApiKey $apiKey
+     *
+     * @return Organization
+     */
+    public function addApiKey(ApiKey $apiKey)
+    {
+        if (!$this->apiKeys->contains($apiKey)) {
+            $this->apiKeys->add($apiKey);
+            $apiKey->setOrganization($this);
+        }
+
+        return $this;
     }
 }
 

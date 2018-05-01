@@ -11,16 +11,15 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\Role\Role;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity
  * @ORM\InheritanceType("JOINED")
- * @ORM\DiscriminatorColumn(name="type", type="string")
+ * @ORM\DiscriminatorColumn(name="accessor_type", type="string")
  * @ORM\DiscriminatorMap({"user" = "User", "api_key" = "ApiKey"})
  */
-abstract class Authenticated implements UserInterface, \Serializable
+abstract class DomainAccessor
 {
     /**
      * @var int
@@ -32,23 +31,15 @@ abstract class Authenticated implements UserInterface, \Serializable
     protected $id;
 
     /**
-     * @var OrganizationMember[]
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="authenticated", cascade={"persist", "remove", "merge"})
-     */
-    protected $organizations;
-
-    /**
      * @var DomainMember[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="authenticated", cascade={"persist", "remove", "merge"})
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="accessor", cascade={"persist", "remove", "merge"})
      */
     protected $domains;
 
     public function __construct()
     {
         $this->domains = new ArrayCollection();
-        $this->organizations = new ArrayCollection();
     }
 
     /**
@@ -62,44 +53,6 @@ abstract class Authenticated implements UserInterface, \Serializable
     }
 
     /**
-     * @return OrganizationMember[]|ArrayCollection
-     */
-    public function getOrganizations()
-    {
-        return $this->organizations;
-    }
-
-    /**
-     * @param OrganizationMember[] $oMembers
-     *
-     * @return Authenticated
-     */
-    public function setOrganizations($oMembers)
-    {
-        $this->organizations->clear();
-        foreach ($oMembers as $oMember) {
-            $this->addOrganization($oMember);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param OrganizationMember $oMember
-     *
-     * @return Authenticated
-     */
-    public function addOrganization(OrganizationMember $oMember)
-    {
-        if (!$this->organizations->contains($oMember)) {
-            $this->organizations->add($oMember);
-            $oMember->setAuthenticated($this);
-        }
-
-        return $this;
-    }
-
-    /**
      * @return DomainMember[]|ArrayCollection
      */
     public function getDomains()
@@ -110,7 +63,7 @@ abstract class Authenticated implements UserInterface, \Serializable
     /**
      * @param DomainMember[] $dMembers
      *
-     * @return Authenticated
+     * @return DomainAccessor
      */
     public function setDomains($dMembers)
     {
@@ -125,13 +78,13 @@ abstract class Authenticated implements UserInterface, \Serializable
     /**
      * @param DomainMember $dMember
      *
-     * @return Authenticated
+     * @return DomainAccessor
      */
     public function addDomain(DomainMember $dMember)
     {
         if (!$this->domains->contains($dMember)) {
             $this->domains->add($dMember);
-            $dMember->setAuthenticated($this);
+            $dMember->setAccessor($this);
         }
 
         return $this;
@@ -155,19 +108,9 @@ abstract class Authenticated implements UserInterface, \Serializable
     }
 
     /**
-     * Returns the roles of the user for a given organization.
+     * Returns all organizations, this accessor has access to.
      *
-     * @param Organization $organization
-     * @return Role[]|string[] The user roles for the organization
+     * @return Organization[]
      */
-    public function getOrganizationRoles(Organization $organization)
-    {
-        foreach ($this->getOrganizations() as $organizationMember) {
-            if ($organizationMember->getOrganization() === $organization) {
-                return $organizationMember->getRoles();
-            }
-        }
-
-        return [];
-    }
+    public abstract function getAccessibleOrganizations() : array;
 }

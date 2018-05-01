@@ -6,7 +6,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Role\Role;
 use UniteCMS\CoreBundle\Entity\ApiKey;
-use UniteCMS\CoreBundle\Entity\Authenticated;
+use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -62,8 +62,8 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        // We can only vote on Authenticated user objects.
-        if (!$token->getUser() instanceof Authenticated) {
+        // We can only vote on DomainAccessor user objects.
+        if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
         }
 

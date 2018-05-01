@@ -209,9 +209,9 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $domainUser = new User();
         $domainUser->setEmail('example@example.com')->setFirstname('Example')->setLastname('Example')->setPassword('XXX');
         $domainUserOrg = new OrganizationMember();
-        $domainUserOrg->setAuthenticated($domainUser)->setOrganization($domain->getOrganization());
+        $domainUserOrg->setUser($domainUser)->setOrganization($domain->getOrganization());
         $domainUserDomain = new DomainMember();
-        $domainUserDomain->setAuthenticated($domainUser)->setDomain($domain);
+        $domainUserDomain->setAccessor($domainUser)->setDomain($domain);
         $this->em->persist($domainUser);
         $this->em->persist($domainUserOrg);
         $this->em->persist($domainUserDomain);
@@ -271,7 +271,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Add this editor to the domain as admin.
         $domainMember = new DomainMember();
-        $domainMember->setDomain($domain)->setAuthenticated($this->editor)->setRoles([Domain::ROLE_EDITOR]);
+        $domainMember->setDomain($domain)->setAccessor($this->editor)->setRoles([Domain::ROLE_EDITOR]);
         $this->em->persist($domainMember);
         $this->em->flush($domainMember);
         $this->em->refresh($domainMember);
@@ -292,7 +292,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Make this domain member an domain administrator.
         $domainMember = $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy([
             'domain' => $domain,
-            'authenticated' => $this->editor,
+            'accessor' => $this->editor,
         ]);
         $domainMember->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR]);
         $this->em->flush($domainMember);

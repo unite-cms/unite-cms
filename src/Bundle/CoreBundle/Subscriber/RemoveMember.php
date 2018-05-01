@@ -20,7 +20,7 @@ class RemoveMember
             // Remove all DomainMemberships for this user.
             foreach ($object->getOrganization()->getDomains() as $domain) {
                 foreach ($domain->getMembers() as $domainMember) {
-                    if ($domainMember->getAuthenticated() === $object->getAuthenticated()) {
+                    if ($domainMember->getAccessor() === $object->getUser()) {
                         $args->getEntityManager()->remove($domainMember);
                     }
                 }

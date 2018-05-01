@@ -43,10 +43,8 @@ class ApiKeyUserProvider implements UserProviderInterface
     public function loadUserByUsername($username)
     {
         if (($token = $this->entityManager->getRepository('UniteCMSCoreBundle:ApiKey')->findOneBy(['token' => $username]))) {
-            foreach($token->getOrganizations() as $oMember) {
-                if($this->uniteCMSManager->getOrganization() === $oMember->getOrganization()) {
-                    return $token;
-                }
+            if($this->uniteCMSManager->getOrganization() === $token->getOrganization()) {
+                return $token;
             }
         }
         throw new TokenNotFoundException("An API Key with token $username was not found for the current organization");

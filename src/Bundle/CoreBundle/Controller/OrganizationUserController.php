@@ -27,7 +27,7 @@ class OrganizationUserController extends Controller
      */
     public function indexAction(Organization $organization)
     {
-        $users = $this->get('knp_paginator')->paginate($organization->getUsers());
+        $users = $this->get('knp_paginator')->paginate($organization->getMembers());
 
         return $this->render(
             'UniteCMSCoreBundle:Organization/User:index.html.twig',

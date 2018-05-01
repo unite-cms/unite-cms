@@ -323,9 +323,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // In this test, we don't care about access checking.
         $admin = new ApiKey();
-        $adminMember = new OrganizationMember();
-        $adminMember->setOrganization($field->getContentType()->getDomain()->getOrganization())->setRoles([Organization::ROLE_ADMINISTRATOR]);
-        $admin->addOrganization($adminMember);
+        $admin->setOrganization($field->getContentType()->getDomain()->getOrganization());
         $this->container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($admin, null, 'api')
         );

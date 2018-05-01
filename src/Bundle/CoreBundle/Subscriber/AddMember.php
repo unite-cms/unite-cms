@@ -17,12 +17,12 @@ class AddMember
         /**
          * @var DomainMember $object
          */
-        if ($object instanceof DomainMember && $object->getAuthenticated() instanceof User) {
+        if ($object instanceof DomainMember && $object->getAccessor() instanceof User) {
 
             // If a user was invited to a domain, that user must also become member of the organization.
             $alreadyMember = false;
 
-            foreach ($object->getAuthenticated()->getOrganizations() as $organizationMember) {
+            foreach ($object->getAccessor()->getOrganizations() as $organizationMember) {
                 if ($object->getDomain()->getOrganization() === $organizationMember->getOrganization()) {
                     $alreadyMember = true;
                 }
@@ -31,7 +31,7 @@ class AddMember
             if (!$alreadyMember) {
                 $organizationMember = new OrganizationMember();
                 $organizationMember->setOrganization($object->getDomain()->getOrganization());
-                $object->getAuthenticated()->addOrganization($organizationMember);
+                $object->getAccessor()->addOrganization($organizationMember);
             }
         }
     }

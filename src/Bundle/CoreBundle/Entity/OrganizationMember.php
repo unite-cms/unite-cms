@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="organization_member")
  * @ORM\Entity()
- * @UniqueEntity(fields={"organization", "authenticated"}, message="validation.user_already_member_of_organization")
+ * @UniqueEntity(fields={"organization", "user"}, message="validation.user_already_member_of_organization")
  */
 class OrganizationMember
 {
@@ -42,12 +42,12 @@ class OrganizationMember
     private $organization;
 
     /**
-     * @var Authenticated
+     * @var User
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Authenticated", inversedBy="organizations")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="organizations")
      */
-    private $authenticated;
+    private $user;
 
     public function __construct()
     {
@@ -120,21 +120,21 @@ class OrganizationMember
     }
 
     /**
-     * @return Authenticated
+     * @return User
      */
-    public function getAuthenticated()
+    public function getUser()
     {
-        return $this->authenticated;
+        return $this->user;
     }
 
     /**
-     * @param Authenticated $authenticated
+     * @param User $user
      *
      * @return OrganizationMember
      */
-    public function setAuthenticated(Authenticated $authenticated)
+    public function setUser(User $user)
     {
-        $this->authenticated = $authenticated;
+        $this->user = $user;
 
         return $this;
     }

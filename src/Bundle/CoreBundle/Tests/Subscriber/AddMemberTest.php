@@ -41,7 +41,7 @@ class AddMemberTest extends DatabaseAwareTestCase
         $this->em->refresh($domain1);
         $this->assertCount(1, $domain1->getMembers());
         $this->assertCount(1, $org1->getMembers());
-        $this->assertEquals($user, $org1->getMembers()->first()->getAuthenticated());
+        $this->assertEquals($user, $org1->getMembers()->first()->getUser());
     }
 
     public function testAddDomainMemberAlreadyInOrganization()
@@ -78,6 +78,6 @@ class AddMemberTest extends DatabaseAwareTestCase
         $this->em->refresh($domain1);
         $this->assertCount(1, $domain1->getMembers());
         $this->assertCount(1, $org1->getMembers());
-        $this->assertEquals($user, $org1->getMembers()->first()->getAuthenticated());
+        $this->assertEquals($user, $org1->getMembers()->first()->getUser());
     }
 }

@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="domain_member")
  * @ORM\Entity()
- * @UniqueEntity(fields={"domain", "authenticated"}, message="validation.user_already_member_of_domain")
+ * @UniqueEntity(fields={"domain", "accessor"}, message="validation.user_already_member_of_domain")
  */
 class DomainMember
 {
@@ -36,18 +36,18 @@ class DomainMember
     /**
      * @var Domain
      * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="allowedDomains", strict=true, message="validation.domain_organization")
+     * @Assert\Choice(callback="possibleDomains", strict=true, message="validation.domain_organization")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="members")
      */
     private $domain;
 
     /**
-     * @var Authenticated
+     * @var DomainAccessor
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Authenticated", inversedBy="domains")
+     * @ORM\ManyToOne(targetEntity="DomainAccessor", inversedBy="domains")
      */
-    private $authenticated;
+    private $accessor;
 
     public function __construct()
     {
@@ -63,12 +63,21 @@ class DomainMember
         return [];
     }
 
-    public function allowedDomains(): array
+    /**
+     * Return possible domains for this domain member. This are the domains from the accessors organizations.
+     * @return array
+     */
+    public function possibleDomains(): array
     {
         $domains = [];
-        if ($this->getAuthenticated()) {
-            foreach ($this->getAuthenticated()->getOrganizations() as $organizationMember) {
-                $domains = array_merge($domains, $organizationMember->getOrganization()->getDomains()->toArray());
+
+        if(!$this->getAccessor()) {
+            return $domains;
+        }
+
+        foreach($this->getAccessor()->getAccessibleOrganizations() as $organization) {
+            foreach($organization->getDomains() as $domain) {
+                $domains[] = $domain;
             }
         }
 
@@ -136,21 +145,21 @@ class DomainMember
     }
 
     /**
-     * @return Authenticated
+     * @return DomainAccessor
      */
-    public function getAuthenticated()
+    public function getAccessor()
     {
-        return $this->authenticated;
+        return $this->accessor;
     }
 
     /**
-     * @param Authenticated $authenticated
+     * @param DomainAccessor $accessor
      *
      * @return DomainMember
      */
-    public function setAuthenticated(Authenticated $authenticated)
+    public function setAccessor(DomainAccessor $accessor)
     {
-        $this->authenticated = $authenticated;
+        $this->accessor = $accessor;
 
         return $this;
     }

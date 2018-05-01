@@ -96,9 +96,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
 
         // Create Test API Client
         $this->apiClient1 = new ApiKey();
-        $orgMember = new OrganizationMember();
-        $orgMember->setOrganization($this->organization)->setRoles([Organization::ROLE_USER]);
-        $this->apiClient1->addOrganization($orgMember);
+        $this->apiClient1->setOrganization($this->organization);
         $domainMember = new DomainMember();
         $domainMember->setDomain($this->domain)->setRoles([Domain::ROLE_EDITOR]);
         $this->apiClient1
@@ -107,9 +105,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
             ->addDomain($domainMember);
 
         $this->apiClient2 = new ApiKey();
-        $orgMember2 = new OrganizationMember();
-        $orgMember2->setOrganization($this->organization)->setRoles([Organization::ROLE_USER]);
-        $this->apiClient2->addOrganization($orgMember2);
+        $this->apiClient2->setOrganization($this->organization);
         $domainMember = new DomainMember();
         $domainMember->setDomain($this->domain2)->setRoles([Domain::ROLE_PUBLIC]);
         $this->apiClient2

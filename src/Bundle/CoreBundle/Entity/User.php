@@ -2,21 +2,23 @@
 
 namespace UniteCMS\CoreBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\Role\Role;
 
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * User
  *
- * @ORM\Table(name="authenticated_user")
+ * @ORM\Table(name="unite_user")
  * @ORM\Entity
  * @UniqueEntity(fields={"email"}, message="validation.email_already_taken")
  * @UniqueEntity(fields={"resetToken"}, message="validation.reset_token_present")
  */
-class User extends Authenticated
+class User extends DomainAccessor implements UserInterface, \Serializable
 {
     const PASSWORD_RESET_TTL = 14400; // Default to 4h
     const ROLE_USER = "ROLE_USER";
@@ -76,9 +78,17 @@ class User extends Authenticated
      */
     protected $resetRequestedAt;
 
+    /**
+     * @var OrganizationMember[]
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"})
+     */
+    protected $organizations;
+
     public function __construct()
     {
         parent::__construct();
+        $this->organizations = new ArrayCollection();
         $this->roles = [self::ROLE_USER];
     }
 
@@ -242,6 +252,75 @@ class User extends Authenticated
     public function getUsername()
     {
         return $this->getEmail();
+    }
+
+    /**
+     * @return OrganizationMember[]|ArrayCollection
+     */
+    public function getOrganizations()
+    {
+        return $this->organizations;
+    }
+
+    /**
+     * @param OrganizationMember[] $oMembers
+     *
+     * @return User
+     */
+    public function setOrganizations($oMembers)
+    {
+        $this->organizations->clear();
+        foreach ($oMembers as $oMember) {
+            $this->addOrganization($oMember);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param OrganizationMember $oMember
+     *
+     * @return User
+     */
+    public function addOrganization(OrganizationMember $oMember)
+    {
+        if (!$this->organizations->contains($oMember)) {
+            $this->organizations->add($oMember);
+            $oMember->setUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns all organizations, this accessor has access to.
+     *
+     * @return Organization[]
+     */
+    public function getAccessibleOrganizations(): array
+    {
+        $organizations = [];
+        foreach($this->getOrganizations() as $organizationMember) {
+            $organizations[] = $organizationMember->getOrganization();
+        }
+        return $organizations;
+    }
+
+    /**
+     * Returns the roles of the user for a given organization.
+     *
+     * @param Organization $organization
+     * @return Role[]|string[] The user roles for the organization
+     */
+    public function getOrganizationRoles(Organization $organization)
+    {
+        foreach ($this->getOrganizations() as $organizationMember) {
+            if (!empty($organization->getId()) && $organizationMember->getOrganization()->getId() === $organization->getId()) {
+                return $organizationMember->getRoles();
+            }
+        }
+
+        return [];
     }
 
     /**

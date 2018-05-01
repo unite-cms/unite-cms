@@ -5,17 +5,19 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * APIKey
  *
- * @ORM\Table(name="authenticated_api_key")
+ * @ORM\Table(name="api_key")
  * @ORM\Entity
- * @UniqueEntity(fields={"token"}, message="validation.token_present")
+ * @UniqueEntity(fields={"token", "organization"}, message="validation.token_present")
+ * @UniqueEntity(fields={"name", "organization"}, message="validation.name_present")
  */
-class ApiKey extends Authenticated
+class ApiKey extends DomainAccessor implements UserInterface, \Serializable
 {
     /**
      * @var string
@@ -33,6 +35,13 @@ class ApiKey extends Authenticated
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;
+
+    /**
+     * @var Organization
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="apiKeys")
+     */
+    private $organization;
 
     /**
      * @var \DateTime $created
@@ -69,6 +78,37 @@ class ApiKey extends Authenticated
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @return Organization
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param Organization $organization
+     *
+     * @return ApiKey
+     */
+    public function setOrganization(Organization $organization)
+    {
+        $this->organization = $organization;
+        $organization->addApiKey($this);
+
+        return $this;
+    }
+
+    /**
+     * Returns all organizations, this accessor has access to.
+     *
+     * @return Organization[]
+     */
+    public function getAccessibleOrganizations(): array
+    {
+        return $this->getOrganization() ? [$this->getOrganization()] : [];
     }
 
     /**

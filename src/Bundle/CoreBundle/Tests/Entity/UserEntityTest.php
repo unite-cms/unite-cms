@@ -55,8 +55,11 @@ class UserEntityTest extends TestCase
     public function testUserSetAndGetOrganizations()
     {
         $org1 = new Organization();
+        $org1->setId(1);
         $org2 = new Organization();
+        $org2->setId(2);
         $org3 = new Organization();
+        $org3->setId(3);
 
         $organizationMember1 = new OrganizationMember();
         $organizationMember1->setOrganization($org1);

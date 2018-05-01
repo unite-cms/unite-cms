@@ -36,9 +36,7 @@ class ApiClientUserProviderTest extends TestCase
                 if($criteria['token'] === 'ThisIsMyToken') {
                     $client = new ApiKey();
                     $client->setToken($criteria['token']);
-                    $orgMember = new OrganizationMember();
-                    $orgMember->setOrganization($this->organization);
-                    $client->addOrganization($orgMember);
+                    $client->setOrganization($this->organization);
                     return $client;
                 }
 
@@ -58,12 +56,12 @@ class ApiClientUserProviderTest extends TestCase
         // Try to load a user from the provider.
         $apiClient = $provider->loadUserByUsername($token);
         $this->assertEquals($token, $apiClient->getToken());
-        $this->assertEquals($organization, $apiClient->getOrganizations()->first()->getOrganization());
+        $this->assertEquals($organization, $apiClient->getOrganization());
 
         // Try to reload a user from the provider.
         $apiClient = $provider->refreshUser($apiClient);
         $this->assertEquals($token, $apiClient->getToken());
-        $this->assertEquals($organization, $apiClient->getOrganizations()->first()->getOrganization());
+        $this->assertEquals($organization, $apiClient->getOrganization());
     }
 
     /**

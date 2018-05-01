@@ -72,18 +72,14 @@ class SettingVoterApiClientTest extends SecurityVoterTestCase
         $this->setting2->setSettingType($this->settingType2);
 
         $admin = new ApiKey();
-        $orgMember = new OrganizationMember();
-        $orgMember->setOrganization($this->org1)->setRoles([Organization::ROLE_USER]);
-        $admin->addOrganization($orgMember);
+        $admin->setOrganization($this->org1);
         $adminMember = new DomainMember();
         $adminMember->setRoles([Domain::ROLE_ADMINISTRATOR]);
         $admin->addDomain($adminMember);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', []);
 
         $user = new ApiKey();
-        $orgMember2 = new OrganizationMember();
-        $orgMember2->setOrganization($this->org1)->setRoles([Organization::ROLE_USER]);
-        $admin->addOrganization($orgMember2);
+        $user->setOrganization($this->org1);
         $userMember = new DomainMember();
         $userMember->setRoles([Domain::ROLE_EDITOR]);
         $user->addDomain($userMember);
