@@ -26,8 +26,7 @@ class TextAreaFieldType extends FieldType
             parent::getFormOptions($field),
               [
                 'attr' => [
-                    'rows' => $field->getSettings()->rows ?? 2,
-                    'style' => 'resize: horizontal;'
+                    'rows' => $field->getSettings()->rows ?? 2
                 ],
               ]
         );
