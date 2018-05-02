@@ -29,7 +29,7 @@ class DomainUserController extends Controller
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -37,7 +37,7 @@ class DomainUserController extends Controller
      */
     public function indexAction(Organization $organization, Domain $domain)
     {
-        $users = $this->get('knp_paginator')->paginate($domain->getUsers());
+        $users = $this->get('knp_paginator')->paginate($domain->getMembers());
         $invites = $this->get('knp_paginator')->paginate($domain->getInvites());
 
         return $this->render(
@@ -56,7 +56,7 @@ class DomainUserController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -70,7 +70,7 @@ class DomainUserController extends Controller
 
         $formCreate = $this->get('form.factory')->createNamedBuilder('create_domain_user', FormType::class, $member)
             ->add(
-                'user',
+                'accessor',
                 EntityType::class,
                 [
                     'label' => 'domain.user.create.form.user',
@@ -79,8 +79,8 @@ class DomainUserController extends Controller
 
                         // Collect all users, that are already in this domain.
                         $domain_users = [0];
-                        foreach ($domain->getUsers() as $domainMember) {
-                            $domain_users[] = $domainMember->getUser()->getId();
+                        foreach ($domain->getMembers() as $domainMember) {
+                            $domain_users[] = $domainMember->getAccessor()->getId();
                         }
 
                         return $er->createQueryBuilder('u')
@@ -196,7 +196,7 @@ class DomainUserController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -247,7 +247,7 @@ class DomainUserController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -292,7 +292,7 @@ class DomainUserController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("invite")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain

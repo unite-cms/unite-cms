@@ -7,13 +7,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Security\OrganizationVoter;
+use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 
 class OrganizationController extends Controller
 {
 
     /**
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::LIST'), 'UniteCMS\\CoreBundle\\Entity\\Organization')")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::LIST'), 'UniteCMS\\CoreBundle\\Entity\\Organization')")
      * @return Response
      */
     public function indexAction()

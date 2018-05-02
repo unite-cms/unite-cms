@@ -23,7 +23,7 @@ class DomainApiKeyController extends Controller
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -48,7 +48,7 @@ class DomainApiKeyController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -86,7 +86,7 @@ class DomainApiKeyController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitecms_core_domainapiclient_index',
+                'unitecms_core_domainapikey_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -110,7 +110,7 @@ class DomainApiKeyController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("client")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -170,7 +170,7 @@ class DomainApiKeyController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -194,7 +194,7 @@ class DomainApiKeyController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitecms_core_domainapiclient_index',
+                'unitecms_core_domainapikey_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),

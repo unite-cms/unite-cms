@@ -8,17 +8,16 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Security\ContentVoter;
-use UniteCMS\CoreBundle\Security\DeletedContentVoter;
-use UniteCMS\CoreBundle\Security\DomainVoter;
-use UniteCMS\CoreBundle\Security\OrganizationVoter;
-use UniteCMS\CoreBundle\Security\SettingVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\DeletedContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
+use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
 class VoterReturnValueTest extends SecurityVoterTestCase
@@ -120,23 +119,4 @@ class VoterReturnValueTest extends SecurityVoterTestCase
         $value->setSettingType($st);
         $contentVoter->voteWithoutCheck($this->token, $value, 'unsupported');
     }
-
-    public function testOrganizationVoterUnknownOrganizationRole() {
-        $organizationVoter = new class extends OrganizationVoter {
-            public function voteWithoutCheck(TokenInterface $token, $subject, $attribute) {
-                return $this->voteOnAttribute($attribute, $subject, $token);
-            }
-        };
-
-        $value = new Organization();
-        $value->setTitle('any');
-
-        /** @var User $user */
-        $user = $this->token->getUser();
-        $member = new OrganizationMember();
-        $member->setOrganization($value)->setRoles(['any_unknown_role']);
-        $user->addOrganization($member);
-        $this->assertEquals(VoterInterface::ACCESS_DENIED, $organizationVoter->voteWithoutCheck($this->token, $value, OrganizationVoter::VIEW));
-    }
-
 }

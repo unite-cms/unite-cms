@@ -14,8 +14,8 @@ use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Security\ContentVoter;
-use UniteCMS\CoreBundle\Security\SettingVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class DomainEntityPersistentTest extends DatabaseAwareTestCase

@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * OrganizationMember
  *
  * @ORM\Table(name="organization_member")
- * @ORM\Entity()
+ * @ORM\Entity
  * @UniqueEntity(fields={"organization", "user"}, message="validation.user_already_member_of_organization")
  */
 class OrganizationMember

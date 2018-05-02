@@ -335,7 +335,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             '{setting_type}' => 'st1',
             '{view}' => 'all',
             '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getId(),
+            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
             '{invite}' => $this->invite1->getId(),
             '{client}' => $this->apiClient1->getId(),
         ];
@@ -439,7 +439,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertAccess('/{organization}/{domain}/client/delete/{client}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess(
             '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
+            false,
             $substitutions,
             ['GET']
         );
@@ -475,7 +475,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             '{setting_type}' => 'st1',
             '{view}' => 'all',
             '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getId(),
+            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
             '{invite}' => $this->invite1->getId(),
             '{client}' => $this->apiClient1->getId(),
         ];
@@ -615,7 +615,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             '{setting_type}' => 'st1',
             '{view}' => 'all',
             '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getId(),
+            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
             '{invite}' => $this->invite1->getId(),
             '{client}' => $this->apiClient1->getId(),
         ];
@@ -650,7 +650,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertAccess('/{organization}/{domain}/client/delete/{client}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess(
             '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
+            false,
             $substitutions,
             ['GET']
         );
@@ -720,7 +720,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertAccess('/{organization}/{domain}/client/delete/{client}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess(
             '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
+            false,
             $substitutions,
             ['GET']
         );
@@ -756,7 +756,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             '{setting_type}' => 'st1',
             '{view}' => 'all',
             '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getId(),
+            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
             '{invite}' => $this->invite1->getId(),
             '{client}' => $this->apiClient1->getId(),
         ];
@@ -861,7 +861,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertAccess('/{organization}/{domain}/client/delete/{client}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess(
             '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
+            false,
             $substitutions,
             ['GET']
         );
@@ -897,7 +897,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             '{setting_type}' => 'st1',
             '{view}' => 'all',
             '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getId(),
+            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
             '{invite}' => $this->invite1->getId(),
             '{client}' => $this->apiClient1->getId(),
         ];

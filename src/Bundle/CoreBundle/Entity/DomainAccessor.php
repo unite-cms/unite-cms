@@ -104,7 +104,7 @@ abstract class DomainAccessor
             }
         }
 
-        return [Domain::ROLE_PUBLIC];
+        return [];
     }
 
     /**

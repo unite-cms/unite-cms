@@ -16,7 +16,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
-use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\View\ViewParameterBag;
 

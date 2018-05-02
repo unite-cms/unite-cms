@@ -3,15 +3,14 @@
 namespace UniteCMS\CollectionFieldBundle\Tests;
 
 use GraphQL\GraphQL;
-use GraphQL\Schema;
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Schema;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
@@ -324,6 +323,10 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         // In this test, we don't care about access checking.
         $admin = new ApiKey();
         $admin->setOrganization($field->getContentType()->getDomain()->getOrganization());
+        $domainMember = new DomainMember();
+        $domainMember->setRoles([Domain::ROLE_ADMINISTRATOR]);
+        $domainMember->setDomain($field->getContentType()->getDomain());
+        $admin->addDomain($domainMember);
         $this->container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($admin, null, 'api')
         );

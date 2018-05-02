@@ -21,7 +21,7 @@ class SettingController extends Controller
      * @Route("/{setting_type}/{locale}", defaults={"locale"=null})
      * @Method({"GET", "POST"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), settingType)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), settingType)")
      *
      * @param SettingType $settingType
      * @param null|string $locale
@@ -99,7 +99,7 @@ class SettingController extends Controller
      * @Route("/{setting_type}/translations/{setting}")
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), setting)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
      *
      * @param SettingType $settingType
      * @param Setting $setting
@@ -121,7 +121,7 @@ class SettingController extends Controller
      * @Route("/{setting_type}/revisions/{setting}")
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), setting)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
      *
      * @param SettingType $settingType
      * @param Setting $setting
@@ -146,7 +146,7 @@ class SettingController extends Controller
      * @Route("/{setting_type}/revisions/{setting}/revert/{version}")
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), setting)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
      *
      * @param SettingType $settingType
      * @param Setting $setting

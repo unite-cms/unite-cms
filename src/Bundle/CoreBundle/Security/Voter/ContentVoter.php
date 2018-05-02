@@ -1,16 +1,13 @@
 <?php
 
-namespace UniteCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Role\Role;
-use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\User;
 
 class ContentVoter extends Voter
 {
@@ -67,27 +64,6 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        // Platform admins are allowed to preform all actions.
-        if ($token->getUser() instanceof User && in_array(User::ROLE_PLATFORM_ADMIN, $token->getUser()->getRoles())) {
-            return self::ACCESS_GRANTED;
-        }
-
-        // All organization admins are allowed to preform all content actions.
-        foreach ($token->getUser()->getOrganizations() as $organizationMember) {
-            if (in_array(Organization::ROLE_ADMINISTRATOR, $organizationMember->getRoles())) {
-
-                if ($subject instanceof ContentType && $subject->getDomain()->getOrganization()->getId(
-                    ) === $organizationMember->getOrganization()->getId()) {
-                    return self::ACCESS_GRANTED;
-                }
-
-                if ($subject instanceof Content && $subject->getContentType()->getDomain()->getOrganization()->getId(
-                    ) === $organizationMember->getOrganization()->getId()) {
-                    return self::ACCESS_GRANTED;
-                }
-            }
-        }
-
         // Check bundle and entity actions on ContentType or Content objects.
         if ($subject instanceof ContentType) {
             return $this->checkPermission(
@@ -115,7 +91,7 @@ class ContentVoter extends Voter
      * @param array $roles
      * @return bool
      */
-    private function checkPermission($attribute, ContentType $contentType, array $roles)
+    protected function checkPermission($attribute, ContentType $contentType, array $roles)
     {
 
         if (empty($contentType->getPermissions()[$attribute])) {

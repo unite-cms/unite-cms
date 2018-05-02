@@ -43,7 +43,7 @@ class ApiKeyUserProvider implements UserProviderInterface
     public function loadUserByUsername($username)
     {
         if (($token = $this->entityManager->getRepository('UniteCMSCoreBundle:ApiKey')->findOneBy(['token' => $username]))) {
-            if($this->uniteCMSManager->getOrganization() === $token->getOrganization()) {
+            if($this->uniteCMSManager->getOrganization()->getId() === $token->getOrganization()->getId()) {
                 return $token;
             }
         }

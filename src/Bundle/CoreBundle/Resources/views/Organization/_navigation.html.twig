@@ -9,7 +9,7 @@
 
 
 
-    {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), unite.organization) %}
+    {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), unite.organization) %}
         <ul class="uk-nav">
             <li class="uk-nav-header">{% trans %}organization.menu.manage.header{% endtrans %}</li>
             <!--li><a href="#">{% trans %}organization.menu.manage.settings{% endtrans %}</a></li-->
@@ -29,7 +29,7 @@
         <li class="uk-nav-header">{% trans %}organization.menu.domains.header{% endtrans %}</li>
 
         {% for domain in unite.organization.domains %}
-            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain) %}
+            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), domain) %}
                 <li>
                     <a href="{{ path('unitecms_core_domain_view', {organization: organization.identifier, domain: domain.identifier}) }}">
                         <i data-feather="globe" class="uk-margin-small-right"></i>
@@ -39,7 +39,7 @@
             {% endif %}
         {% endfor %}
 
-        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization) %}
+        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization) %}
             <li>
                 <a class="uk-text-success" href="{{ url('unitecms_core_domain_create', {organization: unite.organization.identifier}) }}">
                     <i data-feather="plus" class="uk-margin-small-right"></i>

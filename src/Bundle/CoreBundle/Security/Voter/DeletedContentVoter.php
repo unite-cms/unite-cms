@@ -1,6 +1,6 @@
 <?php
 
-namespace UniteCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -11,7 +11,7 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\User;
 
-class DeletedContentVoter extends Voter
+class DeletedContentVoter extends ContentVoter
 {
     /**
      * Determines if the attribute and subject are supported by this voter.
@@ -46,37 +46,18 @@ class DeletedContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        // This voter can decide on a Content subject for APIClients of the same domain.
-        if ($token->getUser() instanceof DomainAccessor) {
-            $roles = $token->getUser()->getDomainRoles($subject->getContentType()->getDomain());
-
-            // Platform admins are allowed to preform all actions.
-            if (in_array(User::ROLE_PLATFORM_ADMIN, $token->getUser()->getRoles())) {
-                return self::ACCESS_GRANTED;
-            }
-
-            // All organization admins are allowed to preform all content actions.
-            foreach ($token->getUser()->getOrganizations() as $organizationMember) {
-                if (in_array(Organization::ROLE_ADMINISTRATOR, $organizationMember->getRoles())) {
-
-                    if ($subject->getContentType()->getDomain()->getOrganization()->getId(
-                        ) === $organizationMember->getOrganization()->getId()) {
-                        return self::ACCESS_GRANTED;
-                    }
-                }
-            }
-        } else {
+        // We can only vote on DomainAccessor user objects.
+        if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
         }
 
-        // User can perform all actions on subject, if he_she can update it.
-        $allowedRoles = $subject->getContentType()->getPermissions()[ContentVoter::UPDATE];
-
-        foreach ($roles as $userRole) {
-            $userRole = ($userRole instanceof Role) ? $userRole->getRole() : $userRole;
-            if (in_array($userRole, $allowedRoles)) {
-                return self::ACCESS_GRANTED;
-            }
+        // Accessors can access deleted content if and only if they are allowed to update it.
+        if(in_array($attribute, self::ENTITY_PERMISSIONS)) {
+            return $this->checkPermission(
+                self::UPDATE,
+                $subject->getContentType(),
+                $token->getUser()->getDomainRoles($subject->getContentType()->getDomain())
+            );
         }
 
         return self::ACCESS_ABSTAIN;

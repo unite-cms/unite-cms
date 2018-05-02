@@ -20,7 +20,7 @@ class OrganizationUserController extends Controller
      * @Route("/")
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @return Response
@@ -43,7 +43,7 @@ class OrganizationUserController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @param OrganizationMember $member
@@ -91,7 +91,7 @@ class OrganizationUserController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @param OrganizationMember $member

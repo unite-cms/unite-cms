@@ -21,22 +21,30 @@ services:
 
 
   # Security voters to check if a user can perform a certain action (like VIEW oder CREATE) on an object (like Content).
-  UniteCMS\CoreBundle\Security\OrganizationVoter:
+  UniteCMS\CoreBundle\Security\Voter\OrganizationVoter:
     public: false
     tags: [security.voter]
 
-  UniteCMS\CoreBundle\Security\DomainVoter:
+  UniteCMS\CoreBundle\Security\Voter\DomainVoter:
     public: false
     tags: [security.voter]
 
-  UniteCMS\CoreBundle\Security\ContentVoter:
+  UniteCMS\CoreBundle\Security\Voter\ContentVoter:
     public: false
     tags: [security.voter]
 
-  UniteCMS\CoreBundle\Security\DeletedContentVoter:
+  UniteCMS\CoreBundle\Security\Voter\DeletedContentVoter:
     public: false
     tags: [security.voter]
 
-  UniteCMS\CoreBundle\Security\SettingVoter:
+  UniteCMS\CoreBundle\Security\Voter\SettingVoter:
+    public: false
+    tags: [security.voter]
+
+  UniteCMS\CoreBundle\Security\Voter\OrganizationAdminVoter:
+    public: false
+    tags: [security.voter]
+
+  UniteCMS\CoreBundle\Security\Voter\PlatformAdminVoter:
     public: false
     tags: [security.voter]

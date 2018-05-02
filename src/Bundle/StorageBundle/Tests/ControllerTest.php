@@ -161,6 +161,10 @@ class ControllerTest extends DatabaseAwareTestCase
 
     public function testPreSignFileUploadWithApiFirewall()
     {
+        # generate new csrf_token
+        $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(
+            StringUtil::fqcnToBlockPrefix(PreSignFormType::class)
+        );
 
         $apiClient = new ApiKey();
         $apiClient->setOrganization($this->org1);
