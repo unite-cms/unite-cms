@@ -15,6 +15,31 @@ class TextAreaTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
     }
 
+    public function testAllowedRowsSetting()
+    {
+        $field = $this->createContentTypeField('textarea');
+        $field->setSettings(
+          new FieldableFieldSettings(
+            [
+              'rows' => 'abc',
+            ]
+          )
+        );
+        $errors = $this->container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.rows', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('validation.nointeger_value', $errors->get(0)->getMessage());
+
+        $field->setSettings(
+          new FieldableFieldSettings(
+            [
+              'rows' => 20,
+            ]
+          )
+        );
+        $this->assertCount(0, $this->container->get('validator')->validate($field));
+    }
+
     public function testContentTypeFieldTypeWithInvalidSettings()
     {
 
