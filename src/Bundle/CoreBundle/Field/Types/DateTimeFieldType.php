@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Bundle\CoreBundle\Field\Types;
+namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use UniteCMS\CoreBundle\Field\FieldType;
