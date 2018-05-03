@@ -54,6 +54,11 @@ class DomainMember
         $this->roles = [Domain::ROLE_EDITOR];
     }
 
+    public function __toString()
+    {
+        return '' . (string)$this->getAccessor();
+    }
+
     public function allowedRoles(): array
     {
         if ($this->getDomain()) {

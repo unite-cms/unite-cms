@@ -33,15 +33,9 @@
                 <div>
                     <ul class="uk-nav uk-dropdown-nav">
                         <li>
-                            <a href="{{ url('unitecms_core_domainuser_index', { organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
+                            <a href="{{ url('unitecms_core_domainmember_index', { organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
                                 <i class="uk-margin-small-right" data-feather="users"></i>
-                                {% trans %}domain.menu.manage.user{% endtrans %}
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('unitecms_core_domainapikey_index', { organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
-                                <i class="uk-margin-small-right" data-feather="hard-drive"></i>
-                                {% trans %}domain.menu.manage.api_clients{% endtrans %}
+                                {% trans %}domain.menu.manage.members{% endtrans %}
                             </a>
                         </li>
                         <li>

@@ -19,6 +19,12 @@
                     {% trans %}organization.menu.manage.user{% endtrans %}
                 </a>
             </li>
+            <li>
+                <a href="{{ url('unitecms_core_organizationapikey_index', {organization: unite.organization.identifier}) }}">
+                    <i data-feather="lock" class="uk-margin-small-right"></i>
+                    {% trans %}organization.menu.manage.api_keys{% endtrans %}
+                </a>
+            </li>
             <!--li><a href="#">{% trans %}organization.menu.manage.delete{% endtrans %}</a></li-->
         </ul>
     {% endif %}

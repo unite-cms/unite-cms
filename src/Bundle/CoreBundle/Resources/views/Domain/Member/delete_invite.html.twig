@@ -1,16 +1,16 @@
 {% extends '@UniteCMSCore/layout.html.twig' %}
-{% block title %}{% trans with { '%user%': member.user|escape } %}domain.user.delete.title{% endtrans %}{% endblock title %}
+{% block title %}{% trans with { '%invite%': invite|escape } %}domain.member.delete_invitation.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitecms_core_domainuser_index', {
+        <a class="back-button" href="{{ path('unitecms_core_domainmember_index', {
             organization: unite.organization.identifier,
             domain: unite.domain.identifier
         }) }}">
             <i data-feather="arrow-left"></i>
         </a>
-        <h2>{% trans with { '%user%': member.user|escape } %}domain.user.delete.headline{% endtrans %}</h2>
+        <h2>{% trans with { '%invite%': invite|escape } %}domain.member.delete_invitation.headline{% endtrans %}</h2>
     </header>
     {{ form(form) }}
 </article>
