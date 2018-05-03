@@ -3,7 +3,11 @@
 {% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 
-    <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    {% if invites|length > 0 %}
+        <article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
+    {% else %}
+        <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    {% endif %}
         <header class="uk-card-header uk-flex">
             <h2 class="uk-flex-1">{% trans %}domain.member.headline{% endtrans %}</h2>
             <a href="{{ path('unitecms_core_domainmember_create', {
@@ -19,19 +23,15 @@
             <table class="uk-table uk-table-justify uk-table-divider">
                 <thead>
                 <tr>
-                    <th>{{ knp_pagination_sortable(members, 'Firstname', 'member.firstname') }}</th>
-                    <th>{{ knp_pagination_sortable(members, 'Lastname', 'member.lastname') }}</th>
-                    <th>{{ knp_pagination_sortable(members, 'Email', 'member.email') }}</th>
-                    <th>{{ knp_pagination_sortable(members, 'Roles', 'member.roles') }}</th>
+                    <th>Identifier</th>
+                    <th>Roles</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for member in members %}
                     <tr>
-                        <td>{{ member.accessor.firstname }}</td>
-                        <td>{{ member.accessor.lastname }}</td>
-                        <td>{{ member.accessor.email }}</td>
+                        <td>{{ member.accessor.label }}</td>
                         <td>{{ member.roles|join(', ') }}</td>
                         <td>
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>

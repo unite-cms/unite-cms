@@ -16,11 +16,13 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 
 class DomainMemberController extends Controller
@@ -69,6 +71,27 @@ class DomainMemberController extends Controller
         $member = new DomainMember();
         $member->setDomain($domain);
 
+        $domain_members = [];
+        foreach ($domain->getMembers() as $domainMember) {
+            $domain_members[] = $domainMember->getAccessor()->getId();
+        }
+
+        $possible_domain_members = $organization->getApiKeys()->filter(
+            function(ApiKey $apiKey) use ($domain_members) {
+                return !in_array($apiKey->getId(), $domain_members);
+            }
+        )->toArray();
+
+        $possible_domain_members = array_merge($possible_domain_members, $organization->getMembers()->filter(
+            function(OrganizationMember $organizationMember) use ($domain_members) {
+                return !in_array($organizationMember->getUser()->getId(), $domain_members);
+            }
+        )->map(
+            function(OrganizationMember $organizationMember){
+                return $organizationMember->getUser();
+            }
+        )->toArray());
+
         $formCreate = $this->get('form.factory')->createNamedBuilder('create_domain_user', FormType::class, $member)
             ->add(
                 'accessor',
@@ -76,29 +99,9 @@ class DomainMemberController extends Controller
                 [
                     'label' => 'domain.member.create.form.user',
                     'class' => DomainAccessor::class,
-                    'query_builder' => function (EntityRepository $er) use ($organization, $domain) {
-
-                        // Collect all users, that are already in this domain.
-                        $domain_members = [0];
-                        foreach ($domain->getMembers() as $domainMember) {
-                            $domain_members[] = $domainMember->getAccessor()->getId();
-                        }
-
-                        // Get users
-                        // TODO
-
-                        // Get api keys
-                        // TODO
-
-                        return $er->createQueryBuilder('a')
-                            ->where('a.organization = :organization')
-                            ->andWhere('a.id NOT IN (:domain_members)')
-                            ->setParameters(
-                                [
-                                    'organization' => $organization,
-                                    'domain_members' => $domain_members,
-                                ]
-                            );
+                    'choices' => $possible_domain_members,
+                    'choice_label' => function(DomainAccessor $accessor) {
+                        return $accessor->label();
                     },
                 ]
             )
@@ -335,7 +338,7 @@ class DomainMemberController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/User:delete_invite.html.twig',
+            'UniteCMSCoreBundle:Domain/Member:delete_invite.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),

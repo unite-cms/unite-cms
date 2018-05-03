@@ -286,8 +286,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // org editors are not allowed to edit domains.
         $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")'));
         $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));
-        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.user') .'")'));
-        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.api_clients') .'")'));
+        $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.members') .'")'));
 
         // Make this domain member an domain administrator.
         $domainMember = $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy([
@@ -300,8 +299,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // org editors, that are domain admins are allowed to edit domain.
         $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.update') .'")'));
-        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.user') .'")'));
-        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.api_clients') .'")'));
+        $this->assertCount(1, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.members') .'")'));
 
         // but are not allowed to delete the domain.
         $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));

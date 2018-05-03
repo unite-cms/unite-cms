@@ -27,6 +27,7 @@
                 <a class="uk-alert-close" uk-close></a>
                 <p>{% trans %}profile.accept_invitation.wrong_user{% endtrans %}</p>
             </div>
+            <p><a class="uk-button uk-button-default" href="{{ path('unitecms_core_organizations') }}">Dashboard</a></p>
         {% elseif alreadyMember %}
             <div class="uk-alert-warning" uk-alert>
                 <a class="uk-alert-close" uk-close></a>
