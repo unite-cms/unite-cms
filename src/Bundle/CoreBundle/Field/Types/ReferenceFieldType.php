@@ -15,14 +15,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\ReferenceType;
+use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Field\FieldType;
-use UniteCMS\CoreBundle\Security\ContentVoter;
-use UniteCMS\CoreBundle\Security\DomainVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 

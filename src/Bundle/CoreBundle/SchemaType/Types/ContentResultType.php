@@ -13,7 +13,7 @@ use GraphQL\Type\Definition\Type;
 use Knp\Component\Pager\Pagination\AbstractPagination;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 

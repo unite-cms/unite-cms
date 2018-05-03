@@ -9,12 +9,13 @@
 namespace UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Controller\GraphQLApiController;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
@@ -180,7 +181,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
     protected $domains = [];
 
     /**
-     * @var ApiClient[] $users
+     * @var ApiKey[] $users
      */
     protected $users = [];
 
@@ -208,9 +209,11 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
                 $this->em->flush($domain);
 
                 foreach($this->roles as $role) {
-                    $this->users[$domain->getIdentifier() . '_' . $role] = new ApiClient();
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setName(ucfirst($role))->setRoles([$role]);
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setDomain($domain);
+                    $domainMember = new DomainMember();
+                    $domainMember->setDomain($domain)->setRoles([$role]);
+                    $this->users[$domain->getIdentifier() . '_' . $role] = new ApiKey();
+                    $this->users[$domain->getIdentifier() . '_' . $role]->setName($domain->getIdentifier() . '_' . $role)->setOrganization($org);
+                    $this->users[$domain->getIdentifier() . '_' . $role]->addDomain($domainMember);
 
                     $this->em->persist($this->users[$domain->getIdentifier() . '_' . $role]);
                     $this->em->flush($this->users[$domain->getIdentifier() . '_' . $role]);
@@ -233,7 +236,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         $reflector->setAccessible(true);
         $reflector->setValue($this->container->get('unite.cms.manager'), true);
 
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'api', $user->getRoles()));
+        $this->container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, 'api', []));
 
         $request = new Request([], [], [
             'organization' => $domain->getOrganization(),

@@ -3,12 +3,12 @@ services:
 
   # For handling API authentication we use the Symfony Guard system and implement a custom Authenticator and
   # UserProvider.
-  unite.cms.api_client_authenticator:
-    class: UniteCMS\CoreBundle\Security\ApiClientAuthenticator
+  unite.cms.api_key_authenticator:
+    class: UniteCMS\CoreBundle\Security\ApiKeyAuthenticator
     public: false
 
-  unite.cms.api_client_provider:
-    class: UniteCMS\CoreBundle\Security\ApiClientUserProvider
+  unite.cms.api_key_provider:
+    class: UniteCMS\CoreBundle\Security\ApiKeyUserProvider
     arguments: ['@unite.cms.manager', '@doctrine.orm.default_entity_manager']
     public: false
 
@@ -21,22 +21,30 @@ services:
 
 
   # Security voters to check if a user can perform a certain action (like VIEW oder CREATE) on an object (like Content).
-  UniteCMS\CoreBundle\Security\OrganizationVoter:
+  UniteCMS\CoreBundle\Security\Voter\OrganizationVoter:
     public: false
     tags: [security.voter]
 
-  UniteCMS\CoreBundle\Security\DomainVoter:
+  UniteCMS\CoreBundle\Security\Voter\DomainVoter:
     public: false
     tags: [security.voter]
 
-  UniteCMS\CoreBundle\Security\ContentVoter:
+  UniteCMS\CoreBundle\Security\Voter\ContentVoter:
     public: false
     tags: [security.voter]
 
-  UniteCMS\CoreBundle\Security\DeletedContentVoter:
+  UniteCMS\CoreBundle\Security\Voter\DeletedContentVoter:
     public: false
     tags: [security.voter]
 
-  UniteCMS\CoreBundle\Security\SettingVoter:
+  UniteCMS\CoreBundle\Security\Voter\SettingVoter:
+    public: false
+    tags: [security.voter]
+
+  UniteCMS\CoreBundle\Security\Voter\OrganizationAdminVoter:
+    public: false
+    tags: [security.voter]
+
+  UniteCMS\CoreBundle\Security\Voter\PlatformAdminVoter:
     public: false
     tags: [security.voter]

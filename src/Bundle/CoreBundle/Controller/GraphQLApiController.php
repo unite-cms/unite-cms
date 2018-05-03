@@ -25,7 +25,7 @@ class GraphQLApiController extends Controller
      *
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), domain)")
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function indexAction(Organization $organization, Domain $domain, Request $request)

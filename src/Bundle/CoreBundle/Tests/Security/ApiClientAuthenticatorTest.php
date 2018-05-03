@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use UniteCMS\CoreBundle\Security\ApiClientAuthenticator;
+use UniteCMS\CoreBundle\Security\ApiKeyAuthenticator;
 
 class ApiClientAuthenticatorTest extends TestCase
 {
@@ -15,7 +15,7 @@ class ApiClientAuthenticatorTest extends TestCase
      */
     public function testGettingCredentialsFromRequest() {
 
-        $authenticator = new ApiClientAuthenticator();
+        $authenticator = new ApiKeyAuthenticator();
 
         // Make sure, APIClient do not support remember_me option.
         $this->assertFalse($authenticator->supportsRememberMe());
@@ -53,7 +53,7 @@ class ApiClientAuthenticatorTest extends TestCase
             ->method('loadUserByUsername')
             ->willReturn('mockResponse');
 
-        $authenticator = new ApiClientAuthenticator();
+        $authenticator = new ApiKeyAuthenticator();
         $this->assertNull($authenticator->getUser(null, $userProvider));
         $this->assertEquals('mockResponse', $authenticator->getUser('any', $userProvider));
     }

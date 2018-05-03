@@ -12,7 +12,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Security\DeletedContentVoter;
 use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
@@ -151,9 +151,9 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content2));
         $this->assertTrue($dm->isGranted([ContentVoter::DELETE], $this->content2));
 
-        $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType1));
+        $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType1));
         $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
-        $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content1));
+        $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content1));
         $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content1));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
@@ -165,9 +165,9 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content1));
         $this->assertTrue($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
-        $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType2));
+        $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType2));
         $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType2));
-        $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content2));
+        $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content2));
         $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content2));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content2));
 
@@ -178,9 +178,9 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content1));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
-        $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType2));
+        $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType2));
         $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType2));
-        $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content2));
+        $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content2));
         $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content2));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content2));
 
@@ -219,7 +219,7 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content2));
         $this->assertTrue($dm->isGranted([ContentVoter::DELETE], $this->content2));
 
-        $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType1));
+        $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType1));
         $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
         $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content1));
         $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content1));
@@ -233,7 +233,7 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content1));
         $this->assertTrue($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
-        $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType2));
+        $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType2));
         $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType2));
         $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content2));
         $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content2));
@@ -246,7 +246,7 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content1));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
-        $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType2));
+        $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType2));
         $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType2));
         $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content2));
         $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content2));

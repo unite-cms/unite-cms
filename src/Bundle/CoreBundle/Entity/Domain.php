@@ -107,7 +107,7 @@ class Domain
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
-    private $users;
+    private $members;
 
     /**
      * @var DomainInvitation[]
@@ -115,13 +115,6 @@ class Domain
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domain", fetch="EXTRA_LAZY")
      */
     private $invites;
-
-    /**
-     * @var ApiClient[]
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\ApiClient", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
-     */
-    private $apiClients;
 
     public function __toString()
     {
@@ -131,11 +124,10 @@ class Domain
     public function __construct()
     {
         $this->roles = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->users = new ArrayCollection();
+        $this->members = new ArrayCollection();
         $this->contentTypes = new ArrayCollection();
         $this->settingTypes = new ArrayCollection();
         $this->invites = new ArrayCollection();
-        $this->apiClients = new ArrayCollection();
     }
 
     /**
@@ -495,36 +487,36 @@ class Domain
     /**
      * @return DomainMember[]|ArrayCollection
      */
-    public function getUsers()
+    public function getMembers()
     {
-        return $this->users;
+        return $this->members;
     }
 
     /**
-     * @param DomainMember[] $users
+     * @param DomainMember[] $members
      *
      * @return Domain
      */
-    public function setUsers($users)
+    public function setMembers($members)
     {
-        $this->users->clear();
-        foreach ($users as $user) {
-            $this->addUser($user);
+        $this->members->clear();
+        foreach ($members as $member) {
+            $this->addMember($member);
         }
 
         return $this;
     }
 
     /**
-     * @param DomainMember $user
+     * @param DomainMember $member
      *
      * @return Domain
      */
-    public function addUser(DomainMember $user)
+    public function addMember(DomainMember $member)
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->setDomain($this);
+        if (!$this->members->contains($member)) {
+            $this->members->add($member);
+            $member->setDomain($this);
         }
 
         return $this;
@@ -536,14 +528,6 @@ class Domain
     public function getInvites()
     {
         return $this->invites;
-    }
-
-    /**
-     * @return ApiClient[]|ArrayCollection
-     */
-    public function getApiClients()
-    {
-        return $this->apiClients;
     }
 }
 

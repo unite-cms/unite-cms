@@ -13,10 +13,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Controller\GraphQLApiController;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
@@ -503,7 +505,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
     protected $domains = [];
 
     /**
-     * @var ApiClient[] $users
+     * @var ApiKey[] $users
      */
     protected $users = [];
 
@@ -531,9 +533,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 $this->em->flush($domain);
 
                 foreach($this->roles as $role) {
-                    $this->users[$domain->getIdentifier() . '_' . $role] = new ApiClient();
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setName(ucfirst($role))->setRoles([$role]);
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setDomain($domain);
+                    $domainMember = new DomainMember();
+                    $domainMember->setDomain($domain)->setRoles([$role]);
+                    $this->users[$domain->getIdentifier() . '_' . $role] = new ApiKey();
+                    $this->users[$domain->getIdentifier() . '_' . $role]->setName(ucfirst($role))->setOrganization($org);
+                    $this->users[$domain->getIdentifier() . '_' . $role]->addDomain($domainMember);
 
                     $this->em->persist($this->users[$domain->getIdentifier() . '_' . $role]);
                     $this->em->flush($this->users[$domain->getIdentifier() . '_' . $role]);
@@ -608,7 +612,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $request->headers->set('X-CSRF-TOKEN', $this->container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))->getValue());
         }
 
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, $firewall, $user->getRoles()));
+        $this->container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, $firewall, []));
 
         $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
         return json_decode($response->getContent());

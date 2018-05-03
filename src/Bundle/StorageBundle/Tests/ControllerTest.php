@@ -14,7 +14,7 @@ use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -161,13 +161,19 @@ class ControllerTest extends DatabaseAwareTestCase
 
     public function testPreSignFileUploadWithApiFirewall()
     {
+        # generate new csrf_token
+        $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(
+            StringUtil::fqcnToBlockPrefix(PreSignFormType::class)
+        );
 
-        $apiClient = new ApiClient();
+        $apiClient = new ApiKey();
+        $apiClient->setOrganization($this->org1);
+        $domainMember = new DomainMember();
+        $domainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
         $apiClient
-            ->setRoles([Domain::ROLE_EDITOR])
             ->setName('API Client 1')
-            ->setDomain($this->domain1)
-            ->setToken('abc');
+            ->setToken('abc')
+            ->addDomain($domainMember);
         $this->em->persist($apiClient);
         $this->em->flush($apiClient);
 

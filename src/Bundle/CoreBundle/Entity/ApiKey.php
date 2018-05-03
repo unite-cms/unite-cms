@@ -3,32 +3,22 @@
 namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\Role\Role;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Gedmo\Mapping\Annotation as Gedmo;
 
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * APIClient
+ * APIKey
  *
- * @ORM\Table(name="api_client")
- * @ORM\Entity()
- * @UniqueEntity(fields={"name"}, message="validation.name_already_taken")
- * @UniqueEntity(fields={"token"}, message="validation.token_present")
+ * @ORM\Table(name="api_key")
+ * @ORM\Entity
+ * @UniqueEntity(fields={"token", "organization"}, message="validation.token_present")
+ * @UniqueEntity(fields={"name", "organization"}, message="validation.name_present")
  */
-class ApiClient implements UserInterface, \Serializable
+class ApiKey extends DomainAccessor implements UserInterface, \Serializable
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="bigint")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
-
     /**
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
@@ -47,6 +37,13 @@ class ApiClient implements UserInterface, \Serializable
     protected $token;
 
     /**
+     * @var Organization
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="apiKeys")
+     */
+    private $organization;
+
+    /**
      * @var \DateTime $created
      *
      * @Gedmo\Timestampable(on="create")
@@ -54,48 +51,9 @@ class ApiClient implements UserInterface, \Serializable
      */
     private $created;
 
-    /**
-     * @var array
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="validation.invalid_selection")
-     * @ORM\Column(name="roles", type="array")
-     */
-    private $roles;
-
-    /**
-     * @var Domain
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="apiClients")
-     */
-    private $domain;
-
-    public function __construct()
-    {
-        $this->roles = [];
-    }
-
-    public function allowedRoles(): array
-    {
-        if ($this->getDomain()) {
-            return $this->getDomain()->getAvailableRolesAsOptions(true);
-        }
-
-        return [];
-    }
-
     public function __toString()
     {
         return ''.$this->getName();
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
     }
 
     /**
@@ -103,7 +61,7 @@ class ApiClient implements UserInterface, \Serializable
      *
      * @param string $name
      *
-     * @return ApiClient
+     * @return ApiKey
      */
     public function setName($name)
     {
@@ -123,29 +81,48 @@ class ApiClient implements UserInterface, \Serializable
     }
 
     /**
-     * @param array $roles
-     *
-     * @return ApiClient
+     * @return Organization
      */
-    public function setRoles(array $roles)
+    public function getOrganization()
     {
-        $this->roles = $roles;
+        return $this->organization;
+    }
+
+    /**
+     * @param Organization $organization
+     *
+     * @return ApiKey
+     */
+    public function setOrganization(Organization $organization)
+    {
+        $this->organization = $organization;
+        $organization->addApiKey($this);
 
         return $this;
     }
 
     /**
-     * Returns the roles granted to the client.
+     * Returns all organizations, this accessor has access to.
      *
-     * @return Role[]|string[] The API client roles
+     * @return Organization[]
      */
-    public function getRoles()
+    public function getAccessibleOrganizations(): array
     {
-        return $this->roles;
+        return $this->getOrganization() ? [$this->getOrganization()] : [];
     }
 
     /**
-     * API Clients do not have a password.
+     * API Keys always returns ROLE_USER.
+     *
+     * @return array
+     */
+    public function getRoles()
+    {
+        return [ User::ROLE_USER ];
+    }
+
+    /**
+     * API Keys do not have a password.
      *
      * @return string|null
      */
@@ -155,9 +132,7 @@ class ApiClient implements UserInterface, \Serializable
     }
 
     /**
-     * Returns the salt that was originally used to encode the password.
-     *
-     * This can return null if the password was not encoded using a salt.
+     * API Keys do not have a salt.
      *
      * @return string|null The salt
      */
@@ -167,9 +142,9 @@ class ApiClient implements UserInterface, \Serializable
     }
 
     /**
-     * Returns the API client name.
+     * Returns the API Key name.
      *
-     * @return string The API client name.
+     * @return string The API Key name.
      */
     public function getUsername()
     {
@@ -177,7 +152,7 @@ class ApiClient implements UserInterface, \Serializable
     }
 
     /**
-     * Removes sensitive data from the API client.
+     * Removes sensitive data from the API Key.
      *
      * This is important if, at any given point, sensitive information like
      * the plain-text password is stored on this object.
@@ -200,8 +175,6 @@ class ApiClient implements UserInterface, \Serializable
                 $this->created,
                 $this->name,
                 $this->token,
-                $this->roles,
-                $this->domain,
             )
         );
     }
@@ -222,29 +195,7 @@ class ApiClient implements UserInterface, \Serializable
             $this->created,
             $this->name,
             $this->token,
-            $this->roles,
-            $this->domain,
             ) = unserialize($serialized);
-    }
-
-    /**
-     * @return Domain
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
-
-    /**
-     * @param Domain
-     *
-     * @return ApiClient
-     */
-    public function setDomain($domain)
-    {
-        $this->domain = $domain;
-
-        return $this;
     }
 
     /**
@@ -258,7 +209,7 @@ class ApiClient implements UserInterface, \Serializable
     /**
      * @param string $token
      *
-     * @return  ApiClient
+     * @return  ApiKey
      */
     public function setToken(string $token)
     {

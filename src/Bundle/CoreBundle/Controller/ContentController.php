@@ -18,7 +18,7 @@ use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Form\WebComponentType;
-use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentController extends Controller
 {
@@ -26,7 +26,7 @@ class ContentController extends Controller
      * @Route("/{content_type}/{view}")
      * @Method({"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::LIST'), view.getContentType())")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), view.getContentType())")
      *
      * @param View $view
      * @return Response
@@ -53,7 +53,7 @@ class ContentController extends Controller
      * @Route("/{content_type}/{view}/create")
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::CREATE'), view.getContentType())")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), view.getContentType())")
      *
      * @param View $view
      * @param Request $request
@@ -141,7 +141,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -213,7 +213,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::DELETE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::DELETE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -464,7 +464,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -511,7 +511,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -622,7 +622,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -693,7 +693,7 @@ class ContentController extends Controller
      * @Method({"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -720,7 +720,7 @@ class ContentController extends Controller
      * @Method({"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
      *
      * @param View $view
      * @param Content $content

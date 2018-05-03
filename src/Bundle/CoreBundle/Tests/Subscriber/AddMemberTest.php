@@ -28,7 +28,7 @@ class AddMemberTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         $this->em->refresh($org1);
-        $this->assertCount(0, $org1->getUsers());
+        $this->assertCount(0, $org1->getMembers());
         // Adding the user to domain1 should also add it to the organization.
 
         $domainMember1 = new DomainMember();
@@ -39,9 +39,9 @@ class AddMemberTest extends DatabaseAwareTestCase
 
         $this->em->refresh($org1);
         $this->em->refresh($domain1);
-        $this->assertCount(1, $domain1->getUsers());
-        $this->assertCount(1, $org1->getUsers());
-        $this->assertEquals($user, $org1->getUsers()->first()->getUser());
+        $this->assertCount(1, $domain1->getMembers());
+        $this->assertCount(1, $org1->getMembers());
+        $this->assertEquals($user, $org1->getMembers()->first()->getUser());
     }
 
     public function testAddDomainMemberAlreadyInOrganization()
@@ -65,7 +65,7 @@ class AddMemberTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         $this->em->refresh($org1);
-        $this->assertCount(1, $org1->getUsers());
+        $this->assertCount(1, $org1->getMembers());
 
         // Adding the user to domain1 should do nothing to the domain.
         $domainMember1 = new DomainMember();
@@ -76,8 +76,8 @@ class AddMemberTest extends DatabaseAwareTestCase
 
         $this->em->refresh($org1);
         $this->em->refresh($domain1);
-        $this->assertCount(1, $domain1->getUsers());
-        $this->assertCount(1, $org1->getUsers());
-        $this->assertEquals($user, $org1->getUsers()->first()->getUser());
+        $this->assertCount(1, $domain1->getMembers());
+        $this->assertCount(1, $org1->getMembers());
+        $this->assertEquals($user, $org1->getMembers()->first()->getUser());
     }
 }

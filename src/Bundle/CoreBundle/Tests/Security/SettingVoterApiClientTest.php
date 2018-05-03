@@ -3,11 +3,14 @@
 namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Security\SettingVoter;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
 class SettingVoterApiClientTest extends SecurityVoterTestCase
@@ -48,19 +51,19 @@ class SettingVoterApiClientTest extends SecurityVoterTestCase
         parent::setUp();
 
         $this->domain1 = new Domain();
-        $this->domain1->setOrganization($this->org1);
+        $this->domain1->setOrganization($this->org1)->setId(1);
 
         $this->domain2 = new Domain();
-        $this->domain2->setOrganization($this->org2);
+        $this->domain2->setOrganization($this->org2)->setId(2);
 
         $this->settingType1 = new SettingType();
-        $this->settingType1->setDomain($this->domain1);
+        $this->settingType1->setDomain($this->domain1)->setId(1);
         $p1 = $this->settingType1->getPermissions();
         $p1[SettingVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
         $this->settingType1->setPermissions($p1);
 
         $this->settingType2 = new SettingType();
-        $this->settingType2->setDomain($this->domain2);
+        $this->settingType2->setDomain($this->domain2)->setId(2);
 
         $this->setting1 = new Setting();
         $this->setting1->setSettingType($this->settingType1);
@@ -68,14 +71,18 @@ class SettingVoterApiClientTest extends SecurityVoterTestCase
         $this->setting2 = new Setting();
         $this->setting2->setSettingType($this->settingType2);
 
-        $admin = new ApiClient();
-        $admin->setRoles([Domain::ROLE_ADMINISTRATOR]);
-        $admin->setDomain($this->domain1);
+        $admin = new ApiKey();
+        $admin->setOrganization($this->org1);
+        $adminMember = new DomainMember();
+        $adminMember->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($this->domain1);
+        $admin->addDomain($adminMember);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', []);
 
-        $user = new ApiClient();
-        $user->setRoles([Domain::ROLE_EDITOR]);
-        $user->setDomain($this->domain1);
+        $user = new ApiKey();
+        $user->setOrganization($this->org1);
+        $userMember = new DomainMember();
+        $userMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain2);
+        $user->addDomain($userMember);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', []);
     }
 

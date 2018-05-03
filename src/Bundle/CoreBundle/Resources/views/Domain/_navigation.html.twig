@@ -12,13 +12,13 @@
                     <li class="uk-nav-header">
                         <a href="{{ path('unitecms_core_domain_index', {organization: unite.organization.identifier}) }}">
                             {{ unite.organization }}
-                            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), unite.organization) %}
+                            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), unite.organization) %}
                                 <i data-feather="settings"></i>
                             {% endif %}
                         </a>
                     </li>
                     {% for d in unite.organization.domains %}
-                        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), d) %}
+                        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), d) %}
                             <li{% if d == unite.domain %} class="uk-active"{% endif %}>
                                 <a href="{{ path('unitecms_core_domain_view', {organization: unite.organization.identifier, domain: d.identifier}) }}">
                                     {{ d }}
@@ -29,19 +29,13 @@
                 </ul>
 
             </div>
-            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), unite.domain) %}
+            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), unite.domain) %}
                 <div>
                     <ul class="uk-nav uk-dropdown-nav">
                         <li>
-                            <a href="{{ url('unitecms_core_domainuser_index', { organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
+                            <a href="{{ url('unitecms_core_domainmember_index', { organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
                                 <i class="uk-margin-small-right" data-feather="users"></i>
-                                {% trans %}domain.menu.manage.user{% endtrans %}
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('unitecms_core_domainapiclient_index', { organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
-                                <i class="uk-margin-small-right" data-feather="hard-drive"></i>
-                                {% trans %}domain.menu.manage.api_clients{% endtrans %}
+                                {% trans %}domain.menu.manage.members{% endtrans %}
                             </a>
                         </li>
                         <li>
@@ -50,7 +44,7 @@
                                 {% trans %}domain.menu.manage.update{% endtrans %}
                             </a>
                         </li>
-                        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::DELETE'), unite.domain) %}
+                        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::DELETE'), unite.domain) %}
                             <li>
                                 <a class="uk-text-danger" href="{{ url('unitecms_core_domain_delete', { organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
                                     <i class="uk-margin-small-right" data-feather="trash-2"></i>
@@ -73,7 +67,7 @@
         {% if unite.domain.contentTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
             {% for type in unite.domain.contentTypes %}
-                {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\ContentVoter::LIST'), type) %}
+                {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), type) %}
                     <li><a {% spaceless %}
                             {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
                                 class="uk-active"
@@ -116,7 +110,7 @@
         {% if unite.domain.settingTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
             {% for type in unite.domain.settingTypes %}
-                {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\SettingVoter::UPDATE'), type) %}
+                {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), type) %}
                     <li><a {% spaceless %}
                                 {% if settingType is defined and settingType.identifier == type.identifier %}
                                     class="uk-active"

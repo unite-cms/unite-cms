@@ -5,8 +5,8 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\Role\Role;
-use Symfony\Component\Security\Core\User\UserInterface;
 
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -14,24 +14,15 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * User
  *
  * @ORM\Table(name="unite_user")
- * @ORM\Entity()
+ * @ORM\Entity
  * @UniqueEntity(fields={"email"}, message="validation.email_already_taken")
  * @UniqueEntity(fields={"resetToken"}, message="validation.reset_token_present")
  */
-class User implements UserInterface, \Serializable
+class User extends DomainAccessor implements UserInterface, \Serializable
 {
     const PASSWORD_RESET_TTL = 14400; // Default to 4h
     const ROLE_USER = "ROLE_USER";
     const ROLE_PLATFORM_ADMIN = "ROLE_PLATFORM_ADMIN";
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="bigint")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
 
     /**
      * @var string
@@ -74,20 +65,6 @@ class User implements UserInterface, \Serializable
     private $roles;
 
     /**
-     * @var OrganizationMember[]
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"})
-     */
-    private $organizations;
-
-    /**
-     * @var DomainMember[]
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="user", cascade={"persist", "remove", "merge"})
-     */
-    private $domains;
-
-    /**
      * @var string
      * @Assert\Length(max="180", maxMessage="validation.too_long")
      * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="validation.invalid_characters")
@@ -101,26 +78,23 @@ class User implements UserInterface, \Serializable
      */
     protected $resetRequestedAt;
 
+    /**
+     * @var OrganizationMember[]
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"})
+     */
+    protected $organizations;
+
     public function __construct()
     {
-        $this->roles = [self::ROLE_USER];
-        $this->domains = new ArrayCollection();
+        parent::__construct();
         $this->organizations = new ArrayCollection();
+        $this->roles = [self::ROLE_USER];
     }
 
     public function __toString()
     {
         return ''.$this->getFirstname().' '.$this->getLastname();
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
     }
 
     /**
@@ -234,40 +208,6 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Returns the roles of the user for a given domain.
-     *
-     * @param Domain $domain
-     * @return Role[]|string[] The user roles for the domain
-     */
-    public function getDomainRoles(Domain $domain)
-    {
-        foreach ($this->getDomains() as $domainMember) {
-            if (!empty($domain->getId()) && $domainMember->getDomain()->getId() === $domain->getId()) {
-                return $domainMember->getRoles();
-            }
-        }
-
-        return [Domain::ROLE_PUBLIC];
-    }
-
-    /**
-     * Returns the roles of the user for a given organization.
-     *
-     * @param Organization $organization
-     * @return Role[]|string[] The user roles for the organization
-     */
-    public function getOrganizationRoles(Organization $organization)
-    {
-        foreach ($this->getOrganizations() as $organizationMember) {
-            if ($organizationMember->getOrganization() === $organization) {
-                return $organizationMember->getRoles();
-            }
-        }
-
-        return [];
-    }
-
-    /**
      * Returns the password used to authenticate the user.
      *
      * This should be the encoded password. On authentication, a plain-text
@@ -312,6 +252,75 @@ class User implements UserInterface, \Serializable
     public function getUsername()
     {
         return $this->getEmail();
+    }
+
+    /**
+     * @return OrganizationMember[]|ArrayCollection
+     */
+    public function getOrganizations()
+    {
+        return $this->organizations;
+    }
+
+    /**
+     * @param OrganizationMember[] $oMembers
+     *
+     * @return User
+     */
+    public function setOrganizations($oMembers)
+    {
+        $this->organizations->clear();
+        foreach ($oMembers as $oMember) {
+            $this->addOrganization($oMember);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param OrganizationMember $oMember
+     *
+     * @return User
+     */
+    public function addOrganization(OrganizationMember $oMember)
+    {
+        if (!$this->organizations->contains($oMember)) {
+            $this->organizations->add($oMember);
+            $oMember->setUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns all organizations, this accessor has access to.
+     *
+     * @return Organization[]
+     */
+    public function getAccessibleOrganizations(): array
+    {
+        $organizations = [];
+        foreach($this->getOrganizations() as $organizationMember) {
+            $organizations[] = $organizationMember->getOrganization();
+        }
+        return $organizations;
+    }
+
+    /**
+     * Returns the roles of the user for a given organization.
+     *
+     * @param Organization $organization
+     * @return Role[]|string[] The user roles for the organization
+     */
+    public function getOrganizationRoles(Organization $organization)
+    {
+        foreach ($this->getOrganizations() as $organizationMember) {
+            if (!empty($organization->getId()) && $organizationMember->getOrganization()->getId() === $organization->getId()) {
+                return $organizationMember->getRoles();
+            }
+        }
+
+        return [];
     }
 
     /**
@@ -363,82 +372,6 @@ class User implements UserInterface, \Serializable
             $this->lastname,
             $this->roles,
             ) = unserialize($serialized);
-    }
-
-    /**
-     * @return OrganizationMember[]|ArrayCollection
-     */
-    public function getOrganizations()
-    {
-        return $this->organizations;
-    }
-
-    /**
-     * @param OrganizationMember[] $organizations
-     *
-     * @return User
-     */
-    public function setOrganizations($organizations)
-    {
-        $this->organizations->clear();
-        foreach ($organizations as $organization) {
-            $this->addOrganization($organization);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param OrganizationMember $organization
-     *
-     * @return User
-     */
-    public function addOrganization(OrganizationMember $organization)
-    {
-        if (!$this->organizations->contains($organization)) {
-            $this->organizations->add($organization);
-            $organization->setUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return DomainMember[]|ArrayCollection
-     */
-    public function getDomains()
-    {
-        return $this->domains;
-    }
-
-    /**
-     * @param DomainMember[] $domains
-     *
-     * @return User
-     */
-    public function setDomains($domains)
-    {
-        $this->domains->clear();
-        foreach ($domains as $domain) {
-            $this->addDomain($domain);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param DomainMember $domain
-     *
-     * @return User
-     */
-    public function addDomain(DomainMember $domain)
-    {
-        if (!$this->domains->contains($domain)) {
-            $this->domains->add($domain);
-            $domain->setUser($this);
-        }
-
-        return $this;
     }
 
     /**

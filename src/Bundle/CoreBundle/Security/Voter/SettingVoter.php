@@ -1,11 +1,12 @@
 <?php
 
-namespace UniteCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Role\Role;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\ApiKey;
+use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
@@ -52,48 +53,18 @@ class SettingVoter extends Voter
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
         // We can also vote on SettingTypes since there is exactly one setting per settingType.
-        if ($subject instanceof SettingType) {
-            $subject = $subject->getSetting();
-        }
-
-        // This voter can decide on a Content subject for APIClients.
-        if ($token->getUser() instanceof ApiClient && ($subject instanceof Setting)) {
-
-            if ($subject->getSettingType()->getDomain() !== $token->getUser()->getDomain()) {
-                return self::ACCESS_ABSTAIN;
-            }
-
-            return $this->checkPermission($attribute, $subject->getSettingType(), $token->getRoles());
+        if ($subject instanceof Setting) {
+            $subject = $subject->getSettingType();
         }
 
         // If the token is not an ApiClient it must be an User.
-        if (!$token->getUser() instanceof User) {
+        if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
         }
 
-        // Platform admins are allowed to preform all actions.
-        if (in_array(User::ROLE_PLATFORM_ADMIN, $token->getUser()->getRoles())) {
-            return self::ACCESS_GRANTED;
-        }
-
-        // All organization admins are allowed to preform all setting actions.
-        foreach ($token->getUser()->getOrganizations() as $organizationMember) {
-            if (in_array(Organization::ROLE_ADMINISTRATOR, $organizationMember->getRoles())) {
-
-                if ($subject instanceof Setting && $subject->getSettingType()->getDomain()->getOrganization()->getId(
-                    ) === $organizationMember->getOrganization()->getId()) {
-                    return self::ACCESS_GRANTED;
-                }
-            }
-        }
-
         // Check entity actions on Setting objects.
-        if ($subject instanceof Setting) {
-            return $this->checkPermission(
-                $attribute,
-                $subject->getSettingType(),
-                $token->getUser()->getDomainRoles($subject->getSettingType()->getDomain())
-            );
+        if ($subject instanceof SettingType) {
+            return $this->checkPermission($attribute, $subject, $token->getUser()->getDomainRoles($subject->getDomain()));
         }
 
         return self::ACCESS_ABSTAIN;
@@ -107,7 +78,7 @@ class SettingVoter extends Voter
      * @param array $roles
      * @return bool
      */
-    private function checkPermission($attribute, SettingType $settingType, array $roles)
+    protected function checkPermission($attribute, SettingType $settingType, array $roles)
     {
 
         if (empty($settingType->getPermissions()[$attribute])) {

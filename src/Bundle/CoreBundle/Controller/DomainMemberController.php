@@ -16,20 +16,23 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 
-class DomainUserController extends Controller
+class DomainMemberController extends Controller
 {
     /**
      * @Route("/")
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -37,15 +40,15 @@ class DomainUserController extends Controller
      */
     public function indexAction(Organization $organization, Domain $domain)
     {
-        $users = $this->get('knp_paginator')->paginate($domain->getUsers());
+        $members = $this->get('knp_paginator')->paginate($domain->getMembers());
         $invites = $this->get('knp_paginator')->paginate($domain->getInvites());
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/User:index.html.twig',
+            'UniteCMSCoreBundle:Domain/Member:index.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
-                'users' => $users,
+                'members' => $members,
                 'invites' => $invites,
             ]
         );
@@ -56,7 +59,7 @@ class DomainUserController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -68,31 +71,37 @@ class DomainUserController extends Controller
         $member = new DomainMember();
         $member->setDomain($domain);
 
+        $domain_members = [];
+        foreach ($domain->getMembers() as $domainMember) {
+            $domain_members[] = $domainMember->getAccessor()->getId();
+        }
+
+        $possible_domain_members = $organization->getApiKeys()->filter(
+            function(ApiKey $apiKey) use ($domain_members) {
+                return !in_array($apiKey->getId(), $domain_members);
+            }
+        )->toArray();
+
+        $possible_domain_members = array_merge($possible_domain_members, $organization->getMembers()->filter(
+            function(OrganizationMember $organizationMember) use ($domain_members) {
+                return !in_array($organizationMember->getUser()->getId(), $domain_members);
+            }
+        )->map(
+            function(OrganizationMember $organizationMember){
+                return $organizationMember->getUser();
+            }
+        )->toArray());
+
         $formCreate = $this->get('form.factory')->createNamedBuilder('create_domain_user', FormType::class, $member)
             ->add(
-                'user',
+                'accessor',
                 EntityType::class,
                 [
-                    'label' => 'domain.user.create.form.user',
-                    'class' => User::class,
-                    'query_builder' => function (EntityRepository $er) use ($organization, $domain) {
-
-                        // Collect all users, that are already in this domain.
-                        $domain_users = [0];
-                        foreach ($domain->getUsers() as $domainMember) {
-                            $domain_users[] = $domainMember->getUser()->getId();
-                        }
-
-                        return $er->createQueryBuilder('u')
-                            ->leftJoin('u.organizations', 'o')
-                            ->where('o.organization = :organization')
-                            ->andWhere('u.id NOT IN (:domain_users)')
-                            ->setParameters(
-                                [
-                                    'organization' => $organization,
-                                    'domain_users' => $domain_users,
-                                ]
-                            );
+                    'label' => 'domain.member.create.form.user',
+                    'class' => DomainAccessor::class,
+                    'choices' => $possible_domain_members,
+                    'choice_label' => function(DomainAccessor $accessor) {
+                        return $accessor->label();
                     },
                 ]
             )
@@ -100,12 +109,12 @@ class DomainUserController extends Controller
                 'roles',
                 ChoiceType::class,
                 [
-                    'label' => 'domain.user.create.form.roles',
+                    'label' => 'domain.member.create.form.roles',
                     'multiple' => true,
                     'choices' => $domain->getAvailableRolesAsOptions(),
                 ]
             )
-            ->add('submit', SubmitType::class, ['label' => 'domain.user.create.form.submit'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.member.create.form.submit'])
             ->getForm();
 
         $formCreate->handleRequest($request);
@@ -115,7 +124,7 @@ class DomainUserController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitecms_core_domainuser_index',
+                'unitecms_core_domainmember_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -129,17 +138,17 @@ class DomainUserController extends Controller
         $invitation->setDomain($domain);
 
         $formInvite = $this->get('form.factory')->createNamedBuilder('invite_domain_user', FormType::class, $invitation)
-            ->add('email', EmailType::class, ['label' => 'domain.user.invite.form.email',])
+            ->add('email', EmailType::class, ['label' => 'domain.member.invite.form.email',])
             ->add(
                 'roles',
                 ChoiceType::class,
                 [
-                    'label' => 'domain.user.invite.form.roles',
+                    'label' => 'domain.member.invite.form.roles',
                     'multiple' => true,
                     'choices' => $domain->getAvailableRolesAsOptions(),
                 ]
             )
-            ->add('submit', SubmitType::class, ['label' => 'domain.user.invite.form.submit'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.member.invite.form.submit'])
             ->getForm();
 
         $formInvite->handleRequest($request);
@@ -171,7 +180,7 @@ class DomainUserController extends Controller
             $this->get('mailer')->send($message);
 
             return $this->redirectToRoute(
-                'unitecms_core_domainuser_index',
+                'unitecms_core_domainmember_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -180,7 +189,7 @@ class DomainUserController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/User:create.html.twig',
+            'UniteCMSCoreBundle:Domain/Member:create.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -196,7 +205,7 @@ class DomainUserController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -222,7 +231,7 @@ class DomainUserController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitecms_core_domainuser_index',
+                'unitecms_core_domainmember_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -231,7 +240,7 @@ class DomainUserController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/User:update.html.twig',
+            'UniteCMSCoreBundle:Domain/Member:update.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -247,7 +256,7 @@ class DomainUserController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -267,7 +276,7 @@ class DomainUserController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitecms_core_domainuser_index',
+                'unitecms_core_domainmember_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -276,7 +285,7 @@ class DomainUserController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/User:delete.html.twig',
+            'UniteCMSCoreBundle:Domain/Member:delete.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -292,7 +301,7 @@ class DomainUserController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @ParamConverter("invite")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -311,7 +320,7 @@ class DomainUserController extends Controller
             ->add(
                 'submit',
                 SubmitType::class,
-                ['label' => 'domain.user.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']]
+                ['label' => 'domain.member.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']]
             )->getForm();
         $form->handleRequest($request);
 
@@ -320,7 +329,7 @@ class DomainUserController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute(
-                'unitecms_core_domainuser_index',
+                'unitecms_core_domainmember_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
@@ -329,7 +338,7 @@ class DomainUserController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/User:delete_invite.html.twig',
+            'UniteCMSCoreBundle:Domain/Member:delete_invite.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),

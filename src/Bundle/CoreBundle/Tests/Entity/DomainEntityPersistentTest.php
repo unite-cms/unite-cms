@@ -14,8 +14,8 @@ use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Security\ContentVoter;
-use UniteCMS\CoreBundle\Security\SettingVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class DomainEntityPersistentTest extends DatabaseAwareTestCase
@@ -71,7 +71,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $organizationMember = new OrganizationMember();
         $organizationMember->setOrganization($org);
         $domainMember = new DomainMember();
-        $domainMember->setUser(new User())->getUser()->addOrganization($organizationMember)->setEmail(
+        $domainMember->setAccessor(new User())->getAccessor()->addOrganization($organizationMember)->setEmail(
             'example@example.com'
         );
         $domain1
@@ -81,7 +81,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             ->setOrganization($org)
             ->addContentType(new ContentType())
             ->addSettingType(new SettingType())
-            ->addUser($domainMember);
+            ->addMember($domainMember);
 
 
         $domain1->setRoles(
@@ -101,7 +101,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain1->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_PUBLIC]);
 
         // Try to test invalid ContentType.
-        $domain1->getOrganization()->setUsers([]);
+        $domain1->getOrganization()->setMembers([]);
         $domain1->getOrganization()->setIdentifier('domain_org1')->setTitle('Domain Org 1');
         $domain1->getContentTypes()->first()->setPermissions(
             [
@@ -133,7 +133,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain1->getSettingTypes()->first()->setIdentifier('domain_set1')->setTitle('Domain Set 1');
         $errors = $this->container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
-        $this->assertStringStartsWith('users', $errors->get(0)->getPropertyPath());
+        $this->assertStringStartsWith('members', $errors->get(0)->getPropertyPath());
 
         // Test valid Domain.
         $user = new User();
@@ -145,14 +145,14 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             'password'
         )->addOrganization($organizationMember);
         $domainMember = new DomainMember();
-        $domainMember->setUser($user);
-        $domain1->setUsers([$domainMember]);
+        $domainMember->setAccessor($user);
+        $domain1->setMembers([$domainMember]);
         $domain1->setOrganization($org);
         $errors = $this->container->get('validator')->validate($domain1);
         $this->assertCount(0, $errors);
 
         // Persist the domain.
-        $domain1->setUsers([])->setContentTypes([])->setSettingTypes([]);
+        $domain1->setMembers([])->setContentTypes([])->setSettingTypes([]);
         $this->em->persist($domain1->getOrganization());
         $this->em->persist($domain1);
         $this->em->flush($domain1);
@@ -736,7 +736,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $user1->setPassword('XXX')->setLastname('XXX')->setFirstname('XXX')->setEmail('org1user@example.com');
         $org1Member = new OrganizationMember();
         $org1Member->setUser($user1);
-        $domain->getOrganization()->addUser($org1Member);
+        $domain->getOrganization()->addMember($org1Member);
 
         $invite2->setEmail('org1user@example.com');
         $invite2->setDomain($domain);

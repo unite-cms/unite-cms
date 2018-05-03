@@ -54,16 +54,23 @@ class Organization
      * @var Domain[]
      * @Assert\Valid()
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Domain", mappedBy="organization")
+     * @ORM\OneToMany(targetEntity="Domain", mappedBy="organization")
      */
     private $domains;
 
     /**
-     * @var User[]
+     * @var OrganizationMember[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="OrganizationMember", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
-    private $users;
+    private $members;
+
+    /**
+     * @var ApiKey[]
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="ApiKey", mappedBy="organization", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
+     */
+    private $apiKeys;
 
     public function __toString()
     {
@@ -73,7 +80,8 @@ class Organization
     public function __construct()
     {
         $this->domains = new ArrayCollection();
-        $this->users = new ArrayCollection();
+        $this->members = new ArrayCollection();
+        $this->apiKeys = new ArrayCollection();
     }
 
     /**
@@ -189,36 +197,74 @@ class Organization
     /**
      * @return OrganizationMember[]|ArrayCollection
      */
-    public function getUsers()
+    public function getMembers()
     {
-        return $this->users;
+        return $this->members;
     }
 
     /**
-     * @param OrganizationMember[]|ArrayCollection $users
+     * @param OrganizationMember[]|ArrayCollection $members
      *
      * @return Organization
      */
-    public function setUsers($users)
+    public function setMembers($members)
     {
-        $this->users->clear();
-        foreach ($users as $user) {
-            $this->addUser($user);
+        $this->members->clear();
+        foreach ($members as $member) {
+            $this->addMember($member);
         }
 
         return $this;
     }
 
     /**
-     * @param OrganizationMember $user
+     * @param OrganizationMember $member
      *
      * @return Organization
      */
-    public function addUser(OrganizationMember $user)
+    public function addMember(OrganizationMember $member)
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->setOrganization($this);
+        if (!$this->members->contains($member)) {
+            $this->members->add($member);
+            $member->setOrganization($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return ApiKey[]|ArrayCollection
+     */
+    public function getApiKeys()
+    {
+        return $this->apiKeys;
+    }
+
+    /**
+     * @param ApiKey[]|ArrayCollection $apiKeys
+     *
+     * @return Organization
+     */
+    public function setApiKeys($apiKeys)
+    {
+        $this->apiKeys->clear();
+        foreach ($apiKeys as $apiKey) {
+            $this->addApiKey($apiKey);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ApiKey $apiKey
+     *
+     * @return Organization
+     */
+    public function addApiKey(ApiKey $apiKey)
+    {
+        if (!$this->apiKeys->contains($apiKey)) {
+            $this->apiKeys->add($apiKey);
+            $apiKey->setOrganization($this);
         }
 
         return $this;

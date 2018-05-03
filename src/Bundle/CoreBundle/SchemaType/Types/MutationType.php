@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
-use UniteCMS\CoreBundle\Security\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 

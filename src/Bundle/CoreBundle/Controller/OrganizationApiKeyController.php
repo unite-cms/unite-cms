@@ -1,0 +1,180 @@
+<?php
+
+namespace UniteCMS\CoreBundle\Controller;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use UniteCMS\CoreBundle\Entity\ApiKey;
+use UniteCMS\CoreBundle\Entity\Organization;
+
+class OrganizationApiKeyController extends Controller
+{
+    /**
+     * @Route("/")
+     * @Method({"GET"})
+     * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
+     *
+     * @param Organization $organization
+     * @return Response
+     */
+    public function indexAction(Organization $organization)
+    {
+        $apiKeys = $this->get('knp_paginator')->paginate($organization->getApiKeys());
+
+        return $this->render(
+            'UniteCMSCoreBundle:Organization/ApiKey:index.html.twig',
+            [
+                'organization' => $organization,
+                'apiKeys' => $apiKeys,
+            ]
+        );
+    }
+
+    /**
+     * @Route("/create")
+     * @Method({"GET", "POST"})
+     * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
+     *
+     * @param Organization $organization
+     * @param Request $request
+     * @return Response
+     */
+    public function createAction(Organization $organization, Request $request)
+    {
+        $apiKey = new ApiKey();
+        $apiKey->setOrganization($organization);
+        $apiKey->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
+
+        $form = $this->createFormBuilder($apiKey)
+            ->add(
+                'name',
+                TextType::class,
+                ['label' => 'organization.api_key.create.form.name', 'required' => true]
+            )
+            ->add('submit', SubmitType::class, ['label' => 'organization.api_key.create.form.submit'])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->persist($apiKey);
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute(
+                'unitecms_core_organizationapikey_index',
+                [
+                    'organization' => $organization->getIdentifier(),
+                ]
+            );
+        }
+
+        return $this->render(
+            'UniteCMSCoreBundle:Organization/ApiKey:create.html.twig',
+            [
+                'organization' => $organization,
+                'form' => $form->createView(),
+            ]
+        );
+    }
+
+    /**
+     * @Route("/update/{apiKey}")
+     * @Method({"GET", "POST"})
+     * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
+     * @ParamConverter("apiKey")
+     *
+     * @param Organization $organization
+     * @param ApiKey $apiKey
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function updateAction(Organization $organization, ApiKey $apiKey, Request $request)
+    {
+        $form = $this->createFormBuilder($apiKey)
+            ->add(
+                'name',
+                TextType::class,
+                ['label' => 'organization.api_key.update.form.name', 'required' => true]
+            )
+            ->add('submit', SubmitType::class, ['label' => 'organization.api_key.update.form.submit'])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute(
+                'unitecms_core_organizationapikey_index',
+                [
+                    'organization' => $organization->getIdentifier(),
+                ]
+            );
+        }
+
+        return $this->render(
+            'UniteCMSCoreBundle:Organization/ApiKey:update.html.twig',
+            [
+                'organization' => $organization,
+                'form' => $form->createView(),
+                'apiKey' => $apiKey,
+            ]
+        );
+    }
+
+    /**
+     * @Route("/delete/{apiKey}")
+     * @Method({"GET", "POST"})
+     * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
+     * @ParamConverter("apiKey")
+     *
+     * @param Organization $organization
+     * @param ApiKey $apiKey
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function deleteAction(Organization $organization, ApiKey $apiKey, Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add(
+                'submit',
+                SubmitType::class,
+                ['label' => 'organization.api_key.delete.form.submit', 'attr' => ['class' => 'uk-button-danger']]
+            )->getForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->remove($apiKey);
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute(
+                'unitecms_core_organizationapikey_index',
+                [
+                    'organization' => $organization->getIdentifier(),
+                ]
+            );
+        }
+
+        return $this->render(
+            'UniteCMSCoreBundle:Organization/ApiKey:delete.html.twig',
+            [
+                'organization' => $organization,
+                'form' => $form->createView(),
+                'apiKey' => $apiKey,
+            ]
+        );
+    }
+}

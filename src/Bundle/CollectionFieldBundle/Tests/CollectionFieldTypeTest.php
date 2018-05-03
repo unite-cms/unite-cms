@@ -3,13 +3,15 @@
 namespace UniteCMS\CollectionFieldBundle\Tests;
 
 use GraphQL\GraphQL;
-use GraphQL\Schema;
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Schema;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
@@ -320,11 +322,14 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $domain = $field->getContentType()->getDomain();
 
         // In this test, we don't care about access checking.
-        $admin = new ApiClient();
-        $admin->setDomain($field->getContentType()->getDomain());
-        $admin->setRoles([Domain::ROLE_ADMINISTRATOR]);
+        $admin = new ApiKey();
+        $admin->setName('admin_key')->setOrganization($field->getContentType()->getDomain()->getOrganization());
+        $domainMember = new DomainMember();
+        $domainMember->setRoles([Domain::ROLE_ADMINISTRATOR]);
+        $domainMember->setDomain($field->getContentType()->getDomain());
+        $admin->addDomain($domainMember);
         $this->container->get('security.token_storage')->setToken(
-            new UsernamePasswordToken($admin, null, 'api', $admin->getRoles())
+            new PostAuthenticationGuardToken($admin, 'api', [])
         );
 
         // Create GraphQL Schema

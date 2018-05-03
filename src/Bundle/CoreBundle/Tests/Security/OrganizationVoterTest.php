@@ -3,7 +3,7 @@
 namespace UniteCMS\CoreBundle\Tests\Security;
 
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Security\OrganizationVoter;
+use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
 class OrganizationVoterTest extends SecurityVoterTestCase

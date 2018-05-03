@@ -21,6 +21,13 @@ unitecms_core_organization_user:
     requirements:
         organization: '[a-z0-9_]+'
 
+unitecms_core_organization_api_key:
+    resource: "@UniteCMSCoreBundle/Controller/OrganizationApiKeyController.php"
+    type:     annotation
+    prefix:   /{organization}/apikeys
+    requirements:
+        organization: '[a-z0-9_]+'
+
 unitecms_core_domains:
     resource: "@UniteCMSCoreBundle/Controller/DomainController.php"
     type:     annotation
@@ -28,18 +35,10 @@ unitecms_core_domains:
     requirements:
         organization: '[a-z0-9_]+'
 
-unitecms_core_domain_user:
-    resource: "@UniteCMSCoreBundle/Controller/DomainUserController.php"
+unitecms_core_domain_member:
+    resource: "@UniteCMSCoreBundle/Controller/DomainMemberController.php"
     type:     annotation
-    prefix:   /{organization}/{domain}/user
-    requirements:
-        organization: '[a-z0-9_]+'
-        domain: '[a-z0-9_]+'
-
-unitecms_core_domain_api_client:
-    resource: "@UniteCMSCoreBundle/Controller/DomainApiClientController.php"
-    type:     annotation
-    prefix:   /{organization}/{domain}/client
+    prefix:   /{organization}/{domain}/member
     requirements:
         organization: '[a-z0-9_]+'
         domain: '[a-z0-9_]+'

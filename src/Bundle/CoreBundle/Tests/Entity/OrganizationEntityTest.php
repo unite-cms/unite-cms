@@ -26,7 +26,7 @@ class OrganizationEntityTest extends TestCase
         $user2->addOrganization($org1Member);
 
         // add the 2 users to the organisation
-        $org1->setUsers(
+        $org1->setMembers(
             [
                 $org1Member,
                 $org2Member,
@@ -34,6 +34,6 @@ class OrganizationEntityTest extends TestCase
         );
 
         // test if users where added
-        $this->assertCount(2, $org1->getUsers());
+        $this->assertCount(2, $org1->getMembers());
     }
 }

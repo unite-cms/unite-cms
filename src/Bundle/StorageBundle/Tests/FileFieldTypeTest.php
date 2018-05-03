@@ -6,6 +6,7 @@ use GraphQL\GraphQL;
 use GraphQL\Schema;
 use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
@@ -209,7 +210,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $admin = new User();
         $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
         $this->container->get('security.token_storage')->setToken(
-            new UsernamePasswordToken($admin, null, 'api', $admin->getRoles())
+            new PostAuthenticationGuardToken($admin, 'api', [])
         );
 
         // Create GraphQL Schema

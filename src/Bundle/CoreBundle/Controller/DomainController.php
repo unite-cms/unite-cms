@@ -23,7 +23,7 @@ class DomainController extends Controller
      * @Route("/")
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::VIEW'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::VIEW'), organization)")
      *
      * @param Organization $organization
      * @param Request $request
@@ -43,7 +43,7 @@ class DomainController extends Controller
      * @Route("/create")
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @param Request $request
@@ -111,7 +111,7 @@ class DomainController extends Controller
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::VIEW'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -138,7 +138,7 @@ class DomainController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -213,7 +213,7 @@ class DomainController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\DomainVoter::DELETE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::DELETE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain

@@ -9,8 +9,8 @@ security:
                 class: UniteCMSCoreBundle:User
                 property: email
 
-        unite_core_api_client:
-            id: unite.cms.api_client_provider
+        unite_core_api_key:
+            id: unite.cms.api_key_provider
 
     encoders:
         UniteCMS\CoreBundle\Entity\User:
@@ -27,12 +27,12 @@ security:
         # If Authentication-Fallback header is present, this firewall gets skipped and the main firewall will be used.
         api:
             anonymous: false
-            provider: unite_core_api_client
+            provider: unite_core_api_key
             request_matcher: unite.cms.api_request_matcher
             stateless: true
             guard:
                 authenticators:
-                    - unite.cms.api_client_authenticator
+                    - unite.cms.api_key_authenticator
 
         # Main firewall for authentication via user or remember_me cookie.
         main:

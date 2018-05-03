@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="domain_member")
  * @ORM\Entity()
- * @UniqueEntity(fields={"domain", "user"}, message="validation.user_already_member_of_domain")
+ * @UniqueEntity(fields={"domain", "accessor"}, message="validation.user_already_member_of_domain")
  */
 class DomainMember
 {
@@ -36,22 +36,27 @@ class DomainMember
     /**
      * @var Domain
      * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="allowedDomains", strict=true, message="validation.domain_organization")
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="users")
+     * @Assert\Choice(callback="possibleDomains", strict=true, message="validation.domain_organization")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="members")
      */
     private $domain;
 
     /**
-     * @var User
+     * @var DomainAccessor
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\User", inversedBy="domains")
+     * @ORM\ManyToOne(targetEntity="DomainAccessor", inversedBy="domains")
      */
-    private $user;
+    private $accessor;
 
     public function __construct()
     {
         $this->roles = [Domain::ROLE_EDITOR];
+    }
+
+    public function __toString()
+    {
+        return '' . (string)$this->getAccessor();
     }
 
     public function allowedRoles(): array
@@ -63,12 +68,21 @@ class DomainMember
         return [];
     }
 
-    public function allowedDomains(): array
+    /**
+     * Return possible domains for this domain member. This are the domains from the accessors organizations.
+     * @return array
+     */
+    public function possibleDomains(): array
     {
         $domains = [];
-        if ($this->getUser()) {
-            foreach ($this->getUser()->getOrganizations() as $organizationMember) {
-                $domains = array_merge($domains, $organizationMember->getOrganization()->getDomains()->toArray());
+
+        if(!$this->getAccessor()) {
+            return $domains;
+        }
+
+        foreach($this->getAccessor()->getAccessibleOrganizations() as $organization) {
+            foreach($organization->getDomains() as $domain) {
+                $domains[] = $domain;
             }
         }
 
@@ -136,21 +150,21 @@ class DomainMember
     }
 
     /**
-     * @return User
+     * @return DomainAccessor
      */
-    public function getUser()
+    public function getAccessor()
     {
-        return $this->user;
+        return $this->accessor;
     }
 
     /**
-     * @param User $user
+     * @param DomainAccessor $accessor
      *
      * @return DomainMember
      */
-    public function setUser(User $user)
+    public function setAccessor(DomainAccessor $accessor)
     {
-        $this->user = $user;
+        $this->accessor = $accessor;
 
         return $this;
     }

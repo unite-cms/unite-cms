@@ -20,14 +20,14 @@ class OrganizationUserController extends Controller
      * @Route("/")
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @return Response
      */
     public function indexAction(Organization $organization)
     {
-        $users = $this->get('knp_paginator')->paginate($organization->getUsers());
+        $users = $this->get('knp_paginator')->paginate($organization->getMembers());
 
         return $this->render(
             'UniteCMSCoreBundle:Organization/User:index.html.twig',
@@ -43,7 +43,7 @@ class OrganizationUserController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @param OrganizationMember $member
@@ -91,7 +91,7 @@ class OrganizationUserController extends Controller
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\OrganizationVoter::UPDATE'), organization)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
      * @param OrganizationMember $member

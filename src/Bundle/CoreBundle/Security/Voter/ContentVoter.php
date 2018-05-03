@@ -1,15 +1,13 @@
 <?php
 
-namespace UniteCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Role\Role;
-use UniteCMS\CoreBundle\Entity\ApiClient;
+use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\User;
 
 class ContentVoter extends Voter
 {
@@ -61,49 +59,9 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        // This voter can decide on a Content subject for APIClients of the same domain.
-        if ($token->getUser() instanceof ApiClient && $subject instanceof Content) {
-
-            if ($subject->getContentType()->getDomain()->getId() !== $token->getUser()->getDomain()->getId()) {
-                return self::ACCESS_ABSTAIN;
-            }
-
-            return $this->checkPermission($attribute, $subject->getContentType(), $token->getRoles());
-        }
-
-        if ($token->getUser() instanceof ApiClient && $subject instanceof ContentType) {
-
-            if ($subject->getDomain()->getId() !== $token->getUser()->getDomain()->getId()) {
-                return self::ACCESS_ABSTAIN;
-            }
-
-            return $this->checkPermission($attribute, $subject, $token->getRoles());
-        }
-
-        // If the token is not an ApiClient it must be an User.
-        if (!$token->getUser() instanceof User) {
+        // We can only vote on DomainAccessor user objects.
+        if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
-        }
-
-        // Platform admins are allowed to preform all actions.
-        if (in_array(User::ROLE_PLATFORM_ADMIN, $token->getUser()->getRoles())) {
-            return self::ACCESS_GRANTED;
-        }
-
-        // All organization admins are allowed to preform all content actions.
-        foreach ($token->getUser()->getOrganizations() as $organizationMember) {
-            if (in_array(Organization::ROLE_ADMINISTRATOR, $organizationMember->getRoles())) {
-
-                if ($subject instanceof ContentType && $subject->getDomain()->getOrganization()->getId(
-                    ) === $organizationMember->getOrganization()->getId()) {
-                    return self::ACCESS_GRANTED;
-                }
-
-                if ($subject instanceof Content && $subject->getContentType()->getDomain()->getOrganization()->getId(
-                    ) === $organizationMember->getOrganization()->getId()) {
-                    return self::ACCESS_GRANTED;
-                }
-            }
         }
 
         // Check bundle and entity actions on ContentType or Content objects.
@@ -133,7 +91,7 @@ class ContentVoter extends Voter
      * @param array $roles
      * @return bool
      */
-    private function checkPermission($attribute, ContentType $contentType, array $roles)
+    protected function checkPermission($attribute, ContentType $contentType, array $roles)
     {
 
         if (empty($contentType->getPermissions()[$attribute])) {

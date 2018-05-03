@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Subscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\User;
 
 class AddMember
 {
@@ -16,12 +17,12 @@ class AddMember
         /**
          * @var DomainMember $object
          */
-        if ($object instanceof DomainMember) {
+        if ($object instanceof DomainMember && $object->getAccessor() instanceof User) {
 
             // If a user was invited to a domain, that user must also become member of the organization.
             $alreadyMember = false;
 
-            foreach ($object->getUser()->getOrganizations() as $organizationMember) {
+            foreach ($object->getAccessor()->getOrganizations() as $organizationMember) {
                 if ($object->getDomain()->getOrganization() === $organizationMember->getOrganization()) {
                     $alreadyMember = true;
                 }
@@ -30,7 +31,7 @@ class AddMember
             if (!$alreadyMember) {
                 $organizationMember = new OrganizationMember();
                 $organizationMember->setOrganization($object->getDomain()->getOrganization());
-                $object->getUser()->addOrganization($organizationMember);
+                $object->getAccessor()->addOrganization($organizationMember);
             }
         }
     }

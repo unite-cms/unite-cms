@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * OrganizationMember
  *
  * @ORM\Table(name="organization_member")
- * @ORM\Entity()
+ * @ORM\Entity
  * @UniqueEntity(fields={"organization", "user"}, message="validation.user_already_member_of_organization")
  */
 class OrganizationMember
@@ -36,7 +36,7 @@ class OrganizationMember
     /**
      * @var Organization
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="users")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="members")
      * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $organization;
@@ -45,7 +45,7 @@ class OrganizationMember
      * @var User
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Valid()
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\User", inversedBy="organizations")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="organizations")
      */
     private $user;
 
