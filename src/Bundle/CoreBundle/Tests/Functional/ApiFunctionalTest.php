@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Controller\GraphQLApiController;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -611,7 +612,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $request->headers->set('X-CSRF-TOKEN', $this->container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))->getValue());
         }
 
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, $firewall, $user->getRoles()));
+        $this->container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, $firewall, []));
 
         $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
         return json_decode($response->getContent());

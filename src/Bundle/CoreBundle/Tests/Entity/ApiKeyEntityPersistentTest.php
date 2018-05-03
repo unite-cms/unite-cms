@@ -6,7 +6,7 @@ use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class ApiClientEntityPersistentTest extends DatabaseAwareTestCase
+class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
 {
 
     public function testValidateDomainApiClient()

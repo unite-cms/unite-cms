@@ -9,8 +9,8 @@
 namespace UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Controller\GraphQLApiController;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -236,7 +236,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         $reflector->setAccessible(true);
         $reflector->setValue($this->container->get('unite.cms.manager'), true);
 
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'api', $user->getRoles()));
+        $this->container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, 'api', []));
 
         $request = new Request([], [], [
             'organization' => $domain->getOrganization(),

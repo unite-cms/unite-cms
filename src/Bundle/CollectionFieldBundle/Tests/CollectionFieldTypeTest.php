@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -322,13 +323,13 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // In this test, we don't care about access checking.
         $admin = new ApiKey();
-        $admin->setOrganization($field->getContentType()->getDomain()->getOrganization());
+        $admin->setName('admin_key')->setOrganization($field->getContentType()->getDomain()->getOrganization());
         $domainMember = new DomainMember();
         $domainMember->setRoles([Domain::ROLE_ADMINISTRATOR]);
         $domainMember->setDomain($field->getContentType()->getDomain());
         $admin->addDomain($domainMember);
         $this->container->get('security.token_storage')->setToken(
-            new UsernamePasswordToken($admin, null, 'api')
+            new PostAuthenticationGuardToken($admin, 'api', [])
         );
 
         // Create GraphQL Schema
