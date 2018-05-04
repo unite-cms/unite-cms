@@ -9,7 +9,11 @@
 namespace UniteCMS\CoreBundle\Tests\Service;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Router;
+use UniteCMS\CoreBundle\Entity\ApiKey;
+use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
@@ -40,7 +44,11 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         "identifier": "ct1", 
         "fields": [
             { "title": "Field 1", "identifier": "f1", "type": "text" }, 
-            { "title": "Field 2", "identifier": "f2", "type": "text" }
+            { "title": "Field 2", "identifier": "f2", "type": "text" },
+            { "title": "Field 3", "identifier": "f3", "type": "reference", "settings": {
+                "domain": "unite_cms_manager",
+                "content_type": "ct1"
+            } }
         ], 
         "views": [
             { "title": "All", "identifier": "all", "type": "table" },

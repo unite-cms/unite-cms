@@ -76,4 +76,49 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('validation.token_present', $errors->get(0)->getMessage());
     }
 
+    public function testFindMethod() {
+
+        $org1 = new Organization();
+        $org1->setIdentifier('org1')->setTitle('Org 1');
+        $org2 = new Organization();
+        $org2->setIdentifier('org2')->setTitle('Org 2');
+
+        $apiKey1 = new ApiKey();
+        $apiKey1->setToken('token1')->setName('API Key 1')->setOrganization($org1);
+
+        $apiKey1b = new ApiKey();
+        $apiKey1b->setToken('token1b')->setName('API Key 1')->setOrganization($org1);
+
+        $apiKey2 = new ApiKey();
+        $apiKey2->setToken('token2')->setName('API Key 2')->setOrganization($org2);
+
+        $this->em->persist($org1);
+        $this->em->persist($org2);
+
+        $this->em->persist($apiKey1);
+        $this->em->persist($apiKey1b);
+        $this->em->persist($apiKey2);
+
+        $this->em->flush();
+
+        $repo = $this->em->getRepository('UniteCMSCoreBundle:ApiKey');
+
+        // Try to find with empty token
+        $this->assertNull($repo->findOneByTokenAndOrganization('', 'org1'));
+
+        // Try to find with empty organization
+        $this->assertNull($repo->findOneByTokenAndOrganization('token1', ''));
+
+        // Try to find with valid token and invalid organization
+        $this->assertNull($repo->findOneByTokenAndOrganization('token1', 'org2'));
+        $this->assertNull($repo->findOneByTokenAndOrganization('token1', 'foo'));
+
+        // Try to find with invalid token and valid organization
+        $this->assertNull($repo->findOneByTokenAndOrganization('foo', 'org1'));
+        $this->assertNull($repo->findOneByTokenAndOrganization('token2', 'org1'));
+
+        // Try to find with valid token and valid organization
+        $this->assertEquals($apiKey1b, $repo->findOneByTokenAndOrganization('token1b', 'org1'));
+    }
+
 }
