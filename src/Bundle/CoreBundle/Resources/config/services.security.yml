@@ -9,7 +9,7 @@ services:
 
   unite.cms.api_key_provider:
     class: UniteCMS\CoreBundle\Security\ApiKeyUserProvider
-    arguments: ['@unite.cms.manager', '@doctrine.orm.default_entity_manager']
+    arguments: ['@request_stack', '@doctrine.orm.default_entity_manager']
     public: false
 
   # We implement a custom RequestMatcher for the API firewall that also handles fallback to the main firewall if a

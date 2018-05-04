@@ -2,29 +2,31 @@
 
 namespace UniteCMS\CoreBundle\Security;
 
+use App\Bundle\CoreBundle\Exception\MissingOrganizationException;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use UniteCMS\CoreBundle\Entity\ApiKey;
-use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\Entity\Organization;
 
 class ApiKeyUserProvider implements UserProviderInterface
 {
     /**
-     * @var UniteCMSManager $uniteCMSManager
+     * @var RequestStack $requestStack
      */
-    private $uniteCMSManager;
+    private $requestStack;
 
     /**
      * @var EntityManager $entityManager
      */
     private $entityManager;
 
-    public function __construct(UniteCMSManager $uniteCMSManager, EntityManager $entityManager)
+    public function __construct(RequestStack $requestStack, EntityManager $entityManager)
     {
-        $this->uniteCMSManager = $uniteCMSManager;
+        $this->requestStack = $requestStack;
         $this->entityManager = $entityManager;
     }
 
@@ -39,14 +41,28 @@ class ApiKeyUserProvider implements UserProviderInterface
      * @return UserInterface|ApiKey
      *
      * @throws TokenNotFoundException if the token is not found
+     * @throws MissingOrganizationException
      */
     public function loadUserByUsername($username)
     {
-        if (($token = $this->entityManager->getRepository('UniteCMSCoreBundle:ApiKey')->findOneBy(['token' => $username]))) {
-            if($this->uniteCMSManager->getOrganization()->getId() === $token->getOrganization()->getId()) {
-                return $token;
-            }
+        $organization = $this->requestStack->getCurrentRequest()->attributes->get('organization');
+        if(is_object($organization) && $organization instanceof Organization) {
+            $organization = $organization->getIdentifier();
         }
+
+        if(!is_string($organization) || empty($organization)) {
+            throw new MissingOrganizationException('No organization was found in this request. The ApiKeyUserProvider can only operate under an organization scope.');
+        }
+
+        if (
+            ($token = $this->entityManager
+                ->getRepository('UniteCMSCoreBundle:ApiKey')
+                ->findOneByTokenAndOrganization($username, $organization)
+            )
+        ) {
+            return $token;
+        }
+
         throw new TokenNotFoundException("An API Key with token $username was not found for the current organization");
     }
 

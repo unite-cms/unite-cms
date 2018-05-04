@@ -13,7 +13,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * APIKey
  *
  * @ORM\Table(name="api_key")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="UniteCMS\CoreBundle\Repository\ApiKeyRepository")
  * @UniqueEntity(fields={"token", "organization"}, message="validation.token_present")
  * @UniqueEntity(fields={"name", "organization"}, message="validation.name_present")
  */
