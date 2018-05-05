@@ -752,7 +752,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(5, $errors);
         $this->assertStringStartsWith('roles', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
-        $this->assertStringStartsWith('domain', $errors->get(1)->getPropertyPath());
+        $this->assertStringStartsWith('domainMemberType', $errors->get(1)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
         $this->assertStringStartsWith('email', $errors->get(2)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
@@ -763,7 +763,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
 
         //Validate invalid email and roles
-        $invite1->setDomain($domain);
+        $invite1->setDomainMemberType($domain->getDomainMemberTypes()->first());
         $invite1->setRoles(['INVALID'])->setEmail('XXX')->setToken('XXX')->setRequestedAt(new \DateTime());
         $errors = $this->container->get('validator')->validate($invite1);
         $this->assertCount(2, $errors);
@@ -809,7 +809,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         // Validate invite uniqueness
         $invite2 = new DomainInvitation();
 
-        $invite2->setDomain($domain);
+        $invite2->setDomainMemberType($domain->getDomainMemberTypes()->first());
         $invite2->setEmail('user1@example.com');
         $invite2->setRoles([Domain::ROLE_EDITOR]);
         $invite2->setToken('XXX')->setRequestedAt(new \DateTime());
@@ -820,15 +820,23 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertStringStartsWith('token', $errors->get(1)->getPropertyPath());
         $this->assertEquals('validation.token_already_present', $errors->get(1)->getMessage());
 
-        $invite2->setDomain($domain2);
+        $domainMemberType2 = new DomainMemberType();
+        $domainMemberType2->setIdentifier('dmt3')->setTitle('DMT3');
+        $domain->addDomainMemberType($domainMemberType2);
+
+        $invite2->setDomainMemberType($domainMemberType2);
         $invite2->setEmail('user1@example.com')->setToken('YYY');
         $this->assertCount(0, $this->container->get('validator')->validate($invite2));
 
-        $invite2->setDomain($domain);
+        $invite2->setDomainMemberType($domain2->getDomainMemberTypes()->first());
+        $invite2->setEmail('user1@example.com')->setToken('YYY');
+        $this->assertCount(0, $this->container->get('validator')->validate($invite2));
+
+        $invite2->setDomainMemberType($domain->getDomainMemberTypes()->first());
         $invite2->setEmail('user2@example.com');
         $this->assertCount(0, $this->container->get('validator')->validate($invite2));
 
-        $invite2->setDomain($domain2);
+        $invite2->setDomainMemberType($domain2->getDomainMemberTypes()->first());
         $invite2->setEmail('user2@example.com');
         $this->assertCount(0, $this->container->get('validator')->validate($invite2));
 
@@ -840,7 +848,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain->getOrganization()->addMember($org1Member);
 
         $invite2->setEmail('org1user@example.com');
-        $invite2->setDomain($domain);
+        $invite2->setDomainMemberType($domain->getDomainMemberTypes()->first());
         $errors = $this->container->get('validator')->validate($invite2);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());

@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Doctrine\ORM\EntityRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -20,34 +20,37 @@ use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\DomainInvitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
-use UniteCMS\CoreBundle\Entity\User;
 
 class DomainMemberController extends Controller
 {
     /**
-     * @Route("/")
+     * @Route("/{member_type}")
      * @Method({"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
+     * @param DomainMemberType $memberType
      * @return Response
      */
-    public function indexAction(Organization $organization, Domain $domain)
+    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType)
     {
-        $members = $this->get('knp_paginator')->paginate($domain->getMembers());
-        $invites = $this->get('knp_paginator')->paginate($domain->getInvites());
+        $members = $this->get('knp_paginator')->paginate($memberType->getDomainMembers());
+        $invites = $this->get('knp_paginator')->paginate($memberType->getInvites());
 
         return $this->render(
             'UniteCMSCoreBundle:Domain/Member:index.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
+                'memberType' => $memberType,
                 'members' => $members,
                 'invites' => $invites,
             ]
@@ -55,36 +58,40 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/create")
+     * @Route("/{member_type}/create")
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
+     * @param DomainMemberType $memberType
      * @param Request $request
      * @return Response
      */
-    public function createAction(Organization $organization, Domain $domain, Request $request)
+    public function createAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request)
     {
         $member = new DomainMember();
-        $member->setDomain($domain);
+        $member->setDomain($domain)->setDomainMemberType($memberType);
 
-        $domain_members = [];
-        foreach ($domain->getMembers() as $domainMember) {
-            $domain_members[] = $domainMember->getAccessor()->getId();
+        $domain_member_type_members = [];
+        foreach ($memberType->getDomainMembers() as $domainMember) {
+            $domain_member_type_members[] = $domainMember->getAccessor()->getId();
         }
 
         $possible_domain_members = $organization->getApiKeys()->filter(
-            function(ApiKey $apiKey) use ($domain_members) {
-                return !in_array($apiKey->getId(), $domain_members);
+            function(ApiKey $apiKey) use ($domain_member_type_members) {
+                return !in_array($apiKey->getId(), $domain_member_type_members);
             }
         )->toArray();
 
+        dump($domain_member_type_members);
+
         $possible_domain_members = array_merge($possible_domain_members, $organization->getMembers()->filter(
-            function(OrganizationMember $organizationMember) use ($domain_members) {
-                return !in_array($organizationMember->getUser()->getId(), $domain_members);
+            function(OrganizationMember $organizationMember) use ($domain_member_type_members) {
+                return !in_array($organizationMember->getUser()->getId(), $domain_member_type_members);
             }
         )->map(
             function(OrganizationMember $organizationMember){
@@ -128,6 +135,7 @@ class DomainMemberController extends Controller
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
+                    'member_type' => $memberType->getIdentifier(),
                 ]
             );
         }
@@ -135,7 +143,7 @@ class DomainMemberController extends Controller
         $invitation = new DomainInvitation();
         $invitation->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
         $invitation->setRequestedAt(new \DateTime());
-        $invitation->setDomain($domain);
+        $invitation->setDomainMemberType($memberType);
 
         $formInvite = $this->get('form.factory')->createNamedBuilder('invite_domain_user', FormType::class, $invitation)
             ->add('email', EmailType::class, ['label' => 'domain.member.invite.form.email',])
@@ -184,6 +192,7 @@ class DomainMemberController extends Controller
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
+                    'member_type' => $memberType->getIdentifier(),
                 ]
             );
         }
@@ -193,6 +202,7 @@ class DomainMemberController extends Controller
             [
                 'organization' => $organization,
                 'domain' => $domain,
+                'memberType' => $memberType,
                 'form_create' => $formCreate->createView(),
                 'form_invite' => $formInvite->createView(),
             ]
@@ -200,10 +210,11 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/update/{member}")
+     * @Route("/{member_type}/update/{member}")
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
      * @ParamConverter("member")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
@@ -214,7 +225,7 @@ class DomainMemberController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function updateAction(Organization $organization, Domain $domain, DomainMember $member, Request $request)
+    public function updateAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
     {
         $form = $this->createFormBuilder($member)
             ->add(
@@ -235,6 +246,7 @@ class DomainMemberController extends Controller
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
+                    'member_type' => $memberType->getIdentifier(),
                 ]
             );
         }
@@ -244,6 +256,7 @@ class DomainMemberController extends Controller
             [
                 'organization' => $organization,
                 'domain' => $domain,
+                'memberType' => $memberType,
                 'form' => $form->createView(),
                 'member' => $member,
             ]
@@ -251,21 +264,23 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/delete/{member}")
+     * @Route("/{member_type}/delete/{member}")
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
      * @ParamConverter("member")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
+     * @param DomainMemberType $memberType
      * @param \UniteCMS\CoreBundle\Entity\DomainMember $member
      * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function deleteAction(Organization $organization, Domain $domain, DomainMember $member, Request $request)
+    public function deleteAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
     {
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, ['label' => 'Remove'])->getForm();
@@ -280,6 +295,7 @@ class DomainMemberController extends Controller
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
+                    'member_type' => $memberType->getIdentifier(),
                 ]
             );
         }
@@ -289,6 +305,7 @@ class DomainMemberController extends Controller
             [
                 'organization' => $organization,
                 'domain' => $domain,
+                'memberType' => $memberType,
                 'form' => $form->createView(),
                 'member' => $member,
             ]
@@ -296,15 +313,17 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/delete-invite/{invite}")
+     * @Route("/{member_type}/delete-invite/{invite}")
      * @Method({"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
      * @ParamConverter("invite")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
      *
      * @param Organization $organization
      * @param Domain $domain
+     * @param DomainMemberType $memberType
      * @param DomainInvitation $invite
      * @param Request $request
      *
@@ -313,6 +332,7 @@ class DomainMemberController extends Controller
     public function deleteInviteAction(
         Organization $organization,
         Domain $domain,
+        DomainMemberType $memberType,
         DomainInvitation $invite,
         Request $request
     ) {
@@ -333,6 +353,7 @@ class DomainMemberController extends Controller
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
+                    'member_type' => $memberType->getIdentifier(),
                 ]
             );
         }
@@ -341,6 +362,8 @@ class DomainMemberController extends Controller
             'UniteCMSCoreBundle:Domain/Member:delete_invite.html.twig',
             [
                 'organization' => $organization,
+                'domain' => $domain,
+                'memberType' => $memberType,
                 'form' => $form->createView(),
                 'invite' => $invite,
             ]

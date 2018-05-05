@@ -113,9 +113,17 @@ class DomainMemberType implements Fieldable
      */
     private $domainMembers;
 
+    /**
+     * @var DomainInvitation[]
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
+     */
+    private $invites;
+
     public function __construct()
     {
         $this->fields = new ArrayCollection();
+        $this->invites = new ArrayCollection();
     }
 
     public function __toString()
@@ -436,6 +444,14 @@ class DomainMemberType implements Fieldable
     public function getLocales(): array
     {
         return [];
+    }
+
+    /**
+     * @return DomainInvitation[]|ArrayCollection
+     */
+    public function getInvites()
+    {
+        return $this->invites;
     }
 }
 

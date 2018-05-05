@@ -301,7 +301,7 @@ class ProfileController extends Controller
                             $wrongUser = false;
 
                             foreach ($existingUser->getDomains() as $domainMember) {
-                                if ($domainMember->getDomain() === $invitation->getDomain()) {
+                                if ($domainMember->getDomainMemberType() === $invitation->getDomainMemberType()) {
                                     $alreadyMember = true;
                                 }
                             }
@@ -318,7 +318,8 @@ class ProfileController extends Controller
                                     if ($form->get('accept')->isClicked()) {
                                         $domainMember = new DomainMember();
                                         $domainMember
-                                            ->setDomain($invitation->getDomain())
+                                            ->setDomain($invitation->getDomainMemberType()->getDomain())
+                                            ->setDomainMemberType($invitation->getDomainMemberType())
                                             ->setRoles($invitation->getRoles());
                                         $existingUser->addDomain($domainMember);
 
@@ -397,7 +398,8 @@ class ProfileController extends Controller
                                 $user = new User();
                                 $domainMember = new DomainMember();
                                 $domainMember
-                                    ->setDomain($invitation->getDomain())
+                                    ->setDomain($invitation->getDomainMemberType()->getDomain())
+                                    ->setDomainMemberType($invitation->getDomainMemberType())
                                     ->setRoles($invitation->getRoles());
                                 $user
                                     ->setEmail($invitation->getEmail())

@@ -121,13 +121,6 @@ class Domain
      */
     private $members;
 
-    /**
-     * @var DomainInvitation[]
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domain", fetch="EXTRA_LAZY")
-     */
-    private $invites;
-
     public function __toString()
     {
         return ''.$this->title;
@@ -140,12 +133,11 @@ class Domain
         $this->contentTypes = new ArrayCollection();
         $this->settingTypes = new ArrayCollection();
         $this->domainMemberTypes = new ArrayCollection();
-        $this->invites = new ArrayCollection();
 
         // Add default domain member type
         $domainMemberType = new DomainMemberType();
         $domainMemberType
-            ->setTitle('User')
+            ->setTitle('Users')
             ->setIdentifier('users');
         $this->addDomainMemberType($domainMemberType);
     }
@@ -628,14 +620,6 @@ class Domain
         }
 
         return $this;
-    }
-
-    /**
-     * @return DomainInvitation[]|ArrayCollection
-     */
-    public function getInvites()
-    {
-        return $this->invites;
     }
 }
 
