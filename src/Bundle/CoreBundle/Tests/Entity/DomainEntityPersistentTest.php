@@ -8,6 +8,8 @@ use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainInvitation;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\Setting;
@@ -71,7 +73,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $organizationMember = new OrganizationMember();
         $organizationMember->setOrganization($org);
         $domainMember = new DomainMember();
-        $domainMember->setAccessor(new User())->getAccessor()->addOrganization($organizationMember)->setEmail(
+        $domainMember->setDomainMemberType($domain1->getDomainMemberTypes()->first())->setAccessor(new User())->getAccessor()->addOrganization($organizationMember)->setEmail(
             'example@example.com'
         );
         $domain1
@@ -100,7 +102,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $domain1->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_PUBLIC]);
 
-        // Try to test invalid ContentType.
+        // Try to set invalid ContentType.
         $domain1->getOrganization()->setMembers([]);
         $domain1->getOrganization()->setIdentifier('domain_org1')->setTitle('Domain Org 1');
         $domain1->getContentTypes()->first()->setPermissions(
@@ -112,12 +114,17 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
                 ContentVoter::DELETE => [Domain::ROLE_EDITOR],
             ]
         );
+
+        // Try to set invalid SettingType
         $domain1->getSettingTypes()->first()->setPermissions(
             [
                 SettingVoter::VIEW => [Domain::ROLE_EDITOR],
                 SettingVoter::UPDATE => [Domain::ROLE_EDITOR],
             ]
         );
+
+        // Try to set invalid DomainMemberType
+        $domain1->getDomainMemberTypes()->first()->setIcon('ä#;');
 
         $errors = $this->container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
@@ -129,8 +136,14 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('settingTypes', $errors->get(0)->getPropertyPath());
 
-        // Try to test invalid users.
+        // Try to test invalid MemberType.
         $domain1->getSettingTypes()->first()->setIdentifier('domain_set1')->setTitle('Domain Set 1');
+        $errors = $this->container->get('validator')->validate($domain1);
+        $this->assertGreaterThanOrEqual(1, $errors->count());
+        $this->assertStringStartsWith('domainMemberTypes', $errors->get(0)->getPropertyPath());
+
+        // Try to test invalid users.
+        $domain1->getDomainMemberTypes()->first()->setIcon('');
         $errors = $this->container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('members', $errors->get(0)->getPropertyPath());
@@ -145,7 +158,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             'password'
         )->addOrganization($organizationMember);
         $domainMember = new DomainMember();
-        $domainMember->setAccessor($user);
+        $domainMember->setAccessor($user)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $domain1->setMembers([$domainMember]);
         $domain1->setOrganization($org);
         $errors = $this->container->get('validator')->validate($domain1);
@@ -153,6 +166,10 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         // Persist the domain.
         $domain1->setMembers([])->setContentTypes([])->setSettingTypes([]);
+        $domain1->getDomainMemberTypes()->first()
+            ->setIcon('')
+            ->setIdentifier('users')
+            ->setTitle('users');
         $this->em->persist($domain1->getOrganization());
         $this->em->persist($domain1);
         $this->em->flush($domain1);
@@ -244,6 +261,13 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $ct2->setIdentifier('ct2')->setTitle('Ct2');
         $ct2->setDomain($domain);
 
+        $dmt1 = new DomainMemberType();
+        $dmt1->setIdentifier('dmt1')->setTitle('Dmt1');
+        $dmt1->setDomain($domain);
+        $dmt2 = new DomainMemberType();
+        $dmt2->setIdentifier('dmt2')->setTitle('Dmt2');
+        $dmt2->setDomain($domain);
+
         $field1 = new ContentTypeField();
         $field1->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($ct1);
         $field2 = new ContentTypeField();
@@ -261,6 +285,15 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $field13->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($st2);
         $field14 = new SettingTypeField();
         $field14->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($st1);
+
+        $fieldd1 = new DomainMemberTypeField();
+        $fieldd1->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($dmt1);
+        $fieldd2 = new DomainMemberTypeField();
+        $fieldd2->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($dmt2);
+        $fieldd3 = new DomainMemberTypeField();
+        $fieldd3->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($dmt2);
+        $fieldd4 = new DomainMemberTypeField();
+        $fieldd4->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($dmt1);
 
         $this->em->persist($org);
         $this->em->persist($domain);
@@ -299,7 +332,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         // A user can only be member of a domain, if he_she is member of the organization.
         $user1MemberDomain1 = new DomainMember();
-        $user1MemberDomain1->setDomain($domain1);
+        $user1MemberDomain1->setDomain($domain1)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $user1->addDomain($user1MemberDomain1);
 
         $errors = $this->container->get('validator')->validate($user1);
@@ -371,10 +404,10 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         );
 
 
-        // A user cannot be member of the same domain twice.
+        // A user cannot be member of the same domain and type twice.
         $user1->setOrganizations([$user1MemberOrg1]);
         $user1MemberDomain1 = new DomainMember();
-        $user1MemberDomain1->setDomain($domain1);
+        $user1MemberDomain1->setDomain($domain1)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $user1->addDomain($user1MemberDomain1);
 
         $this->em->flush($user1);
@@ -382,7 +415,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(0, $this->container->get('validator')->validate($user1));
 
         $user1MemberDomain2 = new DomainMember();
-        $user1MemberDomain2->setDomain($domain1);
+        $user1MemberDomain2->setDomain($domain1)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $user1->addDomain($user1MemberDomain2);
 
         $errors = $this->container->get('validator')->validate($user1);
@@ -393,19 +426,28 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
                 ->getPropertyPath()
         );
         $this->assertEquals(
-            'validation.user_already_member_of_domain',
+            'validation.user_already_member_of_domain_for_type',
             $errors->get(0)
                 ->getMessage()
         );
+
+        $domainMemberType2 = new DomainMemberType();
+        $domainMemberType2->setTitle('DMT2')->setIdentifier('dmt2');
+        $domain1->addDomainMemberType($domainMemberType2);
+        $user1MemberDomain2->setDomainMemberType($domainMemberType2);
+
+        echo $this->container->get('validator')->validate($user1);
+        $this->assertCount(0, $this->container->get('validator')->validate($user1));
     }
 
-    // Case 1: Domain have an additional ContentType and SettingType
+    // Case 1: Domain have additional ContentTypes, SettingTypes and DomainMemberTypes
     public function testSetIdsFromOriginWithMoreContentTypes()
     {
 
         $domain = $this->setUpOriginDomain();
         $updateDomain = new Domain();
         $updateDomain->setOrganization($domain->getOrganization());
+        $updateDomain->setDomainMemberTypes([]);
         $updateDomain->setIdentifier('domain')->setTitle('New Title');
         for ($i = 1; $i <= 3; $i++) {
             $ct = new ContentType();
@@ -414,6 +456,9 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             $st = new SettingType();
             $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
+            $dmt = new DomainMemberType();
+            $dmt->setIdentifier('dmt'.$i)->setTitle('Dmt'.$i);
+            $dmt->setDomain($updateDomain);
         }
 
         $domainIds = (object)[
@@ -421,10 +466,14 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             'ct2' => $domain->getContentTypes()->get('ct2')->getId(),
             'st1' => $domain->getSettingTypes()->get('st1')->getId(),
             'st2' => $domain->getSettingTypes()->get('st2')->getId(),
+            'dmt1' => $domain->getDomainMemberTypes()->get('dmt1')->getId(),
+            'dmt2' => $domain->getDomainMemberTypes()->get('dmt2')->getId(),
             'ct1f1' => $domain->getContentTypes()->get('ct1')->getFields()->get('f1')->getId(),
             'ct1f2' => $domain->getContentTypes()->get('ct2')->getFields()->get('f2')->getId(),
             'st1f1' => $domain->getSettingTypes()->get('st1')->getFields()->get('f1')->getId(),
             'st1f2' => $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId(),
+            'dmt1f1' => $domain->getDomainMemberTypes()->get('dmt1')->getFields()->get('f1')->getId(),
+            'dmt1f2' => $domain->getDomainMemberTypes()->get('dmt2')->getFields()->get('f2')->getId(),
         ];
 
         $domain->setFromEntity($updateDomain);
@@ -437,9 +486,11 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals($domainIds->ct2, $domain->getContentTypes()->get('ct2')->getId());
         $this->assertEquals($domainIds->st1, $domain->getSettingTypes()->get('st1')->getId());
         $this->assertEquals($domainIds->st2, $domain->getSettingTypes()->get('st2')->getId());
+        $this->assertEquals($domainIds->dmt1, $domain->getDomainMemberTypes()->get('dmt1')->getId());
+        $this->assertEquals($domainIds->dmt2, $domain->getDomainMemberTypes()->get('dmt2')->getId());
     }
 
-    // Case 2: Domain have the same ContentTypes and SettingTypes
+    // Case 2: Domain have the same ContentTypes, SettingTypes and DomainMemberTypes
     public function testSetIdsFromOriginWithSameContentTypes()
     {
 
@@ -454,11 +505,16 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             $st = new SettingType();
             $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
+            $dmt = new DomainMemberType();
+            $dmt->setIdentifier('dmt'.$i)->setTitle('Dmt'.$i);
+            $dmt->setDomain($updateDomain);
             for ($k = 1; $k <= 2; $k++) {
                 $field1 = new ContentTypeField();
                 $field1->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($ct);
                 $field2 = new SettingTypeField();
                 $field2->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($st);
+                $field3 = new DomainMemberTypeField();
+                $field3->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($dmt);
             }
         }
 
@@ -467,10 +523,14 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             'ct2' => $domain->getContentTypes()->get('ct2')->getId(),
             'st1' => $domain->getSettingTypes()->get('st1')->getId(),
             'st2' => $domain->getSettingTypes()->get('st2')->getId(),
+            'dmt1' => $domain->getDomainMemberTypes()->get('dmt1')->getId(),
+            'dmt2' => $domain->getDomainMemberTypes()->get('dmt2')->getId(),
             'ct1f1' => $domain->getContentTypes()->get('ct1')->getFields()->get('f1')->getId(),
             'ct1f2' => $domain->getContentTypes()->get('ct2')->getFields()->get('f2')->getId(),
             'st1f1' => $domain->getSettingTypes()->get('st1')->getFields()->get('f1')->getId(),
             'st1f2' => $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId(),
+            'dmt1f1' => $domain->getDomainMemberTypes()->get('dmt1')->getFields()->get('f1')->getId(),
+            'dmt1f2' => $domain->getDomainMemberTypes()->get('dmt2')->getFields()->get('f2')->getId(),
         ];
 
 
@@ -491,7 +551,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals($domainIds->st1f2, $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId());
     }
 
-    // Case 3: Domain have the same ContentTypes and SettingTypes but additional fields
+    // Case 3: Domain have the same ContentTypes, SettingTypes and DomainMemberTypes but additional fields
     public function testSetIdsFromOriginWithMoreFields()
     {
         $domain = $this->setUpOriginDomain();
@@ -505,12 +565,17 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             $st = new SettingType();
             $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
+            $dmt = new DomainMemberType();
+            $dmt->setIdentifier('dmt'.$i)->setTitle('Dmt'.$i);
+            $dmt->setDomain($updateDomain);
 
             for ($k = 1; $k <= 3; $k++) {
                 $field1 = new ContentTypeField();
                 $field1->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($ct);
                 $field2 = new SettingTypeField();
                 $field2->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($st);
+                $field3 = new DomainMemberTypeField();
+                $field3->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($dmt);
             }
         }
 
@@ -519,10 +584,14 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             'ct2' => $domain->getContentTypes()->get('ct2')->getId(),
             'st1' => $domain->getSettingTypes()->get('st1')->getId(),
             'st2' => $domain->getSettingTypes()->get('st2')->getId(),
+            'dmt1' => $domain->getDomainMemberTypes()->get('dmt1')->getId(),
+            'dmt2' => $domain->getDomainMemberTypes()->get('dmt2')->getId(),
             'ct1f1' => $domain->getContentTypes()->get('ct1')->getFields()->get('f1')->getId(),
             'ct1f2' => $domain->getContentTypes()->get('ct2')->getFields()->get('f2')->getId(),
             'st1f1' => $domain->getSettingTypes()->get('st1')->getFields()->get('f1')->getId(),
             'st1f2' => $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId(),
+            'dmt1f1' => $domain->getDomainMemberTypes()->get('dmt1')->getFields()->get('f1')->getId(),
+            'dmt1f2' => $domain->getDomainMemberTypes()->get('dmt2')->getFields()->get('f2')->getId(),
         ];
 
         $domain->setFromEntity($updateDomain);
@@ -538,19 +607,24 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals($domainIds->ct2, $domain->getContentTypes()->get('ct2')->getId());
         $this->assertEquals($domainIds->st1, $domain->getSettingTypes()->get('st1')->getId());
         $this->assertEquals($domainIds->st2, $domain->getSettingTypes()->get('st2')->getId());
+        $this->assertEquals($domainIds->dmt1, $domain->getDomainMemberTypes()->get('dmt1')->getId());
+        $this->assertEquals($domainIds->dmt2, $domain->getDomainMemberTypes()->get('dmt2')->getId());
         $this->assertEquals($domainIds->ct1f1, $domain->getContentTypes()->get('ct1')->getFields()->get('f1')->getId());
         $this->assertEquals($domainIds->ct1f2, $domain->getContentTypes()->get('ct2')->getFields()->get('f2')->getId());
         $this->assertEquals($domainIds->st1f1, $domain->getSettingTypes()->get('st1')->getFields()->get('f1')->getId());
         $this->assertEquals($domainIds->st1f2, $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId());
+        $this->assertEquals($domainIds->dmt1f1, $domain->getDomainMemberTypes()->get('dmt1')->getFields()->get('f1')->getId());
+        $this->assertEquals($domainIds->dmt1f2, $domain->getDomainMemberTypes()->get('dmt2')->getFields()->get('f2')->getId());
     }
 
-    // Case 4: Domain have the same ContentTypes and SettingTypes but less fields
+    // Case 4: Domain have the same ContentTypes, SettingTypes and DomainMemberTypes but less fields
     public function testSetIdsFromOriginWithLessFields()
     {
         $domain = $this->setUpOriginDomain();
         $updateDomain = new Domain();
         $updateDomain->setOrganization($domain->getOrganization());
         $updateDomain->setIdentifier('domain')->setTitle('New Title');
+        $updateDomain->setDomainMemberTypes([]);
         for ($i = 1; $i <= 2; $i++) {
             $ct = new ContentType();
             $ct->setIdentifier('ct'.$i)->setTitle('Ct'.$i);
@@ -558,12 +632,17 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             $st = new SettingType();
             $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
+            $dmt = new DomainMemberType();
+            $dmt->setIdentifier('dmt'.$i)->setTitle('Dmt'.$i);
+            $dmt->setDomain($updateDomain);
 
             for ($k = 1; $k <= 1; $k++) {
                 $field1 = new ContentTypeField();
                 $field1->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($ct);
                 $field2 = new SettingTypeField();
                 $field2->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($st);
+                $field3 = new DomainMemberTypeField();
+                $field3->setTitle('F'.$k)->setIdentifier('f'.$k)->setType('text')->setEntity($dmt);
             }
         }
 
@@ -572,10 +651,14 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             'ct2' => $domain->getContentTypes()->get('ct2')->getId(),
             'st1' => $domain->getSettingTypes()->get('st1')->getId(),
             'st2' => $domain->getSettingTypes()->get('st2')->getId(),
+            'dmt1' => $domain->getDomainMemberTypes()->get('dmt1')->getId(),
+            'dmt2' => $domain->getDomainMemberTypes()->get('dmt2')->getId(),
             'ct1f1' => $domain->getContentTypes()->get('ct1')->getFields()->get('f1')->getId(),
             'ct1f2' => $domain->getContentTypes()->get('ct2')->getFields()->get('f2')->getId(),
             'st1f1' => $domain->getSettingTypes()->get('st1')->getFields()->get('f1')->getId(),
             'st1f2' => $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId(),
+            'dmt1f1' => $domain->getDomainMemberTypes()->get('dmt1')->getFields()->get('f1')->getId(),
+            'dmt1f2' => $domain->getDomainMemberTypes()->get('dmt2')->getFields()->get('f2')->getId(),
         ];
 
         $domain->setFromEntity($updateDomain);
@@ -585,14 +668,22 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $this->assertCount(2, $domain->getContentTypes());
         $this->assertCount(2, $domain->getSettingTypes());
+        $this->assertCount(2, $domain->getDomainMemberTypes());
         $this->assertCount(1, $domain->getContentTypes()->get('ct1')->getFields());
         $this->assertCount(1, $domain->getContentTypes()->get('ct2')->getFields());
+        $this->assertCount(1, $domain->getSettingTypes()->get('st1')->getFields());
+        $this->assertCount(1, $domain->getSettingTypes()->get('st2')->getFields());
+        $this->assertCount(1, $domain->getDomainMemberTypes()->get('dmt1')->getFields());
+        $this->assertCount(1, $domain->getDomainMemberTypes()->get('dmt2')->getFields());
         $this->assertEquals($domainIds->ct1, $domain->getContentTypes()->get('ct1')->getId());
         $this->assertEquals($domainIds->ct2, $domain->getContentTypes()->get('ct2')->getId());
         $this->assertEquals($domainIds->st1, $domain->getSettingTypes()->get('st1')->getId());
         $this->assertEquals($domainIds->st2, $domain->getSettingTypes()->get('st2')->getId());
+        $this->assertEquals($domainIds->dmt1, $domain->getDomainMemberTypes()->get('dmt1')->getId());
+        $this->assertEquals($domainIds->dmt2, $domain->getDomainMemberTypes()->get('dmt2')->getId());
         $this->assertEquals($domainIds->ct1f1, $domain->getContentTypes()->get('ct1')->getFields()->get('f1')->getId());
         $this->assertEquals($domainIds->st1f1, $domain->getSettingTypes()->get('st1')->getFields()->get('f1')->getId());
+        $this->assertEquals($domainIds->dmt1f1, $domain->getDomainMemberTypes()->get('dmt1')->getFields()->get('f1')->getId());
     }
 
     // Case 5: Domain have the less ContentTypes and SettingTypes
@@ -601,6 +692,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain = $this->setUpOriginDomain();
         $updateDomain = new Domain();
         $updateDomain->setOrganization($domain->getOrganization());
+        $updateDomain->setDomainMemberTypes([]);
         $updateDomain->setIdentifier('domain')->setTitle('New Title');
         for ($i = 1; $i <= 1; $i++) {
             $ct = new ContentType();
@@ -609,6 +701,9 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             $st = new SettingType();
             $st->setIdentifier('st'.$i)->setTitle('St'.$i);
             $st->setDomain($updateDomain);
+            $dmt = new DomainMemberType();
+            $dmt->setIdentifier('dmt'.$i)->setTitle('Dmt'.$i);
+            $dmt->setDomain($updateDomain);
         }
 
         $domainIds = (object)[
@@ -616,10 +711,14 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             'ct2' => $domain->getContentTypes()->get('ct2')->getId(),
             'st1' => $domain->getSettingTypes()->get('st1')->getId(),
             'st2' => $domain->getSettingTypes()->get('st2')->getId(),
+            'dmt1' => $domain->getDomainMemberTypes()->get('dmt1')->getId(),
+            'dmt2' => $domain->getDomainMemberTypes()->get('dmt2')->getId(),
             'ct1f1' => $domain->getContentTypes()->get('ct1')->getFields()->get('f1')->getId(),
             'ct1f2' => $domain->getContentTypes()->get('ct2')->getFields()->get('f2')->getId(),
             'st1f1' => $domain->getSettingTypes()->get('st1')->getFields()->get('f1')->getId(),
             'st1f2' => $domain->getSettingTypes()->get('st2')->getFields()->get('f2')->getId(),
+            'dmt1f1' => $domain->getDomainMemberTypes()->get('dmt1')->getFields()->get('f1')->getId(),
+            'dmt1f2' => $domain->getDomainMemberTypes()->get('dmt2')->getFields()->get('f2')->getId(),
         ];
 
         $domain->setFromEntity($updateDomain);
@@ -629,8 +728,10 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $this->assertCount(1, $updateDomain->getContentTypes());
         $this->assertCount(1, $updateDomain->getSettingTypes());
+        $this->assertCount(1, $updateDomain->getDomainMemberTypes());
         $this->assertEquals($domainIds->ct1, $domain->getContentTypes()->get('ct1')->getId());
         $this->assertEquals($domainIds->st1, $domain->getSettingTypes()->get('st1')->getId());
+        $this->assertEquals($domainIds->dmt1, $domain->getDomainMemberTypes()->get('dmt1')->getId());
     }
 
     public function testValidateDomainInvite()
