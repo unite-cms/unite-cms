@@ -208,13 +208,13 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
 
         // Add user to domain of org 1.
         $member = new DomainMember();
-        $member->setDomain($domain1);
+        $member->setDomain($domain1)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $user->addDomain($member);
         $this->assertCount(0, $this->container->get('validator')->validate($user));
 
         // Add user to domain of org 2.
         $member2 = new DomainMember();
-        $member2->setDomain($domain2);
+        $member2->setDomain($domain2)->setDomainMemberType($domain2->getDomainMemberTypes()->first());
         $user->addDomain($member2);
         $errors = $this->container->get('validator')->validate($user);
         $this->assertCount(1, $errors);
