@@ -29,9 +29,9 @@ class RemoveMemberTest extends DatabaseAwareTestCase
         $org2->addDomain($domain2);
 
         $domainMember1 = new DomainMember();
-        $domainMember1->setDomain($domain1);
+        $domainMember1->setDomain($domain1)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $domainMember2 = new DomainMember();
-        $domainMember2->setDomain($domain2);
+        $domainMember2->setDomain($domain2)->setDomainMemberType($domain2->getDomainMemberTypes()->first());;
         $orgMember1 = new OrganizationMember();
         $orgMember1->setOrganization($org1);
         $orgMember2 = new OrganizationMember();

@@ -87,8 +87,6 @@ class DomainMemberController extends Controller
             }
         )->toArray();
 
-        dump($domain_member_type_members);
-
         $possible_domain_members = array_merge($possible_domain_members, $organization->getMembers()->filter(
             function(OrganizationMember $organizationMember) use ($domain_member_type_members) {
                 return !in_array($organizationMember->getUser()->getId(), $domain_member_type_members);
