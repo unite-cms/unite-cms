@@ -244,7 +244,7 @@ class FileFieldType extends FieldType
 
             // If we hard delete this content, delete the attached file.
             $file = $data[$field->getIdentifier()];
-            print_r($this->storageService->deleteObject($file['id'], $file['name'], $field->getSettings()->bucket));
+            $this->storageService->deleteObject($file['id'], $file['name'], $field->getSettings()->bucket);
         }
     }
 }
