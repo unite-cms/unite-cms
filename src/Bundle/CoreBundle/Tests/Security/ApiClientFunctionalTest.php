@@ -167,7 +167,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
 
         // Try to access with fallback but no user access.
         $user1 = new User();
-        $user1->setFirstname('u1')->setLastname('u1')->setEmail('u1@example.com')->setPassword('X');
+        $user1->setName('User 1')->setEmail('u1@example.com')->setPassword('X');
         $this->em->persist($user1);
         $this->em->flush();
         $this->em->refresh($user1);
@@ -189,7 +189,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
 
         // Try to access with fallback and user access.
         $user2 = new User();
-        $user2->setFirstname('u1')->setLastname('u1')->setEmail('u1@example.com')->setPassword('X');
+        $user2->setName('User 2')->setEmail('u1@example.com')->setPassword('X');
         $user2->setRoles([User::ROLE_PLATFORM_ADMIN]);
         $this->em->persist($user2);
         $this->em->flush();

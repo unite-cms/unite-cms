@@ -20,7 +20,7 @@ class RemoveMemberTest extends DatabaseAwareTestCase
         $org2 = new Organization();
         $org2->setTitle('Org2')->setIdentifier('org2');
         $user = new User();
-        $user->setEmail('user@example.com')->setFirstname('User')->setLastname('User')->setPassword('XXX');
+        $user->setEmail('user@example.com')->setName('User')->setPassword('XXX');
         $domain1 = new Domain();
         $domain2 = new Domain();
         $domain1->setTitle('Domain')->setIdentifier('domain');

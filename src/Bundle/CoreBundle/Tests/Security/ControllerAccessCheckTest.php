@@ -97,9 +97,12 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
         // TODO: Add some domain and organization members
         $this->users['domain_editor'] = new User();
-        $this->users['domain_editor']->setEmail('domain_editor@example.com')->setFirstname(
-            'Domain Editor'
-        )->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->users['domain_editor']
+            ->setEmail('domain_editor@example.com')
+            ->setName('Domain Editor')
+            ->setRoles([User::ROLE_USER])
+            ->setPassword('XXX');
+
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
@@ -108,9 +111,12 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->users['domain_editor']->addDomain($domainEditorDomainMember);
 
         $this->users['domain_admin'] = new User();
-        $this->users['domain_admin']->setEmail('domain_admin@example.com')->setFirstname('Domain Admin')->setLastname(
-            'Example'
-        )->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->users['domain_admin']
+            ->setEmail('domain_admin@example.com')
+            ->setName('Domain Admin')
+            ->setRoles([User::ROLE_USER])
+            ->setPassword('XXX');
+
         $domainAdminOrgMember = new OrganizationMember();
         $domainAdminOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainAdminDomainMember = new DomainMember();
@@ -120,25 +126,33 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
 
         $this->users['organization_member'] = new User();
-        $this->users['organization_member']->setEmail('organization_member@example.com')->setFirstname(
-            'Organization Member'
-        )->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->users['organization_member']
+            ->setEmail('organization_member@example.com')
+            ->setName('Organization Member')
+            ->setRoles([User::ROLE_USER])
+            ->setPassword('XXX');
+
         $orgMemberOrgMember = new OrganizationMember();
         $orgMemberOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $this->users['organization_member']->addOrganization($orgMemberOrgMember);
 
         $this->users['organization_admin'] = new User();
-        $this->users['organization_admin']->setEmail('organization_admin@example.com')->setFirstname(
-            'Organization Admin'
-        )->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->users['organization_admin']
+            ->setEmail('organization_admin@example.com')
+            ->setName('Organization Admin')
+            ->setRoles([User::ROLE_USER])
+            ->setPassword('XXX');
+
         $orgAdminOrgMember = new OrganizationMember();
         $orgAdminOrgMember->setRoles([Organization::ROLE_ADMINISTRATOR])->setOrganization($this->organization);
         $this->users['organization_admin']->addOrganization($orgAdminOrgMember);
 
         $this->users['platform'] = new User();
-        $this->users['platform']->setEmail('platform@example.com')->setFirstname('Platform')->setLastname(
-            'Example'
-        )->setRoles([User::ROLE_PLATFORM_ADMIN])->setPassword('XXX');
+        $this->users['platform']
+            ->setEmail('platform@example.com')
+            ->setName('Platform')
+            ->setRoles([User::ROLE_PLATFORM_ADMIN])
+            ->setPassword('XXX');
 
         foreach ($this->users as $user) {
             $this->em->persist($user);

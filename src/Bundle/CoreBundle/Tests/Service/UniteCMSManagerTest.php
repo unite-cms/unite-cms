@@ -161,7 +161,7 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $sTitle = $this->domain->getSettingTypes()->first()->getTitle();
 
         $user = new User();
-        $user->setFirstname('XXX')->setLastname('XXX')->setPassword('XXX')->setEmail('xxx@xxx.com');
+        $user->setName('User')->setPassword('XXX')->setEmail('xxx@xxx.com');
         $orgMember = new OrganizationMember();
         $orgMember->setUser($user);
         $this->organization->addMember($orgMember);

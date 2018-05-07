@@ -17,7 +17,7 @@ class AddMemberTest extends DatabaseAwareTestCase
         $org1 = new Organization();
         $org1->setTitle('Org1')->setIdentifier('org1');
         $user = new User();
-        $user->setEmail('user@example.com')->setFirstname('User')->setLastname('User')->setPassword('XXX');
+        $user->setEmail('user@example.com')->setName('User')->setPassword('XXX');
         $domain1 = new Domain();
         $domain1->setTitle('Domain')->setIdentifier('domain');
         $org1->addDomain($domain1);
@@ -49,7 +49,7 @@ class AddMemberTest extends DatabaseAwareTestCase
         $org1 = new Organization();
         $org1->setTitle('Org1')->setIdentifier('org1');
         $user = new User();
-        $user->setEmail('user@example.com')->setFirstname('User')->setLastname('User')->setPassword('XXX');
+        $user->setEmail('user@example.com')->setName('User')->setPassword('XXX');
         $domain1 = new Domain();
         $domain1->setTitle('Domain')->setIdentifier('domain');
         $org1->addDomain($domain1);

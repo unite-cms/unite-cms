@@ -89,7 +89,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $org2->setTitle('Org2')->setIdentifier('org2');
 
         $user1 = new User();
-        $user1->setEmail('user1d@example.com')->setFirstname('User1')->setLastname('User1')->setPassword('XXX');
+        $user1->setEmail('user1d@example.com')->setName('User 1')->setPassword('XXX');
         $this->assertCount(0, $user1->getOrganizations());
         $org1Member = new OrganizationMember();
         $org1Member->setOrganization($org1);
@@ -158,7 +158,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $org1->setTitle('Org1')->setIdentifier('org1');
 
         $user1 = new User();
-        $user1->setEmail('user1d@example.com')->setFirstname('User1')->setLastname('User1')->setPassword('XXX');
+        $user1->setEmail('user1d@example.com')->setName('User 1')->setPassword('XXX');
         $org1Member = new OrganizationMember();
         $org1Member->setOrganization($org1);
         $user1->addOrganization($org1Member);

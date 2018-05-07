@@ -32,12 +32,11 @@ class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
 
         $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:User')->findAll());
 
-        $firstName = $this->generateRandomMachineName(10);
-        $lastName = $this->generateRandomMachineName(10);
+        $name = $this->generateRandomMachineName(10);
         $email = $this->generateRandomMachineName(10) . '@' . $this->generateRandomMachineName(10) . '.com';
         $password = $this->generateRandomMachineName(10);
 
-        $commandTester->setInputs(array($firstName, $lastName, $email, $password, 'Y'));
+        $commandTester->setInputs(array($name, $email, $password, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
 
         // Verify output
@@ -46,15 +45,14 @@ class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
         // Verify creation
         $users = $this->em->getRepository('UniteCMSCoreBundle:User')->findAll();
         $this->assertCount(1, $users);
-        $this->assertEquals($firstName, $users[0]->getFirstname());
-        $this->assertEquals($lastName, $users[0]->getLastname());
+        $this->assertEquals($name, $users[0]->getName());
         $this->assertEquals($email, $users[0]->getEmail());
         $this->assertTrue($this->container->get('security.password_encoder')->isPasswordValid($users[0], $password));
         $this->assertContains(User::ROLE_PLATFORM_ADMIN, $users[0]->getRoles());
 
 
         // Now let's try to create another user with the same email.
-        $commandTester->setInputs(array($firstName, $lastName, $email, $password, 'Y'));
+        $commandTester->setInputs(array($name, $email, $password, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
         $this->assertContains('There was an error while creating the user', $commandTester->getDisplay());
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:User')->findAll());
