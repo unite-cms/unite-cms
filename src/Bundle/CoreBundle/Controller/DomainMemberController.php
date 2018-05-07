@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -225,28 +226,55 @@ class DomainMemberController extends Controller
      */
     public function updateAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
     {
-        $form = $this->createFormBuilder($member)
-            ->add(
+        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
+            $memberType,
+            $member,
+            ['attr' => ['class' => 'uk-form-vertical']]
+        );
+
+        $form->add(
                 'roles',
                 ChoiceType::class,
                 ['label' => 'Roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions()]
             )
-            ->add('submit', SubmitType::class, ['label' => 'Update'])
-            ->getForm();
+            ->add('submit', SubmitType::class, ['label' => 'Update']);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute(
-                'unitecms_core_domainmember_index',
-                [
-                    'organization' => $organization->getIdentifier(),
-                    'domain' => $domain->getIdentifier(),
-                    'member_type' => $memberType->getIdentifier(),
-                ]
-            );
+            $data = $form->getData();
+
+            if (isset($data['roles'])) {
+                $member->setRoles($data['roles']);
+                unset($data['roles']);
+            }
+
+            $member->setData($data);
+
+            // If member field errors were found, map them to the form.
+            $violations = $this->get('validator')->validate($member);
+
+            if (count($violations) > 0) {
+                $violationMapper = new ViolationMapper();
+                foreach ($violations as $violation) {
+                    $violationMapper->mapViolation($violation, $form);
+                }
+
+            // If member is valid.
+            } else {
+
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirectToRoute(
+                    'unitecms_core_domainmember_index',
+                    [
+                        'organization' => $organization->getIdentifier(),
+                        'domain' => $domain->getIdentifier(),
+                        'member_type' => $memberType->getIdentifier(),
+                    ]
+                );
+            }
         }
 
         return $this->render(
