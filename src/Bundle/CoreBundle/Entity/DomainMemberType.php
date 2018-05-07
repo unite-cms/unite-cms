@@ -1,0 +1,457 @@
+<?php
+
+namespace UniteCMS\CoreBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\Type;
+use JMS\Serializer\Annotation\Accessor;
+
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+
+/**
+ * DomainMemberType
+ *
+ * @ORM\Table(name="domain_member_type")
+ * @ORM\Entity(repositoryClass="UniteCMS\CoreBundle\Repository\DomainMemberTypeRepository")
+ * @UniqueEntity(fields={"identifier", "domain"}, message="validation.identifier_already_taken")
+ * @ExclusionPolicy("all")
+ */
+class DomainMemberType implements Fieldable
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="bigint")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @ORM\Column(name="title", type="string", length=255)
+     * @Expose
+     */
+    private $title;
+
+    /**
+     * @var string
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
+     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\DomainMemberType::RESERVED_IDENTIFIERS")
+     * @ORM\Column(name="identifier", type="string", length=255)
+     * @Expose
+     */
+    private $identifier;
+
+    /**
+     * @var string
+     * @ORM\Column(name="description", type="text", nullable=true)
+     * @Expose
+     */
+    private $description;
+
+    /**
+     * @var string
+     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="validation.invalid_characters")
+     * @ORM\Column(name="icon", type="string", length=255, nullable=true)
+     * @Expose
+     */
+    private $icon;
+
+    /**
+     * @var string
+     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @ORM\Column(name="content_label", type="string", length=255, nullable=true)
+     * @Expose
+     */
+    private $domainMemberLabel = '{type}: {accessor}';
+
+    /**
+     * @var Domain
+     * @Assert\NotBlank(message="validation.not_blank")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="domainMemberTypes")
+     */
+    private $domain;
+
+    /**
+     * @var DomainMemberTypeField[]
+     * @Assert\Valid()
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMemberTypeField>")
+     * @Accessor(getter="getFields",setter="setFields")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberTypeField", mappedBy="domainMemberType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
+     * @ORM\OrderBy({"weight": "ASC"})
+     * @Expose
+     */
+    private $fields;
+
+    /**
+     * @var int
+     * @ORM\Column(name="weight", type="integer")
+     */
+    private $weight;
+
+    /**
+     * @var DomainMember[]|ArrayCollection
+     * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMember>")
+     * @Assert\Valid()
+     *
+     * TODO: Checking that all the domain members are valid will become very expensive for large sets. We most likely will need another approach.
+     *
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
+     */
+    private $domainMembers;
+
+    /**
+     * @var DomainInvitation[]
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
+     */
+    private $invites;
+
+    public function __construct()
+    {
+        $this->fields = new ArrayCollection();
+        $this->invites = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return ''.$this->title;
+    }
+
+    /**
+     * This function sets all structure fields from the given entity and calls setFromEntity for all updated
+     * views and fields.
+     *
+     * @param DomainMemberType $domainMemberType
+     * @return DomainMemberType
+     */
+    public function setFromEntity(DomainMemberType $domainMemberType)
+    {
+        $this
+            ->setTitle($domainMemberType->getTitle())
+            ->setIdentifier($domainMemberType->getIdentifier())
+            ->setWeight($domainMemberType->getWeight())
+            ->setIcon($domainMemberType->getIcon())
+            ->setDomainMemberLabel($domainMemberType->getDomainMemberLabel())
+            ->setDescription($domainMemberType->getDescription());
+
+        // Fields to delete
+        foreach (array_diff($this->getFields()->getKeys(), $domainMemberType->getFields()->getKeys()) as $field) {
+            $this->getFields()->remove($field);
+        }
+
+        // Fields to add
+        foreach (array_diff($domainMemberType->getFields()->getKeys(), $this->getFields()->getKeys()) as $field) {
+            $this->addField($domainMemberType->getFields()->get($field));
+        }
+
+        // Fields to update
+        foreach (array_intersect($domainMemberType->getFields()->getKeys(), $this->getFields()->getKeys()) as $field) {
+            $this->getFields()->get($field)->setFromEntity($domainMemberType->getFields()->get($field));
+        }
+
+        return $this;
+    }
+
+    /**
+     * After deserializing a domain member type, field weights must be initialized.
+     *
+     * @Serializer\PostDeserialize
+     */
+    public function initWeight() {
+        $weight = 0;
+
+        foreach($this->getFields() as $field) {
+            $field->setWeight($weight);
+            $weight++;
+        }
+    }
+
+    /**
+     * Set id
+     *
+     * @param $id
+     *
+     * @return DomainMemberType
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set title
+     *
+     * @param string $title
+     *
+     * @return DomainMemberType
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set identifier
+     *
+     * @param string $identifier
+     *
+     * @return DomainMemberType
+     */
+    public function setIdentifier($identifier)
+    {
+        $this->identifier = $identifier;
+
+        return $this;
+    }
+
+    /**
+     * Get identifier
+     *
+     * @return string
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return DomainMemberType
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set icon
+     *
+     * @param string $icon
+     *
+     * @return DomainMemberType
+     */
+    public function setIcon($icon)
+    {
+        $this->icon = $icon;
+
+        return $this;
+    }
+
+    /**
+     * Get icon
+     *
+     * @return string
+     */
+    public function getIcon()
+    {
+        return $this->icon;
+    }
+
+    /**
+     * @param string $domainMemberLabel
+     *
+     * @return DomainMemberType
+     */
+    public function setDomainMemberLabel($domainMemberLabel)
+    {
+        $this->domainMemberLabel = $domainMemberLabel;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDomainMemberLabel()
+    {
+        return $this->domainMemberLabel;
+    }
+
+    /**
+     * @return Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param Domain $domain
+     *
+     * @return DomainMemberType
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+        $domain->addDomainMemberType($this);
+
+        return $this;
+    }
+
+    /**
+     * @return DomainMemberTypeField[]|ArrayCollection
+     */
+    public function getFields()
+    {
+        return $this->fields;
+    }
+
+    /**
+     * @param DomainMemberTypeField[]|ArrayCollection $fields
+     *
+     * @return DomainMemberType
+     */
+    public function setFields($fields)
+    {
+        $this->fields->clear();
+        foreach ($fields as $field) {
+            $this->addField($field);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param FieldableField $field
+     *
+     * @return DomainMemberType
+     */
+    public function addField(FieldableField $field)
+    {
+        if (!$field instanceof DomainMemberTypeField) {
+            throw new \InvalidArgumentException("'$field' is not a DomainMemberTypeField.");
+        }
+
+        if (!$this->fields->containsKey($field->getIdentifier())) {
+            $this->fields->set($field->getIdentifier(), $field);
+            $field->setDomainMemberType($this);
+
+            if($field->getWeight() === null) {
+                $field->setWeight($this->fields->count() - 1);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return null|int
+     */
+    public function getWeight()
+    {
+        return $this->weight;
+    }
+
+    /**
+     * @param int $weight
+     * @return DomainMemberType
+     */
+    public function setWeight($weight)
+    {
+        $this->weight = $weight;
+
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|DomainMember[]
+     */
+    public function getDomainMembers()
+    {
+        return $this->domainMembers;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRootEntity(): Fieldable
+    {
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIdentifierPath($delimiter = '/')
+    {
+        return $this->getIdentifier();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getParentEntity()
+    {
+        return null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLocales(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return DomainInvitation[]|ArrayCollection
+     */
+    public function getInvites()
+    {
+        return $this->invites;
+    }
+}
+

@@ -102,19 +102,24 @@ class Domain
     private $settingTypes;
 
     /**
+     * @var DomainMemberType[]
+     * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMemberType>")
+     * @Accessor(getter="getDomainMemberTypes",setter="setDomainMemberTypes")
+     * @Assert\Count(min="1", minMessage="validation.member_type_required")
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
+     * @ORM\OrderBy({"weight": "ASC"})
+     * @Expose
+     */
+    private $domainMemberTypes;
+
+    /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $members;
-
-    /**
-     * @var DomainInvitation[]
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domain", fetch="EXTRA_LAZY")
-     */
-    private $invites;
 
     public function __toString()
     {
@@ -127,7 +132,14 @@ class Domain
         $this->members = new ArrayCollection();
         $this->contentTypes = new ArrayCollection();
         $this->settingTypes = new ArrayCollection();
-        $this->invites = new ArrayCollection();
+        $this->domainMemberTypes = new ArrayCollection();
+
+        // Add default domain member type
+        $domainMemberType = new DomainMemberType();
+        $domainMemberType
+            ->setTitle('Users')
+            ->setIdentifier('users');
+        $this->addDomainMemberType($domainMemberType);
     }
 
     /**
@@ -193,6 +205,30 @@ class Domain
     }
 
     /**
+     * Returns domainMemberTypes that are present in this domain but not in $domain.
+     *
+     * @param Domain $domain
+     * @param bool $objects , return keys or objects
+     *
+     * @return \UniteCMS\CoreBundle\Entity\DomainMemberType[]
+     */
+    public function getDomainMemberTypesDiff(Domain $domain, $objects = false)
+    {
+        $keys = array_diff($this->getDomainMemberTypes()->getKeys(), $domain->getDomainMemberTypes()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getDomainMemberTypes()->get($key);
+        }
+
+        return $objects;
+    }
+
+    /**
      * This function sets all structure fields from the given entity and calls setFromEntity for all updated
      * contentTypes and settingTypes.
      *
@@ -237,6 +273,21 @@ class Domain
             $this->getSettingTypes()->get($st)->setFromEntity($domain->getSettingTypes()->get($st));
         }
 
+        // DomainMemberTypes to delete
+        foreach ($this->getDomainMemberTypesDiff($domain) as $dmt) {
+            $this->getDomainMemberTypes()->remove($dmt);
+        }
+
+        // DomainMemberTypes to add
+        foreach (array_diff($domain->getDomainMemberTypes()->getKeys(), $this->getDomainMemberTypes()->getKeys()) as $dmt) {
+            $this->addDomainMemberType($domain->getDomainMemberTypes()->get($dmt));
+        }
+
+        // DomainMemberTypes to update
+        foreach (array_intersect($domain->getDomainMemberTypes()->getKeys(), $this->getDomainMemberTypes()->getKeys()) as $dmt) {
+            $this->getDomainMemberTypes()->get($dmt)->setFromEntity($domain->getDomainMemberTypes()->get($dmt));
+        }
+
         return $this;
     }
 
@@ -258,6 +309,13 @@ class Domain
 
         foreach($this->getSettingTypes() as $settingType) {
             $settingType->setWeight($weight);
+            $weight++;
+        }
+
+        $weight = 0;
+
+        foreach($this->getDomainMemberTypes() as $domainMemberType) {
+            $domainMemberType->setWeight($weight);
             $weight++;
         }
     }
@@ -485,6 +543,48 @@ class Domain
     }
 
     /**
+     * @return DomainMemberType[]|ArrayCollection
+     */
+    public function getDomainMemberTypes()
+    {
+        return $this->domainMemberTypes;
+    }
+
+    /**
+     * @param DomainMemberType[] $domainMemberTypes
+     *
+     * @return Domain
+     */
+    public function setDomainMemberTypes($domainMemberTypes)
+    {
+        $this->domainMemberTypes->clear();
+        foreach ($domainMemberTypes as $domainMemberType) {
+            $this->addDomainMemberType($domainMemberType);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param DomainMemberType $domainMemberType
+     *
+     * @return Domain
+     */
+    public function addDomainMemberType(DomainMemberType $domainMemberType)
+    {
+        if (!$this->domainMemberTypes->contains($domainMemberType)) {
+            $this->domainMemberTypes->set($domainMemberType->getIdentifier(), $domainMemberType);
+            $domainMemberType->setDomain($this);
+
+            if($domainMemberType->getWeight() === null) {
+                $domainMemberType->setWeight($this->domainMemberTypes->count() - 1);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return DomainMember[]|ArrayCollection
      */
     public function getMembers()
@@ -520,14 +620,6 @@ class Domain
         }
 
         return $this;
-    }
-
-    /**
-     * @return DomainInvitation[]|ArrayCollection
-     */
-    public function getInvites()
-    {
-        return $this->invites;
     }
 }
 

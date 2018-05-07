@@ -17,6 +17,7 @@
                         <th>{{ knp_pagination_sortable(users, 'Lastname', 'user.lastname') }}</th>
                         <th>{{ knp_pagination_sortable(users, 'Email', 'user.email') }}</th>
                         <th>{{ knp_pagination_sortable(users, 'Roles', 'user.roles') }}</th>
+                        <th>Domains</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -27,6 +28,11 @@
                             <td>{{ member.user.lastname }}</td>
                             <td>{{ member.user.email }}</td>
                             <td>{{ member.roles|join(', ') }}</td>
+                            <td>
+                                {% for domainMember in member.user.domains %}
+                                    {{ domainMember.domainMemberType }}<br />
+                                {% endfor %}
+                            </td>
                             <td>
                                 <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                                 <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">

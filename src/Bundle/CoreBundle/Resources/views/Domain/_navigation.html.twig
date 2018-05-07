@@ -33,12 +33,6 @@
                 <div>
                     <ul class="uk-nav uk-dropdown-nav">
                         <li>
-                            <a href="{{ url('unitecms_core_domainmember_index', { organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
-                                <i class="uk-margin-small-right" data-feather="users"></i>
-                                {% trans %}domain.menu.manage.members{% endtrans %}
-                            </a>
-                        </li>
-                        <li>
                             <a href="{{ url('unitecms_core_domain_update', {organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
                                 <i class="uk-margin-small-right" data-feather="settings"></i>
                                 {% trans %}domain.menu.manage.update{% endtrans %}
@@ -107,6 +101,26 @@
                 {% endif %}
             {% endfor %}
         {% endif %}
+
+        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), unite.domain) %}
+            <li class="uk-nav-header">{% trans %}domain.menu.domain_member_types.headline{% endtrans %}</li>
+                {% for type in unite.domain.domainMemberTypes %}
+                    <li><a {% spaceless %}
+                            {% if memberType is defined and memberType.identifier == type.identifier %}
+                                class="uk-active"
+                            {% endif %}
+                        {% endspaceless %} href="{{ path('unitecms_core_domainmember_index', {
+                            organization: unite.organization.identifier,
+                            domain: unite.domain.identifier,
+                            member_type: type.identifier
+                        }) }}">
+                            <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'users' }}"></i>
+                            {{ type }}
+                        </a>
+                    </li>
+            {% endfor %}
+        {% endif %}
+
         {% if unite.domain.settingTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
             {% for type in unite.domain.settingTypes %}

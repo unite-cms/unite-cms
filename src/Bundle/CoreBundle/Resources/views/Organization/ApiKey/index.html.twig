@@ -17,6 +17,7 @@
             <tr>
                 <th>{{ knp_pagination_sortable(apiKeys, 'Name', 'apiKey.name') }}</th>
                 <th>{{ knp_pagination_sortable(apiKeys, 'Created', 'apiKey.created') }}</th>
+                <th>Domains</th>
                 <th>Token</th>
                 <th>Actions</th>
             </tr>
@@ -26,6 +27,11 @@
                 <tr>
                     <td>{{ apiKey.name }}</td>
                     <td>{{ apiKey.created|date }}</td>
+                    <td>
+                        {% for domainMember in apiKey.domains %}
+                            {{ domainMember.domainMemberType }}<br />
+                        {% endfor %}
+                    </td>
                     <td>
                         <div class="uk-margin">
                             <span class="uk-label">{{ apiKey.token }}</span>

@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\RequestStack;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -117,7 +118,7 @@ class UniteCMSManager
             $this->organization->addDomain($domain);
         }
 
-        // Get contentTypes and settingTypes for the current domain.
+        // Get contentTypes, settingTypes and domainMemberTypes for the current domain.
         if ($domainIdentifier) {
 
             // Try to find the current domain.
@@ -184,6 +185,23 @@ class UniteCMSManager
                     $row['icon']
                 )->setPermissions($row['permissions']);
                 $this->domain->addSettingType($settingType);
+            }
+
+            $this->domain->setDomainMemberTypes([]);
+            $data = $this->em->createQueryBuilder()
+                ->select('dmt.id', 'dmt.identifier', 'dmt.title', 'dmt.icon')
+                ->from('UniteCMSCoreBundle:DomainMemberType', 'dmt')
+                ->leftJoin('dmt.domain', 'd')
+                ->where('dmt.domain = :domain')
+                ->andWhere('d.organization = :organization')
+                ->orderBy('dmt.weight')
+                ->getQuery()->execute(['organization' => $this->organization, 'domain' => $this->domain]);
+
+            foreach ($data as $row) {
+                $domainMemberType = new DomainMemberType();
+                $domainMemberType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon(
+                    $row['icon']);
+                $this->domain->addDomainMemberType($domainMemberType);
             }
         }
     }
