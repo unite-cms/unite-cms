@@ -56,13 +56,13 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->refresh($this->organization);
 
         $this->admin = new User();
-        $this->admin->setEmail('admin@example.com')->setFirstname('Domain Admin')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->admin->setEmail('admin@example.com')->setName('Domain Admin')->setRoles([User::ROLE_USER])->setPassword('XXX');
         $domainAdminOrgMember = new OrganizationMember();
         $domainAdminOrgMember->setRoles([Organization::ROLE_ADMINISTRATOR])->setOrganization($this->organization);
         $this->admin->addOrganization($domainAdminOrgMember);
 
         $this->editor = new User();
-        $this->editor->setEmail('editor@example.com')->setFirstname('Domain Editor')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->editor->setEmail('editor@example.com')->setName('Domain Editor')->setRoles([User::ROLE_USER])->setPassword('XXX');
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $this->editor->addOrganization($domainEditorOrgMember);
@@ -207,7 +207,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Test delete domain not allowed.
         $domainUser = new User();
-        $domainUser->setEmail('example@example.com')->setFirstname('Example')->setLastname('Example')->setPassword('XXX');
+        $domainUser->setEmail('example@example.com')->setName('Example')->setPassword('XXX');
         $domainUserOrg = new OrganizationMember();
         $domainUserOrg->setUser($domainUser)->setOrganization($domain->getOrganization());
         $domainUserDomain = new DomainMember();

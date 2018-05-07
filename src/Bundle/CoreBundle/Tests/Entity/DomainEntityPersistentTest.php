@@ -154,7 +154,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $organizationMember = new OrganizationMember();
         $organizationMember->setOrganization($org);
         $org->setIdentifier('org1')->setTitle('Org1');
-        $user->setLastname('1')->setFirstname('User')->setEmail('user1@example.com')->setPassword(
+        $user->setName('User 1')->setEmail('user1@example.com')->setPassword(
             'password'
         )->addOrganization($organizationMember);
         $domainMember = new DomainMember();
@@ -326,8 +326,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             ->setIdentifier('domain2')
             ->setOrganization($org1);
         $user1->setEmail('user1d@example.com')
-            ->setFirstname('User1')
-            ->setLastname('User1')
+            ->setName('User 1')
             ->setPassword('XXX');
 
         // A user can only be member of a domain, if he_she is member of the organization.
@@ -370,8 +369,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             ->setIdentifier('domain2')
             ->setOrganization($org1);
         $user1->setEmail('user1d@example.com')
-            ->setFirstname('User1')
-            ->setLastname('User1')
+            ->setName('User 1')
             ->setPassword('XXX');
 
         // A user cannot be member of the same organization twice.
@@ -842,7 +840,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         // Validate invite email cannot be the email address of a member of this organization.
         $user1 = new User();
-        $user1->setPassword('XXX')->setLastname('XXX')->setFirstname('XXX')->setEmail('org1user@example.com');
+        $user1->setPassword('XXX')->setName('XXX')->setEmail('org1user@example.com');
         $org1Member = new OrganizationMember();
         $org1Member->setUser($user1);
         $domain->getOrganization()->addMember($org1Member);

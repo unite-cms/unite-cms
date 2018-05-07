@@ -12,14 +12,7 @@ class Registration
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
      */
-    private $firstname;
-
-    /**
-     * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     */
-    private $lastname;
+    private $name;
 
     /**
      * @Assert\Length(min = 8, max="255", minMessage = "validation.too_short", maxMessage = "validation.too_long")
@@ -55,50 +48,26 @@ class Registration
     }
 
     /**
-     * Set firstname
+     * Set name
      *
-     * @param string $firstname
+     * @param string $name
      *
      * @return Registration
      */
-    public function setFirstname($firstname)
+    public function setName($name)
     {
-        $this->firstname = $firstname;
+        $this->name = $name;
 
         return $this;
     }
 
     /**
-     * Get firstname
+     * Get name
      *
      * @return string
      */
-    public function getFirstname()
+    public function getName()
     {
-        return $this->firstname;
-    }
-
-    /**
-     * Set lastname
-     *
-     * @param string $lastname
-     *
-     * @return Registration
-     */
-    public function setLastname($lastname)
-    {
-        $this->lastname = $lastname;
-
-        return $this;
-    }
-
-    /**
-     * Get lastname
-     *
-     * @return string
-     */
-    public function getLastname()
-    {
-        return $this->lastname;
+        return $this->name;
     }
 }

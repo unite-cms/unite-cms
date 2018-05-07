@@ -171,7 +171,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         ]));
 
         $user = new User();
-        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $user->setRoles([User::ROLE_USER])->setName('User');
         $userInDomain1 = new DomainMember();
         $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
         $user->addDomain($userInDomain1);
@@ -233,7 +233,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         );
 
         $user = new User();
-        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $user->setRoles([User::ROLE_USER])->setName('User');
         $userInDomain1 = new DomainMember();
         $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
         $user->addDomain($userInDomain1);
@@ -293,7 +293,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         );
 
         $user = new User();
-        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $user->setRoles([User::ROLE_USER])->setName('User');
         $userInDomain1 = new DomainMember();
         $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
         $user->addDomain($userInDomain1);
@@ -353,7 +353,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         );
 
         $user = new User();
-        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $user->setRoles([User::ROLE_USER])->setName('User');
         $this->container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
         );
@@ -411,7 +411,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         );
 
         $user = new User();
-        $user->setRoles([User::ROLE_USER])->setFirstname('user')->setLastname('user');
+        $user->setRoles([User::ROLE_USER])->setName('User');
         $userInDomain1 = new DomainMember();
         $userInDomain1->setRoles([Domain::ROLE_PUBLIC])->setDomain($ctField->getContentType()->getDomain());
         $user->addDomain($userInDomain1);

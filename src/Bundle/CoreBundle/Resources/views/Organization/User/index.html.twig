@@ -13,8 +13,7 @@
                 <table class="uk-table uk-table-justify uk-table-divider">
                     <thead>
                     <tr>
-                        <th>{{ knp_pagination_sortable(users, 'Firstname', 'user.firstname') }}</th>
-                        <th>{{ knp_pagination_sortable(users, 'Lastname', 'user.lastname') }}</th>
+                        <th>{{ knp_pagination_sortable(users, 'Name', 'user.name') }}</th>
                         <th>{{ knp_pagination_sortable(users, 'Email', 'user.email') }}</th>
                         <th>{{ knp_pagination_sortable(users, 'Roles', 'user.roles') }}</th>
                         <th>Domains</th>
@@ -24,8 +23,7 @@
                     <tbody>
                     {% for member in users %}
                         <tr>
-                            <td>{{ member.user.firstname }}</td>
-                            <td>{{ member.user.lastname }}</td>
+                            <td>{{ member.user }}</td>
                             <td>{{ member.user.email }}</td>
                             <td>{{ member.roles|join(', ') }}</td>
                             <td>

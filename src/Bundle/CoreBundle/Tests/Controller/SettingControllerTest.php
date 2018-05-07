@@ -102,7 +102,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->em->refresh($this->domain);
 
         $this->editor = new User();
-        $this->editor->setEmail('editor@example.com')->setFirstname('Domain Editor')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->editor->setEmail('editor@example.com')->setName('Domain Editor')->setRoles([User::ROLE_USER])->setPassword('XXX');
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();

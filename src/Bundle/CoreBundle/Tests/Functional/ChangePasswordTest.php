@@ -48,9 +48,10 @@ class ChangePasswordTest extends DatabaseAwareTestCase
         $this->em->refresh($this->organization);
 
         $this->users['domain_editor'] = new User();
-        $this->users['domain_editor']->setEmail('domain_editor@example.com')->setFirstname(
-            'Domain Editor'
-        )->setLastname('Example')->setRoles([User::ROLE_USER])
+        $this->users['domain_editor']
+            ->setEmail('domain_editor@example.com')
+            ->setName('Domain Editor')
+            ->setRoles([User::ROLE_USER])
             ->setPassword(
                 $this->container->get('security.password_encoder')->encodePassword(
                     $this->users['domain_editor'],

@@ -81,14 +81,16 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->em->refresh($this->domain);
 
         $this->users['domain_editor'] = new User();
-        $this->users['domain_editor']->setEmail('domain_editor@example.com')->setFirstname(
-            'Domain Editor'
-        )->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword(
-            $this->container->get('security.password_encoder')->encodePassword(
-                $this->users['domain_editor'],
-                $this->userPassword
-            )
-        );
+        $this->users['domain_editor']
+            ->setEmail('domain_editor@example.com')
+            ->setName('Domain Editor')
+            ->setRoles([User::ROLE_USER])
+            ->setPassword(
+                $this->container->get('security.password_encoder')->encodePassword(
+                    $this->users['domain_editor'],
+                    $this->userPassword
+                )
+            );
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
@@ -97,14 +99,16 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->users['domain_editor']->addDomain($domainEditorDomainMember);
 
         $this->users['domain_editor2'] = new User();
-        $this->users['domain_editor2']->setEmail('domain_editor2@example.com')->setFirstname(
-            'Domain Editor'
-        )->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword(
-            $this->container->get('security.password_encoder')->encodePassword(
-                $this->users['domain_editor2'],
-                $this->userPassword
-            )
-        );
+        $this->users['domain_editor2']
+            ->setEmail('domain_editor2@example.com')
+            ->setName('Domain Editor 2')
+            ->setRoles([User::ROLE_USER])
+            ->setPassword(
+                $this->container->get('security.password_encoder')->encodePassword(
+                    $this->users['domain_editor2'],
+                    $this->userPassword
+                )
+            );
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $this->users['domain_editor2']->addOrganization($domainEditorOrgMember);
@@ -203,8 +207,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         // Try to create a new, valid user
         $form['registration[password][first]'] = "password1";
         $form['registration[password][second]'] = "password1";
-        $form['registration[firstname]'] = "First";
-        $form['registration[lastname]'] = "Last";
+        $form['registration[name]'] = "This is my name";
         $crawler = $this->client->submit($form);
 
         // Should not show a form
@@ -222,8 +225,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
             $user->getDomains()->first()->getDomain()->getIdentifier()
         );
         $this->assertEquals($invitation->getRoles(), $user->getDomains()->first()->getRoles());
-        $this->assertEquals('First', $user->getFirstname());
-        $this->assertEquals('Last', $user->getLastname());
+        $this->assertEquals('This is my name', $user->getName());
         $this->assertTrue($this->container->get('security.password_encoder')->isPasswordValid($user, 'password1'));
 
         // Also make sure, that the invitation got deleted.
