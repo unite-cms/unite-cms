@@ -32,9 +32,16 @@
                             {{ domainMember.domainMemberType }}<br />
                         {% endfor %}
                     </td>
-                    <td>
-                        <div class="uk-margin">
-                            <span class="uk-label">{{ apiKey.token }}</span>
+                    <td class="unite-token-cell">
+                        <button class="uk-button uk-button-default" type="button">
+                            <i data-feather="eye" class="uk-margin-small-right-small" width="16" height="16"></i>
+                        </button>
+                        <div uk-dropdown="mode: click">
+                            <h3>{% trans with { '%name%': apiKey.name } %}organization.api_key.token.headline{% endtrans %}</h3>
+                            <input type="text" disabled class="uk-form-small uk-form-width-large" value="{{ apiKey.token }}" />
+                            <p class="uk-text-small"><strong>ENDPOINT: </strong> https://{BASEURL}/{{ organization.identifier }}/{DOMAIN}/api</p>
+                            <p class="uk-text-small"><strong>HEADER: </strong> <em>Authentication=TOKEN</em> <span class="uk-badge">Recommended</span></p>
+                            <p class="uk-text-small"><strong>QUERY: </strong> <em>token=TOKEN</em></p>
                         </div>
                     </td>
                     <td>
