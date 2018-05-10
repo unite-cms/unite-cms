@@ -9,6 +9,7 @@
         </a>
         <h2 class="uk-flex-1">{% trans with {'%user%': member.user|escape } %}organization.user.update.headline{% endtrans %}</h2>
     </header>
-    {{ form(form) }}
+    {{ form_start(form) }}
+    {{ form_rest(form) }}
 </article>
 {% endblock content %}

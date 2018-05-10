@@ -100,6 +100,35 @@ class OrganizationMember
     }
 
     /**
+     * Allows to get a single admin or user role. This is helpful for form components, that cannot deal with arrays.
+     *
+     * @return string
+     */
+    public function getSingleRole() : string {
+        if(in_array(Organization::ROLE_ADMINISTRATOR, $this->getRoles())) {
+            return Organization::ROLE_ADMINISTRATOR;
+        }
+
+        return Organization::ROLE_USER;
+    }
+
+    /**
+     * Allows to set a single admin or user role. This is helpful for form components, that cannot deal with arrays.
+     *
+     * @param string $role, Organization::ROLE_ADMINISTRATOR or Organization::ROLE_USER.
+     * @return $this
+     */
+    public function setSingleRole(string $role) {
+        if($role === Organization::ROLE_ADMINISTRATOR) {
+            $this->setRoles([Organization::ROLE_ADMINISTRATOR]);
+        } else {
+            $this->setRoles([Organization::ROLE_USER]);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return \UniteCMS\CoreBundle\Entity\Organization
      */
     public function getOrganization()

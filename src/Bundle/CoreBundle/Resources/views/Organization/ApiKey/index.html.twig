@@ -12,12 +12,12 @@
     </header>
 
     <div class="unite-card-table">
-        <table class="uk-table uk-table-justify uk-table-divider">
+        <table class="uk-table uk-table-justify uk-table-divider uk-table-middle">
             <thead>
             <tr>
-                <th>{{ knp_pagination_sortable(apiKeys, 'Name', 'apiKey.name') }}</th>
-                <th>{{ knp_pagination_sortable(apiKeys, 'Created', 'apiKey.created') }}</th>
-                <th>Domains</th>
+                <th>Name</th>
+                <th>Created</th>
+                <th>Memberships</th>
                 <th>Token</th>
                 <th>Actions</th>
             </tr>
@@ -29,12 +29,31 @@
                     <td>{{ apiKey.created|date }}</td>
                     <td>
                         {% for domainMember in apiKey.domains %}
-                            {{ domainMember.domainMemberType }}<br />
+                            <span class="uk-badge split">
+                                <span>{{ domainMember.domain }}</span>
+                                <span>{{ domainMember.domainMemberType }}</span>
+                            </span>
+                            <br />
                         {% endfor %}
                     </td>
-                    <td>
-                        <div class="uk-margin">
-                            <span class="uk-label">{{ apiKey.token }}</span>
+                    <td class="unite-token-cell">
+                        <button class="uk-button uk-button-default" type="button" uk-toggle="target: #key-modal-{{ apiKey.id }}">
+                            <i data-feather="eye" class="uk-margin-small-right-small" width="16" height="16"></i>
+                        </button>
+                        <div id="key-modal-{{ apiKey.id }}" class="uk-flex-top" uk-modal>
+                            <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
+                                <button class="uk-modal-close-default" type="button" uk-close></button>
+                                <h2 class="uk-modal-title">{% trans with { '%name%': apiKey.name } %}organization.api_key.token.headline{% endtrans %}</h2>
+
+                                <unite-cms-core-api-token-field token="{{ apiKey.token }}" success-message="{% trans %}organization.api_key.token.copied{% endtrans %}"></unite-cms-core-api-token-field>
+
+                                <pre><strong>ENDPOINT: </strong> https://{BASEURL}/{{ organization.identifier }}/{DOMAIN}/api
+
+<strong>HEADER: </strong> <em>Authentication=TOKEN</em>
+= or =
+<strong>QUERY: </strong> <em>token=TOKEN</em></pre>
+
+                            </div>
                         </div>
                     </td>
                     <td>

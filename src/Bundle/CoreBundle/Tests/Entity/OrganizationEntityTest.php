@@ -36,4 +36,20 @@ class OrganizationEntityTest extends TestCase
         // test if users where added
         $this->assertCount(2, $org1->getMembers());
     }
+
+    public function testOrganizationMemberSingleRoleMethods()
+    {
+        $orgMember = new OrganizationMember();
+        $orgMember->setRoles([Organization::ROLE_USER, Organization::ROLE_ADMINISTRATOR]);
+        $this->assertEquals([Organization::ROLE_USER, Organization::ROLE_ADMINISTRATOR], $orgMember->getRoles());
+        $this->assertEquals(Organization::ROLE_ADMINISTRATOR, $orgMember->getSingleRole());
+
+        $orgMember->setSingleRole(Organization::ROLE_USER);
+        $this->assertEquals([Organization::ROLE_USER], $orgMember->getRoles());
+        $this->assertEquals(Organization::ROLE_USER, $orgMember->getSingleRole());
+
+        $orgMember->setSingleRole(Organization::ROLE_ADMINISTRATOR);
+        $this->assertEquals([Organization::ROLE_ADMINISTRATOR], $orgMember->getRoles());
+        $this->assertEquals(Organization::ROLE_ADMINISTRATOR, $orgMember->getSingleRole());
+    }
 }
