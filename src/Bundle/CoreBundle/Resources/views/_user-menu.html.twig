@@ -5,6 +5,7 @@
     </button>
     <div uk-dropdown="mode: click; pos: top-center">
         <ul class="uk-nav uk-dropdown-nav">
+            <li class="uk-nav-header uk-hidden@m">{{ app.user }}</li>
             <li><a href="{{ path('unitecms_core_profile_update') }}">
                 <i class="uk-margin-small-right" data-feather="user"></i>
                     {% trans %}user_menu.edit_profile{% endtrans %}
