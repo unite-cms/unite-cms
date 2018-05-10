@@ -90,6 +90,30 @@
     <{{ tag }} {{ block('widget_attributes') }} value="{{ value }}"></{{ tag }}>
 {%- endblock unite_cms_web_component_widget -%}
 
+{%- block unite_cms_choice_cards_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' choice-cards-type uk-grid-small uk-grid-match uk-flex-center')|trim}) %}
+    <div {{ block('widget_container_attributes') }} uk-grid>
+        {%- for child in form %}
+            <div class="uk-flex-1">
+                <label class="uk-card uk-card-hover choice-card uk-card-default" for="{{ child.vars.id }}">
+                    <div class="uk-card-body">
+                        {% if child.vars.attr.icon is defined %}
+                            <i data-feather="{{ child.vars.attr.icon }}" width="50" height="50"></i><br />
+                        {% endif %}
+                        <h3>{{ child.vars.label }}</h3>
+                        {% if child.vars.attr.description is defined %}
+                            <p>{{ child.vars.attr.description }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="uk-card-footer">
+                        {{- form_widget(child) -}}
+                    </div>
+                </label>
+            </div>
+        {% endfor -%}
+    </div>
+{%- endblock unite_cms_choice_cards_widget -%}
+
 {%- block form_errors -%}
     {%- if errors|length > 0 -%}
         {%- for error in errors -%}

@@ -7,12 +7,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Form\ChoiceCardsType;
+use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
 
 class OrganizationUserController extends Controller
 {
@@ -54,13 +55,28 @@ class OrganizationUserController extends Controller
     public function updateAction(Organization $organization, OrganizationMember $member, Request $request)
     {
         $available_roles = [
-            Organization::ROLE_USER => Organization::ROLE_USER,
-            Organization::ROLE_ADMINISTRATOR => Organization::ROLE_ADMINISTRATOR,
+            new ChoiceCardOption(
+                Organization::ROLE_USER,
+                'User',
+                'Users can only manage content in domains, they are invited to.',
+                'user'
+            ),
+            new ChoiceCardOption(
+                Organization::ROLE_ADMINISTRATOR,
+                'Administrator',
+                'Administrators have access to all domains and can manage users and api keys.',
+                'command'
+            ),
         ];
 
-        $form = $this->createFormBuilder($member)
-            ->add('roles', ChoiceType::class, ['label' => 'Roles', 'multiple' => true, 'choices' => $available_roles])
-            ->add('submit', SubmitType::class, ['label' => 'Update'])
+        $form = $this->createFormBuilder($member, ['attr' => ['class' => 'uk-form-vertical']])
+            ->add('singleRole', ChoiceCardsType::class, [
+                'label' => 'organization.user.update.roles.label',
+                'multiple' => false,
+                'expanded' => true,
+                'choices' => $available_roles,
+            ])
+            ->add('submit', SubmitType::class, ['label' => 'organization.user.update.form.submit'])
             ->getForm();
 
         $form->handleRequest($request);
