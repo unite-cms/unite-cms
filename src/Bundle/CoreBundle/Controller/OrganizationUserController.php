@@ -102,7 +102,10 @@ class OrganizationUserController extends Controller
     public function deleteAction(Organization $organization, OrganizationMember $member, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Remove'])->getForm();
+            ->add('submit', SubmitType::class, [
+                'label' => 'organization.user.delete.form.submit',
+                'attr' => ['class' => 'uk-button-danger'
+            ]])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

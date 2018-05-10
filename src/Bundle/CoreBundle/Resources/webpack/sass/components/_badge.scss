@@ -1,13 +1,22 @@
 
-.uk-badge.split {
+.uk-badge {
   display: inline-block;
-  padding: 0;
-  background: map-get($colors, grey);
-  overflow: hidden;
-  font-size: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
   height: auto;
   min-height: 0;
-  text-transform: uppercase;
+  overflow: hidden;
+  padding: 0 8px;
+
+  &.uk-badge-danger {
+    background: $global-danger-background;
+  }
+}
+
+.uk-badge.split {
+  padding: 0;
+  background: map-get($colors, grey);
+  font-size: 0;
 
   span {
     display: inline-block;
