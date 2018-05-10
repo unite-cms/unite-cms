@@ -6,6 +6,8 @@ use Symfony\Component\Validator\ConstraintViolation;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -244,6 +246,43 @@ class FieldEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals(0, $field2->getWeight());
     }
 
+    public function testDomainMemberFieldWeight()
+    {
+        $domainMemberType = new DomainMemberType();
+        $domainMemberType->setIdentifier('st')->setTitle('ST');
+        $org = new Organization();
+        $org->setTitle('Org')->setIdentifier('org');
+        $domain = new Domain();
+        $domain->setOrganization($org)->setTitle('Domain')->setIdentifier('domain');
+        $domainMemberType->setDomain($domain);
+
+        $field1 = new DomainMemberTypeField();
+        $field1->setTitle('F1')->setIdentifier('f1')->setType('text')->setEntity($domainMemberType);
+        $field2 = new DomainMemberTypeField();
+        $field2->setTitle('F2')->setIdentifier('f2')->setType('text')->setEntity($domainMemberType);
+
+        $this->em->persist($org);
+        $this->em->persist($domain);
+        $this->em->flush();
+        $this->em->refresh($field1);
+        $this->em->refresh($field2);
+        $this->assertEquals(0, $field1->getWeight());
+        $this->assertEquals(1, $field2->getWeight());
+
+        // Reorder
+        $domainMemberType->getFields()->remove('f1');
+        $domainMemberType->getFields()->get('f2')->setWeight(0);
+        $field1->setWeight(null);
+
+        $domainMemberType->addField($field1);
+
+        $this->em->flush();
+        $this->em->refresh($field1);
+        $this->em->refresh($field2);
+        $this->assertEquals(1, $field1->getWeight());
+        $this->assertEquals(0, $field2->getWeight());
+    }
+
     public function testReservedIdentifiers()
     {
         $reserved = ContentTypeField::RESERVED_IDENTIFIERS;
@@ -268,10 +307,25 @@ class FieldEntityPersistentTest extends DatabaseAwareTestCase
         $stf->setTitle('title')->setIdentifier(array_pop($reserved))
             ->setType('text')
             ->setEntity(new SettingType())
-            ->getEntity()->setIdentifier('ct')->setTitle('ct')->setDomain(new Domain())
+            ->getEntity()->setIdentifier('st')->setTitle('st')->setDomain(new Domain())
             ->getDomain()->setTitle('domain')->setIdentifier('domain')->setOrganization(new Organization())
             ->getOrganization()->setIdentifier('org')->setTitle('org');;
         $errors = $this->container->get('validator')->validate($stf);
+        $this->assertCount(1, $errors);
+        $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
+
+        $reserved = DomainMemberTypeField::RESERVED_IDENTIFIERS;
+        $this->assertNotEmpty($reserved);
+
+        $dmtf = new DomainMemberTypeField();
+        $dmtf->setTitle('title')->setIdentifier(array_pop($reserved))
+            ->setType('text')
+            ->setEntity(new DomainMemberType())
+            ->getEntity()->setIdentifier('dmt')->setTitle('dmt')->setDomain(new Domain())
+            ->getDomain()->setTitle('domain')->setIdentifier('domain')->setOrganization(new Organization())
+            ->getOrganization()->setIdentifier('org')->setTitle('org');;
+        $errors = $this->container->get('validator')->validate($dmtf);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());

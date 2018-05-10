@@ -1,5 +1,5 @@
 <a{% for attr, value in options %} {{ attr }}="{{ value }}"{% endfor %}>
 {{ title }}
-    {% if options.class is defined and options.class == 'desc' %}<i data-feather="arrow-up"></i>{% endif %}
-    {% if options.class is defined and options.class == 'asc' %}<i data-feather="arrow-down"></i>{% endif %}
+    {% if options.class is defined and options.class == 'desc' %}<i data-feather="arrow-up" width="16" height="16"></i>{% endif %}
+    {% if options.class is defined and options.class == 'asc' %}<i data-feather="arrow-down" width="16" height="16"></i>{% endif %}
 </a>

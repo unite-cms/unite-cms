@@ -37,17 +37,9 @@ class User extends DomainAccessor implements UserInterface, \Serializable
      * @var string
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @ORM\Column(name="firstname", type="string", length=255)
+     * @ORM\Column(name="name", type="string", length=255)
      */
-    private $firstname;
-
-    /**
-     * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @ORM\Column(name="lastname", type="string", length=255)
-     */
-    private $lastname;
+    private $name;
 
     /**
      * @var string
@@ -94,7 +86,7 @@ class User extends DomainAccessor implements UserInterface, \Serializable
 
     public function __toString()
     {
-        return ''.$this->getFirstname().' '.$this->getLastname();
+        return ''.$this->getName();
     }
 
     /**
@@ -122,51 +114,27 @@ class User extends DomainAccessor implements UserInterface, \Serializable
     }
 
     /**
-     * Set firstname
+     * Set name
      *
-     * @param string $firstname
+     * @param string $name
      *
      * @return User
      */
-    public function setFirstname($firstname)
+    public function setName($name)
     {
-        $this->firstname = $firstname;
+        $this->name = $name;
 
         return $this;
     }
 
     /**
-     * Get firstname
+     * Get name
      *
      * @return string
      */
-    public function getFirstname()
+    public function getName()
     {
-        return $this->firstname;
-    }
-
-    /**
-     * Set lastname
-     *
-     * @param string $lastname
-     *
-     * @return User
-     */
-    public function setLastname($lastname)
-    {
-        $this->lastname = $lastname;
-
-        return $this;
-    }
-
-    /**
-     * Get lastname
-     *
-     * @return string
-     */
-    public function getLastname()
-    {
-        return $this->lastname;
+        return $this->name;
     }
 
     /**
@@ -346,8 +314,7 @@ class User extends DomainAccessor implements UserInterface, \Serializable
                 $this->id,
                 $this->email,
                 $this->password,
-                $this->firstname,
-                $this->lastname,
+                $this->name,
                 $this->roles,
             )
         );
@@ -368,8 +335,7 @@ class User extends DomainAccessor implements UserInterface, \Serializable
             $this->id,
             $this->email,
             $this->password,
-            $this->firstname,
-            $this->lastname,
+            $this->name,
             $this->roles,
             ) = unserialize($serialized);
     }

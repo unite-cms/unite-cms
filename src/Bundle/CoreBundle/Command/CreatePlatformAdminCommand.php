@@ -75,11 +75,8 @@ class CreatePlatformAdminCommand extends Command
 
         $helper = $this->getHelper('question');
 
-        $question = new Question('<info>Please enter the firstname of the new user:</info> ');
-        $firstname = $helper->ask($input, $output, $question);
-
-        $question = new Question('<info>And the lastname:</info> ');
-        $lastname = $helper->ask($input, $output, $question);
+        $question = new Question('<info>Please enter the name of the new user:</info> ');
+        $name = $helper->ask($input, $output, $question);
 
         $question = new Question('<info>And the email:</info> ');
         $email = $helper->ask($input, $output, $question);
@@ -91,8 +88,7 @@ class CreatePlatformAdminCommand extends Command
 
         $user = new User();
         $user
-            ->setFirstname($firstname)
-            ->setLastname($lastname)
+            ->setName($name)
             ->setEmail($email)
             ->setRoles([User::ROLE_PLATFORM_ADMIN]);
 
@@ -106,7 +102,7 @@ class CreatePlatformAdminCommand extends Command
         $password = null;
 
         $question = new ConfirmationQuestion(
-            '<info>Should the user "'.$user->getFirstname().' '.$user->getFirstname().'" with email "'.$user->getEmail(
+            '<info>Should the user "'.(string)$user.'" with email "'.$user->getEmail(
             ).'" be created</info>? [<comment>Y/n</comment>] ',
             true,
             '/^(y|j)/i'

@@ -30,9 +30,8 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $user = new User();
         $user
             ->setEmail('user@example.com')
-            ->setFirstname('Example')
-            ->setLastname('Example');
-        $user->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
+            ->setName('Example')
+            ->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();
 
@@ -50,9 +49,8 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $user = new User();
         $user
             ->setEmail('user@example.com')
-            ->setFirstname('Example')
-            ->setLastname('Example');
-        $user->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
+            ->setName('Example')
+            ->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();
 
@@ -72,9 +70,8 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $user = new User();
         $user
             ->setEmail('user@example.com')
-            ->setFirstname('Example')
-            ->setLastname('Example');
-        $user->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
+            ->setName('Example')
+            ->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();
 

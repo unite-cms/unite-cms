@@ -43,7 +43,7 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $this->client->followRedirects(false);
 
         $this->admin = new User();
-        $this->admin->setEmail('editor@example.com')->setFirstname('Domain Admin')->setLastname('Example')->setRoles([User::ROLE_USER])->setPassword('XXX');
+        $this->admin->setEmail('editor@example.com')->setName('Domain Admin')->setRoles([User::ROLE_USER])->setPassword('XXX');
         $this->em->persist($this->admin);
         $this->em->flush();
         $this->em->refresh($this->admin);

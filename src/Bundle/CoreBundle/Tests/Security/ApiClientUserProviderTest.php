@@ -5,12 +5,15 @@ namespace src\UniteCMS\CoreBundle\Tests\Security;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Repository\ApiKeyRepository;
 use UniteCMS\CoreBundle\Security\ApiKeyUserProvider;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
@@ -24,18 +27,19 @@ class ApiClientUserProviderTest extends TestCase
         $token = 'ThisIsMyToken';
         $organization = new Organization();
         $organization->setIdentifier('my_organization');
-        $cmsManager = $this->createMock(UniteCMSManager::class);
-        $cmsManager->expects($this->any())
-            ->method('getOrganization')
-            ->willReturn($organization);
 
-        $entityRepository = new class extends EntityRepository {
+        $request = new Request();
+        $request->attributes->set('organization', $organization->getIdentifier());
+        $requestStack = new RequestStack();
+        $requestStack->push($request);
+
+        $entityRepository = new class extends ApiKeyRepository {
             public $organization;
             public function __construct() {}
-            public function findOneBy(array $criteria, array $orderBy = NULL) {
-                if($criteria['token'] === 'ThisIsMyToken') {
+            public function findOneByTokenAndOrganization(string $token, string $organization) {
+                if($token === 'ThisIsMyToken' && $organization === $this->organization->getIdentifier()) {
                     $client = new ApiKey();
-                    $client->setToken($criteria['token']);
+                    $client->setToken($token);
                     $client->setOrganization($this->organization);
                     return $client;
                 }
@@ -50,7 +54,7 @@ class ApiClientUserProviderTest extends TestCase
             ->method('getRepository')
             ->willReturn($entityRepository);
 
-        $provider = new ApiKeyUserProvider($cmsManager, $entityManager);
+        $provider = new ApiKeyUserProvider($requestStack, $entityManager);
         $this->assertTrue($provider->supportsClass(ApiKey::class));
 
         // Try to load a user from the provider.
@@ -72,33 +76,36 @@ class ApiClientUserProviderTest extends TestCase
     public function testLoadInValidUser() {
 
         $token = 'OtherToken';
-        $domain = new Domain();
-        $domain->setIdentifier('my_domain');
-        $cmsManager = $this->createMock(UniteCMSManager::class);
-        $cmsManager->expects($this->any())
-            ->method('getDomain')
-            ->willReturn($domain);
+        $organization = new Organization();
+        $organization->setIdentifier('org');
 
-        $entityRepository = new class extends EntityRepository {
+        $request = new Request();
+        $request->attributes->set('organization', $organization->getIdentifier());
+        $requestStack = new RequestStack();
+        $requestStack->push($request);
+
+        $entityRepository = new class extends ApiKeyRepository {
+            public $organization;
             public function __construct() {}
-            public function findOneBy(array $criteria, array $orderBy = NULL) {
-                if($criteria['token'] === 'ThisIsMyToken') {
+            public function findOneByTokenAndOrganization(string $token, string $organization) {
+                if($token === 'ThisIsMyToken' && $organization === $this->organization->getIdentifier()) {
                     $client = new ApiKey();
-                    $client->setDomain($criteria['domain']);
-                    $client->setToken($criteria['token']);
+                    $client->setToken($token);
+                    $client->setOrganization($this->organization);
                     return $client;
                 }
 
                 return null;
             }
         };
+        $entityRepository->organization = $organization;
 
         $entityManager = $this->createMock(EntityManager::class);
         $entityManager->expects($this->any())
             ->method('getRepository')
             ->willReturn($entityRepository);
 
-        $provider = new ApiKeyUserProvider($cmsManager, $entityManager);
+        $provider = new ApiKeyUserProvider($requestStack, $entityManager);
         $this->assertTrue($provider->supportsClass(ApiKey::class));
 
         // Try to load a user from the provider.
@@ -111,9 +118,8 @@ class ApiClientUserProviderTest extends TestCase
      * @expectedException \Symfony\Component\Security\Core\Exception\UnsupportedUserException
      */
     public function testRefreshInvalidUser() {
-        $cmsManager = $this->createMock(UniteCMSManager::class);
         $entityManager = $this->createMock(EntityManager::class);
-        $provider = new ApiKeyUserProvider($cmsManager, $entityManager);
+        $provider = new ApiKeyUserProvider(new RequestStack(), $entityManager);
 
         // Try to refresh an non ApiClient.
         $provider->refreshUser(new User());

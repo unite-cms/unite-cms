@@ -1,0 +1,25 @@
+
+.unite-token-cell {
+  > .uk-button {
+    background: none;
+    box-shadow: none;
+    border: 1px solid transparent;
+    padding: 0 20px;
+    color: map-get($colors, grey-dark);
+  }
+}
+
+tr:hover {
+  &:hover {
+    background: $table-hover-row-background;
+
+    .unite-token-cell {
+      > .uk-button {
+        background: map-get($colors, white);
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        border-color: map-get($colors, grey-medium);
+        color: map-get($colors, grey-very-dark);
+      }
+    }
+  }
+}

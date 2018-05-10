@@ -2,66 +2,75 @@
 {% block title %}{% trans %}organization.user.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UniteCMSCore/Organization/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
+<article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    <header class="uk-card-header uk-flex">
+        <h2 class="uk-flex-1">{% trans %}organization.user.headline{% endtrans %}</h2>
+    </header>
 
-    <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
-        <header class="uk-card-header">
-            <h1>{% trans %}organization.user.headline{% endtrans %}</h1>
-        </header>
-
-        <div>
-            {% if users|length > 0 %}
-                <table class="uk-table uk-table-justify uk-table-divider">
-                    <thead>
+    <div class="unite-card-table">
+        <table class="uk-table uk-table-justify uk-table-divider uk-table-middle">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Memberships</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for member in users %}
                     <tr>
-                        <th>{{ knp_pagination_sortable(users, 'Firstname', 'user.firstname') }}</th>
-                        <th>{{ knp_pagination_sortable(users, 'Lastname', 'user.lastname') }}</th>
-                        <th>{{ knp_pagination_sortable(users, 'Email', 'user.email') }}</th>
-                        <th>{{ knp_pagination_sortable(users, 'Roles', 'user.roles') }}</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for member in users %}
-                        <tr>
-                            <td>{{ member.user.firstname }}</td>
-                            <td>{{ member.user.lastname }}</td>
-                            <td>{{ member.user.email }}</td>
-                            <td>{{ member.roles|join(', ') }}</td>
-                            <td>
-                                <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
-                                <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
-                                    <ul class="uk-nav uk-dropdown-nav">
-                                        <li><a href="{{ path('unitecms_core_organizationuser_update', {
-                                                organization: organization.identifier,
-                                                member: member.id
-                                            }) }}">
-                                                <i class="uk-margin-small-right" data-feather="edit"></i>
-                                                {% trans %}organization.user.update.button{% endtrans %}
-                                            </a></li>
-                                        <li><a class="uk-text-danger" href="{{ path('unitecms_core_organizationuser_delete', {
-                                                organization: organization.identifier,
-                                                member: member.id
-                                            }) }}">
-                                                <i class="uk-margin-small-right" data-feather="trash-2"></i>
-                                                {% trans %}organization.user.delete.button{% endtrans %}
-                                            </a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <div class="navigation">
-                    {{ knp_pagination_render(users) }}
-                </div>
-            {% endif %}
+                        <td>{{ member.user }}</td>
+                        <td>{{ member.user.email }}</td>
+                        <td>
 
-            <p class="uk-placeholder uk-text-center uk-width-xlarge uk-align-center">
-                <i data-feather="info"></i>
-                {% trans %}organization.user.description{% endtrans %}
-            </p>
-        </div>
-    </article>
+                            {% if constant('UniteCMS\\CoreBundle\\Entity\\Organization::ROLE_ADMINISTRATOR') in member.roles %}
+                                <span class="uk-badge uk-badge-danger">Organization Admin</span>
+                                <br />
+                            {% endif %}
+
+                            {% for domainMember in member.user.domains %}
+                                <span class="uk-badge split">
+                                    <span>{{ domainMember.domain }}</span>
+                                    <span>{{ domainMember.domainMemberType }}</span>
+                                </span>
+                                <br />
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                            <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                                <ul class="uk-nav uk-dropdown-nav">
+                                    <li><a href="{{ path('unitecms_core_organizationuser_update', {
+                                            organization: organization.identifier,
+                                            member: member.id
+                                        }) }}">
+                                            <i class="uk-margin-small-right" data-feather="edit"></i>
+                                            {% trans %}organization.user.update.button{% endtrans %}
+                                        </a></li>
+                                    <li><a class="uk-text-danger" href="{{ path('unitecms_core_organizationuser_delete', {
+                                            organization: organization.identifier,
+                                            member: member.id
+                                        }) }}">
+                                            <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                            {% trans %}organization.user.delete.button{% endtrans %}
+                                        </a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+    </div>
+    <div class="navigation">
+        {{ knp_pagination_render(users) }}
+    </div>
+
+    <p class="uk-placeholder uk-text-center uk-width-xlarge uk-align-center">
+        <i data-feather="info"></i>
+        {% trans %}organization.user.description{% endtrans %}
+    </p>
+</article>
 
 {% endblock content %}

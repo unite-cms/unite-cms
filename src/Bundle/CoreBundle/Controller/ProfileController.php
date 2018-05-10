@@ -39,8 +39,7 @@ class ProfileController extends Controller
          */
         $user = $this->getUser();
         $form = $this->get('form.factory')->createNamedBuilder('user', FormType::class, $user)
-            ->add('firstname', TextType::class, ['label' => 'profile.update.form.first_name', 'required' => true])
-            ->add('lastname', TextType::class, ['label' => 'profile.update.form.last_name', 'required' => true])
+            ->add('name', TextType::class, ['label' => 'profile.update.form.name', 'required' => true])
             ->add('email', EmailType::class, ['label' => 'profile.update.form.email', 'required' => true])
             ->add('submit', SubmitType::class, ['label' => 'profile.update.form.submit'])
             ->getForm();
@@ -301,7 +300,7 @@ class ProfileController extends Controller
                             $wrongUser = false;
 
                             foreach ($existingUser->getDomains() as $domainMember) {
-                                if ($domainMember->getDomain() === $invitation->getDomain()) {
+                                if ($domainMember->getDomainMemberType() === $invitation->getDomainMemberType()) {
                                     $alreadyMember = true;
                                 }
                             }
@@ -318,7 +317,8 @@ class ProfileController extends Controller
                                     if ($form->get('accept')->isClicked()) {
                                         $domainMember = new DomainMember();
                                         $domainMember
-                                            ->setDomain($invitation->getDomain())
+                                            ->setDomain($invitation->getDomainMemberType()->getDomain())
+                                            ->setDomainMemberType($invitation->getDomainMemberType())
                                             ->setRoles($invitation->getRoles());
                                         $existingUser->addDomain($domainMember);
 
@@ -367,14 +367,9 @@ class ProfileController extends Controller
                                 $registration
                             )
                                 ->add(
-                                    'firstname',
+                                    'name',
                                     TextType::class,
-                                    ['label' => 'Firstname', 'required' => true, 'attr' => ['autocomplete' => 'off']]
-                                )
-                                ->add(
-                                    'lastname',
-                                    TextType::class,
-                                    ['label' => 'Lastname', 'required' => true, 'attr' => ['autocomplete' => 'off']]
+                                    ['label' => 'Name', 'required' => true, 'attr' => ['autocomplete' => 'off']]
                                 )
                                 ->add(
                                     'password',
@@ -397,12 +392,12 @@ class ProfileController extends Controller
                                 $user = new User();
                                 $domainMember = new DomainMember();
                                 $domainMember
-                                    ->setDomain($invitation->getDomain())
+                                    ->setDomain($invitation->getDomainMemberType()->getDomain())
+                                    ->setDomainMemberType($invitation->getDomainMemberType())
                                     ->setRoles($invitation->getRoles());
                                 $user
                                     ->setEmail($invitation->getEmail())
-                                    ->setLastname($registration->getLastname())
-                                    ->setFirstname($registration->getFirstname())
+                                    ->setName($registration->getName())
                                     ->addDomain($domainMember)
                                     ->setPassword(
                                         $this->get('security.password_encoder')->encodePassword(

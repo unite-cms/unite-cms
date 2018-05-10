@@ -18,7 +18,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
 class CollectionField implements FieldableField
 {
 
-    const RESERVED_IDENTIFIERS = ['id', 'created', 'updated', 'type', 'collections'];
+    const RESERVED_IDENTIFIERS = ['id', 'created', 'updated', 'type', 'collection'];
 
     /**
      * @var string

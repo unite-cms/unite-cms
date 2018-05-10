@@ -24,7 +24,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
  */
 class ContentTypeField implements FieldableField
 {
-    const RESERVED_IDENTIFIERS = ['id', 'created', 'updated', 'deleted', 'type', 'collections', 'locale'];
+    const RESERVED_IDENTIFIERS = ['id', 'created', 'updated', 'deleted', 'type', 'locale'];
 
     /**
      * @var int

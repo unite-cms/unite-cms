@@ -98,3 +98,38 @@
     align-self: center;
   }
 }
+
+.uk-card.choice-card {
+  min-width: 200px;
+  cursor: pointer;
+  background: white;
+  border-radius: 5px;
+  text-align: center;
+  display: block;
+
+  svg {
+    margin-top: 25px;
+  }
+
+  h3 {
+    color: #666;
+    margin-top: 20px;
+  }
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  &:hover {
+    background: white;
+  }
+}
+
+.choice-cards-type {
+  margin-top: 15px;
+  margin-bottom: 25px;
+}

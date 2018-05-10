@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *
  * @ORM\Table(name="invitation")
  * @ORM\Entity()
- * @UniqueEntity(fields={"email", "domain"}, message="validation.email_already_invited", ignoreNull=false, errorPath="email")
+ * @UniqueEntity(fields={"email", "domainMemberType"}, message="validation.email_already_invited", ignoreNull=false, errorPath="email")
  * @UniqueEntity(fields={"token"}, message="validation.token_already_present", errorPath="token")
  * @Assert\Callback(callback="emailNotAlreadyTaken")
  */
@@ -39,12 +39,12 @@ class DomainInvitation
     private $roles;
 
     /**
-     * @var Domain
+     * @var DomainMemberType
      * @Assert\Valid()
      * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="invites")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", inversedBy="invites")
      */
-    private $domain;
+    private $domainMemberType;
 
     /**
      * @var User
@@ -82,17 +82,17 @@ class DomainInvitation
 
     public function allowedRoles(): array
     {
-        if (!$this->getDomain()) {
+        if (!$this->getDomainMemberType() || !$this->getDomainMemberType()->getDomain()) {
             return [];
         }
 
-        return $this->getDomain()->getAvailableRolesAsOptions();
+        return $this->getDomainMemberType()->getDomain()->getAvailableRolesAsOptions();
     }
 
     public function emailNotAlreadyTaken(ExecutionContextInterface $context)
     {
-        if ($this->getDomain() && $this->getDomain()->getOrganization()) {
-            foreach ($this->getDomain()->getOrganization()->getMembers() as $organizationMember) {
+        if ($this->getDomainMemberType() && $this->getDomainMemberType()->getDomain() && $this->getDomainMemberType()->getDomain()->getOrganization()) {
+            foreach ($this->getDomainMemberType()->getDomain()->getOrganization()->getMembers() as $organizationMember) {
                 if ($organizationMember->getUser()->getEmail() === $this->getEmail()) {
                     $context->buildViolation('validation.email_already_member')
                         ->atPath('email')
@@ -143,21 +143,21 @@ class DomainInvitation
     }
 
     /**
-     * @return Domain
+     * @return DomainMemberType
      */
-    public function getDomain()
+    public function getDomainMemberType()
     {
-        return $this->domain;
+        return $this->domainMemberType;
     }
 
     /**
-     * @param Domain $domain
+     * @param DomainMemberType $domainMemberType
      *
      * @return DomainInvitation
      */
-    public function setDomain(Domain $domain)
+    public function setDomainMemberType(DomainMemberType $domainMemberType)
     {
-        $this->domain = $domain;
+        $this->domainMemberType = $domainMemberType;
 
         return $this;
     }

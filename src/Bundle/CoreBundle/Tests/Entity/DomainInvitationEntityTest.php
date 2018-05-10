@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 
 class DomainInvitationEntityTest extends ContainerAwareTestCase
@@ -12,7 +13,7 @@ class DomainInvitationEntityTest extends ContainerAwareTestCase
     {
         $invite = new DomainInvitation();
 
-        $invite->setDomain(new Domain());
+        $invite->setDomainMemberType(new DomainMemberType());
         $invite->setEmail('user1@example.com');
         $invite->setRoles([Domain::ROLE_EDITOR]);
         $invite->setToken('XXX')->setRequestedAt(new \DateTime());
@@ -26,7 +27,7 @@ class DomainInvitationEntityTest extends ContainerAwareTestCase
     {
         $invite = new DomainInvitation();
 
-        $invite->setDomain(new Domain());
+        $invite->setDomainMemberType(new DomainMemberType());
         $invite->setEmail('user1@example.com');
         $invite->setRoles([Domain::ROLE_EDITOR]);
         $invite->setToken('XXX')->setRequestedAt(new \DateTime());

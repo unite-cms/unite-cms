@@ -10,6 +10,21 @@
         <h2 class="uk-flex-1">{% trans with {'%apiKey%': apiKey|escape } %}organization.api_key.delete.headline{% endtrans %}</h2>
     </header>
 
+    {{ form_errors(form) }}
+
+    <p class="uk-text-center">
+        <i data-feather="trash-2" width="100" height="100" style="display: block; margin: 50px auto 30px;"></i>
+        <br />
+        {% trans with { '%apiKey%': apiKey|escape } %}organization.api_key.delete.text{% endtrans %}
+    </p>
+
+    {{ form_start(form) }}
+    <p class="uk-text-center">
+        <a class="uk-button" style="background: white; margin: 10px;" href="{{ path('unitecms_core_organizationapikey_index', { organization: organization.identifier}) }}">{% trans %}organization.api_key.delete.cancel{% endtrans %}</a>
+        {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
+    </p>
+    {{ form_rest(form) }}
+
     {{ form(form) }}
 </article>
 {% endblock content %}

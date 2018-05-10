@@ -7,7 +7,8 @@ import feather from 'feather-icons';
 
 import Table from "./vue/views/Table.vue";
 import Sortable from "./vue/views/Sortable.vue";
-import DomainEditor from "./vue/DomainEditor.vue";
+import DomainEditor from "./vue/components/DomainEditor.vue";
+import ApiTokenField from "./vue/components/ApiTokenField";
 import Reference from "./vue/field/Reference.vue";
 
 require("./sass/unite.scss");
@@ -21,6 +22,7 @@ window.UniteCMSEventBus = new Vue();
 Vue.customElement('unite-cms-core-view-table', Table);
 Vue.customElement('unite-cms-core-view-sortable', Sortable);
 Vue.customElement('unite-cms-core-domaineditor', DomainEditor);
+Vue.customElement('unite-cms-core-api-token-field', ApiTokenField);
 Vue.customElement('unite-cms-core-reference-field', Reference);
 
 

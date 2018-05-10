@@ -141,9 +141,12 @@ class ControllerTest extends DatabaseAwareTestCase
         $this->em->flush($this->domain1);
 
         $editor = new User();
-        $editor->setEmail('editor@example.com')->setFirstname('Editor')->setLastname('Editor')->setPassword(
-            'XXX'
-        )->setRoles([User::ROLE_USER]);
+        $editor
+            ->setEmail('editor@example.com')
+            ->setName('Editor')
+            ->setPassword('XXX')
+            ->setRoles([User::ROLE_USER]);
+
         $editorMember = new OrganizationMember();
         $editorMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org1);
         $editorDomainMember = new DomainMember();
@@ -507,8 +510,8 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $newResponse = \GuzzleHttp\json_decode($this->client->getResponse()->getContent());
 
-        $generatedParts = explode('&X-Amz-Date==', $newResponse->pre_signed_url);
-        $actualParts = explode('&X-Amz-Date==', (string)$presignedRequest->getUri());
+        $generatedParts = explode('&X-Amz-Date=', $newResponse->pre_signed_url);
+        $actualParts = explode('&X-Amz-Date=', (string)$presignedRequest->getUri());
 
         $this->assertEquals($actualParts[0], $generatedParts[0]);
 
