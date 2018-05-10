@@ -1,0 +1,27 @@
+
+.uk-badge.split {
+  display: inline-block;
+  padding: 0;
+  background: map-get($colors, grey);
+  overflow: hidden;
+  font-size: 0;
+  height: auto;
+  min-height: 0;
+  text-transform: uppercase;
+
+  span {
+    display: inline-block;
+    padding: 0 5px;
+    font-size: 0.75rem;
+
+    &:first-child {
+      padding-left: 8px;
+      background: #666;
+    }
+
+    &:last-child {
+      padding-right: 8px;
+      background: $background-primary-background;
+    }
+  }
+}

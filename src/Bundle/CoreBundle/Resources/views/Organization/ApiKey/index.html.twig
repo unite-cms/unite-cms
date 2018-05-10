@@ -12,11 +12,11 @@
     </header>
 
     <div class="unite-card-table">
-        <table class="uk-table uk-table-justify uk-table-divider">
+        <table class="uk-table uk-table-justify uk-table-divider uk-table-middle">
             <thead>
             <tr>
-                <th>{{ knp_pagination_sortable(apiKeys, 'Name', 'apiKey.name') }}</th>
-                <th>{{ knp_pagination_sortable(apiKeys, 'Created', 'apiKey.created') }}</th>
+                <th>Name</th>
+                <th>Created</th>
                 <th>Domains</th>
                 <th>Token</th>
                 <th>Actions</th>
@@ -29,7 +29,11 @@
                     <td>{{ apiKey.created|date }}</td>
                     <td>
                         {% for domainMember in apiKey.domains %}
-                            {{ domainMember.domainMemberType }}<br />
+                            <span class="uk-badge split">
+                                <span>{{ domainMember.domain }}</span>
+                                <span>{{ domainMember.domainMemberType }}</span>
+                            </span>
+                            <br />
                         {% endfor %}
                     </td>
                     <td class="unite-token-cell">
