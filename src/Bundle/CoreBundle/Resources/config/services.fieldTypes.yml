@@ -62,11 +62,6 @@ services:
     public: false
     tags: [unite_cms.field_type]
 
-  # A simple Radio field
-  UniteCMS\CoreBundle\Field\Types\RadioFieldType:
-    public: false
-    tags: [unite_cms.field_type]
-
   # A simple Phone field
   UniteCMS\CoreBundle\Field\Types\PhoneFieldType:
     public: false
