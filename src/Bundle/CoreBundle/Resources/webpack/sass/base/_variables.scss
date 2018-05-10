@@ -30,3 +30,5 @@ $dropdown-background: map-get($colors, white);
 $form-background: map-get($colors, white);
 $form-focus-background: $form-background;
 $form-focus-border: map-get($colors, grey-dark);
+$modal-dialog-background: $form-background;
+$notification-message-background: $form-background;

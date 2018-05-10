@@ -33,15 +33,23 @@
                         {% endfor %}
                     </td>
                     <td class="unite-token-cell">
-                        <button class="uk-button uk-button-default" type="button">
+                        <button class="uk-button uk-button-default" type="button" uk-toggle="target: #key-modal-{{ apiKey.id }}">
                             <i data-feather="eye" class="uk-margin-small-right-small" width="16" height="16"></i>
                         </button>
-                        <div uk-dropdown="mode: click">
-                            <h3>{% trans with { '%name%': apiKey.name } %}organization.api_key.token.headline{% endtrans %}</h3>
-                            <input type="text" disabled class="uk-form-small uk-form-width-large" value="{{ apiKey.token }}" />
-                            <p class="uk-text-small"><strong>ENDPOINT: </strong> https://{BASEURL}/{{ organization.identifier }}/{DOMAIN}/api</p>
-                            <p class="uk-text-small"><strong>HEADER: </strong> <em>Authentication=TOKEN</em> <span class="uk-badge">Recommended</span></p>
-                            <p class="uk-text-small"><strong>QUERY: </strong> <em>token=TOKEN</em></p>
+                        <div id="key-modal-{{ apiKey.id }}" class="uk-flex-top" uk-modal>
+                            <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
+                                <button class="uk-modal-close-default" type="button" uk-close></button>
+                                <h2 class="uk-modal-title">{% trans with { '%name%': apiKey.name } %}organization.api_key.token.headline{% endtrans %}</h2>
+
+                                <unite-cms-core-api-token-field token="{{ apiKey.token }}" success-message="{% trans %}organization.api_key.token.copied{% endtrans %}"></unite-cms-core-api-token-field>
+
+                                <pre><strong>ENDPOINT: </strong> https://{BASEURL}/{{ organization.identifier }}/{DOMAIN}/api
+
+<strong>HEADER: </strong> <em>Authentication=TOKEN</em>
+= or =
+<strong>QUERY: </strong> <em>token=TOKEN</em></pre>
+
+                            </div>
                         </div>
                     </td>
                     <td>
