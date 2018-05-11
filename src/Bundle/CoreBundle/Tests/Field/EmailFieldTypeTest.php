@@ -6,29 +6,21 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class EmailFieldTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings()
+    public function testEmailTypeFieldTypeWithEmptySettings()
     {
-        // Content Type Field with empty settings should be valid.
+        // Email Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('email');
         $this->assertCount(0, $this->container->get('validator')->validate($ctField));
     }
 
-    public function testContentTypeFieldTypeWithInvalidSettings()
+    public function testEmailTypeFieldTypeWithInvalidSettings()
     {
-        // Content Type Field with invalid settings should not be valid.
+        // Email Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('email');
-        $ctField->setSettings(new FieldableFieldSettings(['required' => 'baa']));
+        $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
 
         $errors = $this->container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.no_boolean_value', $errors->get(0)->getMessage());
-    }
-
-    public function testContentTypeFieldTypeWithValidSettings()
-    {
-        $ctField = $this->createContentTypeField('email');
-        $ctField->setSettings(new FieldableFieldSettings(['required' => true]));
-        $errors = $this->container->get('validator')->validate($ctField);
-        $this->assertCount(0, $errors);
+        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
     }
 }

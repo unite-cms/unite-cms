@@ -6,29 +6,21 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class IntegerFieldTypeTest extends FieldTypeTestCase
 {
-    public function testContentTypeFieldTypeWithEmptySettings()
+    public function testIntegerTypeFieldTypeWithEmptySettings()
     {
-        // Content Type Field with empty settings should be valid.
+        // Integer Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('integer');
         $this->assertCount(0, $this->container->get('validator')->validate($ctField));
     }
 
-    public function testContentTypeFieldTypeWithInvalidSettings()
+    public function testIntegerTypeFieldTypeWithInvalidSettings()
     {
-        // Content Type Field with invalid settings should not be valid.
+        // Integer Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('integer');
-        $ctField->setSettings(new FieldableFieldSettings(['required' => 'baa']));
+        $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
 
         $errors = $this->container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.no_boolean_value', $errors->get(0)->getMessage());
-    }
-
-    public function testContentTypeFieldTypeWithValidSettings()
-    {
-        $ctField = $this->createContentTypeField('integer');
-        $ctField->setSettings(new FieldableFieldSettings(['required' => true]));
-        $errors = $this->container->get('validator')->validate($ctField);
-        $this->assertCount(0, $errors);
+        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
     }
 }

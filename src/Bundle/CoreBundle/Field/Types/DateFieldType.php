@@ -20,6 +20,7 @@ class DateFieldType extends FieldType
             parent::getFormOptions($field),
             [
                 'widget' => 'single_text',
+                'input' => 'string',
             ]
         );
     }
