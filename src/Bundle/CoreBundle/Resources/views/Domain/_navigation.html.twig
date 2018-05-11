@@ -4,34 +4,38 @@
     <button class="uk-button uk-button-default uk-flex-1" type="button">
         <span>{{ unite.domain }}</span>
         <i class="uk-margin-small-right" data-feather="chevron-down"></i></button>
-    <div id="unite-main-menu-domain" uk-dropdown="mode: click; pos: bottom-left; offset: -50; animation: uk-animation-slide-top" class="uk-width-large">
-        <div class="uk-dropdown-grid uk-child-width-1-2@m" uk-grid>
-            <div>
 
+        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), unite.domain) %}
+            <div id="unite-main-menu-domain" uk-dropdown="mode: click; pos: bottom-left; offset: -50; animation: uk-animation-slide-top" class="uk-width-large">
+                <div class="uk-dropdown-grid uk-child-width-1-2@m" uk-grid>
+        {% else %}
+            <div id="unite-main-menu-domain" uk-dropdown="mode: click; pos: bottom-left; offset: -50; animation: uk-animation-slide-top" class="uk-width-medium">
+                <div class="uk-dropdown-grid uk-child-width-1-1@m" uk-grid>
+        {% endif %}
+
+            <div>
                 <ul class="uk-nav uk-dropdown-nav">
                     <li class="uk-nav-header">
                         <a href="{{ path('unitecms_core_domain_index', {organization: unite.organization.identifier}) }}">
+                            <i data-feather="home"></i>
                             {{ unite.organization }}
-                            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), unite.organization) %}
-                                <i data-feather="settings"></i>
-                            {% endif %}
                         </a>
                     </li>
                     {% for d in unite.organization.domains %}
                         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), d) %}
                             <li{% if d == unite.domain %} class="uk-active"{% endif %}>
                                 <a href="{{ path('unitecms_core_domain_view', {organization: unite.organization.identifier, domain: d.identifier}) }}">
-                                    {{ d }}
+                                    <i data-feather="globe" class="uk-margin-small-right"></i> {{ d }}
                                 </a>
                             </li>
                         {% endif %}
                     {% endfor %}
                 </ul>
-
             </div>
             {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), unite.domain) %}
-                <div>
-                    <ul class="uk-nav uk-dropdown-nav">
+                <div class="uk-flex uk-flex-middle uk-flex-center">
+                    <ul class="uk-nav uk-dropdown-nav secondary">
+                        <li class="uk-nav-header">Manage this domain</li>
                         <li>
                             <a href="{{ url('unitecms_core_domain_update', {organization: unite.organization.identifier, domain: unite.domain.identifier}) }}">
                                 <i class="uk-margin-small-right" data-feather="settings"></i>
@@ -56,6 +60,16 @@
 </header>
 <article id="unite-main-menu-main" class="uk-flex-1" hidden>
     <button type="button" uk-close uk-toggle="target: #unite-main-menu-main; animation: uk-animation-slide-top"></button>
+
+    {% if unite.domain.contentTypes|length == 0 and unite.domain.settingTypes|length == 0 %}
+        <div class="uk-placeholder uk-text-small uk-text-center">
+            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), unite.domain) %}
+                {% trans %}domain.menu.empty_placehodler_admin{% endtrans %}
+            {% else %}
+                {% trans %}domain.menu.empty_placehodler_user{% endtrans %}
+            {% endif %}
+        </div>
+    {% endif %}
 
     <ul class="uk-nav uk-nav-parent-icon" uk-nav>
         {% if unite.domain.contentTypes|length > 0 %}
@@ -102,25 +116,6 @@
             {% endfor %}
         {% endif %}
 
-        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), unite.domain) %}
-            <li class="uk-nav-header">{% trans %}domain.menu.domain_member_types.headline{% endtrans %}</li>
-                {% for type in unite.domain.domainMemberTypes %}
-                    <li><a {% spaceless %}
-                            {% if memberType is defined and memberType.identifier == type.identifier %}
-                                class="uk-active"
-                            {% endif %}
-                        {% endspaceless %} href="{{ path('unitecms_core_domainmember_index', {
-                            organization: unite.organization.identifier,
-                            domain: unite.domain.identifier,
-                            member_type: type.identifier
-                        }) }}">
-                            <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'users' }}"></i>
-                            {{ type }}
-                        </a>
-                    </li>
-            {% endfor %}
-        {% endif %}
-
         {% if unite.domain.settingTypes|length > 0 %}
             <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
             {% for type in unite.domain.settingTypes %}
@@ -140,8 +135,26 @@
                 {% endif %}
             {% endfor %}
         {% endif %}
-    </ul>
 
+        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), unite.domain) %}
+            <li class="uk-nav-header">{% trans %}domain.menu.domain_member_types.headline{% endtrans %}</li>
+            {% for type in unite.domain.domainMemberTypes %}
+                <li><a {% spaceless %}
+                        {% if memberType is defined and memberType.identifier == type.identifier %}
+                            class="uk-active"
+                        {% endif %}
+                    {% endspaceless %} href="{{ path('unitecms_core_domainmember_index', {
+                        organization: unite.organization.identifier,
+                        domain: unite.domain.identifier,
+                        member_type: type.identifier
+                    }) }}">
+                        <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'users' }}"></i>
+                        {{ type }}
+                    </a>
+                </li>
+            {% endfor %}
+        {% endif %}
+    </ul>
 
 </article>
 <footer id="unite-main-menu-user" hidden>

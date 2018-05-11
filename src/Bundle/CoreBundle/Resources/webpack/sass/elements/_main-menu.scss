@@ -34,10 +34,16 @@
         top: 50%;
         right: 0;
         margin-top: -12px;
+        opacity: 1;
+        transition: opacity 0.1s;
       }
 
       &.uk-open {
         z-index: 1050;
+
+        > svg.feather {
+          opacity: 0;
+        }
       }
     }
 
@@ -97,6 +103,7 @@
       padding: 0;
       width: 50px;
       height: 50px;
+      z-index: 10;
     }
   }
 
@@ -119,10 +126,6 @@
               background: map-get($colors, white);
               box-shadow: 0 2px 4px 0 rgba(0,0,0,0.03);
               border-radius: 3px;
-
-              a {
-                padding-left: 10px;
-              }
             }
           }
         }
@@ -145,13 +148,14 @@
         a {
           color: map-get($colors, grey-dark);
           position: relative;
-          padding-right: 20px;
+          padding-left: 25px;
 
           svg.feather {
             position: absolute;
             top: 50%;
-            right: 0;
-            margin-top: -6px;
+            left: 0;
+            right: auto;
+            margin-top: -5px;
           }
         }
 
@@ -179,6 +183,10 @@
         }
       }
     }
+
+    &.secondary {
+      width: 100%;
+    }
   }
 
   .uk-nav-sub {
@@ -203,7 +211,27 @@
     #unite-main-menu-domain {
       top: 0 !important;
       left: 0 !important;
-      border-top: 50px solid map-get($colors, white);
+      padding-top: 50px;
+
+      &:before {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        background: white;
+        display: block;
+        content: "";
+        z-index: 1;
+      }
+    }
+
+    header {
+      > button:not(uk-toggle).uk-button svg.feather {
+        position: relative;
+        margin-top: auto;
+        margin-right: -24px !important;
+      }
     }
 
     .unite-user-menu {
@@ -222,6 +250,10 @@
         min-width: 0;
         padding: 0;
       }
+    }
+
+    .uk-placeholder {
+      margin: 60px 20px;
     }
   }
 }
@@ -298,6 +330,23 @@
 
       .uk-nav {
         margin: 0;
+
+        &.secondary {
+          width: auto;
+
+          li {
+            padding-left: 0;
+
+            &.uk-nav-header {
+              margin-bottom: 10px;
+            }
+
+            a {
+              height: 20px;
+              line-height: 20px;
+            }
+          }
+        }
       }
     }
 
@@ -319,11 +368,41 @@
 
     #unite-main-menu-domain {
       max-width: none;
-      width: 570px;
       z-index: 140;
       border: 1px solid map-get($colors, grey-medium);
       box-shadow: 0 7px 15px 0 rgba(0,0,0,0.10);
       border-radius: 2px;
+
+      &.uk-width-medium {
+        width: 360px;
+      }
+
+      &.uk-width-large {
+        width: 570px;
+
+        .uk-grid.uk-dropdown-grid {
+          > div {
+            &:first-child {
+              li.uk-active {
+                margin-right: -30px;
+                position: relative;
+                border-radius: 3px 0 0 3px;
+
+                &:after {
+                  position: absolute;
+                  width: 6px;
+                  right: -3px;
+                  top: 0;
+                  bottom: 0;
+                  content: "";
+                  display: block;
+                  background: map-get($colors, white);
+                }
+              }
+            }
+          }
+        }
+      }
 
       > button.uk-close {
         display: block;
@@ -333,25 +412,6 @@
       .uk-grid.uk-dropdown-grid {
         > div {
           padding: 10px 30px 20px;
-
-          &:first-child {
-            li.uk-active {
-              margin-right: -30px;
-              position: relative;
-              border-radius: 3px 0 0 3px;
-
-              &:after {
-                position: absolute;
-                width: 6px;
-                right: -3px;
-                top: 0;
-                bottom: 0;
-                content: "";
-                display: block;
-                background: map-get($colors, white);
-              }
-            }
-          }
 
           &:nth-child(2) {
             padding-top: 20px;

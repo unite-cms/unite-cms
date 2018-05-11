@@ -64,6 +64,8 @@ domain.menu.manage.trash: 'Delete domain'
 domain.menu.domain_member_types.headline: 'Members'
 domain.menu.content_types.headline: 'Content'
 domain.menu.setting_types.headline: 'Settings'
+domain.menu.empty_placehodler_admin: 'There are no content or setting types defined. Check out the documentation to learn how to define types.'
+domain.menu.empty_placehodler_user: 'There are no content or setting types, you have access to. Please contact an administrator.'
 
 domain.create.title: 'Create a new domain'
 domain.create.headline: 'Create a new domain'
