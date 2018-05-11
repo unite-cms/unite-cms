@@ -36,7 +36,7 @@
 {%- endblock form_label %}
 
 {%- block form_widget_simple -%}
-    {% if type is not defined or type == 'text' or type == 'email' or type == 'password' or type == 'number' %}{%- set attr = attr|merge({class: (attr.class|default('') ~ ' uk-input')|trim}) -%}{% endif %}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' uk-input')|trim}) -%}
     {{- parent() -}}
 {%- endblock form_widget_simple -%}
 
@@ -80,6 +80,8 @@
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button-default')|trim}) %}
     {{- parent() -}}
 {%- endblock reset_widget -%}
+
+
 
 {%- block collection_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' collection-form')|trim}) %}

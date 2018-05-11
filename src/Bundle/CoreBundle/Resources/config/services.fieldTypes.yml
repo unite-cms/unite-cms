@@ -36,3 +36,33 @@ services:
   UniteCMS\CoreBundle\Field\Types\SortIndexFieldType:
     public: false
     tags: [unite_cms.field_type]
+
+  # A simple Date field
+  UniteCMS\CoreBundle\Field\Types\DateFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
+  # A simple DateTime field
+  UniteCMS\CoreBundle\Field\Types\DateTimeFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
+  # A simple Email field
+  UniteCMS\CoreBundle\Field\Types\EmailFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
+  # A simple Integer field
+  UniteCMS\CoreBundle\Field\Types\IntegerFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
+  # A simple Number field
+  UniteCMS\CoreBundle\Field\Types\NumberFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
+  # A simple Phone field
+  UniteCMS\CoreBundle\Field\Types\PhoneFieldType:
+    public: false
+    tags: [unite_cms.field_type]
