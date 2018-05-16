@@ -369,7 +369,7 @@ class DomainMemberController extends Controller
             ->add(
                 'submit',
                 SubmitType::class,
-                ['label' => 'domain.member.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']]
+                ['label' => 'domain.member.delete_invitation.form.submit', 'attr' => ['class' => 'uk-button-danger']]
             )->getForm();
         $form->handleRequest($request);
 

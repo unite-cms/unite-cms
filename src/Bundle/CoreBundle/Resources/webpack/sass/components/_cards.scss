@@ -1,6 +1,10 @@
 
 .uk-card.full-content-card {
   align-self: normal;
+
+  + .uk-card.full-content-card {
+    margin-top: 10px;
+  }
 }
 
 .uk-card.centered-content-card {
@@ -27,6 +31,7 @@
   background: map-get($colors, white);
   border-bottom: 1px solid map-get($colors, grey-medium);
   margin: -30px -30px 30px;
+  padding: 15px 30px;
 
   .back-button {
     margin-right: 10px;
