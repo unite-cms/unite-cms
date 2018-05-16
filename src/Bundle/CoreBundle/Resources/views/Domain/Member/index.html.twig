@@ -1,22 +1,18 @@
 {% extends '@UniteCMSCore/layout.html.twig' %}
-{% block title %}{% trans %}domain.member.title{% endtrans %}{% endblock title %}
+{% block title %}{% trans with {'%type%': memberType|escape} %}domain.member.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 
-    {% if invites|length > 0 %}
-        <article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
-    {% else %}
-        <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
-    {% endif %}
+    <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
         <header class="uk-card-header uk-flex">
-            <h2 class="uk-flex-1">{% trans %}domain.member.headline{% endtrans %}</h2>
+            <h2 class="uk-flex-1">{% trans with {'%type%': memberType|escape} %}domain.member.headline{% endtrans %}</h2>
             <a href="{{ path('unitecms_core_domainmember_create', {
                 domain: domain.identifier,
                 organization: organization.identifier,
                 member_type: memberType.identifier
     }) }}" class="uk-button uk-button-primary">
                 <i data-feather="plus" class="uk-margin-small-right-small"></i>
-                {% trans %}domain.member.create.button{% endtrans %}
+                {% trans with {'%type%': memberType|escape} %}domain.member.create.button{% endtrans %}
             </a>
         </header>
 
@@ -24,16 +20,22 @@
             <table class="uk-table uk-table-justify uk-table-divider">
                 <thead>
                 <tr>
-                    <th>Identifier</th>
-                    <th>Roles</th>
+                    <th style="width: 40px;">Type</th>
+                    <th>Accessor</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for member in members %}
                     <tr>
-                        <td>{{ member.accessor.label }}</td>
-                        <td>{{ member.roles|join(', ') }}</td>
+                        <td>
+                            {% if member.accessor is instanceof('UniteCMS\\CoreBundle\\Entity\\ApiKey') %}
+                                <i data-feather="lock" uk-tooltip="API Key"></i>
+                            {% else %}
+                                <i data-feather="user" uk-tooltip="User"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ member.accessor }}</td>
                         <td>
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
@@ -69,52 +71,53 @@
         </div>
     </article>
 
-        {% if invites|length > 0 %}
+    {% if invites|length > 0 %}
+        <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+            <header class="uk-card-header">
+                <h2>{% trans %}domain.member.pending_invitations.headline{% endtrans %}</h2>
+            </header>
 
-            <article class="uk-card uk-card-default uk-card-body uk-width-1-1 centered-content-card">
-                <header class="uk-card-header">
-                    <h2>{% trans %}domain.member.pending_invitations.headline{% endtrans %}</h2>
-                </header>
-
-                <div class="unite-card-table">
-                    <table class="uk-table uk-table-justify uk-table-divider">
-                        <thead>
+            <div class="unite-card-table">
+                <table class="uk-table uk-table-justify uk-table-divider">
+                    <thead>
+                    <tr>
+                        <th style="width: 40px;">Type</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for invite in invites %}
                         <tr>
-                            <th>{{ knp_pagination_sortable(invites, 'Email', 'email') }}</th>
-                            <th>{{ knp_pagination_sortable(invites, 'Roles', 'roles') }}</th>
-                            <th>Actions</th>
+                            <td>
+                                <i data-feather="user" uk-tooltip="User"></i>
+                            </td>
+                            <td>{{ invite.email }}</td>
+                            <td>
+                                <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                                <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                                    <ul class="uk-nav uk-dropdown-nav">
+                                        <li><a class="uk-text-danger" href="{{ path('unitecms_core_domainmember_deleteinvite', {
+                                                organization: organization.identifier,
+                                                domain: domain.identifier,
+                                                member_type: memberType.identifier,
+                                                invite: invite.id
+                                            }) }}">
+                                                <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                                {% trans %}domain.member.pending_invitations.delete.button{% endtrans %}
+                                            </a></li>
+                                    </ul>
+                                </div>
+                            </td>
                         </tr>
-                        </thead>
-                        <tbody>
-                        {% for invite in invites %}
-                            <tr>
-                                <td>{{ invite.email }}</td>
-                                <td>{{ invite.roles|join(', ') }}</td>
-                                <td>
-                                    <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
-                                    <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
-                                        <ul class="uk-nav uk-dropdown-nav">
-                                            <li><a class="uk-text-danger" href="{{ path('unitecms_core_domainmember_deleteinvite', {
-                                                    organization: organization.identifier,
-                                                    domain: domain.identifier,
-                                                    member_type: memberType.identifier,
-                                                    invite: invite.id
-                                                }) }}">
-                                                    <i class="uk-margin-small-right" data-feather="trash-2"></i>
-                                                    {% trans %}domain.member.pending_invitations.delete.button{% endtrans %}
-                                                </a></li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-                <div class="navigation">
-                    {{ knp_pagination_render(members) }}
-                </div>
+            <div class="navigation">
+                {{ knp_pagination_render(members) }}
+            </div>
         </article>
     {% endif %}
 

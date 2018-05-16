@@ -25,6 +25,8 @@ use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\DomainInvitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Form\ChoiceCardsType;
+use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
 
 class DomainMemberController extends Controller
 {
@@ -74,43 +76,77 @@ class DomainMemberController extends Controller
      */
     public function createAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request)
     {
-        $member = new DomainMember();
-        $member->setDomain($domain)->setDomainMemberType($memberType);
-
+        // Get a list of ids of all accessors, that are already member of this domain.
         $domain_member_type_members = [];
         foreach ($memberType->getDomainMembers() as $domainMember) {
             $domain_member_type_members[] = $domainMember->getAccessor()->getId();
         }
 
-        $possible_domain_members = $organization->getApiKeys()->filter(
-            function(ApiKey $apiKey) use ($domain_member_type_members) {
-                return !in_array($apiKey->getId(), $domain_member_type_members);
-            }
-        )->toArray();
+        // Create choice options for each possible add type.
+        $add_types = [];
+        foreach([
+            'existing_user' => 'user',
+            'existing_api_key' => 'lock',
+            'invite_user' => 'send',
+        ] as $type => $icon) {
+            $add_types[] = new ChoiceCardOption(
+                $type,
+                $this->get('translator')->trans('domain.member.create.headline.' . $type),
+                $this->get('translator')->trans('domain.member.create.text.' . $type),
+                $icon
+            );
+        }
 
-        $possible_domain_members = array_merge($possible_domain_members, $organization->getMembers()->filter(
-            function(OrganizationMember $organizationMember) use ($domain_member_type_members) {
-                return !in_array($organizationMember->getUser()->getId(), $domain_member_type_members);
-            }
-        )->map(
-            function(OrganizationMember $organizationMember){
-                return $organizationMember->getUser();
-            }
-        )->toArray());
-
-        $formCreate = $this->get('form.factory')->createNamedBuilder('create_domain_user', FormType::class, $member)
+        // Create the two-step create form.
+        $form = $this->get('form.factory')->createNamedBuilder(
+                'create_domain_user',
+                FormType::class,
+                null,
+                ['attr' => ['class' => 'uk-form-vertical']]
+            )
+            ->add('select_add_type', ChoiceCardsType::class, [
+                'label' => false,
+                'multiple' => false,
+                'expanded' => true,
+                'choices' => $add_types,
+            ])
             ->add(
-                'accessor',
+                'existing_user',
                 EntityType::class,
                 [
                     'label' => 'domain.member.create.form.user',
                     'class' => DomainAccessor::class,
-                    'choices' => $possible_domain_members,
+                    'choices' => $organization->getMembers()->filter(
+                        function(OrganizationMember $organizationMember) use ($domain_member_type_members) {
+                            return !in_array($organizationMember->getUser()->getId(), $domain_member_type_members);
+                        }
+                    )->map(
+                        function(OrganizationMember $organizationMember){
+                            return $organizationMember->getUser();
+                        }
+                    )->toArray(),
                     'choice_label' => function(DomainAccessor $accessor) {
                         return $accessor->label();
                     },
                 ]
             )
+            ->add(
+                'existing_api_key',
+                EntityType::class,
+                [
+                    'label' => 'domain.member.create.form.api_key',
+                    'class' => DomainAccessor::class,
+                    'choices' => $organization->getApiKeys()->filter(
+                        function(ApiKey $apiKey) use ($domain_member_type_members) {
+                            return !in_array($apiKey->getId(), $domain_member_type_members);
+                        }
+                    )->toArray(),
+                    'choice_label' => function(DomainAccessor $accessor) {
+                        return $accessor->label();
+                    },
+                ]
+            )
+            ->add('invite_user', EmailType::class, ['label' => 'domain.member.invite.form.email',])
             ->add(
                 'roles',
                 ChoiceType::class,
@@ -123,68 +159,55 @@ class DomainMemberController extends Controller
             ->add('submit', SubmitType::class, ['label' => 'domain.member.create.form.submit'])
             ->getForm();
 
-        $formCreate->handleRequest($request);
+        $form->handleRequest($request);
 
-        if ($formCreate->isSubmitted() && $formCreate->isValid()) {
-            $this->getDoctrine()->getManager()->persist($member);
-            $this->getDoctrine()->getManager()->flush();
+        if ($form->isSubmitted() && $form->isValid()) {
 
-            return $this->redirectToRoute(
-                'unitecms_core_domainmember_index',
-                [
-                    'organization' => $organization->getIdentifier(),
-                    'domain' => $domain->getIdentifier(),
-                    'member_type' => $memberType->getIdentifier(),
-                ]
-            );
-        }
+            $data = $form->getData();
+            if($data['select_add_type'] == 'existing_user' || $data['select_add_type'] == 'existing_api_key') {
 
-        $invitation = new DomainInvitation();
-        $invitation->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
-        $invitation->setRequestedAt(new \DateTime());
-        $invitation->setDomainMemberType($memberType);
+                $member = new DomainMember();
+                $member
+                    ->setDomain($domain)
+                    ->setDomainMemberType($memberType)
+                    ->setRoles($data['roles'])
+                    ->setAccessor($data['select_add_type'] == 'existing_user' ? $data['existing_user'] : $data['existing_api_key']);
+                $this->getDoctrine()->getManager()->persist($member);
+                $this->getDoctrine()->getManager()->flush();
 
-        $formInvite = $this->get('form.factory')->createNamedBuilder('invite_domain_user', FormType::class, $invitation)
-            ->add('email', EmailType::class, ['label' => 'domain.member.invite.form.email',])
-            ->add(
-                'roles',
-                ChoiceType::class,
-                [
-                    'label' => 'domain.member.invite.form.roles',
-                    'multiple' => true,
-                    'choices' => $domain->getAvailableRolesAsOptions(),
-                ]
-            )
-            ->add('submit', SubmitType::class, ['label' => 'domain.member.invite.form.submit'])
-            ->getForm();
+            } elseif($data['select_add_type'] == 'invite_user') {
 
-        $formInvite->handleRequest($request);
+                $invitation = new DomainInvitation();
+                $invitation->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
+                $invitation->setRequestedAt(new \DateTime());
+                $invitation->setDomainMemberType($memberType);
+                $invitation->setEmail($data['invite_user']);
+                $this->getDoctrine()->getManager()->persist($invitation);
+                $this->getDoctrine()->getManager()->flush();
 
-        if ($formInvite->isSubmitted() && $formInvite->isValid()) {
-            $this->getDoctrine()->getManager()->persist($invitation);
-            $this->getDoctrine()->getManager()->flush();
+                // Send out email using the default mailer.
+                $message = (new \Swift_Message('Invitation'))
+                    ->setFrom($this->getParameter('mailer_sender'))
+                    ->setTo($invitation->getEmail())
+                    ->setBody(
+                        $this->renderView(
+                            '@UniteCMSCore/Emails/invitation.html.twig',
+                            [
+                                'invitation' => $invitation,
+                                'invitation_url' => $this->generateUrl(
+                                    'unitecms_core_profile_acceptinvitation',
+                                    [
+                                        'token' => $invitation->getToken(),
+                                    ],
+                                    UrlGeneratorInterface::ABSOLUTE_URL
+                                ),
+                            ]
+                        ),
+                        'text/html'
+                    );
+                $this->get('mailer')->send($message);
 
-            // Send out email using the default mailer.
-            $message = (new \Swift_Message('Invitation'))
-                ->setFrom($this->getParameter('mailer_sender'))
-                ->setTo($invitation->getEmail())
-                ->setBody(
-                    $this->renderView(
-                        '@UniteCMSCore/Emails/invitation.html.twig',
-                        [
-                            'invitation' => $invitation,
-                            'invitation_url' => $this->generateUrl(
-                                'unitecms_core_profile_acceptinvitation',
-                                [
-                                    'token' => $invitation->getToken(),
-                                ],
-                                UrlGeneratorInterface::ABSOLUTE_URL
-                            ),
-                        ]
-                    ),
-                    'text/html'
-                );
-            $this->get('mailer')->send($message);
+            }
 
             return $this->redirectToRoute(
                 'unitecms_core_domainmember_index',
@@ -202,8 +225,7 @@ class DomainMemberController extends Controller
                 'organization' => $organization,
                 'domain' => $domain,
                 'memberType' => $memberType,
-                'form_create' => $formCreate->createView(),
-                'form_invite' => $formInvite->createView(),
+                'form' => $form->createView(),
             ]
         );
     }
@@ -309,7 +331,10 @@ class DomainMemberController extends Controller
     public function deleteAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Remove'])->getForm();
+            ->add('submit', SubmitType::class, [
+                'label' => 'domain.member.delete.form.submit',
+                'attr' => ['class' => 'uk-button-danger'],
+            ])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -366,7 +391,7 @@ class DomainMemberController extends Controller
             ->add(
                 'submit',
                 SubmitType::class,
-                ['label' => 'domain.member.delete_invitation.submit', 'attr' => ['class' => 'uk-button-danger']]
+                ['label' => 'domain.member.delete_invitation.form.submit', 'attr' => ['class' => 'uk-button-danger']]
             )->getForm();
         $form->handleRequest($request);
 

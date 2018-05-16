@@ -5,3 +5,8 @@ services:
         public: false
         tags:
             - { name: twig.extension }
+
+    UniteCMS\CoreBundle\Twig\InstanceOfExtension:
+        public: false
+        tags:
+            - { name: twig.extension }
