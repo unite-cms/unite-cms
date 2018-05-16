@@ -206,7 +206,7 @@ class DomainMemberTypeEntityPersistentTest extends DatabaseAwareTestCase
     public function testDomainMemberLabelProperty()
     {
         $ct = new DomainMemberType();
-        $this->assertEquals('{type}: {accessor}', $ct->getDomainMemberLabel());
+        $this->assertEquals('{accessor}', $ct->getDomainMemberLabel());
         $this->assertEquals('Foo', $ct->setDomainMemberLabel('Foo')->getDomainMemberLabel());
     }
 }
