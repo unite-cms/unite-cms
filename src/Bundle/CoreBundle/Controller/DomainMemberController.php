@@ -309,7 +309,10 @@ class DomainMemberController extends Controller
     public function deleteAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Remove'])->getForm();
+            ->add('submit', SubmitType::class, [
+                'label' => 'domain.member.delete.form.submit',
+                'attr' => ['class' => 'uk-button-danger'],
+            ])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

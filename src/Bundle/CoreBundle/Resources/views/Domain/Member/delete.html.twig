@@ -1,5 +1,5 @@
 {% extends '@UniteCMSCore/layout.html.twig' %}
-{% block title %}{% trans with { '%user%': member|escape } %}domain.member.delete.title{% endtrans %}{% endblock title %}
+{% block title %}{% trans with { '%type%': memberType|escape, '%member%' : member|escape } %}domain.member.delete.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
@@ -11,8 +11,28 @@
         }) }}">
             <i data-feather="arrow-left"></i>
         </a>
-        <h2>{% trans with { '%user%': member|escape } %}domain.member.delete.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{% trans with { '%type%': memberType|escape, '%member%' : member|escape } %}domain.member.delete.headline{% endtrans %}</h2>
     </header>
+
+    {{ form_errors(form) }}
+
+    <p class="uk-text-center">
+        <i data-feather="trash-2" width="100" height="100" style="display: block; margin: 50px auto 30px;"></i>
+        <br />
+        {% trans with { '%type%': memberType|escape, '%member%': member|escape } %}domain.member.delete.text{% endtrans %}
+    </p>
+
+    {{ form_start(form) }}
+    <p class="uk-text-center">
+        <a class="uk-button" style="background: white; margin: 10px;" href="{{ path('unitecms_core_domainmember_index', {
+            organization: unite.organization.identifier,
+            domain: unite.domain.identifier,
+            member_type: memberType.identifier
+        }) }}">{% trans %}domain.member.delete.cancel{% endtrans %}</a>
+        {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
+    </p>
+    {{ form_rest(form) }}
+
     {{ form(form) }}
 </article>
 {% endblock content %}

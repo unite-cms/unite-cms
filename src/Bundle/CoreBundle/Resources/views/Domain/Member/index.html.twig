@@ -1,5 +1,5 @@
 {% extends '@UniteCMSCore/layout.html.twig' %}
-{% block title %}{% trans %}domain.member.title{% endtrans %}{% endblock title %}
+{% block title %}{% trans with {'%type%': memberType|escape} %}domain.member.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 
@@ -9,14 +9,14 @@
         <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     {% endif %}
         <header class="uk-card-header uk-flex">
-            <h2 class="uk-flex-1">{% trans %}domain.member.headline{% endtrans %}</h2>
+            <h2 class="uk-flex-1">{% trans with {'%type%': memberType|escape} %}domain.member.headline{% endtrans %}</h2>
             <a href="{{ path('unitecms_core_domainmember_create', {
                 domain: domain.identifier,
                 organization: organization.identifier,
                 member_type: memberType.identifier
     }) }}" class="uk-button uk-button-primary">
                 <i data-feather="plus" class="uk-margin-small-right-small"></i>
-                {% trans %}domain.member.create.button{% endtrans %}
+                {% trans with {'%type%': memberType|escape} %}domain.member.create.button{% endtrans %}
             </a>
         </header>
 
