@@ -24,16 +24,22 @@
             <table class="uk-table uk-table-justify uk-table-divider">
                 <thead>
                 <tr>
-                    <th>Identifier</th>
-                    <th>Roles</th>
+                    <th style="max-width: 40px;">Type</th>
+                    <th>Accessor</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for member in members %}
                     <tr>
-                        <td>{{ member.accessor.label }}</td>
-                        <td>{{ member.roles|join(', ') }}</td>
+                        <td>
+                            {% if member.accessor is instanceof('UniteCMS\\CoreBundle\\Entity\\ApiKey') %}
+                                <i data-feather="lock" uk-tooltip="API Key"></i>
+                            {% else %}
+                                <i data-feather="user" uk-tooltip="User"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ member.accessor }}</td>
                         <td>
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
