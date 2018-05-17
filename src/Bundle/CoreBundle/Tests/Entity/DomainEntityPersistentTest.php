@@ -107,19 +107,19 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain1->getOrganization()->setIdentifier('domain_org1')->setTitle('Domain Org 1');
         $domain1->getContentTypes()->first()->setPermissions(
             [
-                ContentVoter::VIEW => [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR],
-                ContentVoter::LIST => [Domain::ROLE_EDITOR],
-                ContentVoter::CREATE => [Domain::ROLE_EDITOR],
-                ContentVoter::UPDATE => [Domain::ROLE_EDITOR],
-                ContentVoter::DELETE => [Domain::ROLE_EDITOR],
+                ContentVoter::VIEW => 'true',
+                ContentVoter::LIST => 'true',
+                ContentVoter::CREATE => 'true',
+                ContentVoter::UPDATE => 'true',
+                ContentVoter::DELETE => 'true',
             ]
         );
 
         // Try to set invalid SettingType
         $domain1->getSettingTypes()->first()->setPermissions(
             [
-                SettingVoter::VIEW => [Domain::ROLE_EDITOR],
-                SettingVoter::UPDATE => [Domain::ROLE_EDITOR],
+                SettingVoter::VIEW => 'true',
+                SettingVoter::UPDATE => 'true',
             ]
         );
 

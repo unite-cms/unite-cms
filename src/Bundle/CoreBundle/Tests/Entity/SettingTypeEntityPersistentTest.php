@@ -18,7 +18,7 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $settingType = new SettingType();
         $settingType->setIdentifier('')->setTitle('')->setDescription('')->setIcon('');
         $errors = $this->container->get('validator')->validate($settingType);
-        $this->assertCount(4, $errors);
+        $this->assertCount(3, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
@@ -28,9 +28,6 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
 
         $this->assertEquals('domain', $errors->get(2)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
-
-        $this->assertEquals('permissions', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.invalid_selection', $errors->get(3)->getMessage());
 
         // Try to save a too long icon name or an icon name with special chars.
         $settingType->setTitle('st1')->setIdentifier('st1')->setDomain(new Domain());

@@ -2,19 +2,28 @@
 
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
+use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
-use Symfony\Component\Validator\Exception\InvalidArgumentException;
 
 class ValidPermissionsValidator extends ConstraintValidator
 {
+
+    /**
+     * @var AccessExpressionChecker $accessExpressionChecker
+     */
+    private $accessExpressionChecker;
+
+    public function __construct()
+    {
+        $this->accessExpressionChecker = new AccessExpressionChecker();
+    }
 
     public function validate($value, Constraint $constraint)
     {
 
         $allowedAttributes = [];
-        $allowedRoles = [];
 
         // Get all allowed attributes.
         if ($constraint->callbackAttributes) {
@@ -31,39 +40,15 @@ class ValidPermissionsValidator extends ConstraintValidator
             $allowedAttributes = call_user_func($allowedAttributes);
         }
 
-        // Get all allowed roles.
-        if ($constraint->callbackRoles) {
-            if (!is_callable($allowedRoles = array($this->context->getObject(), $constraint->callbackRoles))
-                && !is_callable($allowedRoles = array($this->context->getClassName(), $constraint->callbackRoles))
-                && !is_callable($allowedRoles = $constraint->callbackRoles)
-            ) {
-                throw new ConstraintDefinitionException(
-                    'The ValidPermission constraint expects a valid allowedRolesCallback'
-                );
-            }
-            $allowedRoles = call_user_func($allowedRoles);
-        }
-
-        foreach ($value as $attribute => $roles) {
+        foreach ($value as $attribute => $expression) {
             if (!in_array($attribute, $allowedAttributes)) {
                 $this->context->buildViolation($constraint->message)->addViolation();
-
                 return;
             }
 
-            if (!is_array($roles)) {
-                throw new InvalidArgumentException(
-                    'The ValidPermission constraint expects an nested array as value'
-                );
-            }
-
-            foreach ($roles as $role) {
-                if (!in_array($role, $allowedRoles)) {
-                    $this->context->buildViolation($constraint->message)
-                        ->addViolation();
-
-                    return;
-                }
+            if(!$this->accessExpressionChecker->validate($expression)) {
+                $this->context->buildViolation($constraint->message)->addViolation();
+                return;
             }
         }
     }

@@ -380,7 +380,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
     {
         $ctField = $this->createContentTypeField('reference');
         $ctField->getContentType()->getDomain()->setIdentifier('domain1');
-        $ctField->getContentType()->addPermission(ContentVoter::LIST, [Domain::ROLE_ADMINISTRATOR]);
+        $ctField->getContentType()->addPermission(ContentVoter::LIST, 'false');
         $ctField->setSettings(
             new FieldableFieldSettings(
                 [

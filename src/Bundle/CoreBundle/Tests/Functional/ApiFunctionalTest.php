@@ -534,7 +534,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
                 foreach($this->roles as $role) {
                     $domainMember = new DomainMember();
-                    $domainMember->setDomain($domain)->setRoles([$role]);
+                    $domainMember->setDomain($domain);
                     $this->users[$domain->getIdentifier() . '_' . $role] = new ApiKey();
                     $this->users[$domain->getIdentifier() . '_' . $role]->setName(ucfirst($role))->setOrganization($org);
                     $this->users[$domain->getIdentifier() . '_' . $role]->addDomain($domainMember);

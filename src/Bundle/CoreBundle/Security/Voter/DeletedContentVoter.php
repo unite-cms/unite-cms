@@ -10,9 +10,20 @@ use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 
 class DeletedContentVoter extends ContentVoter
 {
+    /**
+     * @var AccessExpressionChecker $accessExpressionChecker
+     */
+    private $accessExpressionChecker;
+
+    public function __construct()
+    {
+        $this->accessExpressionChecker = new AccessExpressionChecker();
+    }
+
     /**
      * Determines if the attribute and subject are supported by this voter.
      *
@@ -46,18 +57,27 @@ class DeletedContentVoter extends ContentVoter
             return self::ACCESS_ABSTAIN;
         }
 
+        $contentType = $subject->getContentType();
+        $domainMember = $token->getUser()->getDomainMember($contentType->getDomain());
+
         // We can only vote on DomainAccessor user objects.
         if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
         }
 
-        // Accessors can access deleted content if and only if they are allowed to update it.
-        if(in_array($attribute, self::ENTITY_PERMISSIONS)) {
-            return $this->checkPermission(
-                self::UPDATE,
-                $subject->getContentType(),
-                $token->getUser()->getDomainRoles($subject->getContentType()->getDomain())
-            );
+        // We can only vote if this user is member of the subject's domain.
+        if(!$domainMember) {
+            return self::ACCESS_ABSTAIN;
+        }
+
+        // If the requested permission is not defined, throw an exception.
+        if (empty($contentType->getPermissions()[$attribute])) {
+            throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
+        }
+
+        // If the expression evaluates to true, we grant access.
+        if($this->accessExpressionChecker->evaluate($contentType->getPermissions()[$attribute], $domainMember, $subject instanceof Content ? $subject : null)) {
+            return self::ACCESS_GRANTED;
         }
 
         return self::ACCESS_ABSTAIN;

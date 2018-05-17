@@ -61,8 +61,8 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $this->contentType1 = new ContentType();
         $this->contentType1->setDomain($this->domain1);
         $p1 = $this->contentType1->getPermissions();
-        $p1[ContentVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
-        $p1[ContentVoter::DELETE] = [Domain::ROLE_ADMINISTRATOR];
+        $p1[ContentVoter::UPDATE] = 'member.accessor.name == "Admin"';
+        $p1[ContentVoter::DELETE] = 'member.accessor.name == "Admin"';
         $this->contentType1->setPermissions($p1);
 
         $this->contentType2 = new ContentType();
@@ -75,16 +75,16 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $this->content2->setContentType($this->contentType2);
 
         $admin = new ApiKey();
-        $admin->setOrganization($this->org1);
+        $admin->setOrganization($this->org1)->setName('Admin');
         $domainAdmin = new DomainMember();
-        $domainAdmin->setDomain($this->domain1)->setRoles([Domain::ROLE_ADMINISTRATOR]);
+        $domainAdmin->setDomain($this->domain1);
         $admin->addDomain($domainAdmin);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', []);
 
         $user = new ApiKey();
-        $user->setOrganization($this->org1);
+        $user->setOrganization($this->org1)->setName('User');
         $domainUser = new DomainMember();
-        $domainUser->setDomain($this->domain1)->setRoles([Domain::ROLE_EDITOR]);
+        $domainUser->setDomain($this->domain1);
         $user->addDomain($domainUser);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', []);
     }

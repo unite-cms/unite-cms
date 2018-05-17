@@ -9,7 +9,7 @@
 namespace App\Bundle\CoreBundle\Tests\Security;
 
 
-use App\Bundle\CoreBundle\Security\AccessExpressionChecker;
+use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
@@ -37,13 +37,12 @@ class AccessExpressionCheckerTest extends TestCase
         $this->assertFalse($this->ACE->validate('foo'));
 
         $this->assertFalse($this->ACE->validate('data'));
-        $this->assertFalse($this->ACE->validate('data', false));
 
         $this->assertTrue($this->ACE->validate('1'));
         $this->assertTrue($this->ACE->validate('true'));
         $this->assertTrue($this->ACE->validate('false'));
         $this->assertTrue($this->ACE->validate('member'));
-        $this->assertTrue($this->ACE->validate('data', true));
+        $this->assertTrue($this->ACE->validate('content'));
 
     }
 

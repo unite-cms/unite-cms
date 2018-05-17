@@ -29,14 +29,6 @@ class DomainMember implements FieldableContent
     private $id;
 
     /**
-     * @var array
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="validation.invalid_selection")
-     * @ORM\Column(name="roles", type="array")
-     */
-    private $roles;
-
-    /**
      * @var Domain
      * @Assert\NotBlank(message="validation.not_blank")
      * @Assert\Choice(callback="possibleDomains", strict=true, message="validation.domain_organization")
@@ -82,11 +74,6 @@ class DomainMember implements FieldableContent
      * @ORM\Column(type="datetime")
      */
     private $updated;
-
-    public function __construct()
-    {
-        $this->roles = [Domain::ROLE_EDITOR];
-    }
 
     public function __toString()
     {
@@ -159,15 +146,6 @@ class DomainMember implements FieldableContent
         ) : null;
     }
 
-    public function allowedRoles(): array
-    {
-        if ($this->getDomain()) {
-            return $this->getDomain()->getAvailableRolesAsOptions();
-        }
-
-        return [];
-    }
-
     /**
      * Return possible domains for this domain member. This are the domains from the accessors organizations.
      * @return array
@@ -205,26 +183,6 @@ class DomainMember implements FieldableContent
     public function setId(int $id)
     {
         $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRoles(): array
-    {
-        return $this->roles;
-    }
-
-    /**
-     * @param array $roles
-     *
-     * @return DomainMember
-     */
-    public function setRoles(array $roles)
-    {
-        $this->roles = $roles;
 
         return $this;
     }

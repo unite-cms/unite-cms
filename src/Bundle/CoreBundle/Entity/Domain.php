@@ -24,10 +24,6 @@ use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
  */
 class Domain
 {
-    const ROLE_PUBLIC = "ROLE_PUBLIC";
-    const ROLE_EDITOR = "ROLE_EDITOR";
-    const ROLE_ADMINISTRATOR = "ROLE_ADMINISTRATOR";
-
     const RESERVED_IDENTIFIERS = ['create', 'view', 'update', 'delete', 'user'];
 
     /**
@@ -58,19 +54,6 @@ class Domain
      * @Expose
      */
     private $identifier;
-
-    /**
-     * @var array
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\Column(name="roles", type="array")
-     * @Assert\All({
-     *     @Assert\NotBlank(message="validation.not_blank"),
-     *     @Assert\Length(max = 200, maxMessage="validation.too_long"),
-     *     @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * })
-     * @Expose
-     */
-    private $roles;
 
     /**
      * @var Organization
@@ -128,7 +111,6 @@ class Domain
 
     public function __construct()
     {
-        $this->roles = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
         $this->members = new ArrayCollection();
         $this->contentTypes = new ArrayCollection();
         $this->settingTypes = new ArrayCollection();
@@ -239,8 +221,7 @@ class Domain
     {
         $this
             ->setTitle($domain->getTitle())
-            ->setIdentifier($domain->getIdentifier())
-            ->setRoles($domain->getRoles());
+            ->setIdentifier($domain->getIdentifier());
 
         // ContentTypes to delete
         foreach ($this->getContentTypesDiff($domain) as $ct) {
@@ -390,51 +371,6 @@ class Domain
     public function getIdentifier()
     {
         return $this->identifier;
-    }
-
-    /**
-     * Set roles
-     *
-     * @param array $roles
-     *
-     * @return Domain
-     */
-    public function setRoles($roles)
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
-     * Get roles
-     *
-     * @return array
-     */
-    public function getRoles()
-    {
-        return $this->roles;
-    }
-
-    /**
-     * Returns all available roles for this domain.
-     *
-     * @param bool $include_anonymous Should the anonymous role should be returned?
-     * @return array|bool an array of roles formatted as form option input
-     */
-    public function getAvailableRolesAsOptions($include_anonymous = false)
-    {
-        $available_roles = array_flip($this->getRoles());
-
-        if (!$include_anonymous) {
-            unset($available_roles[Domain::ROLE_PUBLIC]);
-        }
-
-        foreach ($available_roles as $key => $available_role) {
-            $available_roles[$key] = $key;
-        }
-
-        return $available_roles;
     }
 
     /**

@@ -12,6 +12,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 
 class SettingVoter extends Voter
 {
@@ -21,6 +22,15 @@ class SettingVoter extends Voter
     const BUNDLE_PERMISSIONS = [];
     const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE];
 
+    /**
+     * @var AccessExpressionChecker $accessExpressionChecker
+     */
+    private $accessExpressionChecker;
+
+    public function __construct()
+    {
+        $this->accessExpressionChecker = new AccessExpressionChecker();
+    }
 
     /**
      * Determines if the attribute and subject are supported by this voter.
@@ -52,46 +62,27 @@ class SettingVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
-        // We can also vote on SettingTypes since there is exactly one setting per settingType.
-        if ($subject instanceof Setting) {
-            $subject = $subject->getSettingType();
-        }
+        $settingType = $subject instanceof Setting ? $subject->getSettingType() : $subject;
+        $domainMember = $token->getUser()->getDomainMember($subject->getDomain());
 
         // If the token is not an ApiClient it must be an User.
         if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
         }
 
-        // Check entity actions on Setting objects.
-        if ($subject instanceof SettingType) {
-            return $this->checkPermission($attribute, $subject, $token->getUser()->getDomainRoles($subject->getDomain()));
+        // We can only vote if this user is member of the subject's domain.
+        if(!$domainMember) {
+            return self::ACCESS_ABSTAIN;
         }
 
-        return self::ACCESS_ABSTAIN;
-    }
-
-    /**
-     * Check if the user has the role for the settingType.
-     *
-     * @param $attribute
-     * @param SettingType $settingType
-     * @param array $roles
-     * @return bool
-     */
-    protected function checkPermission($attribute, SettingType $settingType, array $roles)
-    {
-
+        // If the requested permission is not defined, throw an exception.
         if (empty($settingType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in SettingType '$settingType'");
         }
 
-        $allowedRoles = $settingType->getPermissions()[$attribute];
-
-        foreach ($roles as $userRole) {
-            $userRole = ($userRole instanceof Role) ? $userRole->getRole() : $userRole;
-            if (in_array($userRole, $allowedRoles)) {
-                return self::ACCESS_GRANTED;
-            }
+        // If the expression evaluates to true, we grant access.
+        if($this->accessExpressionChecker->evaluate($settingType->getPermissions()[$attribute], $domainMember, $subject instanceof Setting ? $subject : $settingType->getSetting())) {
+            return self::ACCESS_GRANTED;
         }
 
         return self::ACCESS_ABSTAIN;

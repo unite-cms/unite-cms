@@ -6,9 +6,8 @@
  * Time: 16:18
  */
 
-namespace App\Bundle\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security;
 
-use PHPUnit\Framework\Error\Notice;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\DomainMember;
@@ -67,16 +66,11 @@ class AccessExpressionChecker
      * Returns true, of the expression is valid (syntax and allowed variables).
      *
      * @param string $expression
-     * @param bool $isFieldable     True, if fieldable content should be available in the expression.
      * @return bool
      */
-    public function validate(string $expression, $isFieldable = false) : bool {
+    public function validate(string $expression) : bool {
         $expressionLanguage = new PlainExpressionLanguage();
-        $variables = ['member'];
-
-        if($isFieldable) {
-            $variables[] = 'data';
-        }
+        $variables = ['member', 'content'];
 
         try {
             $expressionLanguage->parse($expression, $variables);

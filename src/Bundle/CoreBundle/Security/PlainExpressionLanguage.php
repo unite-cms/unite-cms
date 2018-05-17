@@ -6,7 +6,7 @@
  * Time: 16:40
  */
 
-namespace App\Bundle\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security;
 
 
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;

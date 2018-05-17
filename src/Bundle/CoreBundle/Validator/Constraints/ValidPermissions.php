@@ -9,15 +9,14 @@ use Symfony\Component\Validator\Constraint;
  */
 class ValidPermissions extends Constraint
 {
-    public $message = 'Invalid permissions or roles where selected.';
+    public $message = 'Unsupported permissions or invalid expressions found.';
     public $callbackAttributes = null;
-    public $callbackRoles = null;
 
     /**
      * @inheritdoc
      */
     public function getRequiredOptions()
     {
-        return array('callbackAttributes', 'callbackRoles');
+        return array('callbackAttributes');
     }
 }
