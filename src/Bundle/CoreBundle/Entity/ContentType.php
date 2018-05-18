@@ -180,18 +180,9 @@ class ContentType implements Fieldable
     {
         $this->permissions[ContentVoter::VIEW] = 'true';
         $this->permissions[ContentVoter::LIST] = 'true';
-        $this->permissions[ContentVoter::CREATE] = 'true';
-        $this->permissions[ContentVoter::UPDATE] = 'true';
-        $this->permissions[ContentVoter::DELETE] = 'true';
-    }
-
-    public function allowedPermissionRoles(): array
-    {
-        if ($this->getDomain()) {
-            return $this->getDomain()->getRoles();
-        }
-
-        return [];
+        $this->permissions[ContentVoter::CREATE] = 'member.type == "editor"';
+        $this->permissions[ContentVoter::UPDATE] = 'member.type == "editor"';
+        $this->permissions[ContentVoter::DELETE] = 'member.type == "editor"';
     }
 
     public function allowedPermissionKeys(): array

@@ -150,7 +150,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $editorMember = new OrganizationMember();
         $editorMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org1);
         $editorDomainMember = new DomainMember();
-        $editorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
+        $editorDomainMember->setDomain($this->domain1)->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('viewer'));
         $editor->addOrganization($editorMember);
         $editor->addDomain($editorDomainMember);
         $this->em->persist($editor);
@@ -172,7 +172,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $apiClient = new ApiKey();
         $apiClient->setOrganization($this->org1);
         $domainMember = new DomainMember();
-        $domainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
+        $domainMember->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('viewer'))->setDomain($this->domain1);
         $apiClient
             ->setName('API Client 1')
             ->setToken('abc')

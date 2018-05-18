@@ -31,10 +31,6 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
             '{
   "title": "Marketing & PR",
   "identifier": "marketing",
-  "roles": [
-    "ROLE_PUBLIC",
-    "ROLE_EDITOR"
-  ],
   "content_types": [
     {
       "title": "News",
@@ -70,25 +66,6 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     },
     {
@@ -119,25 +96,6 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     }
   ],
@@ -159,21 +117,12 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view setting": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "update setting": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     }
   ]
 }']];
 
-    protected $roles = ['ROLE_PUBLIC', 'ROLE_EDITOR'];
+    protected $member_types = ['editor', 'viewer'];
 
     /**
      * @var Domain[] $domains
@@ -208,15 +157,15 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
                 $this->em->persist($domain);
                 $this->em->flush($domain);
 
-                foreach($this->roles as $role) {
+                foreach($this->member_types as $mtype) {
                     $domainMember = new DomainMember();
-                    $domainMember->setDomain($domain)->setRoles([$role]);
-                    $this->users[$domain->getIdentifier() . '_' . $role] = new ApiKey();
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setName($domain->getIdentifier() . '_' . $role)->setOrganization($org);
-                    $this->users[$domain->getIdentifier() . '_' . $role]->addDomain($domainMember);
+                    $domainMember->setDomain($domain)->setDomainMemberType($domain->getDomainMemberTypes()->get($mtype));
+                    $this->users[$domain->getIdentifier() . '_' . $mtype] = new ApiKey();
+                    $this->users[$domain->getIdentifier() . '_' . $mtype]->setName($domain->getIdentifier() . '_' . $mtype)->setOrganization($org);
+                    $this->users[$domain->getIdentifier() . '_' . $mtype]->addDomain($domainMember);
 
-                    $this->em->persist($this->users[$domain->getIdentifier() . '_' . $role]);
-                    $this->em->flush($this->users[$domain->getIdentifier() . '_' . $role]);
+                    $this->em->persist($this->users[$domain->getIdentifier() . '_' . $mtype]);
+                    $this->em->flush($this->users[$domain->getIdentifier() . '_' . $mtype]);
                 }
             }
         }
@@ -280,7 +229,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
 
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_viewer'],'query {
                 findNews {
                     result {
                       category {

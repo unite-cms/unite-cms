@@ -12,7 +12,9 @@ use JMS\Serializer\Annotation\Accessor;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
  * Domain
@@ -97,6 +99,14 @@ class Domain
     private $domainMemberTypes;
 
     /**
+     * @var array
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="validation.invalid_selection")
+     * @ORM\Column(name="permissions", type="array", nullable=true)
+     * @Expose
+     */
+    private $permissions;
+
+    /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
@@ -116,12 +126,36 @@ class Domain
         $this->settingTypes = new ArrayCollection();
         $this->domainMemberTypes = new ArrayCollection();
 
-        // Add default domain member type
-        $domainMemberType = new DomainMemberType();
-        $domainMemberType
-            ->setTitle('Users')
-            ->setIdentifier('users');
-        $this->addDomainMemberType($domainMemberType);
+        $this->addDefaultMemberTypes();
+        $this->addDefaultPermissions();
+    }
+
+    private function addDefaultMemberTypes()
+    {
+        $editor = new DomainMemberType();
+        $editor
+            ->setTitle('Editor')
+            ->setIdentifier('editor');
+
+        $viewer = new DomainMemberType();
+        $viewer
+            ->setTitle('Viewer')
+            ->setIdentifier('viewer');
+
+        $this->addDomainMemberType($editor);
+        $this->addDomainMemberType($viewer);
+    }
+
+    private function addDefaultPermissions()
+    {
+        $this->permissions[DomainVoter::VIEW] = 'true';
+        $this->permissions[DomainVoter::LIST] = 'true';
+        $this->permissions[DomainVoter::UPDATE] = 'false';
+    }
+
+    public function allowedPermissionKeys(): array
+    {
+        return array_merge(DomainVoter::ENTITY_PERMISSIONS, DomainVoter::BUNDLE_PERMISSIONS);
     }
 
     /**
@@ -221,7 +255,8 @@ class Domain
     {
         $this
             ->setTitle($domain->getTitle())
-            ->setIdentifier($domain->getIdentifier());
+            ->setIdentifier($domain->getIdentifier())
+            ->setPermissions($domain->getPermissions());
 
         // ContentTypes to delete
         foreach ($this->getContentTypesDiff($domain) as $ct) {
@@ -518,6 +553,36 @@ class Domain
         }
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPermissions()
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * @param array $permissions
+     *
+     * @return Domain
+     */
+    public function setPermissions($permissions)
+    {
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        foreach ($permissions as $attribute => $expression) {
+            $this->addPermission($attribute, $expression);
+        }
+
+        return $this;
+    }
+
+    public function addPermission($attribute, string $expression)
+    {
+        $this->permissions[$attribute] = $expression;
     }
 
     /**

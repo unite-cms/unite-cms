@@ -8,9 +8,9 @@
 
 namespace App\Bundle\CoreBundle\Tests\Security;
 
-use App\Bundle\CoreBundle\Security\PlainExpressionLanguage;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use UniteCMS\CoreBundle\Security\PlainExpressionLanguage;
 
 define('TEST_PLAIN_EXPRESSION_LANGUAGE_TEST_CONSTANT', 'foo');
 

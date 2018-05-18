@@ -106,7 +106,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
+        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('viewer'));
         $this->users['domain_editor']->addOrganization($domainEditorOrgMember);
         $this->users['domain_editor']->addDomain($domainEditorDomainMember);
 
@@ -120,7 +120,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $domainAdminOrgMember = new OrganizationMember();
         $domainAdminOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainAdminDomainMember = new DomainMember();
-        $domainAdminDomainMember->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
+        $domainAdminDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('editor'));
         $this->users['domain_admin']->addOrganization($domainAdminOrgMember);
         $this->users['domain_admin']->addDomain($domainAdminDomainMember);
 
@@ -178,7 +178,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->apiKey1 = new ApiKey();
         $this->apiKey1->setOrganization($this->organization);
         $domainEditor = new DomainMember();
-        $domainEditor->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain);
+        $domainEditor->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('viewer'));
         $this->apiKey1
             ->setName('API Client 1')
             ->setToken('xxx')

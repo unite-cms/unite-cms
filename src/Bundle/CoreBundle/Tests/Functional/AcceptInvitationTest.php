@@ -94,7 +94,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
+        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
         $this->users['domain_editor']->addOrganization($domainEditorOrgMember);
         $this->users['domain_editor']->addDomain($domainEditorDomainMember);
 
@@ -156,7 +156,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     {
 
         $invitation = new DomainInvitation();
-        $invitation->setRoles(['ROLE_EDITOR'])->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             'another_email@example.com'
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -176,7 +176,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     {
 
         $invitation = new DomainInvitation();
-        $invitation->setRoles(['ROLE_EDITOR'])->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             'another_email@example.com'
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -224,7 +224,6 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
             $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
             $user->getDomains()->first()->getDomain()->getIdentifier()
         );
-        $this->assertEquals($invitation->getRoles(), $user->getDomains()->first()->getRoles());
         $this->assertEquals('This is my name', $user->getName());
         $this->assertTrue($this->container->get('security.password_encoder')->isPasswordValid($user, 'password1'));
 
@@ -239,7 +238,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     {
 
         $invitation = new DomainInvitation();
-        $invitation->setRoles(['ROLE_EDITOR'])->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             $this->users['domain_editor']->getEmail()
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -260,7 +259,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     {
 
         $invitation = new DomainInvitation();
-        $invitation->setRoles(['ROLE_EDITOR'])->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             $this->users['domain_editor']->getEmail()
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -280,7 +279,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     {
 
         $invitation = new DomainInvitation();
-        $invitation->setRoles(['ROLE_EDITOR'])->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             $this->users['domain_editor2']->getEmail()
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -317,7 +316,6 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
             $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
             $existingUser->getDomains()->first()->getDomain()->getIdentifier()
         );
-        $this->assertEquals($invitation->getRoles(), $existingUser->getDomains()->first()->getRoles());
 
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
@@ -330,7 +328,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     {
 
         $invitation = new DomainInvitation();
-        $invitation->setRoles(['ROLE_EDITOR'])->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             $this->users['domain_editor2']->getEmail()
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);

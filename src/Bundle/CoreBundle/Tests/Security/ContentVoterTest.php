@@ -62,8 +62,8 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->contentType1 = new ContentType();
         $this->contentType1->setDomain($this->domain1);
         $p1 = $this->contentType1->getPermissions();
-        $p1[ContentVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
-        $p1[ContentVoter::DELETE] = [Domain::ROLE_ADMINISTRATOR];
+        $p1[ContentVoter::UPDATE] = 'member.accessor.name == "Admin"';
+        $p1[ContentVoter::DELETE] = 'member.accessor.name == "Admin"';
         $this->contentType1->setPermissions($p1);
 
         $this->contentType2 = new ContentType();
@@ -76,11 +76,11 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->content2->setContentType($this->contentType2);
 
         $admin = new User();
-        $admin->setRoles([User::ROLE_USER]);
+        $admin->setRoles([User::ROLE_USER])->setName('Admin');
         $adminMember = new OrganizationMember();
         $adminMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org2);
         $adminDomainMember = new DomainMember();
-        $adminDomainMember->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($this->domain1);
+        $adminDomainMember->setDomain($this->domain1);
         $admin->addOrganization($adminMember);
         $admin->addDomain($adminDomainMember);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', $admin->getRoles());
@@ -90,7 +90,7 @@ class ContentVoterTest extends SecurityVoterTestCase
         $userMember = new OrganizationMember();
         $userMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org2);
         $userDomainMember = new DomainMember();
-        $userDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
+        $userDomainMember->setDomain($this->domain1);
         $user->addOrganization($userMember);
         $user->addDomain($userDomainMember);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', $user->getRoles());

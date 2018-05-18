@@ -140,7 +140,7 @@ class SettingType implements Fieldable
     private function addDefaultPermissions()
     {
         $this->permissions[SettingVoter::VIEW] = 'true';
-        $this->permissions[SettingVoter::UPDATE] = 'true';
+        $this->permissions[SettingVoter::UPDATE] = 'member.type == "editor"';
     }
 
     public function allowedPermissionRoles(): array

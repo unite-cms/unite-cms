@@ -325,7 +325,6 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $admin = new ApiKey();
         $admin->setName('admin_key')->setOrganization($field->getContentType()->getDomain()->getOrganization());
         $domainMember = new DomainMember();
-        $domainMember->setRoles([Domain::ROLE_ADMINISTRATOR]);
         $domainMember->setDomain($field->getContentType()->getDomain());
         $admin->addDomain($domainMember);
         $this->container->get('security.token_storage')->setToken(

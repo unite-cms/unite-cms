@@ -63,6 +63,10 @@ class ContentVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
+        if(!$subject instanceof Content && !$subject instanceof ContentType) {
+            return self::ACCESS_ABSTAIN;
+        }
+
         $contentType = $subject instanceof ContentType ? $subject : $subject->getContentType();
         $domainMember = $token->getUser()->getDomainMember($contentType->getDomain());
 

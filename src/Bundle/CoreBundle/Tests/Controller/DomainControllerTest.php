@@ -17,6 +17,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class DomainControllerTest extends DatabaseAwareTestCase
@@ -165,12 +166,11 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1", "roles": [
-            "ROLE_PUBLIC",
-            "ROLE_EDITOR",
-            "ROLE_ADMINISTRATOR",
-            "ROLE_FOO"
-        ] }';
+        $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1", "permissions": {
+            "list domain": "true",
+            "view domain": "true",
+            "update domain": "member.type == \"user\""
+        }}';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => $this->organization->getIdentifier(),
@@ -181,11 +181,10 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // make sure, that the domain was updated.
         $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll()[0];
         $this->assertEquals([
-            'ROLE_PUBLIC',
-            'ROLE_EDITOR',
-            'ROLE_ADMINISTRATOR',
-            'ROLE_FOO',
-        ], $domain->getRoles());
+            'list domain' => 'true',
+            'view domain' => 'true',
+            'update domain' => 'member.type == "user"',
+        ], $domain->getPermissions());
 
         // Click on domain delete.
         $deleteButton = $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")');
@@ -254,8 +253,12 @@ class DomainControllerTest extends DatabaseAwareTestCase
             ->setIdentifier('test')
             ->setTitle('Test')
             ->setOrganization($this->organization);
+
+        $domain->addPermission(DomainVoter::UPDATE, 'member.accessor.name == "Domain Admin"');
+
         $this->em->persist($domain);
         $this->em->flush($domain);
+        $this->em->refresh($domain);
 
         // List all domains.
         $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_domain_index', [
@@ -269,9 +272,9 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Org editors are not allowed to add new domains.
         $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('organization.menu.domains.add') . '")'));
 
-        // Add this editor to the domain as admin.
+        // Add this editor to the domain.
         $domainMember = new DomainMember();
-        $domainMember->setDomain($domain)->setAccessor($this->editor)->setRoles([Domain::ROLE_EDITOR]);
+        $domainMember->setDomain($domain)->setAccessor($this->editor);
         $this->em->persist($domainMember);
         $this->em->flush($domainMember);
         $this->em->refresh($domainMember);
@@ -288,13 +291,13 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->assertCount(0, $crawler->filter('a:contains("' . $this->container->get('translator')->trans('domain.menu.manage.trash') .'")'));
         $this->assertCount(0, $crawler->filter('li:contains("' . $this->container->get('translator')->trans('domain.menu.domain_member_types.headline') .'")'));
 
-        // Make this domain member an domain administrator.
-        $domainMember = $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy([
-            'domain' => $domain,
-            'accessor' => $this->editor,
+        // Make this domain member an domain administrator (according to update permission expression).
+        $this->editor = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy([
+            'email' => $this->editor->getEmail(),
         ]);
-        $domainMember->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR]);
-        $this->em->flush($domainMember);
+        $this->editor->setName('Domain Admin');
+        $this->em->flush($this->editor);
+
         $crawler = $this->client->reload();
 
         // org editors, that are domain admins are allowed to edit domain.

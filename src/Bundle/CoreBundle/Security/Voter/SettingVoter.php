@@ -63,7 +63,7 @@ class SettingVoter extends Voter
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
         $settingType = $subject instanceof Setting ? $subject->getSettingType() : $subject;
-        $domainMember = $token->getUser()->getDomainMember($subject->getDomain());
+        $domainMember = $token->getUser()->getDomainMember($settingType->getDomain());
 
         // If the token is not an ApiClient it must be an User.
         if (!$token->getUser() instanceof DomainAccessor) {

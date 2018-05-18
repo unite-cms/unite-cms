@@ -15,7 +15,6 @@ class DomainInvitationEntityTest extends ContainerAwareTestCase
 
         $invite->setDomainMemberType(new DomainMemberType());
         $invite->setEmail('user1@example.com');
-        $invite->setRoles([Domain::ROLE_EDITOR]);
         $invite->setToken('XXX')->setRequestedAt(new \DateTime());
 
         // test id change
@@ -29,7 +28,6 @@ class DomainInvitationEntityTest extends ContainerAwareTestCase
 
         $invite->setDomainMemberType(new DomainMemberType());
         $invite->setEmail('user1@example.com');
-        $invite->setRoles([Domain::ROLE_EDITOR]);
         $invite->setToken('XXX')->setRequestedAt(new \DateTime());
 
         // test token flush

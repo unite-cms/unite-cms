@@ -59,7 +59,6 @@ class SettingVoterApiClientTest extends SecurityVoterTestCase
         $this->settingType1 = new SettingType();
         $this->settingType1->setDomain($this->domain1)->setId(1);
         $p1 = $this->settingType1->getPermissions();
-        $p1[SettingVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
         $this->settingType1->setPermissions($p1);
 
         $this->settingType2 = new SettingType();
@@ -74,14 +73,14 @@ class SettingVoterApiClientTest extends SecurityVoterTestCase
         $admin = new ApiKey();
         $admin->setOrganization($this->org1);
         $adminMember = new DomainMember();
-        $adminMember->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($this->domain1);
+        $adminMember->setDomain($this->domain1)->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('editor'));
         $admin->addDomain($adminMember);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', []);
 
         $user = new ApiKey();
         $user->setOrganization($this->org1);
         $userMember = new DomainMember();
-        $userMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain2);
+        $userMember->setDomain($this->domain2)->setDomainMemberType($this->domain2->getDomainMemberTypes()->get('viewer'));
         $user->addDomain($userMember);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', []);
     }
