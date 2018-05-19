@@ -148,7 +148,7 @@ class SettingVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting2));
 
         $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
-        $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting1));
+        $this->assertTrue($dm->isGranted([SettingVoter::VIEW], $this->setting1));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 
         $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting2));

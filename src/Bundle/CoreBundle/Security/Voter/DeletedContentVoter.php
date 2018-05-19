@@ -3,27 +3,11 @@
 namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use Symfony\Component\Security\Core\Role\Role;
-use UniteCMS\CoreBundle\Entity\ApiKey;
-use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
+use UniteCMS\CoreBundle\Entity\DomainAccessor;
 
 class DeletedContentVoter extends ContentVoter
 {
-    /**
-     * @var AccessExpressionChecker $accessExpressionChecker
-     */
-    private $accessExpressionChecker;
-
-    public function __construct()
-    {
-        $this->accessExpressionChecker = new AccessExpressionChecker();
-    }
-
     /**
      * Determines if the attribute and subject are supported by this voter.
      *
@@ -53,15 +37,25 @@ class DeletedContentVoter extends ContentVoter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
-        if (!$subject instanceof Content) {
+        if(!$subject instanceof Content) {
+            return self::ACCESS_ABSTAIN;
+        }
+
+        // We can only vote on DomainAccessor user objects.
+        if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
         }
 
         $contentType = $subject->getContentType();
+
+        if(!$contentType) {
+            return self::ACCESS_ABSTAIN;
+        }
+
         $domainMember = $token->getUser()->getDomainMember($contentType->getDomain());
 
-        // We can only vote on DomainAccessor user objects.
-        if (!$token->getUser() instanceof DomainAccessor) {
+        // Only work for non-deleted content
+        if ($subject->getDeleted() == null) {
             return self::ACCESS_ABSTAIN;
         }
 
@@ -73,6 +67,11 @@ class DeletedContentVoter extends ContentVoter
         // If the requested permission is not defined, throw an exception.
         if (empty($contentType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
+        }
+
+        // in order to perform RUD actions on deleted content the user must have update permissions.
+        if(in_array($attribute, self::ENTITY_PERMISSIONS)) {
+            $attribute = ContentVoter::UPDATE;
         }
 
         // If the expression evaluates to true, we grant access.

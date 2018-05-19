@@ -30,9 +30,11 @@ class DomainVoterTest extends SecurityVoterTestCase
 
         $this->domain1 = new Domain();
         $this->domain1->setOrganization($this->org1)->setId(1);
+        $this->domain1->addPermission(DomainVoter::UPDATE, 'member.type == "editor"');
 
         $this->domain2 = new Domain();
         $this->domain2->setOrganization($this->org2)->setId(2);
+        $this->domain2->addPermission(DomainVoter::UPDATE, 'member.type == "editor"');
 
         $admin = new User();
         $admin->setRoles([User::ROLE_USER]);

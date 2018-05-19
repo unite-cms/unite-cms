@@ -4,14 +4,9 @@ namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use Symfony\Component\Security\Core\Role\Role;
-use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
-use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 
 class SettingVoter extends Voter
@@ -62,13 +57,22 @@ class SettingVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
-        $settingType = $subject instanceof Setting ? $subject->getSettingType() : $subject;
-        $domainMember = $token->getUser()->getDomainMember($settingType->getDomain());
+        if(!$subject instanceof Setting && !$subject instanceof SettingType) {
+            return self::ACCESS_ABSTAIN;
+        }
 
         // If the token is not an ApiClient it must be an User.
         if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
         }
+
+        $settingType = $subject instanceof Setting ? $subject->getSettingType() : $subject;
+
+        if(!$settingType) {
+            return self::ACCESS_ABSTAIN;
+        }
+
+        $domainMember = $token->getUser()->getDomainMember($settingType->getDomain());
 
         // We can only vote if this user is member of the subject's domain.
         if(!$domainMember) {

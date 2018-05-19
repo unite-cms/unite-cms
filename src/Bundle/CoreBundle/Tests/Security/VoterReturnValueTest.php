@@ -8,8 +8,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\User;
@@ -95,10 +94,17 @@ class VoterReturnValueTest extends SecurityVoterTestCase
             }
         };
         $domain = new Domain();
+        $domain->setId(1);
         $ct = new ContentType();
         $ct->setTitle('any')->setDomain($domain);
         $value = new Content();
         $value->setContentType($ct);
+
+        $user = $this->token->getUser();
+        $domainMember = new DomainMember();
+        $domainMember->setDomain($domain);
+        $user->addDomain($domainMember);
+
         $contentVoter->voteWithoutCheck($this->token, $value, 'unsupported');
     }
 
@@ -113,10 +119,17 @@ class VoterReturnValueTest extends SecurityVoterTestCase
             }
         };
         $domain = new Domain();
+        $domain->setId(1);
         $st = new SettingType();
         $st->setTitle('any')->setDomain($domain);
         $value = new Setting();
         $value->setSettingType($st);
+
+        $user = $this->token->getUser();
+        $domainMember = new DomainMember();
+        $domainMember->setDomain($domain);
+        $user->addDomain($domainMember);
+
         $contentVoter->voteWithoutCheck($this->token, $value, 'unsupported');
     }
 }

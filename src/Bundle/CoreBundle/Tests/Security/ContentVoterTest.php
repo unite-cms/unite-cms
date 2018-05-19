@@ -62,8 +62,7 @@ class ContentVoterTest extends SecurityVoterTestCase
         $this->contentType1 = new ContentType();
         $this->contentType1->setDomain($this->domain1);
         $p1 = $this->contentType1->getPermissions();
-        $p1[ContentVoter::UPDATE] = 'member.accessor.name == "Admin"';
-        $p1[ContentVoter::DELETE] = 'member.accessor.name == "Admin"';
+        $p1[ContentVoter::UPDATE] = 'member.type == "editor" || member.type == "viewer"';
         $this->contentType1->setPermissions($p1);
 
         $this->contentType2 = new ContentType();
@@ -80,7 +79,7 @@ class ContentVoterTest extends SecurityVoterTestCase
         $adminMember = new OrganizationMember();
         $adminMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org2);
         $adminDomainMember = new DomainMember();
-        $adminDomainMember->setDomain($this->domain1);
+        $adminDomainMember->setDomain($this->domain1)->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('editor'));
         $admin->addOrganization($adminMember);
         $admin->addDomain($adminDomainMember);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', $admin->getRoles());
@@ -90,7 +89,7 @@ class ContentVoterTest extends SecurityVoterTestCase
         $userMember = new OrganizationMember();
         $userMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org2);
         $userDomainMember = new DomainMember();
-        $userDomainMember->setDomain($this->domain1);
+        $userDomainMember->setDomain($this->domain1)->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('viewer'));
         $user->addOrganization($userMember);
         $user->addDomain($userDomainMember);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', $user->getRoles());
@@ -173,9 +172,9 @@ class ContentVoterTest extends SecurityVoterTestCase
 
         $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType1));
-        $this->assertTrue($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
+        $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
         $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content1));
-        $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content1));
+        $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content1));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
         $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType2));
@@ -241,10 +240,10 @@ class ContentVoterTest extends SecurityVoterTestCase
 
         $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType1));
-        $this->assertTrue($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
-        $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content1));
-        $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content1));
-        $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content1));
+        $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
+        $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content1));
+        $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content1));
+        $this->assertTrue($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
         $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType2));
         $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType2));

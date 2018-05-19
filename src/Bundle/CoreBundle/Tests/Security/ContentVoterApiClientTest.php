@@ -61,8 +61,7 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $this->contentType1 = new ContentType();
         $this->contentType1->setDomain($this->domain1);
         $p1 = $this->contentType1->getPermissions();
-        $p1[ContentVoter::UPDATE] = 'member.accessor.name == "Admin"';
-        $p1[ContentVoter::DELETE] = 'member.accessor.name == "Admin"';
+        $p1[ContentVoter::UPDATE] = 'member.type == "editor" || member.type == "viewer"';
         $this->contentType1->setPermissions($p1);
 
         $this->contentType2 = new ContentType();
@@ -77,14 +76,14 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $admin = new ApiKey();
         $admin->setOrganization($this->org1)->setName('Admin');
         $domainAdmin = new DomainMember();
-        $domainAdmin->setDomain($this->domain1);
+        $domainAdmin->setDomain($this->domain1)->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('editor'));
         $admin->addDomain($domainAdmin);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', []);
 
         $user = new ApiKey();
         $user->setOrganization($this->org1)->setName('User');
         $domainUser = new DomainMember();
-        $domainUser->setDomain($this->domain1);
+        $domainUser->setDomain($this->domain1)->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('viewer'));
         $user->addDomain($domainUser);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', []);
     }
@@ -110,9 +109,9 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
 
         $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType1));
-        $this->assertTrue($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
+        $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
         $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content1));
-        $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content1));
+        $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content1));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
         $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType2));
@@ -147,10 +146,10 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
 
         $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType1));
-        $this->assertTrue($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
-        $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content1));
-        $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content1));
-        $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content1));
+        $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType1));
+        $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content1));
+        $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content1));
+        $this->assertTrue($dm->isGranted([ContentVoter::DELETE], $this->content1));
 
         $this->assertFalse($dm->isGranted([ContentVoter::LIST], $this->contentType2));
         $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType2));

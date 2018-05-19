@@ -23,7 +23,7 @@ class ContentVoter extends Voter
     /**
      * @var AccessExpressionChecker $accessExpressionChecker
      */
-    private $accessExpressionChecker;
+    protected $accessExpressionChecker;
 
     public function __construct()
     {
@@ -67,16 +67,21 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
+        // We can only vote on DomainAccessor user objects.
+        if (!$token->getUser() instanceof DomainAccessor) {
+            return self::ACCESS_ABSTAIN;
+        }
+
         $contentType = $subject instanceof ContentType ? $subject : $subject->getContentType();
+
+        if(!$contentType) {
+            return self::ACCESS_ABSTAIN;
+        }
+
         $domainMember = $token->getUser()->getDomainMember($contentType->getDomain());
 
         // Only work for non-deleted content
         if ($subject instanceof Content && $subject->getDeleted() != null) {
-            return self::ACCESS_ABSTAIN;
-        }
-
-        // We can only vote on DomainAccessor user objects.
-        if (!$token->getUser() instanceof DomainAccessor) {
             return self::ACCESS_ABSTAIN;
         }
 

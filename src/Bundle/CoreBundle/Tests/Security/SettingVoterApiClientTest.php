@@ -102,7 +102,7 @@ class SettingVoterApiClientTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting1));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 
-        $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting2));
+        $this->assertTrue($dm->isGranted([SettingVoter::VIEW], $this->setting2));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting2));
     }
 }

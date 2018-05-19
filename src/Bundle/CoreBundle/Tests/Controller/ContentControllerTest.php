@@ -99,11 +99,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setDomain($this->domain);
+        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('editor'));
         $this->editor->addOrganization($domainEditorOrgMember);
         $this->editor->addDomain($domainEditorDomainMember);
 
         $this->em->persist($this->editor);
+
         $this->em->flush();
         $this->em->refresh($this->editor);
 
