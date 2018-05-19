@@ -125,9 +125,6 @@ class DomainMemberController extends Controller
                             return $organizationMember->getUser();
                         }
                     )->toArray(),
-                    'choice_label' => function(DomainAccessor $accessor) {
-                        return $accessor->label();
-                    },
                 ]
             )
             ->add(
@@ -141,9 +138,6 @@ class DomainMemberController extends Controller
                             return !in_array($apiKey->getId(), $domain_member_type_members);
                         }
                     )->toArray(),
-                    'choice_label' => function(DomainAccessor $accessor) {
-                        return $accessor->label();
-                    },
                 ]
             )
             ->add('invite_user', EmailType::class, ['label' => 'domain.member.invite.form.email'])

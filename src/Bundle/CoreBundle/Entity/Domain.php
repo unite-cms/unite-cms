@@ -149,13 +149,12 @@ class Domain
     private function addDefaultPermissions()
     {
         $this->permissions[DomainVoter::VIEW] = 'true';
-        $this->permissions[DomainVoter::LIST] = 'true';
         $this->permissions[DomainVoter::UPDATE] = 'false';
     }
 
     public function allowedPermissionKeys(): array
     {
-        return array_merge(DomainVoter::ENTITY_PERMISSIONS, DomainVoter::BUNDLE_PERMISSIONS);
+        return DomainVoter::ENTITY_PERMISSIONS;
     }
 
     /**

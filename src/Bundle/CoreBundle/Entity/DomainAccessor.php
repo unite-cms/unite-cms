@@ -42,21 +42,6 @@ abstract class DomainAccessor
         $this->domains = new ArrayCollection();
     }
 
-    public function label() : string
-    {
-        $label = (string)$this;
-
-        if($this instanceof User) {
-            $label .= ' (User)';
-        }
-
-        if($this instanceof ApiKey) {
-            $label .= ' (API Key)';
-        }
-
-        return $label;
-    }
-
     /**
      * Get id
      *

@@ -10,12 +10,8 @@ namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\DomainMember;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 
 class DomainVoter extends Voter

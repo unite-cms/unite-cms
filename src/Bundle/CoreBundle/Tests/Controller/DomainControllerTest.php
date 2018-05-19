@@ -167,7 +167,6 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $form->form();
         $form->disableValidation();
         $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1", "permissions": {
-            "list domain": "true",
             "view domain": "true",
             "update domain": "member.type == \"user\""
         }}';
@@ -181,7 +180,6 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // make sure, that the domain was updated.
         $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll()[0];
         $this->assertEquals([
-            'list domain' => 'true',
             'view domain' => 'true',
             'update domain' => 'member.type == "user"',
         ], $domain->getPermissions());
