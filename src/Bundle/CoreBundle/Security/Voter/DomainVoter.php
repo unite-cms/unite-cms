@@ -10,12 +10,9 @@ namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\DomainMember;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 
 class DomainVoter extends Voter
 {
@@ -27,6 +24,16 @@ class DomainVoter extends Voter
 
     const BUNDLE_PERMISSIONS = [self::LIST];
     const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE];
+
+    /**
+     * @var AccessExpressionChecker $accessExpressionChecker
+     */
+    private $accessExpressionChecker;
+
+    public function __construct()
+    {
+        $this->accessExpressionChecker = new AccessExpressionChecker();
+    }
 
     /**
      * Determines if the attribute and subject are supported by this voter.
@@ -81,17 +88,21 @@ class DomainVoter extends Voter
 
         if($subject instanceof Domain) {
 
-            // Accessors can view domain, if they are a member.
-            if($attribute === self::VIEW) {
-                if(!empty($user->getDomainRoles($subject))) {
-                    return self::ACCESS_GRANTED;
-                }
+            $domainMember = $user->getDomainMember($subject);
+
+            // We can only vote if this user is member of the domain.
+            if(!$domainMember) {
+                return self::ACCESS_ABSTAIN;
             }
 
-            if($attribute === self::UPDATE) {
-                if(in_array(Domain::ROLE_ADMINISTRATOR, $user->getDomainRoles($subject))) {
-                    return self::ACCESS_GRANTED;
-                }
+            // If the requested permission is not defined, throw an exception.
+            if (empty($subject->getPermissions()[$attribute])) {
+                throw new \InvalidArgumentException("Permission '$attribute' was not found in domain '$subject'");
+            }
+
+            // If the expression evaluates to true, we grant access.
+            if($this->accessExpressionChecker->evaluate($subject->getPermissions()[$attribute], $domainMember)) {
+                return self::ACCESS_GRANTED;
             }
         }
 

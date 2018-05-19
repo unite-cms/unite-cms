@@ -75,25 +75,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     },
     {
@@ -115,25 +96,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     }
   ],
@@ -156,13 +118,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }
       ],
       "permissions": {
-        "view setting": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "update setting": [
-          "ROLE_EDITOR"
-        ]
+        "view setting": "true",
+        "update setting": "true"
       },
       "locales": []
     }
@@ -203,23 +160,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     },
     {
@@ -241,23 +181,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     }
   ],
@@ -307,25 +230,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     },
     {
@@ -347,25 +251,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     }
   ],
@@ -388,13 +273,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }
       ],
       "permissions": {
-        "view setting": [
-          "ROLE_PUBLIC",
-          "ROLE_EDITOR"
-        ],
-        "update setting": [
-          "ROLE_EDITOR"
-        ]
+        "view setting": "true",
+        "update setting": "true"
       },
       "locales": []
     }
@@ -403,9 +283,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             '{
   "title": "Internal Content",
   "identifier": "intern",
-  "roles": [
-    "ROLE_EDITOR"
-  ],
   "content_types": [
     {
       "title": "Time Tracking",
@@ -435,23 +312,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     },
     {
@@ -473,23 +333,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "permissions": {
-        "view content": [
-          "ROLE_EDITOR"
-        ],
-        "list content": [
-          "ROLE_EDITOR"
-        ],
-        "create content": [
-          "ROLE_EDITOR"
-        ],
-        "update content": [
-          "ROLE_EDITOR"
-        ],
-        "delete content": [
-          "ROLE_EDITOR"
-        ]
-      },
       "locales": []
     }
   ],
@@ -497,7 +340,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 }'
         ],
     ];
-    protected $roles = ['ROLE_PUBLIC', 'ROLE_EDITOR'];
+    protected $member_types = ['editor', 'viewer'];
 
     /**
      * @var Domain[] $domains
@@ -532,15 +375,15 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 $this->em->persist($domain);
                 $this->em->flush($domain);
 
-                foreach($this->roles as $role) {
+                foreach($this->member_types as $mtype) {
                     $domainMember = new DomainMember();
-                    $domainMember->setDomain($domain)->setRoles([$role]);
-                    $this->users[$domain->getIdentifier() . '_' . $role] = new ApiKey();
-                    $this->users[$domain->getIdentifier() . '_' . $role]->setName(ucfirst($role))->setOrganization($org);
-                    $this->users[$domain->getIdentifier() . '_' . $role]->addDomain($domainMember);
+                    $domainMember->setDomain($domain)->setDomainMemberType($domain->getDomainMemberTypes()->get($mtype));
+                    $this->users[$domain->getIdentifier() . '_' . $mtype] = new ApiKey();
+                    $this->users[$domain->getIdentifier() . '_' . $mtype]->setName($domain->getIdentifier() . '_' . $mtype)->setOrganization($org);
+                    $this->users[$domain->getIdentifier() . '_' . $mtype]->addDomain($domainMember);
 
-                    $this->em->persist($this->users[$domain->getIdentifier() . '_' . $role]);
-                    $this->em->flush($this->users[$domain->getIdentifier() . '_' . $role]);
+                    $this->em->persist($this->users[$domain->getIdentifier() . '_' . $mtype]);
+                    $this->em->flush($this->users[$domain->getIdentifier() . '_' . $mtype]);
                 }
 
                 // For each content type create some views and test content.
@@ -636,7 +479,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_viewer'],'query {
                 findNews {
                     page
                 }
@@ -654,7 +497,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_viewer'],'query {
                 findNews {
                     page
                 },
@@ -674,7 +517,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ],
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_viewer'],'query {
             findNews(filter: { field: "title", operator: "IS NULL" }) {
                 total
             }
@@ -687,7 +530,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ],
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_viewer'],'query {
             findNews(filter: { field: "title", operator: "IS NOT NULL" }) {
                 total
             }
@@ -697,7 +540,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
     public function testGenericApiFindMethod() {
         $result = $this->api(
         $this->domains['marketing'],
-        $this->users['marketing_ROLE_PUBLIC'],'query {
+        $this->users['marketing_viewer'],'query {
           find(limit: 500, types: ["news", "news_category"]) {
             total,
             result {
@@ -737,7 +580,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // First get all news
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_viewer'],'query {
                 findNews(limit: 100) {
                     total,
                     result {
@@ -757,7 +600,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Filter by exact title.
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query($value: String) {
+            $this->users['marketing_viewer'],'query($value: String) {
                 findNews(filter: { field: "title", operator: "=", value: $value }) {
                     total,
                     result {
@@ -782,7 +625,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Filter by exact title and exact content.
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query($title: String, $content: String) {
+            $this->users['marketing_viewer'],'query($title: String, $content: String) {
                 findNews(filter: { AND: [
                     { field: "title", operator: "=", value: $title },
                     { field: "content", operator: "=", value: $content }
@@ -811,7 +654,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Filter by part title or part content.
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query($title: String, $content: String) {
+            $this->users['marketing_viewer'],'query($title: String, $content: String) {
                 findNews(filter: { OR: [
                     { field: "title", operator: "LIKE", value: $title },
                     { field: "content", operator: "LIKE", value: $content }
@@ -868,7 +711,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // First get all news
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, sort: { field: "created", order: "ASC" }) {
                     total,
                     result {
@@ -882,7 +725,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, sort: { field: "created", order: "DESC" }) {
                     total,
                     result {
@@ -896,7 +739,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, 
                     filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
                     sort: { field: "content", order: "ASC" }) {
@@ -914,7 +757,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, 
                     filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
                     sort: { field: "content", order: "DESC" }) {
@@ -932,7 +775,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, 
                     filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
                     sort: [
@@ -953,7 +796,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, 
                     filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
                     sort: [
@@ -1008,7 +851,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ],
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 1, filter: { field: "title", operator: "=", value: "with_category" }) {
                     total,
                     result {
@@ -1038,7 +881,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query($newsID: ID!) {
+            $this->users['marketing_viewer'], 'query($newsID: ID!) {
                 getNews(id: $newsID) {
                     id,
                     title,
@@ -1073,7 +916,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $ids = [];
         $all_news = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 100) {
                     total,
                     result {
@@ -1089,7 +932,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Test pagination with limit 0 and page 0.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(limit: 0, page: 1) { total, result { id } }
             }');
         $this->assertNull($response->data->findNews);
@@ -1100,7 +943,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             'data' => [ 'findNews' => [ 'total' => 60, 'result' => [] ] ]
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'query {
+            $this->users['marketing_viewer'], 'query {
                 findNews(page: 1000) { total, result { id } }
             }'));
 
@@ -1109,12 +952,12 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
             $this->api(
                 $this->domains['marketing'],
-                $this->users['marketing_ROLE_PUBLIC'], 'query {
+                $this->users['marketing_viewer'], 'query {
                     findNews(page: 1) { total, result { id } }
                 }'),
             $this->api(
                 $this->domains['marketing'],
-                $this->users['marketing_ROLE_PUBLIC'], 'query {
+                $this->users['marketing_viewer'], 'query {
                     findNews(page: -5) { total, result { id } }
                 }')
         );
@@ -1128,7 +971,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $page_ids = [];
             $response = $this->api(
                 $this->domains['marketing'],
-                $this->users['marketing_ROLE_PUBLIC'], 'query($page: Int, $limit: Int) {
+                $this->users['marketing_viewer'], 'query($page: Int, $limit: Int) {
                     findNews(page: $page, limit: $limit) { total, result { id } }
                 }', ['page' => $page, 'limit' => $page_size]);
 
@@ -1147,7 +990,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Try to create content without permissions.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'mutation {
+            $this->users['marketing_viewer'], 'mutation {
                 createNews_category(data: { name: "First Category" }) {
                     id, 
                     name
@@ -1160,7 +1003,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Try to create content with permissions.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation {
+            $this->users['marketing_editor'], 'mutation {
                 createNews_category(data: { name: "First Category" }) {
                     id, 
                     name
@@ -1175,7 +1018,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Now create a news content with invalid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($category: ReferenceFieldTypeInput) {
+            $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
                 createNews(data: { title: "First News", content: "<p>Hello World</p>", category: $category }) {
                     id, 
                     title,
@@ -1199,7 +1042,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Now create a news content with valid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($category: ReferenceFieldTypeInput) {
+            $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
                 createNews(data: { title: "First News", content: "<p>Hello World</p>", category: $category }) {
                     id, 
                     title,
@@ -1228,7 +1071,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Update the category, but with wrong user.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'], 'mutation($id: ID!) {
+            $this->users['marketing_viewer'], 'mutation($id: ID!) {
                 updateNews_category(id: $id, data: { name: "Updated Category Title" }) {
                     id, 
                     name
@@ -1241,7 +1084,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Update the category with right user.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+            $this->users['marketing_editor'], 'mutation($id: ID!) {
                 updateNews_category(id: $id, data: { name: "Updated Category Title" }) {
                     id, 
                     name
@@ -1257,7 +1100,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Update a news content with invalid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
+            $this->users['marketing_editor'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
                 updateNews(id: $id, data: { title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
                     id, 
                     title,
@@ -1282,7 +1125,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // update a news content with valid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
+            $this->users['marketing_editor'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
                 updateNews(id: $id, data: { title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
                     id, 
                     title,
@@ -1306,7 +1149,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // update partial news content with valid content.
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+            $this->users['marketing_editor'], 'mutation($id: ID!) {
                 updateNews(id: $id, data: { title: "Updated News2" }) {
                     id, 
                     title,
@@ -1342,7 +1185,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_viewer'],'query {
                 findNews {
                     page
                 }
@@ -1358,7 +1201,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_PUBLIC'],'query {
+            $this->users['marketing_viewer'],'query {
                 findNews {
                     page
                 }
@@ -1368,7 +1211,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Try Create without csrf token
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation {
+            $this->users['marketing_editor'], 'mutation {
                 createNews(data: { title: "First News" }) {
                     id, 
                     title
@@ -1381,7 +1224,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Try Create with csrf token
         $response = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation {
+            $this->users['marketing_editor'], 'mutation {
                 createNews(data: { title: "First News" }) {
                     id, 
                     title
@@ -1394,7 +1237,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // Try Update
         $responseUpdate = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+            $this->users['marketing_editor'], 'mutation($id: ID!) {
                 updateNews(id: $id, data: { title: "Updated News" }) { 
                     title
                 }
@@ -1407,7 +1250,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $responseUpdate = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_ROLE_EDITOR'], 'mutation($id: ID!) {
+            $this->users['marketing_editor'], 'mutation($id: ID!) {
                 updateNews(id: $id, data: { title: "Updated News" }) { 
                     title
                 }

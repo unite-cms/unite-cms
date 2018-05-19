@@ -15,7 +15,8 @@
         "twig/twig": "^2.4",
         "webonyx/graphql-php": "^0.11.5",
         "symfony/swiftmailer-bundle": "^3.1",
-        "oro/doctrine-extensions": "^1.2"
+        "oro/doctrine-extensions": "^1.2",
+        "symfony/expression-language": "^4.0"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^4.0",

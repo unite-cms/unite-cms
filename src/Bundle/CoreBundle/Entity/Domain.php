@@ -12,7 +12,9 @@ use JMS\Serializer\Annotation\Accessor;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
  * Domain
@@ -24,10 +26,6 @@ use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
  */
 class Domain
 {
-    const ROLE_PUBLIC = "ROLE_PUBLIC";
-    const ROLE_EDITOR = "ROLE_EDITOR";
-    const ROLE_ADMINISTRATOR = "ROLE_ADMINISTRATOR";
-
     const RESERVED_IDENTIFIERS = ['create', 'view', 'update', 'delete', 'user'];
 
     /**
@@ -58,19 +56,6 @@ class Domain
      * @Expose
      */
     private $identifier;
-
-    /**
-     * @var array
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @ORM\Column(name="roles", type="array")
-     * @Assert\All({
-     *     @Assert\NotBlank(message="validation.not_blank"),
-     *     @Assert\Length(max = 200, maxMessage="validation.too_long"),
-     *     @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * })
-     * @Expose
-     */
-    private $roles;
 
     /**
      * @var Organization
@@ -114,6 +99,14 @@ class Domain
     private $domainMemberTypes;
 
     /**
+     * @var array
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="validation.invalid_selection")
+     * @ORM\Column(name="permissions", type="array", nullable=true)
+     * @Expose
+     */
+    private $permissions;
+
+    /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
@@ -128,18 +121,40 @@ class Domain
 
     public function __construct()
     {
-        $this->roles = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
         $this->members = new ArrayCollection();
         $this->contentTypes = new ArrayCollection();
         $this->settingTypes = new ArrayCollection();
         $this->domainMemberTypes = new ArrayCollection();
 
-        // Add default domain member type
-        $domainMemberType = new DomainMemberType();
-        $domainMemberType
-            ->setTitle('Users')
-            ->setIdentifier('users');
-        $this->addDomainMemberType($domainMemberType);
+        $this->addDefaultMemberTypes();
+        $this->addDefaultPermissions();
+    }
+
+    private function addDefaultMemberTypes()
+    {
+        $editor = new DomainMemberType();
+        $editor
+            ->setTitle('Editor')
+            ->setIdentifier('editor');
+
+        $viewer = new DomainMemberType();
+        $viewer
+            ->setTitle('Viewer')
+            ->setIdentifier('viewer');
+
+        $this->addDomainMemberType($editor);
+        $this->addDomainMemberType($viewer);
+    }
+
+    private function addDefaultPermissions()
+    {
+        $this->permissions[DomainVoter::VIEW] = 'true';
+        $this->permissions[DomainVoter::UPDATE] = 'false';
+    }
+
+    public function allowedPermissionKeys(): array
+    {
+        return DomainVoter::ENTITY_PERMISSIONS;
     }
 
     /**
@@ -240,7 +255,7 @@ class Domain
         $this
             ->setTitle($domain->getTitle())
             ->setIdentifier($domain->getIdentifier())
-            ->setRoles($domain->getRoles());
+            ->setPermissions($domain->getPermissions());
 
         // ContentTypes to delete
         foreach ($this->getContentTypesDiff($domain) as $ct) {
@@ -393,51 +408,6 @@ class Domain
     }
 
     /**
-     * Set roles
-     *
-     * @param array $roles
-     *
-     * @return Domain
-     */
-    public function setRoles($roles)
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
-     * Get roles
-     *
-     * @return array
-     */
-    public function getRoles()
-    {
-        return $this->roles;
-    }
-
-    /**
-     * Returns all available roles for this domain.
-     *
-     * @param bool $include_anonymous Should the anonymous role should be returned?
-     * @return array|bool an array of roles formatted as form option input
-     */
-    public function getAvailableRolesAsOptions($include_anonymous = false)
-    {
-        $available_roles = array_flip($this->getRoles());
-
-        if (!$include_anonymous) {
-            unset($available_roles[Domain::ROLE_PUBLIC]);
-        }
-
-        foreach ($available_roles as $key => $available_role) {
-            $available_roles[$key] = $key;
-        }
-
-        return $available_roles;
-    }
-
-    /**
      * @return Organization
      */
     public function getOrganization()
@@ -582,6 +552,36 @@ class Domain
         }
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPermissions()
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * @param array $permissions
+     *
+     * @return Domain
+     */
+    public function setPermissions($permissions)
+    {
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        foreach ($permissions as $attribute => $expression) {
+            $this->addPermission($attribute, $expression);
+        }
+
+        return $this;
+    }
+
+    public function addPermission($attribute, string $expression)
+    {
+        $this->permissions[$attribute] = $expression;
     }
 
     /**

@@ -29,9 +29,9 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain1 = new Domain();
 
         // Try to validate empty Domain.
-        $domain1->setTitle('')->setIdentifier('')->setRoles([]);
+        $domain1->setTitle('')->setIdentifier('')->setPermissions([]);
         $errors = $this->container->get('validator')->validate($domain1);
-        $this->assertCount(4, $errors);
+        $this->assertCount(3, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
@@ -39,11 +39,8 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('identifier', $errors->get(1)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
 
-        $this->assertEquals('roles', $errors->get(2)->getPropertyPath());
+        $this->assertEquals('organization', $errors->get(2)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
-
-        $this->assertEquals('organization', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(3)->getMessage());
 
         // Try to validate organization with too long title and identifier.
         $domain1
@@ -68,7 +65,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.invalid_characters', $errors->get(0)->getMessage());
 
-        // Try to test invalid roles.
+        // Try to set invalid ContentType.
         $org = new Organization();
         $organizationMember = new OrganizationMember();
         $organizationMember->setOrganization($org);
@@ -79,47 +76,28 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain1
             ->setTitle($this->generateRandomUTF8String(255))
             ->setIdentifier($this->generateRandomMachineName(255))
-            ->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_PUBLIC])
             ->setOrganization($org)
             ->addContentType(new ContentType())
             ->addSettingType(new SettingType())
             ->addMember($domainMember);
 
-
-        $domain1->setRoles(
-            ['', $this->generateRandomMachineName(201), '#', Domain::ROLE_EDITOR, Domain::ROLE_PUBLIC]
-        );
-        $errors = $this->container->get('validator')->validate($domain1);
-        $this->assertGreaterThanOrEqual(1, $errors->count());
-        $this->assertEquals('roles[0]', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
-
-        $this->assertEquals('roles[1]', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(1)->getMessage());
-
-        $this->assertEquals('roles[2]', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.invalid_characters', $errors->get(2)->getMessage());
-
-        $domain1->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_PUBLIC]);
-
-        // Try to set invalid ContentType.
         $domain1->getOrganization()->setMembers([]);
         $domain1->getOrganization()->setIdentifier('domain_org1')->setTitle('Domain Org 1');
         $domain1->getContentTypes()->first()->setPermissions(
             [
-                ContentVoter::VIEW => [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR],
-                ContentVoter::LIST => [Domain::ROLE_EDITOR],
-                ContentVoter::CREATE => [Domain::ROLE_EDITOR],
-                ContentVoter::UPDATE => [Domain::ROLE_EDITOR],
-                ContentVoter::DELETE => [Domain::ROLE_EDITOR],
+                ContentVoter::VIEW => 'true',
+                ContentVoter::LIST => 'true',
+                ContentVoter::CREATE => 'true',
+                ContentVoter::UPDATE => 'true',
+                ContentVoter::DELETE => 'true',
             ]
         );
 
         // Try to set invalid SettingType
         $domain1->getSettingTypes()->first()->setPermissions(
             [
-                SettingVoter::VIEW => [Domain::ROLE_EDITOR],
-                SettingVoter::UPDATE => [Domain::ROLE_EDITOR],
+                SettingVoter::VIEW => 'true',
+                SettingVoter::UPDATE => 'true',
             ]
         );
 
@@ -736,7 +714,6 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
     {
 
         $domain = $this->setUpOriginDomain();
-        $domain->setRoles([Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR, Domain::ROLE_PUBLIC, 'custom_role']);
 
         $org2 = new Organization();
         $org2->setTitle('org2')->setIdentifier('Org2');
@@ -745,30 +722,25 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         //Validate empty invite.
         $invite1 = new DomainInvitation();
-        $invite1->setRoles([]);
         $errors = $this->container->get('validator')->validate($invite1);
-        $this->assertCount(5, $errors);
-        $this->assertStringStartsWith('roles', $errors->get(0)->getPropertyPath());
+        $this->assertCount(4, $errors);
+        $this->assertStringStartsWith('domainMemberType', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
-        $this->assertStringStartsWith('domainMemberType', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
-        $this->assertStringStartsWith('email', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
-        $this->assertStringStartsWith('token', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(3)->getMessage());
-        $this->assertStringStartsWith('requestedAt', $errors->get(4)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(4)->getMessage());
-
-
-        //Validate invalid email and roles
-        $invite1->setDomainMemberType($domain->getDomainMemberTypes()->first());
-        $invite1->setRoles(['INVALID'])->setEmail('XXX')->setToken('XXX')->setRequestedAt(new \DateTime());
-        $errors = $this->container->get('validator')->validate($invite1);
-        $this->assertCount(2, $errors);
-        $this->assertStringStartsWith('roles', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_selection', $errors->get(0)->getMessage());
         $this->assertStringStartsWith('email', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.invalid_email', $errors->get(1)->getMessage());
+        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
+        $this->assertStringStartsWith('token', $errors->get(2)->getPropertyPath());
+        $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
+        $this->assertStringStartsWith('requestedAt', $errors->get(3)->getPropertyPath());
+        $this->assertEquals('validation.not_blank', $errors->get(3)->getMessage());
+
+
+        //Validate invalid email
+        $invite1->setDomainMemberType($domain->getDomainMemberTypes()->first());
+        $invite1->setEmail('XXX')->setToken('XXX')->setRequestedAt(new \DateTime());
+        $errors = $this->container->get('validator')->validate($invite1);
+        $this->assertCount(1, $errors);
+        $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('validation.invalid_email', $errors->get(0)->getMessage());
 
         // Validate too long token.
         $invite1->setToken($this->generateRandomMachineName(181));
@@ -797,7 +769,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $invite1->setToken('XXX');
 
         // Validate valid invite
-        $invite1->setRoles(['custom_role'])->setEmail('user1@example.com');
+        $invite1->setEmail('user1@example.com');
         $this->assertCount(0, $this->container->get('validator')->validate($invite1));
 
         $this->em->persist($domain);
@@ -809,7 +781,6 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $invite2->setDomainMemberType($domain->getDomainMemberTypes()->first());
         $invite2->setEmail('user1@example.com');
-        $invite2->setRoles([Domain::ROLE_EDITOR]);
         $invite2->setToken('XXX')->setRequestedAt(new \DateTime());
         $errors = $this->container->get('validator')->validate($invite2);
         $this->assertCount(2, $errors);

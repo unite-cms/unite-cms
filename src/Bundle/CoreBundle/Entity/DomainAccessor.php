@@ -42,21 +42,6 @@ abstract class DomainAccessor
         $this->domains = new ArrayCollection();
     }
 
-    public function label() : string
-    {
-        $label = (string)$this;
-
-        if($this instanceof User) {
-            $label .= ' (User)';
-        }
-
-        if($this instanceof ApiKey) {
-            $label .= ' (API Key)';
-        }
-
-        return $label;
-    }
-
     /**
      * Get id
      *
@@ -120,6 +105,23 @@ abstract class DomainAccessor
         }
 
         return [];
+    }
+
+    /**
+     * Returns the domain membership of this user for the given domain or null if this user is not member of the domain.
+     *
+     * @param Domain $domain
+     * @return DomainMember|null
+     */
+    public function getDomainMember(Domain $domain)
+    {
+        foreach ($this->getDomains() as $domainMember) {
+            if (!empty($domain->getId()) && $domainMember->getDomain()->getId() === $domain->getId()) {
+                return $domainMember;
+            }
+        }
+
+        return null;
     }
 
     /**

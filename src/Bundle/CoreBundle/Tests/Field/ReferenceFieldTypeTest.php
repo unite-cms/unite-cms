@@ -173,10 +173,10 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $user = new User();
         $user->setRoles([User::ROLE_USER])->setName('User');
         $userInDomain1 = new DomainMember();
-        $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
+        $userInDomain1->setDomain($ctField->getContentType()->getDomain());
         $user->addDomain($userInDomain1);
         $userInDomain2 = new DomainMember();
-        $userInDomain2->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($domain2);
+        $userInDomain2->setDomain($domain2);
         $user->addDomain($userInDomain2);
         $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'main', $user->getRoles()));
 
@@ -235,7 +235,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $user = new User();
         $user->setRoles([User::ROLE_USER])->setName('User');
         $userInDomain1 = new DomainMember();
-        $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
+        $userInDomain1->setDomain($ctField->getContentType()->getDomain())->setDomainMemberType($ctField->getContentType()->getDomain()->getDomainMemberTypes()->get('editor'));
         $user->addDomain($userInDomain1);
         $this->container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
@@ -295,7 +295,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $user = new User();
         $user->setRoles([User::ROLE_USER])->setName('User');
         $userInDomain1 = new DomainMember();
-        $userInDomain1->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($ctField->getContentType()->getDomain());
+        $userInDomain1->setDomain($ctField->getContentType()->getDomain())->setDomainMemberType($ctField->getContentType()->getDomain()->getDomainMemberTypes()->get('editor'));
         $user->addDomain($userInDomain1);
         $this->container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
@@ -380,7 +380,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
     {
         $ctField = $this->createContentTypeField('reference');
         $ctField->getContentType()->getDomain()->setIdentifier('domain1');
-        $ctField->getContentType()->addPermission(ContentVoter::LIST, [Domain::ROLE_ADMINISTRATOR]);
+        $ctField->getContentType()->addPermission(ContentVoter::LIST, 'false');
         $ctField->setSettings(
             new FieldableFieldSettings(
                 [
@@ -413,7 +413,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $user = new User();
         $user->setRoles([User::ROLE_USER])->setName('User');
         $userInDomain1 = new DomainMember();
-        $userInDomain1->setRoles([Domain::ROLE_PUBLIC])->setDomain($ctField->getContentType()->getDomain());
+        $userInDomain1->setDomain($ctField->getContentType()->getDomain())->setDomainMemberType($ctField->getContentType()->getDomain()->getDomainMemberTypes()->get('viewer'));
         $user->addDomain($userInDomain1);
 
         $this->container->get('security.token_storage')->setToken(

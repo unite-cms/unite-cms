@@ -100,7 +100,7 @@ class SettingType implements Fieldable
 
     /**
      * @var array
-     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", callbackRoles="allowedPermissionRoles", message="validation.invalid_selection")
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="validation.invalid_selection")
      * @ORM\Column(name="permissions", type="array", nullable=true)
      * @Expose
      */
@@ -139,8 +139,8 @@ class SettingType implements Fieldable
 
     private function addDefaultPermissions()
     {
-        $this->permissions[SettingVoter::VIEW] = [Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[SettingVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
+        $this->permissions[SettingVoter::VIEW] = 'true';
+        $this->permissions[SettingVoter::UPDATE] = 'member.type == "editor"';
     }
 
     public function allowedPermissionRoles(): array
@@ -477,16 +477,16 @@ class SettingType implements Fieldable
         $this->permissions = [];
         $this->addDefaultPermissions();
 
-        foreach ($permissions as $attribute => $roles) {
-            $this->addPermission($attribute, $roles);
+        foreach ($permissions as $attribute => $expression) {
+            $this->addPermission($attribute, $expression);
         }
 
         return $this;
     }
 
-    public function addPermission($attribute, array $roles)
+    public function addPermission($attribute, string $expression)
     {
-        $this->permissions[$attribute] = $roles;
+        $this->permissions[$attribute] = $expression;
     }
 
     /**

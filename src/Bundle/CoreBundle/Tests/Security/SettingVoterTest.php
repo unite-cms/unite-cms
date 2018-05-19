@@ -60,7 +60,6 @@ class SettingVoterTest extends SecurityVoterTestCase
         $this->settingType1 = new SettingType();
         $this->settingType1->setDomain($this->domain1);
         $p1 = $this->settingType1->getPermissions();
-        $p1[SettingVoter::UPDATE] = [Domain::ROLE_ADMINISTRATOR];
         $this->settingType1->setPermissions($p1);
 
         $this->settingType2 = new SettingType();
@@ -77,7 +76,7 @@ class SettingVoterTest extends SecurityVoterTestCase
         $adminMember = new OrganizationMember();
         $adminMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org2);
         $adminDomainMember = new DomainMember();
-        $adminDomainMember->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($this->domain1);
+        $adminDomainMember->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('editor'))->setDomain($this->domain1);
         $admin->addOrganization($adminMember);
         $admin->addDomain($adminDomainMember);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', $admin->getRoles());
@@ -87,7 +86,7 @@ class SettingVoterTest extends SecurityVoterTestCase
         $userMember = new OrganizationMember();
         $userMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org2);
         $userDomainMember = new DomainMember();
-        $userDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
+        $userDomainMember->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('viewer'))->setDomain($this->domain1);
         $user->addOrganization($userMember);
         $user->addDomain($userDomainMember);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', $user->getRoles());
@@ -149,7 +148,7 @@ class SettingVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting2));
 
         $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
-        $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting1));
+        $this->assertTrue($dm->isGranted([SettingVoter::VIEW], $this->setting1));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 
         $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting2));

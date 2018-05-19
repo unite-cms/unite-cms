@@ -61,14 +61,7 @@ class ControllerTest extends DatabaseAwareTestCase
                 { "title": "File", "identifier": "file", "type": "file", "settings": { "file_types": "txt", "bucket": { "endpoint": "https://example.com", "key": "XXX", "secret": "XXX", "bucket": "foo" } } }
               ]}
             }
-        ],
-        "permissions": {
-          "view content": [ "ROLE_EDITOR" ],
-          "list content": [ "ROLE_EDITOR" ],
-          "create content": [ "ROLE_EDITOR" ],
-          "update content": [ "ROLE_EDITOR" ],
-          "delete content": [ "ROLE_EDITOR" ]
-        }
+        ]
       },
       {
         "title": "CT 2",
@@ -82,11 +75,7 @@ class ControllerTest extends DatabaseAwareTestCase
             }
         ],
         "permissions": {
-          "view content": [ "ROLE_ADMINISTRATOR" ],
-          "list content": [ "ROLE_ADMINISTRATOR" ],
-          "create content": [ "ROLE_ADMINISTRATOR" ],
-          "update content": [ "ROLE_ADMINISTRATOR" ],
-          "delete content": [ "ROLE_ADMINISTRATOR" ]
+            "create content": "false"
         }
       }
     ], 
@@ -96,11 +85,7 @@ class ControllerTest extends DatabaseAwareTestCase
         "identifier": "st1", 
         "fields": [
             { "title": "File", "identifier": "file", "type": "file", "settings": { "file_types": "txt", "bucket": { "endpoint": "https://example.com", "key": "XXX", "secret": "XXX", "bucket": "foo" } }  }
-        ],
-        "permissions": {
-          "view setting": [ "ROLE_EDITOR" ],
-          "update setting": [ "ROLE_EDITOR" ]
-        }
+        ]
       },
       {
         "title": "ST 2",
@@ -109,8 +94,7 @@ class ControllerTest extends DatabaseAwareTestCase
             { "title": "File", "identifier": "file", "type": "file", "settings": { "file_types": "txt", "bucket": { "endpoint": "https://example.com", "key": "XXX", "secret": "XXX", "bucket": "foo" } }  }
         ],
         "permissions": {
-          "view setting": [ "ROLE_ADMINISTRATOR" ],
-          "update setting": [ "ROLE_ADMINISTRATOR" ]
+            "update setting": "false"
         }
       }
     ]
@@ -150,7 +134,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $editorMember = new OrganizationMember();
         $editorMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org1);
         $editorDomainMember = new DomainMember();
-        $editorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
+        $editorDomainMember->setDomain($this->domain1)->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('editor'));
         $editor->addOrganization($editorMember);
         $editor->addDomain($editorDomainMember);
         $this->em->persist($editor);
@@ -172,7 +156,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $apiClient = new ApiKey();
         $apiClient->setOrganization($this->org1);
         $domainMember = new DomainMember();
-        $domainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
+        $domainMember->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('editor'))->setDomain($this->domain1);
         $apiClient
             ->setName('API Client 1')
             ->setToken('abc')

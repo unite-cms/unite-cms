@@ -4,10 +4,10 @@ namespace UniteCMS\CoreBundle\Security\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use Symfony\Component\Security\Core\Role\Role;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 
 class ContentVoter extends Voter
 {
@@ -20,6 +20,15 @@ class ContentVoter extends Voter
     const BUNDLE_PERMISSIONS = [self::LIST, self::CREATE];
     const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE, self::DELETE];
 
+    /**
+     * @var AccessExpressionChecker $accessExpressionChecker
+     */
+    protected $accessExpressionChecker;
+
+    public function __construct()
+    {
+        $this->accessExpressionChecker = new AccessExpressionChecker();
+    }
 
     /**
      * Determines if the attribute and subject are supported by this voter.
@@ -54,8 +63,7 @@ class ContentVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
-        // Only work for non-deleted content
-        if ($subject instanceof Content && $subject->getDeleted() != null) {
+        if(!$subject instanceof Content && !$subject instanceof ContentType) {
             return self::ACCESS_ABSTAIN;
         }
 
@@ -64,47 +72,32 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        // Check bundle and entity actions on ContentType or Content objects.
-        if ($subject instanceof ContentType) {
-            return $this->checkPermission(
-                $attribute,
-                $subject,
-                $token->getUser()->getDomainRoles($subject->getDomain())
-            );
-        }
-        if ($subject instanceof Content) {
-            return $this->checkPermission(
-                $attribute,
-                $subject->getContentType(),
-                $token->getUser()->getDomainRoles($subject->getContentType()->getDomain())
-            );
+        $contentType = $subject instanceof ContentType ? $subject : $subject->getContentType();
+
+        if(!$contentType) {
+            return self::ACCESS_ABSTAIN;
         }
 
-        return self::ACCESS_ABSTAIN;
-    }
+        $domainMember = $token->getUser()->getDomainMember($contentType->getDomain());
 
-    /**
-     * Check if the user has the role for the contentType.
-     *
-     * @param $attribute
-     * @param ContentType $contentType
-     * @param array $roles
-     * @return bool
-     */
-    protected function checkPermission($attribute, ContentType $contentType, array $roles)
-    {
+        // Only work for non-deleted content
+        if ($subject instanceof Content && $subject->getDeleted() != null) {
+            return self::ACCESS_ABSTAIN;
+        }
 
+        // We can only vote if this user is member of the subject's domain.
+        if(!$domainMember) {
+            return self::ACCESS_ABSTAIN;
+        }
+
+        // If the requested permission is not defined, throw an exception.
         if (empty($contentType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
         }
 
-        $allowedRoles = $contentType->getPermissions()[$attribute];
-
-        foreach ($roles as $userRole) {
-            $userRole = ($userRole instanceof Role) ? $userRole->getRole() : $userRole;
-            if (in_array($userRole, $allowedRoles)) {
-                return self::ACCESS_GRANTED;
-            }
+        // If the expression evaluates to true, we grant access.
+        if($this->accessExpressionChecker->evaluate($contentType->getPermissions()[$attribute], $domainMember, $subject instanceof Content ? $subject : null)) {
+            return self::ACCESS_GRANTED;
         }
 
         return self::ACCESS_ABSTAIN;

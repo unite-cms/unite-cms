@@ -318,8 +318,7 @@ class ProfileController extends Controller
                                         $domainMember = new DomainMember();
                                         $domainMember
                                             ->setDomain($invitation->getDomainMemberType()->getDomain())
-                                            ->setDomainMemberType($invitation->getDomainMemberType())
-                                            ->setRoles($invitation->getRoles());
+                                            ->setDomainMemberType($invitation->getDomainMemberType());
                                         $existingUser->addDomain($domainMember);
 
                                         // Validate user.
@@ -393,8 +392,7 @@ class ProfileController extends Controller
                                 $domainMember = new DomainMember();
                                 $domainMember
                                     ->setDomain($invitation->getDomainMemberType()->getDomain())
-                                    ->setDomainMemberType($invitation->getDomainMemberType())
-                                    ->setRoles($invitation->getRoles());
+                                    ->setDomainMemberType($invitation->getDomainMemberType());
                                 $user
                                     ->setEmail($invitation->getEmail())
                                     ->setName($registration->getName())

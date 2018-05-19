@@ -125,9 +125,6 @@ class DomainMemberController extends Controller
                             return $organizationMember->getUser();
                         }
                     )->toArray(),
-                    'choice_label' => function(DomainAccessor $accessor) {
-                        return $accessor->label();
-                    },
                 ]
             )
             ->add(
@@ -141,21 +138,9 @@ class DomainMemberController extends Controller
                             return !in_array($apiKey->getId(), $domain_member_type_members);
                         }
                     )->toArray(),
-                    'choice_label' => function(DomainAccessor $accessor) {
-                        return $accessor->label();
-                    },
                 ]
             )
-            ->add('invite_user', EmailType::class, ['label' => 'domain.member.invite.form.email',])
-            ->add(
-                'roles',
-                ChoiceType::class,
-                [
-                    'label' => 'domain.member.create.form.roles',
-                    'multiple' => true,
-                    'choices' => $domain->getAvailableRolesAsOptions(),
-                ]
-            )
+            ->add('invite_user', EmailType::class, ['label' => 'domain.member.invite.form.email'])
             ->add('submit', SubmitType::class, ['label' => 'domain.member.create.form.submit'])
             ->getForm();
 
@@ -170,7 +155,6 @@ class DomainMemberController extends Controller
                 $member
                     ->setDomain($domain)
                     ->setDomainMemberType($memberType)
-                    ->setRoles($data['roles'])
                     ->setAccessor($data['select_add_type'] == 'existing_user' ? $data['existing_user'] : $data['existing_api_key']);
                 $this->getDoctrine()->getManager()->persist($member);
                 $this->getDoctrine()->getManager()->flush();
@@ -252,27 +236,13 @@ class DomainMemberController extends Controller
             $memberType,
             $member,
             ['attr' => ['class' => 'uk-form-vertical']]
-        );
-
-        $form->add(
-                'roles',
-                ChoiceType::class,
-                ['label' => 'Roles', 'multiple' => true, 'choices' => $domain->getAvailableRolesAsOptions()]
-            )
-            ->add('submit', SubmitType::class, ['label' => 'Update']);
+        )->add('submit', SubmitType::class, ['label' => 'Update']);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            if (isset($data['roles'])) {
-                $member->setRoles($data['roles']);
-                unset($data['roles']);
-            }
-
-            $member->setData($data);
+            $member->setData($form->getData());
 
             // If member field errors were found, map them to the form.
             $violations = $this->get('validator')->validate($member);

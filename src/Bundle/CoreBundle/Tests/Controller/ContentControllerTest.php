@@ -97,13 +97,14 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->editor = new User();
         $this->editor->setEmail('editor@example.com')->setName('Domain Editor')->setRoles([User::ROLE_USER])->setPassword('XXX');
         $domainEditorOrgMember = new OrganizationMember();
-        $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
+        $domainEditorOrgMember->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain);
+        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('editor'));
         $this->editor->addOrganization($domainEditorOrgMember);
         $this->editor->addDomain($domainEditorDomainMember);
 
         $this->em->persist($this->editor);
+
         $this->em->flush();
         $this->em->refresh($this->editor);
 
@@ -435,7 +436,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Try to access page without UPDATE right.
         $ct = $this->em->getRepository('UniteCMSCoreBundle:ContentType')->find($this->domain->getContentTypes()->first()->getId());
-        $ct->addPermission(ContentVoter::UPDATE, [Domain::ROLE_ADMINISTRATOR]);
+        $ct->addPermission(ContentVoter::UPDATE, 'false');
         $this->em->flush($ct);
 
         $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_content_deletedefinitely', [
@@ -447,7 +448,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         ]));
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
-        $ct->addPermission(ContentVoter::UPDATE, [Domain::ROLE_EDITOR]);
+        $ct->addPermission(ContentVoter::UPDATE, 'true');
         $this->em->flush($ct);
 
         // Delete content definitely.
@@ -542,7 +543,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Try to access page without UPDATE right.
         $ct = $this->em->getRepository('UniteCMSCoreBundle:ContentType')->find($this->domain->getContentTypes()->first()->getId());
-        $ct->addPermission(ContentVoter::UPDATE, [Domain::ROLE_ADMINISTRATOR]);
+        $ct->addPermission(ContentVoter::UPDATE, 'false');
         $this->em->flush($ct);
 
         $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_content_recover', [
@@ -554,7 +555,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         ]));
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
-        $ct->addPermission(ContentVoter::UPDATE, [Domain::ROLE_EDITOR]);
+        $ct->addPermission(ContentVoter::UPDATE, 'true');
         $this->em->flush($ct);
 
         // Recover delete content.

@@ -89,7 +89,6 @@ class CreateDomainCommand extends Command
         $output->writeln(['', '', '<info>*****Domain definition*****</info>', '']);
         $output->writeln('Title</>: <comment>'.$domain->getTitle().'</comment>');
         $output->writeln('Identifier: <comment>'.$domain->getIdentifier().'</comment>');
-        $output->writeln('Roles: [<comment>'.join(', ', $domain->getRoles()).'</comment>]');
         $output->writeln('ContentTypes: [');
 
         foreach ($domain->getContentTypes() as $contentType) {

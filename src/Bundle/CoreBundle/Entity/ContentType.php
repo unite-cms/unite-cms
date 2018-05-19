@@ -113,7 +113,7 @@ class ContentType implements Fieldable
 
     /**
      * @var array
-     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", callbackRoles="allowedPermissionRoles", message="validation.invalid_selection")
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="validation.invalid_selection")
      * @ORM\Column(name="permissions", type="array", nullable=true)
      * @Expose
      */
@@ -178,20 +178,11 @@ class ContentType implements Fieldable
 
     private function addDefaultPermissions()
     {
-        $this->permissions[ContentVoter::VIEW] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::LIST] = [Domain::ROLE_PUBLIC, Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::CREATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::UPDATE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-        $this->permissions[ContentVoter::DELETE] = [Domain::ROLE_EDITOR, Domain::ROLE_ADMINISTRATOR];
-    }
-
-    public function allowedPermissionRoles(): array
-    {
-        if ($this->getDomain()) {
-            return $this->getDomain()->getRoles();
-        }
-
-        return [];
+        $this->permissions[ContentVoter::VIEW] = 'true';
+        $this->permissions[ContentVoter::LIST] = 'true';
+        $this->permissions[ContentVoter::CREATE] = 'member.type == "editor"';
+        $this->permissions[ContentVoter::UPDATE] = 'member.type == "editor"';
+        $this->permissions[ContentVoter::DELETE] = 'member.type == "editor"';
     }
 
     public function allowedPermissionKeys(): array
@@ -565,16 +556,16 @@ class ContentType implements Fieldable
         $this->permissions = [];
         $this->addDefaultPermissions();
 
-        foreach ($permissions as $attribute => $roles) {
-            $this->addPermission($attribute, $roles);
+        foreach ($permissions as $attribute => $expression) {
+            $this->addPermission($attribute, $expression);
         }
 
         return $this;
     }
 
-    public function addPermission($attribute, array $roles)
+    public function addPermission($attribute, string $expression)
     {
-        $this->permissions[$attribute] = $roles;
+        $this->permissions[$attribute] = $expression;
     }
 
     /**

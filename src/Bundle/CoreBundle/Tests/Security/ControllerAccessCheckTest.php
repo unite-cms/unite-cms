@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\DomainInvitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -88,6 +89,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->organization->setTitle('Test controller access check')->setIdentifier('access_check');
         $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
+        $this->domain->addPermission(DomainVoter::UPDATE, 'member.type == "editor"');
 
         $this->em->persist($this->organization);
         $this->em->persist($this->domain);
@@ -95,7 +97,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->refresh($this->organization);
         $this->em->refresh($this->domain);
 
-        // TODO: Add some domain and organization members
         $this->users['domain_editor'] = new User();
         $this->users['domain_editor']
             ->setEmail('domain_editor@example.com')
@@ -106,23 +107,23 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
+        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('editor'));
         $this->users['domain_editor']->addOrganization($domainEditorOrgMember);
         $this->users['domain_editor']->addDomain($domainEditorDomainMember);
 
-        $this->users['domain_admin'] = new User();
-        $this->users['domain_admin']
-            ->setEmail('domain_admin@example.com')
-            ->setName('Domain Admin')
+        $this->users['domain_viewer'] = new User();
+        $this->users['domain_viewer']
+            ->setEmail('domain_viewer@example.com')
+            ->setName('Domain Viewer')
             ->setRoles([User::ROLE_USER])
             ->setPassword('XXX');
 
-        $domainAdminOrgMember = new OrganizationMember();
-        $domainAdminOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
-        $domainAdminDomainMember = new DomainMember();
-        $domainAdminDomainMember->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
-        $this->users['domain_admin']->addOrganization($domainAdminOrgMember);
-        $this->users['domain_admin']->addDomain($domainAdminDomainMember);
+        $domainViewerOrgMember = new OrganizationMember();
+        $domainViewerOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
+        $domainViewerDomainMember = new DomainMember();
+        $domainViewerDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('viewer'));
+        $this->users['domain_viewer']->addOrganization($domainViewerOrgMember);
+        $this->users['domain_viewer']->addDomain($domainViewerDomainMember);
 
 
         $this->users['organization_member'] = new User();
@@ -178,7 +179,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->apiKey1 = new ApiKey();
         $this->apiKey1->setOrganization($this->organization);
         $domainEditor = new DomainMember();
-        $domainEditor->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain);
+        $domainEditor->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('viewer'));
         $this->apiKey1
             ->setName('API Client 1')
             ->setToken('xxx')
@@ -368,147 +369,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/view/{domain}', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
-
-        $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(
-            ['identifier' => 'access_check',]
-        );
-        $domain2 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
-        $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org);
-
-        $content2 = new Content();
-        $content2->setContentType($domain2->getContentTypes()->get('ct1'));
-        $this->em->persist($domain2);
-        $this->em->persist($content2);
-        $this->em->flush();
-
-        $substitutions['{domain}'] = $domain2->getIdentifier();
-        $substitutions['{content}'] = $content2->getId();
-
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            false,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
-    }
-
-    public function testControllerActionAccessForDomainAdmin()
-    {
-        $this->login($this->users['domain_admin']);
-
-        $substitutions = [
-            '{organization}' => 'access_check',
-            '{domain}' => 'access_check',
-            '{content_type}' => 'ct1',
-            '{setting_type}' => 'st1',
-            '{view}' => 'all',
-            '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
-            '{invite}' => $this->invite1->getId(),
-            '{apiKey}' => $this->apiKey1->getId(),
-            '{member_type}' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
-        ];
-
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', true, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/update/{domain}', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/{domain}/member/{member_type}', true, $substitutions, ['GET']);
@@ -597,6 +457,78 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertAccess(
             '/{organization}/{domain}/content/{content_type}/{view}',
             false,
+            $substitutions,
+            ['GET']
+        );
+        $this->assertAccess(
+            '/{organization}/{domain}/content/{content_type}/{view}/create',
+            false,
+            $substitutions,
+            ['GET', 'POST']
+        );
+        $this->assertAccess(
+            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
+            false,
+            $substitutions,
+            ['GET', 'POST']
+        );
+        $this->assertAccess(
+            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
+            false,
+            $substitutions,
+            ['GET', 'POST']
+        );
+        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
+    }
+
+    public function testControllerActionAccessForDomainViewer()
+    {
+        $this->login($this->users['domain_viewer']);
+
+        $substitutions = [
+            '{organization}' => 'access_check',
+            '{domain}' => 'access_check',
+            '{content_type}' => 'ct1',
+            '{setting_type}' => 'st1',
+            '{view}' => 'all',
+            '{content}' => $this->content1->getId(),
+            '{member}' => $this->users['domain_viewer']->getOrganizations()->first()->getId(),
+            '{invite}' => $this->invite1->getId(),
+            '{apiKey}' => $this->apiKey1->getId(),
+            '{member_type}' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+        ];
+
+        $this->assertAccess('/', true, $substitutions, ['GET']);
+        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
+        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
+        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
+        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
+        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/view/{domain}', true, $substitutions, ['GET']);
+        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
+        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess(
+            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
+            false,
+            $substitutions,
+            ['GET', 'POST']
+        );
+        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
+        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess(
+            '/{organization}/{domain}/content/{content_type}/{view}',
+            true,
             $substitutions,
             ['GET']
         );

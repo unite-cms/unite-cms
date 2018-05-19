@@ -18,7 +18,7 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $contentType = new ContentType();
         $contentType->setIdentifier('')->setTitle('')->setDescription('')->setIcon('');
         $errors = $this->container->get('validator')->validate($contentType);
-        $this->assertCount(4, $errors);
+        $this->assertCount(3, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
@@ -109,7 +109,7 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
 
 
         // Try to set invalid permissions.
-        $contentType->setPermissions(['invalid' => ['invalid']]);
+        $contentType->setPermissions(['invalid' => '(((']);
         $errors = $this->container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('permissions', $errors->get(0)->getPropertyPath());

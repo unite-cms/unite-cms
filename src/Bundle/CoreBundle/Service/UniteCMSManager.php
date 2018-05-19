@@ -107,14 +107,14 @@ class UniteCMSManager
 
         // Get all domains of this organization from db.
         $data = $this->em->createQueryBuilder()
-            ->select('d.id', 'd.identifier', 'd.title')
+            ->select('d.id', 'd.identifier', 'd.title', 'd.permissions')
             ->from('UniteCMSCoreBundle:Domain', 'd')
             ->where('d.organization = :organization')
             ->getQuery()->execute(['organization' => $this->organization]);
 
         foreach ($data as $row) {
             $domain = new Domain();
-            $domain->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title']);
+            $domain->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setPermissions($row['permissions']);
             $this->organization->addDomain($domain);
         }
 

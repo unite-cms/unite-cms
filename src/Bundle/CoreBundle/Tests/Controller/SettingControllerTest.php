@@ -71,12 +71,8 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             { "title": "Field 3", "identifier": "f3", "type": "reference", "settings": { "domain": "d1", "content_type": "ct1" } }
         ],
         "permissions": {
-            "view setting": [
-              "ROLE_EDITOR"
-            ],
-            "update setting": [
-              "ROLE_EDITOR"
-            ]
+            "view setting": "true",
+            "update setting": "true"
           },
         "locales": ["de", "en"]
       }
@@ -106,7 +102,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain);
+        $domainEditorDomainMember->setDomain($this->domain);
         $this->editor->addOrganization($domainEditorOrgMember);
         $this->editor->addDomain($domainEditorDomainMember);
 

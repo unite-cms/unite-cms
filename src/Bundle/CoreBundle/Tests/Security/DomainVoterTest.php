@@ -30,16 +30,18 @@ class DomainVoterTest extends SecurityVoterTestCase
 
         $this->domain1 = new Domain();
         $this->domain1->setOrganization($this->org1)->setId(1);
+        $this->domain1->addPermission(DomainVoter::UPDATE, 'member.type == "editor"');
 
         $this->domain2 = new Domain();
         $this->domain2->setOrganization($this->org2)->setId(2);
+        $this->domain2->addPermission(DomainVoter::UPDATE, 'member.type == "editor"');
 
         $admin = new User();
         $admin->setRoles([User::ROLE_USER]);
         $adminMember = new OrganizationMember();
         $adminMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org2);
         $adminDomainMember = new DomainMember();
-        $adminDomainMember->setRoles([Domain::ROLE_ADMINISTRATOR])->setDomain($this->domain1);
+        $adminDomainMember->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('editor'))->setDomain($this->domain1);
         $admin->addOrganization($adminMember);
         $admin->addDomain($adminDomainMember);
         $this->u['domain_admin'] = new UsernamePasswordToken($admin, 'password', 'main', $admin->getRoles());
@@ -49,7 +51,7 @@ class DomainVoterTest extends SecurityVoterTestCase
         $userMember = new OrganizationMember();
         $userMember->setRoles([Organization::ROLE_USER])->setOrganization($this->org2);
         $userDomainMember = new DomainMember();
-        $userDomainMember->setRoles([Domain::ROLE_EDITOR])->setDomain($this->domain1);
+        $userDomainMember->setDomainMemberType($this->domain1->getDomainMemberTypes()->get('viewer'))->setDomain($this->domain1);
         $user->addOrganization($userMember);
         $user->addDomain($userDomainMember);
         $this->u['domain_editor'] = new UsernamePasswordToken($user, 'password', 'main', $user->getRoles());

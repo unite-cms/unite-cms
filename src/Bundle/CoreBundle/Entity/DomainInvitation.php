@@ -31,14 +31,6 @@ class DomainInvitation
     private $id;
 
     /**
-     * @var array
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="validation.invalid_selection")
-     * @ORM\Column(name="roles", type="array")
-     */
-    private $roles;
-
-    /**
      * @var DomainMemberType
      * @Assert\Valid()
      * @Assert\NotBlank(message="validation.not_blank")
@@ -70,23 +62,9 @@ class DomainInvitation
      */
     protected $requestedAt;
 
-    public function __construct()
-    {
-        $this->roles = [];
-    }
-
     public function __toString()
     {
         return $this->getEmail();
-    }
-
-    public function allowedRoles(): array
-    {
-        if (!$this->getDomainMemberType() || !$this->getDomainMemberType()->getDomain()) {
-            return [];
-        }
-
-        return $this->getDomainMemberType()->getDomain()->getAvailableRolesAsOptions();
     }
 
     public function emailNotAlreadyTaken(ExecutionContextInterface $context)
@@ -118,26 +96,6 @@ class DomainInvitation
     public function setId(int $id)
     {
         $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRoles(): array
-    {
-        return $this->roles;
-    }
-
-    /**
-     * @param array $roles
-     *
-     * @return DomainInvitation
-     */
-    public function setRoles(array $roles)
-    {
-        $this->roles = $roles;
 
         return $this;
     }
