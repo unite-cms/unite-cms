@@ -2,12 +2,24 @@
 {% block title %}{{ site_name }}{% endblock title %}
 {% block navigation %}{% endblock %}
 {% block content %}
-<article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-large">
+<article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-xlarge">
     <header class="uk-card-header">
         <h2>{% trans %}registration.registration.headline{% endtrans %}</h2>
     </header>
     <div class="uk-flex-1">
-        {{ form(form) }}
+        {{ form_start(form) }}
+            <fieldset class="uk-fieldset">
+                {{ form_row(form.name) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.password) }}
+            </fieldset>
+            <hr />
+            <fieldset class="uk-fieldset">
+                {{ form_row(form.organizationTitle) }}
+                {{ form_row(form.organizationIdentifier) }}
+            </fieldset>
+            <hr />
+        {{ form_rest(form) }}
     </div>
 </article>
 <style type="text/css" rel="stylesheet">
