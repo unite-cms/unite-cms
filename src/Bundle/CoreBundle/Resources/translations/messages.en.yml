@@ -207,6 +207,10 @@ profile.accept_invitation.token_expired: 'The invitation token has expired. Plea
 profile.accept_invitation.wrong_user: 'The invitation token only works for another user. Please login as another user and try again.'
 profile.accept_invitation.already_member: 'You are already a member of the domain domain "%domain%".'
 profile.accept_invitation.submit: 'Accept invitation'
+profile.accept_invitation.name.label: 'Your name'
+profile.accept_invitation.email.label: 'Your email address'
+profile.accept_invitation.password.label: 'Enter a strong password'
+profile.accept_invitation.password_repeat.label: 'Enter the password again'
 
 profile.accept_invitation.success.headline: 'Invitation process complete!'
 profile.accept_invitation.success.message: 'Thank you for accepting the invitation to the domain "%domain%". Now you can login using your email and password.'
