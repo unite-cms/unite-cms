@@ -51,7 +51,12 @@ security:
 
     access_control:
         - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/profile/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+
+        # Although registration bundle is optional, this path can be part of the default config.
+        # If the bundle is not installed /profile/registration will result in a 404 error.
+        - { path: ^/profile/registration, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        
         - { path: ^/profile/reset-password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/profile/reset-password-confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/profile/accept-invitation, roles: IS_AUTHENTICATED_ANONYMOUSLY }

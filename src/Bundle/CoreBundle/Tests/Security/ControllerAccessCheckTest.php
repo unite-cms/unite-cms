@@ -211,14 +211,14 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
                 if (!$this->client->getResponse()->isRedirect($route) && !$this->client->getResponse()->isRedirect(
                         $route.'/'
                     )) {
-                    $this->assertFalse($this->client->getResponse()->isRedirect('http://localhost/login'));
+                    $this->assertFalse($this->client->getResponse()->isRedirect('http://localhost/profile/login'));
                 }
                 $this->assertFalse($this->client->getResponse()->isForbidden());
                 $this->assertFalse($this->client->getResponse()->isServerError());
                 $this->assertFalse($this->client->getResponse()->isClientError());
             } else {
                 $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect(
-                        'http://localhost/login'
+                        'http://localhost/profile/login'
                     )));
                 $this->assertTrue($forbidden);
             }
@@ -227,7 +227,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         // Check, that all other methods are not allowed (Http 405).
         // This check does not works for the login action, because this action will
         // redirect the user to the invalid route login/ if method is not GET or POST.
-        if ($canAccess && $route != 'http://localhost/login') {
+        if ($canAccess && $route != 'http://localhost/profile/login') {
             $methodsAvailable = ['GET', 'POST', 'PUT', 'DELETE'];
             foreach (array_diff($methodsAvailable, $methods) as $method) {
                 $this->client->request($method, $route);
@@ -283,7 +283,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         ];
 
         $this->assertAccess('/', false, $substitutions);
-        $this->assertAccess('/login', true, $substitutions, ['GET', 'POST'], [
+        $this->assertAccess('/profile/login', true, $substitutions, ['GET', 'POST'], [
             '_username' => '',
             '_password' => '',
         ]);
@@ -358,7 +358,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         ];
 
         $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/login', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
@@ -427,7 +427,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $substitutions['{content}'] = $content2->getId();
 
         $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/login', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
@@ -499,7 +499,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         ];
 
         $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/login', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
@@ -571,7 +571,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         ];
 
         $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/login', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
@@ -641,7 +641,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $substitutions['{content}'] = $content2->getId();
 
         $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/login', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
@@ -713,7 +713,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         ];
 
         $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/login', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
@@ -783,7 +783,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $substitutions['{content}'] = $content2->getId();
 
         $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/login', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
@@ -855,7 +855,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         ];
 
         $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/login', '/', $substitutions);
+        $this->assertRedirect('/profile/login', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password', '/', $substitutions);
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);

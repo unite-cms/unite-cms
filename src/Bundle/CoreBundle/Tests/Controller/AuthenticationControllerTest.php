@@ -35,7 +35,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/profile/login');
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail();
         $form['_password'] = $password;
@@ -54,12 +54,12 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/profile/login');
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail() . 'invalid';
         $form['_password'] = $password;
         $this->client->submit($form);
-        $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/login'));
+        $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/profile/login'));
         $crawler = $this->client->followRedirect();
         $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("Invalid credentials.")'));
     }
@@ -75,12 +75,12 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/profile/login');
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail();
         $form['_password'] = $password . 'invalid';
         $this->client->submit($form);
-        $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/login'));
+        $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/profile/login'));
         $crawler = $this->client->followRedirect();
         $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("Invalid credentials.")'));
     }

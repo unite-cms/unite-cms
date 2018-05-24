@@ -2,7 +2,7 @@
 unitecms_core_authentication:
     resource: "@UniteCMSCoreBundle/Controller/AuthenticationController.php"
     type:     annotation
-    prefix:   /
+    prefix:   /profile
 
 unitecms_core_profile:
     resource: "@UniteCMSCoreBundle/Controller/ProfileController.php"
