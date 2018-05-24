@@ -1,0 +1,28 @@
+{
+    "name": "unite-cms/registration-bundle",
+    "type": "symfony-bundle",
+    "description": "Allows users to self-register and self-delete an unite cms user account.",
+    "require": {
+        "unite-cms/core-bundle": "0@dev"
+    },
+    "autoload": {
+        "psr-4": { "UniteCMS\\RegistrationBundle\\": "" },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\app\\": "Tests/app/" }
+    },
+    "authors": [
+        {
+            "name": "Franz Wilding",
+            "email": "franz@unite.co.at"
+        },
+        {
+            "name": "Stefan Kamsker",
+            "email": "stefan@unite.co.at"
+        }
+    ]
+}
+

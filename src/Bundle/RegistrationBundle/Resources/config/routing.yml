@@ -1,0 +1,10 @@
+
+unitecms_registration_registration:
+    resource: "@UniteCMSRegistrationBundle/Controller/RegistrationController.php"
+    type:     annotation
+    prefix:   /profile
+
+unitecms_registration_cancellation:
+    resource: "@UniteCMSRegistrationBundle/Controller/CancellationController.php"
+    type:     annotation
+    prefix:   /profile

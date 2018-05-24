@@ -33,6 +33,10 @@
         },
         {
             "type": "path",
+            "url": "./src/Bundle/RegistrationBundle"
+        },
+        {
+            "type": "path",
             "url": "./src/Bundle/StorageBundle"
         },
         {
@@ -43,6 +47,7 @@
     "require": {
         "unite-cms/core-bundle": "0@dev",
         "unite-cms/collection-field-bundle": "0@dev",
+        "unite-cms/registration-bundle": "0@dev",
         "unite-cms/storage-bundle": "0@dev",
         "unite-cms/wysiwyg-field-bundle": "0@dev"
     },
