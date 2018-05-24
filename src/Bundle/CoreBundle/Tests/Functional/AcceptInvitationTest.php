@@ -196,8 +196,8 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         );
 
         // Try to create a new, invalid user (full validation is tested somewhere else)
-        $form['registration[password][first]'] = "pw1";
-        $form['registration[password][second]'] = "pw2";
+        $form['invitation_registration[password][first]'] = "pw1";
+        $form['invitation_registration[password][second]'] = "pw2";
         $crawler = $this->client->submit($form);
 
         // Should show the form with form errors.
@@ -205,9 +205,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertGreaterThan(0, $crawler->filter('form div.uk-alert-danger')->count());
 
         // Try to create a new, valid user
-        $form['registration[password][first]'] = "password1";
-        $form['registration[password][second]'] = "password1";
-        $form['registration[name]'] = "This is my name";
+        $form['invitation_registration[password][first]'] = "password1";
+        $form['invitation_registration[password][second]'] = "password1";
+        $form['invitation_registration[name]'] = "This is my name";
         $crawler = $this->client->submit($form);
 
         // Should not show a form

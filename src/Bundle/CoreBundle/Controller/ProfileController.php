@@ -16,9 +16,12 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Event\RegistrationEvent;
+use UniteCMS\CoreBundle\Form\InvitationRegistrationType;
 use UniteCMS\CoreBundle\Form\Model\ChangePassword;
-use UniteCMS\CoreBundle\Form\Model\Registration;
+use UniteCMS\CoreBundle\Form\Model\InvitationRegistrationModel;
 
 class ProfileController extends Controller
 {
@@ -357,37 +360,23 @@ class ProfileController extends Controller
 
                         // An invitation for a new user can only be accepted if no user is logged in.
                         if (!$this->getUser()) {
-                            $wrongUser = false;
+                            $wrongUser = false;;
 
-                            $registration = new Registration();
-                            $form = $this->get('form.factory')->createNamedBuilder(
-                                'registration',
-                                FormType::class,
-                                $registration
-                            )
-                                ->add(
-                                    'name',
-                                    TextType::class,
-                                    ['label' => 'Name', 'required' => true, 'attr' => ['autocomplete' => 'off']]
-                                )
-                                ->add(
-                                    'password',
-                                    RepeatedType::class,
-                                    [
-                                        'type' => PasswordType::class,
-                                        'invalid_message' => 'validation.passwords_must_match',
-                                        'required' => true,
-                                        'first_options' => array('label' => 'Password'),
-                                        'second_options' => array('label' => 'Repeat password'),
-                                        'attr' => ['autocomplete' => 'off'],
-                                    ]
-                                )
-                                ->add('submit', SubmitType::class, ['label' => 'profile.accept_invitation.submit'])
-                                ->getForm();
+                            $form = $this->createForm(InvitationRegistrationType::class);
+                            $registrationModelClass = $form->getConfig()->getDataClass();
 
+                            if(!empty($registrationModelClass) && is_a($registrationModelClass, InvitationRegistrationModel::class, true)) {
+                                $registration = new $registrationModelClass();
+                            } else {
+                                $registration = new InvitationRegistrationModel();
+                            }
+
+                            $registration->setEmail($invitation->getEmail());
+                            $form->setData($registration);
                             $form->handleRequest($request);
 
                             if ($form->isSubmitted() && $form->isValid()) {
+
                                 $user = new User();
                                 $domainMember = new DomainMember();
                                 $domainMember
@@ -396,21 +385,32 @@ class ProfileController extends Controller
                                 $user
                                     ->setEmail($invitation->getEmail())
                                     ->setName($registration->getName())
-                                    ->addDomain($domainMember)
                                     ->setPassword(
                                         $this->get('security.password_encoder')->encodePassword(
                                             $user,
                                             $registration->getPassword()
                                         )
-                                    );
+                                    )
+                                    ->addDomain($domainMember);
+
+                                $organizationMember = new OrganizationMember();
+                                $organizationMember->setOrganization($domainMember->getDomain()->getOrganization());
+                                $user->addOrganization($organizationMember);
 
                                 // Clear plaintext password, so it can't be accessed later in this request.
                                 $registration->eraseCredentials();
 
+                                $violations = $this->get('validator')->validate($user);
+
                                 // Validate new created user.
-                                if (!$this->get('validator')->validate($user)) {
+                                if ($violations->count() > 0) {
                                     $form->addError(new FormError('invitation.invalid_user'));
+                                    $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_FAILURE, new RegistrationEvent($registration));
+
                                 } else {
+
+                                    $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_SUCCESS, new RegistrationEvent($registration));
+
                                     $this->getDoctrine()->getManager()->persist($domainMember);
                                     $this->getDoctrine()->getManager()->persist($user);
 
@@ -419,6 +419,8 @@ class ProfileController extends Controller
 
                                     // Save changes to database.
                                     $this->getDoctrine()->getManager()->flush();
+
+                                    $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration));
                                 }
                             }
                         }
