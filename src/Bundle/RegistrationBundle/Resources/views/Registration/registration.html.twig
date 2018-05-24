@@ -1,0 +1,19 @@
+{% extends '@UniteCMSCore/layout.html.twig' %}
+{% block title %}{{ site_name }}{% endblock title %}
+{% block navigation %}{% endblock %}
+{% block content %}
+<article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-large">
+    <header class="uk-card-header">
+        <h2>{% trans %}registration.registration.headline{% endtrans %}</h2>
+    </header>
+    <div class="uk-flex-1">
+        {{ form(form) }}
+    </div>
+</article>
+<style type="text/css" rel="stylesheet">
+    body {
+        background: url({{ site_background }}) no-repeat;
+        background-size: cover;
+    }
+</style>
+{% endblock %}

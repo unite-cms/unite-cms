@@ -1,0 +1,9 @@
+
+registration.registration.headline: 'Create a new account'
+registration.registration.submit: 'Create a new account'
+registration.registration.name.label: 'Your name'
+registration.registration.email.label: 'Your email address'
+registration.registration.password.label: 'Enter a strong password'
+registration.registration.password_repeat.label: 'Enter the password again'
+registration.registration.organization_title.label: 'Organization name'
+registration.registration.organization_identifier.label: 'Organization machine name'
