@@ -72,8 +72,8 @@ class User extends DomainAccessor implements UserInterface, \Serializable
 
     /**
      * @var OrganizationMember[]
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"})
+     * @Assert\Valid(groups={"Default", "CREATE", "UPDATE", "DELETE"})
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\OrganizationMember", mappedBy="user", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     protected $organizations;
 

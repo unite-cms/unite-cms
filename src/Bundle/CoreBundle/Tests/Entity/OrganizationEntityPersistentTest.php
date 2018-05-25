@@ -194,4 +194,117 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
     }
+
+    public function testOrganizationMemberDeleteValidation() {
+
+        $validator = $this->container->get('validator');
+
+        // Updating or deleting organization member is only allowed if after that action there is at least one admin remaining.
+        $org = new Organization();
+        $org->setTitle('Org')->setIdentifier('org');
+
+        $user1 = new User();
+        $user1->setName('User 1')->setEmail('user1@example.com')->setPassword('XXX');
+
+        $user2 = new User();
+        $user2->setName('User 2')->setEmail('user2@example.com')->setPassword('XXX');
+
+        $this->em->persist($org);
+        $this->em->persist($user1);
+        $this->em->persist($user2);
+        $this->em->flush();
+        $this->em->refresh($org);
+        $this->em->refresh($user1);
+        $this->em->refresh($user2);
+
+        // Adding users to an organization is valid at any time.
+        $orgMember1 = new OrganizationMember();
+        $orgMember1->setOrganization($org)->setUser($user1)->setSingleRole(Organization::ROLE_ADMINISTRATOR);
+        $this->assertCount(0, $validator->validate($orgMember1, null, ['CREATE']));
+
+        $this->em->persist($orgMember1);
+        $this->em->flush($orgMember1);
+        $this->em->refresh($org);
+
+        $orgMember2 = new OrganizationMember();
+        $orgMember2->setOrganization($org)->setUser($user2)->setSingleRole(Organization::ROLE_ADMINISTRATOR);
+        $this->assertCount(0, $validator->validate($orgMember2, null, ['CREATE']));
+
+        $this->em->persist($orgMember2);
+        $this->em->flush($orgMember2);
+        $this->em->refresh($org);
+
+        // Deleting the first user should be valid, because there is still another admin in this org.
+        $this->assertCount(0, $validator->validate($orgMember1, null, ['DELETE']));
+        $this->em->remove($orgMember1);
+        $this->em->flush($orgMember1);
+        $this->em->refresh($org);
+
+        // Deleting the 2nd user should not be valid, because no admin would be left.
+        $violations = $validator->validate($orgMember2, null, ['DELETE']);
+        $this->assertCount(1, $violations);
+        $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
+        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+
+
+        // Adding the first user again as user should work.
+        $orgMember1User = new OrganizationMember();
+        $orgMember1User->setOrganization($org)->setUser($user1)->setSingleRole(Organization::ROLE_USER);
+        $this->assertCount(0, $validator->validate($orgMember1, null, ['CREATE']));
+
+        $this->em->persist($orgMember1User);
+        $this->em->flush();
+        $this->em->refresh($org);
+
+        // Deleting the 2nd user should still not be valid, because user1 is only a member and not an admin.
+        $violations = $validator->validate($orgMember2, null, ['DELETE']);
+        $this->assertCount(1, $violations);
+        $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
+        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+
+        // Updating the user role of user 2 should not work, because there would be no admin left.
+        $orgMember2->setSingleRole(Organization::ROLE_USER);
+        $violations = $validator->validate($orgMember2, null, ['UPDATE']);
+        $this->assertCount(1, $violations);
+        $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
+        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+
+        // Updating user2, but leaving admin role should work.
+        $orgMember2->setSingleRole(Organization::ROLE_ADMINISTRATOR);
+        $this->assertCount(0, $validator->validate($orgMember2, null, ['UPDATE']));
+        $orgMember2->setSingleRole(Organization::ROLE_USER);
+
+        // Making the first user an admin, should allow the 2nds user to change role.
+        $orgMember1User->setSingleRole(Organization::ROLE_ADMINISTRATOR);
+        $this->em->flush($orgMember1User);
+        $this->em->refresh($org);
+
+        $this->assertCount(0, $validator->validate($orgMember2, null, ['UPDATE']));
+        $this->em->flush($orgMember2);
+        $this->em->refresh($org);
+
+        $this->em->refresh($user1);
+        $this->em->refresh($user2);
+
+        // Deleting the underlying user for the admin membership should not work.
+        $violations = $validator->validate($user1, null, ['DELETE']);
+        $this->assertCount(1, $violations);
+        $this->assertEquals('organizations[0].organization', $violations->get(0)->getPropertyPath());
+        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+
+        // If user2 is admin again, we can now delete user1.
+        $orgMember2->setSingleRole(Organization::ROLE_ADMINISTRATOR);
+        $this->em->flush($orgMember2);
+        $this->em->refresh($org);
+
+        $this->assertCount(0, $validator->validate($user1, null, ['DELETE']));
+        $this->em->remove($user1);
+        $this->em->flush();
+        $this->em->refresh($org);
+
+        $violations = $validator->validate($orgMember2, null, ['DELETE']);
+        $this->assertCount(1, $violations);
+        $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
+        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+    }
 }

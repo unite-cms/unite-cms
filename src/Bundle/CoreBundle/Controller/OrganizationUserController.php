@@ -8,6 +8,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -69,7 +70,7 @@ class OrganizationUserController extends Controller
             ),
         ];
 
-        $form = $this->createFormBuilder($member, ['attr' => ['class' => 'uk-form-vertical']])
+        $form = $this->createFormBuilder($member, ['validation_groups' => ['UPDATE'], 'attr' => ['class' => 'uk-form-vertical']])
             ->add('singleRole', ChoiceCardsType::class, [
                 'label' => 'organization.user.update.roles.label',
                 'multiple' => false,
@@ -125,15 +126,29 @@ class OrganizationUserController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->remove($member);
-            $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute(
-                'unitecms_core_organizationuser_index',
-                [
-                    'organization' => $organization->getIdentifier(),
-                ]
-            );
+            $violations = $this->get('validator')->validate($member, null, ['DELETE']);
+
+            // If there where violation problems.
+            if($violations->count() > 0) {
+
+                $violationMapper = new ViolationMapper();
+                foreach ($violations as $violation) {
+                    $violationMapper->mapViolation($violation, $form);
+                }
+
+            // if this member is save to delete.
+            } else {
+                $this->getDoctrine()->getManager()->remove($member);
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirectToRoute(
+                    'unitecms_core_organizationuser_index',
+                    [
+                        'organization' => $organization->getIdentifier(),
+                    ]
+                );
+            }
         }
 
         return $this->render(
