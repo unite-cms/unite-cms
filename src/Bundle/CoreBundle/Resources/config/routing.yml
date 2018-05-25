@@ -1,3 +1,7 @@
+unitecms_core_index:
+    path:     /
+    methods: ['GET']
+    defaults: { _controller: UniteCMSCoreBundle:Index:index }
 
 unitecms_core_authentication:
     resource: "@UniteCMSCoreBundle/Controller/AuthenticationController.php"
@@ -8,11 +12,6 @@ unitecms_core_profile:
     resource: "@UniteCMSCoreBundle/Controller/ProfileController.php"
     type:     annotation
     prefix:   /profile
-
-unitecms_core_organizations:
-    path:     /
-    methods: ['GET']
-    defaults: { _controller: UniteCMSCoreBundle:Organization:index }
 
 unitecms_core_organization_user:
     resource: "@UniteCMSCoreBundle/Controller/OrganizationUserController.php"

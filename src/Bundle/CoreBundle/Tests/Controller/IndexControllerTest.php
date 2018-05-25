@@ -8,17 +8,16 @@
 
 namespace UniteCMS\CoreBundle\Tests\Controller;
 
-
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class OrganizationControllerTest extends DatabaseAwareTestCase
+class IndexControllerTest extends DatabaseAwareTestCase
 {
 
     /**
@@ -58,10 +57,15 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
 
     public function testIndexAction() {
 
-        $url = $this->container->get('router')->generate('unitecms_core_organizations');
+        $url = $this->container->get('router')->generate('unitecms_core_index');
+        $profile_orgs_url = $this->container->get('router')->generate('unitecms_core_profile_organizations',  [], Router::ABSOLUTE_PATH);
+
+        // index redirects to profile organizations route
+        $this->client->request('GET', $url);
+        $this->assertTrue($this->client->getResponse()->isRedirect($profile_orgs_url));
+        $crawler = $this->client->followRedirect();
 
         // If there are no organizations for this user, the index action should display an info.
-        $crawler = $this->client->request('GET', $url);
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertFalse($this->client->getResponse()->isRedirect());
         $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . $this->container->get('translator')->trans('organizations.error.no_organizations') .'")'));
@@ -73,7 +77,8 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         // Should be the same result.
-        $crawler = $this->client->request('GET', $url);
+        $this->client->request('GET', $url);
+        $crawler = $this->client->followRedirect();
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertFalse($this->client->getResponse()->isRedirect());
         $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . $this->container->get('translator')->trans('organizations.error.no_organizations') .'")'));
@@ -87,7 +92,7 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         // Index should now redirect to first organization.
-        $crawler = $this->client->request('GET', $url);
+        $this->client->request('GET', $url);
         $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $org1->getIdentifier(),
         ])));
@@ -113,7 +118,8 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         // Index should now show a menu with all organizations for this user.
-        $crawler = $this->client->request('GET', $url);
+        $this->client->request('GET', $url);
+        $crawler = $this->client->followRedirect();
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertFalse($this->client->getResponse()->isRedirect());
         $this->assertCount(1, $crawler->filter('a:contains("Org 1")'));
@@ -126,9 +132,9 @@ class OrganizationControllerTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         // Should be the same result.
-        $crawler = $this->client->request('GET', $url);
+        $this->client->request('GET', $url);
+        $crawler = $this->client->followRedirect();
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-        $this->assertFalse($this->client->getResponse()->isRedirect());
         $this->assertCount(1, $crawler->filter('a:contains("Org 1")'));
         $this->assertCount(1, $crawler->filter('a:contains("Org 2")'));
     }

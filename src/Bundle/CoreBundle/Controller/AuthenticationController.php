@@ -18,7 +18,7 @@ class AuthenticationController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitecms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_index');
         }
 
         // get the login error if there is one

@@ -22,6 +22,7 @@ use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Form\InvitationRegistrationType;
 use UniteCMS\CoreBundle\Form\Model\ChangePassword;
 use UniteCMS\CoreBundle\Form\Model\InvitationRegistrationModel;
+use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 
 class ProfileController extends Controller
 {
@@ -52,7 +53,7 @@ class ProfileController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('unitecms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_index');
         }
 
         $changePassword = new ChangePassword();
@@ -92,7 +93,7 @@ class ProfileController extends Controller
             $changePassword->eraseCredentials();
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('unitecms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_index');
         }
 
         return $this->render(
@@ -100,6 +101,43 @@ class ProfileController extends Controller
             [
                 'form' => $form->createView(),
                 'change_password_form' => $changePasswordForm->createView(),
+            ]
+        );
+    }
+
+    /**
+     * @Route("/organizations")
+     * @Method({"GET"})
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function organizationsAction(Request $request) {
+
+        // Platform admins are allowed to view all organizations.
+        if ($this->isGranted(User::ROLE_PLATFORM_ADMIN)) {
+            $organizations = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Organization')->findAll();
+        } else {
+            $organizations = $this->getUser()->getOrganizations()->map(
+                function (OrganizationMember $member) {
+                    return $member->getOrganization();
+                }
+            );
+        }
+
+        $allowedOrganizations = [];
+        foreach ($organizations as $organization) {
+            if ($this->isGranted(OrganizationVoter::VIEW, $organization)) {
+                $allowedOrganizations[] = $organization;
+            }
+        }
+
+        return $this->render(
+            'UniteCMSCoreBundle:Profile:organizations.html.twig',
+            [
+                'organizations' => $allowedOrganizations,
             ]
         );
     }
@@ -115,7 +153,7 @@ class ProfileController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitecms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_index');
         }
 
         $form = $this->createFormBuilder()
@@ -189,7 +227,7 @@ class ProfileController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitecms_core_organizations');
+            return $this->redirectToRoute('unitecms_core_index');
         }
 
         $userFound = false;

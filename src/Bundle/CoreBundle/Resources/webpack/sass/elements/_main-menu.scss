@@ -414,6 +414,7 @@
           padding: 10px 30px 20px;
 
           &:nth-child(2) {
+            min-height: 200px;
             padding-top: 20px;
             background: map-get($colors, white);
             box-shadow: 0 -5px 10px 0 rgba(0,0,0,0.10);
