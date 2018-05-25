@@ -3,19 +3,37 @@
 {% block navigation %}{% endblock %}
 {% block content %}
 
-    <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-xlarge">
+<article class="uk-card uk-card-default uk-card-body centered-content-card uk-flex-1 uk-flex uk-flex-column" style="width: 1200px;">
+    <header class="uk-card-header uk-flex">
+        <a class="back-button" href="{{ path('unitecms_core_index') }}">
+            <i data-feather="arrow-left"></i>
+        </a>
+        <h2>{% trans %}profile.update.headline{% endtrans %}</h2>
+    </header>
 
-        <header class="uk-card-header uk-flex">
-            <a class="back-button" href="{{ path('unitecms_core_index') }}">
-                <i data-feather="arrow-left"></i>
-            </a>
-            <h2>{% trans %}profile.update.headline{% endtrans %}</h2>
-        </header>
-
-        <div class="uk-card-body">
-            {{ form(form) }}
-            <h3>{% trans %}profile.change_password.headline{% endtrans %}</h3>
-            {{ form(change_password_form) }}
+    <div uk-grid class="uk-flex-1">
+        <div class="uk-width-auto">
+            <ul class="uk-tab-left uk-height-1-1" uk-tab="connect: #component-tab-left; animation: uk-animation-fade" style="flex-wrap: nowrap; overflow: auto;">
+                <li><a href="#"><i data-feather="user" width="16" height="16" style="margin-top: -4px;"></i> Personal</a></li>
+                <li><a href="#"><i data-feather="shield" width="16" height="16" style="margin-top: -4px;"></i> Password</a></li>
+                <li><a href="#"><i data-feather="trash" width="16" height="16" style="margin-top: -4px;"></i> Delete account</a></li>
+            </ul>
         </div>
-    </article>
+        <div class="uk-width-expand@m">
+            <ul id="component-tab-left" class="uk-switcher">
+                <li>
+                    <h3>{% trans %}profile.personal.headline{% endtrans %}</h3>
+                    {{ form(form) }}
+                </li>
+                <li>
+                    <h3>{% trans %}profile.change_password.headline{% endtrans %}</h3>
+                    {{ form(change_password_form) }}
+                </li>
+                <li>
+                    <h3>{% trans %}profile.delete_account.headline{% endtrans %}</h3>
+                </li>
+            </ul>
+        </div>
+    </div>
+</article>
 {% endblock content %}
