@@ -46,7 +46,7 @@ class OrganizationMember
     /**
      * @var User
      * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Valid()
+     * @Assert\Valid
      * @ORM\ManyToOne(targetEntity="User", inversedBy="organizations")
      */
     private $user;

@@ -54,6 +54,11 @@ class OrganizationAdminPresentValidator extends ConstraintValidator
             }
         }
 
+        // If this is an update validation and this user is admin, we can skip any checks.
+        if($thisMember->getSingleRole() === Organization::ROLE_ADMINISTRATOR && $this->context->getGroup() === 'UPDATE') {
+            return;
+        }
+
         if (!$value instanceof Organization) {
             throw new InvalidArgumentException(
                 'The OrganizationAdminPresentValidator constraint expects a UniteCMS\CoreBundle\Entity\Organization value.'

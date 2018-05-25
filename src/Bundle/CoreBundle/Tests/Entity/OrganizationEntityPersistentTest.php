@@ -214,6 +214,8 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->em->persist($user2);
         $this->em->flush();
         $this->em->refresh($org);
+        $this->em->refresh($user1);
+        $this->em->refresh($user2);
 
         // Adding users to an organization is valid at any time.
         $orgMember1 = new OrganizationMember();
@@ -267,6 +269,11 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
         $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
 
+        // Updating user2, but leaving admin role should work.
+        $orgMember2->setSingleRole(Organization::ROLE_ADMINISTRATOR);
+        $this->assertCount(0, $validator->validate($orgMember2, null, ['UPDATE']));
+        $orgMember2->setSingleRole(Organization::ROLE_USER);
+
         // Making the first user an admin, should allow the 2nds user to change role.
         $orgMember1User->setSingleRole(Organization::ROLE_ADMINISTRATOR);
         $this->em->flush($orgMember1User);
@@ -275,6 +282,9 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(0, $validator->validate($orgMember2, null, ['UPDATE']));
         $this->em->flush($orgMember2);
         $this->em->refresh($org);
+
+        $this->em->refresh($user1);
+        $this->em->refresh($user2);
 
         // Deleting the underlying user for the admin membership should not work.
         $violations = $validator->validate($user1, null, ['DELETE']);
