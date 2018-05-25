@@ -83,24 +83,29 @@
 
 @media (min-width: $breakpoint-xlarge) {
   .uk-card.full-content-card {
-    border-radius: 5px;
-    margin: 50px;
 
-    .uk-card-header {
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
-    }
+    &:not(.always-full) {
+      border-radius: 5px;
+      margin: 50px;
 
-    + .uk-card.full-content-card {
-      margin-top: 0;
+      .uk-card-header {
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+      }
+
+      + .uk-card.full-content-card {
+        margin-top: 0;
+      }
     }
   }
 }
 
 @media (min-width: 2100px) {
   .uk-card.full-content-card {
-    width: 1600px;
-    align-self: center;
+    &:not(.always-full) {
+      width: 1600px;
+      align-self: center;
+    }
   }
 }
 
