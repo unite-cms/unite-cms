@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use UniteCMS\CoreBundle\Validator\Constraints\OrganizationAdminPresent;
 
 /**
  * OrganizationMember
@@ -36,6 +37,7 @@ class OrganizationMember
     /**
      * @var Organization
      * @Assert\NotBlank(message="validation.not_blank")
+     * @OrganizationAdminPresent(groups={"UPDATE", "DELETE"}, message="validation.no_organization_admins")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="members")
      * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="CASCADE")
      */
