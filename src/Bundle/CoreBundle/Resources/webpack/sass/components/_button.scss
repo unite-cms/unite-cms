@@ -1,10 +1,14 @@
 
 .uk-button {
-  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
-  border-radius: 2px;
-  text-transform: none;
-  font-size: 1rem;
-  padding: 0 20px;
+
+  &:not(.uk-button-text):not(.uk-button-link) {
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
+    border-radius: 2px;
+    text-transform: none;
+    font-size: 1rem;
+    padding: 0 20px;
+  }
+
   white-space: nowrap;
 
   svg.feather {
