@@ -109,7 +109,6 @@ class Domain
     /**
      * @var DomainMember[]
      * @Assert\Valid()
-     * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $members;
@@ -274,7 +273,7 @@ class Domain
 
         // SettingTypes to delete
         foreach ($this->getSettingTypesDiff($domain) as $st) {
-            $this->getContentTypes()->remove($st);
+            $this->getSettingTypes()->remove($st);
             unset($st);
         }
 

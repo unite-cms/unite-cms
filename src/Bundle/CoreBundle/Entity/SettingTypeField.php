@@ -80,6 +80,7 @@ class SettingTypeField implements FieldableField
      * @var SettingType
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", inversedBy="fields")
+     * @ORM\JoinColumn(name="setting_type_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $settingType;
 

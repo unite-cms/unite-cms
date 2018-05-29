@@ -44,6 +44,12 @@ class OrganizationAdminPresentValidator extends ConstraintValidator
             );
         }
 
+        // Only continue if the root of this validation chain is this object or the related user object. Without this
+        // check, this validator thinks on delete of other objects (e.g. domain) that this org member will get deleted.
+        if($this->context->getRoot() != $thisMember && $this->context->getRoot() != $thisMember->getUser()) {
+            return;
+        }
+
         // if this member is not an admin, ...
         if($thisMember->getSingleRole() !== Organization::ROLE_ADMINISTRATOR) {
 

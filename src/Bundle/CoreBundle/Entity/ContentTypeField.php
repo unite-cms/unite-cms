@@ -80,6 +80,7 @@ class ContentTypeField implements FieldableField
      * @var ContentType
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", inversedBy="fields")
+     * @ORM\JoinColumn(name="content_type_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $contentType;
 

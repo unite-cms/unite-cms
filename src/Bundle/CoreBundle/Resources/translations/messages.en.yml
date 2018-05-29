@@ -76,6 +76,9 @@ domain.create.headline: 'Create a new domain'
 
 domain.delete.title: 'Delete domain "%domain%"'
 domain.delete.headline: 'Delete domain "%domain%"'
+domain.delete.text: 'Do you really want to delete domain: <strong>"%domain%"</strong>? All content and setting types and all domain memberships will get deleted. You <strong>cannot undo this action</strong>.'
+domain.delete.form.submit: 'Permanently delete'
+domain.delete.cancel: 'Cancel'
 
 domain.update.title: 'Update domain "%domain%"'
 domain.update.headline: 'Update domain "%domain%"'
