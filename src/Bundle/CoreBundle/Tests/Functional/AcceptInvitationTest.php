@@ -364,4 +364,40 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
     }
+
+    /**
+     * After creating a new user account during invitation, the user should get logged in automatically.
+     */
+    public function testAcceptInvitationAutoLogin()
+    {
+
+        $invitation = new DomainInvitation();
+        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+            'test@example.com'
+        )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
+        $this->em->persist($invitation);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+
+        $form = $crawler->filter('form');
+        $this->assertCount(1, $form);
+        $form = $form->form();
+
+        $form['invitation_registration[name]'] = 'New User';
+        $form['invitation_registration[password][first]'] = 'password';
+        $form['invitation_registration[password][second]'] = 'password';
+        $this->client->submit($form);
+
+        // There should be a user token in the client session.
+        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_view', [
+            'organization' => $invitation->getDomainMemberType()->getDomain()->getOrganization()->getIdentifier(),
+            'domain' => $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
+        ])));
+        $token = $this->client->getContainer()->get('security.token_storage')->getToken();
+        $this->assertNotNull($token);
+        $this->assertEquals('New User', $token->getUser()->getName());
+        $this->assertEquals($invitation->getEmail(), $token->getUser()->getEmail());
+
+    }
 }

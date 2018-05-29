@@ -17,6 +17,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\EqualTo;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
@@ -435,7 +436,7 @@ class ProfileController extends Controller
 
                         // An invitation for a new user can only be accepted if no user is logged in.
                         if (!$this->getUser()) {
-                            $wrongUser = false;;
+                            $wrongUser = false;
 
                             $form = $this->createForm(InvitationRegistrationType::class);
                             $registrationModelClass = $form->getConfig()->getDataClass();
@@ -495,7 +496,16 @@ class ProfileController extends Controller
                                     // Save changes to database.
                                     $this->getDoctrine()->getManager()->flush();
 
+                                    // Login the user and redirect him_her to index.
+                                    $userToken = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
+                                    $this->container->get('security.token_storage')->setToken($userToken);
+                                    $this->container->get('session')->set('_security_main', serialize($userToken));
+
                                     $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration));
+                                    return $this->redirectToRoute('unitecms_core_domain_view', [
+                                        'organization' => $domainMember->getDomain()->getOrganization()->getIdentifier(),
+                                        'domain' => $domainMember->getDomain()->getIdentifier(),
+                                    ]);
                                 }
                             }
                         }

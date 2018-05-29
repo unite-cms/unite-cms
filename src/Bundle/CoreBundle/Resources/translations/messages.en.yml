@@ -232,10 +232,8 @@ profile.accept_invitation.password.label: 'Enter a strong password'
 profile.accept_invitation.password_repeat.label: 'Enter the password again'
 
 profile.accept_invitation.success.headline: 'Invitation process complete!'
-profile.accept_invitation.success.message: 'Thank you for accepting the invitation to the domain "%domain%". Now you can login using your email and password.'
-profile.accept_invitation.success.message_logged_in: 'Thank you for accepting the invitation for the domain "%domain%".'
+profile.accept_invitation.success.message: 'Thank you for accepting the invitation for the domain "%domain%".'
 profile.accept_invitation.success.view_domain.button: 'View domain'
-profile.accept_invitation.success.login.button: 'Login'
 
 profile.reset_password.title: 'Password reset'
 profile.reset_password.headline: 'Password reset'
