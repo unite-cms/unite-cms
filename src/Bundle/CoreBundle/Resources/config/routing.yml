@@ -8,6 +8,9 @@ unitecms_core_authentication:
     type:     annotation
     prefix:   /profile
 
+unitecms_core_logout:
+    path: /profile/logout
+
 unitecms_core_profile:
     resource: "@UniteCMSCoreBundle/Controller/ProfileController.php"
     type:     annotation
