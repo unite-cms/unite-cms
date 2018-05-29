@@ -85,6 +85,7 @@ class ContentType implements Fieldable
      * @var Domain
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="contentTypes")
+     * @ORM\JoinColumn(name="domain_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $domain;
 
@@ -139,13 +140,12 @@ class ContentType implements Fieldable
 
     /**
      * @var Content[]|ArrayCollection
-     * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Content>")
      * @Assert\Valid()
      *
      * TODO: Checking that all the content is valid will become very expensive for large content sets. We most likely will need another approach.
      *
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Content", mappedBy="contentType", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Content", mappedBy="contentType", fetch="EXTRA_LAZY", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $content;
 

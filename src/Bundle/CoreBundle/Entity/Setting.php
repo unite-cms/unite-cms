@@ -30,6 +30,7 @@ class Setting implements FieldableContent
      * @var SettingType
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", inversedBy="settings", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="setting_type_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $settingType;
 

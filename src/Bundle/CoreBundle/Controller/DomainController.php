@@ -9,6 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -223,22 +224,31 @@ class DomainController extends Controller
     public function deleteAction(Organization $organization, Domain $domain, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('submit', SubmitType::class, ['label' => 'Delete'])->getForm();
+            ->add('submit', SubmitType::class, [
+                'label' => 'domain.delete.form.submit',
+                'attr' => ['class' => 'uk-button-danger']
+            ])->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->get('validator')->validate($domain, null, ['DELETE'])->count() == 0) {
+
+            $violations = $this->get('validator')->validate($domain, null, ['DELETE']);
+
+            // If there where violation problems.
+            if($violations->count() > 0) {
+
+                $violationMapper = new ViolationMapper();
+                foreach ($violations as $violation) {
+                    $violationMapper->mapViolation($violation, $form);
+                }
+
+            // if this domain is save to delete.
+            } else {
                 $this->getDoctrine()->getManager()->remove($domain);
                 $this->getDoctrine()->getManager()->flush();
-
-                return $this->redirectToRoute(
-                    'unitecms_core_domain_index',
-                    [
-                        'organization' => $organization->getIdentifier(),
-                    ]
-                );
-            } else {
-                $form->addError(new FormError('Domain could not be deleted.'));
+                return $this->redirectToRoute('unitecms_core_domain_index', [
+                    'organization' => $organization->getIdentifier()
+                ]);
             }
         }
 

@@ -76,6 +76,7 @@ class SettingType implements Fieldable
      * @var Domain
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="settingTypes")
+     * @ORM\JoinColumn(name="domain_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $domain;
 
@@ -94,7 +95,7 @@ class SettingType implements Fieldable
      * @var Setting[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Setting>")
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Setting", mappedBy="settingType", cascade={"persist", "remove", "merge"})
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Setting", mappedBy="settingType", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $settings;
 

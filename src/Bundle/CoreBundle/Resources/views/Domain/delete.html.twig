@@ -13,8 +13,24 @@
             <h1 class="uk-flex-1">{% trans with { '%domain%': unite.domain|escape } %}domain.delete.headline{% endtrans %}</h1>
         </header>
 
-        <div class="uk-card-body">
-            {{ form(form) }}
-        </div>
+        {{ form_errors(form) }}
+
+        <p class="uk-text-center">
+            <i data-feather="trash-2" width="100" height="100" style="display: block; margin: 50px auto 30px;"></i>
+            <br />
+            {% trans with {'%domain%': domain|escape } %}domain.delete.text{% endtrans %}
+        </p>
+
+        {{ form_start(form) }}
+        <p class="uk-text-center">
+
+            <a class="uk-button" style="background: white; margin: 10px;" href="{{ path('unitecms_core_domain_view', {
+                domain: domain.identifier,
+                organization: organization.identifier
+            }) }}">{% trans %}domain.delete.cancel{% endtrans %}</a>
+
+            {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
+        </p>
+        {{ form_rest(form) }}
     </article>
 {% endblock content %}

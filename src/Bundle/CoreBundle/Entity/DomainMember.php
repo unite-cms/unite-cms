@@ -48,6 +48,7 @@ class DomainMember implements FieldableContent
      * @var DomainMemberType
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", inversedBy="domainMembers", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="domain_member_type_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $domainMemberType;
 

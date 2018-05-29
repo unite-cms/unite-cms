@@ -217,18 +217,6 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Submit valid form
         $form = $crawler->filter('form');
         $form = $form->form();
-        $crawler = $this->client->submit($form);
-
-        // Should not delete domain, since we have a domain user.
-        $this->assertFalse($this->client->getResponse()->isRedirection());
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("Domain could not be deleted.")'));
-
-        $this->em->remove($domainUserDomain);
-        $this->em->flush();
-
-        // Now deletion should work.
-        $form = $crawler->filter('form');
-        $form = $form->form();
         $this->client->submit($form);
 
         // Assert redirect to index.

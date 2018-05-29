@@ -81,6 +81,7 @@ class DomainMemberType implements Fieldable
      * @var Domain
      * @Assert\NotBlank(message="validation.not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="domainMemberTypes")
+     * @ORM\JoinColumn(name="domain_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $domain;
 
@@ -103,7 +104,6 @@ class DomainMemberType implements Fieldable
 
     /**
      * @var DomainMember[]|ArrayCollection
-     * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMember>")
      * @Assert\Valid()
      *

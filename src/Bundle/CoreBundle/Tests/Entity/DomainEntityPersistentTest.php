@@ -199,11 +199,8 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         // Normal validation should be fine.
         $this->assertCount(0, $this->container->get('validator')->validate($domain2));
 
-        // Validation for deletion should throw an error.
-        $errors = $this->container->get('validator')->validate($domain2, null, ['DELETE']);
-        $this->assertCount(1, $errors);
-        $this->assertStringStartsWith('contentTypes', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.should_be_empty', $errors->get(0)->getMessage());
+        // We allow to delete domains with content_types. They also will get deleted.
+        $this->assertCount(0, $this->container->get('validator')->validate($domain2, null, ['DELETE']));
 
         // try to validate invalid content
         $content->setData(['any_unknown_field' => 'foo']);
