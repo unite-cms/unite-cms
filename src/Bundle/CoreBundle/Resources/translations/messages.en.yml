@@ -185,14 +185,27 @@ setting.revisions.revert.button: 'Revert to this version'
 
 profile.update.title: 'Profile settings'
 profile.update.headline: 'Profile settings'
-profile.update.form.name: 'Name'
-profile.update.form.email: 'Email'
-profile.update.form.submit: 'Submit'
+
+profile.personal.menu: 'Personal settings'
+profile.personal.headline: 'Change your personal settings'
+profile.personal.form.name: 'Name'
+profile.personal.form.email: 'Email'
+profile.personal.form.submit: 'Save'
+
+profile.change_password.menu: 'Change password'
 profile.change_password.headline: 'Change your password'
 profile.change_password.form.current_password: 'Current password'
 profile.change_password.form.new_password: 'New password'
 profile.change_password.form.new_password_repeat: 'Repeat new password'
-profile.change_password.form.submit: 'Submit'
+profile.change_password.form.submit: 'Save new password'
+
+profile.delete_account.menu: 'Delete account'
+profile.delete_account.headline: 'Permanently delete account'
+profile.delete_account.form.submit: 'Permanently delete account'
+profile.delete_account.text: 'Do you really want to delete your account? Your organizations, domains and content will <strong>not</strong> be deleted. Be careful, you cannot undo this action! In order to avoid an accident, please enter the <strong>email address of your user account</strong> to continue.'
+profile.delete_account.form.type_email: 'Email address'
+profile.delete_account.form.type_email.not_equal: 'This is not the email address of the user, you want to delete. Please check, which account you want to delete!'
+
 
 profile.reset_password_confirm.title: 'Reset your password'
 profile.reset_password_confirm.headline: 'Reset your password'

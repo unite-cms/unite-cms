@@ -12,9 +12,12 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
+use Symfony\Component\Validator\Constraints\EqualTo;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
@@ -38,55 +41,46 @@ class ProfileController extends Controller
      */
     public function updateAction(Request $request)
     {
-        /**
-         * @var \UniteCMS\CoreBundle\Entity\User $user
-         */
+        $forms = [];
         $user = $this->getUser();
-        $form = $this->get('form.factory')->createNamedBuilder('user', FormType::class, $user)
-            ->add('name', TextType::class, ['label' => 'profile.update.form.name', 'required' => true])
-            ->add('email', EmailType::class, ['label' => 'profile.update.form.email', 'required' => true])
-            ->add('submit', SubmitType::class, ['label' => 'profile.update.form.submit'])
+        $changePassword = new ChangePassword();
+
+        // Personal settings form.
+        $forms['personal'] = $this->get('form.factory')->createNamedBuilder('user', FormType::class, $user)
+            ->add('name', TextType::class, ['label' => 'profile.personal.form.name', 'required' => true])
+            ->add('email', EmailType::class, ['label' => 'profile.personal.form.email', 'required' => true])
+            ->add('submit', SubmitType::class, ['label' => 'profile.personal.form.submit'])
             ->getForm();
 
-        $form->handleRequest($request);
+        $forms['personal']->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($forms['personal']->isSubmitted() && $forms['personal']->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-
             return $this->redirectToRoute('unitecms_core_index');
         }
 
-        $changePassword = new ChangePassword();
-        $changePasswordForm = $this->get('form.factory')->createNamedBuilder(
-            'change_password',
-            FormType::class,
-            $changePassword,
-            ['validation_groups' => 'UPDATE']
-        )
-            ->add(
-                'currentPassword',
-                PasswordType::class,
-                ['label' => 'profile.change_password.form.current_password', 'required' => true]
-            )
-            ->add(
-                'newPassword',
-                RepeatedType::class,
-                [
-                    'type' => PasswordType::class,
-                    'invalid_message' => 'validation.passwords_must_match',
-                    'required' => true,
-                    'first_options' => array('label' => 'profile.change_password.form.new_password'),
-                    'second_options' => array('label' => 'profile.change_password.form.new_password_repeat'),
-                ]
-            )
+
+        // Change password form.
+        $forms['change_password'] = $this->get('form.factory')->createNamedBuilder('change_password',FormType::class, $changePassword, ['validation_groups' => 'UPDATE'])
+            ->add('currentPassword',PasswordType::class, [
+                'label' => 'profile.change_password.form.current_password',
+                'required' => true,
+            ])
+            ->add('newPassword', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'invalid_message' => 'validation.passwords_must_match',
+                'required' => true,
+                'first_options' => array('label' => 'profile.change_password.form.new_password'),
+                'second_options' => array('label' => 'profile.change_password.form.new_password_repeat'),
+            ])
             ->add('submit', SubmitType::class, ['label' => 'profile.change_password.form.submit'])
             ->getForm();
 
-        $changePasswordForm->handleRequest($request);
+        $forms['change_password']->handleRequest($request);
 
-        if ($changePasswordForm->isSubmitted() && $changePasswordForm->isValid()) {
-            $user->setPassword(
-                $this->get('security.password_encoder')->encodePassword($user, $changePassword->getNewPassword())
+        if ($forms['change_password']->isSubmitted() && $forms['change_password']->isValid()) {
+            $this->getUser()->setPassword(
+                $this->get('security.password_encoder')->encodePassword($this->getUser(), $changePassword->getNewPassword())
             );
 
             // Clear plaintext password, so it can't be accessed later in this request.
@@ -96,11 +90,54 @@ class ProfileController extends Controller
             return $this->redirectToRoute('unitecms_core_index');
         }
 
+
+        // Delete account.
+        $forms['delete_account'] = $this->get('form.factory')->createNamedBuilder('delete_account',FormType::class, null)
+            ->add('type_email', EmailType::class, [
+                'label' => 'profile.delete_account.form.type_email',
+                'required' => true,
+                'attr' => ['autocomplete' => 'off'],
+                'constraints' => [
+                    new EqualTo(['value' => $user->getEmail(), 'message' => $this->get('translator')->trans('profile.delete_account.form.type_email.not_equal')]),
+                ],
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => 'profile.delete_account.form.submit',
+                'attr' => ['class' => 'uk-button-danger'],
+            ])
+            ->getForm();
+
+        $forms['delete_account']->handleRequest($request);
+
+        $response = $this->redirect($this->generateUrl('unitecms_core_index'));
+
+        if ($forms['delete_account']->isSubmitted() && $forms['delete_account']->isValid()) {
+
+            $violations = $this->get('validator')->validate($user, null, ['DELETE']);
+
+            // If there where violation problems.
+            if($violations->count() > 0) {
+
+                $violationMapper = new ViolationMapper();
+                foreach ($violations as $violation) {
+                    $violationMapper->mapViolation($violation, $forms['delete_account']);
+                }
+
+            // if this member is save to delete.
+            } else {
+                $this->getDoctrine()->getManager()->remove($user);
+                $this->getDoctrine()->getManager()->flush();
+
+                // Clear user session.
+                $this->container->get('security.token_storage')->setToken(null);
+                $this->container->get('session')->clear();
+                return $this->redirect($this->generateUrl('unitecms_core_index'));
+            }
+        }
+
         return $this->render(
-            'UniteCMSCoreBundle:Profile:update.html.twig',
-            [
-                'form' => $form->createView(),
-                'change_password_form' => $changePasswordForm->createView(),
+            'UniteCMSCoreBundle:Profile:update.html.twig', [
+                'forms' => array_map(function($form) { return $form->createView(); }, $forms),
             ]
         );
     }

@@ -42,7 +42,7 @@ security:
                 login_path: unitecms_core_authentication_login
                 check_path: unitecms_core_authentication_login
             logout:
-                path:   /logout
+                path:   /profile/logout
                 target: /
             remember_me:
                 secret:   '%env(APP_SECRET)%'

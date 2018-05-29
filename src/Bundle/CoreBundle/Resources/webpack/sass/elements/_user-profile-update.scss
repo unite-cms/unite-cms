@@ -1,0 +1,48 @@
+
+.uk-card.centered-content-card.user-profile-update {
+  width: $breakpoint-large;
+
+  .uk-tab {
+    flex-wrap: nowrap;
+    overflow: auto;
+
+    li {
+      svg.feather {
+        margin-top: -4px;
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+@media (max-width: $breakpoint-medium) {
+  .uk-card.centered-content-card.user-profile-update {
+    > .uk-grid {
+      flex-direction: column;
+    }
+  }
+}
+
+@media (min-width: $breakpoint-medium) {
+  .uk-card.centered-content-card.user-profile-update {
+    .uk-tab {
+      li {
+        a {
+          padding: 10px 30px 10px 10px;
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: $breakpoint-large) {
+  .uk-card.centered-content-card.user-profile-update {
+    .uk-tab {
+      li {
+        a {
+          padding-right: 40px;
+        }
+      }
+    }
+  }
+}
