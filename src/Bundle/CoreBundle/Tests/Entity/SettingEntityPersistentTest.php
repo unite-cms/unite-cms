@@ -4,11 +4,9 @@ namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
 use UniteCMS\CoreBundle\Entity\FieldableField;
-use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\SettingTypeField;
-use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -45,14 +43,14 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($setting);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
 
         // 4. Create Setting2 with only another field. => INVALID
         $setting->setData(['other' => 'Other']);
         $errors = $this->container->get('validator')->validate($setting);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
 
         // 5. SettingType have more fields than setting. => VALID
         $field2 = new SettingTypeField();

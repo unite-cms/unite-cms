@@ -57,8 +57,8 @@ abstract class ViewType implements ViewTypeInterface
         foreach (array_keys($settings) as $setting) {
             if (!in_array($setting, static::SETTINGS)) {
                 $violations[] = new ConstraintViolation(
-                    'validation.additional_data',
-                    'validation.additional_data',
+                    'additional_data',
+                    'additional_data',
                     [],
                     $settings,
                     $setting,
@@ -71,8 +71,8 @@ abstract class ViewType implements ViewTypeInterface
         foreach (static::REQUIRED_SETTINGS as $setting) {
             if (!isset($settings[$setting])) {
                 $violations[] = new ConstraintViolation(
-                    'validation.required',
-                    'validation.required',
+                    'required',
+                    'required',
                     [],
                     $settings,
                     $setting,

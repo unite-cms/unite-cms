@@ -24,7 +24,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $field = $this->createContentTypeField('collection');
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessage());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -38,7 +38,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -65,7 +65,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         // Try to validate empty collection field definitions.
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessage());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -659,7 +659,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             $field->getEntity()->getIdentifierPath('.').'.'.$field->getIdentifier().'.foo',
             $violations[0]->getPropertyPath()
         );
-        $this->assertEquals('validation.additional_data', $violations[0]->getMessage());
+        $this->assertEquals('additional_data', $violations[0]->getMessage());
         $this->assertEquals('[f2]', $violations[1]->getPropertyPath());
         $this->assertEquals('validation.wrong_definition', $violations[1]->getMessage());
         $this->assertEquals('[f2]', $violations[2]->getPropertyPath());
@@ -668,7 +668,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             $field->getEntity()->getIdentifierPath('.').'.'.$field->getIdentifier().'.n1.n2.foo',
             $violations[3]->getPropertyPath()
         );
-        $this->assertEquals('validation.additional_data', $violations[3]->getMessage());
+        $this->assertEquals('additional_data', $violations[3]->getMessage());
 
         // on DELETE all content is valid.
         $this->assertCount(

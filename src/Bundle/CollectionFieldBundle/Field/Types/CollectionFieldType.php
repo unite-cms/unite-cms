@@ -4,6 +4,7 @@ namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
@@ -115,20 +116,17 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         // Validate allowed and required settings.
-        $violations = parent::validateSettings($field, $settings);
+        parent::validateSettings($settings, $context);
 
-        // Validate sub fields.
-        if(empty($violations)) {
+        $field = $context->getObject();
 
-            // Validate a virtual fieldable for this collection field.
-            foreach($this->validator->validate(self::getNestableFieldable($field)) as $violation) {
-                $violations[] = $violation;
-            }
+        // Validate virtual sub fields for this collection.
+        if($context->getViolations()->count() == 0 && $field instanceof FieldableField) {
+            $context->getValidator()->inContext($context)->validate(self::getNestableFieldable($field));
         }
-        return $violations;
     }
 
     /**
@@ -179,8 +177,8 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 // If the field does not exists, add an error.
                 if (!$collection->getFields()->containsKey($data_key)) {
                     $violations[] = new ConstraintViolation(
-                      'validation.additional_data',
-                      'validation.additional_data',
+                      'additional_data',
+                      'additional_data',
                       [],
                       $row,
                       join('.', [

@@ -1,7 +1,7 @@
 
 validation.identifier_already_taken: 'validation.identifier_already_taken'
 validation.no_null: 'validation.no_null'
-validation.required: 'validation.required'
+required: 'required'
 validation.not_blank: 'validation.not_blank'
 validation.too_short: 'validation.too_short'
 validation.too_long: 'validation.too_long'

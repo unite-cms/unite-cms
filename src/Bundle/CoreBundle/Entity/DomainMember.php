@@ -54,7 +54,7 @@ class DomainMember implements FieldableContent
 
     /**
      * @var array
-     * @ValidFieldableContentData(additionalDataMessage="validation.additional_data", groups={"Default", "DELETE"})
+     * @ValidFieldableContentData(additionalDataMessage="additional_data", groups={"Default", "DELETE"})
      * @Gedmo\Versioned
      * @ORM\Column(name="data", type="json", nullable=true)
      */

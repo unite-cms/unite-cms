@@ -32,7 +32,7 @@ class TextAreaTypeTest extends FieldTypeTestCase
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.rows', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.nointeger_value', $errors->get(0)->getMessage());
+        $this->assertEquals('nointeger_value', $errors->get(0)->getMessage());
 
         // check valid rows settings
         $field->setSettings(
@@ -58,6 +58,6 @@ class TextAreaTypeTest extends FieldTypeTestCase
 
         $errors = $this->container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
     }
 }

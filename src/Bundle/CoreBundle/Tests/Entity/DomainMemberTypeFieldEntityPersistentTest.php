@@ -2,11 +2,10 @@
 
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
-use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\SettingTypeField;
@@ -117,22 +116,11 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
         {
             const TYPE = "field_entity_test_mocked_field";
 
-            function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
+            function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
             {
                 if (isset($settings->invalid)) {
-                    return [
-                        new ConstraintViolation(
-                            'mocked_message',
-                            'mocked_message',
-                            [],
-                            $settings,
-                            '',
-                            $settings
-                        ),
-                    ];
+                    $context->buildViolation('mocked_message')->atPath('invalid')->addViolation();
                 }
-
-                return [];
             }
         };
 
@@ -154,7 +142,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
         $field->setSettings(new FieldableFieldSettings(['invalid' => true]));
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('settings.invalid', $errors->get(0)->getPropertyPath());
         $this->assertEquals('mocked_message', $errors->get(0)->getMessage());
 
         // 3. Set valid field settings.

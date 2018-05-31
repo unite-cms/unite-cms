@@ -44,7 +44,7 @@ class Setting implements FieldableContent
 
     /**
      * @var array
-     * @ValidFieldableContentData(additionalDataMessage="validation.additional_data")
+     * @ValidFieldableContentData(additionalDataMessage="additional_data")
      * @Gedmo\Versioned
      * @ORM\Column(name="data", type="json", nullable=true)
      */

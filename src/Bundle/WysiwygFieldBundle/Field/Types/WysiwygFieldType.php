@@ -3,6 +3,7 @@
 namespace UniteCMS\WysiwygFieldBundle\Field\Types;
 
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
@@ -52,93 +53,74 @@ class WysiwygFieldType extends FieldType
     }
 
     /**
-     * Validates a toolbar option and returns a violation if it is not allowed.
-     * @param string $option
-     * @param $settings
-     * @return ConstraintViolation[]
-     */
-    protected function validateToolbarOption($option, $settings) : array {
-        $violations = [];
-
-        if(!in_array($option, self::ALLOWED_TOOLBAR_OPTIONS)) {
-            $violations[] = new ConstraintViolation(
-                'wysiwygfield.unknown_toolbar_option',
-                'wysiwygfield.unknown_toolbar_option',
-                [],
-                $settings,
-                'toolbar',
-                $option
-            );
-        }
-        return $violations;
-    }
-
-    /**
      * {@inheritdoc}
      */
-    function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         // Validate allowed and required settings.
-        $violations = parent::validateSettings($field, $settings);
+        parent::validateSettings($settings, $context);
 
         // Only continue, if there are no violations yet.
-        if(!empty($violations)) {
-            return $violations;
+        if($context->getViolations()->count() > 0) {
+            return;
         }
 
         // Check allowed theme.
         if(!empty($settings->theme)) {
             if(!in_array($settings->theme, self::ALLOWED_THEMES)) {
-                $violations[] = new ConstraintViolation(
-                    'wysiwygfield.unknown_theme',
-                    'wysiwygfield.unknown_theme',
-                    [],
-                    $settings,
-                    'theme',
-                    $settings->theme
-                );
+                $context->buildViolation('wysiwygfield.unknown_theme')->atPath('theme')->addViolation();
             }
         }
 
         // Check available toolbar options.
         if(empty($settings->toolbar)) {
-            return [new ConstraintViolation(
-                'not_blank',
-                'not_blank',
-                [],
-                $settings,
-                'toolbar',
-                $settings
-            )];
+            $context->buildViolation('not_blank')->atPath('toolbar')->addViolation();
         }
 
         if(!is_array($settings->toolbar)) {
-            return [new ConstraintViolation(
-                'wysiwygfield.invalid_toolbar_definition',
-                'wysiwygfield.invalid_toolbar_definition',
-                [],
-                $settings,
-                'toolbar',
-                $settings
-            )];
+            $context->buildViolation('wysiwygfield.invalid_toolbar_definition')->atPath('toolbar')->addViolation();
         }
 
         // Validate toolbar options
-        foreach($settings->toolbar as $option) {
+        if($context->getViolations()->count() == 0) {
+            foreach ($settings->toolbar as $option) {
 
-            // case 1: option is a option group
-            if(is_array($option) && count(array_filter(array_keys($option), 'is_string')) === 0) {
-                foreach($option as $child) {
-                    $violations = array_merge($violations, $this->validateToolbarOption($child, $settings));
+                // case 1: option is a option group
+                if (is_array($option) && count(array_filter(array_keys($option), 'is_string')) === 0) {
+                    foreach ($option as $child) {
+                        if (!in_array($child, self::ALLOWED_TOOLBAR_OPTIONS)) {
+
+                            $path = 'toolbar';
+
+                            if(is_string($child)) {
+                                $path .= '.'.$child;
+                            }
+
+                            elseif(is_array($child) && !empty($child)) {
+                                $path .= '.'.array_keys($child)[0].':'.array_values($child)[0];
+                            }
+
+                            $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($path)->addViolation();
+                        }
+                    }
+                } // case 2: option is a string or object option
+                else {
+                    if (!in_array($option, self::ALLOWED_TOOLBAR_OPTIONS)) {
+
+                        $path = 'toolbar';
+
+                        if(is_string($option)) {
+                            $path .= '.'.$option;
+                        }
+
+                        elseif(is_array($option) && !empty($option)) {
+                            $path .= '.'.array_keys($option)[0].':'.array_values($option)[0];
+                        }
+
+                        $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($path)->addViolation();
+                    }
                 }
             }
-
-            // case 2: option is a string or object option
-            else {
-                $violations = array_merge($violations, $this->validateToolbarOption($option, $settings));
-            }
         }
-
-        return $violations;
     }
 }

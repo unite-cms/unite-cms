@@ -22,7 +22,7 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         $errors = $this->container->get('validator')->validate($ctField);
 
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
     }
 
     public function testFormDataTransformers() {

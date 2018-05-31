@@ -207,7 +207,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($domain2);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('content', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
 
         // Empty domains can be deleted.
         $this->em->remove($content);

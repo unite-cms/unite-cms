@@ -43,14 +43,14 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
 
         // 4. Create Content2 with only another field. => INVALID
         $content->setData(['other' => 'Other']);
         $errors = $this->container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
 
         // 5. ContentType have more fields than content. => VALID
         $field2 = new ContentTypeField();

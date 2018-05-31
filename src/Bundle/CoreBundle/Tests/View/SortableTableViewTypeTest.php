@@ -73,7 +73,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         // View should not be valid.
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessage());
 
         $view->setSettings(
             new ViewSettings(
@@ -87,7 +87,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         // View should not be valid.
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
 
         // Test validating invalid columns.
         $view->setSettings(new ViewSettings(['columns' => 'string', 'sort_field' => 'position']));
