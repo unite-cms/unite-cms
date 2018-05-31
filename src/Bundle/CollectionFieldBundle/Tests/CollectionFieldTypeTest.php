@@ -591,7 +591,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $violations = $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, []);
         $this->assertCount(1, $violations);
         $this->assertEquals('['.$field->getIdentifier().']', $violations[0]->getPropertyPath());
-        $this->assertEquals('validation.too_few_rows', $violations[0]->getMessage());
+        $this->assertEquals('collectionfield.too_few_rows', $violations[0]->getMessage());
 
         // on DELETE all content is valid.
         $this->assertCount(
@@ -613,7 +613,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             );
         $this->assertCount(1, $violations);
         $this->assertEquals('['.$field->getIdentifier().']', $violations[0]->getPropertyPath());
-        $this->assertEquals('validation.too_many_rows', $violations[0]->getMessage());
+        $this->assertEquals('collectionfield.too_many_rows', $violations[0]->getMessage());
 
         // on DELETE all content is valid.
         $this->assertCount(

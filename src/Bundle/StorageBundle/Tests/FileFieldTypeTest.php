@@ -72,7 +72,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.absolute_url', $errors->get(0)->getMessage());
+        $this->assertEquals('storage.absolute_url', $errors->get(0)->getMessage());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -254,7 +254,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $result = json_decode(json_encode($result->toArray(true)));
 
         // Checksum should be invalid.
-        $this->assertEquals('ERROR: validation.invalid_checksum', trim($result->errors[0]->message));
+        $this->assertEquals('ERROR: validation.storage.invalid_checksum', trim($result->errors[0]->message));
 
         // Try with valid checksum.
         $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');

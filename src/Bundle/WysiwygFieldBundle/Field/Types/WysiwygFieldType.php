@@ -62,12 +62,12 @@ class WysiwygFieldType extends FieldType
 
         if(!in_array($option, self::ALLOWED_TOOLBAR_OPTIONS)) {
             $violations[] = new ConstraintViolation(
-                'validation.unknown_toolbar_option',
-                'validation.unknown_toolbar_option',
+                'wysiwygfield.unknown_toolbar_option',
+                'wysiwygfield.unknown_toolbar_option',
                 [],
                 $settings,
                 'toolbar',
-                $settings
+                $option
             );
         }
         return $violations;
@@ -90,12 +90,12 @@ class WysiwygFieldType extends FieldType
         if(!empty($settings->theme)) {
             if(!in_array($settings->theme, self::ALLOWED_THEMES)) {
                 $violations[] = new ConstraintViolation(
-                    'validation.unknown_theme',
-                    'validation.unknown_theme',
+                    'wysiwygfield.unknown_theme',
+                    'wysiwygfield.unknown_theme',
                     [],
                     $settings,
                     'theme',
-                    $settings
+                    $settings->theme
                 );
             }
         }
@@ -103,8 +103,8 @@ class WysiwygFieldType extends FieldType
         // Check available toolbar options.
         if(empty($settings->toolbar)) {
             return [new ConstraintViolation(
-                'validation.not_blank',
-                'validation.not_blank',
+                'not_blank',
+                'not_blank',
                 [],
                 $settings,
                 'toolbar',
@@ -114,8 +114,8 @@ class WysiwygFieldType extends FieldType
 
         if(!is_array($settings->toolbar)) {
             return [new ConstraintViolation(
-                'validation.invalid_definition',
-                'validation.invalid_definition',
+                'wysiwygfield.invalid_toolbar_definition',
+                'wysiwygfield.invalid_toolbar_definition',
                 [],
                 $settings,
                 'toolbar',

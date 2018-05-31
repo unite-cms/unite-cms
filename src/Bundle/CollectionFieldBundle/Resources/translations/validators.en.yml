@@ -1,0 +1,3 @@
+
+collectionfield.too_many_rows: 'There must be at least %count% rows.'
+collectionfield.too_few_rows: 'There cannot be more than %count% rows.'

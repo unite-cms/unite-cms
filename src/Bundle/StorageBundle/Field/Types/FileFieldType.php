@@ -138,7 +138,7 @@ class FileFieldType extends FieldType
         if(empty($violations)) {
             $preSignedUrl = new PreSignedUrl('', $data['id'], $data['name'], $data['checksum']);
             if (!$preSignedUrl->check($this->secret)) {
-                $violations[] = $this->createViolation($field, 'validation.invalid_checksum');
+                $violations[] = $this->createViolation($field, 'storage.invalid_checksum');
             }
         }
 
@@ -188,8 +188,8 @@ class FileFieldType extends FieldType
         if(empty($violations)) {
             if(!preg_match("/^(http|https):\/\//", $settings->bucket['endpoint'])) {
                 $violations[] = new ConstraintViolation(
-                  'validation.absolute_url',
-                  'validation.absolute_url',
+                  'storage.absolute_url',
+                  'storage.absolute_url',
                   [],
                   $settings->bucket,
                   'bucket.endpoint',

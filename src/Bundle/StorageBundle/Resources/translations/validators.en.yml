@@ -1,0 +1,3 @@
+
+storage.invalid_checksum: 'The checksum of your file upload is not valid. Please try again.'
+storage.absolute_url: 'Please enter an absolute URL (starting with https://).'

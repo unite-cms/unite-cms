@@ -148,12 +148,12 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
         // Validate max_rows
         if($max_rows > 0 && $max_rows < count($data)) {
-            $violations[] = $this->createViolation($field, 'validation.too_many_rows');
+            $violations[] = $this->createViolation($field, 'collectionfield.too_many_rows');
         }
 
         // Validate min_rows
         if(count($data) < $min_rows) {
-            $violations[] = $this->createViolation($field, 'validation.too_few_rows');
+            $violations[] = $this->createViolation($field, 'collectionfield.too_few_rows');
         }
 
         return $violations;
