@@ -2,7 +2,6 @@
 
 namespace UniteCMS\WysiwygFieldBundle\Field\Types;
 
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;

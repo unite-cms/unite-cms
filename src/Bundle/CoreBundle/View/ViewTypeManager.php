@@ -3,7 +3,7 @@
 namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\View;
 
 class ViewTypeManager
@@ -66,19 +66,13 @@ class ViewTypeManager
 
     /**
      * Validates view settings for given view by using the validation method of the view type.
-     * @param View $view
      * @param ViewSettings $settings
-     *
-     * @return ConstraintViolation[]
+     * @param ExecutionContextInterface $context
      */
-    public function validateViewSettings(View $view, ViewSettings $settings): array
+    public function validateViewSettings(ViewSettings $settings, ExecutionContextInterface $context)
     {
-        $viewType = $this->getViewType($view->getType());
-        $viewType->setEntity($view);
-        $constraints = $viewType->validateSettings($settings);
-        $viewType->unsetEntity();
-
-        return $constraints;
+        $viewType = $this->getViewType($context->getObject()->getType());
+        $viewType->validateSettings($settings, $context);
     }
 
     /**

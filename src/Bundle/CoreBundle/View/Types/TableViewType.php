@@ -2,8 +2,8 @@
 
 namespace UniteCMS\CoreBundle\View\Types;
 
-use Doctrine\ORM\Query\QueryException;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 use UniteCMS\CoreBundle\View\ViewSettings;
 use UniteCMS\CoreBundle\View\ViewType;
@@ -66,34 +66,39 @@ class TableViewType extends ViewType
     /**
      * {@inheritdoc}
      */
-    function validateSettings(ViewSettings $settings): array
+    function validateSettings(ViewSettings $settings, ExecutionContextInterface $context)
     {
-        $violations = parent::validateSettings($settings);
+        parent::validateSettings($settings, $context);
 
         // Only continue, if all required settings are available and there are no additional settings.
-        if (!empty($violations)) {
-            return $violations;
+        if ($context->getViolations()->count() > 0) {
+            return;
         }
+
+        /**
+         * @var View $view
+         */
+        $view = $context->getObject();
 
         // validate setting structure.
         if (!empty($settings->columns) && !is_array($settings->columns)) {
-            $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'columns');
+            $context->buildViolation('wrong_setting_definition')->atPath('columns')->addViolation();
         }
         if (!empty($settings->sort_field) && !is_string($settings->sort_field)) {
-            $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'sort_field');
+            $context->buildViolation('wrong_setting_definition')->atPath('sort_field')->addViolation();
         }
 
         if (!empty($settings->sort_asc) && !is_bool($settings->sort_asc)) {
-            $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'sort_asc');
+            $context->buildViolation('wrong_setting_definition')->atPath('sort_asc')->addViolation();
         }
         if (!empty($settings->filter)) {
             if (!is_array($settings->filter)) {
-                $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'filter');
+                $context->buildViolation('wrong_setting_definition')->atPath('filter')->addViolation();
             } else {
 
                 // Make sure, that there arr only allowed filter fields.
                 if (!empty(array_diff(array_keys($settings->filter), ['AND', 'OR', 'field', 'value', 'operator']))) {
-                    $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'filter');
+                    $context->buildViolation('wrong_setting_definition')->atPath('filter')->addViolation();
                 } else {
 
                     $filter_structure = null;
@@ -101,14 +106,14 @@ class TableViewType extends ViewType
                     try {
                         $filter_structure = new GraphQLDoctrineFilterQueryBuilder($settings->filter, [], 'c');
                     } catch (\Exception $e) {
-                        $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'filter');
+                        $context->buildViolation('wrong_setting_definition')->atPath('filter')->addViolation();
                     }
 
                     // Validate filter structure.
                     if ($filter_structure) {
 
                         if (!$filter_structure->getFilter()) {
-                            $violations[] = $this->createInvalidSettingDefinitionConstraint($settings, 'filter');
+                            $context->buildViolation('wrong_setting_definition')->atPath('filter')->addViolation();
                         }
                     }
                 }
@@ -116,54 +121,28 @@ class TableViewType extends ViewType
         }
 
         // Only continue, if all setting properties have correct type.
-        if (!empty($violations)) {
-            return $violations;
+        if ($context->getViolations()->count() > 0) {
+            return;
         }
 
         // Validate column fields.
         if (!empty($settings->columns)) {
             foreach ($settings->columns as $field => $label) {
-                if (!$this->content_type_contains_field($field)) {
-                    $violations[] = $this->createUnknownColumnConstraint($settings, 'columns.'.$field);
+                if (!$this->content_type_contains_field($view, $field)) {
+                    $context->buildViolation('unknown_column')->atPath('columns.'.$field)->addViolation();
                 }
             }
         }
 
         // Validate sort_field.
         if (!empty($settings->sort_field)) {
-            if (!$this->content_type_contains_field($settings->sort_field)) {
-                $violations[] = $this->createUnknownColumnConstraint($settings, 'sort_field');
+            if (!$this->content_type_contains_field($view, $settings->sort_field)) {
+                $context->buildViolation('unknown_column')->atPath('sort_field')->addViolation();
             }
         }
-
-        return $violations;
     }
 
-    private function createInvalidSettingDefinitionConstraint($settings, $property)
-    {
-        return new ConstraintViolation(
-            "validation.invalid_{$property}_definition",
-            "validation.invalid_{$property}_definition",
-            [],
-            $settings,
-            $property,
-            $settings
-        );
-    }
-
-    private function createUnknownColumnConstraint($settings, $property_path)
-    {
-        return new ConstraintViolation(
-            "validation.unknown_column",
-            "validation.unknown_column",
-            [],
-            $settings,
-            $property_path,
-            $settings
-        );
-    }
-
-    private function content_type_contains_field($field)
+    private function content_type_contains_field(View $view, $field)
     {
         if (in_array($field, ['id', 'locale', 'created', 'updated', 'deleted'])) {
             return true;
@@ -173,6 +152,6 @@ class TableViewType extends ViewType
         $fieldParts = explode('.', $field);
         $field = array_shift($fieldParts);
 
-        return $this->view->getContentType()->getFields()->containsKey($field);
+        return $view->getContentType()->getFields()->containsKey($field);
     }
 }

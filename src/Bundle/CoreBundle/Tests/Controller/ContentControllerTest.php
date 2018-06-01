@@ -345,7 +345,8 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("validation.wrong_definition")'));
+        $error_text = $this->container->get('translator')->trans('wrong_setting_definition', [], 'validators');
+        $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("'.$error_text.'")'));
 
         // On Update.
         $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_content_update', [
@@ -389,7 +390,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("validation.wrong_definition")'));
+        $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("'.$error_text.'")'));
     }
 
     public function testDeleteDefinitelyAction() {

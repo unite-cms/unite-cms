@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\View;
 
 interface ViewTypeInterface
@@ -31,8 +32,9 @@ interface ViewTypeInterface
 
     /**
      * @param ViewSettings $settings
+     * @param ExecutionContextInterface $context
      *
      * @return ConstraintViolation[]
      */
-    function validateSettings(ViewSettings $settings): array;
+    function validateSettings(ViewSettings $settings, ExecutionContextInterface $context);
 }

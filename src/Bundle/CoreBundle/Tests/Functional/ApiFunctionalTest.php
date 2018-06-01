@@ -1037,7 +1037,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertContains("ERROR: validation.wrong_definition", $response->errors[0]->message);
+        $this->assertContains("ERROR: wrong_setting_definition", $response->errors[0]->message);
 
         // Now create a news content with valid content.
         $response = $this->api(
@@ -1120,7 +1120,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertContains("ERROR: validation.wrong_definition", $response->errors[0]->message);
+        $this->assertContains("ERROR: wrong_setting_definition", $response->errors[0]->message);
 
         // update a news content with valid content.
         $response = $this->api(
