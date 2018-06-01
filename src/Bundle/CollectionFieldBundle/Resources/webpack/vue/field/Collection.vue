@@ -126,7 +126,7 @@
             }
         }
 
-        > div > button.add {
+        > div > button.add.uk-button:not(.uk-button-text):not(.uk-button-link) {
             padding: 0;
             width: 40px;
             border-radius: 100%;
