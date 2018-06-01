@@ -23,15 +23,15 @@ class TableViewType extends ViewType
     /**
      * {@inheritdoc}
      */
-    function getTemplateRenderParameters(string $selectMode = self::SELECT_MODE_NONE): array
+    function getTemplateRenderParameters(View $view, string $selectMode = self::SELECT_MODE_NONE): array
     {
-        $columns = $this->view->getSettings()->columns ?? [];
-        $sort_field = $this->view->getSettings()->sort_field ?? 'updated';
-        $sort_asc = $this->view->getSettings()->sort_asc ?? false;
-        $filter = $this->view->getSettings()->filter ?? null;
+        $columns = $view->getSettings()->columns ?? [];
+        $sort_field = $view->getSettings()->sort_field ?? 'updated';
+        $sort_asc = $view->getSettings()->sort_asc ?? false;
+        $filter = $view->getSettings()->filter ?? null;
 
         // If no columns are defined, try to find any human readable key identifier and also add common fields.
-        $fields = $this->view->getContentType()->getFields();
+        $fields = $view->getContentType()->getFields();
         $possible_field_types = ['text'];
 
         if (empty($columns)) {
@@ -57,9 +57,9 @@ class TableViewType extends ViewType
             ],
             'filter' => $filter,
             'columns' => $columns,
-            'View' => $this->view->getIdentifier(),
-            'contentType' => $this->view->getContentType()->getIdentifier(),
-            'hasTranslations' => count($this->view->getContentType()->getLocales()) > 1,
+            'View' => $view->getIdentifier(),
+            'contentType' => $view->getContentType()->getIdentifier(),
+            'hasTranslations' => count($view->getContentType()->getLocales()) > 1,
         ];
     }
 
