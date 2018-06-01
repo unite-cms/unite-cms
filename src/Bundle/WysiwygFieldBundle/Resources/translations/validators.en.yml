@@ -1,0 +1,3 @@
+wysiwygfield.invalid_toolbar_definition: 'The toolbar must be defined as array of options or option groups. Please see the <a target="_blank" href="https://quilljs.com/docs/formats/">Quill docs</a> for more information.'
+wysiwygfield.unknown_toolbar_option: 'Unknown toolbar option "%option%". Allowed options are: %allowed_options%. Please see the <a target="_blank" href="https://quilljs.com/docs/formats/">Quill docs</a> for more information.'
+wysiwygfield.unknown_theme: 'Unknown theme "%theme%". Supported themes are "snow" and "bubble". For more information, see the <a target="_blank" href="https://quilljs.com/docs/themes/">Quill docs</a>'

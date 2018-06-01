@@ -3,12 +3,11 @@
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
-use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\SettingTypeField;
-use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -24,7 +23,7 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('settingType', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
     }
 
     public function testValidateAdditionalContentData()
@@ -45,14 +44,14 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($setting);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // 4. Create Setting2 with only another field. => INVALID
         $setting->setData(['other' => 'Other']);
         $errors = static::$container->get('validator')->validate($setting);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // 5. SettingType have more fields than setting. => VALID
         $field2 = new SettingTypeField();
@@ -70,22 +69,11 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         {
             const TYPE = "setting_entity_test_mocked_field";
 
-            function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+            function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
             {
                 if ($data) {
-                    return [
-                        new ConstraintViolation(
-                            'mocked_message',
-                            'mocked_message',
-                            [],
-                            $data,
-                            'invalid',
-                            $data
-                        ),
-                    ];
+                    $context->buildViolation('mocked_message')->atPath('invalid')->addViolation();
                 }
-
-                return [];
             }
         };
 
@@ -104,7 +92,7 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($setting);
         $this->assertCount(1, $errors);
         $this->assertEquals('data.invalid', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('mocked_message', $errors->get(0)->getMessage());
+        $this->assertEquals('mocked_message', $errors->get(0)->getMessageTemplate());
 
         // 3. Create Setting that is valid with FieldType. => VALID
         $setting->setData(['invalid' => false]);

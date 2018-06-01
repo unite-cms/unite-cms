@@ -73,7 +73,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         // View should not be valid.
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
         $view->setSettings(
             new ViewSettings(
@@ -87,13 +87,13 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         // View should not be valid.
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // Test validating invalid columns.
         $view->setSettings(new ViewSettings(['columns' => 'string', 'sort_field' => 'position']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.invalid_columns_definition', $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.columns', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(
@@ -101,22 +101,22 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         );
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(2, $errors);
-        $this->assertEquals('validation.unknown_column', $errors->get(0)->getMessage());
+        $this->assertEquals('unknown_column', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.columns.foo', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.unknown_column', $errors->get(1)->getMessage());
+        $this->assertEquals('unknown_column', $errors->get(1)->getMessageTemplate());
         $this->assertEquals('settings.columns.baa', $errors->get(1)->getPropertyPath());
 
         // Test validating invalid sort_field.
         $view->setSettings(new ViewSettings(['sort_field' => ['foo']]));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.invalid_sort_field_definition', $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_field' => 'foo']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.unknown_column', $errors->get(0)->getMessage());
+        $this->assertEquals('unknown_column', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
     }
 

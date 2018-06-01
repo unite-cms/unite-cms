@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
@@ -22,7 +23,7 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('contentType', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
     }
 
     public function testValidateAdditionalContentData()
@@ -43,14 +44,14 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // 4. Create Content2 with only another field. => INVALID
         $content->setData(['other' => 'Other']);
         $errors = static::$container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // 5. ContentType have more fields than content. => VALID
         $field2 = new ContentTypeField();
@@ -68,22 +69,11 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         {
             const TYPE = "content_entity_test_mocked_field";
 
-            function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+            function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
             {
-                if ($data && $validation_group !== 'DELETE') {
-                    return [
-                        new ConstraintViolation(
-                            'mocked_message',
-                            'mocked_message',
-                            [],
-                            $data,
-                            'invalid',
-                            $data
-                        ),
-                    ];
+                if ($data && $context->getGroup() !== 'DELETE') {
+                    $context->buildViolation('mocked_message')->atPath('invalid')->addViolation();
                 }
-
-                return [];
             }
         };
 
@@ -102,7 +92,7 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data.invalid', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('mocked_message', $errors->get(0)->getMessage());
+        $this->assertEquals('mocked_message', $errors->get(0)->getMessageTemplate());
 
         // 2.1 Validate DELETE on invalid content should be valid.
         $content = new Content();
@@ -122,22 +112,11 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         {
             const TYPE = "content_entity_test_mocked_field";
 
-            function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+            function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
             {
-                if ($data && $validation_group === 'DELETE') {
-                    return [
-                        new ConstraintViolation(
-                            'mocked_message',
-                            'mocked_message',
-                            [],
-                            $data,
-                            'invalid',
-                            $data
-                        ),
-                    ];
+                if ($data && $context->getGroup() === 'DELETE') {
+                    $context->buildViolation('mocked_message')->atPath('invalid')->addViolation();
                 }
-
-                return [];
             }
         };
 
@@ -156,7 +135,7 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($content, null, ['DELETE']);
         $this->assertCount(1, $errors);
         $this->assertEquals('data.invalid', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('mocked_message', $errors->get(0)->getMessage());
+        $this->assertEquals('mocked_message', $errors->get(0)->getMessageTemplate());
 
         // 2.1 Validate DEFAULT on invalid content should be valid.
         $content = new Content();

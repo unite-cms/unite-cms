@@ -20,13 +20,13 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(3, $errors);
 
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('name', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
 
         $this->assertEquals('password', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
     }
 
     public function testValidateFieldLength()
@@ -46,13 +46,13 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(3, $errors);
 
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
+        $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('name', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(1)->getMessage());
+        $this->assertEquals('too_long', $errors->get(1)->getMessageTemplate());
 
         $this->assertEquals('password', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(2)->getMessage());
+        $this->assertEquals('too_long', $errors->get(2)->getMessageTemplate());
     }
 
     public function testValidateEmail()
@@ -72,7 +72,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_email', $errors->get(0)->getMessage());
+        $this->assertEquals('invalid_email', $errors->get(0)->getMessageTemplate());
     }
 
     public function testValidateUserOnUpdate()
@@ -82,10 +82,10 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(2, $errors);
 
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('name', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
     }
 
     public function testValidateUniqueUserEntity()
@@ -115,7 +115,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($user2);
         $this->assertCount(1, $errors);
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.email_already_taken', $errors->get(0)->getMessage());
+        $this->assertEquals('validation.email_already_taken', $errors->get(0)->getMessageTemplate());
 
         $user3 = new User();
         $user3->setName('User 3')->setEmail('user2@example.com')->setPassword(
@@ -131,7 +131,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($user4);
         $this->assertCount(1, $errors);
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.email_already_taken', $errors->get(0)->getMessage());
+        $this->assertEquals('validation.email_already_taken', $errors->get(0)->getMessageTemplate());
     }
 
     public function testDeleteOrganizationShouldNotDeleteUsers()
@@ -212,7 +212,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($user);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('domains', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.domain_organization', $errors->get(0)->getMessage());
+        $this->assertEquals('domain_organization', $errors->get(0)->getMessageTemplate());
     }
 
     public function testOrganizationMemberIdChange()
@@ -245,11 +245,11 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $errors = [];
 
         foreach (static::$container->get('validator')->validate($user) as $error) {
-            $errors[$error->getPropertyPath()] = $error->getMessage();
+            $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
         $this->assertArrayHasKey('resetToken', $errors);
-        $this->assertEquals($errors['resetToken'], 'validation.too_long');
+        $this->assertEquals($errors['resetToken'], 'too_long');
 
 
         // Validate invalid token characters.
@@ -258,11 +258,11 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $errors = [];
 
         foreach (static::$container->get('validator')->validate($user) as $error) {
-            $errors[$error->getPropertyPath()] = $error->getMessage();
+            $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
         $this->assertArrayHasKey('resetToken', $errors);
-        $this->assertEquals($errors['resetToken'], 'validation.invalid_characters');
+        $this->assertEquals($errors['resetToken'], 'invalid_characters');
 
         // Validate token uniqueness.
         $user
@@ -282,10 +282,10 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $errors = [];
 
         foreach (static::$container->get('validator')->validate($user2) as $error) {
-            $errors[$error->getPropertyPath()] = $error->getMessage();
+            $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
         $this->assertArrayHasKey('resetToken', $errors);
-        $this->assertEquals($errors['resetToken'], 'validation.reset_token_present');
+        $this->assertEquals($errors['resetToken'], 'reset_token_present');
     }
 }

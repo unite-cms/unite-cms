@@ -14,31 +14,31 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @ORM\Table(name="api_key")
  * @ORM\Entity(repositoryClass="UniteCMS\CoreBundle\Repository\ApiKeyRepository")
- * @UniqueEntity(fields={"token", "organization"}, message="validation.token_present")
- * @UniqueEntity(fields={"name", "organization"}, message="validation.name_present")
+ * @UniqueEntity(fields={"token", "organization"}, message="token_present")
+ * @UniqueEntity(fields={"name", "organization"}, message="name_present")
  */
 class ApiKey extends DomainAccessor implements UserInterface, \Serializable
 {
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="180", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="validation.invalid_characters")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="180", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="invalid_characters")
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;
 
     /**
      * @var Organization
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="apiKeys")
      */
     private $organization;

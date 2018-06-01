@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -42,33 +43,27 @@ class FieldTypeManager
 
     /**
      * Validates content data for given field by using the validation method of the field type.
+     *
      * @param FieldableField $field
      * @param mixed $data
-     *
-     * @param string $validation_group
-     * @return ConstraintViolation[]
+     * @param ExecutionContextInterface $context
      */
-    public function validateFieldData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+    public function validateFieldData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
         $fieldType = $this->getFieldType($field->getType());
-        $constraints = $fieldType->validateData($field, $data, $validation_group);
-
-        return $constraints;
+        $fieldType->validateData($field, $data, $context);
     }
 
     /**
      * Validates field settings for given field by using the validation method of the field type.
-     * @param FieldableField $field
-     * @param FieldableFieldSettings $settings
      *
-     * @return ConstraintViolation[]
+     * @param FieldableFieldSettings $settings
+     * @param ExecutionContextInterface $context
      */
-    public function validateFieldSettings(FieldableField $field, FieldableFieldSettings $settings): array
+    public function validateFieldSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
-        $fieldType = $this->getFieldType($field->getType());
-        $constraints = $fieldType->validateSettings($field, $settings);
-
-        return $constraints;
+        $fieldType = $this->getFieldType($context->getObject()->getType());
+        $fieldType->validateSettings($settings, $context);
     }
 
     public function onContentInsert(ContentTypeField $field, Content $content, LifecycleEventArgs $args)

@@ -120,8 +120,8 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $values['form']['definition'] = '{ "foo": "baa" }';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertFalse($this->client->getResponse()->isRedirect());
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: validation.not_blank")'));
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("identifier: validation.not_blank")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("identifier: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
 
         // Submit valid Domain definition.
         $form = $crawler->filter('form');
@@ -159,8 +159,8 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $values['form']['definition'] = '{ "foo": "baa" }';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertFalse($this->client->getResponse()->isRedirect());
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: validation.not_blank")'));
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("identifier: validation.not_blank")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("identifier: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
 
         // Submit valid Domain definition.
         $form = $crawler->filter('form');

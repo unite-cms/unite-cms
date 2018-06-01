@@ -20,7 +20,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $field = $this->createContentTypeField('file');
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -33,7 +33,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         );
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -47,13 +47,13 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(4, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.bucket.key', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.required', $errors->get(1)->getMessage());
+        $this->assertEquals('required', $errors->get(1)->getMessageTemplate());
         $this->assertEquals('settings.bucket.secret', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.required', $errors->get(2)->getMessage());
+        $this->assertEquals('required', $errors->get(2)->getMessageTemplate());
         $this->assertEquals('settings.bucket.bucket', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.required', $errors->get(3)->getMessage());
+        $this->assertEquals('required', $errors->get(3)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -72,7 +72,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.absolute_url', $errors->get(0)->getMessage());
+        $this->assertEquals('storage.absolute_url', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -113,7 +113,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.foo', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testGettingGraphQLData()
@@ -254,7 +254,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $result = json_decode(json_encode($result->toArray(true)));
 
         // Checksum should be invalid.
-        $this->assertEquals('ERROR: validation.invalid_checksum', trim($result->errors[0]->message));
+        $this->assertEquals('ERROR: '.static::$container->get('translator')->trans('storage.invalid_checksum', [], 'validators'), trim($result->errors[0]->message));
 
         // Try with valid checksum.
         $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');

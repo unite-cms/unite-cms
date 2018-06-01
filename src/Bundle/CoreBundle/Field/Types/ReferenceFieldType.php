@@ -11,6 +11,7 @@ use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -267,33 +268,29 @@ class ReferenceFieldType extends FieldType
      * {@inheritdoc}
      *
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
 
         // When deleting content, we don't need to validate data.
-        if ($validation_group === 'DELETE') {
-            return [];
+        if (strtoupper($context->getGroup()) === 'DELETE') {
+            return;
         }
-
-        $violations = [];
 
         // Only validate available data.
         if (empty($data)) {
-            return $violations;
+            return;
         }
 
         // Make sure, that all required fields are set.
         if (empty($data['domain']) || empty($data['content_type']) || empty($data['content'])) {
-            $violations[] = $this->createViolation($field, 'validation.missing_definition');
+            $context->buildViolation('missing_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
         } // Try to resolve the data to check if the current user is allowed to access it.
         else {
             try {
                 $this->resolveGraphQLData($field, $data);
             } catch (\Exception $e) {
-                $violations[] = $this->createViolation($field, 'validation.wrong_definition');
+                $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
         }
-
-        return $violations;
     }
 }

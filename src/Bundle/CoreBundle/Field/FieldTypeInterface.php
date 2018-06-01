@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Field;
 
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -89,21 +90,19 @@ interface FieldTypeInterface
     /**
      * A callback to allow the field type to validate the field settings.
      *
-     * @param FieldableField $field
      * @param FieldableFieldSettings $settings
+     * @param ExecutionContextInterface $context
      *
      * @return ConstraintViolation[]
      */
-    function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array;
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context);
 
     /**
      * A callback to allow the field type to validate the data for a given fieldable.
      *
      * @param FieldableField $field
      * @param array $data
-     * @param $validation_group , This can be "DEFAULT" (content and settings) or "DELETE" (only for content).
-     *
-     * @return ConstraintViolation[]
+     * @param ExecutionContextInterface $context
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array;
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context);
 }

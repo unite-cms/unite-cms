@@ -21,7 +21,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
  *
  * @ORM\Table(name="setting_type")
  * @ORM\Entity(repositoryClass="UniteCMS\CoreBundle\Repository\SettingTypeRepository")
- * @UniqueEntity(fields={"identifier", "domain"}, message="validation.identifier_already_taken")
+ * @UniqueEntity(fields={"identifier", "domain"}, message="identifier_already_taken")
  * @ExclusionPolicy("all")
  */
 class SettingType implements Fieldable
@@ -37,8 +37,8 @@ class SettingType implements Fieldable
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="title", type="string", length=255)
      * @Expose
      */
@@ -46,10 +46,10 @@ class SettingType implements Fieldable
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\SettingType::RESERVED_IDENTIFIERS")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\SettingType::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -65,8 +65,8 @@ class SettingType implements Fieldable
 
     /**
      * @var string
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="validation.invalid_characters")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="invalid_characters")
      * @ORM\Column(name="icon", type="string", length=255, nullable=true)
      * @Expose
      */
@@ -74,7 +74,7 @@ class SettingType implements Fieldable
 
     /**
      * @var Domain
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="settingTypes")
      * @ORM\JoinColumn(name="domain_id", referencedColumnName="id", onDelete="CASCADE")
      */
@@ -101,7 +101,7 @@ class SettingType implements Fieldable
 
     /**
      * @var array
-     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="validation.invalid_selection")
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="invalid_selection")
      * @ORM\Column(name="permissions", type="array", nullable=true)
      * @Expose
      */

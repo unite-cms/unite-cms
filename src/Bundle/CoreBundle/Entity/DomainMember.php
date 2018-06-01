@@ -15,7 +15,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
  * @ORM\Table(name="domain_member")
  * @ORM\Entity
  * @Gedmo\Loggable
- * @UniqueEntity(fields={"domain", "accessor", "domainMemberType"}, message="validation.user_already_member_of_domain_for_type")
+ * @UniqueEntity(fields={"domain", "accessor", "domainMemberType"}, message="user_already_member_of_domain_for_type")
  */
 class DomainMember implements FieldableContent
 {
@@ -30,15 +30,15 @@ class DomainMember implements FieldableContent
 
     /**
      * @var Domain
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="possibleDomains", strict=true, message="validation.domain_organization")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Choice(callback="possibleDomains", strict=true, message="domain_organization")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="members")
      */
     private $domain;
 
     /**
      * @var DomainAccessor
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @Assert\Valid()
      * @ORM\ManyToOne(targetEntity="DomainAccessor", inversedBy="domains")
      */
@@ -46,7 +46,7 @@ class DomainMember implements FieldableContent
 
     /**
      * @var DomainMemberType
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", inversedBy="domainMembers", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="domain_member_type_id", referencedColumnName="id", onDelete="CASCADE")
      */
@@ -54,7 +54,7 @@ class DomainMember implements FieldableContent
 
     /**
      * @var array
-     * @ValidFieldableContentData(additionalDataMessage="validation.additional_data", groups={"Default", "DELETE"})
+     * @ValidFieldableContentData(additionalDataMessage="additional_data", groups={"Default", "DELETE"})
      * @Gedmo\Versioned
      * @ORM\Column(name="data", type="json", nullable=true)
      */

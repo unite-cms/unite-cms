@@ -21,7 +21,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
  *
  * @ORM\Table(name="domain")
  * @ORM\Entity()
- * @UniqueEntity(fields={"identifier", "organization"}, message="validation.identifier_already_taken")
+ * @UniqueEntity(fields={"identifier", "organization"}, message="identifier_already_taken")
  * @ExclusionPolicy("all")
  */
 class Domain
@@ -39,8 +39,8 @@ class Domain
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="title", type="string", length=255)
      * @Expose
      */
@@ -48,10 +48,10 @@ class Domain
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Domain::RESERVED_IDENTIFIERS")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Domain::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -59,7 +59,7 @@ class Domain
 
     /**
      * @var Organization
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="domains")
      */
     private $organization;
@@ -90,7 +90,7 @@ class Domain
      * @var DomainMemberType[]
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMemberType>")
      * @Accessor(getter="getDomainMemberTypes",setter="setDomainMemberTypes")
-     * @Assert\Count(min="1", minMessage="validation.member_type_required")
+     * @Assert\Count(min="1", minMessage="member_type_required")
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
@@ -100,7 +100,7 @@ class Domain
 
     /**
      * @var array
-     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="validation.invalid_selection")
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="invalid_selection")
      * @ORM\Column(name="permissions", type="array", nullable=true)
      * @Expose
      */

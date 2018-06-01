@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\View;
 
 abstract class ViewType implements ViewTypeInterface
@@ -40,15 +41,19 @@ abstract class ViewType implements ViewTypeInterface
         $this->view = null;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     function getTemplateRenderParameters(string $selectMode = self::SELECT_MODE_NONE): array
     {
         return [];
     }
 
-    function validateSettings(ViewSettings $settings): array
+    /**
+     * {@inheritdoc}
+     */
+    function validateSettings(ViewSettings $settings, ExecutionContextInterface $context)
     {
-        $violations = [];
-
         if (is_object($settings)) {
             $settings = get_object_vars($settings);
         }
@@ -56,31 +61,15 @@ abstract class ViewType implements ViewTypeInterface
         // Check that only allowed settings are present.
         foreach (array_keys($settings) as $setting) {
             if (!in_array($setting, static::SETTINGS)) {
-                $violations[] = new ConstraintViolation(
-                    'validation.additional_data',
-                    'validation.additional_data',
-                    [],
-                    $settings,
-                    $setting,
-                    $settings
-                );
+                $context->buildViolation('additional_data')->atPath($setting)->addViolation();
             }
         }
 
         // Check that all required settings are present.
         foreach (static::REQUIRED_SETTINGS as $setting) {
             if (!isset($settings[$setting])) {
-                $violations[] = new ConstraintViolation(
-                    'validation.required',
-                    'validation.required',
-                    [],
-                    $settings,
-                    $setting,
-                    $settings
-                );
+                $context->buildViolation('required')->atPath($setting)->addViolation();
             }
         }
-
-        return $violations;
     }
 }

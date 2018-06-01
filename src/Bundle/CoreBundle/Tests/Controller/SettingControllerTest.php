@@ -194,7 +194,10 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("validation.missing_definition")'));
+        $error_text = static::$container->get('translator')->trans('missing_reference_definition', [], 'validators');
+        $alert = $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p');
+        $this->assertCount(1, $alert);
+        $this->assertEquals($error_text, $alert->text());
 
         // Assert add form
         $form = $crawler->filter('form');
@@ -212,7 +215,10 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("validation.wrong_definition")'));
+        $error_text = static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators');
+        $alert = $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p');
+        $this->assertCount(1, $alert);
+        $this->assertEquals($error_text, $alert->text());
     }
 
     public function testTranslateActions() {

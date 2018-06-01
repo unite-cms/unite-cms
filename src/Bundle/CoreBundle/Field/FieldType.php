@@ -3,7 +3,7 @@
 namespace UniteCMS\CoreBundle\Field;
 
 use GraphQL\Type\Definition\Type;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -108,11 +108,12 @@ abstract class FieldType implements FieldTypeInterface
      * Basic settings validation based on self::SETTINGS and self::REQUIRED_SETTINGS constants. More sophisticated
      * validation should be done in child implementations.
      *
-     * @param FieldableField $field
      * @param FieldableFieldSettings $settings
+     * @param ExecutionContextInterface $context
+     *
      * @return array
      */
-    function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         $violations = [];
 
@@ -123,28 +124,14 @@ abstract class FieldType implements FieldTypeInterface
         // Check that only allowed settings are present.
         foreach (array_keys($settings) as $setting) {
             if (!in_array($setting, static::SETTINGS)) {
-                $violations[] = new ConstraintViolation(
-                    'validation.additional_data',
-                    'validation.additional_data',
-                    [],
-                    $settings,
-                    $setting,
-                    $settings
-                );
+                $context->buildViolation('additional_data')->atPath($setting)->addViolation();
             }
         }
 
         // Check that all required settings are present.
         foreach (static::REQUIRED_SETTINGS as $setting) {
             if (!isset($settings[$setting])) {
-                $violations[] = new ConstraintViolation(
-                    'validation.required',
-                    'validation.required',
-                    [],
-                    $settings,
-                    $setting,
-                    $settings
-                );
+                $context->buildViolation('required')->atPath($setting)->addViolation();
             }
         }
 
@@ -154,38 +141,5 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
-    {
-        return [];
-    }
-
-    protected function createViolation(
-        $field,
-        $message,
-        $messageTemplate = null,
-        $parameters = [],
-        $root = null,
-        string $propertyPath = null,
-        $invalidValue = null,
-        $plural = null
-    ) {
-
-        if (!$messageTemplate) {
-            $messageTemplate = $message;
-        }
-
-        if (!$propertyPath) {
-            $propertyPath = '['.$this->getIdentifier($field).']';
-        }
-
-        return new ConstraintViolation(
-            $message,
-            $messageTemplate,
-            $parameters,
-            $root,
-            $propertyPath,
-            $invalidValue,
-            $plural
-        );
-    }
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context) {}
 }

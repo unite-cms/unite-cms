@@ -13,7 +13,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\OrganizationAdminPresent;
  *
  * @ORM\Table(name="organization_member")
  * @ORM\Entity
- * @UniqueEntity(fields={"organization", "user"}, message="validation.user_already_member_of_organization")
+ * @UniqueEntity(fields={"organization", "user"}, message="user_already_member_of_organization")
  */
 class OrganizationMember
 {
@@ -28,16 +28,16 @@ class OrganizationMember
 
     /**
      * @var array
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="validation.invalid_selection")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Choice(callback="allowedRoles", strict=true, multiple=true, multipleMessage="invalid_selection")
      * @ORM\Column(name="roles", type="array")
      */
     private $roles;
 
     /**
      * @var Organization
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @OrganizationAdminPresent(groups={"UPDATE", "DELETE"}, message="validation.no_organization_admins")
+     * @Assert\NotBlank(message="not_blank")
+     * @OrganizationAdminPresent(groups={"UPDATE", "DELETE"}, message="no_organization_admins")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="members")
      * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="CASCADE")
      */
@@ -45,7 +45,7 @@ class OrganizationMember
 
     /**
      * @var User
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @Assert\Valid
      * @ORM\ManyToOne(targetEntity="User", inversedBy="organizations")
      */

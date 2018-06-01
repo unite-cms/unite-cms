@@ -3,7 +3,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
@@ -35,30 +35,21 @@ class TextAreaFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         // Validate allowed and required settings.
-        $violations = parent::validateSettings($field, $settings);
+        parent::validateSettings($settings, $context);
 
         // Only continue, if there are no violations yet.
-        if(!empty($violations)) {
-            return $violations;
+        if($context->getViolations()->count() > 0) {
+            return;
         }
 
         // Check integer Values for rows
         if(!empty($settings->rows)) {
             if(!is_int($settings->rows)) {
-                $violations[] = new ConstraintViolation(
-                  'validation.nointeger_value',
-                  'validation.nointeger_value',
-                  [],
-                  $settings,
-                  'rows',
-                  $settings
-                );
+                $context->buildViolation('nointeger_value')->atPath('rows')->addViolation();
             }
         }
-
-        return $violations;
     }
 }

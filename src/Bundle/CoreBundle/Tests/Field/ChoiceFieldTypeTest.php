@@ -13,7 +13,7 @@ class ChoiceFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('choice');
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
     }
 
     public function testContentTypeFieldTypeWithInvalidSettings()
@@ -25,7 +25,7 @@ class ChoiceFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testContentTypeFieldTypeWithValidSettings()

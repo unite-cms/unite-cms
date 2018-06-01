@@ -34,13 +34,13 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(3, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('identifier', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
 
         $this->assertEquals('organization', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
 
         // Try to validate organization with too long title and identifier.
         $domain1
@@ -50,10 +50,10 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertGreaterThanOrEqual(2, $errors->count());
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
+        $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('identifier', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(1)->getMessage());
+        $this->assertEquals('too_long', $errors->get(1)->getMessageTemplate());
 
         // Try to test invalid identifier.
         $domain1
@@ -63,7 +63,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertGreaterThanOrEqual(1, $errors->count());
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_characters', $errors->get(0)->getMessage());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         // Try to set invalid ContentType.
         $org = new Organization();
@@ -162,7 +162,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.identifier_already_taken', $errors->get(0)->getMessage());
+        $this->assertEquals('identifier_already_taken', $errors->get(0)->getMessageTemplate());
 
         // Test all combinations of same organizations and identifier
         $org2 = new Organization();
@@ -207,7 +207,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($domain2);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('content', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // Empty domains can be deleted.
         $this->em->remove($content);
@@ -317,9 +317,9 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
                 ->getPropertyPath()
         );
         $this->assertEquals(
-            'validation.domain_organization',
+            'domain_organization',
             $errors->get(0)
-                ->getMessage()
+                ->getMessageTemplate()
         );
 
         $user1MemberOrg1 = new OrganizationMember();
@@ -371,9 +371,9 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
                 ->getPropertyPath()
         );
         $this->assertEquals(
-            'validation.user_already_member_of_organization',
+            'user_already_member_of_organization',
             $errors->get(0)
-                ->getMessage()
+                ->getMessageTemplate()
         );
 
 
@@ -399,9 +399,9 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
                 ->getPropertyPath()
         );
         $this->assertEquals(
-            'validation.user_already_member_of_domain_for_type',
+            'user_already_member_of_domain_for_type',
             $errors->get(0)
-                ->getMessage()
+                ->getMessageTemplate()
         );
 
         $domainMemberType2 = new DomainMemberType();
@@ -722,13 +722,13 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($invite1);
         $this->assertCount(4, $errors);
         $this->assertStringStartsWith('domainMemberType', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
         $this->assertStringStartsWith('email', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
         $this->assertStringStartsWith('token', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
         $this->assertStringStartsWith('requestedAt', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(3)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(3)->getMessageTemplate());
 
 
         //Validate invalid email
@@ -737,7 +737,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($invite1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_email', $errors->get(0)->getMessage());
+        $this->assertEquals('invalid_email', $errors->get(0)->getMessageTemplate());
 
         // Validate too long token.
         $invite1->setToken($this->generateRandomMachineName(181));
@@ -745,11 +745,11 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = [];
 
         foreach (static::$container->get('validator')->validate($invite1) as $error) {
-            $errors[$error->getPropertyPath()] = $error->getMessage();
+            $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
         $this->assertArrayHasKey('token', $errors);
-        $this->assertEquals($errors['token'], 'validation.too_long');
+        $this->assertEquals($errors['token'], 'too_long');
 
         // Validate invalid token characters.
         $invite1->setToken('   '.$this->generateRandomUTF8String(150));
@@ -757,11 +757,11 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = [];
 
         foreach (static::$container->get('validator')->validate($invite1) as $error) {
-            $errors[$error->getPropertyPath()] = $error->getMessage();
+            $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
         $this->assertArrayHasKey('token', $errors);
-        $this->assertEquals($errors['token'], 'validation.invalid_characters');
+        $this->assertEquals($errors['token'], 'invalid_characters');
 
         $invite1->setToken('XXX');
 
@@ -782,9 +782,9 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($invite2);
         $this->assertCount(2, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.email_already_invited', $errors->get(0)->getMessage());
+        $this->assertEquals('email_already_invited', $errors->get(0)->getMessageTemplate());
         $this->assertStringStartsWith('token', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.token_already_present', $errors->get(1)->getMessage());
+        $this->assertEquals('token_already_present', $errors->get(1)->getMessageTemplate());
 
         $domainMemberType2 = new DomainMemberType();
         $domainMemberType2->setIdentifier('dmt3')->setTitle('DMT3');
@@ -818,7 +818,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($invite2);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.email_already_member', $errors->get(0)->getMessage());
+        $this->assertEquals('email_already_member', $errors->get(0)->getMessageTemplate());
     }
 
     public function testReservedIdentifiers()
@@ -834,6 +834,6 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($domain);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
+        $this->assertEquals('reserved_identifier', $errors->get(0)->getMessageTemplate());
     }
 }

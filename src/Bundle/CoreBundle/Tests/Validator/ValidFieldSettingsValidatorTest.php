@@ -2,11 +2,11 @@
 
 namespace UniteCMS\CoreBundle\Tests\Validator;
 
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
-use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
@@ -41,46 +41,50 @@ class ValidFieldSettingsValidatorTest extends ConstraintValidatorTestCase
     }
 
     public function testInvalidValue() {
+
         // Create validator with mocked FieldTypeManager.
-        $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
-        $fieldTypeManagerMock->expects($this->any())
-            ->method('validateFieldSettings')
-            ->willReturn([
-                new ConstraintViolation('m1', 'm1', [], 'root', 'root', 'i1'),
-                new ConstraintViolation('m2', 'm2', [], 'root', 'root', 'i2'),
-            ]);
-        $fieldTypeManagerMock->expects($this->any())
-            ->method('hasFieldType')
-            ->willReturn(true);
+        $fieldTypeManagerMock = new FieldTypeManager();
+        $fieldTypeManagerMock->registerFieldType(new class extends FieldType{
+            const TYPE = "type";
+            public function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
+            {
+                $context->buildViolation('m1')->addViolation();
+                $context->buildViolation('m2')->addViolation();
+            }
+        });
+
+        $field = new ContentTypeField();
+        $field->setType('type');
 
         // Validate value.
-        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, new ContentTypeField());
+        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, $field);
         $this->assertCount(2, $context->getViolations());
         $this->assertEquals('m1', $context->getViolations()->get(0)->getMessageTemplate());
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
 
-        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, new SettingTypeField());
+        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, $field);
         $this->assertCount(2, $context->getViolations());
         $this->assertEquals('m1', $context->getViolations()->get(0)->getMessageTemplate());
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
     }
 
     public function testValidValue() {
-        // Create validator with mocked FieldTypeManager.
-        $fieldTypeManagerMock = $this->createMock(FieldTypeManager::class);
-        $fieldTypeManagerMock->expects($this->any())
-            ->method('validateFieldSettings')
-            ->willReturn([]);
 
-        $fieldTypeManagerMock->expects($this->any())
-            ->method('hasFieldType')
-            ->willReturn(true);
+        // Create validator with mocked FieldTypeManager.
+        $fieldTypeManagerMock = new FieldTypeManager();
+        $fieldTypeManagerMock->registerFieldType(new class extends FieldType{
+            const TYPE = "type";
+            public function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context) {}
+        });
+
+        $field = new ContentTypeField();
+        $field->setType('type');
 
         // Validate value.
-        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, new ContentTypeField());
+        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, $field);
         $this->assertCount(0, $context->getViolations());
 
-        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, new SettingTypeField());
+        $context = $this->validate(new FieldableFieldSettings(), new ValidFieldSettingsValidator($fieldTypeManagerMock), null, $field);
         $this->assertCount(0, $context->getViolations());
     }
 }

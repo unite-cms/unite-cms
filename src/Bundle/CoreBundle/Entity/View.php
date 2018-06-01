@@ -17,7 +17,7 @@ use UniteCMS\CoreBundle\View\ViewSettings;
 /**
  * View
  *
- * @UniqueEntity(fields={"identifier", "contentType"}, message="validation.identifier_already_taken")
+ * @UniqueEntity(fields={"identifier", "contentType"}, message="identifier_already_taken")
  * @ORM\Table(name="view")
  * @ORM\Entity(repositoryClass="UniteCMS\CoreBundle\Repository\ViewRepository")
  * @ExclusionPolicy("all")
@@ -38,8 +38,8 @@ class View
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="title", type="string", length=255)
      * @Expose
      */
@@ -47,10 +47,10 @@ class View
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\View::RESERVED_IDENTIFIERS")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\View::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -58,8 +58,8 @@ class View
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ViewType(message="validation.invalid_view_type")
      * @ORM\Column(name="type", type="string", length=255)
      * @Expose
@@ -76,8 +76,8 @@ class View
 
     /**
      * @var string
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="validation.invalid_characters")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="invalid_characters")
      * @ORM\Column(name="icon", type="string", length=255, nullable=true)
      * @Expose
      */
@@ -85,7 +85,7 @@ class View
 
     /**
      * @var ContentType
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @Assert\Valid()
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", inversedBy="views", fetch="EXTRA_LAZY")
      */
@@ -96,7 +96,7 @@ class View
      *
      * @ORM\Column(name="settings", type="object", nullable=true)
      * @ValidViewSettings()
-     * @Assert\NotNull(message="validation.not_null")
+     * @Assert\NotNull(message="not_null")
      * @Type("UniteCMS\CoreBundle\View\ViewSettings")
      * @Expose
      */

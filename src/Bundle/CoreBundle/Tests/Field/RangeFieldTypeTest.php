@@ -24,7 +24,7 @@ class RangeFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testContentTypeFieldTypeWithValidSettings()

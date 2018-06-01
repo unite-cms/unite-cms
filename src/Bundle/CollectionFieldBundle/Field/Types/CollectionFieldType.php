@@ -3,7 +3,7 @@
 namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
@@ -115,61 +115,54 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         // Validate allowed and required settings.
-        $violations = parent::validateSettings($field, $settings);
+        parent::validateSettings($settings, $context);
 
-        // Validate sub fields.
-        if(empty($violations)) {
+        $field = $context->getObject();
 
-            // Validate a virtual fieldable for this collection field.
-            foreach($this->validator->validate(self::getNestableFieldable($field)) as $violation) {
-                $violations[] = $violation;
-            }
+        // Validate virtual sub fields for this collection.
+        if($context->getViolations()->count() == 0 && $field instanceof FieldableField) {
+            $context->getValidator()->inContext($context)->validate(self::getNestableFieldable($field));
         }
-        return $violations;
     }
 
     /**
      * {@inheritdoc}
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
         // When deleting content, we don't need to validate data.
-        if($validation_group === 'DELETE') {
-            return [];
+        if(strtoupper($context->getGroup()) === 'DELETE') {
+            return;
         }
 
-        $violations = $this->validateNestedFields($data, $field);
+        $this->validateNestedFields($field, $data, $context);
 
         $max_rows = $field->getSettings()->max_rows ?? 0;
         $min_rows = $field->getSettings()->min_rows ?? 0;
 
         // Validate max_rows
         if($max_rows > 0 && $max_rows < count($data)) {
-            $violations[] = $this->createViolation($field, 'validation.too_many_rows');
+            $context->buildViolation('collectionfield.too_many_rows', ['%count%' => $max_rows])->atPath('['.$field->getIdentifier().']')->addViolation();
         }
 
         // Validate min_rows
         if(count($data) < $min_rows) {
-            $violations[] = $this->createViolation($field, 'validation.too_few_rows');
+            $context->buildViolation('collectionfield.too_few_rows', ['%count%' => $min_rows])->atPath('['.$field->getIdentifier().']')->addViolation();
         }
-
-        return $violations;
     }
 
     /**
      * Recursively validate all fields in this collection.
      *
-     * @param array $data
      * @param FieldableField $field
-     *
-     * @return array
+     * @param array $data
+     * @param ExecutionContextInterface $context
      */
-    private function validateNestedFields($data, FieldableField $field) {
+    private function validateNestedFields(FieldableField $field, $data, ExecutionContextInterface $context) {
 
-        $violations = [];
         $collection = self::getNestableFieldable($field);
 
         // Make sure, that there is no additional data in content that is not in settings.
@@ -178,30 +171,18 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
                 // If the field does not exists, add an error.
                 if (!$collection->getFields()->containsKey($data_key)) {
-                    $violations[] = new ConstraintViolation(
-                      'validation.additional_data',
-                      'validation.additional_data',
-                      [],
-                      $row,
-                      join('.', [
-                          $field->getEntity()->getIdentifierPath('.'),
-                          $field->getIdentifier(),
-                          $data_key
-                      ]),
-                      $row
-                    );
+                    $context->buildViolation('additional_data')->atPath('['.join('][', [
+                        $field->getEntity()->getIdentifierPath(']['),
+                        $field->getIdentifier(),
+                        $data_key
+                    ]).']')->addViolation();
 
                 // If the field exists, let the fieldTypeManager validate it.
                 } else {
-                    $violations = array_merge(
-                      $violations,
-                      $this->fieldTypeManager->validateFieldData($collection->getFields()->get($data_key), $row[$data_key])
-                    );
+                    $this->fieldTypeManager->validateFieldData($collection->getFields()->get($data_key), $row[$data_key], $context);
                 }
             }
         }
-
-        return $violations;
     }
 
     /**

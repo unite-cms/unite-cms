@@ -9,22 +9,22 @@ class InvitationRegistrationModel
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      */
     private $name;
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Email(message="validation.invalid_email")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Email(message="invalid_email")
+     * @Assert\Length(max="255", maxMessage="too_long")
      */
     private $email;
 
     /**
-     * @Assert\Length(min = 8, max="255", minMessage = "validation.too_short", maxMessage = "validation.too_long")
+     * @Assert\Length(min = 8, max="255", minMessage = "too_short", maxMessage = "too_long")
      */
     private $password;
 

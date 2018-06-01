@@ -5,7 +5,7 @@ namespace UniteCMS\StorageBundle\Field\Types;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -118,87 +118,60 @@ class FileFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
         // When deleting content, we don't need to validate data.
-        if($validation_group === 'DELETE') {
-            return [];
+        if(strtoupper($context->getGroup()) === 'DELETE') {
+            return;
         }
 
-        $violations = [];
-
         if(empty($data)) {
-            return $violations;
+            return;
         }
 
         if(empty($data['size']) || empty($data['id']) || empty($data['name']) || empty($data['checksum'])) {
-            $violations[] = $this->createViolation($field, 'validation.missing_definition');
+            $context->buildViolation('storage.missing_file_definition')->addViolation();
         }
 
         if(empty($violations)) {
             $preSignedUrl = new PreSignedUrl('', $data['id'], $data['name'], $data['checksum']);
             if (!$preSignedUrl->check($this->secret)) {
-                $violations[] = $this->createViolation($field, 'validation.invalid_checksum');
+                $context->buildViolation('storage.invalid_checksum')->addViolation();
             }
         }
-
-        return $violations;
     }
 
     /**
      * {@inheritdoc}
      */
-    function validateSettings(FieldableField $field, FieldableFieldSettings $settings): array
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         // Validate allowed and required settings.
-        $violations = parent::validateSettings($field, $settings);
+        parent::validateSettings($settings, $context);
 
         // Validate allowed bucket configuration.
-        if(empty($violations)) {
+        if($context->getViolations()->count() == 0) {
             foreach($settings->bucket as $field => $value) {
                 if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region'])) {
-                    $violations[] = new ConstraintViolation(
-                        'validation.additional_data',
-                        'validation.additional_data',
-                        [],
-                        $settings->bucket,
-                        'bucket.' . $field,
-                        $settings->bucket
-                    );
+                    $context->buildViolation('additional_data')->atPath('bucket.' . $field)->addViolation();
                 }
             }
         }
 
         // Validate required bucket configuration.
-        if(empty($violations)) {
+        if($context->getViolations()->count() == 0) {
             foreach(['endpoint', 'key', 'secret', 'bucket'] as $required_field) {
                 if(!isset($settings->bucket[$required_field])) {
-                    $violations[] = new ConstraintViolation(
-                      'validation.required',
-                      'validation.required',
-                      [],
-                      $settings->bucket,
-                      'bucket.' . $required_field,
-                      $settings->bucket
-                    );
+                    $context->buildViolation('required')->atPath('bucket.' . $required_field)->addViolation();
                 }
             }
         }
 
-        if(empty($violations)) {
+        if($context->getViolations()->count() == 0) {
             if(!preg_match("/^(http|https):\/\//", $settings->bucket['endpoint'])) {
-                $violations[] = new ConstraintViolation(
-                  'validation.absolute_url',
-                  'validation.absolute_url',
-                  [],
-                  $settings->bucket,
-                  'bucket.endpoint',
-                  $settings->bucket
-                );
+                $context->buildViolation('storage.absolute_url')->atPath('bucket.endpoint')->addViolation();
             }
         }
-
-        return $violations;
     }
 
     /**

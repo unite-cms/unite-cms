@@ -17,7 +17,7 @@ class ChangePassword
     private $currentPassword;
 
     /**
-     * @Assert\Length(min = 8, max="255", minMessage = "validation.too_short", maxMessage = "validation.too_long", groups={"UPDATE", "RESET"})
+     * @Assert\Length(min = 8, max="255", minMessage = "too_short", maxMessage = "too_long", groups={"UPDATE", "RESET"})
      */
     private $newPassword;
 
