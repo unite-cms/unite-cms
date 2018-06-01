@@ -113,7 +113,7 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.theme', $errors->get(0)->getPropertyPath());
-        $this->assertEquals(static::$container->get('translator')->trans('wysiwygfield.unknown_theme', [], 'validators'), $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('wysiwygfield.unknown_theme', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
