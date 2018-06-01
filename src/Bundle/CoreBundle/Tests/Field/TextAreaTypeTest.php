@@ -11,7 +11,7 @@ class TextAreaTypeTest extends FieldTypeTestCase
 
         // Content Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('textarea');
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
     }
 
@@ -20,7 +20,7 @@ class TextAreaTypeTest extends FieldTypeTestCase
         // check invalid row setting
         $field = $this->createContentTypeField('textarea');
 
-        $fieldType = $this->container->get('unite.cms.field_type_manager')->getFieldType($field->getType());
+        $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($field->getType());
 
         $field->setSettings(
           new FieldableFieldSettings(
@@ -29,7 +29,7 @@ class TextAreaTypeTest extends FieldTypeTestCase
             ]
           )
         );
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.rows', $errors->get(0)->getPropertyPath());
         $this->assertEquals('nointeger_value', $errors->get(0)->getMessageTemplate());
@@ -42,7 +42,7 @@ class TextAreaTypeTest extends FieldTypeTestCase
             ]
           )
         );
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
 
         // Check if setting is set correctly
         $options = $fieldType->getFormOptions($field);
@@ -56,7 +56,7 @@ class TextAreaTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('textarea');
         $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
 
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }

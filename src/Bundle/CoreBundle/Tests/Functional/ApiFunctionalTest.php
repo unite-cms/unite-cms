@@ -369,7 +369,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $this->em->flush($org);
 
             foreach($domains as $domain_data) {
-                $domain = $this->container->get('unite.cms.domain_definition_parser')->parse($domain_data);
+                $domain = static::$container->get('unite.cms.domain_definition_parser')->parse($domain_data);
                 $domain->setOrganization($org);
                 $this->domains[$domain->getIdentifier()] = $domain;
                 $this->em->persist($domain);
@@ -421,7 +421,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }
 
         $this->controller = new GraphQLApiController();
-        $this->controller->setContainer($this->container);
+        $this->controller->setContainer(static::$container);
     }
 
     private function api(Domain $domain, UserInterface $user, string $query, array $variables = [], $set_csrf_token = FALSE, $firewall = 'api') {
@@ -444,18 +444,18 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $requestStack);
 
         $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
         $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('unite.cms.manager'));
+        $reflector->invoke(static::$container->get('unite.cms.manager'));
 
         // If we fallback to the statefull main firewall, we need to add a csrf-token with the request.
         if($set_csrf_token) {
-            $request->headers->set('X-CSRF-TOKEN', $this->container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))->getValue());
+            $request->headers->set('X-CSRF-TOKEN', static::$container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))->getValue());
         }
 
-        $this->container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, $firewall, []));
+        static::$container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, $firewall, []));
 
         $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
         return json_decode($response->getContent());
@@ -1037,7 +1037,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertContains("ERROR: ".$this->container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertContains("ERROR: ".static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
 
         // Now create a news content with valid content.
         $response = $this->api(
@@ -1120,7 +1120,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertContains("ERROR: ".$this->container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertContains("ERROR: ".static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
 
         // update a news content with valid content.
         $response = $this->api(

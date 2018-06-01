@@ -10,7 +10,7 @@ class EmailFieldTypeTest extends FieldTypeTestCase
     {
         // Email Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('email');
-        $this->assertCount(0, $this->container->get('validator')->validate($ctField));
+        $this->assertCount(0, static::$container->get('validator')->validate($ctField));
     }
 
     public function testEmailTypeFieldTypeWithInvalidSettings()
@@ -19,7 +19,7 @@ class EmailFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('email');
         $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
 
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }

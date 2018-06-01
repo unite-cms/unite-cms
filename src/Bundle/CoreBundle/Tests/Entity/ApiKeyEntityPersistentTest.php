@@ -14,7 +14,7 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
 
         // Validate empty ApiClient
         $apiClient = new ApiKey();
-        $errors = $this->container->get('validator')->validate($apiClient);
+        $errors = static::$container->get('validator')->validate($apiClient);
         $this->assertCount(3, $errors);
 
         $this->assertEquals('name', $errors->get(0)->getPropertyPath());
@@ -33,7 +33,7 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
             ->setName($this->generateRandomUTF8String(256));
         $apiClient->getOrganization()->setTitle('Org')->setIdentifier('org');
 
-        $errors = $this->container->get('validator')->validate($apiClient);
+        $errors = static::$container->get('validator')->validate($apiClient);
         $this->assertCount(2, $errors);
 
         $this->assertEquals('name', $errors->get(0)->getPropertyPath());
@@ -47,7 +47,7 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
             ->setToken('   '.$this->generateRandomUTF8String(150))
             ->setName($this->generateRandomUTF8String(255));
 
-        $errors = $this->container->get('validator')->validate($apiClient);
+        $errors = static::$container->get('validator')->validate($apiClient);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('token', $errors->get(0)->getPropertyPath());
@@ -56,7 +56,7 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         $apiClient->setToken('valid');
 
         // Validate valid token
-        $errors = $this->container->get('validator')->validate($apiClient);
+        $errors = static::$container->get('validator')->validate($apiClient);
         $this->assertCount(0, $errors);
 
         $this->em->persist($apiClient->getOrganization());
@@ -70,7 +70,7 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
             ->setName('Api Client 2')
             ->setToken($apiClient->getToken());
 
-        $errors = $this->container->get('validator')->validate($apiClient2);
+        $errors = static::$container->get('validator')->validate($apiClient2);
         $this->assertCount(1, $errors);
         $this->assertEquals('token', $errors->get(0)->getPropertyPath());
         $this->assertEquals('token_present', $errors->get(0)->getMessageTemplate());

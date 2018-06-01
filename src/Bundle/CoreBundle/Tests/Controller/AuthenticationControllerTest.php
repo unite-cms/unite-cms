@@ -19,7 +19,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
     public function setUp()
     {
         parent::setUp();
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
     }
 
@@ -31,7 +31,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $user
             ->setEmail('user@example.com')
             ->setName('Example')
-            ->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
+            ->setPassword(static::$container->get('security.password_encoder')->encodePassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();
 
@@ -50,7 +50,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $user
             ->setEmail('user@example.com')
             ->setName('Example')
-            ->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
+            ->setPassword(static::$container->get('security.password_encoder')->encodePassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();
 
@@ -71,7 +71,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $user
             ->setEmail('user@example.com')
             ->setName('Example')
-            ->setPassword($this->container->get('security.password_encoder')->encodePassword($user, $password));
+            ->setPassword(static::$container->get('security.password_encoder')->encodePassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();
 

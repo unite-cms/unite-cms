@@ -32,7 +32,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
 
         // Create Test Organization and import Test Domain.
@@ -194,7 +194,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
             ['email' => $this->users['domain_editor']->getEmail()]
         );
         $this->assertTrue(
-            $this->container->get('security.password_encoder')->isPasswordValid(
+            static::$container->get('security.password_encoder')->isPasswordValid(
                 $this->users['domain_editor'],
                 $new_RandPassword
             )

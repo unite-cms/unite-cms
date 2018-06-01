@@ -16,7 +16,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
     {
         $user = new User();
         $user->setName('')->setEmail('')->setPassword('');
-        $errors = $this->container->get('validator')->validate($user, null, ['User', 'CREATE']);
+        $errors = static::$container->get('validator')->validate($user, null, ['User', 'CREATE']);
         $this->assertCount(3, $errors);
 
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
@@ -42,7 +42,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
             ->setEmail($this->generateRandomMachineName(256).'@example.com')
             ->setPassword($this->generateRandomUTF8String(256)
         );
-        $errors = $this->container->get('validator')->validate($user);
+        $errors = static::$container->get('validator')->validate($user);
         $this->assertCount(3, $errors);
 
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
@@ -68,7 +68,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
             ->setEmail('invalid@invalid@invalid')
             ->setPassword($this->generateRandomUTF8String(255));
 
-        $errors = $this->container->get('validator')->validate($user);
+        $errors = static::$container->get('validator')->validate($user);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
@@ -78,7 +78,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
     public function testValidateUserOnUpdate()
     {
         $user = new User();
-        $errors = $this->container->get('validator')->validate($user);
+        $errors = static::$container->get('validator')->validate($user);
         $this->assertCount(2, $errors);
 
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
@@ -112,7 +112,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $user2->setName('User 2')->setEmail('user1@example.com')->setPassword(
             'password'
         )->addOrganization($organizationMember2);
-        $errors = $this->container->get('validator')->validate($user2);
+        $errors = static::$container->get('validator')->validate($user2);
         $this->assertCount(1, $errors);
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.email_already_taken', $errors->get(0)->getMessageTemplate());
@@ -121,14 +121,14 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $user3->setName('User 3')->setEmail('user2@example.com')->setPassword(
             'password'
         )->addOrganization($organizationMember);
-        $this->assertCount(0, $this->container->get('validator')->validate($user3));
+        $this->assertCount(0, static::$container->get('validator')->validate($user3));
 
         // Test Email already taken for different organizations.
         $user4 = new User();
         $user4->setName('User 4')->setEmail('user1@example.com')->setPassword(
             'password'
         )->addOrganization($organizationMember2);
-        $errors = $this->container->get('validator')->validate($user4);
+        $errors = static::$container->get('validator')->validate($user4);
         $this->assertCount(1, $errors);
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.email_already_taken', $errors->get(0)->getMessageTemplate());
@@ -203,13 +203,13 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $member = new DomainMember();
         $member->setDomain($domain1)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $user->addDomain($member);
-        $this->assertCount(0, $this->container->get('validator')->validate($user));
+        $this->assertCount(0, static::$container->get('validator')->validate($user));
 
         // Add user to domain of org 2.
         $member2 = new DomainMember();
         $member2->setDomain($domain2)->setDomainMemberType($domain2->getDomainMemberTypes()->first());
         $user->addDomain($member2);
-        $errors = $this->container->get('validator')->validate($user);
+        $errors = static::$container->get('validator')->validate($user);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('domains', $errors->get(0)->getPropertyPath());
         $this->assertEquals('domain_organization', $errors->get(0)->getMessageTemplate());
@@ -244,7 +244,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
 
         $errors = [];
 
-        foreach ($this->container->get('validator')->validate($user) as $error) {
+        foreach (static::$container->get('validator')->validate($user) as $error) {
             $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
@@ -257,7 +257,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
 
         $errors = [];
 
-        foreach ($this->container->get('validator')->validate($user) as $error) {
+        foreach (static::$container->get('validator')->validate($user) as $error) {
             $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
@@ -272,7 +272,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
             ->setEmail('user@example.com')
             ->setName('User 1');
 
-        $this->assertCount(0, $this->container->get('validator')->validate($user));
+        $this->assertCount(0, static::$container->get('validator')->validate($user));
         $this->em->persist($user);
         $this->em->flush($user);
 
@@ -281,7 +281,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
 
         $errors = [];
 
-        foreach ($this->container->get('validator')->validate($user2) as $error) {
+        foreach (static::$container->get('validator')->validate($user2) as $error) {
             $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 

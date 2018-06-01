@@ -119,7 +119,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $this->em->persist($this->org1);
         $this->em->flush($this->org1);
 
-        $this->domain1 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain1 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain1->setOrganization($this->org1);
         $this->em->persist($this->domain1);
         $this->em->flush($this->domain1);
@@ -141,7 +141,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $this->em->flush($editor);
         $this->user = $editor;
 
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
 
     }
@@ -149,7 +149,7 @@ class ControllerTest extends DatabaseAwareTestCase
     public function testPreSignFileUploadWithApiFirewall()
     {
         # generate new csrf_token
-        $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(
+        $this->csrf_token = static::$container->get('security.csrf.token_manager')->getToken(
             StringUtil::fqcnToBlockPrefix(PreSignFormType::class)
         );
 
@@ -164,7 +164,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $this->em->persist($apiClient);
         $this->em->flush($apiClient);
 
-        $route_uri = $this->container->get('router')->generate(
+        $route_uri = static::$container->get('router')->generate(
             'unitecms_storage_sign_uploadcontenttype',
             [
                 'domain' => $this->domain1->getIdentifier(),
@@ -199,7 +199,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $token = new UsernamePasswordToken($this->user, null, 'main', $this->user->getRoles());
 
         # generate new csrf_token
-        $this->csrf_token = $this->container->get('security.csrf.token_manager')->getToken(
+        $this->csrf_token = static::$container->get('security.csrf.token_manager')->getToken(
             StringUtil::fqcnToBlockPrefix(PreSignFormType::class)
         );
 
@@ -211,7 +211,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $this->client->setServerParameter('HTTP_Authentication-Fallback', true);
 
         // Try to access with invalid method.
-        $baseUrl = $this->container->get('router')->generate(
+        $baseUrl = static::$container->get('router')->generate(
             'unitecms_storage_sign_uploadcontenttype',
             ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']
         );
@@ -222,7 +222,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $this->client->request('DELETE', $baseUrl);
         $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
 
-        $baseUrl = $this->container->get('router')->generate(
+        $baseUrl = static::$container->get('router')->generate(
             'unitecms_storage_sign_uploadsettingtype',
             ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo']
         );
@@ -246,7 +246,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
             $this->client->request(
                 'POST',
-                $this->container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params),
+                static::$container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params),
                 []
             );
             $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
@@ -263,7 +263,7 @@ class ControllerTest extends DatabaseAwareTestCase
                  ] as $params) {
             $this->client->request(
                 'POST',
-                $this->container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params),
+                static::$container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params),
                 []
             );
             $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
@@ -272,7 +272,7 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to pre sign without CREATE permission.
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -285,7 +285,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -299,7 +299,7 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to pre sign for invalid content type field.
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -316,7 +316,7 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to pre sign for invalid setting type field.
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -333,7 +333,7 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to pre sign for invalid content type nested field.
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -349,7 +349,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -366,7 +366,7 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to pre sign for invalid setting type nested field.
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -382,7 +382,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -399,7 +399,7 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to pre sign invalid file type.
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -418,7 +418,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -439,7 +439,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -467,7 +467,7 @@ class ControllerTest extends DatabaseAwareTestCase
             $response->checksum
         );
         $this->assertNotNull($preSignedUrl->getChecksum());
-        $this->assertTrue($preSignedUrl->check($this->container->getParameter('kernel.secret')));
+        $this->assertTrue($preSignedUrl->check(static::$container->getParameter('kernel.secret')));
 
         $s3Client = new S3Client(
             [
@@ -501,7 +501,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $this->client->request(
             'POST',
-            $this->container->get('router')->generate(
+            static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
                     'organization' => $this->org1->getIdentifier(),
@@ -528,7 +528,7 @@ class ControllerTest extends DatabaseAwareTestCase
             $response->checksum
         );
         $this->assertNotNull($preSignedUrl->getChecksum());
-        $this->assertTrue($preSignedUrl->check($this->container->getParameter('kernel.secret')));
+        $this->assertTrue($preSignedUrl->check(static::$container->getParameter('kernel.secret')));
 
         $s3Client = new S3Client(
             [
@@ -570,7 +570,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $contentType->addField($field);
         $fieldSettings = $field->getSettings();
 
-        $service = $this->container->get('unite.cms.storage.service');
+        $service = static::$container->get('unite.cms.storage.service');
 
 
         // Test setting endpoint and bucket

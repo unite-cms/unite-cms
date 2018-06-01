@@ -10,7 +10,7 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
     {
         // Integer Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('integer');
-        $this->assertCount(0, $this->container->get('validator')->validate($ctField));
+        $this->assertCount(0, static::$container->get('validator')->validate($ctField));
     }
 
     public function testIntegerTypeFieldTypeWithInvalidSettings()
@@ -19,7 +19,7 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('integer');
         $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
 
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }

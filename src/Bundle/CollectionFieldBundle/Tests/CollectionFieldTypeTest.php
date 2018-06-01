@@ -24,7 +24,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
     public function testAllowedFieldSettings()
     {
         $field = $this->createContentTypeField('collection');
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
@@ -38,7 +38,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                 ]
             )
         );
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
@@ -52,7 +52,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             )
         );
 
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(0, $errors);
     }
 
@@ -65,7 +65,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $content->setContentType($field->getContentType());
 
         // Try to validate empty collection field definitions.
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
@@ -78,16 +78,16 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
 
         // Try to validate collection without fields.
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
 
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $field->getContentType(),
             $content
         );
         $this->assertInstanceOf(FieldableFormType::class, $form->getConfig()->getType()->getInnerType());
         $this->assertTrue($form->has($field->getIdentifier()));
         $this->assertEquals($field->getTitle(), $form->get($field->getIdentifier())->getConfig()->getOption('label'));
-        $csrf_token = $this->container->get('security.csrf.token_manager')->getToken($form->getName());
+        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
         $formData = [
             '_token' => $csrf_token->getValue(),
         ];
@@ -97,7 +97,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertTrue($form->isValid());
 
         // Submitting sub field data should be valid since we auto-delete empty rows, but content data must be empty.
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $field->getContentType(),
             $content
         );
@@ -132,14 +132,14 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $content->setContentType($field->getContentType());
 
         // Try to validate collection with sub field definitions.
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
 
         // Submitting sub field data should work, for the given fields.
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $field->getContentType(),
             $content
         );
-        $csrf_token = $this->container->get('security.csrf.token_manager')->getToken($form->getName());
+        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
         $form->submit(
             [
                 '_token' => $csrf_token->getValue(),
@@ -203,12 +203,12 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->em->refresh($field);
 
         // Inject created domain into untied.cms.manager.
-        $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
-        $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+        $d->setValue(static::$container->get('unite.cms.manager'), $field->getContentType()->getDomain());
 
         $key = ucfirst($field->getContentType()->getIdentifier()).'Content';
-        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
+        $type = static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
             $key,
             $field->getContentType()->getDomain()
         );
@@ -314,11 +314,11 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // Inject created domain into untied.cms.manager.
         $d = new \ReflectionProperty(
-            $this->container->get('unite.cms.manager'), 'domain'
+            static::$container->get('unite.cms.manager'), 'domain'
         );
         $d->setAccessible(true);
         $d->setValue(
-            $this->container->get('unite.cms.manager'),
+            static::$container->get('unite.cms.manager'),
             $field->getContentType()->getDomain()
         );
         $domain = $field->getContentType()->getDomain();
@@ -329,12 +329,12 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $domainMember = new DomainMember();
         $domainMember->setDomain($field->getContentType()->getDomain())->setDomainMemberType($field->getContentType()->getDomain()->getDomainMemberTypes()->get('editor'));
         $admin->addDomain($domainMember);
-        $this->container->get('security.token_storage')->setToken(
+        static::$container->get('security.token_storage')->setToken(
             new PostAuthenticationGuardToken($admin, 'api', [])
         );
 
         // Create GraphQL Schema
-        $schemaTypeManager = $this->container->get(
+        $schemaTypeManager = static::$container->get(
             'unite.cms.graphql.schema_type_manager'
         );
 
@@ -449,11 +449,11 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
 
         // Inject created domain into untied.cms.manager.
         $d = new \ReflectionProperty(
-            $this->container->get('unite.cms.manager'), 'domain'
+            static::$container->get('unite.cms.manager'), 'domain'
         );
         $d->setAccessible(true);
         $d->setValue(
-            $this->container->get('unite.cms.manager'),
+            static::$container->get('unite.cms.manager'),
             $field->getContentType()->getDomain()
         );
         $domain = $field->getContentType()->getDomain();
@@ -461,12 +461,12 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         // In this test, we don't care about access checking.
         $admin = new User();
         $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
-        $this->container->get('security.token_storage')->setToken(
+        static::$container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($admin, null, 'main', $admin->getRoles())
         );
 
         // Create GraphQL Schema
-        $schemaTypeManager = $this->container->get(
+        $schemaTypeManager = static::$container->get(
             'unite.cms.graphql.schema_type_manager'
         );
 
@@ -513,7 +513,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
     }',
             null,
             [
-                'csrf_token' => $this->container->get('security.csrf.token_manager')
+                'csrf_token' => static::$container->get('security.csrf.token_manager')
                     ->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))
                     ->getValue(),
             ]
@@ -579,43 +579,43 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
 
         // Inject created domain into untied.cms.manager.
-        $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
-        $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
-        $o = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'organization');
+        $d->setValue(static::$container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+        $o = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'organization');
         $o->setAccessible(true);
         $o->setValue(
-            $this->container->get('unite.cms.manager'),
+            static::$container->get('unite.cms.manager'),
             $field->getContentType()->getDomain()->getOrganization()
         );
 
         // Validate min rows.
-        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context = new ExecutionContext(static::$container->get('validator'), null, static::$container->get('translator'), 'validators');
         $context->setNode([], new Content(), null, '');
         $context->setConstraint(new ValidFieldableContentData());
         $context->setGroup('DEFAULT');
 
-        $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
+        static::$container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
         $violations = $context->getViolations();
 
         $this->assertCount(1, $violations);
         $this->assertEquals('['.$field->getIdentifier().']', $violations[0]->getPropertyPath());
-        $this->assertEquals($this->container->get('translator')->trans('collectionfield.too_few_rows', ['%count%' => 1], 'validators'), $violations[0]->getMessage());
+        $this->assertEquals(static::$container->get('translator')->trans('collectionfield.too_few_rows', ['%count%' => 1], 'validators'), $violations[0]->getMessage());
 
         // on DELETE all content is valid.
-        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context = new ExecutionContext(static::$container->get('validator'), null, static::$container->get('translator'), 'validators');
         $context->setNode([], new Content(), null, '');
         $context->setConstraint(new ValidFieldableContentData());
         $context->setGroup('DELETE');
-        $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
+        static::$container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
         $this->assertCount(0, $context->getViolations());
 
         // Validate max rows.
-        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context = new ExecutionContext(static::$container->get('validator'), null, static::$container->get('translator'), 'validators');
         $context->setNode([], new Content(), null, '');
         $context->setConstraint(new ValidFieldableContentData());
         $context->setGroup('DEFAULT');
-        $this->container->get('unite.cms.field_type_manager')
+        static::$container->get('unite.cms.field_type_manager')
             ->validateFieldData(
                 $field,
                 [
@@ -631,22 +631,22 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $violations = $context->getViolations();
         $this->assertCount(1, $violations);
         $this->assertEquals('['.$field->getIdentifier().']', $violations[0]->getPropertyPath());
-        $this->assertEquals($this->container->get('translator')->trans('collectionfield.too_many_rows', ['%count%' => 4], 'validators'), $violations[0]->getMessage());
+        $this->assertEquals(static::$container->get('translator')->trans('collectionfield.too_many_rows', ['%count%' => 4], 'validators'), $violations[0]->getMessage());
 
         // on DELETE all content is valid.
-        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context = new ExecutionContext(static::$container->get('validator'), null, static::$container->get('translator'), 'validators');
         $context->setNode([], new Content(), null, '');
         $context->setConstraint(new ValidFieldableContentData());
         $context->setGroup('DELETE');
-        $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
+        static::$container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
         $this->assertCount(0, $context->getViolations());
 
         // Validate additional data (also nested).
-        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context = new ExecutionContext(static::$container->get('validator'), null, static::$container->get('translator'), 'validators');
         $context->setNode([], new Content(), null, '');
         $context->setConstraint(new ValidFieldableContentData());
         $context->setGroup('DEFAULT');
-        $this->container->get('unite.cms.field_type_manager')->validateFieldData(
+        static::$container->get('unite.cms.field_type_manager')->validateFieldData(
             $field,
             [
                 ['f1' => 'baa'],
@@ -694,11 +694,11 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('additional_data', $violations[3]->getMessageTemplate());
 
         // on DELETE all content is valid.
-        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context = new ExecutionContext(static::$container->get('validator'), null, static::$container->get('translator'), 'validators');
         $context->setNode([], new Content(), null, '');
         $context->setConstraint(new ValidFieldableContentData());
         $context->setGroup('DELETE');
-        $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
+        static::$container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
         $this->assertCount(0, $context->getViolations());
     }
 
@@ -753,7 +753,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                 ],
             ]
         )->setContentType($field->getContentType());
-        $form = $this->container->get('unite.cms.fieldable_form_builder')
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
             ->createForm(
                 $field->getContentType(),
                 $content

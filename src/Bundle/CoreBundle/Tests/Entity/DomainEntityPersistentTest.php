@@ -30,7 +30,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         // Try to validate empty Domain.
         $domain1->setTitle('')->setIdentifier('')->setPermissions([]);
-        $errors = $this->container->get('validator')->validate($domain1);
+        $errors = static::$container->get('validator')->validate($domain1);
         $this->assertCount(3, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -46,7 +46,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain1
             ->setTitle($this->generateRandomUTF8String(256))
             ->setIdentifier($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($domain1);
+        $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(2, $errors->count());
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -59,7 +59,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain1
             ->setTitle($this->generateRandomUTF8String(255))
             ->setIdentifier($this->generateRandomMachineName(254).':');
-        $errors = $this->container->get('validator')->validate($domain1);
+        $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -104,25 +104,25 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         // Try to set invalid DomainMemberType
         $domain1->getDomainMemberTypes()->first()->setIcon('ä#;');
 
-        $errors = $this->container->get('validator')->validate($domain1);
+        $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('contentTypes', $errors->get(0)->getPropertyPath());
 
         // Try to test invalid SettingType.
         $domain1->getContentTypes()->first()->setIdentifier('domain_ct1')->setTitle('Domain CT 1');
-        $errors = $this->container->get('validator')->validate($domain1);
+        $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('settingTypes', $errors->get(0)->getPropertyPath());
 
         // Try to test invalid MemberType.
         $domain1->getSettingTypes()->first()->setIdentifier('domain_set1')->setTitle('Domain Set 1');
-        $errors = $this->container->get('validator')->validate($domain1);
+        $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('domainMemberTypes', $errors->get(0)->getPropertyPath());
 
         // Try to test invalid users.
         $domain1->getDomainMemberTypes()->first()->setIcon('');
-        $errors = $this->container->get('validator')->validate($domain1);
+        $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('members', $errors->get(0)->getPropertyPath());
 
@@ -139,7 +139,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domainMember->setAccessor($user)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $domain1->setMembers([$domainMember]);
         $domain1->setOrganization($org);
-        $errors = $this->container->get('validator')->validate($domain1);
+        $errors = static::$container->get('validator')->validate($domain1);
         $this->assertCount(0, $errors);
 
         // Persist the domain.
@@ -158,7 +158,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain2->setTitle($domain1->getTitle())->setIdentifier($domain1->getIdentifier())->setOrganization(
             $domain1->getOrganization()
         );
-        $errors = $this->container->get('validator')->validate($domain2);
+        $errors = static::$container->get('validator')->validate($domain2);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -172,15 +172,15 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         // Same organization, different identifier should be valid
         $domain2->setIdentifier('different_domain_identifier_2');
-        $this->assertCount(0, $this->container->get('validator')->validate($domain2));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain2));
 
         // Different organization, same identifier should be valid
         $domain2->setIdentifier($domain1->getIdentifier())->setOrganization($org2);
-        $this->assertCount(0, $this->container->get('validator')->validate($domain2));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain2));
 
         // Different organization, different identifier should be valid
         $domain2->setIdentifier('different_domain_identifier_2')->setOrganization($org2);
-        $this->assertCount(0, $this->container->get('validator')->validate($domain2));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain2));
 
         // Try to delete non empty domain.
         $ct = new ContentType();
@@ -197,14 +197,14 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
             ->addContentType($ct);
 
         // Normal validation should be fine.
-        $this->assertCount(0, $this->container->get('validator')->validate($domain2));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain2));
 
         // We allow to delete domains with content_types. They also will get deleted.
-        $this->assertCount(0, $this->container->get('validator')->validate($domain2, null, ['DELETE']));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain2, null, ['DELETE']));
 
         // try to validate invalid content
         $content->setData(['any_unknown_field' => 'foo']);
-        $errors = $this->container->get('validator')->validate($domain2);
+        $errors = static::$container->get('validator')->validate($domain2);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('content', $errors->get(0)->getPropertyPath());
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
@@ -213,7 +213,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->em->remove($content);
         $this->em->flush($content);
         $this->em->refresh($ct);
-        $this->assertCount(0, $this->container->get('validator')->validate($domain2, null, ['DELETE']));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain2, null, ['DELETE']));
     }
 
     private function setUpOriginDomain()
@@ -309,7 +309,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $user1MemberDomain1->setDomain($domain1)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $user1->addDomain($user1MemberDomain1);
 
-        $errors = $this->container->get('validator')->validate($user1);
+        $errors = static::$container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith(
             'domain',
@@ -328,7 +328,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $this->assertCount(
             0,
-            $this->container->get('validator')
+            static::$container->get('validator')
                 ->validate($user1)
         );
     }
@@ -357,13 +357,13 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->em->persist($user1);
         $this->em->flush($user1);
 
-        $this->assertCount(0, $this->container->get('validator')->validate($user1));
+        $this->assertCount(0, static::$container->get('validator')->validate($user1));
 
         $user1MemberOrg2 = new OrganizationMember();
         $user1MemberOrg2->setOrganization($org1);
         $user1->addOrganization($user1MemberOrg2);
 
-        $errors = $this->container->get('validator')->validate($user1);
+        $errors = static::$container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith(
             'organization',
@@ -385,13 +385,13 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $this->em->flush($user1);
 
-        $this->assertCount(0, $this->container->get('validator')->validate($user1));
+        $this->assertCount(0, static::$container->get('validator')->validate($user1));
 
         $user1MemberDomain2 = new DomainMember();
         $user1MemberDomain2->setDomain($domain1)->setDomainMemberType($domain1->getDomainMemberTypes()->first());
         $user1->addDomain($user1MemberDomain2);
 
-        $errors = $this->container->get('validator')->validate($user1);
+        $errors = static::$container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith(
             'domain',
@@ -409,8 +409,8 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $domain1->addDomainMemberType($domainMemberType2);
         $user1MemberDomain2->setDomainMemberType($domainMemberType2);
 
-        echo $this->container->get('validator')->validate($user1);
-        $this->assertCount(0, $this->container->get('validator')->validate($user1));
+        echo static::$container->get('validator')->validate($user1);
+        $this->assertCount(0, static::$container->get('validator')->validate($user1));
     }
 
     // Case 1: Domain have additional ContentTypes, SettingTypes and DomainMemberTypes
@@ -450,7 +450,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         ];
 
         $domain->setFromEntity($updateDomain);
-        $this->assertCount(0, $this->container->get('validator')->validate($domain));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
         $this->em->flush($domain);
         $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
         $this->assertCount(3, $domain->getContentTypes());
@@ -508,7 +508,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
 
         $domain->setFromEntity($updateDomain);
-        $this->assertCount(0, $this->container->get('validator')->validate($domain));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
         $this->em->flush($domain);
         $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
 
@@ -568,7 +568,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         ];
 
         $domain->setFromEntity($updateDomain);
-        $this->assertCount(0, $this->container->get('validator')->validate($domain));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
         $this->em->flush($domain);
         $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
 
@@ -635,7 +635,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         ];
 
         $domain->setFromEntity($updateDomain);
-        $this->assertCount(0, $this->container->get('validator')->validate($domain));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
         $this->em->flush($domain);
         $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
 
@@ -695,7 +695,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         ];
 
         $domain->setFromEntity($updateDomain);
-        $this->assertCount(0, $this->container->get('validator')->validate($domain));
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
         $this->em->flush($domain);
         $domain = $this->em->find('UniteCMSCoreBundle:Domain', $domain->getId());
 
@@ -719,7 +719,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         //Validate empty invite.
         $invite1 = new DomainInvitation();
-        $errors = $this->container->get('validator')->validate($invite1);
+        $errors = static::$container->get('validator')->validate($invite1);
         $this->assertCount(4, $errors);
         $this->assertStringStartsWith('domainMemberType', $errors->get(0)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
@@ -734,7 +734,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         //Validate invalid email
         $invite1->setDomainMemberType($domain->getDomainMemberTypes()->first());
         $invite1->setEmail('XXX')->setToken('XXX')->setRequestedAt(new \DateTime());
-        $errors = $this->container->get('validator')->validate($invite1);
+        $errors = static::$container->get('validator')->validate($invite1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_email', $errors->get(0)->getMessageTemplate());
@@ -744,7 +744,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $errors = [];
 
-        foreach ($this->container->get('validator')->validate($invite1) as $error) {
+        foreach (static::$container->get('validator')->validate($invite1) as $error) {
             $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
@@ -756,7 +756,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $errors = [];
 
-        foreach ($this->container->get('validator')->validate($invite1) as $error) {
+        foreach (static::$container->get('validator')->validate($invite1) as $error) {
             $errors[$error->getPropertyPath()] = $error->getMessageTemplate();
         }
 
@@ -767,7 +767,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         // Validate valid invite
         $invite1->setEmail('user1@example.com');
-        $this->assertCount(0, $this->container->get('validator')->validate($invite1));
+        $this->assertCount(0, static::$container->get('validator')->validate($invite1));
 
         $this->em->persist($domain);
         $this->em->persist($invite1);
@@ -779,7 +779,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $invite2->setDomainMemberType($domain->getDomainMemberTypes()->first());
         $invite2->setEmail('user1@example.com');
         $invite2->setToken('XXX')->setRequestedAt(new \DateTime());
-        $errors = $this->container->get('validator')->validate($invite2);
+        $errors = static::$container->get('validator')->validate($invite2);
         $this->assertCount(2, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
         $this->assertEquals('email_already_invited', $errors->get(0)->getMessageTemplate());
@@ -792,19 +792,19 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $invite2->setDomainMemberType($domainMemberType2);
         $invite2->setEmail('user1@example.com')->setToken('YYY');
-        $this->assertCount(0, $this->container->get('validator')->validate($invite2));
+        $this->assertCount(0, static::$container->get('validator')->validate($invite2));
 
         $invite2->setDomainMemberType($domain2->getDomainMemberTypes()->first());
         $invite2->setEmail('user1@example.com')->setToken('YYY');
-        $this->assertCount(0, $this->container->get('validator')->validate($invite2));
+        $this->assertCount(0, static::$container->get('validator')->validate($invite2));
 
         $invite2->setDomainMemberType($domain->getDomainMemberTypes()->first());
         $invite2->setEmail('user2@example.com');
-        $this->assertCount(0, $this->container->get('validator')->validate($invite2));
+        $this->assertCount(0, static::$container->get('validator')->validate($invite2));
 
         $invite2->setDomainMemberType($domain2->getDomainMemberTypes()->first());
         $invite2->setEmail('user2@example.com');
-        $this->assertCount(0, $this->container->get('validator')->validate($invite2));
+        $this->assertCount(0, static::$container->get('validator')->validate($invite2));
 
         // Validate invite email cannot be the email address of a member of this organization.
         $user1 = new User();
@@ -815,7 +815,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $invite2->setEmail('org1user@example.com');
         $invite2->setDomainMemberType($domain->getDomainMemberTypes()->first());
-        $errors = $this->container->get('validator')->validate($invite2);
+        $errors = static::$container->get('validator')->validate($invite2);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('email', $errors->get(0)->getPropertyPath());
         $this->assertEquals('email_already_member', $errors->get(0)->getMessageTemplate());
@@ -831,7 +831,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         $domain = new Domain();
         $domain->setTitle('title')->setOrganization($org)->setIdentifier(array_pop($reserved));
-        $errors = $this->container->get('validator')->validate($domain);
+        $errors = static::$container->get('validator')->validate($domain);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('reserved_identifier', $errors->get(0)->getMessageTemplate());

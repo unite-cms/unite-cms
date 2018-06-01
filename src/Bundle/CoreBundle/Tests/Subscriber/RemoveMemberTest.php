@@ -43,7 +43,7 @@ class RemoveMemberTest extends DatabaseAwareTestCase
             ->addDomain($domainMember1)
             ->addDomain($domainMember2);
 
-        $this->assertCount(0, $this->container->get('validator')->validate($user));
+        $this->assertCount(0, static::$container->get('validator')->validate($user));
         $this->em->persist($org1);
         $this->em->persist($org2);
         $this->em->persist($domain1);

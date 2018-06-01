@@ -22,9 +22,9 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
 
         $application = new Application(self::$kernel);
         $application->add(new CreateDomainCommand(
-            $this->container->get('doctrine.orm.default_entity_manager'),
-            $this->container->get('validator'),
-            $this->container->get('unite.cms.domain_definition_parser')
+            static::$container->get('doctrine.orm.default_entity_manager'),
+            static::$container->get('validator'),
+            static::$container->get('unite.cms.domain_definition_parser')
         ));
 
         $command = $application->find('unite:domain:create');
@@ -38,7 +38,7 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
 
         $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
 
-        $inputDomain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->validDomain);
+        $inputDomain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->validDomain);
         $commandTester->setInputs(array('0', $this->validDomain, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
 

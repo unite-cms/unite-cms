@@ -75,7 +75,7 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Organization')->setIdentifier('org1');
-        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
@@ -87,10 +87,10 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
 
     public function testGettingOrgAndDomainWithoutRequest() {
         // cms manager should silently return null if it could not find an organization or domain
-        $this->assertNull($this->container->get('unite.cms.manager')->getOrganization());
-        $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
+        $this->assertNull(static::$container->get('unite.cms.manager')->getOrganization());
+        $this->assertNull(static::$container->get('unite.cms.manager')->getDomain());
 
-        $this->container->get('request_stack')->push(new Request(
+        static::$container->get('request_stack')->push(new Request(
             [], [], [
                 'organization' => 'foo',
                 'domain' => 'baa',
@@ -99,25 +99,25 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
     }
 
     public function testGettingOrgAndDomainWithInvalidOrganizationIdentifier() {
-        $this->container->get('request_stack')->push(new Request(
+        static::$container->get('request_stack')->push(new Request(
             [], [], [
                 'organization' => 'foo',
                 'domain' => 'baa',
             ]
         ));
-        $this->assertNull($this->container->get('unite.cms.manager')->getOrganization());
-        $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
+        $this->assertNull(static::$container->get('unite.cms.manager')->getOrganization());
+        $this->assertNull(static::$container->get('unite.cms.manager')->getDomain());
     }
 
     public function testGettingOrgAndDomainWithInvalidDomainIdentifier() {
-        $this->container->get('request_stack')->push(new Request(
+        static::$container->get('request_stack')->push(new Request(
             [], [], [
                 'organization' => $this->organization,
                 'domain' => 'baa',
             ]
         ));
-        $this->assertEquals($this->organization->getIdentifier(), $this->container->get('unite.cms.manager')->getOrganization()->getIdentifier());
-        $this->assertNull($this->container->get('unite.cms.manager')->getDomain());
+        $this->assertEquals($this->organization->getIdentifier(), static::$container->get('unite.cms.manager')->getOrganization()->getIdentifier());
+        $this->assertNull(static::$container->get('unite.cms.manager')->getDomain());
     }
 
     public function testGettingOriginalDomainFromManager() {
@@ -126,13 +126,13 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $cTitle = $this->domain->getContentTypes()->first()->getTitle();
         $sTitle = $this->domain->getSettingTypes()->first()->getTitle();
 
-        $this->container->get('request_stack')->push(new Request(
+        static::$container->get('request_stack')->push(new Request(
             [], [], [
                 'organization' => $this->organization,
                 'domain' => $this->domain,
             ]
         ));
-        $originalDomain = $this->container->get('unite.cms.manager')->getDomain();
+        $originalDomain = static::$container->get('unite.cms.manager')->getDomain();
 
         // Change domain and content type title on loaded domain
         $this->domain->setTitle('New Title');
@@ -168,14 +168,14 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
         $this->em->persist($user);
         $this->em->flush();
 
-        $this->container->get('request_stack')->push(new Request(
+        static::$container->get('request_stack')->push(new Request(
             [], [], [
                 'organization' => $this->organization,
                 'domain' => $this->domain,
             ]
         ));
-        $originalOrganization = $this->container->get('unite.cms.manager')->getOrganization();
-        $originalDomain = $this->container->get('unite.cms.manager')->getDomain();
+        $originalOrganization = static::$container->get('unite.cms.manager')->getOrganization();
+        $originalDomain = static::$container->get('unite.cms.manager')->getDomain();
 
         // unite.cms.manager will return cloned, un-managed objects, so updating or persisting them should not work.
         $originalOrganization->setTitle('new Title');

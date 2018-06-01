@@ -20,9 +20,9 @@ class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
 
         $application = new Application(self::$kernel);
         $command = new CreatePlatformAdminCommand(
-            $this->container->get('doctrine.orm.default_entity_manager'),
-            $this->container->get('validator'),
-            $this->container->get('security.password_encoder')
+            static::$container->get('doctrine.orm.default_entity_manager'),
+            static::$container->get('validator'),
+            static::$container->get('security.password_encoder')
         );
         $command->disableHidePasswordInput();
         $application->add($command);
@@ -47,7 +47,7 @@ class CreatePlatformAdminCommandTest extends DatabaseAwareTestCase
         $this->assertCount(1, $users);
         $this->assertEquals($name, $users[0]->getName());
         $this->assertEquals($email, $users[0]->getEmail());
-        $this->assertTrue($this->container->get('security.password_encoder')->isPasswordValid($users[0], $password));
+        $this->assertTrue(static::$container->get('security.password_encoder')->isPasswordValid($users[0], $password));
         $this->assertContains(User::ROLE_PLATFORM_ADMIN, $users[0]->getRoles());
 
 

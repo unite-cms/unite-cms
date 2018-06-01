@@ -82,13 +82,13 @@ class SettingControllerTest extends DatabaseAwareTestCase {
     public function setUp()
     {
         parent::setUp();
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Organization')->setIdentifier('org1');
-        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
@@ -120,7 +120,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
     public function testCRUDActions() {
 
-        $url_list = $this->container->get('router')->generate('unitecms_core_setting_index', [
+        $url_list = static::$container->get('router')->generate('unitecms_core_setting_index', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -173,7 +173,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
 
         // Test update content validation.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_index', [
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_index', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -194,7 +194,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $error_text = $this->container->get('translator')->trans('missing_reference_definition', [], 'validators');
+        $error_text = static::$container->get('translator')->trans('missing_reference_definition', [], 'validators');
         $alert = $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p');
         $this->assertCount(1, $alert);
         $this->assertEquals($error_text, $alert->text());
@@ -215,7 +215,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $error_text = $this->container->get('translator')->trans('invalid_reference_definition', [], 'validators');
+        $error_text = static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators');
         $alert = $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p');
         $this->assertCount(1, $alert);
         $this->assertEquals($error_text, $alert->text());
@@ -232,7 +232,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Try to access translations page with invalid content id.
         $doctrineUUIDGenerator = new UuidGenerator();
-        $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_translations', [
+        $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -242,7 +242,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to access translations page with valid setting id.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_translations', [
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -252,7 +252,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Create english translation.
-        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('setting.translations.create.button', ['%locale%' => $this->client->getRequest()->getLocale()]) .'")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . static::$container->get('translator')->trans('setting.translations.create.button', ['%locale%' => $this->client->getRequest()->getLocale()]) .'")')->link());
 
         // Assert add form
         $form = $crawler->filter('form');
@@ -285,7 +285,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
 
         // Try to access translations page with valid setting id.
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_translations', [
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -307,7 +307,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->em->flush($setting);
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
 
-        $revisions_url = $this->container->get('router')->generate('unitecms_core_setting_revisions', [
+        $revisions_url = static::$container->get('router')->generate('unitecms_core_setting_revisions', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -316,7 +316,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Try to get revisions page of unknown setting.
         $doctrineUUIDGenerator = new UuidGenerator();
-        $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_setting_revisions', [
+        $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_revisions', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -342,7 +342,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(2, $crawler->filter('.unite-card-table table tbody tr'));
 
         // Revert to version 1.
-        $crawler = $this->client->click($crawler->filter('a:contains("' . $this->container->get('translator')->trans('setting.revisions.revert.button') .'")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("' . static::$container->get('translator')->trans('setting.revisions.revert.button') .'")')->link());
 
         // Assert form
         $form = $crawler->filter('form');

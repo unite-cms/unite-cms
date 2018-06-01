@@ -18,8 +18,8 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
 {
 
     public function testFormBuilderAvailable() {
-        $this->assertTrue($this->container->has('unite.cms.fieldable_form_builder'));
-        $this->assertInstanceOf(FieldableFormBuilder::class, $this->container->get('unite.cms.fieldable_form_builder'));
+        $this->assertTrue(static::$container->has('unite.cms.fieldable_form_builder'));
+        $this->assertInstanceOf(FieldableFormBuilder::class, static::$container->get('unite.cms.fieldable_form_builder'));
     }
 
     public function testFormBuilderBuildForm() {
@@ -54,7 +54,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             public function getLocale() { return null; }
         };
 
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($fieldable, $content);
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($fieldable, $content);
 
         $this->assertInstanceOf(FieldableFormType::class, $form->getConfig()->getType()->getInnerType());
         $this->assertTrue($form->has('field1'));
@@ -65,7 +65,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
     public function testEmptyFormType() {
         $data = [];
         $options = ['fields' => []];
-        $form = $this->container->get('form.factory')->create(FieldableFormType::class, $data, $options);
+        $form = static::$container->get('form.factory')->create(FieldableFormType::class, $data, $options);
 
         $this->assertInstanceOf(FieldableFormType::class, $form->getConfig()->getType()->getInnerType());
         $this->assertCount(0, $form);
@@ -111,7 +111,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             new FieldableFormField($ft2, $ft2Field),
         ]];
 
-        $form = $this->container->get('form.factory')->create(FieldableFormType::class, $data, $options);
+        $form = static::$container->get('form.factory')->create(FieldableFormType::class, $data, $options);
 
         $this->assertInstanceOf(FieldableFormType::class, $form->getConfig()->getType()->getInnerType());
         $this->assertCount(2, $form);

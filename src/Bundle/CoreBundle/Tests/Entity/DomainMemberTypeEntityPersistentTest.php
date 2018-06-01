@@ -16,7 +16,7 @@ class DomainMemberTypeEntityPersistentTest extends DatabaseAwareTestCase
         // Try to validate empty DomainMemberType.
         $domainMemberType = new DomainMemberType();
         $domainMemberType->setIdentifier('')->setTitle('')->setDescription('')->setIcon('');
-        $errors = $this->container->get('validator')->validate($domainMemberType);
+        $errors = static::$container->get('validator')->validate($domainMemberType);
         $this->assertCount(3, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -31,33 +31,33 @@ class DomainMemberTypeEntityPersistentTest extends DatabaseAwareTestCase
         // Try to save a too long icon name or an icon name with special chars.
         $domainMemberType->setTitle('dmt1')->setIdentifier('dmt1')->setDomain(new Domain());
         $domainMemberType->setIcon($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($domainMemberType);
+        $errors = static::$container->get('validator')->validate($domainMemberType);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $domainMemberType->setIcon('# ');
-        $errors = $this->container->get('validator')->validate($domainMemberType);
+        $errors = static::$container->get('validator')->validate($domainMemberType);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         // Try to save invalid title.
         $domainMemberType->setIcon(null)->setTitle($this->generateRandomUTF8String(256));
-        $errors = $this->container->get('validator')->validate($domainMemberType);
+        $errors = static::$container->get('validator')->validate($domainMemberType);
         $this->assertCount(1, $errors);
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         // Try to save invalid identifier.
         $domainMemberType->setTitle($this->generateRandomUTF8String(255))->setIdentifier('X ');
-        $errors = $this->container->get('validator')->validate($domainMemberType);
+        $errors = static::$container->get('validator')->validate($domainMemberType);
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         $domainMemberType->setIdentifier($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($domainMemberType);
+        $errors = static::$container->get('validator')->validate($domainMemberType);
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
@@ -87,31 +87,31 @@ class DomainMemberTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->em->persist($domain22);
         $this->em->persist($domainMemberType);
         $this->em->flush($domainMemberType);
-        $this->assertCount(0, $this->container->get('validator')->validate($domainMemberType));
+        $this->assertCount(0, static::$container->get('validator')->validate($domainMemberType));
 
         // DMT2 one the same domain with the same identifier should not be valid.
         $dmt2 = new DomainMemberType();
         $dmt2->setIdentifier('org1_domain1_dmt1')->setTitle('org1_domain1_dmt1')->setDomain($domain1);
-        $this->assertCount(1, $this->container->get('validator')->validate($dmt2));
+        $this->assertCount(1, static::$container->get('validator')->validate($dmt2));
 
         $dmt2->setIdentifier('org1_domain1_dmt2');
-        $this->assertCount(0, $this->container->get('validator')->validate($dmt2));
+        $this->assertCount(0, static::$container->get('validator')->validate($dmt2));
 
         $dmt2->setIdentifier('org1_domain1_dmt1')->setDomain($domain2);
-        $this->assertCount(0, $this->container->get('validator')->validate($dmt2));
+        $this->assertCount(0, static::$container->get('validator')->validate($dmt2));
 
         $dmt2->setIdentifier('org1_domain1_dmt1')->setDomain($domain21);
-        $this->assertCount(0, $this->container->get('validator')->validate($dmt2));
+        $this->assertCount(0, static::$container->get('validator')->validate($dmt2));
 
         $dmt2->setIdentifier('org1_domain1_dmt1')->setDomain($domain22);
-        $this->assertCount(0, $this->container->get('validator')->validate($dmt2));
+        $this->assertCount(0, static::$container->get('validator')->validate($dmt2));
 
         // Test unique entity validation.
         $domainMemberType2 = new DomainMemberType();
         $domainMemberType2->setTitle($domainMemberType->getTitle())->setIdentifier($domainMemberType->getIdentifier())->setDomain(
             $domainMemberType->getDomain()
         );
-        $errors = $this->container->get('validator')->validate($domainMemberType2);
+        $errors = static::$container->get('validator')->validate($domainMemberType2);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -167,7 +167,7 @@ class DomainMemberTypeEntityPersistentTest extends DatabaseAwareTestCase
 
         $ct = new DomainMemberType();
         $ct->setTitle('title')->setIdentifier(array_pop($reserved))->setDomain(new Domain());
-        $errors = $this->container->get('validator')->validate($ct);
+        $errors = static::$container->get('validator')->validate($ct);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('reserved_identifier', $errors->get(0)->getMessageTemplate());

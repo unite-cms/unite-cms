@@ -38,7 +38,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
 
         $this->admin = new User();
@@ -57,8 +57,8 @@ class IndexControllerTest extends DatabaseAwareTestCase
 
     public function testIndexAction() {
 
-        $url = $this->container->get('router')->generate('unitecms_core_index');
-        $profile_orgs_url = $this->container->get('router')->generate('unitecms_core_profile_organizations',  [], Router::ABSOLUTE_PATH);
+        $url = static::$container->get('router')->generate('unitecms_core_index');
+        $profile_orgs_url = static::$container->get('router')->generate('unitecms_core_profile_organizations',  [], Router::ABSOLUTE_PATH);
 
         // index redirects to profile organizations route
         $this->client->request('GET', $url);
@@ -68,7 +68,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
         // If there are no organizations for this user, the index action should display an info.
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertFalse($this->client->getResponse()->isRedirect());
-        $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . $this->container->get('translator')->trans('organizations.error.no_organizations') .'")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . static::$container->get('translator')->trans('organizations.error.no_organizations') .'")'));
 
         // Add an organization, but not for this user.
         $org1 = new Organization();
@@ -81,7 +81,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->followRedirect();
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertFalse($this->client->getResponse()->isRedirect());
-        $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . $this->container->get('translator')->trans('organizations.error.no_organizations') .'")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-warning:contains("' . static::$container->get('translator')->trans('organizations.error.no_organizations') .'")'));
 
         // Now invite the user to the organization.
         $org1 = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll()[0];
@@ -93,7 +93,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
 
         // Index should now redirect to first organization.
         $this->client->request('GET', $url);
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_index', [
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $org1->getIdentifier(),
         ])));
 
@@ -105,7 +105,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
 
         // Should be the same result.
         $this->client->request('GET', $url);
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_index', [
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $org1->getIdentifier(),
         ])));
 

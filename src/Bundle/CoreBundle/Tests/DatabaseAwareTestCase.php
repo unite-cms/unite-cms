@@ -16,7 +16,7 @@ abstract class DatabaseAwareTestCase extends ContainerAwareTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->em = $this->container->get('doctrine')->getManager();
+        $this->em = static::$container->get('doctrine')->getManager();
 
         $schemaTool = new SchemaTool($this->em);
         $metadata = $this->em->getMetadataFactory()->getAllMetadata();

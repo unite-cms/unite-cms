@@ -18,7 +18,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         // Try to validate empty View.
         $view = new View();
         $view->setIdentifier('')->setTitle('');
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(5, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -47,7 +47,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
             ->getDomain()->setTitle('domain')->setIdentifier('domain')->setOrganization(new Organization())
             ->getOrganization()->setIdentifier('org')->setTitle('org');
 
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(4, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -67,7 +67,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
             ->setTitle($this->generateRandomUTF8String(255))
             ->setIdentifier('identifier')
             ->setType('invalid');
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('type', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.invalid_view_type', $errors->get(0)->getMessageTemplate());
@@ -77,7 +77,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
             ->setIdentifier('#')
             ->setType('table');
 
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -87,13 +87,13 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $view
             ->setIdentifier('any')
             ->setIcon($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $view->setIcon('# ');
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
@@ -112,7 +112,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
             ->setIdentifier($view->getIdentifier())
             ->setContentType($view->getContentType())
             ->setType('table');
-        $errors = $this->container->get('validator')->validate($view2);
+        $errors = static::$container->get('validator')->validate($view2);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -135,7 +135,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
             ->getDomain()->setTitle('domain')->setIdentifier('domain')->setOrganization(new Organization())
             ->getOrganization()->setIdentifier('org')->setTitle('org');
 
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('reserved_identifier', $errors->get(0)->getMessageTemplate());

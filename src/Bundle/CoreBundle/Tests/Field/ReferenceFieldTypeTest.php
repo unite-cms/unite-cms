@@ -26,7 +26,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         // Content Type Field with empty settings should not be valid.
         $ctField = $this->createContentTypeField('reference');
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(2, $errors);
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
         $this->assertContains('settings.domain', $errors->get(0)->getPropertyPath());
@@ -46,7 +46,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
             'foo' => 'baa'
         ]));
 
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }
@@ -62,7 +62,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
             'content_label' => 'laa',
         ]));
 
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
     }
 
@@ -73,7 +73,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $ctField->getContentType()->setIdentifier('baa');
 
         // Fake organization and domain
-        $fieldType = $this->container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
+        $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
 
         $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
         $o1->setAccessible(true);
@@ -178,17 +178,17 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $userInDomain2 = new DomainMember();
         $userInDomain2->setDomain($domain2);
         $user->addDomain($userInDomain2);
-        $this->container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'main', $user->getRoles()));
+        static::$container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, null, 'main', $user->getRoles()));
 
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $requestStack);
 
         $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
         $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('unite.cms.manager'));
+        $reflector->invoke(static::$container->get('unite.cms.manager'));
 
-        $contentSchemaType = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
+        $contentSchemaType = static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
             ucfirst($ctField->getContentType()->getIdentifier()) . 'Content', $ctField->getContentType()->getDomain());
 
         // If we can get reach this line, no exceptions where thrown during content schema creation.
@@ -237,22 +237,22 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $userInDomain1 = new DomainMember();
         $userInDomain1->setDomain($ctField->getContentType()->getDomain())->setDomainMemberType($ctField->getContentType()->getDomain()->getDomainMemberTypes()->get('editor'));
         $user->addDomain($userInDomain1);
-        $this->container->get('security.token_storage')->setToken(
+        static::$container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
         );
 
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $requestStack);
 
         $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
         $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('unite.cms.manager'));
+        $reflector->invoke(static::$container->get('unite.cms.manager'));
 
-        $this->container
+        static::$container
             ->get('unite.cms.field_type_manager')
             ->getFieldType('reference')
-            ->getGraphQLType($ctField, $this->container->get('unite.cms.graphql.schema_type_manager'));
+            ->getGraphQLType($ctField, static::$container->get('unite.cms.graphql.schema_type_manager'));
     }
 
     /**
@@ -297,22 +297,22 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $userInDomain1 = new DomainMember();
         $userInDomain1->setDomain($ctField->getContentType()->getDomain())->setDomainMemberType($ctField->getContentType()->getDomain()->getDomainMemberTypes()->get('editor'));
         $user->addDomain($userInDomain1);
-        $this->container->get('security.token_storage')->setToken(
+        static::$container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
         );
 
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $requestStack);
 
         $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
         $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('unite.cms.manager'));
+        $reflector->invoke(static::$container->get('unite.cms.manager'));
 
-        $this->container
+        static::$container
             ->get('unite.cms.field_type_manager')
             ->getFieldType('reference')
-            ->getGraphQLType($ctField, $this->container->get('unite.cms.graphql.schema_type_manager'));
+            ->getGraphQLType($ctField, static::$container->get('unite.cms.graphql.schema_type_manager'));
     }
 
     /**
@@ -354,22 +354,22 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $user = new User();
         $user->setRoles([User::ROLE_USER])->setName('User');
-        $this->container->get('security.token_storage')->setToken(
+        static::$container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
         );
 
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $requestStack);
 
         $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
         $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('unite.cms.manager'));
+        $reflector->invoke(static::$container->get('unite.cms.manager'));
 
-        $this->container
+        static::$container
             ->get('unite.cms.field_type_manager')
             ->getFieldType('reference')
-            ->getGraphQLType($ctField, $this->container->get('unite.cms.graphql.schema_type_manager'));
+            ->getGraphQLType($ctField, static::$container->get('unite.cms.graphql.schema_type_manager'));
     }
 
     /**
@@ -416,21 +416,21 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $userInDomain1->setDomain($ctField->getContentType()->getDomain())->setDomainMemberType($ctField->getContentType()->getDomain()->getDomainMemberTypes()->get('viewer'));
         $user->addDomain($userInDomain1);
 
-        $this->container->get('security.token_storage')->setToken(
+        static::$container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
         );
 
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'requestStack');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $requestStack);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $requestStack);
 
         $reflector = new \ReflectionMethod(UniteCMSManager::class, 'initialize');
         $reflector->setAccessible(true);
-        $reflector->invoke($this->container->get('unite.cms.manager'));
+        $reflector->invoke(static::$container->get('unite.cms.manager'));
 
-        $this->container
+        static::$container
             ->get('unite.cms.field_type_manager')
             ->getFieldType('reference')
-            ->getGraphQLType($ctField, $this->container->get('unite.cms.graphql.schema_type_manager'));
+            ->getGraphQLType($ctField, static::$container->get('unite.cms.graphql.schema_type_manager'));
     }
 }

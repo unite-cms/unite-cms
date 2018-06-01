@@ -48,7 +48,7 @@ class DomainEntityWeightTest extends ContainerAwareTestCase
     public function testWeightUpdateAfterDeserialization()
     {
 
-        $domain = $this->container->get('unite.cms.domain_definition_parser')->parse(
+        $domain = static::$container->get('unite.cms.domain_definition_parser')->parse(
             '{
             "title": "Test",
             "identifier": "test",
@@ -153,7 +153,7 @@ class DomainEntityWeightTest extends ContainerAwareTestCase
         $this->assertCorrectWeights($existingDomain);
 
         // Let's move ct1, st1 and first fields of ct1 and st1 to the end.
-        $domain = $this->container->get('unite.cms.domain_definition_parser')->parse(
+        $domain = static::$container->get('unite.cms.domain_definition_parser')->parse(
             '{
             "title": "Test",
             "identifier": "test",
@@ -265,7 +265,7 @@ class DomainEntityWeightTest extends ContainerAwareTestCase
 
         // Let's delete ct2, st2 and f2 of ct1 and st1
         // Let's move ct1, st1 and first fields of ct1 and st1 to the end.
-        $domain = $this->container->get('unite.cms.domain_definition_parser')->parse(
+        $domain = static::$container->get('unite.cms.domain_definition_parser')->parse(
             '{
             "title": "Test",
             "identifier": "test",

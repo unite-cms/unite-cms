@@ -18,7 +18,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
     public function testAllowedFieldSettings()
     {
         $field = $this->createContentTypeField('file');
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
@@ -31,7 +31,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                 ]
             )
         );
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
@@ -44,7 +44,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             )
         );
 
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(4, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
@@ -69,7 +69,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             )
         );
 
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
         $this->assertEquals('storage.absolute_url', $errors->get(0)->getMessageTemplate());
@@ -89,7 +89,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             )
         );
 
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(0, $errors);
 
         // Try saving additional data
@@ -110,7 +110,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             )
         );
 
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.foo', $errors->get(0)->getPropertyPath());
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
@@ -146,12 +146,12 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->em->refresh($field);
 
         // Inject created domain into untied.cms.manager.
-        $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
-        $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+        $d->setValue(static::$container->get('unite.cms.manager'), $field->getContentType()->getDomain());
 
         $key = ucfirst($field->getContentType()->getIdentifier()).'Content';
-        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
+        $type = static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
             $key,
             $field->getContentType()->getDomain()
         );
@@ -201,20 +201,20 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->em->refresh($field);
 
         // Inject created domain into untied.cms.manager.
-        $d = new \ReflectionProperty($this->container->get('unite.cms.manager'), 'domain');
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
-        $d->setValue($this->container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+        $d->setValue(static::$container->get('unite.cms.manager'), $field->getContentType()->getDomain());
         $domain = $field->getContentType()->getDomain();
 
         // In this test, we don't care about access checking.
         $admin = new User();
         $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
-        $this->container->get('security.token_storage')->setToken(
+        static::$container->get('security.token_storage')->setToken(
             new PostAuthenticationGuardToken($admin, 'api', [])
         );
 
         // Create GraphQL Schema
-        $schemaTypeManager = $this->container->get('unite.cms.graphql.schema_type_manager');
+        $schemaTypeManager = static::$container->get('unite.cms.graphql.schema_type_manager');
 
         $schema = new Schema(
             [
@@ -254,7 +254,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $result = json_decode(json_encode($result->toArray(true)));
 
         // Checksum should be invalid.
-        $this->assertEquals('ERROR: '.$this->container->get('translator')->trans('storage.invalid_checksum', [], 'validators'), trim($result->errors[0]->message));
+        $this->assertEquals('ERROR: '.static::$container->get('translator')->trans('storage.invalid_checksum', [], 'validators'), trim($result->errors[0]->message));
 
         // Try with valid checksum.
         $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');
@@ -269,7 +269,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             size: 12345,
             type: "image/jpeg",
             id: "XXX-YYY-ZZZ",
-            checksum: "'.$preSignedUrl->sign($this->container->getParameter('kernel.secret')).'"
+            checksum: "'.$preSignedUrl->sign(static::$container->getParameter('kernel.secret')).'"
           }
         }
       ) {
@@ -327,7 +327,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                 ],
             ]
         )->setContentType($field->getContentType());
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $field->getContentType(),
             $content
         );

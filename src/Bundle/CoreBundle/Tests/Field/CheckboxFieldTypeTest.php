@@ -11,7 +11,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
 
         // Content Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('checkbox');
-        $this->assertCount(0, $this->container->get('validator')->validate($ctField));
+        $this->assertCount(0, static::$container->get('validator')->validate($ctField));
     }
 
     public function testContentTypeFieldTypeWithInvalidSettings()
@@ -21,7 +21,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('checkbox');
         $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
 
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }
@@ -31,7 +31,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
 
         // Setting Type Field with empty settings should be valid.
         $stField = $this->createSettingTypeField('checkbox');
-        $this->assertCount(0, $this->container->get('validator')->validate($stField));
+        $this->assertCount(0, static::$container->get('validator')->validate($stField));
     }
 
     public function testSettingTypeFieldTypeWithInvalidSettings()
@@ -41,7 +41,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $stField = $this->createSettingTypeField('checkbox');
         $stField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
 
-        $errors = $this->container->get('validator')->validate($stField);
+        $errors = static::$container->get('validator')->validate($stField);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }

@@ -124,15 +124,15 @@ class SettingVoterTest extends SecurityVoterTestCase
     public function testCRUDActions()
     {
 
-        $dm = $this->container->get('security.authorization_checker');
+        $dm = static::$container->get('security.authorization_checker');
 
         // Platform admins can preform all setting actions.
-        $this->container->get('security.token_storage')->setToken($this->u['platform']);
+        static::$container->get('security.token_storage')->setToken($this->u['platform']);
         $this->assertTrue($dm->isGranted([SettingVoter::VIEW], $this->setting1));
         $this->assertTrue($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 
         // Organization admins can preform all setting actions on their organization domain's setting.
-        $this->container->get('security.token_storage')->setToken($this->u['admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['admin']);
         $this->assertTrue($dm->isGranted([SettingVoter::VIEW], $this->setting2));
         $this->assertTrue($dm->isGranted([SettingVoter::UPDATE], $this->setting2));
 
@@ -140,14 +140,14 @@ class SettingVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 
         // All other users can preform the actions they have access to.
-        $this->container->get('security.token_storage')->setToken($this->u['domain_admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_admin']);
         $this->assertTrue($dm->isGranted([SettingVoter::VIEW], $this->setting1));
         $this->assertTrue($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 
         $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting2));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting2));
 
-        $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertTrue($dm->isGranted([SettingVoter::VIEW], $this->setting1));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 
@@ -155,7 +155,7 @@ class SettingVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting2));
 
         // Anonymous user have only access to setting if it is granted
-        $this->container->get('security.token_storage')->setToken($this->u['anonymous']);
+        static::$container->get('security.token_storage')->setToken($this->u['anonymous']);
         $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting2));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting2));
     }

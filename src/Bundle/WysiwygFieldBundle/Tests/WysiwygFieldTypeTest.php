@@ -12,7 +12,7 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
     public function testAllowedFieldSettings()
     {
         $field = $this->createContentTypeField('wysiwyg');
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
@@ -27,7 +27,7 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
                 ]
             )
         );
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.foo', $errors->get(0)->getPropertyPath());
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
@@ -40,7 +40,7 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         // Empty toolbar is not valid
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => []]));
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
@@ -48,7 +48,7 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         // Toolbar must be an array
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => 'foo']));
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
         $this->assertEquals('wysiwygfield.invalid_toolbar_definition', $errors->get(0)->getMessageTemplate());
@@ -56,23 +56,23 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         // Fields can be set as direct toolbar child or in child groups
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => ['bold']]));
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
 
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => [['bold', 'italic']]]));
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
 
         // Only defined options can be set.
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => ['foo']]));
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar.foo', $errors->get(0)->getPropertyPath());
         $this->assertEquals('wysiwygfield.unknown_toolbar_option', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => [['bold', 'foo']]]));
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar.foo', $errors->get(0)->getPropertyPath());
         $this->assertEquals('wysiwygfield.unknown_toolbar_option', $errors->get(0)->getMessageTemplate());
@@ -80,18 +80,18 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         // Some options are nested. They should be validated as well.
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => [ ['header' => 1], [ [ 'header' => 5 ] ] ]]));
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
 
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => [ ['header' => 7] ]]));
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar.header:7', $errors->get(0)->getPropertyPath());
         $this->assertEquals('wysiwygfield.unknown_toolbar_option', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => [[ ['header' => 8] ]]]));
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar.header:8', $errors->get(0)->getPropertyPath());
         $this->assertEquals('wysiwygfield.unknown_toolbar_option', $errors->get(0)->getMessageTemplate());
@@ -110,10 +110,10 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
                 ]
             )
         );
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.theme', $errors->get(0)->getPropertyPath());
-        $this->assertEquals($this->container->get('translator')->trans('wysiwygfield.unknown_theme', [], 'validators'), $errors->get(0)->getMessageTemplate());
+        $this->assertEquals(static::$container->get('translator')->trans('wysiwygfield.unknown_theme', [], 'validators'), $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -123,7 +123,7 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
                 ]
             )
         );
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -133,7 +133,7 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
                 ]
             )
         );
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
     }
 
     public function testSettingPassing()

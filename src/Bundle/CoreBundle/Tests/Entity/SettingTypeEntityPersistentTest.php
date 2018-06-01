@@ -17,7 +17,7 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         // Try to validate empty SettingType.
         $settingType = new SettingType();
         $settingType->setIdentifier('')->setTitle('')->setDescription('')->setIcon('');
-        $errors = $this->container->get('validator')->validate($settingType);
+        $errors = static::$container->get('validator')->validate($settingType);
         $this->assertCount(3, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -32,33 +32,33 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         // Try to save a too long icon name or an icon name with special chars.
         $settingType->setTitle('st1')->setIdentifier('st1')->setDomain(new Domain());
         $settingType->setIcon($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($settingType);
+        $errors = static::$container->get('validator')->validate($settingType);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $settingType->setIcon('# ');
-        $errors = $this->container->get('validator')->validate($settingType);
+        $errors = static::$container->get('validator')->validate($settingType);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         // Try to save invalid title.
         $settingType->setIcon(null)->setTitle($this->generateRandomUTF8String(256));
-        $errors = $this->container->get('validator')->validate($settingType);
+        $errors = static::$container->get('validator')->validate($settingType);
         $this->assertCount(1, $errors);
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         // Try to save invalid identifier.
         $settingType->setTitle($this->generateRandomUTF8String(255))->setIdentifier('X ');
-        $errors = $this->container->get('validator')->validate($settingType);
+        $errors = static::$container->get('validator')->validate($settingType);
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         $settingType->setIdentifier($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($settingType);
+        $errors = static::$container->get('validator')->validate($settingType);
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
@@ -79,18 +79,18 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->em->persist($domain2);
         $this->em->persist($settingType);
         $this->em->flush($settingType);
-        $this->assertCount(0, $this->container->get('validator')->validate($settingType));
+        $this->assertCount(0, static::$container->get('validator')->validate($settingType));
 
         // CT2 one the same domain with the same identifier should not be valid.
         $settingType2 = new SettingType();
         $settingType2->setIdentifier('domain1_st1')->setTitle('domain1_st1')->setDomain($domain1);
-        $this->assertCount(1, $this->container->get('validator')->validate($settingType2));
-        $errors = $this->container->get('validator')->validate($settingType2);
+        $this->assertCount(1, static::$container->get('validator')->validate($settingType2));
+        $errors = static::$container->get('validator')->validate($settingType2);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('identifier_already_taken', $errors->get(0)->getMessageTemplate());
 
         $settingType2->setIdentifier('domain1_st2');
-        $this->assertCount(0, $this->container->get('validator')->validate($settingType2));
+        $this->assertCount(0, static::$container->get('validator')->validate($settingType2));
     }
 
     public function testDeleteDomainWithSettingType()
@@ -113,7 +113,7 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->em->persist($setting);
         $this->em->flush($setting);
 
-        $this->assertCount(0, $this->container->get('validator')->validate($settingType, null, ['DELETE']));
+        $this->assertCount(0, static::$container->get('validator')->validate($settingType, null, ['DELETE']));
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
         $this->em->remove($settingType);
         $this->em->flush();
@@ -170,7 +170,7 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
 
         $st = new SettingType();
         $st->setTitle('title')->setIdentifier(array_pop($reserved))->setDomain(new Domain());
-        $errors = $this->container->get('validator')->validate($st);
+        $errors = static::$container->get('validator')->validate($st);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('reserved_identifier', $errors->get(0)->getMessageTemplate());
