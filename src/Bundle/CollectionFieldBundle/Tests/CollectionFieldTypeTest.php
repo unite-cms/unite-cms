@@ -26,7 +26,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $field = $this->createContentTypeField('collection');
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -40,7 +40,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -67,7 +67,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         // Try to validate empty collection field definitions.
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -683,15 +683,15 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('['.$field->getEntity()->getIdentifierPath('][').']['.$field->getIdentifier().'][foo]',
             $violations[0]->getPropertyPath()
         );
-        $this->assertEquals($this->container->get('translator')->trans('additional_data', [], 'validators'), $violations[0]->getMessage());
+        $this->assertEquals('additional_data', $violations[0]->getMessageTemplate());
         $this->assertEquals('[f2]', $violations[1]->getPropertyPath());
-        $this->assertEquals($this->container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $violations[1]->getMessage());
+        $this->assertEquals('invalid_reference_definition', $violations[1]->getMessageTemplate());
         $this->assertEquals('[f2]', $violations[2]->getPropertyPath());
-        $this->assertEquals($this->container->get('translator')->trans('missing_reference_definition', [], 'validators'), $violations[2]->getMessage());
+        $this->assertEquals('missing_reference_definition', $violations[2]->getMessageTemplate());
         $this->assertEquals('['.$field->getEntity()->getIdentifierPath('][').']['.$field->getIdentifier().'][n1][n2][foo]',
             $violations[3]->getPropertyPath()
         );
-        $this->assertEquals($this->container->get('translator')->trans('additional_data', [], 'validators'), $violations[3]->getMessage());
+        $this->assertEquals('additional_data', $violations[3]->getMessageTemplate());
 
         // on DELETE all content is valid.
         $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');

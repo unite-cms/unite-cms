@@ -35,7 +35,7 @@ class Content implements FieldableContent
 
     /**
      * @var ContentType
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", inversedBy="content", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="content_type_id", referencedColumnName="id", onDelete="CASCADE")
      */
@@ -44,7 +44,7 @@ class Content implements FieldableContent
     /**
      * @var string
      * @Assert\Locale()
-     * @ValidFieldableContentLocale(message="validation.invalid_locale")
+     * @ValidFieldableContentLocale(message="invalid_locale")
      * @ORM\Column(type="string", nullable=true)
      */
     protected $locale;
@@ -61,7 +61,7 @@ class Content implements FieldableContent
      * @var Content[]
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Content>")
      * @Accessor(getter="geTranslations",setter="setTranslations")
-     * @ValidContentTranslations(uniqueLocaleMessage="validation.unique_translations", nestedTranslationMessage="validation.nested_translations")
+     * @ValidContentTranslations(uniqueLocaleMessage="unique_translations", nestedTranslationMessage="nested_translations")
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Content", mappedBy="translationOf", fetch="EXTRA_LAZY")
      */
     private $translations;
@@ -71,7 +71,7 @@ class Content implements FieldableContent
      * @Type("UniteCMS\CoreBundle\Entity\Content")
      * @Accessor(getter="geTranslationOf",setter="setTranslationOf")
      * @ORM\ManyToOne(targetEntity="Content", inversedBy="translations")
-     * @ValidContentTranslationOf(uniqueLocaleMessage="validation.unique_translations")
+     * @ValidContentTranslationOf(uniqueLocaleMessage="unique_translations")
      * @ORM\JoinColumn(name="translation_of_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     private $translationOf;

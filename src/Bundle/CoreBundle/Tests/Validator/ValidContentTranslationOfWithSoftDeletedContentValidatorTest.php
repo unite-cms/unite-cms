@@ -49,7 +49,7 @@ class ValidContentTranslationOfWithSoftDeletedContentValidatorTest extends Datab
 
         $errors = $this->container->get('validator')->validate($reloadedObject);
         $this->assertCount(1, $errors);
-        $this->assertEquals('validation.unique_translations', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('unique_translations', $errors->get(0)->getMessageTemplate());
 
         $reloadedObject->setLocale('en');
         $this->em->persist($reloadedObject);

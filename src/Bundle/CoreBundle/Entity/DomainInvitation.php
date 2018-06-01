@@ -13,8 +13,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *
  * @ORM\Table(name="invitation")
  * @ORM\Entity()
- * @UniqueEntity(fields={"email", "domainMemberType"}, message="validation.email_already_invited", ignoreNull=false, errorPath="email")
- * @UniqueEntity(fields={"token"}, message="validation.token_already_present", errorPath="token")
+ * @UniqueEntity(fields={"email", "domainMemberType"}, message="email_already_invited", ignoreNull=false, errorPath="email")
+ * @UniqueEntity(fields={"token"}, message="token_already_present", errorPath="token")
  * @Assert\Callback(callback="emailNotAlreadyTaken")
  */
 class DomainInvitation
@@ -33,7 +33,7 @@ class DomainInvitation
     /**
      * @var DomainMemberType
      * @Assert\Valid()
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", inversedBy="invites")
      * @ORM\JoinColumn(name="domain_member_type_id", referencedColumnName="id", onDelete="CASCADE")
      */
@@ -41,24 +41,24 @@ class DomainInvitation
 
     /**
      * @var User
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Email(message="validation.invalid_email")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Email(message="invalid_email")
      * @ORM\Column(name="email", type="string")
      */
     private $email;
 
     /**
      * @var string
-     * @Assert\Length(max="180", maxMessage="validation.too_long")
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="validation.invalid_characters")
+     * @Assert\Length(max="180", maxMessage="too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="invalid_characters")
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;
 
     /**
      * @var \DateTime
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\Column(name="requested_at", type="datetime", nullable=true)
      */
     protected $requestedAt;
@@ -73,7 +73,7 @@ class DomainInvitation
         if ($this->getDomainMemberType() && $this->getDomainMemberType()->getDomain() && $this->getDomainMemberType()->getDomain()->getOrganization()) {
             foreach ($this->getDomainMemberType()->getDomain()->getOrganization()->getMembers() as $organizationMember) {
                 if ($organizationMember->getUser()->getEmail() === $this->getEmail()) {
-                    $context->buildViolation('validation.email_already_member')
+                    $context->buildViolation('email_already_member')
                         ->atPath('email')
                         ->addViolation();
                 }

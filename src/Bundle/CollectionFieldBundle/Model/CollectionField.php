@@ -13,7 +13,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
 
 /**
  * We use this model only for validation!
- * @UniqueFieldableField(message="validation.identifier_already_taken")
+ * @UniqueFieldableField(message="identifier_already_taken")
  */
 class CollectionField implements FieldableField
 {
@@ -22,25 +22,25 @@ class CollectionField implements FieldableField
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      */
     private $title;
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CollectionFieldBundle\Model\CollectionField::RESERVED_IDENTIFIERS")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CollectionFieldBundle\Model\CollectionField::RESERVED_IDENTIFIERS")
      */
     private $identifier;
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @FieldType(message="validation.invalid_field_type")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @FieldType(message="invalid_field_type")
      */
     private $type;
 

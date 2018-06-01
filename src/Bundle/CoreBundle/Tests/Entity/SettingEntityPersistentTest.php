@@ -23,7 +23,7 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('settingType', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
     }
 
     public function testValidateAdditionalContentData()
@@ -44,14 +44,14 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($setting);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // 4. Create Setting2 with only another field. => INVALID
         $setting->setData(['other' => 'Other']);
         $errors = $this->container->get('validator')->validate($setting);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // 5. SettingType have more fields than setting. => VALID
         $field2 = new SettingTypeField();
@@ -92,7 +92,7 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($setting);
         $this->assertCount(1, $errors);
         $this->assertEquals('data.invalid', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('mocked_message', $errors->get(0)->getMessage());
+        $this->assertEquals('mocked_message', $errors->get(0)->getMessageTemplate());
 
         // 3. Create Setting that is valid with FieldType. => VALID
         $setting->setData(['invalid' => false]);

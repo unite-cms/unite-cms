@@ -16,17 +16,17 @@ class RegistrationModel extends InvitationRegistrationModel
 {
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      */
     private $organizationTitle;
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Organization::RESERVED_IDENTIFIERS")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Organization::RESERVED_IDENTIFIERS")
      */
     private $organizationIdentifier;
 

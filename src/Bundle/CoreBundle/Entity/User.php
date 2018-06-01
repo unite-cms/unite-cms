@@ -16,7 +16,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Table(name="unite_user")
  * @ORM\Entity
  * @UniqueEntity(fields={"email"}, message="validation.email_already_taken")
- * @UniqueEntity(fields={"resetToken"}, message="validation.reset_token_present")
+ * @UniqueEntity(fields={"resetToken"}, message="reset_token_present")
  */
 class User extends DomainAccessor implements UserInterface, \Serializable
 {
@@ -26,25 +26,25 @@ class User extends DomainAccessor implements UserInterface, \Serializable
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Email(message="validation.invalid_email")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Email(message="invalid_email")
      * @ORM\Column(name="email", type="string", length=255)
      */
     private $email;
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank", groups={"CREATE"})
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank", groups={"CREATE"})
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="password", type="string", length=255)
      */
     private $password;
@@ -58,8 +58,8 @@ class User extends DomainAccessor implements UserInterface, \Serializable
 
     /**
      * @var string
-     * @Assert\Length(max="180", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="validation.invalid_characters")
+     * @Assert\Length(max="180", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="invalid_characters")
      * @ORM\Column(name="reset_token", type="string", length=180, unique=true, nullable=true)
      */
     protected $resetToken;

@@ -19,7 +19,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
  *
  * @ORM\Table(name="domain_member_type_field")
  * @ORM\Entity
- * @UniqueFieldableField(message="validation.identifier_already_taken")
+ * @UniqueFieldableField(message="identifier_already_taken")
  * @ExclusionPolicy("all")
  */
 class DomainMemberTypeField implements FieldableField
@@ -37,8 +37,8 @@ class DomainMemberTypeField implements FieldableField
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="title", type="string", length=255)
      * @Expose
      */
@@ -46,10 +46,10 @@ class DomainMemberTypeField implements FieldableField
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\DomainMemberTypeField::RESERVED_IDENTIFIERS")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\DomainMemberTypeField::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
      */
@@ -57,9 +57,9 @@ class DomainMemberTypeField implements FieldableField
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @FieldType(message="validation.invalid_field_type")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @FieldType(message="invalid_field_type")
      * @ORM\Column(name="type", type="string", length=255)
      * @Expose
      */
@@ -70,7 +70,7 @@ class DomainMemberTypeField implements FieldableField
      *
      * @ORM\Column(name="settings", type="object", nullable=true)
      * @ValidFieldSettings()
-     * @Assert\NotNull(message="validation.not_null")
+     * @Assert\NotNull(message="not_null")
      * @Type("UniteCMS\CoreBundle\Field\FieldableFieldSettings")
      * @Expose
      */
@@ -78,7 +78,7 @@ class DomainMemberTypeField implements FieldableField
 
     /**
      * @var DomainMemberType
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", inversedBy="fields")
      * @ORM\JoinColumn(name="domain_member_type_id", referencedColumnName="id", onDelete="CASCADE")
      */

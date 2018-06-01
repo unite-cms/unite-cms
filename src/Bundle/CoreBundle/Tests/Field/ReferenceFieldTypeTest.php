@@ -28,9 +28,9 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('reference');
         $errors = $this->container->get('validator')->validate($ctField);
         $this->assertCount(2, $errors);
-        $this->assertEquals('required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
         $this->assertContains('settings.domain', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(1)->getMessage());
+        $this->assertEquals('required', $errors->get(1)->getMessageTemplate());
         $this->assertContains('settings.content_type', $errors->get(1)->getPropertyPath());
     }
 
@@ -48,7 +48,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $errors = $this->container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testContentTypeFieldTypeWithValidSettings() {

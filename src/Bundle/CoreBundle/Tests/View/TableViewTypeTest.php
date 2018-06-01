@@ -95,7 +95,7 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         // View should not be valid.
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('additional_data', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         $view->setSettings(new ViewSettings([]));
 
@@ -103,72 +103,72 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $view->setSettings(new ViewSettings(['columns' => 'string']));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.columns', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['columns' => ['foo' => 'Foo', 'baa' => 'Baa']]));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(2, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('unknown_column', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('unknown_column', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.columns.foo', $errors->get(0)->getPropertyPath());
-        $this->assertEquals($this->container->get('translator')->trans('unknown_column', [], 'validators'), $errors->get(1)->getMessage());
+        $this->assertEquals('unknown_column', $errors->get(1)->getMessageTemplate());
         $this->assertEquals('settings.columns.baa', $errors->get(1)->getPropertyPath());
 
         // Test validating invalid sort_field.
         $view->setSettings(new ViewSettings(['sort_field' => ['foo']]));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_field' => 'foo']));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('unknown_column', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('unknown_column', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
 
         // Test validating invalid sort_asc.
         $view->setSettings(new ViewSettings(['sort_asc' => 'yes']));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.sort_asc', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_asc' => 'foo']));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.sort_asc', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_asc' => ['foo']]));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.sort_asc', $errors->get(0)->getPropertyPath());
 
         // Test validating invalid filter.
         $view->setSettings(new ViewSettings(['filter' => ['foo']]));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['filter' => 'string']));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['filter' => ['AND' => ['foo']]]));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['filter' => ['operator' => 'foo', 'field' => 'foo', 'value' => 'baa']]));
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(
@@ -176,7 +176,7 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         );
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals($this->container->get('translator')->trans('wrong_setting_definition', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
     }
 

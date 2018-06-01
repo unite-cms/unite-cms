@@ -565,8 +565,8 @@ class ContentController extends Controller
 
                         $form->addError(
                             new FormError(
-                                'validation.content_not_found',
-                                'validation.content_not_found'
+                                'content_not_found',
+                                'content_not_found'
                             )
                         );
 

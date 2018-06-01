@@ -22,10 +22,10 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(2, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('identifier', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
 
         // Try to validate organization with too long title and identifier.
         $org1->setTitle($this->generateRandomUTF8String(256))->setIdentifier($this->generateRandomMachineName(256));
@@ -33,10 +33,10 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(2, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
+        $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('identifier', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(1)->getMessage());
+        $this->assertEquals('too_long', $errors->get(1)->getMessageTemplate());
 
         // Try to test invalid identifier.
         $org1
@@ -46,7 +46,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_characters', $errors->get(0)->getMessage());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         // Try to validate valid organization.
         $org1->setIdentifier($this->generateRandomMachineName(255));
@@ -63,7 +63,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.identifier_already_taken', $errors->get(0)->getMessage());
+        $this->assertEquals('identifier_already_taken', $errors->get(0)->getMessageTemplate());
 
         // Try to add an invalid Domain to the organization.
         $org1->addDomain(new Domain());
@@ -78,7 +78,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($org1, null, ['DELETE']);
         $this->assertCount(1, $errors);
         $this->assertEquals('domains', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.should_be_empty', $errors->get(0)->getMessage());
+        $this->assertEquals('domains_must_be_empty', $errors->get(0)->getMessageTemplate());
     }
 
     public function testAddUserToOrganization()
@@ -111,7 +111,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('organization', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.user_already_member_of_organization', $errors->get(0)->getMessage());
+        $this->assertEquals('user_already_member_of_organization', $errors->get(0)->getMessageTemplate());
 
         // A user can be member of multiple organizations.
         $org2Member2 = new OrganizationMember();
@@ -167,13 +167,13 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('organization', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_selection', $errors->get(0)->getMessage());
+        $this->assertEquals('invalid_selection', $errors->get(0)->getMessageTemplate());
 
         $org1Member->setRoles([]);
         $errors = $this->container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('organization', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
 
         $org1Member->setRoles([Organization::ROLE_USER]);
         $this->assertCount(0, $this->container->get('validator')->validate($user1));
@@ -192,7 +192,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($org);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
+        $this->assertEquals('reserved_identifier', $errors->get(0)->getMessageTemplate());
     }
 
     public function testOrganizationMemberDeleteValidation() {
@@ -244,7 +244,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $violations = $validator->validate($orgMember2, null, ['DELETE']);
         $this->assertCount(1, $violations);
         $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
-        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+        $this->assertEquals('no_organization_admins', $violations->get(0)->getMessageTemplate());
 
 
         // Adding the first user again as user should work.
@@ -260,14 +260,14 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $violations = $validator->validate($orgMember2, null, ['DELETE']);
         $this->assertCount(1, $violations);
         $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
-        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+        $this->assertEquals('no_organization_admins', $violations->get(0)->getMessageTemplate());
 
         // Updating the user role of user 2 should not work, because there would be no admin left.
         $orgMember2->setSingleRole(Organization::ROLE_USER);
         $violations = $validator->validate($orgMember2, null, ['UPDATE']);
         $this->assertCount(1, $violations);
         $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
-        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+        $this->assertEquals('no_organization_admins', $violations->get(0)->getMessageTemplate());
 
         // Updating user2, but leaving admin role should work.
         $orgMember2->setSingleRole(Organization::ROLE_ADMINISTRATOR);
@@ -290,7 +290,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $violations = $validator->validate($user1, null, ['DELETE']);
         $this->assertCount(1, $violations);
         $this->assertEquals('organizations[0].organization', $violations->get(0)->getPropertyPath());
-        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+        $this->assertEquals('no_organization_admins', $violations->get(0)->getMessageTemplate());
 
         // If user2 is admin again, we can now delete user1.
         $orgMember2->setSingleRole(Organization::ROLE_ADMINISTRATOR);
@@ -305,6 +305,6 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $violations = $validator->validate($orgMember2, null, ['DELETE']);
         $this->assertCount(1, $violations);
         $this->assertEquals('organization', $violations->get(0)->getPropertyPath());
-        $this->assertEquals('validation.no_organization_admins', $violations->get(0)->getMessage());
+        $this->assertEquals('no_organization_admins', $violations->get(0)->getMessageTemplate());
     }
 }

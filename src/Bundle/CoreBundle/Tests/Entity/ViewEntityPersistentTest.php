@@ -22,19 +22,19 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(5, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('identifier', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
 
         $this->assertEquals('type', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
 
         $this->assertEquals('type', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.invalid_view_type', $errors->get(3)->getMessage());
+        $this->assertEquals('validation.invalid_view_type', $errors->get(3)->getMessageTemplate());
 
         $this->assertEquals('contentType', $errors->get(4)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(4)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(4)->getMessageTemplate());
 
         // Try to validate too long title, identifier, type
         $view
@@ -51,16 +51,16 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(4, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
+        $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('identifier', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(1)->getMessage());
+        $this->assertEquals('too_long', $errors->get(1)->getMessageTemplate());
 
         $this->assertEquals('type', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(2)->getMessage());
+        $this->assertEquals('too_long', $errors->get(2)->getMessageTemplate());
 
         $this->assertEquals('type', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.invalid_view_type', $errors->get(3)->getMessage());
+        $this->assertEquals('validation.invalid_view_type', $errors->get(3)->getMessageTemplate());
 
         // Try to validate invalid type
         $view
@@ -70,7 +70,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('type', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_view_type', $errors->get(0)->getMessage());
+        $this->assertEquals('validation.invalid_view_type', $errors->get(0)->getMessageTemplate());
 
         // Try to validate invalid identifier
         $view
@@ -81,7 +81,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_characters', $errors->get(0)->getMessage());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         // Try to validate invalid icon
         $view
@@ -90,13 +90,13 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
+        $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $view->setIcon('# ');
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_characters', $errors->get(0)->getMessage());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         // Test UniqueEntity Validation.
         $view->setIcon('any');
@@ -116,7 +116,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.identifier_already_taken', $errors->get(0)->getMessage());
+        $this->assertEquals('identifier_already_taken', $errors->get(0)->getMessageTemplate());
     }
 
     public function testReservedIdentifiers()
@@ -138,6 +138,6 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
+        $this->assertEquals('reserved_identifier', $errors->get(0)->getMessageTemplate());
     }
 }

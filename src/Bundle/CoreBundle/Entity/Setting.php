@@ -28,7 +28,7 @@ class Setting implements FieldableContent
 
     /**
      * @var SettingType
-     * @Assert\NotBlank(message="validation.not_blank")
+     * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", inversedBy="settings", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="setting_type_id", referencedColumnName="id", onDelete="CASCADE")
      */
@@ -37,7 +37,7 @@ class Setting implements FieldableContent
     /**
      * @var string
      * @Assert\Locale()
-     * @ValidFieldableContentLocale(message="validation.invalid_locale")
+     * @ValidFieldableContentLocale(message="invalid_locale")
      * @ORM\Column(type="string", nullable=true)
      */
     protected $locale;

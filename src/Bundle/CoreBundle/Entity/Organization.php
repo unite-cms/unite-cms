@@ -13,7 +13,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
  *
  * @ORM\Table(name="organization")
  * @ORM\Entity()
- * @UniqueEntity(fields={"identifier"}, message="validation.identifier_already_taken")
+ * @UniqueEntity(fields={"identifier"}, message="identifier_already_taken")
  */
 class Organization
 {
@@ -34,18 +34,18 @@ class Organization
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="title", type="string", length=255)
      */
     private $title;
 
     /**
      * @var string
-     * @Assert\NotBlank(message="validation.not_blank")
-     * @Assert\Length(max="255", maxMessage="validation.too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="validation.invalid_characters")
-     * @ReservedWords(message="validation.reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Organization::RESERVED_IDENTIFIERS")
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Organization::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255, unique=true)
      */
     private $identifier;
@@ -53,7 +53,7 @@ class Organization
     /**
      * @var Domain[]
      * @Assert\Valid()
-     * @Assert\Count(max="0", maxMessage="validation.should_be_empty", groups={"DELETE"})
+     * @Assert\Count(max="0", maxMessage="domains_must_be_empty", groups={"DELETE"})
      * @ORM\OneToMany(targetEntity="Domain", mappedBy="organization")
      */
     private $domains;

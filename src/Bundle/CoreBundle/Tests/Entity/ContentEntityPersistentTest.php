@@ -23,7 +23,7 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('contentType', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
     }
 
     public function testValidateAdditionalContentData()
@@ -44,14 +44,14 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // 4. Create Content2 with only another field. => INVALID
         $content->setData(['other' => 'Other']);
         $errors = $this->container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // 5. ContentType have more fields than content. => VALID
         $field2 = new ContentTypeField();
@@ -92,7 +92,7 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data.invalid', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('mocked_message', $errors->get(0)->getMessage());
+        $this->assertEquals('mocked_message', $errors->get(0)->getMessageTemplate());
 
         // 2.1 Validate DELETE on invalid content should be valid.
         $content = new Content();
@@ -135,7 +135,7 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($content, null, ['DELETE']);
         $this->assertCount(1, $errors);
         $this->assertEquals('data.invalid', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('mocked_message', $errors->get(0)->getMessage());
+        $this->assertEquals('mocked_message', $errors->get(0)->getMessageTemplate());
 
         // 2.1 Validate DEFAULT on invalid content should be valid.
         $content = new Content();

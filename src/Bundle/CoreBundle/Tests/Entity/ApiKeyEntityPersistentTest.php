@@ -18,13 +18,13 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(3, $errors);
 
         $this->assertEquals('name', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('token', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(1)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
 
         $this->assertEquals('organization', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('validation.not_blank', $errors->get(2)->getMessage());
+        $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
 
         // Validate too long name and token.
         $apiClient
@@ -37,10 +37,10 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(2, $errors);
 
         $this->assertEquals('name', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
+        $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
         $this->assertEquals('token', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('validation.too_long', $errors->get(1)->getMessage());
+        $this->assertEquals('too_long', $errors->get(1)->getMessageTemplate());
 
         // Validate invalid token.
         $apiClient
@@ -51,7 +51,7 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
 
         $this->assertEquals('token', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_characters', $errors->get(0)->getMessage());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         $apiClient->setToken('valid');
 
@@ -73,7 +73,7 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         $errors = $this->container->get('validator')->validate($apiClient2);
         $this->assertCount(1, $errors);
         $this->assertEquals('token', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.token_present', $errors->get(0)->getMessage());
+        $this->assertEquals('token_present', $errors->get(0)->getMessageTemplate());
     }
 
     public function testFindMethod() {

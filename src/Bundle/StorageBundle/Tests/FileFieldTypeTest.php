@@ -20,7 +20,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $field = $this->createContentTypeField('file');
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -33,7 +33,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         );
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -47,13 +47,13 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(4, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(0)->getMessage());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('settings.bucket.key', $errors->get(1)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(1)->getMessage());
+        $this->assertEquals('required', $errors->get(1)->getMessageTemplate());
         $this->assertEquals('settings.bucket.secret', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(2)->getMessage());
+        $this->assertEquals('required', $errors->get(2)->getMessageTemplate());
         $this->assertEquals('settings.bucket.bucket', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(3)->getMessage());
+        $this->assertEquals('required', $errors->get(3)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -72,7 +72,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
-        $this->assertEquals($this->container->get('translator')->trans('storage.absolute_url', [], 'validators'), $errors->get(0)->getMessage());
+        $this->assertEquals('storage.absolute_url', $errors->get(0)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -113,7 +113,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $errors = $this->container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.foo', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('additional_data', $errors->get(0)->getMessage());
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testGettingGraphQLData()
