@@ -6,7 +6,7 @@
  * Time: 09:27
  */
 
-namespace App\Bundle\CoreBundle\Exception;
+namespace UniteCMS\CoreBundle\Exception;
 
 use GraphQL\Error\ClientAware;
 
@@ -14,7 +14,7 @@ use GraphQL\Error\ClientAware;
  * This exception should be thrown when the current user is not allowed to access some property.
  *
  * Class InvalidFieldConfigurationException
- * @package App\Bundle\CoreBundle\Exception
+ * @package UniteCMS\CoreBundle\Exception
  */
 abstract class AccessDeniedException extends \Exception implements ClientAware
 {

@@ -197,7 +197,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
     }
 
     /**
-     * @expectedException \App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException
+     * @expectedException \UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException
      * @expectedExceptionMessage A reference field was configured to reference to domain "foo". However "foo" does not exist, or you don't have access to it.
      */
     public function testDomainNotFoundException()
@@ -256,7 +256,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
     }
 
     /**
-     * @expectedException \App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException
+     * @expectedException \UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException
      * @expectedExceptionMessage A reference field was configured to reference to content type "baa" on domain "domain1". However "baa" does not exist.
      */
     public function testContentTypeNotFoundException()
@@ -316,7 +316,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
     }
 
     /**
-     * @expectedException \App\Bundle\CoreBundle\Exception\DomainAccessDeniedException
+     * @expectedException \UniteCMS\CoreBundle\Exception\DomainAccessDeniedException
      * @expectedExceptionMessage A reference field was configured to reference to domain "domain1". However you are not allowed to access it.
      */
     public function testDomainNoAccess()
@@ -373,7 +373,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
     }
 
     /**
-     * @expectedException \App\Bundle\CoreBundle\Exception\ContentTypeAccessDeniedException
+     * @expectedException \UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException
      * @expectedExceptionMessage You are not allowed to list content of content type "ct1" on domain "domain1".
      */
     public function testContentTypeNoAccess()

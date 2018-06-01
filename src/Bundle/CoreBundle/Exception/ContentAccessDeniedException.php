@@ -6,13 +6,13 @@
  * Time: 09:27
  */
 
-namespace App\Bundle\CoreBundle\Exception;
+namespace UniteCMS\CoreBundle\Exception;
 
 /**
  * This exception should be thrown when the current user is not allowed to access a content entity.
  *
  * Class InvalidFieldConfigurationException
- * @package App\Bundle\CoreBundle\Exception
+ * @package UniteCMS\CoreBundle\Exception
  */
 class ContentAccessDeniedException extends AccessDeniedException
 {

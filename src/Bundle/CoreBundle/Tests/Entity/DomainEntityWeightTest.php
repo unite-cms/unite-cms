@@ -6,7 +6,7 @@
  * Time: 10:53
  */
 
-namespace App\Bundle\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;

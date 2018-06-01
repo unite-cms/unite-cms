@@ -6,7 +6,7 @@
  * Time: 08:32
  */
 
-namespace App\Bundle\WysiwygFieldBundle\Tests;
+namespace UniteCMS\WysiwygFieldBundle\Tests;
 
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Test\TypeTestCase;

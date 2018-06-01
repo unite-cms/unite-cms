@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Security;
 
-use App\Bundle\CoreBundle\Exception\MissingOrganizationException;
+use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Exception\TokenNotFoundException;

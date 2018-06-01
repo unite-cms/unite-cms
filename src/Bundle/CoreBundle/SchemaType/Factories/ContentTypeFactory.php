@@ -2,8 +2,8 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
-use App\Bundle\CoreBundle\Exception\AccessDeniedException;
-use App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException;
+use UniteCMS\CoreBundle\Exception\AccessDeniedException;
+use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;

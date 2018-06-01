@@ -6,7 +6,7 @@
  * Time: 16:43
  */
 
-namespace App\Bundle\CoreBundle\Tests\Security;
+namespace UniteCMS\CoreBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;

@@ -6,7 +6,7 @@
  * Time: 16:46
  */
 
-namespace App\Bundle\CoreBundle\Tests\Twig;
+namespace UniteCMS\CoreBundle\Tests\Twig;
 
 use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Twig\AlreadyRenderedExtension;

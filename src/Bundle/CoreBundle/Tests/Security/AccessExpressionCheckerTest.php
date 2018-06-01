@@ -6,7 +6,7 @@
  * Time: 17:06
  */
 
-namespace App\Bundle\CoreBundle\Tests\Security;
+namespace UniteCMS\CoreBundle\Tests\Security;
 
 
 use UniteCMS\CoreBundle\Security\AccessExpressionChecker;

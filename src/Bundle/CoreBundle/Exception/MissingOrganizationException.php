@@ -6,7 +6,7 @@
  * Time: 09:22
  */
 
-namespace App\Bundle\CoreBundle\Exception;
+namespace UniteCMS\CoreBundle\Exception;
 
 
 class MissingOrganizationException extends \Exception

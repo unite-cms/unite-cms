@@ -6,7 +6,7 @@
  * Time: 09:27
  */
 
-namespace App\Bundle\CoreBundle\Exception;
+namespace UniteCMS\CoreBundle\Exception;
 
 use GraphQL\Error\ClientAware;
 
@@ -15,7 +15,7 @@ use GraphQL\Error\ClientAware;
  * field settings on domain crate / update, don't throw this Exception but an InvalidArgumentException.
  *
  * Class InvalidFieldConfigurationException
- * @package App\Bundle\CoreBundle\Exception
+ * @package UniteCMS\CoreBundle\Exception
  */
 class InvalidFieldConfigurationException extends \Exception implements ClientAware
 {

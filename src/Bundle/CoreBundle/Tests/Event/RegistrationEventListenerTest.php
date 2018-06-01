@@ -6,7 +6,7 @@
  * Time: 13:36
  */
 
-namespace App\Bundle\CoreBundle\Tests\Event;
+namespace UniteCMS\CoreBundle\Tests\Event;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

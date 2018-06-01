@@ -2,10 +2,10 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
-use App\Bundle\CoreBundle\Exception\ContentAccessDeniedException;
-use App\Bundle\CoreBundle\Exception\ContentTypeAccessDeniedException;
-use App\Bundle\CoreBundle\Exception\DomainAccessDeniedException;
-use App\Bundle\CoreBundle\Exception\InvalidFieldConfigurationException;
+use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
+use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
+use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
+use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\Form\Exception\InvalidArgumentException;

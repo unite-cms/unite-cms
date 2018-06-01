@@ -6,7 +6,7 @@
  * Time: 16:46
  */
 
-namespace App\Bundle\CoreBundle\Tests\Twig;
+namespace UniteCMS\CoreBundle\Tests\Twig;
 
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
