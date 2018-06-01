@@ -109,7 +109,7 @@ class DomainMemberType implements Fieldable
      *
      * TODO: Checking that all the domain members are valid will become very expensive for large sets. We most likely will need another approach.
      *
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domainMemberType", fetch="EXTRA_LAZY", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $domainMembers;
 
@@ -124,6 +124,7 @@ class DomainMemberType implements Fieldable
     {
         $this->fields = new ArrayCollection();
         $this->invites = new ArrayCollection();
+        $this->domainMembers = new ArrayCollection();
     }
 
     public function __toString()

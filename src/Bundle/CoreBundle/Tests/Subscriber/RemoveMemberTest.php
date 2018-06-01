@@ -1,6 +1,6 @@
 <?php
 
-namespace UniteCMS\CoreBundle\Tests\Entity;
+namespace UniteCMS\CoreBundle\Tests\Subscriber;
 
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;

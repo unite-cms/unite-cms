@@ -337,11 +337,6 @@ class ContentController extends Controller
                 // If content is valid.
             } else {
 
-                // Get log entries and delete them.
-                foreach ($em->getRepository('GedmoLoggable:LogEntry')->getLogEntries($content) as $logEntry) {
-                    $em->remove($logEntry);
-                }
-
                 // Delete content item.
                 $em->remove($content);
                 $em->flush();

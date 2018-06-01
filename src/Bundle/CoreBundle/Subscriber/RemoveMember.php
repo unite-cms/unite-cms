@@ -27,8 +27,6 @@ class RemoveMember
             }
 
         }
-
-        // Maybe we need to do something in the future on DomainMember delete here.
     }
 
 }

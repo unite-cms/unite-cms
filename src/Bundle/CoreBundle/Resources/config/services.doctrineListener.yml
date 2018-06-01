@@ -13,6 +13,12 @@ services:
     tags:
       - { name: doctrine.event_listener, event: prePersist }
 
+  # When deleting fieldable content, remove all log entries.
+  UniteCMS\CoreBundle\Subscriber\DeleteFieldableContentSubscriber:
+    public: false
+    tags:
+      - { name: doctrine.event_listener, event: preRemove }
+
   # When recovering content, create a log entry
   UniteCMS\CoreBundle\Subscriber\RecoverContentLogger:
     public: false
