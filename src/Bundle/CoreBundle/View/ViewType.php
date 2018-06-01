@@ -2,7 +2,6 @@
 
 namespace UniteCMS\CoreBundle\View;
 
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\View;
 
@@ -14,11 +13,6 @@ abstract class ViewType implements ViewTypeInterface
     const SETTINGS = [];
     const REQUIRED_SETTINGS = [];
 
-    /**
-     * @var View $view
-     */
-    protected $view;
-
     static function getType(): string
     {
         return static::TYPE;
@@ -29,22 +23,10 @@ abstract class ViewType implements ViewTypeInterface
         return static::TEMPLATE;
     }
 
-    function setEntity(View $view)
-    {
-        $this->view = $view;
-
-        return $this;
-    }
-
-    function unsetEntity()
-    {
-        $this->view = null;
-    }
-
     /**
      * {@inheritdoc}
      */
-    function getTemplateRenderParameters(string $selectMode = self::SELECT_MODE_NONE): array
+    function getTemplateRenderParameters(View $view, string $selectMode = self::SELECT_MODE_NONE): array
     {
         return [];
     }

@@ -24,13 +24,13 @@ class SortableViewType extends ViewType
     /**
      * {@inheritdoc}
      */
-    function getTemplateRenderParameters(string $selectMode = self::SELECT_MODE_NONE): array
+    function getTemplateRenderParameters(View $view, string $selectMode = self::SELECT_MODE_NONE): array
     {
-        $columns = $this->view->getSettings()->columns ?? [];
-        $sort_field = $this->view->getSettings()->sort_field;
+        $columns = $view->getSettings()->columns ?? [];
+        $sort_field = $view->getSettings()->sort_field;
 
         // If no columns are defined, try to find any human readable key identifier and also add common fields.
-        $fields = $this->view->getContentType()->getFields();
+        $fields = $view->getContentType()->getFields();
         $possible_field_types = ['text'];
 
         if (empty($columns)) {
@@ -52,9 +52,9 @@ class SortableViewType extends ViewType
         return [
             'sort_field' => $sort_field,
             'columns' => $columns,
-            'View' => $this->view->getIdentifier(),
-            'contentType' => $this->view->getContentType()->getIdentifier(),
-            'hasTranslations' => count($this->view->getContentType()->getLocales()) > 1,
+            'View' => $view->getIdentifier(),
+            'contentType' => $view->getContentType()->getIdentifier(),
+            'hasTranslations' => count($view->getContentType()->getLocales()) > 1,
         ];
     }
 

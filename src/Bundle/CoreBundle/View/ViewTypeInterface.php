@@ -16,19 +16,15 @@ interface ViewTypeInterface
     //const SELECT_MODE_MULTIPLE = 'SELECT_MODE_MULTIPLE';
 
     static function getType(): string;
-
     static function getTemplate(): string;
 
-    function setEntity(View $view);
-
-    function unsetEntity();
-
     /**
+     * @param View $view
      * @param string $selectMode , the select mode. Default's to none. But can also be single or multiple.
      *
      * @return array
      */
-    function getTemplateRenderParameters(string $selectMode = self::SELECT_MODE_NONE): array;
+    function getTemplateRenderParameters(View $view, string $selectMode = self::SELECT_MODE_NONE): array;
 
     /**
      * @param ViewSettings $settings
