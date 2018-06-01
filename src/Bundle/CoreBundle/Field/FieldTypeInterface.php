@@ -102,9 +102,7 @@ interface FieldTypeInterface
      *
      * @param FieldableField $field
      * @param array $data
-     * @param $validation_group , This can be "DEFAULT" (content and settings) or "DELETE" (only for content).
-     *
-     * @return ConstraintViolation[]
+     * @param ExecutionContextInterface $context
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array;
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context);
 }

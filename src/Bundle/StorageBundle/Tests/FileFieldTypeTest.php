@@ -254,7 +254,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $result = json_decode(json_encode($result->toArray(true)));
 
         // Checksum should be invalid.
-        $this->assertEquals('ERROR: storage.invalid_checksum', trim($result->errors[0]->message));
+        $this->assertEquals('ERROR: '.$this->container->get('translator')->trans('storage.invalid_checksum', [], 'validators'), trim($result->errors[0]->message));
 
         // Try with valid checksum.
         $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');

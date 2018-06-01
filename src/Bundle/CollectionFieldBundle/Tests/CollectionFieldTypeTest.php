@@ -8,6 +8,7 @@ use GraphQL\Type\Schema;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
+use Symfony\Component\Validator\Context\ExecutionContext;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -16,6 +17,7 @@ use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
 
 class CollectionFieldTypeTest extends FieldTypeTestCase
 {
@@ -588,19 +590,32 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
 
         // Validate min rows.
-        $violations = $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, []);
+        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context->setNode([], new Content(), null, '');
+        $context->setConstraint(new ValidFieldableContentData());
+        $context->setGroup('DEFAULT');
+
+        $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
+        $violations = $context->getViolations();
+
         $this->assertCount(1, $violations);
         $this->assertEquals('['.$field->getIdentifier().']', $violations[0]->getPropertyPath());
-        $this->assertEquals('collectionfield.too_few_rows', $violations[0]->getMessage());
+        $this->assertEquals($this->container->get('translator')->trans('collectionfield.too_few_rows', ['%count%' => 1], 'validators'), $violations[0]->getMessage());
 
         // on DELETE all content is valid.
-        $this->assertCount(
-            0,
-            $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], 'DELETE')
-        );
+        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context->setNode([], new Content(), null, '');
+        $context->setConstraint(new ValidFieldableContentData());
+        $context->setGroup('DELETE');
+        $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
+        $this->assertCount(0, $context->getViolations());
 
         // Validate max rows.
-        $violations = $this->container->get('unite.cms.field_type_manager')
+        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context->setNode([], new Content(), null, '');
+        $context->setConstraint(new ValidFieldableContentData());
+        $context->setGroup('DEFAULT');
+        $this->container->get('unite.cms.field_type_manager')
             ->validateFieldData(
                 $field,
                 [
@@ -609,72 +624,82 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                     ['f1' => 'baa'],
                     ['f1' => 'baa'],
                     ['f1' => 'baa'],
-                ]
+                ],
+                $context
             );
+
+        $violations = $context->getViolations();
         $this->assertCount(1, $violations);
         $this->assertEquals('['.$field->getIdentifier().']', $violations[0]->getPropertyPath());
-        $this->assertEquals('collectionfield.too_many_rows', $violations[0]->getMessage());
+        $this->assertEquals($this->container->get('translator')->trans('collectionfield.too_many_rows', ['%count%' => 4], 'validators'), $violations[0]->getMessage());
 
         // on DELETE all content is valid.
-        $this->assertCount(
-            0,
-            $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], 'DELETE')
-        );
+        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context->setNode([], new Content(), null, '');
+        $context->setConstraint(new ValidFieldableContentData());
+        $context->setGroup('DELETE');
+        $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
+        $this->assertCount(0, $context->getViolations());
 
         // Validate additional data (also nested).
-        $violations = $this->container->get('unite.cms.field_type_manager')
-            ->validateFieldData(
-                $field,
+        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context->setNode([], new Content(), null, '');
+        $context->setConstraint(new ValidFieldableContentData());
+        $context->setGroup('DEFAULT');
+        $this->container->get('unite.cms.field_type_manager')->validateFieldData(
+            $field,
+            [
+                ['f1' => 'baa'],
+                ['foo' => 'baa'],
                 [
-                    ['f1' => 'baa'],
-                    ['foo' => 'baa'],
-                    [
-                        'n1' => [
-                            [
-                                'n2' => [
-                                    [
-                                        'f2' => [
-                                            'domain' => 'foo',
-                                            'content_type' => 'baa',
-                                            'content' => 'any',
-                                        ],
+                    'n1' => [
+                        [
+                            'n2' => [
+                                [
+                                    'f2' => [
+                                        'domain' => 'foo',
+                                        'content_type' => 'baa',
+                                        'content' => 'any',
                                     ],
                                 ],
                             ],
                         ],
                     ],
-                    [
-                        'n1' => [
-                            [
-                                'n2' => [
-                                    ['f2' => ['domain' => 'foo'], 'foo' => 'baa',],
-                                ],
+                ],
+                [
+                    'n1' => [
+                        [
+                            'n2' => [
+                                ['f2' => ['domain' => 'foo'], 'foo' => 'baa',],
                             ],
                         ],
                     ],
-                ]
-            );
+                ],
+            ],
+            $context
+        );
+        $violations = $context->getViolations();
         $this->assertCount(4, $violations);
-        $this->assertEquals(
-            $field->getEntity()->getIdentifierPath('.').'.'.$field->getIdentifier().'.foo',
+        $this->assertEquals('['.$field->getEntity()->getIdentifierPath('][').']['.$field->getIdentifier().'][foo]',
             $violations[0]->getPropertyPath()
         );
-        $this->assertEquals('additional_data', $violations[0]->getMessage());
+        $this->assertEquals($this->container->get('translator')->trans('additional_data', [], 'validators'), $violations[0]->getMessage());
         $this->assertEquals('[f2]', $violations[1]->getPropertyPath());
-        $this->assertEquals('validation.wrong_definition', $violations[1]->getMessage());
+        $this->assertEquals($this->container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $violations[1]->getMessage());
         $this->assertEquals('[f2]', $violations[2]->getPropertyPath());
-        $this->assertEquals('validation.missing_definition', $violations[2]->getMessage());
-        $this->assertEquals(
-            $field->getEntity()->getIdentifierPath('.').'.'.$field->getIdentifier().'.n1.n2.foo',
+        $this->assertEquals($this->container->get('translator')->trans('missing_reference_definition', [], 'validators'), $violations[2]->getMessage());
+        $this->assertEquals('['.$field->getEntity()->getIdentifierPath('][').']['.$field->getIdentifier().'][n1][n2][foo]',
             $violations[3]->getPropertyPath()
         );
-        $this->assertEquals('additional_data', $violations[3]->getMessage());
+        $this->assertEquals($this->container->get('translator')->trans('additional_data', [], 'validators'), $violations[3]->getMessage());
 
         // on DELETE all content is valid.
-        $this->assertCount(
-            0,
-            $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], 'DELETE')
-        );
+        $context = new ExecutionContext($this->container->get('validator'), null, $this->container->get('translator'), 'validators');
+        $context->setNode([], new Content(), null, '');
+        $context->setConstraint(new ValidFieldableContentData());
+        $context->setGroup('DELETE');
+        $this->container->get('unite.cms.field_type_manager')->validateFieldData($field, [], $context);
+        $this->assertCount(0, $context->getViolations());
     }
 
     public function testFormBuilding()

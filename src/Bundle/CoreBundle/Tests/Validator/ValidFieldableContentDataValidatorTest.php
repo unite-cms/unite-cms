@@ -3,12 +3,15 @@
 namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Tests\ConstraintValidatorTestCase;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
@@ -77,20 +80,22 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
 
         $ct = new ContentType();
         $f1 = new ContentTypeField();
-        $f1->setIdentifier('f1');
+        $f1->setIdentifier('f1')->setType('type');
         $ct->addField($f1);
         $content = new Content();
         $content->setContentType($ct);
 
-        $fieldTypeManager = $this->createMock(FieldTypeManager::class);
-        $fieldTypeManager->expects($this->any())
-            ->method('validateFieldData')
-            ->willReturn([
-                new ConstraintViolation('m1', 'm1', [], 'root', 'root', 'i1'),
-                new ConstraintViolation('m2', 'm2', [], 'root', 'root', 'i2'),
-            ]);
+        $fieldTypeManagerMock = new FieldTypeManager();
+        $fieldTypeManagerMock->registerFieldType(new class extends FieldType {
+            const TYPE = "type";
+            public function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
+            {
+                $context->buildViolation('m1')->addViolation();
+                $context->buildViolation('m2')->addViolation();
+            }
+        });
 
-        $context = $this->validate(['f1' => 'foo'], new ValidFieldableContentDataValidator($fieldTypeManager), null, $content);
+        $context = $this->validate(['f1' => 'foo'], new ValidFieldableContentDataValidator($fieldTypeManagerMock), null, $content);
         $this->assertCount(2, $context->getViolations());
         $this->assertEquals('m1', $context->getViolations()->get(0)->getMessageTemplate());
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());

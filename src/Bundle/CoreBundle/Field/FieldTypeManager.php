@@ -43,18 +43,15 @@ class FieldTypeManager
 
     /**
      * Validates content data for given field by using the validation method of the field type.
+     *
      * @param FieldableField $field
      * @param mixed $data
-     *
-     * @param string $validation_group
-     * @return ConstraintViolation[]
+     * @param ExecutionContextInterface $context
      */
-    public function validateFieldData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+    public function validateFieldData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
         $fieldType = $this->getFieldType($field->getType());
-        $constraints = $fieldType->validateData($field, $data, $validation_group);
-
-        return $constraints;
+        $fieldType->validateData($field, $data, $context);
     }
 
     /**

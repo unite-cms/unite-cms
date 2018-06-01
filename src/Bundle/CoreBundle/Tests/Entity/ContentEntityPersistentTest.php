@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
@@ -68,22 +69,11 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         {
             const TYPE = "content_entity_test_mocked_field";
 
-            function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+            function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
             {
-                if ($data && $validation_group !== 'DELETE') {
-                    return [
-                        new ConstraintViolation(
-                            'mocked_message',
-                            'mocked_message',
-                            [],
-                            $data,
-                            'invalid',
-                            $data
-                        ),
-                    ];
+                if ($data && $context->getGroup() !== 'DELETE') {
+                    $context->buildViolation('mocked_message')->atPath('invalid')->addViolation();
                 }
-
-                return [];
             }
         };
 
@@ -122,22 +112,11 @@ class ContentEntityPersistentTest extends DatabaseAwareTestCase
         {
             const TYPE = "content_entity_test_mocked_field";
 
-            function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+            function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
             {
-                if ($data && $validation_group === 'DELETE') {
-                    return [
-                        new ConstraintViolation(
-                            'mocked_message',
-                            'mocked_message',
-                            [],
-                            $data,
-                            'invalid',
-                            $data
-                        ),
-                    ];
+                if ($data && $context->getGroup() === 'DELETE') {
+                    $context->buildViolation('mocked_message')->atPath('invalid')->addViolation();
                 }
-
-                return [];
             }
         };
 

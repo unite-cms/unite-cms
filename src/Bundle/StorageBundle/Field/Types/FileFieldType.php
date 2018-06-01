@@ -118,31 +118,27 @@ class FileFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
         // When deleting content, we don't need to validate data.
-        if($validation_group === 'DELETE') {
-            return [];
+        if(strtoupper($context->getGroup()) === 'DELETE') {
+            return;
         }
 
-        $violations = [];
-
         if(empty($data)) {
-            return $violations;
+            return;
         }
 
         if(empty($data['size']) || empty($data['id']) || empty($data['name']) || empty($data['checksum'])) {
-            $violations[] = $this->createViolation($field, 'validation.missing_definition');
+            $context->buildViolation('storage.missing_file_definition')->addViolation();
         }
 
         if(empty($violations)) {
             $preSignedUrl = new PreSignedUrl('', $data['id'], $data['name'], $data['checksum']);
             if (!$preSignedUrl->check($this->secret)) {
-                $violations[] = $this->createViolation($field, 'storage.invalid_checksum');
+                $context->buildViolation('storage.invalid_checksum')->addViolation();
             }
         }
-
-        return $violations;
     }
 
     /**

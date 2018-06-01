@@ -51,6 +51,20 @@ class WysiwygFieldType extends FieldType
         );
     }
 
+    protected function getOptionPath($option) {
+        $path = 'toolbar';
+
+        if(is_string($option)) {
+            $path .= '.'.$option;
+        }
+
+        elseif(is_array($option) && !empty($option)) {
+            $path .= '.'.array_keys($option)[0].':'.array_values($option)[0];
+        }
+
+        return $path;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -88,35 +102,15 @@ class WysiwygFieldType extends FieldType
                 if (is_array($option) && count(array_filter(array_keys($option), 'is_string')) === 0) {
                     foreach ($option as $child) {
                         if (!in_array($child, self::ALLOWED_TOOLBAR_OPTIONS)) {
-
-                            $path = 'toolbar';
-
-                            if(is_string($child)) {
-                                $path .= '.'.$child;
-                            }
-
-                            elseif(is_array($child) && !empty($child)) {
-                                $path .= '.'.array_keys($child)[0].':'.array_values($child)[0];
-                            }
-
-                            $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($path)->addViolation();
+                            $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($this->getOptionPath($child))->addViolation();
                         }
                     }
-                } // case 2: option is a string or object option
+                }
+
+                // case 2: option is a string or object option
                 else {
                     if (!in_array($option, self::ALLOWED_TOOLBAR_OPTIONS)) {
-
-                        $path = 'toolbar';
-
-                        if(is_string($option)) {
-                            $path .= '.'.$option;
-                        }
-
-                        elseif(is_array($option) && !empty($option)) {
-                            $path .= '.'.array_keys($option)[0].':'.array_values($option)[0];
-                        }
-
-                        $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($path)->addViolation();
+                        $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($this->getOptionPath($option))->addViolation();
                     }
                 }
             }

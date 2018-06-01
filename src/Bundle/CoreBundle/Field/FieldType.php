@@ -3,7 +3,6 @@
 namespace UniteCMS\CoreBundle\Field;
 
 use GraphQL\Type\Definition\Type;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -142,38 +141,5 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
-    {
-        return [];
-    }
-
-    protected function createViolation(
-        $field,
-        $message,
-        $messageTemplate = null,
-        $parameters = [],
-        $root = null,
-        string $propertyPath = null,
-        $invalidValue = null,
-        $plural = null
-    ) {
-
-        if (!$messageTemplate) {
-            $messageTemplate = $message;
-        }
-
-        if (!$propertyPath) {
-            $propertyPath = '['.$this->getIdentifier($field).']';
-        }
-
-        return new ConstraintViolation(
-            $message,
-            $messageTemplate,
-            $parameters,
-            $root,
-            $propertyPath,
-            $invalidValue,
-            $plural
-        );
-    }
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context) {}
 }

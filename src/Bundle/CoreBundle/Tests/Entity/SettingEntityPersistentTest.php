@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -68,22 +69,11 @@ class SettingEntityPersistentTest extends DatabaseAwareTestCase
         {
             const TYPE = "setting_entity_test_mocked_field";
 
-            function validateData(FieldableField $field, $data, $validation_group = 'DEFAULT'): array
+            function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
             {
                 if ($data) {
-                    return [
-                        new ConstraintViolation(
-                            'mocked_message',
-                            'mocked_message',
-                            [],
-                            $data,
-                            'invalid',
-                            $data
-                        ),
-                    ];
+                    $context->buildViolation('mocked_message')->atPath('invalid')->addViolation();
                 }
-
-                return [];
             }
         };
 
