@@ -68,7 +68,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->em->persist($org);
         $this->em->flush($org);
 
-        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfig);
+        $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfig);
         $this->domain->setOrganization($org);
         $this->em->persist($this->domain);
         $this->em->flush($this->domain);
@@ -77,7 +77,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
     public function testContentCreateEvent()
     {
 
-        $this->container->get('unite.cms.field_type_manager')->registerFieldType(
+        static::$container->get('unite.cms.field_type_manager')->registerFieldType(
             new class extends FieldType
             {
                 const TYPE = 'testeventhook';
@@ -112,7 +112,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
     public function testContentUpdateEvent()
     {
 
-        $this->container->get('unite.cms.field_type_manager')->registerFieldType(
+        static::$container->get('unite.cms.field_type_manager')->registerFieldType(
             new class extends FieldType
             {
                 const TYPE = 'testeventhook';
@@ -178,7 +178,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
             }
         };
 
-        $this->container->get('unite.cms.field_type_manager')->registerFieldType($mock);
+        static::$container->get('unite.cms.field_type_manager')->registerFieldType($mock);
 
         $content = new Content();
         $content->setContentType($this->domain->getContentTypes()->first());
@@ -261,7 +261,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
             }
         };
 
-        $this->container->get('unite.cms.field_type_manager')->registerFieldType($mock);
+        static::$container->get('unite.cms.field_type_manager')->registerFieldType($mock);
 
         $setting = new Setting();
         $setting->setSettingType($this->domain->getSettingTypes()->first());

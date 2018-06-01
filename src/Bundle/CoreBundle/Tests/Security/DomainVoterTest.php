@@ -60,10 +60,10 @@ class DomainVoterTest extends SecurityVoterTestCase
     public function testCRUDActions()
     {
 
-        $dm = $this->container->get('security.authorization_checker');
+        $dm = static::$container->get('security.authorization_checker');
 
         // Platform admins can preform all actions.
-        $this->container->get('security.token_storage')->setToken($this->u['platform']);
+        static::$container->get('security.token_storage')->setToken($this->u['platform']);
         $this->assertTrue($dm->isGranted([DomainVoter::CREATE], Domain::class));
         $this->assertTrue($dm->isGranted([DomainVoter::LIST], Domain::class));
         $this->assertTrue($dm->isGranted([DomainVoter::VIEW], $this->domain1));
@@ -71,40 +71,40 @@ class DomainVoterTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([DomainVoter::DELETE], $this->domain1));
 
         // Organization Admins are allowed to add new Domains.
-        $this->container->get('security.token_storage')->setToken($this->u['domain_admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_admin']);
         $this->assertFalse($dm->isGranted([DomainVoter::CREATE], Domain::class));
 
-        $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertFalse($dm->isGranted([DomainVoter::CREATE], Domain::class));
 
-        $this->container->get('security.token_storage')->setToken($this->u['user']);
+        static::$container->get('security.token_storage')->setToken($this->u['user']);
         $this->assertFalse($dm->isGranted([DomainVoter::CREATE], Domain::class));
 
-        $this->container->get('security.token_storage')->setToken($this->u['anonymous']);
+        static::$container->get('security.token_storage')->setToken($this->u['anonymous']);
         $this->assertFalse($dm->isGranted([DomainVoter::CREATE], Domain::class));
 
-        $this->container->get('security.token_storage')->setToken($this->u['admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['admin']);
         $this->assertTrue($dm->isGranted([DomainVoter::CREATE], Domain::class));
 
 
         // Add Organization Users are allowed to list Domains.
-        $this->container->get('security.token_storage')->setToken($this->u['domain_admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_admin']);
         $this->assertTrue($dm->isGranted([DomainVoter::LIST], Domain::class));
 
-        $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertTrue($dm->isGranted([DomainVoter::LIST], Domain::class));
 
-        $this->container->get('security.token_storage')->setToken($this->u['user']);
+        static::$container->get('security.token_storage')->setToken($this->u['user']);
         $this->assertTrue($dm->isGranted([DomainVoter::LIST], Domain::class));
 
-        $this->container->get('security.token_storage')->setToken($this->u['anonymous']);
+        static::$container->get('security.token_storage')->setToken($this->u['anonymous']);
         $this->assertFalse($dm->isGranted([DomainVoter::LIST], Domain::class));
 
-        $this->container->get('security.token_storage')->setToken($this->u['admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['admin']);
         $this->assertTrue($dm->isGranted([DomainVoter::LIST], Domain::class));
 
         // Organization Admins are allowed to view/update/delete all domains of his_her organization.
-        $this->container->get('security.token_storage')->setToken($this->u['admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['admin']);
         $this->assertTrue($dm->isGranted([DomainVoter::VIEW], $this->domain2));
         $this->assertTrue($dm->isGranted([DomainVoter::UPDATE], $this->domain2));
         $this->assertTrue($dm->isGranted([DomainVoter::DELETE], $this->domain2));
@@ -113,13 +113,13 @@ class DomainVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([DomainVoter::DELETE], $this->domain1));
 
         // Organization Members are not allowed to view/update/delete domains without a membership.
-        $this->container->get('security.token_storage')->setToken($this->u['user']);
+        static::$container->get('security.token_storage')->setToken($this->u['user']);
         $this->assertFalse($dm->isGranted([DomainVoter::VIEW], $this->domain2));
         $this->assertFalse($dm->isGranted([DomainVoter::UPDATE], $this->domain2));
         $this->assertFalse($dm->isGranted([DomainVoter::DELETE], $this->domain2));
 
         // Domain Admins are allowed to view/update their domains.
-        $this->container->get('security.token_storage')->setToken($this->u['domain_admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_admin']);
         $this->assertTrue($dm->isGranted([DomainVoter::VIEW], $this->domain1));
         $this->assertTrue($dm->isGranted([DomainVoter::UPDATE], $this->domain1));
         $this->assertFalse($dm->isGranted([DomainVoter::DELETE], $this->domain1));
@@ -128,7 +128,7 @@ class DomainVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([DomainVoter::DELETE], $this->domain2));
 
         // Domain Members are allowed to view their domains.
-        $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertTrue($dm->isGranted([DomainVoter::VIEW], $this->domain1));
         $this->assertFalse($dm->isGranted([DomainVoter::UPDATE], $this->domain1));
         $this->assertFalse($dm->isGranted([DomainVoter::DELETE], $this->domain1));
@@ -137,7 +137,7 @@ class DomainVoterTest extends SecurityVoterTestCase
         $this->assertFalse($dm->isGranted([DomainVoter::DELETE], $this->domain2));
 
         // Anonymous users are not allowed to access any domain.
-        $this->container->get('security.token_storage')->setToken($this->u['anonymous']);
+        static::$container->get('security.token_storage')->setToken($this->u['anonymous']);
         $this->assertFalse($dm->isGranted([DomainVoter::VIEW], $this->domain1));
         $this->assertFalse($dm->isGranted([DomainVoter::UPDATE], $this->domain1));
         $this->assertFalse($dm->isGranted([DomainVoter::DELETE], $this->domain1));

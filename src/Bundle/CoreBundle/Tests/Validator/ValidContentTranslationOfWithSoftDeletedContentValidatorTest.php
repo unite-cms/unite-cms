@@ -47,13 +47,13 @@ class ValidContentTranslationOfWithSoftDeletedContentValidatorTest extends Datab
         // And reload our main object.
         $reloadedObject = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($object->getId());
 
-        $errors = $this->container->get('validator')->validate($reloadedObject);
+        $errors = static::$container->get('validator')->validate($reloadedObject);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.unique_translations', $errors->get(0)->getMessageTemplate());
 
         $reloadedObject->setLocale('en');
         $this->em->persist($reloadedObject);
-        $errors = $this->container->get('validator')->validate($reloadedObject);
+        $errors = static::$container->get('validator')->validate($reloadedObject);
         $this->assertCount(0, $errors);
     }
 }

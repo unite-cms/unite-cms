@@ -11,7 +11,7 @@ class TextFieldTypeTest extends FieldTypeTestCase
 
         // Content Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('text');
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
     }
 
@@ -22,7 +22,7 @@ class TextFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('text');
         $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
 
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
     }

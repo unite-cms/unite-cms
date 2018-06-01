@@ -11,7 +11,7 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
     {
         // DateTime Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('datetime');
-        $this->assertCount(0, $this->container->get('validator')->validate($ctField));
+        $this->assertCount(0, static::$container->get('validator')->validate($ctField));
     }
 
     public function testDateTimeTypeFieldTypeWithInvalidSettings()
@@ -19,7 +19,7 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         // DateTime Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('datetime');
         $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
 
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
@@ -30,7 +30,7 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('datetime');
 
         $content = new Content();
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);
 
@@ -44,7 +44,7 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
             $ctField->getIdentifier() => '2012-01-01 10:10:10',
         ]);
 
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);
 

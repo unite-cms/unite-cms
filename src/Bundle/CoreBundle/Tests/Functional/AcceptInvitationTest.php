@@ -64,14 +64,14 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Test password reset')->setIdentifier('password_reset');
 
-        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
@@ -86,7 +86,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
             ->setName('Domain Editor')
             ->setRoles([User::ROLE_USER])
             ->setPassword(
-                $this->container->get('security.password_encoder')->encodePassword(
+                static::$container->get('security.password_encoder')->encodePassword(
                     $this->users['domain_editor'],
                     $this->userPassword
                 )
@@ -104,7 +104,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
             ->setName('Domain Editor 2')
             ->setRoles([User::ROLE_USER])
             ->setPassword(
-                $this->container->get('security.password_encoder')->encodePassword(
+                static::$container->get('security.password_encoder')->encodePassword(
                     $this->users['domain_editor2'],
                     $this->userPassword
                 )
@@ -142,11 +142,11 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation');
         $this->assertCount(1, $crawler->filter('div.uk-alert-danger'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.token_missing'), trim($crawler->filter('div.uk-alert-danger')->text()));
+        $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.token_missing'), trim($crawler->filter('div.uk-alert-danger')->text()));
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation?token=XXX');
         $this->assertCount(1, $crawler->filter('div.uk-alert-danger'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.token_not_found'), trim($crawler->filter('div.uk-alert-danger')->text()));
+        $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.token_not_found'), trim($crawler->filter('div.uk-alert-danger')->text()));
     }
 
     /**
@@ -166,7 +166,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
+        $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
 
     /**
@@ -225,7 +225,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
             $user->getDomains()->first()->getDomain()->getIdentifier()
         );
         $this->assertEquals('This is my name', $user->getName());
-        $this->assertTrue($this->container->get('security.password_encoder')->isPasswordValid($user, 'password1'));
+        $this->assertTrue(static::$container->get('security.password_encoder')->isPasswordValid($user, 'password1'));
 
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
@@ -248,7 +248,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
+        $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
 
     /**
@@ -269,7 +269,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
-        $this->assertEquals($this->container->get('translator')->trans('profile.accept_invitation.already_member'), trim($crawler->filter('div.uk-alert-warning')->text()));
+        $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.already_member'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
 
     /**
@@ -298,7 +298,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Try to submit the form with operation accept
         $this->assertCount(0, $this->users['domain_editor2']->getDomains());
-        $form = $crawler->selectButton($this->container->get('translator')->trans('invitation.accept'))->form();
+        $form = $crawler->selectButton(static::$container->get('translator')->trans('invitation.accept'))->form();
         $crawler = $this->client->submit($form);
 
         // Should not show a form
@@ -347,7 +347,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Try to submit the form with operation reject
         $this->assertCount(0, $this->users['domain_editor2']->getDomains());
-        $form = $crawler->selectButton($this->container->get('translator')->trans('invitation.reject'))->form();
+        $form = $crawler->selectButton(static::$container->get('translator')->trans('invitation.reject'))->form();
         $crawler = $this->client->submit($form);
 
         // Should not show a form
@@ -390,7 +390,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->client->submit($form);
 
         // There should be a user token in the client session.
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->container->get('router')->generate('unitecms_core_domain_view', [
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => $invitation->getDomainMemberType()->getDomain()->getOrganization()->getIdentifier(),
             'domain' => $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
         ])));

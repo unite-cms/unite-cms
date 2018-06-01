@@ -151,7 +151,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
             $this->em->flush($org);
 
             foreach($domains as $domain_data) {
-                $domain = $this->container->get('unite.cms.domain_definition_parser')->parse($domain_data);
+                $domain = static::$container->get('unite.cms.domain_definition_parser')->parse($domain_data);
                 $domain->setOrganization($org);
                 $this->domains[$domain->getIdentifier()] = $domain;
                 $this->em->persist($domain);
@@ -171,21 +171,21 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         }
 
         $this->controller = new GraphQLApiController();
-        $this->controller->setContainer($this->container);
+        $this->controller->setContainer(static::$container);
     }
 
     private function api(Domain $domain, UserInterface $user, string $query, array $variables = []) {
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'domain');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $domain);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $domain);
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'organization');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), $domain->getOrganization());
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $domain->getOrganization());
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'initialized');
         $reflector->setAccessible(true);
-        $reflector->setValue($this->container->get('unite.cms.manager'), true);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), true);
 
-        $this->container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, 'api', []));
+        static::$container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, 'api', []));
 
         $request = new Request([], [], [
             'organization' => $domain->getOrganization(),

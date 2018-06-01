@@ -23,7 +23,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
         // Try to validate empty Field.
         $field = new DomainMemberTypeField();
         $field->setIdentifier('')->setTitle('')->setType('');
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(5, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -52,7 +52,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
             ->getDomain()->setTitle('domain')->setIdentifier('domain')->setOrganization(new Organization())
             ->getOrganization()->setIdentifier('org')->setTitle('org');
 
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(4, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -72,7 +72,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
             ->setTitle($this->generateRandomUTF8String(255))
             ->setIdentifier('identifier')
             ->setType('invalid');
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('type', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.invalid_field_type', $errors->get(0)->getMessage());
@@ -82,7 +82,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
             ->setIdentifier('#')
             ->setType('text');
 
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -103,7 +103,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
             ->setEntity($field->getEntity())
             ->setType($field->getType());
 
-        $errors = $this->container->get('validator')->validate($field2);
+        $errors = static::$container->get('validator')->validate($field2);
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.identifier_already_taken', $errors->get(0)->getMessage());
@@ -137,7 +137,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
         };
 
         // Inject the field type
-        $this->container->get('unite.cms.field_type_manager')->registerFieldType($mockedFieldType);
+        static::$container->get('unite.cms.field_type_manager')->registerFieldType($mockedFieldType);
 
         $field = new DomainMemberTypeField();
         $field
@@ -152,14 +152,14 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
 
         // 2. Set invalid field settings.
         $field->setSettings(new FieldableFieldSettings(['invalid' => true]));
-        $errors = $this->container->get('validator')->validate($field);
+        $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
         $this->assertEquals('mocked_message', $errors->get(0)->getMessage());
 
         // 3. Set valid field settings.
         $field->setSettings(new FieldableFieldSettings(['other' => true]));
-        $this->assertCount(0, $this->container->get('validator')->validate($field));
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
     }
 
     public function testContentFieldWeight()
@@ -256,7 +256,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
             ->getEntity()->setIdentifier('ct')->setTitle('ct')->setDomain(new Domain())
             ->getDomain()->setTitle('domain')->setIdentifier('domain')->setOrganization(new Organization())
             ->getOrganization()->setIdentifier('org')->setTitle('org');
-        $errors = $this->container->get('validator')->validate($ctf);
+        $errors = static::$container->get('validator')->validate($ctf);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
@@ -271,7 +271,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
             ->getEntity()->setIdentifier('ct')->setTitle('ct')->setDomain(new Domain())
             ->getDomain()->setTitle('domain')->setIdentifier('domain')->setOrganization(new Organization())
             ->getOrganization()->setIdentifier('org')->setTitle('org');;
-        $errors = $this->container->get('validator')->validate($stf);
+        $errors = static::$container->get('validator')->validate($stf);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());

@@ -17,7 +17,7 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         // Try to validate empty ContentType.
         $contentType = new ContentType();
         $contentType->setIdentifier('')->setTitle('')->setDescription('')->setIcon('');
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(3, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -32,33 +32,33 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         // Try to save a too long icon name or an icon name with special chars.
         $contentType->setTitle('ct1')->setIdentifier('ct1')->setDomain(new Domain());
         $contentType->setIcon($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
 
         $contentType->setIcon('# ');
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('icon', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.invalid_characters', $errors->get(0)->getMessage());
 
         // Try to save invalid title.
         $contentType->setIcon(null)->setTitle($this->generateRandomUTF8String(256));
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
 
         // Try to save invalid identifier.
         $contentType->setTitle($this->generateRandomUTF8String(255))->setIdentifier('X ');
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.invalid_characters', $errors->get(0)->getMessage());
 
         $contentType->setIdentifier($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.too_long', $errors->get(0)->getMessage());
@@ -88,42 +88,42 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->em->persist($domain22);
         $this->em->persist($contentType);
         $this->em->flush($contentType);
-        $this->assertCount(0, $this->container->get('validator')->validate($contentType));
+        $this->assertCount(0, static::$container->get('validator')->validate($contentType));
 
         // CT2 one the same domain with the same identifier should not be valid.
         $ct2 = new ContentType();
         $ct2->setIdentifier('org1_domain1_ct1')->setTitle('org1_domain1_ct1')->setDomain($domain1);
-        $this->assertCount(1, $this->container->get('validator')->validate($ct2));
+        $this->assertCount(1, static::$container->get('validator')->validate($ct2));
 
         $ct2->setIdentifier('org1_domain1_ct2');
-        $this->assertCount(0, $this->container->get('validator')->validate($ct2));
+        $this->assertCount(0, static::$container->get('validator')->validate($ct2));
 
         $ct2->setIdentifier('org1_domain1_ct1')->setDomain($domain2);
-        $this->assertCount(0, $this->container->get('validator')->validate($ct2));
+        $this->assertCount(0, static::$container->get('validator')->validate($ct2));
 
         $ct2->setIdentifier('org1_domain1_ct1')->setDomain($domain21);
-        $this->assertCount(0, $this->container->get('validator')->validate($ct2));
+        $this->assertCount(0, static::$container->get('validator')->validate($ct2));
 
         $ct2->setIdentifier('org1_domain1_ct1')->setDomain($domain22);
-        $this->assertCount(0, $this->container->get('validator')->validate($ct2));
+        $this->assertCount(0, static::$container->get('validator')->validate($ct2));
 
 
         // Try to set invalid permissions.
         $contentType->setPermissions(['invalid' => '(((']);
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('permissions', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.invalid_selection', $errors->get(0)->getMessage());
 
         // Test invalid view.
         $contentType->setPermissions([])->addView(new View());
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('views', $errors->get(0)->getPropertyPath());
 
         // Test ContentType without all view.
         $contentType->getViews()->clear();
-        $errors = $this->container->get('validator')->validate($contentType);
+        $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('views', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.missing_default_view', $errors->get(0)->getMessage());
@@ -133,7 +133,7 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $contentType2->setTitle($contentType->getTitle())->setIdentifier($contentType->getIdentifier())->setDomain(
             $contentType->getDomain()
         );
-        $errors = $this->container->get('validator')->validate($contentType2);
+        $errors = static::$container->get('validator')->validate($contentType2);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -144,11 +144,11 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $ct3->setTitle('CT3')->setIdentifier('CT3')->setDomain($contentType->getDomain());
         $this->assertTrue($ct3->getViews()->containsKey(View::DEFAULT_VIEW_IDENTIFIER));
 
-        $errors = $this->container->get('validator')->validate($ct3);
+        $errors = static::$container->get('validator')->validate($ct3);
         $this->assertCount(0, $errors);
 
         $ct3->getViews()->remove(View::DEFAULT_VIEW_IDENTIFIER);
-        $errors = $this->container->get('validator')->validate($ct3);
+        $errors = static::$container->get('validator')->validate($ct3);
         $this->assertCount(1, $errors);
         $this->assertEquals('views', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.missing_default_view', $errors->get(0)->getMessage());
@@ -160,14 +160,14 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertTrue($ct3->getViews()->containsKey(View::DEFAULT_VIEW_IDENTIFIER));
         $this->assertTrue($ct3->getViews()->containsKey('other'));
 
-        $errors = $this->container->get('validator')->validate($ct3);
+        $errors = static::$container->get('validator')->validate($ct3);
         $this->assertCount(0, $errors);
         $this->em->persist($ct3);
         $this->em->flush($ct3);
         $this->em->refresh($ct3);
 
         $ct3->getViews()->remove('other');
-        $errors = $this->container->get('validator')->validate($ct3);
+        $errors = static::$container->get('validator')->validate($ct3);
         $this->assertCount(0, $errors);
         $this->em->persist($ct3);
         $this->em->flush($ct3);
@@ -222,7 +222,7 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
 
         $ct = new ContentType();
         $ct->setTitle('title')->setIdentifier(array_pop($reserved))->setDomain(new Domain());
-        $errors = $this->container->get('validator')->validate($ct);
+        $errors = static::$container->get('validator')->validate($ct);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());

@@ -7,12 +7,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class ContainerAwareTestCase extends KernelTestCase
 {
-
-    /**
-     * @var ContainerInterface $container
-     */
-    protected $container;
-
     protected function generateRandomMachineName($count = 0)
     {
         $allowed = str_split('abcdefghijklmnopqrstuvwxyz0123456789_');
@@ -31,13 +25,6 @@ abstract class ContainerAwareTestCase extends KernelTestCase
 
     public function setUp()
     {
-        $kernel = static::bootKernel(['debug' => false]);
-        $this->container = $kernel->getContainer();
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
-        $this->container = null;
+        static::bootKernel(['debug' => false]);
     }
 }

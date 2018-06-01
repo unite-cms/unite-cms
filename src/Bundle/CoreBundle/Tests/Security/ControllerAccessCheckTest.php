@@ -81,13 +81,13 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Test controller access check')->setIdentifier('access_check');
-        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
         $this->domain->addPermission(DomainVoter::UPDATE, 'member.type == "editor"');
 
@@ -414,7 +414,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(
             ['identifier' => 'access_check',]
         );
-        $domain2 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org);
 
         $content2 = new Content();
@@ -626,7 +626,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
         $org2 = new Organization();
         $org2->setTitle('Org 2')->setIdentifier('access_check2');
-        $domain2 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org2);
 
         $content2 = new Content();
@@ -768,7 +768,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
         $org2 = new Organization();
         $org2->setTitle('Org 2')->setIdentifier('access_check2');
-        $domain2 = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org2);
 
         $content2 = new Content();

@@ -74,13 +74,13 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Test controller access check')->setIdentifier('access_check');
-        $this->domain = $this->container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->domain2 = new Domain();
@@ -124,7 +124,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
     public function testAccessAPIEndpoint() {
 
         // Try to access without token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
+        $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
         ], Router::ABSOLUTE_URL), [], [], [
@@ -134,7 +134,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
 
         // Try to access with wrong token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
+        $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
             'token' => $this->apiClient2->getToken(),
@@ -145,7 +145,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
         // Try to access with valid token.
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
+        $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
             'token' => $this->apiClient1->getToken(),
@@ -154,7 +154,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Try to access with fallback but no user loggedin.
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
+        $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
         ], Router::ABSOLUTE_URL), [], [], [
@@ -177,7 +177,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $session->save();
         $cookie = new Cookie($session->getName(), $session->getId());
         $this->client->getCookieJar()->set($cookie);
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
+        $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
         ], Router::ABSOLUTE_URL), [], [], [
@@ -200,7 +200,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $session->save();
         $cookie = new Cookie($session->getName(), $session->getId());
         $this->client->getCookieJar()->set($cookie);
-        $this->client->request('POST', $this->container->get('router')->generate('unitecms_core_api', [
+        $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
             'organization' => $this->organization->getIdentifier(),
         ], Router::ABSOLUTE_URL), [], [], [

@@ -15,7 +15,7 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
 
         // Empty settings can be valid.
         $ctField = $this->createContentTypeField('sortindex');
-        $this->assertCount(0, $this->container->get('validator')->validate($ctField));
+        $this->assertCount(0, static::$container->get('validator')->validate($ctField));
     }
 
     public function testAutoUpdateSortIndexOnInsertUpdateDelete() {

@@ -88,17 +88,17 @@ class SettingVoterApiClientTest extends SecurityVoterTestCase
     public function testCRUDActions()
     {
 
-        $dm = $this->container->get('security.authorization_checker');
+        $dm = static::$container->get('security.authorization_checker');
 
         // All other users can preform the actions they have access to.
-        $this->container->get('security.token_storage')->setToken($this->u['domain_admin']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_admin']);
         $this->assertTrue($dm->isGranted([SettingVoter::VIEW], $this->setting1));
         $this->assertTrue($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 
         $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting2));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting2));
 
-        $this->container->get('security.token_storage')->setToken($this->u['domain_editor']);
+        static::$container->get('security.token_storage')->setToken($this->u['domain_editor']);
         $this->assertFalse($dm->isGranted([SettingVoter::VIEW], $this->setting1));
         $this->assertFalse($dm->isGranted([SettingVoter::UPDATE], $this->setting1));
 

@@ -32,7 +32,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
     {
         parent::setUp();
 
-        $this->client = $this->container->get('test.client');
+        $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
 
         $org = new Organization();
@@ -47,10 +47,10 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
             ->setDomainMemberType($domain->getDomainMemberTypes()->first())
             ->setRequestedAt(new \DateTime('now'));
 
-        $this->container->get('doctrine.orm.entity_manager')->persist($org);
-        $this->container->get('doctrine.orm.entity_manager')->persist($domain);
-        $this->container->get('doctrine.orm.entity_manager')->persist($this->domainInvitation);
-        $this->container->get('doctrine.orm.entity_manager')->flush();
+        static::$container->get('doctrine.orm.entity_manager')->persist($org);
+        static::$container->get('doctrine.orm.entity_manager')->persist($domain);
+        static::$container->get('doctrine.orm.entity_manager')->persist($this->domainInvitation);
+        static::$container->get('doctrine.orm.entity_manager')->flush();
     }
 
     public function testInvitationRegistrationEvents() {
@@ -86,7 +86,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->domainInvitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->domainInvitation->getToken()]));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -138,7 +138,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', $this->container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->domainInvitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->domainInvitation->getToken()]));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);

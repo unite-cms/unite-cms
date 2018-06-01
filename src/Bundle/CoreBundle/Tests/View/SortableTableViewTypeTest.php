@@ -49,10 +49,10 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $view = $this->createInstance();
 
         // View should be valid.
-        $this->assertCount(0, $this->container->get('validator')->validate($view));
+        $this->assertCount(0, static::$container->get('validator')->validate($view));
 
         // Test templateRenderParameters.
-        $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
+        $parameters = static::$container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals(
             [
@@ -71,7 +71,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $view->setSettings(new ViewSettings());
 
         // View should not be valid.
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.required', $errors->get(0)->getMessage());
 
@@ -85,13 +85,13 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         );
 
         // View should not be valid.
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
 
         // Test validating invalid columns.
         $view->setSettings(new ViewSettings(['columns' => 'string', 'sort_field' => 'position']));
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.invalid_columns_definition', $errors->get(0)->getMessage());
         $this->assertEquals('settings.columns', $errors->get(0)->getPropertyPath());
@@ -99,7 +99,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $view->setSettings(
             new ViewSettings(['columns' => ['foo' => 'Foo', 'baa' => 'Baa'], 'sort_field' => 'position'])
         );
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(2, $errors);
         $this->assertEquals('validation.unknown_column', $errors->get(0)->getMessage());
         $this->assertEquals('settings.columns.foo', $errors->get(0)->getPropertyPath());
@@ -108,13 +108,13 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
 
         // Test validating invalid sort_field.
         $view->setSettings(new ViewSettings(['sort_field' => ['foo']]));
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.invalid_sort_field_definition', $errors->get(0)->getMessage());
         $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_field' => 'foo']));
-        $errors = $this->container->get('validator')->validate($view);
+        $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.unknown_column', $errors->get(0)->getMessage());
         $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
@@ -141,10 +141,10 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $view->getContentType()->addField($field);
 
         // View should be valid.
-        $this->assertCount(0, $this->container->get('validator')->validate($view));
+        $this->assertCount(0, static::$container->get('validator')->validate($view));
 
         // Test templateRenderParameters.
-        $parameters = $this->container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
+        $parameters = static::$container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals(
             [

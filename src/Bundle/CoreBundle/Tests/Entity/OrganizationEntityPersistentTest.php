@@ -18,7 +18,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
 
         // Try to validate empty Organization.
         $org1->setTitle('')->setIdentifier('');
-        $errors = $this->container->get('validator')->validate($org1);
+        $errors = static::$container->get('validator')->validate($org1);
         $this->assertCount(2, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -29,7 +29,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
 
         // Try to validate organization with too long title and identifier.
         $org1->setTitle($this->generateRandomUTF8String(256))->setIdentifier($this->generateRandomMachineName(256));
-        $errors = $this->container->get('validator')->validate($org1);
+        $errors = static::$container->get('validator')->validate($org1);
         $this->assertCount(2, $errors);
 
         $this->assertEquals('title', $errors->get(0)->getPropertyPath());
@@ -42,7 +42,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $org1
             ->setTitle($this->generateRandomUTF8String(255))
             ->setIdentifier($this->generateRandomMachineName(254).':');
-        $errors = $this->container->get('validator')->validate($org1);
+        $errors = static::$container->get('validator')->validate($org1);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -50,7 +50,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
 
         // Try to validate valid organization.
         $org1->setIdentifier($this->generateRandomMachineName(255));
-        $this->assertCount(0, $this->container->get('validator')->validate($org1));
+        $this->assertCount(0, static::$container->get('validator')->validate($org1));
 
         // Save the organization to the database.
         $this->em->persist($org1);
@@ -59,7 +59,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         // Try validate organization with the same identifier.
         $org2 = new Organization();
         $org2->setTitle($org1->getTitle())->setIdentifier($org1->getIdentifier());
-        $errors = $this->container->get('validator')->validate($org2);
+        $errors = static::$container->get('validator')->validate($org2);
         $this->assertCount(1, $errors);
 
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
@@ -68,14 +68,14 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         // Try to add an invalid Domain to the organization.
         $org1->addDomain(new Domain());
 
-        $errors = $this->container->get('validator')->validate($org1);
+        $errors = static::$container->get('validator')->validate($org1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('domains', $errors->get(0)->getPropertyPath());
 
         // Try to delete non empty organization.
         $org1->addDomain(new Domain());
 
-        $errors = $this->container->get('validator')->validate($org1, null, ['DELETE']);
+        $errors = static::$container->get('validator')->validate($org1, null, ['DELETE']);
         $this->assertCount(1, $errors);
         $this->assertEquals('domains', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.should_be_empty', $errors->get(0)->getMessage());
@@ -96,7 +96,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $user1->addOrganization($org1Member);
 
         $this->assertCount(1, $user1->getOrganizations());
-        $this->assertCount(0, $this->container->get('validator')->validate($user1));
+        $this->assertCount(0, static::$container->get('validator')->validate($user1));
 
         $this->em->persist($org1);
         $this->em->persist($org2);
@@ -108,7 +108,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $org2Member->setOrganization($org1);
         $user1->addOrganization($org2Member);
         $this->assertCount(2, $user1->getOrganizations());
-        $errors = $this->container->get('validator')->validate($user1);
+        $errors = static::$container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('organization', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.user_already_member_of_organization', $errors->get(0)->getMessage());
@@ -118,7 +118,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $org2Member2->setOrganization($org2);
         $user1->setOrganizations([$org1Member, $org2Member2]);
         $this->assertCount(2, $user1->getOrganizations());
-        $this->assertCount(0, $this->container->get('validator')->validate($user1));
+        $this->assertCount(0, static::$container->get('validator')->validate($user1));
     }
 
     public function testSetDomainsToOrganization()
@@ -164,22 +164,22 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $user1->addOrganization($org1Member);
 
         $org1Member->setRoles(['UNKNOWN_ROLE']);
-        $errors = $this->container->get('validator')->validate($user1);
+        $errors = static::$container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('organization', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.invalid_selection', $errors->get(0)->getMessage());
 
         $org1Member->setRoles([]);
-        $errors = $this->container->get('validator')->validate($user1);
+        $errors = static::$container->get('validator')->validate($user1);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('organization', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.not_blank', $errors->get(0)->getMessage());
 
         $org1Member->setRoles([Organization::ROLE_USER]);
-        $this->assertCount(0, $this->container->get('validator')->validate($user1));
+        $this->assertCount(0, static::$container->get('validator')->validate($user1));
 
         $org1Member->setRoles([Organization::ROLE_ADMINISTRATOR]);
-        $this->assertCount(0, $this->container->get('validator')->validate($user1));
+        $this->assertCount(0, static::$container->get('validator')->validate($user1));
     }
 
     public function testReservedIdentifiers()
@@ -189,7 +189,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
 
         $org = new Organization();
         $org->setTitle('title')->setIdentifier(array_pop($reserved));
-        $errors = $this->container->get('validator')->validate($org);
+        $errors = static::$container->get('validator')->validate($org);
         $this->assertCount(1, $errors);
         $this->assertStringStartsWith('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('validation.reserved_identifier', $errors->get(0)->getMessage());
@@ -197,7 +197,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
 
     public function testOrganizationMemberDeleteValidation() {
 
-        $validator = $this->container->get('validator');
+        $validator = static::$container->get('validator');
 
         // Updating or deleting organization member is only allowed if after that action there is at least one admin remaining.
         $org = new Organization();

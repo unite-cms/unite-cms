@@ -11,7 +11,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
     {
         // Date Type Field with empty settings should be valid.
         $ctField = $this->createContentTypeField('date');
-        $this->assertCount(0, $this->container->get('validator')->validate($ctField));
+        $this->assertCount(0, static::$container->get('validator')->validate($ctField));
     }
 
     public function testDateTypeFieldTypeWithInvalidSettings()
@@ -19,7 +19,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
         // Date Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('date');
         $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
-        $errors = $this->container->get('validator')->validate($ctField);
+        $errors = static::$container->get('validator')->validate($ctField);
 
         $this->assertCount(1, $errors);
         $this->assertEquals('validation.additional_data', $errors->get(0)->getMessage());
@@ -30,7 +30,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('date');
 
         $content = new Content();
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);
 
@@ -44,7 +44,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
             $ctField->getIdentifier() => '2012-01-01',
         ]);
 
-        $form = $this->container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);
 
