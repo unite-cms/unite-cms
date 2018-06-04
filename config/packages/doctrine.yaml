@@ -39,3 +39,5 @@ stof_doctrine_extensions:
             softdeleteable: true
             timestampable: true
             loggable: true
+    class:
+        loggable: UniteCMS\CoreBundle\Subscriber\LoggableListener

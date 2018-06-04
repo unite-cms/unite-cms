@@ -13,12 +13,11 @@ services:
     tags:
       - { name: doctrine.event_listener, event: prePersist }
 
-  # When recovering content, create a log entry
-  UniteCMS\CoreBundle\Subscriber\RecoverContentLogger:
+  # When deleting fieldable content, remove all log entries.
+  UniteCMS\CoreBundle\Subscriber\DeleteFieldableContentSubscriber:
     public: false
-    arguments: ['@security.token_storage']
     tags:
-      - { name: doctrine.event_listener, event: onFlush }
+      - { name: doctrine.event_listener, event: preRemove }
 
   # When inserting, updating or deleting content, the dispatcher notifies all parts of unite CMS about this change.
   UniteCMS\CoreBundle\Subscriber\ContentEventDispatcher:
