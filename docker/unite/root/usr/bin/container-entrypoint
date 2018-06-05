@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+ep /etc/nginx/conf.d/*
+#ep /etc/php.ini
+#ep /etc/php-fpm.conf
+#ep /etc/php-fpm.d/*
+
+exec "$@"
