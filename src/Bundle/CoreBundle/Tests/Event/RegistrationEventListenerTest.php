@@ -28,6 +28,11 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
      */
     private $invitation;
 
+    /**
+     * @var Domain $domain
+     */
+    private $domain;
+
     public function setUp()
     {
         parent::setUp();
@@ -37,8 +42,8 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
 
         $org = new Organization();
         $org->setIdentifier('org')->setTitle('Org');
-        $domain = new Domain();
-        $domain->setIdentifier('domain')->setTitle('Domain')->setOrganization($org);
+        $this->domain = new Domain();
+        $this->domain->setIdentifier('domain')->setTitle('Domain')->setOrganization($org);
 
         $this->invitation = new Invitation();
         $this->invitation
@@ -48,7 +53,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
             ->setRequestedAt(new \DateTime('now'));
 
         static::$container->get('doctrine.orm.entity_manager')->persist($org);
-        static::$container->get('doctrine.orm.entity_manager')->persist($domain);
+        static::$container->get('doctrine.orm.entity_manager')->persist($this->domain);
         static::$container->get('doctrine.orm.entity_manager')->persist($this->invitation);
         static::$container->get('doctrine.orm.entity_manager')->flush();
     }
@@ -160,7 +165,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         // Manipulate domain org, so user validation will fail.
         $org2 = new Organization();
         $org2->setIdentifier('org2')->setTitle('org2')->setId(2);
-        $this->invitation->setOrganization($org2);
+        $this->invitation->setOrganization($org2)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
         $org2->setDomains([]);
 
         // Submitting valid data should result in an success and complete invitation action.
