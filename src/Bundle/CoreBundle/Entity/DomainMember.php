@@ -33,6 +33,7 @@ class DomainMember implements FieldableContent
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Choice(callback="possibleDomains", strict=true, message="domain_organization")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="members")
+     * @ORM\JoinColumn(name="domain_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $domain;
 
