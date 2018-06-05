@@ -72,6 +72,13 @@ class Organization
      */
     private $apiKeys;
 
+    /**
+     * @var Invitation[]
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="Invitation", mappedBy="organization", fetch="EXTRA_LAZY")
+     */
+    private $invites;
+
     public function __toString()
     {
         return ''.$this->title;
@@ -82,6 +89,7 @@ class Organization
         $this->domains = new ArrayCollection();
         $this->members = new ArrayCollection();
         $this->apiKeys = new ArrayCollection();
+        $this->invites = new ArrayCollection();
     }
 
     /**
@@ -268,6 +276,14 @@ class Organization
         }
 
         return $this;
+    }
+
+    /**
+     * @return Invitation[]|ArrayCollection
+     */
+    public function getInvites()
+    {
+        return $this->invites;
     }
 }
 

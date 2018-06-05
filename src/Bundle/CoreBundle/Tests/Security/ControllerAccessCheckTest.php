@@ -11,7 +11,7 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
@@ -49,7 +49,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     private $content1;
 
     /**
-     * @var DomainInvitation
+     * @var Invitation
      */
     private $invite1;
 
@@ -171,7 +171,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->persist($this->content1);
 
         // Create Test invite
-        $this->invite1 = new DomainInvitation();
+        $this->invite1 = new Invitation();
         $this->invite1->setEmail('invite@example.com')->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
         $this->em->persist($this->invite1);
 

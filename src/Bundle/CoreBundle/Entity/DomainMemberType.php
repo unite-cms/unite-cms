@@ -114,9 +114,9 @@ class DomainMemberType implements Fieldable
     private $domainMembers;
 
     /**
-     * @var DomainInvitation[]
+     * @var Invitation[]
      * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="Invitation", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
      */
     private $invites;
 
@@ -448,7 +448,7 @@ class DomainMemberType implements Fieldable
     }
 
     /**
-     * @return DomainInvitation[]|ArrayCollection
+     * @return Invitation[]|ArrayCollection
      */
     public function getInvites()
     {
