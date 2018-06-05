@@ -1,0 +1,6 @@
+# Contains all security related services.
+services:
+
+  UniteCMS\RegistrationBundle\Security\Voter\CreateOrganizationVoter:
+    public: false
+    tags: [security.voter]
