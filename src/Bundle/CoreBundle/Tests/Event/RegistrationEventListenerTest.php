@@ -103,6 +103,14 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->assertCount(2, $subscriberMock->events);
         $this->assertEquals(RegistrationEvent::REGISTRATION_SUCCESS, $subscriberMock->events[0]['type']);
         $this->assertEquals(RegistrationEvent::REGISTRATION_COMPLETE, $subscriberMock->events[1]['type']);
+
+        $this->assertEquals('foo', $subscriberMock->events[0]['event']->getRegistrationModel()->getName());
+        $this->assertEquals('test@example.com', $subscriberMock->events[0]['event']->getRegistrationModel()->getEmail());
+        $this->assertEmpty($subscriberMock->events[0]['event']->getRegistrationModel()->getPassword());
+
+        $this->assertEquals('foo', $subscriberMock->events[1]['event']->getRegistrationModel()->getName());
+        $this->assertEquals('test@example.com', $subscriberMock->events[1]['event']->getRegistrationModel()->getEmail());
+        $this->assertEmpty($subscriberMock->events[1]['event']->getRegistrationModel()->getPassword());
     }
 
     public function testInvitationRegistrationFailure() {
@@ -160,6 +168,10 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
 
         $this->assertCount(1, $subscriberMock->events);
         $this->assertEquals(RegistrationEvent::REGISTRATION_FAILURE, $subscriberMock->events[0]['type']);
+
+        $this->assertEquals('foo', $subscriberMock->events[0]['event']->getRegistrationModel()->getName());
+        $this->assertEquals('test@example.com', $subscriberMock->events[0]['event']->getRegistrationModel()->getEmail());
+        $this->assertEmpty($subscriberMock->events[0]['event']->getRegistrationModel()->getPassword());
     }
 
 }
