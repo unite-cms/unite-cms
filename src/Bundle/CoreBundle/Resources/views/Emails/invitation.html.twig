@@ -1,3 +1,9 @@
 <h2>Invitation</h2>
-<p>{{ app.user }} invited you to join Domain {{ invitation.domainMemberType.domain }} as {{ invitation.domainMemberType }}.</p>
+<p>{{ app.user }} invited you to join
+    {% if invitation.domainMemberType %}
+        domain <strong>{{ invitation.domainMemberType.domain }}</strong> on {{ invitation.organization }} as <strong>{{ invitation.domainMemberType }}</strong>.
+    {% else %}
+        organization <strong>{{ invitation.organization }}</strong>.
+    {% endif %}
+</p>
 <p><a href="{{ invitation_url }}">Accept</a></p>

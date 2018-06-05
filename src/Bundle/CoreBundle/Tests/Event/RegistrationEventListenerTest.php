@@ -11,7 +11,7 @@ namespace UniteCMS\CoreBundle\Tests\Event;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
@@ -24,7 +24,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
     private $client;
 
     /**
-     * @var DomainInvitation $domainInvitation
+     * @var Invitation $domainInvitation
      */
     private $domainInvitation;
 
@@ -40,7 +40,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $domain = new Domain();
         $domain->setIdentifier('domain')->setTitle('Domain')->setOrganization($org);
 
-        $this->domainInvitation = new DomainInvitation();
+        $this->domainInvitation = new Invitation();
         $this->domainInvitation
             ->setEmail('test@example.com')
             ->setToken('token')

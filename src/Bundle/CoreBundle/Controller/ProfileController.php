@@ -19,6 +19,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\EqualTo;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Event\CancellationEvent;
@@ -352,7 +353,13 @@ class ProfileController extends Controller
         $tokenExpired = true;
         $wrongUser = true;
         $token = null;
+
+        /*** @var Invitation $invitation */
         $invitation = null;
+
+        /*** @var User $user */
+        $existingUser = null;
+
         $newUser = true;
         $alreadyMember = false;
         $form = null;
@@ -360,7 +367,7 @@ class ProfileController extends Controller
         if (!empty($token = $request->query->get('token'))) {
             $tokenPresent = true;
 
-            if ($invitation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:DomainInvitation')->findOneBy(
+            if ($invitation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Invitation')->findOneBy(
                 ['token' => $token]
             )) {
                 $tokenFound = true;
@@ -383,8 +390,8 @@ class ProfileController extends Controller
                         if ($existingUser == $this->getUser()) {
                             $wrongUser = false;
 
-                            foreach ($existingUser->getDomains() as $domainMember) {
-                                if ($domainMember->getDomainMemberType() === $invitation->getDomainMemberType()) {
+                            foreach ($existingUser->getOrganizations() as $orgMember) {
+                                if ($orgMember->getOrganization() === $invitation->getOrganization()) {
                                     $alreadyMember = true;
                                 }
                             }
@@ -399,11 +406,21 @@ class ProfileController extends Controller
 
                                 if ($form->isSubmitted() && $form->isValid()) {
                                     if ($form->get('accept')->isClicked()) {
-                                        $domainMember = new DomainMember();
-                                        $domainMember
-                                            ->setDomain($invitation->getDomainMemberType()->getDomain())
-                                            ->setDomainMemberType($invitation->getDomainMemberType());
-                                        $existingUser->addDomain($domainMember);
+
+                                        $organizationMember = new OrganizationMember();
+                                        $organizationMember->setOrganization($invitation->getOrganization());
+                                        $existingUser->addOrganization($organizationMember);
+
+                                        $domainMember = null;
+
+                                        // If this invitation includes a domain membership, we create it.
+                                        if($invitation->getDomainMemberType()) {
+                                            $domainMember = new DomainMember();
+                                            $domainMember
+                                                ->setDomain($invitation->getDomainMemberType()->getDomain())
+                                                ->setDomainMemberType($invitation->getDomainMemberType());
+                                            $existingUser->addDomain($domainMember);
+                                        }
 
                                         // Validate user.
                                         if (!$this->get('validator')->validate($existingUser)) {
@@ -413,8 +430,12 @@ class ProfileController extends Controller
                                             // Delete invitation.
                                             $this->getDoctrine()->getManager()->remove($invitation);
 
-                                            // Save domainMember.
-                                            $this->getDoctrine()->getManager()->persist($domainMember);
+                                            // Save orgMember.
+                                            $this->getDoctrine()->getManager()->persist($organizationMember);
+
+                                            if($domainMember) {
+                                                $this->getDoctrine()->getManager()->persist($domainMember);
+                                            }
 
                                             // Save changes to database.
                                             $this->getDoctrine()->getManager()->flush();
@@ -459,10 +480,6 @@ class ProfileController extends Controller
                             if ($form->isSubmitted() && $form->isValid()) {
 
                                 $user = new User();
-                                $domainMember = new DomainMember();
-                                $domainMember
-                                    ->setDomain($invitation->getDomainMemberType()->getDomain())
-                                    ->setDomainMemberType($invitation->getDomainMemberType());
                                 $user
                                     ->setEmail($invitation->getEmail())
                                     ->setName($registration->getName())
@@ -471,12 +488,23 @@ class ProfileController extends Controller
                                             $user,
                                             $registration->getPassword()
                                         )
-                                    )
-                                    ->addDomain($domainMember);
+                                    );
 
+                                // Create organization membership for this user.
                                 $organizationMember = new OrganizationMember();
-                                $organizationMember->setOrganization($domainMember->getDomain()->getOrganization());
+                                $organizationMember->setOrganization($invitation->getOrganization());
                                 $user->addOrganization($organizationMember);
+
+                                $domainMember = null;
+
+                                // If this invitation includes a domain membership, we create it.
+                                if($invitation->getDomainMemberType()) {
+                                    $domainMember = new DomainMember();
+                                    $domainMember
+                                        ->setDomain($invitation->getDomainMemberType()->getDomain())
+                                        ->setDomainMemberType($invitation->getDomainMemberType());
+                                    $user->addDomain($domainMember);
+                                }
 
                                 // Clear plaintext password, so it can't be accessed later in this request.
                                 $registration->eraseCredentials();
@@ -492,8 +520,13 @@ class ProfileController extends Controller
 
                                     $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_SUCCESS, new RegistrationEvent($registration));
 
-                                    $this->getDoctrine()->getManager()->persist($domainMember);
                                     $this->getDoctrine()->getManager()->persist($user);
+
+                                    $this->getDoctrine()->getManager()->persist($organizationMember);
+
+                                    if($domainMember) {
+                                        $this->getDoctrine()->getManager()->persist($domainMember);
+                                    }
 
                                     // Delete invitation.
                                     $this->getDoctrine()->getManager()->remove($invitation);
@@ -507,10 +540,17 @@ class ProfileController extends Controller
                                     $this->container->get('session')->set('_security_main', serialize($userToken));
 
                                     $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration));
-                                    return $this->redirectToRoute('unitecms_core_domain_view', [
-                                        'organization' => $domainMember->getDomain()->getOrganization()->getIdentifier(),
-                                        'domain' => $domainMember->getDomain()->getIdentifier(),
-                                    ]);
+
+                                    if($domainMember) {
+                                        return $this->redirectToRoute('unitecms_core_domain_view', [
+                                            'organization' => $organizationMember->getOrganization()->getIdentifier(),
+                                            'domain' => $domainMember->getDomain()->getIdentifier(),
+                                        ]);
+                                    } else {
+                                        return $this->redirectToRoute('unitecms_core_domain_index', [
+                                            'organization' => $organizationMember->getOrganization()->getIdentifier(),
+                                        ]);
+                                    }
                                 }
                             }
                         }

@@ -31,7 +31,7 @@
         {% elseif alreadyMember %}
             <div class="uk-alert-warning" uk-alert>
                 <a class="uk-alert-close" uk-close></a>
-                <p>{% trans %}profile.accept_invitation.already_member{% endtrans %}</p>
+                <p>{% trans with { '%organization%': invitation.organization|escape } %}profile.accept_invitation.already_member{% endtrans %}</p>
             </div>
         {% elseif form %}
 

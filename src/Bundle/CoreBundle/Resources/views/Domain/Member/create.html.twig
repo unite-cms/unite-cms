@@ -26,6 +26,7 @@
         </h2>
     </header>
 
+    {{ form_errors(form) }}
     {{ form_start(form) }}
 
     <div id="domain_member_create_select_add_type">
@@ -53,14 +54,23 @@
         let add_types = document.getElementById('domain_member_create_select_add_type').querySelectorAll('input[type="radio"]');
 
         let disableRequired = function(input){
+
+            console.log("DISABLE");
+            console.log(input);
+            console.log(input.dataset);
+
             if(input.hasAttribute('required')) {
                 input.removeAttribute('required');
-                input.dataset['virtual_required'] = true;
+                input.dataset.virtual_required = true;
             }
         };
 
         let enableRequired = function(input){
-            if(input.dataset['virtual_required'] === true) {
+            console.log("ENABLE");
+            console.log(input);
+            console.log(input.dataset);
+
+            if(input.dataset.virtual_required === true) {
                 input.setAttribute('required', 'required');
             }
         };
@@ -130,6 +140,10 @@
             add_types[i].addEventListener('change', function(){
                 domainMemberCreateShowSelectedType(this.value);
             });
+
+            if(add_types[i].checked) {
+                domainMemberCreateShowSelectedType(add_types[i].value);
+            }
         }
     </script>
 </article>

@@ -9,17 +9,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * DomainInvitation
+ * Invitation
  *
  * @ORM\Table(name="invitation")
  * @ORM\Entity()
- * @UniqueEntity(fields={"email", "domainMemberType"}, message="email_already_invited", ignoreNull=false, errorPath="email")
+ * @UniqueEntity(fields={"email", "organization"}, message="email_already_invited", ignoreNull=false, errorPath="email")
  * @UniqueEntity(fields={"token"}, message="token_already_present", errorPath="token")
  * @Assert\Callback(callback="emailNotAlreadyTaken")
+ * @Assert\Callback(callback="domainInOrganization")
  */
-class DomainInvitation
+class Invitation
 {
-    const INVITATION_RESET_TTL = 2592000; // Default to two one month
+    const INVITATION_RESET_TTL = 2592000; // Default to one month
 
     /**
      * @var int
@@ -31,11 +32,19 @@ class DomainInvitation
     private $id;
 
     /**
-     * @var DomainMemberType
+     * @var Organization
      * @Assert\Valid()
      * @Assert\NotBlank(message="not_blank")
+     * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="invites")
+     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    private $organization;
+
+    /**
+     * @var DomainMemberType
+     * @Assert\Valid()
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", inversedBy="invites")
-     * @ORM\JoinColumn(name="domain_member_type_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="domain_member_type_id", referencedColumnName="id", onDelete="CASCADE", nullable=true)
      */
     private $domainMemberType;
 
@@ -70,13 +79,24 @@ class DomainInvitation
 
     public function emailNotAlreadyTaken(ExecutionContextInterface $context)
     {
-        if ($this->getDomainMemberType() && $this->getDomainMemberType()->getDomain() && $this->getDomainMemberType()->getDomain()->getOrganization()) {
-            foreach ($this->getDomainMemberType()->getDomain()->getOrganization()->getMembers() as $organizationMember) {
+        if ($this->getOrganization()) {
+            foreach ($this->getOrganization()->getMembers() as $organizationMember) {
                 if ($organizationMember->getUser()->getEmail() === $this->getEmail()) {
                     $context->buildViolation('email_already_member')
                         ->atPath('email')
                         ->addViolation();
                 }
+            }
+        }
+    }
+
+    public function domainInOrganization(ExecutionContextInterface $context)
+    {
+        if ($this->getOrganization() && $this->getDomainMemberType()) {
+            if($this->getDomainMemberType()->getDomain()->getOrganization() !== $this->getOrganization()) {
+                $context->buildViolation('invalid_domain_member_type')
+                    ->atPath('domainMemberType')
+                    ->addViolation();
             }
         }
     }
@@ -92,11 +112,31 @@ class DomainInvitation
     /**
      * @param int $id
      *
-     * @return DomainInvitation
+     * @return Invitation
      */
     public function setId(int $id)
     {
         $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * @return Organization
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param Organization $organization
+     *
+     * @return $this
+     */
+    public function setOrganization(Organization $organization)
+    {
+        $this->organization = $organization;
 
         return $this;
     }
@@ -112,9 +152,9 @@ class DomainInvitation
     /**
      * @param DomainMemberType $domainMemberType
      *
-     * @return DomainInvitation
+     * @return Invitation
      */
-    public function setDomainMemberType(DomainMemberType $domainMemberType)
+    public function setDomainMemberType($domainMemberType)
     {
         $this->domainMemberType = $domainMemberType;
 
@@ -132,7 +172,7 @@ class DomainInvitation
     /**
      * @param string $email
      *
-     * @return DomainInvitation
+     * @return Invitation
      */
     public function setEmail($email)
     {
@@ -152,7 +192,7 @@ class DomainInvitation
     /**
      * @param string $token
      *
-     * @return  DomainInvitation
+     * @return  Invitation
      */
     public function setToken(string $token)
     {
@@ -172,7 +212,7 @@ class DomainInvitation
     /**
      * @param \DateTime $requestedAt
      *
-     * @return DomainInvitation
+     * @return Invitation
      */
     public function setRequestedAt(\DateTime $requestedAt)
     {
@@ -184,7 +224,7 @@ class DomainInvitation
     /**
      * Clears the current token and resets the requestedAt value.
      *
-     * @return DomainInvitation
+     * @return Invitation
      */
     public function clearToken()
     {

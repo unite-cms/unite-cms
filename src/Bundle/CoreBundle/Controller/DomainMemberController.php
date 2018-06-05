@@ -9,7 +9,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -23,7 +22,7 @@ use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
@@ -154,53 +153,87 @@ class DomainMemberController extends Controller
                 $member = new DomainMember();
                 $member
                     ->setDomain($domain)
-                    ->setDomainMemberType($memberType)
-                    ->setAccessor($data['select_add_type'] == 'existing_user' ? $data['existing_user'] : $data['existing_api_key']);
-                $this->getDoctrine()->getManager()->persist($member);
-                $this->getDoctrine()->getManager()->flush();
+                    ->setDomainMemberType($memberType);
+
+                if($data['select_add_type'] == 'existing_user' && !empty($data['existing_user'])) {
+                    $member->setAccessor($data['existing_user']);
+                }
+
+                if($data['select_add_type'] == 'existing_api_key' && !empty($data['existing_api_key'])) {
+                    $member->setAccessor($data['existing_api_key']);
+                }
+
+                $violations = $this->get('validator')->validate($member);
+                if($violations->count() > 0) {
+                    $violationMapper = new ViolationMapper();
+                    foreach ($violations as $violation) {
+                        $violationMapper->mapViolation($violation, ($data['select_add_type'] == 'existing_user' ? $form->get('existing_user') : $form->get('existing_api_key')));
+                    }
+                } else {
+                    $this->getDoctrine()->getManager()->persist($member);
+                    $this->getDoctrine()->getManager()->flush();
+
+                    return $this->redirectToRoute(
+                        'unitecms_core_domainmember_index',
+                        [
+                            'organization' => $organization->getIdentifier(),
+                            'domain' => $domain->getIdentifier(),
+                            'member_type' => $memberType->getIdentifier(),
+                        ]
+                    );
+                }
 
             } elseif($data['select_add_type'] == 'invite_user') {
 
-                $invitation = new DomainInvitation();
+                $invitation = new Invitation();
                 $invitation->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
                 $invitation->setRequestedAt(new \DateTime());
+                $invitation->setOrganization($organization);
                 $invitation->setDomainMemberType($memberType);
                 $invitation->setEmail($data['invite_user']);
-                $this->getDoctrine()->getManager()->persist($invitation);
-                $this->getDoctrine()->getManager()->flush();
 
-                // Send out email using the default mailer.
-                $message = (new \Swift_Message('Invitation'))
-                    ->setFrom($this->getParameter('mailer_sender'))
-                    ->setTo($invitation->getEmail())
-                    ->setBody(
-                        $this->renderView(
-                            '@UniteCMSCore/Emails/invitation.html.twig',
-                            [
-                                'invitation' => $invitation,
-                                'invitation_url' => $this->generateUrl(
-                                    'unitecms_core_profile_acceptinvitation',
-                                    [
-                                        'token' => $invitation->getToken(),
-                                    ],
-                                    UrlGeneratorInterface::ABSOLUTE_URL
-                                ),
-                            ]
-                        ),
-                        'text/html'
+                $violations = $this->get('validator')->validate($invitation);
+                if($violations->count() > 0) {
+                    $violationMapper = new ViolationMapper();
+                    foreach ($violations as $violation) {
+                        $violationMapper->mapViolation($violation, $form->get('invite_user'));
+                    }
+                } else {
+                    $this->getDoctrine()->getManager()->persist($invitation);
+                    $this->getDoctrine()->getManager()->flush();
+
+                    // Send out email using the default mailer.
+                    $message = (new \Swift_Message('Invitation'))
+                        ->setFrom($this->getParameter('mailer_sender'))
+                        ->setTo($invitation->getEmail())
+                        ->setBody(
+                            $this->renderView(
+                                '@UniteCMSCore/Emails/invitation.html.twig',
+                                [
+                                    'invitation' => $invitation,
+                                    'invitation_url' => $this->generateUrl(
+                                        'unitecms_core_profile_acceptinvitation',
+                                        [
+                                            'token' => $invitation->getToken(),
+                                        ],
+                                        UrlGeneratorInterface::ABSOLUTE_URL
+                                    ),
+                                ]
+                            ),
+                            'text/html'
+                        );
+                    $this->get('mailer')->send($message);
+
+                    return $this->redirectToRoute(
+                        'unitecms_core_domainmember_index',
+                        [
+                            'organization' => $organization->getIdentifier(),
+                            'domain' => $domain->getIdentifier(),
+                            'member_type' => $memberType->getIdentifier(),
+                        ]
                     );
-                $this->get('mailer')->send($message);
-
+                }
             }
-
-            return $this->redirectToRoute(
-                'unitecms_core_domainmember_index',
-                [
-                    'organization' => $organization->getIdentifier(),
-                    'domain' => $domain->getIdentifier(),
-                    'member_type' => $memberType->getIdentifier(),
-                ]
-            );
         }
 
         return $this->render(
@@ -345,7 +378,7 @@ class DomainMemberController extends Controller
      * @param Organization $organization
      * @param Domain $domain
      * @param DomainMemberType $memberType
-     * @param DomainInvitation $invite
+     * @param Invitation $invite
      * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
@@ -354,7 +387,7 @@ class DomainMemberController extends Controller
         Organization $organization,
         Domain $domain,
         DomainMemberType $memberType,
-        DomainInvitation $invite,
+        Invitation $invite,
         Request $request
     ) {
         $form = $this->createFormBuilder()
