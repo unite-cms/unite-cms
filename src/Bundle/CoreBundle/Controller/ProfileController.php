@@ -16,12 +16,12 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\EqualTo;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Event\CancellationEvent;
 use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Form\InvitationRegistrationType;
 use UniteCMS\CoreBundle\Form\Model\ChangePassword;
@@ -110,8 +110,6 @@ class ProfileController extends Controller
 
         $forms['delete_account']->handleRequest($request);
 
-        $response = $this->redirect($this->generateUrl('unitecms_core_index'));
-
         if ($forms['delete_account']->isSubmitted() && $forms['delete_account']->isValid()) {
 
             $violations = $this->get('validator')->validate($user, null, ['DELETE']);
@@ -124,14 +122,21 @@ class ProfileController extends Controller
                     $violationMapper->mapViolation($violation, $forms['delete_account']);
                 }
 
+                $this->get('event_dispatcher')->dispatch(CancellationEvent::CANCELLATION_FAILURE, new CancellationEvent($user));
+
             // if this member is save to delete.
             } else {
+                $this->get('event_dispatcher')->dispatch(CancellationEvent::CANCELLATION_SUCCESS, new CancellationEvent($user));
+
                 $this->getDoctrine()->getManager()->remove($user);
                 $this->getDoctrine()->getManager()->flush();
 
                 // Clear user session.
                 $this->container->get('security.token_storage')->setToken(null);
                 $this->container->get('session')->clear();
+
+                $this->get('event_dispatcher')->dispatch(CancellationEvent::CANCELLATION_COMPLETE, new CancellationEvent($user));
+
                 return $this->redirect($this->generateUrl('unitecms_core_index'));
             }
         }
