@@ -24,9 +24,9 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
     private $client;
 
     /**
-     * @var Invitation $domainInvitation
+     * @var Invitation $invitation
      */
-    private $domainInvitation;
+    private $invitation;
 
     public function setUp()
     {
@@ -40,16 +40,16 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $domain = new Domain();
         $domain->setIdentifier('domain')->setTitle('Domain')->setOrganization($org);
 
-        $this->domainInvitation = new Invitation();
-        $this->domainInvitation
+        $this->invitation = new Invitation();
+        $this->invitation
             ->setEmail('test@example.com')
             ->setToken('token')
-            ->setDomainMemberType($domain->getDomainMemberTypes()->first())
+            ->setOrganization($org)
             ->setRequestedAt(new \DateTime('now'));
 
         static::$container->get('doctrine.orm.entity_manager')->persist($org);
         static::$container->get('doctrine.orm.entity_manager')->persist($domain);
-        static::$container->get('doctrine.orm.entity_manager')->persist($this->domainInvitation);
+        static::$container->get('doctrine.orm.entity_manager')->persist($this->invitation);
         static::$container->get('doctrine.orm.entity_manager')->flush();
     }
 
@@ -86,7 +86,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->domainInvitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->invitation->getToken()]));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -146,7 +146,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->domainInvitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->invitation->getToken()]));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -160,7 +160,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         // Manipulate domain org, so user validation will fail.
         $org2 = new Organization();
         $org2->setIdentifier('org2')->setTitle('org2')->setId(2);
-        $this->domainInvitation->getDomainMemberType()->getDomain()->setOrganization($org2);
+        $this->invitation->setOrganization($org2);
         $org2->setDomains([]);
 
         // Submitting valid data should result in an success and complete invitation action.
