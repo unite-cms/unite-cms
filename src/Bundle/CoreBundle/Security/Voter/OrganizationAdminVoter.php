@@ -20,6 +20,15 @@ use UniteCMS\CoreBundle\Entity\User;
 
 class OrganizationAdminVoter extends Voter
 {
+    const SUPPORTED_OBJECTS = [
+        Organization::class,
+        Domain::class,
+        SettingType::class,
+        ContentType::class,
+        Setting::class,
+        Content::class,
+    ];
+
     /**
      * The organization admin voter supports all object subjects.
      *
@@ -34,14 +43,14 @@ class OrganizationAdminVoter extends Voter
             $subject = get_class($subject);
         }
 
-        return in_array($subject, [
-            Organization::class,
-            Domain::class,
-            SettingType::class,
-            ContentType::class,
-            Setting::class,
-            Content::class,
-        ]);
+        if(!empty($subject)) {
+            foreach(self::SUPPORTED_OBJECTS as $class) {
+                if(is_a($subject, $class, true)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -91,6 +100,7 @@ class OrganizationAdminVoter extends Voter
 
             // If we found a organization for this subject and it is one of the adminOrganizations for this user.
             $subjectOrganization = $this->findSubjectOrganization($subject);
+            dump($subjectOrganization);
 
             foreach($adminOrganizations as $adminOrganization) {
                 if($adminOrganization->getId() === $subjectOrganization->getId()) {
@@ -103,14 +113,31 @@ class OrganizationAdminVoter extends Voter
     }
 
     private function findSubjectOrganization($subject) {
-        switch (get_class($subject)) {
-            case Organization::class: return $subject; break;
-            case Domain::class: return $subject->getOrganization(); break;
-            case SettingType::class: return $subject->getDomain()->getOrganization(); break;
-            case ContentType::class: return $subject->getDomain()->getOrganization(); break;
-            case Setting::class: return $subject->getSettingType()->getDomain()->getOrganization(); break;
-            case Content::class: return $subject->getContentType()->getDomain()->getOrganization(); break;
-            default: return null; break;
+
+        if($subject instanceof Organization) {
+            return $subject;
         }
+
+        if($subject instanceof Domain) {
+            return $subject->getOrganization();
+        }
+
+        if($subject instanceof SettingType) {
+            return $subject->getDomain()->getOrganization();
+        }
+
+        if($subject instanceof ContentType) {
+            return $subject->getDomain()->getOrganization();
+        }
+
+        if($subject instanceof Setting) {
+            return $subject->getSettingType()->getDomain()->getOrganization();
+        }
+
+        if($subject instanceof Content) {
+            return $subject->getContentType()->getDomain()->getOrganization();
+        }
+
+        return null;
     }
 }

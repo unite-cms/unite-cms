@@ -27,7 +27,6 @@ use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Form\InvitationRegistrationType;
 use UniteCMS\CoreBundle\Form\Model\ChangePassword;
 use UniteCMS\CoreBundle\Form\Model\InvitationRegistrationModel;
-use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 
 class ProfileController extends Controller
 {
@@ -145,43 +144,6 @@ class ProfileController extends Controller
         return $this->render(
             'UniteCMSCoreBundle:Profile:update.html.twig', [
                 'forms' => array_map(function($form) { return $form->createView(); }, $forms),
-            ]
-        );
-    }
-
-    /**
-     * @Route("/organizations")
-     * @Method({"GET"})
-     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
-     *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function organizationsAction(Request $request) {
-
-        // Platform admins are allowed to view all organizations.
-        if ($this->isGranted(User::ROLE_PLATFORM_ADMIN)) {
-            $organizations = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Organization')->findAll();
-        } else {
-            $organizations = $this->getUser()->getOrganizations()->map(
-                function (OrganizationMember $member) {
-                    return $member->getOrganization();
-                }
-            );
-        }
-
-        $allowedOrganizations = [];
-        foreach ($organizations as $organization) {
-            if ($this->isGranted(OrganizationVoter::VIEW, $organization)) {
-                $allowedOrganizations[] = $organization;
-            }
-        }
-
-        return $this->render(
-            'UniteCMSCoreBundle:Profile:organizations.html.twig',
-            [
-                'organizations' => $allowedOrganizations,
             ]
         );
     }
