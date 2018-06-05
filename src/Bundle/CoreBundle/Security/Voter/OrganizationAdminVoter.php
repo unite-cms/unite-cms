@@ -100,7 +100,6 @@ class OrganizationAdminVoter extends Voter
 
             // If we found a organization for this subject and it is one of the adminOrganizations for this user.
             $subjectOrganization = $this->findSubjectOrganization($subject);
-            dump($subjectOrganization);
 
             foreach($adminOrganizations as $adminOrganization) {
                 if($adminOrganization->getId() === $subjectOrganization->getId()) {
