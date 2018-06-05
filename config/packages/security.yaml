@@ -42,8 +42,8 @@ security:
                 login_path: unitecms_core_authentication_login
                 check_path: unitecms_core_authentication_login
             logout:
-                path:   /profile/logout
-                target: /
+                path:   unitecms_core_logout
+                target: unitecms_core_authentication_login
             remember_me:
                 secret:   '%env(APP_SECRET)%'
                 lifetime: 8640000 # 100 days
