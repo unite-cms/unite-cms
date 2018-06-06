@@ -1,10 +1,5 @@
-
 unite_cms_core:
   resource: "@UniteCMSCoreBundle/Resources/config/routing.yml"
-  prefix:   /
-
-unite_cms_registration:
-  resource: "@UniteCMSRegistrationBundle/Resources/config/routing.yml"
   prefix:   /
 
 unite_cms_storage:

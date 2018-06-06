@@ -11,6 +11,12 @@ use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 
 class CreateOrganizationTest extends ContainerAwareTestCase {
 
+    protected static function bootKernel(array $options = array())
+    {
+        $options['environment'] = 'test_registration';
+        return parent::bootKernel($options);
+    }
+
     public function testUserIsAllowedToCreateAnOrganization() {
 
         // Anonymous users are not allowed to create organizations.

@@ -7,6 +7,12 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class RegistrationControllerTest extends DatabaseAwareTestCase {
 
+    protected static function bootKernel(array $options = array())
+    {
+        $options['environment'] = 'test_registration';
+        return parent::bootKernel($options);
+    }
+
     public function testSubmitRegistrationForm() {
 
         $org = new Organization();
