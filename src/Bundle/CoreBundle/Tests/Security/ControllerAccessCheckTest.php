@@ -291,6 +291,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertAccess('/profile/reset-password-confirm', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', false, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
@@ -363,6 +367,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', true, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
@@ -432,6 +440,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', true, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
@@ -504,6 +516,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', true, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
@@ -576,6 +592,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', true, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
@@ -646,6 +666,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', true, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
@@ -718,6 +742,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', true, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', true, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', true, $substitutions, ['GET', 'POST']);
@@ -788,6 +816,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', true, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', false, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
@@ -860,6 +892,10 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
         $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/', true, $substitutions, ['GET']);
+        $this->assertAccess('/profile/organizations/create', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/update/{organization}', true, $substitutions, ['GET', 'POST']);
+        $this->assertAccess('/profile/organizations/delete/{organization}', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/', true, $substitutions, ['GET']);
         $this->assertAccess('/{organization}/user/update/{member}', true, $substitutions, ['GET', 'POST']);
         $this->assertAccess('/{organization}/user/delete/{member}', true, $substitutions, ['GET', 'POST']);

@@ -21,6 +21,12 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
      */
     private $client;
 
+    protected static function bootKernel(array $options = array())
+    {
+        $options['environment'] = 'test_registration';
+        return parent::bootKernel($options);
+    }
+
     public function setUp()
     {
         parent::setUp();

@@ -46,7 +46,7 @@ class IndexController extends Controller
 
         // Otherwise redirect to the organization overview page.
         else {
-            return $this->redirectToRoute('unitecms_core_profile_organizations');
+            return $this->redirectToRoute('unitecms_core_organization_index');
         }
     }
 }

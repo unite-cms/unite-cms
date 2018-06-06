@@ -7,7 +7,7 @@
         <h2>{% trans %}organizations.headline{% endtrans %}</h2>
     </header>
     <div class="uk-flex-1">
-        {% if organizations|length == 0 %}
+        {% if organizations|length == 0 and not is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::CREATE'), 'UniteCMS\\CoreBundle\\Entity\\Organization') %}
             <div class="uk-alert-warning" uk-alert>
                 {% trans %}organizations.error.no_organizations{% endtrans %}
             </div>
@@ -20,19 +20,19 @@
                         </a>
 
                         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization) %}
-                            <!--a class="action-edit" uk-tooltip title="{% trans %}organizations.button.edit{% endtrans %}" href="#"><i data-feather="edit"></i></a-->
+                            <a class="action-edit" uk-tooltip title="{% trans %}organizations.button.edit{% endtrans %}" href="{{ path('unitecms_core_organization_update', { organization: organization.identifier }) }}"><i data-feather="edit"></i></a>
                         {% endif %}
                         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::DELETE'), organization) %}
-                            <!--a class="action-delete uk-text-danger" uk-tooltip title="{% trans %}organizations.button.delete{% endtrans %}" href="#"><i data-feather="trash-2"></i></a-->
+                            <a class="action-delete uk-text-danger" uk-tooltip title="{% trans %}organizations.button.delete{% endtrans %}" href="{{ path('unitecms_core_organization_delete', { organization: organization.identifier }) }}"><i data-feather="trash-2"></i></a>
                         {% endif %}
                     </li>
                 {% endfor %}
                 {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::CREATE'), 'UniteCMS\\CoreBundle\\Entity\\Organization') %}
-                    <!--li class="uk-flex uk-flex-middle">
-                        <a class="uk-text-success" href="#"><i data-feather="plus-circle" class="uk-margin-small-right"></i>
+                    <li class="uk-flex uk-flex-middle">
+                        <a class="uk-text-success" href="{{ path('unitecms_core_organization_create') }}"><i data-feather="plus-circle" class="uk-margin-small-right"></i>
                             {% trans %}organizations.button.create{% endtrans %}
                         </a>
-                    </li-->
+                    </li>
                 {% endif %}
             </ul>
         {% endif %}

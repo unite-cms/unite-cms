@@ -16,6 +16,11 @@ unitecms_core_profile:
     type:     annotation
     prefix:   /profile
 
+unitecms_core_organizations:
+    resource: "@UniteCMSCoreBundle/Controller/OrganizationController.php"
+    type:     annotation
+    prefix:   /profile/organizations
+
 unitecms_core_organization_user:
     resource: "@UniteCMSCoreBundle/Controller/OrganizationUserController.php"
     type:     annotation

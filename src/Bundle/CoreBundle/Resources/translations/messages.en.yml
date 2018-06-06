@@ -13,6 +13,23 @@ organizations.button.edit: 'Configure organization'
 organizations.button.delete: 'Delete organization'
 organizations.button.create: 'Create a new organization'
 organizations.error.no_organizations: 'You are no member of any organization. Please contact the system administrator. If you are the system administrator, please consult the docs to see how you can create an organization.'
+
+organizations.create.headline: 'Create a new organization'
+organizations.create.form.title: 'Title'
+organizations.create.form.identifier: 'Machine name'
+organizations.create.form.submit: 'Create organization'
+
+organizations.update.headline: 'Update organization'
+organizations.update.warning: 'Be very careful here! Changing the identifier of an organization will change the API urls of all domains of this organization!'
+organizations.update.form.title: 'Title'
+organizations.update.form.identifier: 'Machine name'
+organizations.update.form.submit: 'Update'
+
+organizations.delete.headline: 'Delete organization "%organization%"'
+organizations.delete.text: 'Be very careful here! Deleting an organization will permanently delete it and all members. Do you really want to delete organization <strong>%organization%</strong>? This action cannot be undone.'
+organizations.delete.cancel: 'Cancel'
+organizations.delete.form.submit: 'Delete organization'
+
 organization.menu.manage.header: 'Manage this organization'
 organization.menu.manage.settings: 'Settings'
 organization.menu.manage.user: 'User'

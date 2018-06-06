@@ -33,7 +33,7 @@ class Invitation
 
     /**
      * @var Organization
-     * @Assert\Valid()
+     * @Assert\Valid(groups={"Default", "CREATE", "UPDATE"})
      * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="invites")
      * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="CASCADE")
@@ -42,7 +42,7 @@ class Invitation
 
     /**
      * @var DomainMemberType
-     * @Assert\Valid()
+     * @Assert\Valid(groups={"Default", "CREATE", "UPDATE"})
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", inversedBy="invites")
      * @ORM\JoinColumn(name="domain_member_type_id", referencedColumnName="id", onDelete="CASCADE", nullable=true)
      */

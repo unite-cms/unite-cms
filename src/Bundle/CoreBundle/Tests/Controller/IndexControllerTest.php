@@ -58,7 +58,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
     public function testIndexAction() {
 
         $url = static::$container->get('router')->generate('unitecms_core_index');
-        $profile_orgs_url = static::$container->get('router')->generate('unitecms_core_profile_organizations',  [], Router::ABSOLUTE_PATH);
+        $profile_orgs_url = static::$container->get('router')->generate('unitecms_core_organization_index',  [], Router::ABSOLUTE_PATH);
 
         // index redirects to profile organizations route
         $this->client->request('GET', $url);
