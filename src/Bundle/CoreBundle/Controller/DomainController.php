@@ -11,6 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -148,18 +150,17 @@ class DomainController extends Controller
      */
     public function updateAction(Organization $organization, Domain $domain, Request $request)
     {
-        $form = $this->createFormBuilder(
-            [
-                'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
-            ]
-        )
-            ->add(
-                'definition',
-                WebComponentType::class,
-                ['tag' => 'unite-cms-core-domaineditor']
-            )->getForm()
-            ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']]);
+        $originalDomain = null;
+        $updatedDomain = null;
+
+        $form = $this->createFormBuilder(['definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain)])
+            ->add('definition', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
+            ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
+            ->add('confirm', SubmitType::class, ['label' => 'domain.update.form.confirm', 'attr' => ['class' => 'uk-button uk-button-primary']])
+            ->getForm();
         $form->handleRequest($request);
+        $formView = $form->createView();
 
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -172,41 +173,47 @@ class DomainController extends Controller
             }
 
             if (isset($updatedDomain)) {
-                $errors = new ConstraintViolationList();
 
-                // For all content types that would be deleted, check validation
-                foreach ($domain->getContentTypesDiff($updatedDomain, true) as $contentType) {
-                    $errors->addAll($this->get('validator')->validate($contentType, null, ['DELETE']));
-                }
-
-                // For all setting types that would be deleted, check validation
-                foreach ($domain->getSettingTypesDiff($updatedDomain, true) as $settingType) {
-                    $errors->addAll($this->get('validator')->validate($settingType, null, ['DELETE']));
-                }
-
+                $originalDomain = new Domain();
+                $originalDomain->setFromEntity($domain);
                 $domain->setFromEntity($updatedDomain);
-                $errors->addAll($this->get('validator')->validate($domain));
+                $violations = $this->get('validator')->validate($domain);
 
-                if ($errors->count() == 0) {
-                    $this->getDoctrine()->getManager()->flush();
+                // If this config is valid and could be saved.
+                if ($violations->count() == 0) {
 
-                    return $this->redirectToRoute(
-                        'unitecms_core_domain_view',
-                        [
+                    $formView = $form->createView();
+
+                    // Case 1: form was submitted but not confirmed yet.
+                    if($form->get('submit')->isClicked()) {
+                        $formView->children['definition']->vars['disabled'] = true;
+                        $formView->children['submit']->vars['disabled'] = true;
+                        $formView->children['back']->vars['disabled'] = false;
+                        $formView->children['confirm']->vars['disabled'] = false;
+                    }
+
+                    // Case 2: form was submitted and confirmed.
+                    else if($form->get('confirm')->isClicked()) {
+                        $this->getDoctrine()->getManager()->flush();
+                        return $this->redirectToRoute('unitecms_core_domain_view', [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),
-                        ]
-                    );
-                } else {
-                    foreach ($errors as $error) {
-
-                        $this->addFlash('danger', $error->getPropertyPath().': '.$error->getMessage());
+                        ]);
                     }
+
+
+                } else {
+                    $violationMapper = new ViolationMapper();
+                    foreach($violations as $violation) {
+                        $violationMapper->mapViolation($violation, $form);
+                    }
+
+                    $formView = $form->createView();
                 }
             }
         }
 
-        return $this->render('UniteCMSCoreBundle:Domain:update.html.twig', ['form' => $form->createView()]);
+        return $this->render('UniteCMSCoreBundle:Domain:update.html.twig', ['form' => $formView, 'originalDomain' => $originalDomain, 'updatedDomain' => $updatedDomain]);
     }
 
     /**
@@ -252,11 +259,15 @@ class DomainController extends Controller
             }
         }
 
+        $deletedDomain = new Domain();
+        $deletedDomain->setDomainMemberTypes([]);
+
         return $this->render(
             'UniteCMSCoreBundle:Domain:delete.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
+                'deletedDomain' => $deletedDomain,
                 'form' => $form->createView(),
             ]
         );

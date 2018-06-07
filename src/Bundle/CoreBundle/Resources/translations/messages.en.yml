@@ -113,7 +113,14 @@ domain.delete.cancel: 'Cancel'
 
 domain.update.title: 'Update domain "%domain%"'
 domain.update.headline: 'Update domain "%domain%"'
-domain.update.form.submit: 'Save changes'
+domain.update.form.submit: 'Validate'
+domain.update.confirm.headline: 'Do you really want to update "%domain%"?'
+domain.update.form.back: 'Back'
+domain.update.form.confirm: 'Save changes'
+domain.update.confirmation: 'If you save this changes the following will happen to your content, settings and members:'
+
+domain.change_visualization.added: '<strong>%type%</strong> will be added.'
+domain.change_visualization.removed: '<strong>%type%</strong> and <strong>all of its content</strong> will be deleted permanently.'
 
 domain.member.title: '%type% members'
 domain.member.headline: '%type% members'

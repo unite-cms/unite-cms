@@ -2,18 +2,55 @@
 {% block title %}{% trans with { '%domain%': unite.domain|escape } %}domain.update.title{% endtrans %}{% endblock title %}
 {% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
+{% if form.vars.submitted and not form.vars.valid %}
+    <div class="unite-main-messages">
+        {{ form_errors(form) }}
+    </div>
+{% endif %}
 <article class="uk-card uk-card-default uk-card-body full-content-card always-full uk-flex-1">
     {{ form_start(form) }}
-    <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitecms_core_domain_view', {
-            organization: unite.organization.identifier,
-            domain: unite.domain.identifier
-        }) }}">
-            <i data-feather="arrow-left"></i>
-        </a>
-        <h2 class="uk-flex-1">{% trans with { '%domain%': unite.domain|escape } %}domain.update.headline{% endtrans %}</h2>
-        {{ form_widget(form.submit) }}
-    </header>
+
+    {# Step1: Render the form and skip confirmation button #}
+    {% if not form.vars.submitted or not form.vars.valid or not form.submit.vars.clicked %}
+
+        {% do form.confirm.setRendered %}
+        {% do form.back.setRendered %}
+
+        <header class="uk-card-header uk-flex">
+            <a class="back-button" href="{{ path('unitecms_core_domain_view', {
+                organization: unite.organization.identifier,
+                domain: unite.domain.identifier
+            }) }}">
+                <i data-feather="arrow-left"></i>
+            </a>
+            <h2 class="uk-flex-1">{% trans with { '%domain%': unite.domain|escape } %}domain.update.headline{% endtrans %}</h2>
+            {{ form_widget(form.submit) }}
+        </header>
+
+    {# Step2: Render just the confirmation button #}
+    {% else %}
+
+        {% do form.submit.setRendered %}
+
+        <header class="uk-card-header uk-flex">
+            <h2 class="uk-flex-1">{% trans with { '%domain%': unite.domain|escape } %}domain.update.confirm.headline{% endtrans %}</h2>
+        </header>
+
+        <p class="uk-text-center">
+            <i data-feather="alert-triangle" width="100" height="100" style="display: block; margin: 50px auto 30px;"></i>
+            <br />
+            {% trans %}domain.update.confirmation{% endtrans %}
+        </p>
+
+        {{ include('@UniteCMSCore/Domain/_change_visualization.html.twig', { original: originalDomain, updated: updatedDomain}) }}
+
+        <p class="uk-text-center">
+            {{ form_widget(form.back, {attr: {class: 'uk-button', style: 'margin: 10px;'}}) }}
+            {{ form_widget(form.confirm, {attr: {style: 'margin: 10px;'}}) }}
+        </p>
+
+    {% endif %}
+
     {{ form_end(form) }}
 </article>
 {% endblock content %}
