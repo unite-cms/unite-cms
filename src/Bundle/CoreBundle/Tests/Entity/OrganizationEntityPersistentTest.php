@@ -48,6 +48,15 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
+        $org1
+            ->setTitle($this->generateRandomUTF8String(255))
+            ->setIdentifier('CAPITAL');
+        $errors = static::$container->get('validator')->validate($org1);
+        $this->assertCount(1, $errors);
+
+        $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
+
         // Try to validate valid organization.
         $org1->setIdentifier($this->generateRandomMachineName(255));
         $this->assertCount(0, static::$container->get('validator')->validate($org1));

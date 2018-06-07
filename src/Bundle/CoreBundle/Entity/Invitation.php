@@ -60,7 +60,7 @@ class Invitation
      * @var string
      * @Assert\Length(max="180", maxMessage="too_long")
      * @Assert\NotBlank(message="not_blank")
-     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="invalid_characters")
+     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/", message="invalid_characters")
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;

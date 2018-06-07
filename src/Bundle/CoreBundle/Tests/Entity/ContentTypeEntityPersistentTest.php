@@ -141,7 +141,7 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
 
         // Deleting the "all" view from a contentType should not work.
         $ct3 = new ContentType();
-        $ct3->setTitle('CT3')->setIdentifier('CT3')->setDomain($contentType->getDomain());
+        $ct3->setTitle('CT3')->setIdentifier('ct3')->setDomain($contentType->getDomain());
         $this->assertTrue($ct3->getViews()->containsKey(View::DEFAULT_VIEW_IDENTIFIER));
 
         $errors = static::$container->get('validator')->validate($ct3);

@@ -23,7 +23,7 @@ class InvitationPersistentTest extends DatabaseAwareTestCase
         $domain12->setOrganization($org)->setTitle('Domain12')->setIdentifier('domain12');
 
         $org2 = new Organization();
-        $org2->setTitle('org2')->setIdentifier('Org2');
+        $org2->setTitle('org2')->setIdentifier('org2');
         $domain2 = new Domain();
         $domain2->setOrganization($org2)->setTitle('Domain2')->setIdentifier('domain2');
 
