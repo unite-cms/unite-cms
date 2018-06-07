@@ -9,4 +9,3 @@ twig:
     globals:
         unite: '@unite.cms.manager'
         site_name: '%site_name%'
-        site_background: '%site_background%'

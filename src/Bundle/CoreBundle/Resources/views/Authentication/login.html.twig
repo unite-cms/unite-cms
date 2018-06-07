@@ -39,7 +39,7 @@
             <hr />
 
             <div class="uk-flex uk-flex-between uk-flex-middle">
-                <a class="uk-button uk-button-text" href="{{ path('unitecms_core_profile_resetpassword') }}">{% trans %}authentication.login.reset_password{% endtrans %}</a>
+                <a class="uk-button uk-button-text uk-button-tiny" href="{{ path('unitecms_core_profile_resetpassword') }}">{% trans %}authentication.login.reset_password{% endtrans %}</a>
                 <button class="uk-button uk-button-primary" type="submit">{% trans %}authentication.login.submit{% endtrans %}</button>
             </div>
         </form>
@@ -47,8 +47,7 @@
 </article>
 <style type="text/css" rel="stylesheet">
     body {
-        background: url({{ site_background }}) no-repeat;
-        background-size: cover;
+        background-image: radial-gradient(50% 100%, #073B4C 0%, #02212B 100%);
     }
 </style>
 {% endblock %}
