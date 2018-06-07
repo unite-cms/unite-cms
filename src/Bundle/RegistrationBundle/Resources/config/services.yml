@@ -4,3 +4,10 @@ services:
   UniteCMS\RegistrationBundle\Security\Voter\CreateOrganizationVoter:
     public: false
     tags: [security.voter]
+
+
+  UniteCMS\RegistrationBundle\Subscriber\CreateOrganizationSubscriber:
+    public: false
+    arguments: ['@security.token_storage']
+    tags:
+      - { name: doctrine.event_listener, event: prePersist }
