@@ -5,7 +5,6 @@ parameters:
     mailer_sender: '%env(MAILER_SENDER)%'
     jms_serializer.unserialize_object_constructor.class: UniteCMS\CoreBundle\Serializer\ObjectConstructor
     site_name: unite cms
-    site_background: https://source.unsplash.com/XVTWFHcNIko/1440x1024
 
 services:
     # default configuration for services in *this* file

@@ -64,7 +64,7 @@ class DomainController extends Controller
                 WebComponentType::class,
                 ['tag' => 'unite-cms-core-domaineditor']
             )->getForm()
-            ->add('submit', SubmitType::class, ['attr' => ['class' => 'uk-button uk-button-primary']]);
+            ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -158,7 +158,7 @@ class DomainController extends Controller
                 WebComponentType::class,
                 ['tag' => 'unite-cms-core-domaineditor']
             )->getForm()
-            ->add('submit', SubmitType::class, ['attr' => ['class' => 'uk-button uk-button-primary']]);
+            ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
