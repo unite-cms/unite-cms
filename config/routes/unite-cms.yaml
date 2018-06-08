@@ -1,7 +1,15 @@
+#unite_cms_core:
+#  resource: "@UniteCMSCoreBundle/Resources/config/routing.subdomain.yml"
+#  prefix:   /
+
 unite_cms_core:
-  resource: "@UniteCMSCoreBundle/Resources/config/routing.subdomain.yml"
+  resource: "@UniteCMSCoreBundle/Resources/config/routing.yml"
   prefix:   /
 
+#unite_cms_storage:
+#  resource: "@UniteCMSStorageBundle/Resources/config/routing.subdomain.yml"
+#  prefix:   /
+
 unite_cms_storage:
-  resource: "@UniteCMSStorageBundle/Resources/config/routing.subdomain.yml"
+  resource: "@UniteCMSStorageBundle/Resources/config/routing.yml"
   prefix:   /

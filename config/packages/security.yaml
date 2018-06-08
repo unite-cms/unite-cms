@@ -51,4 +51,5 @@ security:
 
 # Include either access_control.yaml or access_control.subdomain.yaml
 imports:
-    - { resource: '../access_control/access_control.subdomain.yaml' }
+    #- { resource: '../access_control/access_control.subdomain.yaml' }
+    - { resource: '../access_control/access_control.yaml' }
