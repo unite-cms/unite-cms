@@ -21,7 +21,7 @@ class Organization
     const ROLE_USER = "ROLE_USER";
     const ROLE_ADMINISTRATOR = "ROLE_ADMINISTRATOR";
 
-    const RESERVED_IDENTIFIERS = ["login", "profile"];
+    const RESERVED_IDENTIFIERS = ['profile', 'api', 'app'];
 
     /**
      * @var int

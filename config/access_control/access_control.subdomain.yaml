@@ -1,0 +1,15 @@
+# Include this file, if you want the use the subdomain approach where the organization will be the subdomain of the hostname.
+security:
+    access_control:
+        - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: ^profile\. }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: ^profile\. }
+
+        # Although registration bundle is optional, this path can be part of the default config.
+        # If the bundle is not installed /profile/registration will result in a 404 error.
+        - { path: ^/registration, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: '^profile\.%allowed_hostname%' }
+
+        - { path: ^/reset-password, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: '^profile\.%allowed_hostname%' }
+        - { path: ^/reset-password-confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: '^profile\.%allowed_hostname%' }
+        - { path: ^/accept-invitation, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: '^profile\.%allowed_hostname%' }
+        - { path: ^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/|$), roles: [ROLE_USER, IS_AUTHENTICATED_FULLY], host: '^[a-z0-9_]+\.%allowed_hostname%' }
+        - { path: ^/*, roles: ROLE_USER, host: '^[a-z0-9_]+\.%allowed_hostname%' }

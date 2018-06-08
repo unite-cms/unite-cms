@@ -26,7 +26,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
  */
 class Domain
 {
-    const RESERVED_IDENTIFIERS = ['create', 'view', 'update', 'delete', 'user'];
+    const RESERVED_IDENTIFIERS = ['create', 'view', 'update', 'delete', 'user', 'api', 'app'];
 
     /**
      * @var int

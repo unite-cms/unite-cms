@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
@@ -173,14 +174,14 @@ class DomainMemberController extends Controller
                     $this->getDoctrine()->getManager()->persist($member);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->redirectToRoute(
+                    return $this->redirect($this->generateUrl(
                         'unitecms_core_domainmember_index',
                         [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),
                             'member_type' => $memberType->getIdentifier(),
-                        ]
-                    );
+                        ], Router::ABSOLUTE_URL
+                    ));
                 }
 
             } elseif($data['select_add_type'] == 'invite_user') {
@@ -224,14 +225,14 @@ class DomainMemberController extends Controller
                         );
                     $this->get('mailer')->send($message);
 
-                    return $this->redirectToRoute(
+                    return $this->redirect($this->generateUrl(
                         'unitecms_core_domainmember_index',
                         [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),
                             'member_type' => $memberType->getIdentifier(),
-                        ]
-                    );
+                        ], Router::ABSOLUTE_URL
+                    ));
                 }
             }
         }
@@ -291,14 +292,14 @@ class DomainMemberController extends Controller
 
                 $this->getDoctrine()->getManager()->flush();
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_domainmember_index',
                     [
                         'organization' => $organization->getIdentifier(),
                         'domain' => $domain->getIdentifier(),
                         'member_type' => $memberType->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -344,14 +345,14 @@ class DomainMemberController extends Controller
             $this->getDoctrine()->getManager()->remove($member);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_domainmember_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
                     'member_type' => $memberType->getIdentifier(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(
@@ -402,14 +403,14 @@ class DomainMemberController extends Controller
             $this->getDoctrine()->getManager()->remove($invite);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_domainmember_index',
                 [
                     'organization' => $organization->getIdentifier(),
                     'domain' => $domain->getIdentifier(),
                     'member_type' => $memberType->getIdentifier(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(

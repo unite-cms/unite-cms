@@ -3,6 +3,7 @@
 namespace src\UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -145,11 +146,11 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testAcceptInvitationWithInvalidToken()
     {
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', [], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-danger'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.token_missing'), trim($crawler->filter('div.uk-alert-danger')->text()));
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => 'XXX']));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => 'XXX'], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-danger'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.token_not_found'), trim($crawler->filter('div.uk-alert-danger')->text()));
     }
@@ -169,7 +170,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
@@ -187,7 +188,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->em->persist($invitation);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
@@ -252,7 +253,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->em->persist($invitation);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
@@ -313,7 +314,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
@@ -334,7 +335,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.already_member', ['%organization%' => (string)$this->organization]), trim($crawler->filter('div.uk-alert-warning p')->html()));
     }
@@ -354,7 +355,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
 
@@ -406,7 +407,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
 
@@ -457,7 +458,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
 
@@ -499,7 +500,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->em->persist($invitation);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -514,7 +515,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => $invitation->getDomainMemberType()->getDomain()->getOrganization()->getIdentifier(),
             'domain' => $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $token = $this->client->getContainer()->get('security.token_storage')->getToken();
         $this->assertNotNull($token);
         $this->assertEquals('New User', $token->getUser()->getName());
@@ -536,7 +537,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->em->persist($invitation);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -550,7 +551,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         // There should be a user token in the client session.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $invitation->getOrganization()->getIdentifier(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $token = $this->client->getContainer()->get('security.token_storage')->getToken();
         $this->assertNotNull($token);
         $this->assertEquals('New User', $token->getUser()->getName());

@@ -36,7 +36,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login', [], Router::ABSOLUTE_URL));
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail();
         $form['_password'] = $password;
@@ -55,7 +55,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login', [], Router::ABSOLUTE_URL));
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail() . 'invalid';
         $form['_password'] = $password;
@@ -76,7 +76,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login', [], Router::ABSOLUTE_URL));
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail();
         $form['_password'] = $password . 'invalid';

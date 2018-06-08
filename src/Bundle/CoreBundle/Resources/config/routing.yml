@@ -73,7 +73,7 @@ unitecms_core_api:
     methods: ['POST']
     defaults: { _controller: UniteCMSCoreBundle:GraphQLApi:index }
 
-unitecms_graph_api:
+unitecms_core_graph_api:
     path:     /{organization}/{domain}/api/graphql
     methods: ['POST']
     defaults: { _controller: UniteCMSCoreBundle:GraphQLApi:index }

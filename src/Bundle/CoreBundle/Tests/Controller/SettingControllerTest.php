@@ -125,7 +125,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
-        ]);
+        ], Router::ABSOLUTE_URL);
 
         $crawler = $this->client->request('GET', $url_list);
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -178,7 +178,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -238,7 +238,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $doctrineUUIDGenerator->generate($this->em, $setting),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
@@ -248,7 +248,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $setting->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -291,7 +291,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $setting->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -313,7 +313,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $setting->getId(),
-        ]);
+        ], Router::ABSOLUTE_URL);
 
         // Try to get revisions page of unknown setting.
         $doctrineUUIDGenerator = new UuidGenerator();
@@ -322,7 +322,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $doctrineUUIDGenerator->generate($this->em, $setting),
-        ]), Router::ABSOLUTE_URL);
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 

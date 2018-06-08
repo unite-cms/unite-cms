@@ -4,7 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitecms_core_organizationuser_index', { organization: unite.organization.identifier }) }}">
+        <a class="back-button" href="{{ url('unitecms_core_organizationuser_index', { organization: unite.organization.identifier }) }}">
             <i data-feather="arrow-left"></i>
         </a>
         <h2 class="uk-flex-1">{% trans with {'%user%': member.user|escape } %}organization.user.delete.headline{% endtrans %}</h2>
@@ -20,7 +20,7 @@
 
     {{ form_start(form) }}
     <p class="uk-text-center">
-        <a class="uk-button" style="background: white; margin: 10px;" href="{{ path('unitecms_core_organizationuser_index', { organization: organization.identifier}) }}">{% trans %}organization.user.delete.cancel{% endtrans %}</a>
+        <a class="uk-button" style="background: white; margin: 10px;" href="{{ url('unitecms_core_organizationuser_index', { organization: organization.identifier}) }}">{% trans %}organization.user.delete.cancel{% endtrans %}</a>
         {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
     </p>
     {{ form_rest(form) }}

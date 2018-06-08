@@ -57,8 +57,8 @@ class IndexControllerTest extends DatabaseAwareTestCase
 
     public function testIndexAction() {
 
-        $url = static::$container->get('router')->generate('unitecms_core_index');
-        $profile_orgs_url = static::$container->get('router')->generate('unitecms_core_organization_index',  [], Router::ABSOLUTE_PATH);
+        $url = static::$container->get('router')->generate('unitecms_core_index', [], Router::ABSOLUTE_URL);
+        $profile_orgs_url = static::$container->get('router')->generate('unitecms_core_organization_index',  [], Router::ABSOLUTE_URL);
 
         // index redirects to profile organizations route
         $this->client->request('GET', $url);
@@ -95,7 +95,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
         $this->client->request('GET', $url);
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $org1->getIdentifier(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
 
         // Create a 2nd organization.
         $org2 = new Organization();
@@ -107,7 +107,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
         $this->client->request('GET', $url);
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $org1->getIdentifier(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
 
         // Now invite the user to the 2nd organization.
         $org2 = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll()[1];

@@ -213,7 +213,8 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to access with invalid method.
         $baseUrl = static::$container->get('router')->generate(
             'unitecms_storage_sign_uploadcontenttype',
-            ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']
+            ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo'],
+            Router::ABSOLUTE_URL
         );
         $this->client->request('GET', $baseUrl);
         $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
@@ -224,7 +225,8 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $baseUrl = static::$container->get('router')->generate(
             'unitecms_storage_sign_uploadsettingtype',
-            ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo']
+            ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo'],
+            Router::ABSOLUTE_URL
         );
         $this->client->request('GET', $baseUrl);
         $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
@@ -246,7 +248,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
             $this->client->request(
                 'POST',
-                static::$container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params),
+                static::$container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params, Router::ABSOLUTE_URL),
                 []
             );
             $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
@@ -263,7 +265,7 @@ class ControllerTest extends DatabaseAwareTestCase
                  ] as $params) {
             $this->client->request(
                 'POST',
-                static::$container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params),
+                static::$container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params, Router::ABSOLUTE_URL),
                 []
             );
             $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
@@ -278,7 +280,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct2',
-                ]
+                ], Router::ABSOLUTE_URL
             )
         );
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
@@ -291,7 +293,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st2',
-                ]
+                ], Router::ABSOLUTE_URL
             )
         );
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
@@ -305,7 +307,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'foo'],
@@ -322,7 +324,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'foo'],
@@ -339,7 +341,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'foo/baa'],
@@ -355,7 +357,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'nested/baa'],
@@ -372,7 +374,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'foo/baa'],
@@ -388,7 +390,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'nested/baa'],
@@ -405,7 +407,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => [
@@ -424,7 +426,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => [
@@ -445,7 +447,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => [
@@ -507,7 +509,7 @@ class ControllerTest extends DatabaseAwareTestCase
                     'organization' => $this->org1->getIdentifier(),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => [

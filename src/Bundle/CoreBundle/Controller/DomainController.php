@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Validator\ConstraintViolationList;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -86,13 +87,13 @@ class DomainController extends Controller
                     $this->getDoctrine()->getManager()->persist($domain);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->redirectToRoute(
+                    return $this->redirect($this->generateUrl(
                         'unitecms_core_domain_view',
                         [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),
-                        ]
-                    );
+                        ], Router::ABSOLUTE_URL
+                    ));
                 } else {
                     foreach ($errors as $error) {
                         $this->addFlash('danger', $error->getPropertyPath().': '.$error->getMessage());
@@ -190,13 +191,13 @@ class DomainController extends Controller
                 if ($errors->count() == 0) {
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->redirectToRoute(
+                    return $this->redirect($this->generateUrl(
                         'unitecms_core_domain_view',
                         [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),
-                        ]
-                    );
+                        ], Router::ABSOLUTE_URL
+                    ));
                 } else {
                     foreach ($errors as $error) {
 
@@ -246,9 +247,9 @@ class DomainController extends Controller
             } else {
                 $this->getDoctrine()->getManager()->remove($domain);
                 $this->getDoctrine()->getManager()->flush();
-                return $this->redirectToRoute('unitecms_core_domain_index', [
+                return $this->redirect($this->generateUrl('unitecms_core_domain_index', [
                     'organization' => $organization->getIdentifier()
-                ]);
+                ], Router::ABSOLUTE_URL));
             }
         }
 

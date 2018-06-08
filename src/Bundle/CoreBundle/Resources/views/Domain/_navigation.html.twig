@@ -16,7 +16,7 @@
             <div>
                 <ul class="uk-nav uk-dropdown-nav">
                     <li class="uk-nav-header">
-                        <a href="{{ path('unitecms_core_domain_index', {organization: unite.organization.identifier}) }}">
+                        <a href="{{ url('unitecms_core_domain_index', {organization: unite.organization.identifier}) }}">
                             <i data-feather="home"></i>
                             {{ unite.organization }}
                         </a>
@@ -24,7 +24,7 @@
                     {% for d in unite.organization.domains %}
                         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), d) %}
                             <li{% if d == unite.domain %} class="uk-active"{% endif %}>
-                                <a href="{{ path('unitecms_core_domain_view', {organization: unite.organization.identifier, domain: d.identifier}) }}">
+                                <a href="{{ url('unitecms_core_domain_view', {organization: unite.organization.identifier, domain: d.identifier}) }}">
                                     <i data-feather="globe" class="uk-margin-small-right"></i> {{ d }}
                                 </a>
                             </li>
@@ -80,7 +80,7 @@
                             {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
                                 class="uk-active"
                             {% endif %}
-                        {% endspaceless %} href="{{ path('unitecms_core_content_index', {
+                        {% endspaceless %} href="{{ url('unitecms_core_content_index', {
                             organization: unite.organization.identifier,
                             domain: unite.domain.identifier,
                             content_type: type.identifier,
@@ -98,7 +98,7 @@
                                             {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}
                                                 class="uk-active"
                                             {% endif %}
-                                            {% endspaceless %}href="{{ path('unitecms_core_content_index', {
+                                            {% endspaceless %}href="{{ url('unitecms_core_content_index', {
                                         organization: unite.organization.identifier,
                                         domain: unite.domain.identifier,
                                         content_type: type.identifier,
@@ -124,7 +124,7 @@
                                 {% if settingType is defined and settingType.identifier == type.identifier %}
                                     class="uk-active"
                                 {% endif %}
-                                {% endspaceless %} href="{{ path('unitecms_core_setting_index', {
+                                {% endspaceless %} href="{{ url('unitecms_core_setting_index', {
                             organization: unite.organization.identifier,
                             domain: unite.domain.identifier,
                             setting_type: type.identifier
@@ -143,7 +143,7 @@
                         {% if memberType is defined and memberType.identifier == type.identifier %}
                             class="uk-active"
                         {% endif %}
-                    {% endspaceless %} href="{{ path('unitecms_core_domainmember_index', {
+                    {% endspaceless %} href="{{ url('unitecms_core_domainmember_index', {
                         organization: unite.organization.identifier,
                         domain: unite.domain.identifier,
                         member_type: type.identifier

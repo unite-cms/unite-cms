@@ -10,7 +10,9 @@ class ApiRequestMatcher extends RequestMatcher
 
     public function __construct()
     {
-        parent::__construct('^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/.+|$)');
+        // Would match {organization}.unitecms.io/{domain}/api and also unitecms.io/{organization}/{domain}/api
+
+        parent::__construct('^/([A-Za-z0-9_-]/)*[A-Za-z0-9_-]+/api(/.+|$)');
     }
 
     /**

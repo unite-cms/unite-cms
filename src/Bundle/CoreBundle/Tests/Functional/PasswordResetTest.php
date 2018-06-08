@@ -3,6 +3,7 @@
 namespace src\UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
@@ -68,7 +69,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
     public function testPasswordResetActionForUnknownEmail()
     {
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword', [], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 
@@ -83,7 +84,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
     public function testPasswordResetActionForKnownEmail()
     {
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword', [], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 
@@ -111,7 +112,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $resetRequestedAt = $this->users['domain_editor']->setResetRequestedAt(new \DateTime())->getResetRequestedAt();
         $this->em->flush($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword', [], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 
@@ -165,7 +166,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $this->users['domain_editor']->setResetRequestedAt(new \DateTime());
         $this->em->flush($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpasswordconfirm', ['token' => $resetToken]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpasswordconfirm', ['token' => $resetToken], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 

@@ -10,6 +10,7 @@ unitecms_core_index:
 
 unitecms_core_authentication:
     resource: "@UniteCMSCoreBundle/Controller/AuthenticationController.php"
+    prefix:   /
     type:     annotation
     host:     'profile.{hostname}'
     requirements:
@@ -27,6 +28,7 @@ unitecms_core_logout:
 
 unitecms_core_profile:
     resource: "@UniteCMSCoreBundle/Controller/ProfileController.php"
+    prefix:   /
     type:     annotation
     host:     'profile.{hostname}'
     requirements:
@@ -127,7 +129,7 @@ unitecms_core_api:
         _controller: UniteCMSCoreBundle:GraphQLApi:index
         hostname: '%default_hostname%'
 
-unitecms_graph_api:
+unitecms_core_graph_api:
     path:     /{domain}/api/graphql
     methods: ['POST']
     host:     '{organization}.{hostname}'
@@ -138,3 +140,10 @@ unitecms_graph_api:
     defaults:
         _controller: UniteCMSCoreBundle:GraphQLApi:index
         hostname: '%default_hostname%'
+
+# add a fallback route that redirects to regular index
+unitecms_core_index_fallback:
+    path:     /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: unitecms_core_index

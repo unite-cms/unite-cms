@@ -131,7 +131,6 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
             'CONTENT_TYPE' => 'application/json',
         ], json_encode(['query' => '{}']));
 
-        dump($this->client->getResponse()->getContent());
         $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
 
         // Try to access with wrong token.

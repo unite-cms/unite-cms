@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 
@@ -97,6 +98,7 @@ class SettingController extends Controller
 
     /**
      * @Route("/{setting_type}/translations/{setting}")
+     * @Method({"GET"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
@@ -119,6 +121,7 @@ class SettingController extends Controller
 
     /**
      * @Route("/{setting_type}/revisions/{setting}")
+     * @Method({"GET"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
@@ -144,6 +147,7 @@ class SettingController extends Controller
 
     /**
      * @Route("/{setting_type}/revisions/{setting}/revert/{version}")
+     * @Method({"GET", "POST"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
@@ -168,15 +172,16 @@ class SettingController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Setting reverted.');
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_setting_revisions',
                 [
                     'organization' => $settingType->getDomain()->getOrganization()->getIdentifier(),
                     'domain' => $settingType->getDomain()->getIdentifier(),
                     'setting_type' => $settingType->getIdentifier(),
                     'setting' => $setting->getId(),
-                ]
-            );
+                ],
+                Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(

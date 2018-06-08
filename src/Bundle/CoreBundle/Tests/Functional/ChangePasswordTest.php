@@ -3,6 +3,7 @@
 namespace src\UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -87,7 +88,7 @@ class ChangePasswordTest extends DatabaseAwareTestCase
     {
 
         $this->login($this->users['domain_editor']);
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_update'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_update', [], Router::ABSOLUTE_URL));
 
         // Make sure, that there are two forms. One for profile update, on for password reset.
         $this->assertCount(1, $crawler->filter('form[name="change_password"]'));
