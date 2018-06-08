@@ -87,7 +87,7 @@ class ChangePasswordTest extends DatabaseAwareTestCase
     {
 
         $this->login($this->users['domain_editor']);
-        $crawler = $this->client->request('GET', '/profile/update');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_update'));
 
         // Make sure, that there are two forms. One for profile update, on for password reset.
         $this->assertCount(1, $crawler->filter('form[name="change_password"]'));

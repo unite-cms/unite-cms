@@ -1,0 +1,12 @@
+
+unitecms_storage_sign:
+    resource: "@UniteCMSStorageBundle/Controller/SignController.php"
+    type:     annotation
+    prefix:   /{domain}/api/storage/sign
+    host:     '{organization}.{hostname}'
+    requirements:
+        domain: '[a-z0-9_]+'
+        organization: '[a-z0-9_]+'
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'

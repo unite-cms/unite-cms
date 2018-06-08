@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Tests\Controller;
 
 use Symfony\Component\HttpKernel\Client;
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -35,12 +36,12 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/profile/login');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login'));
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail();
         $form['_password'] = $password;
         $this->client->submit($form);
-        $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/'));
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_index', [], Router::ABSOLUTE_URL)));
     }
 
     public function testLoginWithInValidUser() {
@@ -54,12 +55,12 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/profile/login');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login'));
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail() . 'invalid';
         $form['_password'] = $password;
         $this->client->submit($form);
-        $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/profile/login'));
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_authentication_login', [], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
         $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("Invalid credentials.")'));
     }
@@ -75,12 +76,12 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($user);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/profile/login');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_authentication_login'));
         $form = $crawler->filter('form')->form();
         $form['_username'] = $user->getEmail();
         $form['_password'] = $password . 'invalid';
         $this->client->submit($form);
-        $this->assertTrue($this->client->getResponse()->isRedirect('http://localhost/profile/login'));
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_authentication_login', [], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
         $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("Invalid credentials.")'));
     }

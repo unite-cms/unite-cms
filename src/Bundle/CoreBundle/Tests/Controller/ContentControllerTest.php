@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Tests\Controller;
 use Doctrine\ORM\Id\UuidGenerator;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpKernel\Client;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;

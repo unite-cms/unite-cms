@@ -68,7 +68,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
     public function testPasswordResetActionForUnknownEmail()
     {
 
-        $crawler = $this->client->request('GET', '/profile/reset-password');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword'));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 
@@ -83,7 +83,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
     public function testPasswordResetActionForKnownEmail()
     {
 
-        $crawler = $this->client->request('GET', '/profile/reset-password');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword'));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 
@@ -111,7 +111,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $resetRequestedAt = $this->users['domain_editor']->setResetRequestedAt(new \DateTime())->getResetRequestedAt();
         $this->em->flush($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', '/profile/reset-password');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpassword'));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 
@@ -165,7 +165,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         $this->users['domain_editor']->setResetRequestedAt(new \DateTime());
         $this->em->flush($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', '/profile/reset-password-confirm?token='.$resetToken);
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_resetpasswordconfirm', ['token' => $resetToken]));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
 

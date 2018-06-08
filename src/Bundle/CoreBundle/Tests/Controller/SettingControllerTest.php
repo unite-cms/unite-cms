@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Tests\Controller;
 use Doctrine\ORM\Id\UuidGenerator;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpKernel\Client;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -321,7 +322,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $doctrineUUIDGenerator->generate($this->em, $setting),
-        ]));
+        ]), Router::ABSOLUTE_URL);
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
