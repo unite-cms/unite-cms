@@ -10,9 +10,16 @@ class ApiRequestMatcher extends RequestMatcher
 
     public function __construct()
     {
-        // Would match {organization}.unitecms.io/{domain}/api and also unitecms.io/{organization}/{domain}/api
+        $approach = $_ENV['ROUTING_APPROACH'] ?? 'subdomain';
 
-        parent::__construct('^/([A-Za-z0-9_-]/)*[A-Za-z0-9_-]+/api(/.+|$)');
+        // Matches /{domain}/api
+        if($approach == 'subdomain') {
+            parent::__construct('^/[A-Za-z0-9_-]+/api(/.+|$)');
+
+        // Matches /{organization}/{domain}/api
+        } else {
+            parent::__construct('^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/.+|$)');
+        }
     }
 
     /**

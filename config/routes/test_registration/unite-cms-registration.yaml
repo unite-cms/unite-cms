@@ -1,5 +1,0 @@
-#unite_cms_registration:
-#  resource: "@UniteCMSRegistrationBundle/Resources/config/routing.subdomain.yml"
-
-unite_cms_registration:
-  resource: "@UniteCMSRegistrationBundle/Resources/config/routing.yml"

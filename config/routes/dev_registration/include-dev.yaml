@@ -1,0 +1,3 @@
+dev:
+  resource: '../dev/'
+  type:     directory
