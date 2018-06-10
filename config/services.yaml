@@ -6,6 +6,7 @@ parameters:
     jms_serializer.unserialize_object_constructor.class: UniteCMS\CoreBundle\Serializer\ObjectConstructor
     site_name: unite cms
     default_hostname: '%env(DEFAULT_HOSTNAME)%'
+    env(ROUTING_APPROACH): subdomain
     routing_approach: '%env(ROUTING_APPROACH)%'
 
     # You can add more allowed hostnames by adding each with a pipe: '%default_hostname%|unitecms.io|example.com'

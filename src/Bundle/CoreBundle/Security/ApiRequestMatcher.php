@@ -8,13 +8,11 @@ use Symfony\Component\HttpFoundation\RequestMatcher;
 class ApiRequestMatcher extends RequestMatcher
 {
 
-    public function __construct()
+    public function __construct($approach)
     {
-        $approach = $_ENV['ROUTING_APPROACH'] ?? 'subdomain';
-
         // Matches /{domain}/api
         if($approach == 'subdomain') {
-            parent::__construct('^/[A-Za-z0-9_-]+/api(/.+|$)');
+            parent::__construct('^/[A-Za-z0-9_-]+/api(/.+|$)', '^[a-zA-Z0-9-_]*\.[a-zA-Z0-9-_]*\.[a-zA-Z0-9-_]+$');
 
         // Matches /{organization}/{domain}/api
         } else {
