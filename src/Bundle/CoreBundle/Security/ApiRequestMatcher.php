@@ -12,7 +12,7 @@ class ApiRequestMatcher extends RequestMatcher
     {
         // Matches /{domain}/api
         if($approach == 'subdomain') {
-            parent::__construct('^/[A-Za-z0-9_-]+/api(/|$)', '^[A-Za-z0-9_]+\.'.$allowed_hostname);
+            parent::__construct('^/[A-Za-z0-9_-]+/api(/|$)', '^[A-Za-z0-9_-]+\.'.$allowed_hostname);
 
         // Matches /{organization}/{domain}/api
         } else {
