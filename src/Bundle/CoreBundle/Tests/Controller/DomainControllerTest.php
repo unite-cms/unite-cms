@@ -8,7 +8,6 @@
 
 namespace UniteCMS\CoreBundle\Tests\Controller;
 
-
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\BrowserKit\Cookie;
@@ -158,6 +157,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $form->form();
         $form->disableValidation();
         $values['form']['definition'] = '{ "foo": "baa" }';
+        $values['form']['submit'] = '';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertFalse($this->client->getResponse()->isRedirect());
         $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
@@ -171,11 +171,39 @@ class DomainControllerTest extends DatabaseAwareTestCase
             "view domain": "true",
             "update domain": "member.type == \"user\""
         }}';
-        $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+        $values['form']['submit'] = '';
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        // assert confirmation page.
+        $this->assertCount(1, $crawler->filter('.unite-domain-change-visualization'));
+        $this->assertCount(1, $crawler->filter('button[name="form[back]"]'));
+
+        // click on back button.
+        $values['form']['back'] = '';
+        unset($values['form']['submit']);
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        // we should see the edit page again.
+        $this->assertCount(0, $crawler->filter('.unite-domain-change-visualization'));
+        $this->assertCount(1, $crawler->filter('button[name="form[submit]"]'));
+
+        // submit.
+        $values['form']['submit'] = '';
+        unset($values['form']['back']);
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+        $this->assertCount(1, $crawler->filter('.unite-domain-change-visualization'));
+        $this->assertCount(1, $crawler->filter('button[name="form[confirm]"]'));
+
+        // click on confirmation button.
+        $values['form']['confirm'] = '';
+        unset($values['form']['submit']);
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => 'd1',
         ], Router::ABSOLUTE_URL)));
+
         $crawler = $this->client->followRedirect();
 
         // make sure, that the domain was updated.

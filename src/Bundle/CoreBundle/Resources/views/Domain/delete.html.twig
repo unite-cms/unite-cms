@@ -21,6 +21,8 @@
             {% trans with {'%domain%': domain|escape } %}domain.delete.text{% endtrans %}
         </p>
 
+        {{ include('@UniteCMSCore/Domain/_change_visualization.html.twig', { original: domain, updated: deletedDomain}) }}
+
         {{ form_start(form) }}
         <p class="uk-text-center">
 

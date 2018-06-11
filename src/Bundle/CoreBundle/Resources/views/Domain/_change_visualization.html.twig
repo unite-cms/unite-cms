@@ -1,0 +1,70 @@
+<div class="unite-domain-change-visualization">
+
+    {% set left_content_type = original.contentTypesDiff(updated, true) %}
+    {% set right_content_type = updated.contentTypesDiff(original, true) %}
+
+
+    <div class="uk-card uk-card-default uk-card-body uk-margin">
+        <div class="uk-card-header">
+            <h4>Content Types</h4>
+        </div>
+
+        {% if not left_content_type is empty or not right_content_type is empty %}
+
+            <ul class="uk-list uk-list-divider">
+                {% for type in right_content_type %}
+                    <li><i data-feather="plus-circle" class="uk-text-success uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.added{% endtrans %}</li>
+                {% endfor %}
+                {% for type in left_content_type %}
+                    <li><i data-feather="minus-circle" class="uk-text-danger uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.removed{% endtrans %}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{% trans %}domain.change_visualization.nothing_changed{% endtrans %}</p>
+        {% endif %}
+    </div>
+
+    {% set left_setting_type = original.settingTypesDiff(updated, true) %}
+    {% set right_setting_type = updated.settingTypesDiff(original, true) %}
+
+
+    <div class="uk-card uk-card-default uk-card-body uk-margin">
+        <div class="uk-card-header">
+            <h4>Setting Types</h4>
+        </div>
+        {% if not left_setting_type is empty or not right_setting_type is empty %}
+            <ul class="uk-list uk-list-divider">
+                {% for type in right_setting_type %}
+                        <li><i data-feather="plus-circle" class="uk-text-success uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.added{% endtrans %}</li>
+                {% endfor %}
+                {% for type in left_setting_type %}
+                        <li><i data-feather="minus-circle" class="uk-text-danger uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.removed{% endtrans %}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{% trans %}domain.change_visualization.nothing_changed{% endtrans %}</p>
+        {% endif %}
+    </div>
+
+    {% set left_member_type = original.domainMemberTypesDiff(updated, true) %}
+    {% set right_member_type = updated.domainMemberTypesDiff(original, true) %}
+
+
+    <div class="uk-card uk-card-default uk-card-body uk-margin">
+        <div class="uk-card-header">
+            <h4>Member Types</h4>
+        </div>
+        {% if not left_member_type is empty or not right_member_type is empty %}
+            <ul class="uk-list uk-list-divider">
+                {% for type in right_member_type %}
+                        <li><i data-feather="plus-circle" class="uk-text-success uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.added{% endtrans %}</li>
+                {% endfor %}
+                {% for type in left_member_type %}
+                        <li><i data-feather="minus-circle" class="uk-text-danger uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.removed{% endtrans %}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{% trans %}domain.change_visualization.nothing_changed{% endtrans %}</p>
+        {% endif %}
+    </div>
+</div>
