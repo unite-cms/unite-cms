@@ -53,7 +53,7 @@ unitecms_core_organization_user:
     prefix:   /user
     host:     '{organization}.{hostname}'
     requirements:
-        organization: '[a-z0-9_]+'
+        organization: '%identifier_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         hostname: '%default_hostname%'
@@ -64,7 +64,7 @@ unitecms_core_organization_api_key:
     prefix:   /apikeys
     host:     '{organization}.{hostname}'
     requirements:
-        organization: '[a-z0-9_]+'
+        organization: '%identifier_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         hostname: '%default_hostname%'
@@ -74,7 +74,7 @@ unitecms_core_domains:
     type:     annotation
     host:     '{organization}.{hostname}'
     requirements:
-        organization: '[a-z0-9_]+'
+        organization: '%identifier_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         hostname: '%default_hostname%'
@@ -85,8 +85,8 @@ unitecms_core_domain_member:
     prefix:   /{domain}/member
     host:     '{organization}.{hostname}'
     requirements:
-        domain: '[a-z0-9_]+'
-        organization: '[a-z0-9_]+'
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         hostname: '%default_hostname%'
@@ -97,8 +97,8 @@ unitecms_core_content:
     prefix:   /{domain}/content
     host:     '{organization}.{hostname}'
     requirements:
-        domain: '[a-z0-9_]+'
-        organization: '[a-z0-9_]+'
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         hostname: '%default_hostname%'
@@ -109,8 +109,8 @@ unitecms_core_setting:
     prefix:   /{domain}/setting
     host:     '{organization}.{hostname}'
     requirements:
-        domain: '[a-z0-9_]+'
-        organization: '[a-z0-9_]+'
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         hostname: '%default_hostname%'
@@ -122,8 +122,8 @@ unitecms_core_api:
     methods: ['POST']
     host:     '{organization}.{hostname}'
     requirements:
-        domain: '[a-z0-9_]+'
-        organization: '[a-z0-9_]+'
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         _controller: UniteCMSCoreBundle:GraphQLApi:index
@@ -134,8 +134,8 @@ unitecms_core_graph_api:
     methods: ['POST']
     host:     '{organization}.{hostname}'
     requirements:
-        domain: '[a-z0-9_]+'
-        organization: '[a-z0-9_]+'
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         _controller: UniteCMSCoreBundle:GraphQLApi:index

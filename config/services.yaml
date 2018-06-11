@@ -9,6 +9,9 @@ parameters:
     env(ROUTING_APPROACH): subdomain
     routing_approach: '%env(ROUTING_APPROACH)%'
 
+    # This pattern will be used for organization and domain identifier url matching
+    identifier_pattern: '[a-z0-9-]+'
+
     # You can add more allowed hostnames by adding each with a pipe: '%default_hostname%|unitecms.io|example.com'
     allowed_hostname: '%default_hostname%'
 
