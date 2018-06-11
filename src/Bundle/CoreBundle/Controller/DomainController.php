@@ -195,7 +195,7 @@ class DomainController extends Controller
 
                     // Case 2: form was submitted and confirmed.
                     else if($form->get('confirm')->isClicked()) {
-                        $this->getDoctrine()->getManager()->flush();
+                        $this->getDoctrine()->getManager()->flush($domain);
                         return $this->redirect($this->generateUrl('unitecms_core_domain_view', [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),
@@ -253,7 +253,7 @@ class DomainController extends Controller
             // if this domain is save to delete.
             } else {
                 $this->getDoctrine()->getManager()->remove($domain);
-                $this->getDoctrine()->getManager()->flush();
+                $this->getDoctrine()->getManager()->flush($domain);
                 return $this->redirect($this->generateUrl('unitecms_core_domain_index', [
                     'organization' => $organization->getIdentifier()
                 ], Router::ABSOLUTE_URL));
