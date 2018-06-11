@@ -3,7 +3,7 @@
 use Symfony\Component\Routing\RouteCollection;
 
 # Include routes from core bundles depending on a ROUTING_APPROACH env param. This can be "subdomain" or "parameter".
-$approach = $_ENV['ROUTING_APPROACH'] ?? 'subdomain';
+$approach = getenv('ROUTING_APPROACH') ? getenv('ROUTING_APPROACH') : 'subdomain';
 
 $routes = new RouteCollection();
 $routes->addCollection($loader->import("@UniteCMSCoreBundle/Resources/config/routing.$approach.yml"));
