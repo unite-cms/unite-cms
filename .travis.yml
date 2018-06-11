@@ -9,7 +9,9 @@ matrix:
     include:
         - php: 7.1
         - php: 7.2
-        - php: 7.1
+        - php: 7.2
+          env: ROUTING_APPROACH=parameter
+        - php: 7.2
           if: branch = master
           env: coverage=true
 

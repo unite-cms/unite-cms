@@ -4,7 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitecms_core_setting_index', {
+        <a class="back-button" href="{{ url('unitecms_core_setting_index', {
             domain: unite.domain.identifier,
             organization: unite.organization.identifier,
             setting_type: settingType.identifier
@@ -42,7 +42,7 @@
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a href="{{ path('unitecms_core_setting_revisionsrevert', {
+                                    <li><a href="{{ url('unitecms_core_setting_revisionsrevert', {
                                             'organization': unite.domain.organization.identifier,
                                             'domain': unite.domain.identifier,
                                             'setting_type': settingType.identifier,

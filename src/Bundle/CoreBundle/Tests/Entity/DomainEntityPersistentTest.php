@@ -108,13 +108,13 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertStringStartsWith('contentTypes', $errors->get(0)->getPropertyPath());
 
         // Try to test invalid SettingType.
-        $domain1->getContentTypes()->first()->setIdentifier('domain_ct1')->setTitle('Domain CT 1');
+        $domain1->getContentTypes()->first()->setIdentifier('domain-ct1')->setTitle('Domain CT 1');
         $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('settingTypes', $errors->get(0)->getPropertyPath());
 
         // Try to test invalid MemberType.
-        $domain1->getSettingTypes()->first()->setIdentifier('domain_set1')->setTitle('Domain Set 1');
+        $domain1->getSettingTypes()->first()->setIdentifier('domain-set1')->setTitle('Domain Set 1');
         $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('domainMemberTypes', $errors->get(0)->getPropertyPath());
@@ -165,12 +165,12 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
 
         // Test all combinations of same organizations and identifier
         $org2 = new Organization();
-        $org2->setTitle('Domain Org 1')->setIdentifier('domain_org2');
+        $org2->setTitle('Domain Org 1')->setIdentifier('domain-org2');
         $this->em->persist($org2);
         $this->em->flush($org2);
 
         // Same organization, different identifier should be valid
-        $domain2->setIdentifier('different_domain_identifier_2');
+        $domain2->setIdentifier('different-domain-identifier-2');
         $this->assertCount(0, static::$container->get('validator')->validate($domain2));
 
         // Different organization, same identifier should be valid
@@ -178,12 +178,12 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(0, static::$container->get('validator')->validate($domain2));
 
         // Different organization, different identifier should be valid
-        $domain2->setIdentifier('different_domain_identifier_2')->setOrganization($org2);
+        $domain2->setIdentifier('different-domain-identifier-2')->setOrganization($org2);
         $this->assertCount(0, static::$container->get('validator')->validate($domain2));
 
         // Try to delete non empty domain.
         $ct = new ContentType();
-        $ct->setTitle('New Content Type')->setIdentifier('domain_entity_test_new_ct')->setWeight(0);
+        $ct->setTitle('New Content Type')->setIdentifier('domain-entity-test-new-ct')->setWeight(0);
         $content = new Content();
         $content->setContentType($ct);
         $this->em->persist($ct);

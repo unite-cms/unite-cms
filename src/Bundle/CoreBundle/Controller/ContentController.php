@@ -13,7 +13,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\Translator;
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -112,15 +112,15 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content created.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -183,15 +183,15 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content updated.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -249,15 +249,15 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content deleted.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -343,15 +343,15 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content deleted.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -429,15 +429,15 @@ class ContentController extends Controller
                 $this->getDoctrine()->getManager()->flush();
                 $this->addFlash('success', 'Deleted content was restored.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -456,7 +456,7 @@ class ContentController extends Controller
 
     /**
      * @Route("/{content_type}/{view}/translations/{content}")
-     * @Method({"GET", "POST"})
+     * @Method({"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -479,15 +479,15 @@ class ContentController extends Controller
                     'You cannot manage translations for this content, because it is a translation of soft-deleted content.'
                 );
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
                         'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -581,7 +581,7 @@ class ContentController extends Controller
                             $this->getDoctrine()->getManager()->flush();
                             $this->addFlash('success', 'Translation added.');
 
-                            return $this->redirectToRoute(
+                            return $this->redirect($this->generateUrl(
                                 'unitecms_core_content_translations',
                                 [
                                     'organization' => $view->getContentType()->getDomain()->getOrganization(
@@ -590,8 +590,8 @@ class ContentController extends Controller
                                     'content_type' => $view->getContentType()->getIdentifier(),
                                     'view' => $view->getIdentifier(),
                                     'content' => $content->getId(),
-                                ]
-                            );
+                                ], Router::ABSOLUTE_URL
+                            ));
                         }
                     }
                 }
@@ -657,7 +657,7 @@ class ContentController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Translation removed.');
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_content_translations',
                 [
                     'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
@@ -665,8 +665,8 @@ class ContentController extends Controller
                     'content_type' => $view->getContentType()->getIdentifier(),
                     'view' => $view->getIdentifier(),
                     'content' => $content->getId(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(
@@ -737,7 +737,7 @@ class ContentController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Content reverted.');
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_content_revisions',
                 [
                     'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
@@ -745,8 +745,8 @@ class ContentController extends Controller
                     'content_type' => $view->getContentType()->getIdentifier(),
                     'view' => $view->getIdentifier(),
                     'content' => $content->getId(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(

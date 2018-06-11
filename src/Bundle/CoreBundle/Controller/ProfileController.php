@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\EqualTo;
 use UniteCMS\CoreBundle\Entity\DomainMember;
@@ -57,7 +58,7 @@ class ProfileController extends Controller
 
         if ($forms['personal']->isSubmitted() && $forms['personal']->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
 
@@ -88,7 +89,7 @@ class ProfileController extends Controller
             $changePassword->eraseCredentials();
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
 
@@ -159,7 +160,7 @@ class ProfileController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
         $form = $this->createFormBuilder()
@@ -233,7 +234,7 @@ class ProfileController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
         $userFound = false;
@@ -504,14 +505,14 @@ class ProfileController extends Controller
                                     $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration));
 
                                     if($domainMember) {
-                                        return $this->redirectToRoute('unitecms_core_domain_view', [
+                                        return $this->redirect($this->generateUrl('unitecms_core_domain_view', [
                                             'organization' => $organizationMember->getOrganization()->getIdentifier(),
                                             'domain' => $domainMember->getDomain()->getIdentifier(),
-                                        ]);
+                                        ], Router::ABSOLUTE_URL));
                                     } else {
-                                        return $this->redirectToRoute('unitecms_core_domain_index', [
+                                        return $this->redirect($this->generateUrl('unitecms_core_domain_index', [
                                             'organization' => $organizationMember->getOrganization()->getIdentifier(),
-                                        ]);
+                                        ], Router::ABSOLUTE_URL));
                                     }
                                 }
                             }

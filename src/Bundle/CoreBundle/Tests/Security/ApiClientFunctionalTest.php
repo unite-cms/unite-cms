@@ -56,7 +56,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
      */
     private $domainConfiguration = '{
     "title": "Test controller access check domain",
-    "identifier": "access_check", 
+    "identifier": "access-check", 
     "content_types": [
       {
         "title": "CT 1",
@@ -79,7 +79,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
-        $this->organization->setTitle('Test controller access check')->setIdentifier('access_check');
+        $this->organization->setTitle('Test controller access check')->setIdentifier('access-check');
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 

@@ -6,7 +6,7 @@
     <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
         <header class="uk-card-header uk-flex">
             <h2 class="uk-flex-1">{% trans with {'%type%': memberType|escape} %}domain.member.headline{% endtrans %}</h2>
-            <a href="{{ path('unitecms_core_domainmember_create', {
+            <a href="{{ url('unitecms_core_domainmember_create', {
                 domain: domain.identifier,
                 organization: organization.identifier,
                 member_type: memberType.identifier
@@ -40,7 +40,7 @@
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a href="{{ path('unitecms_core_domainmember_update', {
+                                    <li><a href="{{ url('unitecms_core_domainmember_update', {
                                             domain: domain.identifier,
                                             organization: organization.identifier,
                                             member_type: memberType.identifier,
@@ -49,7 +49,7 @@
                                             <i class="uk-margin-small-right" data-feather="edit"></i>
                                             {% trans %}domain.member.update.button{% endtrans %}
                                         </a></li>
-                                    <li><a class="uk-text-danger" href="{{ path('unitecms_core_domainmember_delete', {
+                                    <li><a class="uk-text-danger" href="{{ url('unitecms_core_domainmember_delete', {
                                             domain: domain.identifier,
                                             organization: organization.identifier,
                                             member_type: memberType.identifier,
@@ -97,7 +97,7 @@
                                 <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                                 <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                     <ul class="uk-nav uk-dropdown-nav">
-                                        <li><a class="uk-text-danger" href="{{ path('unitecms_core_domainmember_deleteinvite', {
+                                        <li><a class="uk-text-danger" href="{{ url('unitecms_core_domainmember_deleteinvite', {
                                                 organization: organization.identifier,
                                                 domain: domain.identifier,
                                                 member_type: memberType.identifier,

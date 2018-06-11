@@ -8,13 +8,13 @@
         <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
             <ul class="uk-nav uk-dropdown-nav">
-                {% if settingType.locales|length > 0 %}<li><a href="{{ path('unitecms_core_setting_translations', {
+                {% if settingType.locales|length > 0 %}<li><a href="{{ url('unitecms_core_setting_translations', {
                         'organization': unite.domain.organization.identifier,
                         'domain': unite.domain.identifier,
                         'setting_type': settingType.identifier,
                         'setting': setting.id
                     }) }}"><i class="uk-margin-small-right" data-feather="globe"></i>{% trans %}setting.translations.button{% endtrans %}</a></li>{% endif %}
-                <li><a href="{{ path('unitecms_core_setting_revisions', {
+                <li><a href="{{ url('unitecms_core_setting_revisions', {
                         'organization': unite.domain.organization.identifier,
                         'domain': unite.domain.identifier,
                         'setting_type': settingType.identifier,

@@ -1,0 +1,149 @@
+unitecms_core_index:
+    path:     /
+    methods: ['GET']
+    host:     'profile.{hostname}'
+    requirements:
+        hostname: '%allowed_hostname%'
+    defaults:
+        _controller: UniteCMSCoreBundle:Index:index
+        hostname: '%default_hostname%'
+
+unitecms_core_authentication:
+    resource: "@UniteCMSCoreBundle/Controller/AuthenticationController.php"
+    prefix:   /
+    type:     annotation
+    host:     'profile.{hostname}'
+    requirements:
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+unitecms_core_logout:
+    path: /logout
+    host:     'profile.{hostname}'
+    requirements:
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+unitecms_core_profile:
+    resource: "@UniteCMSCoreBundle/Controller/ProfileController.php"
+    prefix:   /
+    type:     annotation
+    host:     'profile.{hostname}'
+    requirements:
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+
+unitecms_core_organizations:
+    resource: "@UniteCMSCoreBundle/Controller/OrganizationController.php"
+    type:     annotation
+    prefix:   /organizations
+    host:     'profile.{hostname}'
+    requirements:
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+unitecms_core_organization_user:
+    resource: "@UniteCMSCoreBundle/Controller/OrganizationUserController.php"
+    type:     annotation
+    prefix:   /user
+    host:     '{organization}.{hostname}'
+    requirements:
+        organization: '%identifier_pattern%'
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+unitecms_core_organization_api_key:
+    resource: "@UniteCMSCoreBundle/Controller/OrganizationApiKeyController.php"
+    type:     annotation
+    prefix:   /apikeys
+    host:     '{organization}.{hostname}'
+    requirements:
+        organization: '%identifier_pattern%'
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+unitecms_core_domains:
+    resource: "@UniteCMSCoreBundle/Controller/DomainController.php"
+    type:     annotation
+    host:     '{organization}.{hostname}'
+    requirements:
+        organization: '%identifier_pattern%'
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+unitecms_core_domain_member:
+    resource: "@UniteCMSCoreBundle/Controller/DomainMemberController.php"
+    type:     annotation
+    prefix:   /{domain}/member
+    host:     '{organization}.{hostname}'
+    requirements:
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+unitecms_core_content:
+    resource: "@UniteCMSCoreBundle/Controller/ContentController.php"
+    type:     annotation
+    prefix:   /{domain}/content
+    host:     '{organization}.{hostname}'
+    requirements:
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+unitecms_core_setting:
+    resource: "@UniteCMSCoreBundle/Controller/SettingController.php"
+    type:     annotation
+    prefix:   /{domain}/setting
+    host:     '{organization}.{hostname}'
+    requirements:
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
+        hostname: '%allowed_hostname%'
+    defaults:
+        hostname: '%default_hostname%'
+
+
+# Add a route to api that will return the default implementation (graphQL)
+unitecms_core_api:
+    path:     /{domain}/api
+    methods: ['POST']
+    host:     '{organization}.{hostname}'
+    requirements:
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
+        hostname: '%allowed_hostname%'
+    defaults:
+        _controller: UniteCMSCoreBundle:GraphQLApi:index
+        hostname: '%default_hostname%'
+
+unitecms_core_graph_api:
+    path:     /{domain}/api/graphql
+    methods: ['POST']
+    host:     '{organization}.{hostname}'
+    requirements:
+        domain: '%identifier_pattern%'
+        organization: '%identifier_pattern%'
+        hostname: '%allowed_hostname%'
+    defaults:
+        _controller: UniteCMSCoreBundle:GraphQLApi:index
+        hostname: '%default_hostname%'
+
+# add a fallback route that redirects to regular index
+unitecms_core_index_fallback:
+    path:     /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: unitecms_core_index

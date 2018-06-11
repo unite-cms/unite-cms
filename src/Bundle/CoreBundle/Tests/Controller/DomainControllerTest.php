@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Tests\Controller;
 
 
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -91,7 +92,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // List all domains.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $this->organization->getIdentifier(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Check that there is a add domain button.
@@ -132,7 +133,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => 'd1',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
         $updateButton = $crawler->filter('a:contains("' . static::$container->get('translator')->trans('domain.menu.manage.update') .'")');
         $this->assertGreaterThanOrEqual(1, $updateButton->count());
@@ -174,7 +175,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => 'd1',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // make sure, that the domain was updated.
@@ -222,7 +223,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $this->organization->getIdentifier(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $this->client->followRedirect();
 
         // Assert domain was deleted.
@@ -249,7 +250,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // List all domains.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domain_index', [
             'organization' => $this->organization->getIdentifier(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // org editors are not automatically domain editors.

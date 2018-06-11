@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
@@ -91,12 +92,12 @@ class OrganizationUserController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_organizationuser_index',
                 [
                     'organization' => $organization->getIdentifier(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(
@@ -148,12 +149,13 @@ class OrganizationUserController extends Controller
                 $this->getDoctrine()->getManager()->remove($member);
                 $this->getDoctrine()->getManager()->flush();
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_organizationuser_index',
                     [
                         'organization' => $organization->getIdentifier(),
-                    ]
-                );
+                    ],
+                    Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -229,7 +231,7 @@ class OrganizationUserController extends Controller
                         'text/html'
                     );
                 $this->get('mailer')->send($message);
-                return $this->redirectToRoute('unitecms_core_organizationuser_index', ['organization' => $organization->getIdentifier()]);
+                return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
             }
         }
 
@@ -268,9 +270,9 @@ class OrganizationUserController extends Controller
             $this->getDoctrine()->getManager()->remove($invite);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('unitecms_core_organizationuser_index', [
+            return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', [
                 'organization' => $organization->getIdentifier(),
-            ]            );
+            ], Router::ABSOLUTE_URL));
         }
 
         return $this->render(

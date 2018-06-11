@@ -18,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
@@ -84,7 +85,7 @@ class OrganizationController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->persist($organization);
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirectToRoute('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()]);
+            return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
         }
 
         return $this->render('UniteCMSCoreBundle:Organization:create.html.twig', [ 'form' => $form->createView()]);
@@ -112,7 +113,7 @@ class OrganizationController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirectToRoute('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()]);
+            return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
         }
 
         return $this->render('UniteCMSCoreBundle:Organization:update.html.twig', [ 'form' => $form->createView(), 'organization' => $organization]);
@@ -147,7 +148,7 @@ class OrganizationController extends Controller
             } else {
                 $this->getDoctrine()->getManager()->remove($organization);
                 $this->getDoctrine()->getManager()->flush();
-                return $this->redirectToRoute('unitecms_core_organization_index');
+                return $this->redirect($this->generateUrl('unitecms_core_organization_index', [], Router::ABSOLUTE_URL));
             }
         }
 

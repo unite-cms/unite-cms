@@ -4,5 +4,5 @@ unitecms_storage_sign:
     type:     annotation
     prefix:   /{organization}/{domain}/api/storage/sign
     requirements:
-        organization: '[a-z0-9_]+'
-        domain: '[a-z0-9_]+'
+        organization: '%identifier_pattern%'
+        domain: '%identifier_pattern%'

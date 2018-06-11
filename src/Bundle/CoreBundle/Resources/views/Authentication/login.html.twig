@@ -14,7 +14,7 @@
             </div>
         {% endif %}
 
-        <form class="uk-form-vertical" action="{{ path('unitecms_core_authentication_login') }}" method="post">
+        <form class="uk-form-vertical" action="{{ url('unitecms_core_authentication_login') }}" method="post">
             <div class="uk-margin">
                 <label class="uk-form-label" for="username">{% trans %}authentication.login.username{% endtrans %}</label>
                 <div class="uk-form-controls">
@@ -39,7 +39,7 @@
             <hr />
 
             <div class="uk-flex uk-flex-between uk-flex-middle">
-                <a class="uk-button uk-button-text uk-button-tiny" href="{{ path('unitecms_core_profile_resetpassword') }}">{% trans %}authentication.login.reset_password{% endtrans %}</a>
+                <a class="uk-button uk-button-text uk-button-tiny" href="{{ url('unitecms_core_profile_resetpassword') }}">{% trans %}authentication.login.reset_password{% endtrans %}</a>
                 <button class="uk-button uk-button-primary" type="submit">{% trans %}authentication.login.submit{% endtrans %}</button>
             </div>
         </form>
