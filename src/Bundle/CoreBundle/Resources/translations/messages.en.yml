@@ -121,6 +121,7 @@ domain.update.confirmation: 'If you save this changes the following will happen 
 
 domain.change_visualization.added: '<strong>%type%</strong> will be added.'
 domain.change_visualization.removed: '<strong>%type%</strong> and <strong>all of its content</strong> will be deleted permanently.'
+domain.change_visualization.nothing_changed: 'No types have been added and no types have need deleted.'
 
 domain.member.title: '%type% members'
 domain.member.headline: '%type% members'

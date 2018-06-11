@@ -16,6 +16,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -155,7 +156,7 @@ class DomainController extends Controller
         $updatedDomain = null;
 
         $form = $this->createFormBuilder(['definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain)])
-            ->add('definition', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
+            ->add('definition', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'error_bubbling' => true])
             ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
             ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
             ->add('confirm', SubmitType::class, ['label' => 'domain.update.form.confirm', 'attr' => ['class' => 'uk-button uk-button-primary']])
@@ -171,6 +172,7 @@ class DomainController extends Controller
                 );
             } catch (\Exception $e) {
                 $form->get('definition')->addError(new FormError('Could not parse domain definition JSON.'));
+                $formView = $form->createView();
             }
 
             if (isset($updatedDomain)) {
@@ -205,16 +207,36 @@ class DomainController extends Controller
 
                 } else {
                     $violationMapper = new ViolationMapper();
+
+                    /**
+                     * @var ConstraintViolation[] $violations
+                     */
                     foreach($violations as $violation) {
-                        $violationMapper->mapViolation($violation, $form);
+                        $violationMapper->mapViolation(new ConstraintViolation(
+                            $violation->getPropertyPath() .': '.$violation->getMessage(),
+                            $violation->getMessageTemplate(),
+                            $violation->getParameters(),
+                            $violation->getRoot(),
+                            null,
+                            $violation->getInvalidValue(),
+                            $violation->getPlural(),
+                            $violation->getCode(),
+                            $violation->getConstraint(),
+                            $violation->getCause()
+                        ), $form);
                     }
 
+                    $domain->setFromEntity($originalDomain);
                     $formView = $form->createView();
                 }
             }
         }
 
-        return $this->render('UniteCMSCoreBundle:Domain:update.html.twig', ['form' => $formView, 'originalDomain' => $originalDomain, 'updatedDomain' => $updatedDomain]);
+        return $this->render('UniteCMSCoreBundle:Domain:update.html.twig', [
+            'form' => $formView,
+            'originalDomain' => $originalDomain,
+            'updatedDomain' => $updatedDomain
+        ]);
     }
 
     /**
