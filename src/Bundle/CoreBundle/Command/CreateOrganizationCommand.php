@@ -98,11 +98,11 @@ class CreateOrganizationCommand extends Command
         // Lowercase.
         $name = strtolower($title);
         // Replace spaces, underscores, and dashes with underscores.
-        $name = preg_replace('/(\s|_+|-+)+/', '_', $name);
+        $name = preg_replace('/(\s|_+|-+)+/', '-', $name);
         // Trim underscores from the ends.
         $name = trim($name, '_');
         // Remove all except alpha-numeric and underscore characters.
-        $name = preg_replace('/[^a-z0-9_]+/', '', $name);
+        $name = preg_replace('/[^a-z0-9-]+/', '', $name);
 
         return $name;
     }

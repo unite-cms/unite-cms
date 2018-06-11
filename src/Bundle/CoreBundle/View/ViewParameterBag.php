@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\View;
 
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use UniteCMS\CoreBundle\Entity\View;
 
@@ -79,25 +80,25 @@ class ViewParameterBag implements \JsonSerializable
             'domain' => $view->getContentType()->getDomain()->getIdentifier(),
             'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
         ];
-        $bag->setApiEndpointPattern($generator->generate('unitecms_core_api', $urlParameter));
+        $bag->setApiEndpointPattern($generator->generate('unitecms_core_api', $urlParameter, Router::ABSOLUTE_URL));
 
         $urlParameter['view'] = $view->getIdentifier();
         $urlParameter['content_type'] = $view->getContentType()->getIdentifier();
-        $bag->setCreateUrlPattern($generator->generate('unitecms_core_content_create', $urlParameter));
+        $bag->setCreateUrlPattern($generator->generate('unitecms_core_content_create', $urlParameter, Router::ABSOLUTE_URL));
 
         $urlParameter['content'] = '__id__';
-        $bag->setUpdateUrlPattern($generator->generate('unitecms_core_content_update', $urlParameter));
-        $bag->setDeleteUrlPattern($generator->generate('unitecms_core_content_delete', $urlParameter));
-        $bag->setRecoverUrlPattern($generator->generate('unitecms_core_content_recover', $urlParameter));
+        $bag->setUpdateUrlPattern($generator->generate('unitecms_core_content_update', $urlParameter, Router::ABSOLUTE_URL));
+        $bag->setDeleteUrlPattern($generator->generate('unitecms_core_content_delete', $urlParameter, Router::ABSOLUTE_URL));
+        $bag->setRecoverUrlPattern($generator->generate('unitecms_core_content_recover', $urlParameter, Router::ABSOLUTE_URL));
         $bag->setDeleteDefinitelyUrlPattern(
-            $generator->generate('unitecms_core_content_deletedefinitely', $urlParameter)
+            $generator->generate('unitecms_core_content_deletedefinitely', $urlParameter, Router::ABSOLUTE_URL)
         );
 
         if (count($view->getContentType()->getLocales()) > 1) {
-            $bag->setTranslationsUrlPattern($generator->generate('unitecms_core_content_translations', $urlParameter));
+            $bag->setTranslationsUrlPattern($generator->generate('unitecms_core_content_translations', $urlParameter, Router::ABSOLUTE_URL));
         }
 
-        $bag->setRevisionsUrlPattern($generator->generate('unitecms_core_content_revisions', $urlParameter));
+        $bag->setRevisionsUrlPattern($generator->generate('unitecms_core_content_revisions', $urlParameter, Router::ABSOLUTE_URL));
 
         $bag->setSelectMode($select_mode);
 

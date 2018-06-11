@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Tests\Controller;
 use Doctrine\ORM\Id\UuidGenerator;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpKernel\Client;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -123,7 +124,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'other',
-        ]);
+        ], Router::ABSOLUTE_URL);
 
         $this->client->request('GET', $url_other_list);
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -133,7 +134,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ]);
+        ], Router::ABSOLUTE_URL);
 
         $crawler = $this->client->request('GET', $url_list);
 
@@ -192,7 +193,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
@@ -203,7 +204,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId()
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -251,7 +252,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to delete valid content
@@ -261,7 +262,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId()
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -310,7 +311,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -360,7 +361,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -421,7 +422,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to definitely delete non-deleted content.
@@ -431,7 +432,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Delete content.
@@ -457,7 +458,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
         $ct->addPermission(ContentVoter::UPDATE, 'true');
@@ -470,7 +471,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert delete form
@@ -497,7 +498,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert deletion message.
@@ -528,7 +529,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to recover non-deleted content.
@@ -538,7 +539,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Delete content.
@@ -564,7 +565,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
         $ct->addPermission(ContentVoter::UPDATE, 'true');
@@ -577,7 +578,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert recover form
@@ -604,7 +605,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert recover message.
@@ -629,7 +630,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
@@ -640,7 +641,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -667,7 +668,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert recover message.
@@ -693,7 +694,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -712,13 +713,13 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $translated_content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_index', [
             'organization' => $this->organization->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert warning.
@@ -739,7 +740,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $translated_content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         // Remove english translation.
         $crawler = $this->client->click($crawler->filter('a.uk-text-danger:contains("Remove as translation")')->link());
@@ -769,7 +770,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert remove translation message.
@@ -817,7 +818,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert remove translation message.
@@ -845,7 +846,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]);
+        ], Router::ABSOLUTE_URL);
 
         // Try to get revisions page of unknown content.
         $doctrineUUIDGenerator = new UuidGenerator();
@@ -855,7 +856,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 

@@ -4,7 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitecms_core_domainmember_index', {
+        <a class="back-button" href="{{ url('unitecms_core_domainmember_index', {
             organization: unite.organization.identifier,
             domain: unite.domain.identifier,
             member_type: memberType.identifier

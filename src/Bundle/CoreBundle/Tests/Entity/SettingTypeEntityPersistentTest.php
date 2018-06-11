@@ -73,7 +73,7 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $org->addDomain($domain1);
         $org->addDomain($domain2);
         $settingType = new SettingType();
-        $settingType->setIdentifier('domain1_st1')->setTitle('domain1_ct1')->setDomain($domain1);
+        $settingType->setIdentifier('domain1-st1')->setTitle('domain1_ct1')->setDomain($domain1);
         $this->em->persist($org);
         $this->em->persist($domain1);
         $this->em->persist($domain2);
@@ -83,13 +83,13 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
 
         // CT2 one the same domain with the same identifier should not be valid.
         $settingType2 = new SettingType();
-        $settingType2->setIdentifier('domain1_st1')->setTitle('domain1_st1')->setDomain($domain1);
+        $settingType2->setIdentifier('domain1-st1')->setTitle('domain1_st1')->setDomain($domain1);
         $this->assertCount(1, static::$container->get('validator')->validate($settingType2));
         $errors = static::$container->get('validator')->validate($settingType2);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('identifier_already_taken', $errors->get(0)->getMessageTemplate());
 
-        $settingType2->setIdentifier('domain1_st2');
+        $settingType2->setIdentifier('domain1-st2');
         $this->assertCount(0, static::$container->get('validator')->validate($settingType2));
     }
 

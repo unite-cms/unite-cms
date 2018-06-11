@@ -27,7 +27,7 @@
                 <a class="uk-alert-close" uk-close></a>
                 <p>{% trans %}profile.accept_invitation.wrong_user{% endtrans %}</p>
             </div>
-            <p><a class="uk-button uk-button-default" href="{{ path('unitecms_core_index') }}">Dashboard</a></p>
+            <p><a class="uk-button uk-button-default" href="{{ url('unitecms_core_index') }}">Dashboard</a></p>
         {% elseif alreadyMember %}
             <div class="uk-alert-warning" uk-alert>
                 <a class="uk-alert-close" uk-close></a>
@@ -43,7 +43,7 @@
 
                 {% if app.user %}
                     <p>{% trans with {"%domain%": invitation.domainMemberType.domain } %}profile.accept_invitation.success.message{% endtrans %}.</p>
-                    <p><a href="{{ path('unitecms_core_domain_view', {
+                    <p><a href="{{ url('unitecms_core_domain_view', {
                             organization: invitation.domainMemberType.domain.organization,
                             domain: invitation.domainMemberType.domain
                         }) }}" class="uk-button uk-button-default uk-button-small">{% trans %}profile.accept_invitation.success.view_domain.button{% endtrans %}</a></p>

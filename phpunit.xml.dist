@@ -15,6 +15,7 @@
         <server name="KERNEL_DIR" value="src" />
         <env name="APP_SECRET" value="SECRET"/>
         <env name="APP_ENV" value="test"/>
+        <env name="DEFAULT_HOSTNAME" value="unite.test"/>
         <env name="APP_DEBUG" value="1"/>
         <env name="DATABASE_HOST" value="127.0.0.1"/>
         <env name="DATABASE_PORT" value=""/>

@@ -17,7 +17,7 @@
         {% do form.back.setRendered %}
 
         <header class="uk-card-header uk-flex">
-            <a class="back-button" href="{{ path('unitecms_core_domain_view', {
+            <a class="back-button" href="{{ url('unitecms_core_domain_view', {
                 organization: unite.organization.identifier,
                 domain: unite.domain.identifier
             }) }}">

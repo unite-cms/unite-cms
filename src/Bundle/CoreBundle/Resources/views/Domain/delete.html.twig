@@ -4,7 +4,7 @@
 {% block content %}
     <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
         <header class="uk-card-header uk-flex">
-            <a class="back-button" href="{{ path('unitecms_core_domain_view', {
+            <a class="back-button" href="{{ url('unitecms_core_domain_view', {
                 organization: unite.organization.identifier,
                 domain: unite.domain.identifier
             }) }}">
@@ -26,7 +26,7 @@
         {{ form_start(form) }}
         <p class="uk-text-center">
 
-            <a class="uk-button" style="background: white; margin: 10px;" href="{{ path('unitecms_core_domain_view', {
+            <a class="uk-button" style="background: white; margin: 10px;" href="{{ url('unitecms_core_domain_view', {
                 domain: domain.identifier,
                 organization: organization.identifier
             }) }}">{% trans %}domain.delete.cancel{% endtrans %}</a>

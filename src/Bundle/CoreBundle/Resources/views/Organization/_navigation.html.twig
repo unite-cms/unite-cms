@@ -37,7 +37,7 @@
         {% for domain in unite.organization.domains %}
             {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), domain) %}
                 <li>
-                    <a href="{{ path('unitecms_core_domain_view', {organization: organization.identifier, domain: domain.identifier}) }}">
+                    <a href="{{ url('unitecms_core_domain_view', {organization: organization.identifier, domain: domain.identifier}) }}">
                         <i data-feather="globe" class="uk-margin-small-right"></i>
                         {{ domain }}
                     </a>

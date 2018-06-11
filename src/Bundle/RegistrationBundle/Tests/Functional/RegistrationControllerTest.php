@@ -2,6 +2,7 @@
 
 namespace UniteCMS\RegistrationBundle\Tests\Functional;
 
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -21,7 +22,11 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
         $this->em->flush();
 
         $client = static::$container->get('test.client');
-        $crawler = $client->request('GET', $client->getContainer()->get('router')->generate('unitecms_registration_registration_registration'));
+        $crawler = $client->request('GET', $client->getContainer()->get('router')->generate(
+            'unitecms_registration_registration_registration',
+            [],
+            Router::ABSOLUTE_URL
+        ));
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
         $form = $crawler->filter('form');
@@ -54,6 +59,10 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
         $form['registration[organizationIdentifier]'] = 'new';
         $client->submit($form);
 
-        $this->assertTrue($client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', ['organization' => 'new'])));
+        $this->assertTrue($client->getResponse()->isRedirect(static::$container->get('router')->generate(
+            'unitecms_core_domain_index',
+            ['organization' => 'new'],
+            Router::ABSOLUTE_URL
+        )));
     }
 }

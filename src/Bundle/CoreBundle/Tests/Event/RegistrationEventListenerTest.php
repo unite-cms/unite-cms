@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Tests\Event;
 
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Invitation;
@@ -91,7 +92,11 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate(
+            'unitecms_core_profile_acceptinvitation',
+            ['token' => $this->invitation->getToken()],
+            Router::ABSOLUTE_URL
+        ));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -151,7 +156,11 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->invitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate(
+            'unitecms_core_profile_acceptinvitation',
+            ['token' => $this->invitation->getToken()],
+            Router::ABSOLUTE_URL
+        ));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);

@@ -20,7 +20,7 @@
             </fieldset>
             <hr />
             <div class="uk-flex uk-flex-between uk-flex-middle">
-                <a class="uk-button uk-button-text" style="margin: 10px;" href="{{ path('unitecms_core_authentication_login') }}">{% trans %}registration.registration.login.button{% endtrans %}</a>
+                <a class="uk-button uk-button-text" style="margin: 10px;" href="{{ url('unitecms_core_authentication_login') }}">{% trans %}registration.registration.login.button{% endtrans %}</a>
                 {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
             </div>
         {{ form_rest(form) }}

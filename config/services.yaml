@@ -5,6 +5,15 @@ parameters:
     mailer_sender: '%env(MAILER_SENDER)%'
     jms_serializer.unserialize_object_constructor.class: UniteCMS\CoreBundle\Serializer\ObjectConstructor
     site_name: unite cms
+    default_hostname: '%env(DEFAULT_HOSTNAME)%'
+    env(ROUTING_APPROACH): subdomain
+    routing_approach: '%env(ROUTING_APPROACH)%'
+
+    # This pattern will be used for organization and domain identifier url matching
+    identifier_pattern: '[a-z0-9-]+'
+
+    # You can add more allowed hostnames by adding each with a pipe: '%default_hostname%|unitecms.io|example.com'
+    allowed_hostname: '%default_hostname%'
 
 services:
     # default configuration for services in *this* file
