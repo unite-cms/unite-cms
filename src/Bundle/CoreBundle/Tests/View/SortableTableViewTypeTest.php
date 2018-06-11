@@ -22,7 +22,7 @@ class SortableTableViewTypeTest extends DatabaseAwareTestCase
         $view
             ->setType('sortable')
             ->setTitle('New View')
-            ->setIdentifier('new_view')
+            ->setIdentifier('new-view')
             ->setSettings(new ViewSettings(['sort_field' => 'position']))
             ->setContentType(new ContentType())
             ->getContentType()
