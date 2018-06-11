@@ -8,15 +8,15 @@ use Symfony\Component\HttpFoundation\RequestMatcher;
 class ApiRequestMatcher extends RequestMatcher
 {
 
-    public function __construct($approach)
+    public function __construct($approach, $allowed_hostname)
     {
         // Matches /{domain}/api
         if($approach == 'subdomain') {
-            parent::__construct('^/[A-Za-z0-9_-]+/api(/.+|$)', '^[a-zA-Z0-9-_]*\.[a-zA-Z0-9-_]*\.[a-zA-Z0-9-_]+$');
+            parent::__construct('^/[A-Za-z0-9_-]+/api(/|$)', '^[A-Za-z0-9_]+\.'.$allowed_hostname);
 
         // Matches /{organization}/{domain}/api
         } else {
-            parent::__construct('^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/.+|$)');
+            parent::__construct('^/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/api(/|$)');
         }
     }
 
@@ -30,6 +30,8 @@ class ApiRequestMatcher extends RequestMatcher
      */
     public function matches(Request $request)
     {
+        dump($request->getHost());
+        dump($request->getUri());
         return parent::matches($request) && (!$request->headers->has('Authentication-Fallback') || !filter_var(
                     $request->headers->get('Authentication-Fallback'),
                     FILTER_VALIDATE_BOOLEAN

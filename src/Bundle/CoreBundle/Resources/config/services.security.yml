@@ -17,7 +17,7 @@ services:
   # the need of an access token.
   unite.cms.api_request_matcher:
     class: UniteCMS\CoreBundle\Security\ApiRequestMatcher
-    arguments: ['%routing_approach%']
+    arguments: ['%routing_approach%', '%allowed_hostname%']
     public: false
 
 
