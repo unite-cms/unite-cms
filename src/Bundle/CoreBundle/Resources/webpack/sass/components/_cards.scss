@@ -60,6 +60,12 @@
   }
 }
 
+.uk-card.uk-card-small {
+  .uk-card-header {
+    margin: -20px -20px 0;
+  }
+}
+
 @media (min-width: $breakpoint-medium) {
   .uk-card-header {
     h1, h2, .uk-h1, .uk-h2 {
