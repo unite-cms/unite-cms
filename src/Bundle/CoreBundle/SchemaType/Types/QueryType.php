@@ -14,6 +14,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
@@ -107,7 +108,7 @@ class QueryType extends AbstractType
 
         // Append Content types.
         foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
-            $key = ucfirst($contentType->getIdentifier());
+            $key = IdentifierNormalizer::graphQLType($contentType, '');
             $fields['get' . $key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
                 'args' => [
@@ -150,7 +151,7 @@ class QueryType extends AbstractType
 
         // Append Setting types.
         foreach ($this->uniteCMSManager->getDomain()->getSettingTypes() as $settingType) {
-            $key = ucfirst($settingType->getIdentifier()) . 'Setting';
+            $key = IdentifierNormalizer::graphQLType($settingType);
             $fields[$key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
             ];
@@ -192,7 +193,7 @@ class QueryType extends AbstractType
         // Resolve single setting type.
         elseif (substr($info->fieldName, -strlen('Setting')) === 'Setting') {
 
-            $identifier = strtolower(substr($info->fieldName, 0, -strlen('Setting')));
+            $identifier = IdentifierNormalizer::fromGraphQLSchema($info->fieldName);
 
             if (!$settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->findOneBy(['domain' => $this->uniteCMSManager->getDomain(), 'identifier' => $identifier])) {
                 throw new UserError("SettingType '$identifier' was not found in domain.");
@@ -208,13 +209,14 @@ class QueryType extends AbstractType
 
         // Resolve list content type.
         elseif(substr($info->fieldName, 0, 4) == 'find' && strlen($info->fieldName) > 4) {
-            $args['types'] = [strtolower(substr($info->fieldName, 4))];
-            return $this->resolvefindContent(substr($info->fieldName, 4) . 'ContentResult',  $value, $args, $context, $info);
+            $identifier = IdentifierNormalizer::fromGraphQLFieldName($info->fieldName);
+            $args['types'] = [$identifier];
+            return $this->resolveFindContent(IdentifierNormalizer::graphQLType($identifier, 'ContentResult'),  $value, $args, $context, $info);
         }
 
         // Resolve generic find type
         elseif(substr($info->fieldName, 0, 4) == 'find' && strlen($info->fieldName) == 4) {
-            return $this->resolvefindContent('ContentResult', $value, $args, $context, $info);
+            return $this->resolveFindContent('ContentResult', $value, $args, $context, $info);
         }
 
         return null;
@@ -232,7 +234,7 @@ class QueryType extends AbstractType
      * @return mixed
      * @throws \Doctrine\Common\Persistence\Mapping\MappingException
      */
-    private function resolvefindContent($resultType, $value, array $args, $context, ResolveInfo $info) : AbstractPagination
+    private function resolveFindContent($resultType, $value, array $args, $context, ResolveInfo $info) : AbstractPagination
     {
 
         $args['types'] = $args['types'] ?? [];

@@ -303,7 +303,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'view' => 'all',
             'content' => $this->content1->getId(),
             'setting' => $this->setting1->getId(),
-            'member' => $this->users['domain_editor']->getId(),
+            'member' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
             'invite' => $this->invite1->getId(),
             'apiKey' => $this->apiKey1->getId(),
             'member_type' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),

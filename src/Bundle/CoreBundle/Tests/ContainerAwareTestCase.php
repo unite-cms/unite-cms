@@ -12,7 +12,11 @@ abstract class ContainerAwareTestCase extends KernelTestCase
         $allowed = str_split('abcdefghijklmnopqrstuvwxyz0123456789-');
 
         // should start with an letter
-        $return = 'a';
+        if($count > 0) {
+            $return = 'a';
+            $count--;
+        }
+
         for ($i = 0; $i < $count; $i++) {
             $return .= $allowed[random_int(0, count($allowed) - 1)];
         }

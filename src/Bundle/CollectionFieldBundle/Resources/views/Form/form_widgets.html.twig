@@ -10,7 +10,8 @@
 
     <{{ tag }} {{ block('widget_attributes') }}></{{ tag }}>
 
-    {% if not alreadyRendered('UniteCMSCollectionFieldBundle') %}
+    {# Render once for every nesting level #}
+    {% if not alreadyRendered('UniteCMSCollectionFieldBundle' ~ form.parent.vars.name) %}
         <link type="text/css" rel="stylesheet" href="{{ asset('main.css', 'UniteCMSCollectionFieldBundle') }}">
         <script type="text/javascript" src="{{ asset('main.js', 'UniteCMSCollectionFieldBundle') }}"></script>
     {% endif %}

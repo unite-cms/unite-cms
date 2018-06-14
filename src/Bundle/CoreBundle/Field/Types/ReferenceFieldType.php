@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\ReferenceType;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
@@ -201,7 +202,7 @@ class ReferenceFieldType extends FieldType
             throw new ContentTypeAccessDeniedException("You are not allowed to list content of content type \"{$contentType->getIdentifier()}\" on domain \"{$contentType->getDomain()->getIdentifier()}\".");
         }
 
-        $name = ucfirst($field->getSettings()->content_type.'Content');
+        $name = IdentifierNormalizer::graphQLType($contentType);
 
         if ($nestingLevel > 0) {
             $name .= 'Level'.$nestingLevel;

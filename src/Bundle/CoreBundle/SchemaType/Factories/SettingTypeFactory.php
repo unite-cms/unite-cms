@@ -13,6 +13,7 @@ use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class SettingTypeFactory implements SchemaTypeFactoryInterface
@@ -42,12 +43,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
      */
     public function supports(string $schemaTypeName): bool
     {
-        $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
-
-        // If this has an Level Suffix, we need to remove it first.
-        if(substr($nameParts[count($nameParts) - 1], 0, strlen('Level')) == 'Level') {
-            array_pop($nameParts);
-        }
+        $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
 
         if(count($nameParts) !== 2) {
             return false;
@@ -74,8 +70,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
             throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory::createSchemaType needs an domain as second argument');
         }
 
-        $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
-        $identifier = strtolower($nameParts[0]);
+        $identifier = IdentifierNormalizer::fromGraphQLSchema($schemaTypeName);
 
         /**
          * @var SettingType $settingType
@@ -107,9 +102,11 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
          * @var \UniteCMS\CoreBundle\Entity\SettingTypeField $field
          */
         foreach ($settingType->getFields() as $field) {
+            $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
+
             try {
-                $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
-                $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType(
+                $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
+                $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType(
                     $field,
                     $schemaTypeManager,
                     $nestingLevel + 1
@@ -127,7 +124,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
 
         return new ObjectType(
             [
-                'name' => ucfirst($identifier).'Setting'  . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                'name' => IdentifierNormalizer::graphQLType($identifier, 'Setting')  . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
                 'fields' => array_merge(
                     [
                         'type' => Type::string(),
@@ -144,16 +141,18 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
 
                     switch ($info->fieldName) {
                         case 'type':
-                            return $value->getSettingType()->getIdentifier();
+                            return IdentifierNormalizer::graphQLIdentifier($value->getSettingType());
                         default:
 
                             if (!array_key_exists($info->fieldName, $fieldTypes)) {
                                 return null;
                             }
 
-                            $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData(
-                            )[$info->fieldName] : null;
-                            $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($settingType->getFields()->get($info->fieldName), $fieldData);
+                            $normalizedFieldName = str_replace('_', '-', $info->fieldName);
+
+                            $fieldData = array_key_exists($normalizedFieldName, $value->getData()) ? $value->getData(
+                            )[$normalizedFieldName] : null;
+                            $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($settingType->getFields()->get($normalizedFieldName), $fieldData);
 
                             return $data;
                     }

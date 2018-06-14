@@ -13,6 +13,7 @@ use GraphQL\Type\Definition\Type;
 use Knp\Component\Pager\Pagination\AbstractPagination;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -107,7 +108,7 @@ class ContentResultType extends AbstractType
                         $items[] = $item;
 
                         // Create content schema type for current domain.
-                        $type = ucfirst($item->getContentType()->getIdentifier()).'Content';
+                        $type = IdentifierNormalizer::graphQLType($item->getContentType());
                         $this->schemaTypeManager->getSchemaType($type, $this->domain);
                     }
                 }

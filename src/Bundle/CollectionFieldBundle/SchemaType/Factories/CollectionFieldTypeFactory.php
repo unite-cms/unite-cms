@@ -11,6 +11,7 @@ use UniteCMS\CollectionFieldBundle\Model\Collection;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class CollectionFieldTypeFactory
@@ -37,7 +38,7 @@ class CollectionFieldTypeFactory
      */
     public function createCollectionFieldType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, FieldableField $field, Collection $collection, $isInputType = false)
     {
-        $schemaTypeName = str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')) . 'CollectionField';
+        $schemaTypeName = IdentifierNormalizer::graphQLType(str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')), 'CollectionField');
         $schemaTypeRowName = $schemaTypeName . 'Row';
 
         if($isInputType) {
@@ -63,13 +64,14 @@ class CollectionFieldTypeFactory
                  */
                 $fieldTypes = [];
                 foreach($collection->getFields() as $field) {
-                    $fields[$field->getIdentifier()] = $field;
-                    $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
+                    $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
+                    $fields[$fieldIdentifier] = $field;
+                    $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
 
                     if($isInputType) {
-                      $fieldsSchemaTypes[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
+                      $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
                     } else {
-                      $fieldsSchemaTypes[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
+                      $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
                     }
                 }
 
@@ -88,13 +90,15 @@ class CollectionFieldTypeFactory
                     },
                     'resolveField' => function($value, array $args, $context, ResolveInfo $info) use ($fields, $fieldTypes) {
 
-                      if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$info->fieldName])) {
+                      $normalizedFieldName = str_replace('_', '-', $info->fieldName);
+
+                      if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$normalizedFieldName])) {
                         return null;
                       }
 
                       $return_value = null;
                       $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName]);
+                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$normalizedFieldName]);
                       return $return_value;
                     }
                   ]));

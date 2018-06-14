@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class ContentTypeFactory implements SchemaTypeFactoryInterface
@@ -43,12 +44,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
      */
     public function supports(string $schemaTypeName): bool
     {
-        $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
-
-        // If this has an Level Suffix, we need to remove it first.
-        if(substr($nameParts[count($nameParts) - 1], 0, strlen('Level')) == 'Level') {
-            array_pop($nameParts);
-        }
+        $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
 
         // Support for content type.
         if(count($nameParts) == 2) {
@@ -81,10 +77,8 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
             throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument');
         }
 
-        $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
-
-        $identifier = strtolower($nameParts[0]);
-
+        $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
+        $identifier = IdentifierNormalizer::fromGraphQLSchema($schemaTypeName);
         $isInputType = (count($nameParts) == 3 && $nameParts[2] == 'Input');
 
         /**
@@ -118,18 +112,20 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
          */
         foreach ($contentType->getFields() as $field) {
 
+            $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
+
             try {
-                $fieldTypes[$field->getIdentifier()] = $this->fieldTypeManager->getFieldType($field->getType());
+                $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
 
                 // If we want to create an InputObjectType, get GraphQLInputType.
                 if ($isInputType) {
-                    $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLInputType(
+                    $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLInputType(
                         $field,
                         $schemaTypeManager,
                         $nestingLevel + 1
                     );
                 } else {
-                    $fields[$field->getIdentifier()] = $fieldTypes[$field->getIdentifier()]->getGraphQLType(
+                    $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType(
                         $field,
                         $schemaTypeManager,
                         $nestingLevel + 1
@@ -156,14 +152,14 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
             return new InputObjectType(
                 [
-                    'name' => ucfirst($identifier) . 'ContentInput' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                    'name' => IdentifierNormalizer::graphQLType($identifier, 'ContentInput') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
                     'fields' => $fields,
                 ]
             );
         } else {
             return new ObjectType(
                 [
-                    'name' => ucfirst($identifier) . 'Content' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                    'name' => IdentifierNormalizer::graphQLType($identifier, 'Content') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
                     'fields' => array_merge(
                         [
                             'id' => Type::id(),
@@ -202,11 +198,14 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                     return null;
                                 }
 
+                                $normalizedFieldName = str_replace('_', '-', $info->fieldName);
+
                                 $fieldData = array_key_exists(
-                                    $info->fieldName,
+                                    $normalizedFieldName,
                                     $value->getData()
-                                ) ? $value->getData()[$info->fieldName] : null;
-                                $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($contentType->getFields()->get($info->fieldName), $fieldData);
+                                ) ? $value->getData()[$normalizedFieldName] : null;
+
+                                $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($contentType->getFields()->get($normalizedFieldName), $fieldData);
 
                                 return $data;
                         }
