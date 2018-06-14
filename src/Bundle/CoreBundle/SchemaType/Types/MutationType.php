@@ -10,7 +10,9 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -23,6 +25,11 @@ class MutationType extends AbstractType
      * @var SchemaTypeManager $schemaTypeManager
      */
     private $schemaTypeManager;
+
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
 
     /**
      * @var EntityManager $entityManager
@@ -51,6 +58,7 @@ class MutationType extends AbstractType
 
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
+        FieldTypeManager $fieldTypeManager,
         EntityManager $entityManager,
         UniteCMSManager $uniteCMSManager,
         AuthorizationChecker $authorizationChecker,
@@ -58,6 +66,7 @@ class MutationType extends AbstractType
         FieldableFormBuilder $fieldableFormBuilder
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
+        $this->fieldTypeManager = $fieldTypeManager;
         $this->entityManager = $entityManager;
         $this->uniteCMSManager = $uniteCMSManager;
         $this->authorizationChecker = $authorizationChecker;
@@ -77,7 +86,7 @@ class MutationType extends AbstractType
 
         // Append Content types.
         foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
-            $key = ucfirst($contentType->getIdentifier());
+            $key = IdentifierNormalizer::graphQLType($contentType, '');
 
             $fields['create' . $key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
@@ -128,7 +137,7 @@ class MutationType extends AbstractType
         // Resolve create content type
         if(substr($info->fieldName, 0, 6) == 'create') {
             return $this->resolveCreateContent(
-                strtolower(substr($info->fieldName, 6)),
+                IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
                 $value, $args, $context, $info
             );
         }
@@ -136,7 +145,7 @@ class MutationType extends AbstractType
         // Resolve update content type
         elseif(substr($info->fieldName, 0, 6) == 'update') {
             return $this->resolveUpdateContent(
-                strtolower(substr($info->fieldName, 6, -strlen('Content'))),
+                IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
                 $value, $args, $context, $info
             );
         }
@@ -175,6 +184,11 @@ class MutationType extends AbstractType
 
         $content = new Content();
         $form = $this->fieldableFormBuilder->createForm($contentType, $content);
+
+        // normalize data.
+        if(is_array($args['data'])) {
+            $args['data'] = IdentifierNormalizer::fromGraphQLData($args['data'], $this->fieldTypeManager, $contentType);
+        }
 
         // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
         if(is_array($args['data']) && !empty($context['csrf_token'])) {
@@ -244,6 +258,11 @@ class MutationType extends AbstractType
         }
 
         $form = $this->fieldableFormBuilder->createForm($content->getContentType(), $content);
+
+        // normalize data.
+        if(is_array($args['data'])) {
+            $args['data'] = IdentifierNormalizer::fromGraphQLData($args['data'], $this->fieldTypeManager, $content->getContentType());
+        }
 
         // Update only changed fields on this entity. Note: nested values will get replaced, no recursively replacement possible here.
         $args['data'] = array_replace($content->getData(), $args['data']);

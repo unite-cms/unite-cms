@@ -42,3 +42,9 @@ services:
     tags: [validator.constraint_validator]
     arguments: ['@doctrine.orm.entity_manager']
     public: false
+
+  # Checks, that an identifier only contains valid characters.
+  UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifierValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['%identifier_pattern%']
+    public: false

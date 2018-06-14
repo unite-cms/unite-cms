@@ -112,7 +112,7 @@
             findHumanReadableName() {
                 if(this.content) {
                     this.loading = true;
-                    let schemaType = this.contentType.charAt(0).toUpperCase() + this.contentType.slice(1);
+                    let schemaType = (this.contentType.charAt(0).toUpperCase() + this.contentType.slice(1)).replace('-', '_');
                     let queryMethod = 'get' + schemaType;
                     let label = this.contentLabel;
 

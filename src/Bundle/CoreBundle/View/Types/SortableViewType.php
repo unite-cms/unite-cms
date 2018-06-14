@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\View\Types;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\View\ViewSettings;
 use UniteCMS\CoreBundle\View\ViewType;
 
@@ -53,7 +54,7 @@ class SortableViewType extends ViewType
             'sort_field' => $sort_field,
             'columns' => $columns,
             'View' => $view->getIdentifier(),
-            'contentType' => $view->getContentType()->getIdentifier(),
+            'contentType' => IdentifierNormalizer::graphQLIdentifier($view->getContentType()),
             'hasTranslations' => count($view->getContentType()->getLocales()) > 1,
         ];
     }

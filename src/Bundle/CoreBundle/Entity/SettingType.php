@@ -14,6 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
@@ -48,7 +49,7 @@ class SettingType implements Fieldable
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9-]+$/", message="invalid_characters")
+     * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\SettingType::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
@@ -142,15 +143,6 @@ class SettingType implements Fieldable
     {
         $this->permissions[SettingVoter::VIEW] = 'true';
         $this->permissions[SettingVoter::UPDATE] = 'member.type == "editor"';
-    }
-
-    public function allowedPermissionRoles(): array
-    {
-        if ($this->getDomain()) {
-            return $this->getDomain()->getRoles();
-        }
-
-        return [];
     }
 
     public function allowedPermissionKeys(): array

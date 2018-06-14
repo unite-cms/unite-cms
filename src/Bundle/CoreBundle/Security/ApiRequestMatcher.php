@@ -10,6 +10,10 @@ class ApiRequestMatcher extends RequestMatcher
 
     public function __construct($approach, $allowed_hostname, $identifier_pattern)
     {
+        // Remove prefix and suffix.
+        $identifier_pattern = str_replace('^', '', $identifier_pattern);
+        $identifier_pattern = str_replace('$', '', $identifier_pattern);
+
         // Matches /{domain}/api
         if($approach == 'subdomain') {
             parent::__construct('^/'.$identifier_pattern.'/api(/|$)', '^'.$identifier_pattern.'\.'.$allowed_hostname);

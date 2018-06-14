@@ -63,7 +63,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "type": "reference",
           "settings": {
             "domain": "marketing",
-            "content_type": "news_category"
+            "content_type": "news-category"
           }
         }
       ],
@@ -79,7 +79,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
     },
     {
       "title": "News Category",
-      "identifier": "news_category",
+      "identifier": "news-category",
       "fields": [
         {
           "title": "Name",
@@ -218,7 +218,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "type": "reference",
           "settings": {
             "domain": "marketing",
-            "content_type": "news_category"
+            "content_type": "news-category"
           }
         }
       ],
@@ -234,7 +234,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
     },
     {
       "title": "News Category",
-      "identifier": "news_category",
+      "identifier": "news-category",
       "fields": [
         {
           "title": "Name",
@@ -541,7 +541,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $result = $this->api(
         $this->domains['marketing'],
         $this->users['marketing_viewer'],'query {
-          find(limit: 500, types: ["news", "news_category"]) {
+          find(limit: 500, types: ["news", "news-category"]) {
             total,
             result {
               id,
@@ -558,7 +558,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           }
         }');
 
-        // Result should contain 60x news and other 40x news_category
+        // Result should contain 60x news and other 40x news-category
         $count_news = 0;
         $count_category = 0;
 
@@ -566,7 +566,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             if($content->type == 'news') {
                 $count_news++;
             }
-            if($content->type == 'news_category') {
+            if($content->type == 'news-category') {
                 $count_category++;
             }
         }
@@ -825,7 +825,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             'title' => 'with_category',
             'category' => [
                 'domain' => 'marketing',
-                'content_type' => 'news_category',
+                'content_type' => 'news-category',
                 'content' => $category->getId(),
             ],
         ]);
@@ -1031,7 +1031,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }', [
                 'category' => [
                     'domain' => 'marketing',
-                    'content_type' => 'news_category',
+                    'content_type' => 'news-category',
                     'content' => 'foo',
                 ]
             ]);
@@ -1055,7 +1055,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }', [
             'category' => [
                 'domain' => 'marketing',
-                'content_type' => 'news_category',
+                'content_type' => 'news-category',
                 'content' => $category->id,
             ]
         ]);
@@ -1114,7 +1114,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             'id' => $news->id,
             'category' => [
                 'domain' => 'marketing',
-                'content_type' => 'news_category',
+                'content_type' => 'news-category',
                 'content' => 'foo',
             ]
         ]);

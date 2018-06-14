@@ -6,6 +6,7 @@ use GraphQL\Type\Definition\Type;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\SchemaType\Types\ContentResultType;
 
@@ -29,7 +30,7 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
      */
     public function supports(string $schemaTypeName): bool
     {
-        $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
+        $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
 
         if(count($nameParts) !== 3) {
             return false;
@@ -56,8 +57,7 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
             throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory::createSchemaType needs an domain as second argument');
         }
 
-        $nameParts = preg_split('/(?=[A-Z])/', $schemaTypeName, -1, PREG_SPLIT_NO_EMPTY);
-        $identifier = strtolower($nameParts[0]);
+        $identifier = IdentifierNormalizer::fromGraphQLSchema($schemaTypeName);
 
         /**
          * @var ContentType $contentType
@@ -73,9 +73,9 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
             $this->authorizationChecker,
             null,
             $domain,
-            ucfirst($identifier) . 'Content'
+            IdentifierNormalizer::graphQLType($contentType)
         );
-        $type->name = ucfirst($identifier) . 'ContentResult';
+        $type->name = IdentifierNormalizer::graphQLType($contentType, 'ContentResult');
         return $type;
     }
 }
