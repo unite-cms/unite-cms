@@ -8,6 +8,7 @@ framework:
     # Remove or comment this section to explicitly disable session support.
     session:
         handler_id: ~
+        cookie_domain: '.%default_hostname%'
 
     #esi: true
     #fragments: true
