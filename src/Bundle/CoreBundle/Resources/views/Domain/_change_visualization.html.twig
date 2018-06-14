@@ -4,9 +4,9 @@
     {% set right_content_type = updated.contentTypesDiff(original, true) %}
 
 
-    <div class="uk-card uk-card-default uk-card-body uk-margin">
+    <div class="uk-card uk-card-default uk-card-body uk-margin-small uk-card-small">
         <div class="uk-card-header">
-            <h4>Content Types</h4>
+            <h5>Content Types</h5>
         </div>
 
         {% if not left_content_type is empty or not right_content_type is empty %}
@@ -28,9 +28,9 @@
     {% set right_setting_type = updated.settingTypesDiff(original, true) %}
 
 
-    <div class="uk-card uk-card-default uk-card-body uk-margin">
+    <div class="uk-card uk-card-default uk-card-body uk-margin-small uk-card-small">
         <div class="uk-card-header">
-            <h4>Setting Types</h4>
+            <h5>Setting Types</h5>
         </div>
         {% if not left_setting_type is empty or not right_setting_type is empty %}
             <ul class="uk-list uk-list-divider">
@@ -50,9 +50,9 @@
     {% set right_member_type = updated.domainMemberTypesDiff(original, true) %}
 
 
-    <div class="uk-card uk-card-default uk-card-body uk-margin">
+    <div class="uk-card uk-card-default uk-card-body uk-margin-small uk-card-small">
         <div class="uk-card-header">
-            <h4>Member Types</h4>
+            <h5>Member Types</h5>
         </div>
         {% if not left_member_type is empty or not right_member_type is empty %}
             <ul class="uk-list uk-list-divider">

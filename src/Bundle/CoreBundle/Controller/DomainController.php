@@ -177,8 +177,8 @@ class DomainController extends Controller
 
             if (isset($updatedDomain)) {
 
-                $originalDomain = new Domain();
-                $originalDomain->setFromEntity($domain);
+                // In order to avoid persistence conflicts, we create a new domain from serialized domain.
+                $originalDomain = $this->get('unite.cms.domain_definition_parser')->parse($this->get('unite.cms.domain_definition_parser')->serialize($domain));
                 $domain->setFromEntity($updatedDomain);
                 $violations = $this->get('validator')->validate($domain);
 
@@ -197,7 +197,9 @@ class DomainController extends Controller
 
                     // Case 2: form was submitted and confirmed.
                     else if($form->get('confirm')->isClicked()) {
-                        $this->getDoctrine()->getManager()->flush($domain);
+
+                        $this->getDoctrine()->getManager()->flush();
+
                         return $this->redirect($this->generateUrl('unitecms_core_domain_view', [
                             'organization' => $organization->getIdentifier(),
                             'domain' => $domain->getIdentifier(),

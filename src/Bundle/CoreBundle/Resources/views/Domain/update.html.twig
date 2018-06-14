@@ -36,11 +36,11 @@
             <h2 class="uk-flex-1">{% trans with { '%domain%': unite.domain|escape } %}domain.update.confirm.headline{% endtrans %}</h2>
         </header>
 
-        <p class="uk-text-center">
-            <i data-feather="alert-triangle" width="100" height="100" style="display: block; margin: 50px auto 30px;"></i>
-            <br />
-            {% trans %}domain.update.confirmation{% endtrans %}
-        </p>
+        <div class="uk-alert-warning" uk-alert>
+            <p>
+                <i data-feather="alert-triangle" width="24" height="24"></i> {% trans %}domain.update.confirmation{% endtrans %}
+            </p>
+        </div>
 
         {{ include('@UniteCMSCore/Domain/_change_visualization.html.twig', { original: originalDomain, updated: updatedDomain}) }}
 
