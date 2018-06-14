@@ -10,6 +10,7 @@ namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Doctrine\ORM\EntityManager;
 use InvalidArgumentException;
+use Symfony\Component\Form\Form;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -44,9 +45,12 @@ class OrganizationAdminPresentValidator extends ConstraintValidator
             );
         }
 
+        // context root can also be a form. If so, we need to check the form data.
+        $root = $this->context->getRoot() instanceof Form ? $this->context->getRoot()->getData() : $this->context->getRoot();
+
         // Only continue if the root of this validation chain is this object or the related user object. Without this
         // check, this validator thinks on delete of other objects (e.g. domain) that this org member will get deleted.
-        if($this->context->getRoot() != $thisMember && $this->context->getRoot() != $thisMember->getUser()) {
+        if($root != $thisMember && $root != $thisMember->getUser()) {
             return;
         }
 
