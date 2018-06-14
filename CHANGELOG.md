@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1
+
+- Improved: Add cookie domain config to all repositories
+- Fixed: normalize identifier between hyphen (unite) and underscore (graphql)
+- Fixed: Fixing a bug, where the only org admin could devote himself_herself to user
+- Fixed: Fixed a bug, where domain types where not updated during domain save
+- Fixed: Hide content create button if user does not have create permissions
+
 ## 0.5.0
 
 - Added: Allow to create/update/delete organizations
