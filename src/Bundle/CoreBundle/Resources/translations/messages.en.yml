@@ -271,11 +271,26 @@ profile.accept_invitation.email.label: 'Your email address'
 profile.accept_invitation.password.label: 'Enter a strong password'
 profile.accept_invitation.password_repeat.label: 'Enter the password again'
 
+profile.accept_invitation.form.accept.button: 'Accept invitation'
+profile.accept_invitation.form.reject.button: 'Reject invitation'
+profile.accept_invitation.intro_organization: 'The user <strong>%invitor%</strong> invited you to join the organization <strong>%organization%</strong> on unite cms.'
+profile.accept_invitation.intro_domain: 'The user <strong>%invitor%</strong> invited you to join the domain <strong>%domain%</strong> inside the organization <strong>%organization%</strong> on unite cms as a <em>%domain_type%</em>.'
+
+profile.accept_invitation.dashboard.button: 'Go to dashboard'
 profile.accept_invitation.success.headline: 'Invitation process complete!'
-profile.accept_invitation.success.message: 'Thank you for accepting the invitation for the domain "%domain%".'
-profile.accept_invitation.success.view_domain.button: 'View domain'
 
 profile.reset_password.title: 'Password reset'
 profile.reset_password.headline: 'Password reset'
 profile.reset_password.success.headline: 'Successfully requested a new password.'
 profile.reset_password.success.message: 'If your email address <strong>%username%</strong> is registered, an email with further instructions is on the way to you.'
+
+email.reset_password.headline: 'Reset your password'
+email.reset_password.intro: 'You recently requested to reset your password for unite cms. Click the button to reset your password. If you did not request a password reset, you can savely ignore this message, the link only be valid for a few hours.'
+email.reset_password.button: 'Reset your password'
+email.reset_password.footer: 'This is a one-time email, sent by unite cms.'
+
+email.invitation.headline: '%invitor% invited you to join unite cms'
+email.invitation.intro_organization: 'The user <strong>%invitor%</strong> invited you to join the organization <strong>%organization%</strong> on unite cms. After clicking the button, you can accept or reject the invitation.'
+email.invitation.intro_domain: 'The user <strong>%invitor%</strong> invited you to join the domain <strong>%domain%</strong> inside the organization <strong>%organization%</strong> on unite cms as a <em>%domain_type%</em>. After clicking the button, you can accept or reject the invitation.'
+email.invitation.button: 'See invitation'
+email.invitation.footer: 'This is a one-time email, sent by unite cms.'
