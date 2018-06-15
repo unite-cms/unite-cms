@@ -106,17 +106,12 @@ class DomainMemberType implements Fieldable
     /**
      * @var DomainMember[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMember>")
-     * @Assert\Valid()
-     *
-     * TODO: Checking that all the domain members are valid will become very expensive for large sets. We most likely will need another approach.
-     *
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domainMemberType", fetch="EXTRA_LAZY", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $domainMembers;
 
     /**
      * @var Invitation[]
-     * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="Invitation", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
      */
     private $invites;

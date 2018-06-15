@@ -58,7 +58,6 @@ class SettingType implements Fieldable
 
     /**
      * @var string
-     *
      * @ORM\Column(name="description", type="text", nullable=true)
      * @Expose
      */
@@ -86,7 +85,7 @@ class SettingType implements Fieldable
      * @Assert\Valid()
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\SettingTypeField>")
      * @Accessor(getter="getFields",setter="setFields")
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
      */
@@ -95,7 +94,6 @@ class SettingType implements Fieldable
     /**
      * @var Setting[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Setting>")
-     * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Setting", mappedBy="settingType", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $settings;

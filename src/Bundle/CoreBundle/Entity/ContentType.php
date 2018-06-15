@@ -142,10 +142,6 @@ class ContentType implements Fieldable
     /**
      * @var Content[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Content>")
-     * @Assert\Valid()
-     *
-     * TODO: Checking that all the content is valid will become very expensive for large content sets. We most likely will need another approach.
-     *
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Content", mappedBy="contentType", fetch="EXTRA_LAZY", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $content;
