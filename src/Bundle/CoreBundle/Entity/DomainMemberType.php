@@ -106,17 +106,12 @@ class DomainMemberType implements Fieldable
     /**
      * @var DomainMember[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMember>")
-     * @Assert\Valid()
-     *
-     * TODO: Checking that all the domain members are valid will become very expensive for large sets. We most likely will need another approach.
-     *
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domainMemberType", fetch="EXTRA_LAZY", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $domainMembers;
 
     /**
      * @var Invitation[]
-     * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="Invitation", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
      */
     private $invites;
@@ -131,6 +126,30 @@ class DomainMemberType implements Fieldable
     public function __toString()
     {
         return ''.$this->title;
+    }
+
+    /**
+     * Returns fieldTypes that are present in this domainMemberType but not in $domainMemberType.
+     *
+     * @param DomainMemberType $domainMemberType
+     * @param bool $objects , return keys or objects
+     *
+     * @return DomainMemberTypeField[]
+     */
+    public function getFieldTypesDiff(DomainMemberType $domainMemberType, $objects = false)
+    {
+        $keys = array_diff($this->getFields()->getKeys(), $domainMemberType->getFields()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getFields()->get($key);
+        }
+
+        return $objects;
     }
 
     /**
@@ -151,7 +170,7 @@ class DomainMemberType implements Fieldable
             ->setDescription($domainMemberType->getDescription());
 
         // Fields to delete
-        foreach (array_diff($this->getFields()->getKeys(), $domainMemberType->getFields()->getKeys()) as $field) {
+        foreach ($this->getFieldTypesDiff($domainMemberType) as $field) {
             $this->getFields()->remove($field);
         }
 

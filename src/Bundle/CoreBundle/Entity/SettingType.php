@@ -58,7 +58,6 @@ class SettingType implements Fieldable
 
     /**
      * @var string
-     *
      * @ORM\Column(name="description", type="text", nullable=true)
      * @Expose
      */
@@ -86,7 +85,7 @@ class SettingType implements Fieldable
      * @Assert\Valid()
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\SettingTypeField>")
      * @Accessor(getter="getFields",setter="setFields")
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
      */
@@ -95,7 +94,6 @@ class SettingType implements Fieldable
     /**
      * @var Setting[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Setting>")
-     * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Setting", mappedBy="settingType", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $settings;
@@ -151,6 +149,30 @@ class SettingType implements Fieldable
     }
 
     /**
+     * Returns fieldTypes that are present in this settingType but not in $settingType.
+     *
+     * @param SettingType $settingType
+     * @param bool $objects , return keys or objects
+     *
+     * @return SettingTypeField[]
+     */
+    public function getFieldTypesDiff(SettingType $settingType, $objects = false)
+    {
+        $keys = array_diff($this->getFields()->getKeys(), $settingType->getFields()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getFields()->get($key);
+        }
+
+        return $objects;
+    }
+
+    /**
      * This function sets all structure fields from the given entity and calls setFromEntity for all updated fields.
      *
      * @param SettingType $settingType
@@ -168,7 +190,7 @@ class SettingType implements Fieldable
             ->setPermissions($settingType->getPermissions());
 
         // Fields to delete
-        foreach (array_diff($this->getFields()->getKeys(), $settingType->getFields()->getKeys()) as $field) {
+        foreach ($this->getFieldTypesDiff($settingType) as $field) {
             $this->getFields()->remove($field);
         }
 

@@ -120,8 +120,10 @@ domain.update.form.confirm: 'Save changes'
 domain.update.confirmation: 'If you save this changes the following will happen to your content, settings and members:'
 
 domain.change_visualization.added: '<strong>%type%</strong> will be added.'
-domain.change_visualization.removed: '<strong>%type%</strong> and <strong>all of its content</strong> will be deleted permanently.'
-domain.change_visualization.nothing_changed: 'No types have been added and no types have need deleted.'
+domain.change_visualization.removed: '<strong>%type%</strong> and <strong>all of its content/settings/members</strong> will be deleted permanently.'
+domain.change_visualization.field.added: 'Field <strong>%field%</strong> will be added.'
+domain.change_visualization.field.removed: 'Field <strong>%field%</strong> and data for this field in <strong>all content/setting/member objects</strong> will be deleted permanently.'
+domain.change_visualization.empty: 'No defined types.'
 
 domain.member.title: '%type% members'
 domain.member.headline: '%type% members'

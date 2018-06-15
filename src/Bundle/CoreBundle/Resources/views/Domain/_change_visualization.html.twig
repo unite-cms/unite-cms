@@ -1,70 +1,27 @@
 <div class="unite-domain-change-visualization">
 
-    {% set left_content_type = original.contentTypesDiff(updated, true) %}
-    {% set right_content_type = updated.contentTypesDiff(original, true) %}
+    {{ include('@UniteCMSCore/Domain/_change_visualization_block.html.twig', {
+        headline: 'Content Types',
+        types: updated.contentTypes,
+        original_types: original.contentTypes,
+        left_types: original.contentTypesDiff(updated, true),
+        right_types: updated.contentTypesDiff(original, true)
+    }) }}
 
+    {{ include('@UniteCMSCore/Domain/_change_visualization_block.html.twig', {
+        headline: 'Setting Types',
+        types: updated.settingTypes,
+        original_types: original.settingTypes,
+        left_types: original.settingTypesDiff(updated, true),
+        right_types: updated.settingTypesDiff(original, true)
+    }) }}
 
-    <div class="uk-card uk-card-default uk-card-body uk-margin-small uk-card-small">
-        <div class="uk-card-header">
-            <h5>Content Types</h5>
-        </div>
+    {{ include('@UniteCMSCore/Domain/_change_visualization_block.html.twig', {
+        headline: 'Member Types',
+        types: updated.domainMemberTypes,
+        original_types: original.domainMemberTypes,
+        left_types: original.domainMemberTypesDiff(updated, true),
+        right_types: updated.domainMemberTypesDiff(original, true)
+    }) }}
 
-        {% if not left_content_type is empty or not right_content_type is empty %}
-
-            <ul class="uk-list uk-list-divider">
-                {% for type in right_content_type %}
-                    <li><i data-feather="plus-circle" class="uk-text-success uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.added{% endtrans %}</li>
-                {% endfor %}
-                {% for type in left_content_type %}
-                    <li><i data-feather="minus-circle" class="uk-text-danger uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.removed{% endtrans %}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>{% trans %}domain.change_visualization.nothing_changed{% endtrans %}</p>
-        {% endif %}
-    </div>
-
-    {% set left_setting_type = original.settingTypesDiff(updated, true) %}
-    {% set right_setting_type = updated.settingTypesDiff(original, true) %}
-
-
-    <div class="uk-card uk-card-default uk-card-body uk-margin-small uk-card-small">
-        <div class="uk-card-header">
-            <h5>Setting Types</h5>
-        </div>
-        {% if not left_setting_type is empty or not right_setting_type is empty %}
-            <ul class="uk-list uk-list-divider">
-                {% for type in right_setting_type %}
-                        <li><i data-feather="plus-circle" class="uk-text-success uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.added{% endtrans %}</li>
-                {% endfor %}
-                {% for type in left_setting_type %}
-                        <li><i data-feather="minus-circle" class="uk-text-danger uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.removed{% endtrans %}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>{% trans %}domain.change_visualization.nothing_changed{% endtrans %}</p>
-        {% endif %}
-    </div>
-
-    {% set left_member_type = original.domainMemberTypesDiff(updated, true) %}
-    {% set right_member_type = updated.domainMemberTypesDiff(original, true) %}
-
-
-    <div class="uk-card uk-card-default uk-card-body uk-margin-small uk-card-small">
-        <div class="uk-card-header">
-            <h5>Member Types</h5>
-        </div>
-        {% if not left_member_type is empty or not right_member_type is empty %}
-            <ul class="uk-list uk-list-divider">
-                {% for type in right_member_type %}
-                        <li><i data-feather="plus-circle" class="uk-text-success uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.added{% endtrans %}</li>
-                {% endfor %}
-                {% for type in left_member_type %}
-                        <li><i data-feather="minus-circle" class="uk-text-danger uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.removed{% endtrans %}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>{% trans %}domain.change_visualization.nothing_changed{% endtrans %}</p>
-        {% endif %}
-    </div>
 </div>

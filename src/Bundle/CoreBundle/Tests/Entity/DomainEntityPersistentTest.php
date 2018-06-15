@@ -201,12 +201,9 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         // We allow to delete domains with content_types. They also will get deleted.
         $this->assertCount(0, static::$container->get('validator')->validate($domain2, null, ['DELETE']));
 
-        // try to validate invalid content
+        // We don't validate content on domain validation.
         $content->setData(['any_unknown_field' => 'foo']);
-        $errors = static::$container->get('validator')->validate($domain2);
-        $this->assertCount(1, $errors);
-        $this->assertStringStartsWith('content', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertCount(0, static::$container->get('validator')->validate($domain2));
 
         // Empty domains can be deleted.
         $this->em->remove($content);
