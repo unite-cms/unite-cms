@@ -129,6 +129,30 @@ class DomainMemberType implements Fieldable
     }
 
     /**
+     * Returns fieldTypes that are present in this domainMemberType but not in $domainMemberType.
+     *
+     * @param DomainMemberType $domainMemberType
+     * @param bool $objects , return keys or objects
+     *
+     * @return DomainMemberTypeField[]
+     */
+    public function getFieldTypesDiff(DomainMemberType $domainMemberType, $objects = false)
+    {
+        $keys = array_diff($this->getFields()->getKeys(), $domainMemberType->getFields()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getFields()->get($key);
+        }
+
+        return $objects;
+    }
+
+    /**
      * This function sets all structure fields from the given entity and calls setFromEntity for all updated
      * views and fields.
      *
@@ -146,7 +170,7 @@ class DomainMemberType implements Fieldable
             ->setDescription($domainMemberType->getDescription());
 
         // Fields to delete
-        foreach (array_diff($this->getFields()->getKeys(), $domainMemberType->getFields()->getKeys()) as $field) {
+        foreach ($this->getFieldTypesDiff($domainMemberType) as $field) {
             $this->getFields()->remove($field);
         }
 

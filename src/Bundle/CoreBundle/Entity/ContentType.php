@@ -188,6 +188,30 @@ class ContentType implements Fieldable
     }
 
     /**
+     * Returns fieldTypes that are present in this contentType but not in $contentType.
+     *
+     * @param ContentType $contentType
+     * @param bool $objects , return keys or objects
+     *
+     * @return ContentTypeField[]
+     */
+    public function getFieldTypesDiff(ContentType $contentType, $objects = false)
+    {
+        $keys = array_diff($this->getFields()->getKeys(), $contentType->getFields()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getFields()->get($key);
+        }
+
+        return $objects;
+    }
+
+    /**
      * This function sets all structure fields from the given entity and calls setFromEntity for all updated
      * views and fields.
      *
@@ -207,7 +231,7 @@ class ContentType implements Fieldable
             ->setLocales($contentType->getLocales());
 
         // Fields to delete
-        foreach (array_diff($this->getFields()->getKeys(), $contentType->getFields()->getKeys()) as $field) {
+        foreach ($this->getFieldTypesDiff($contentType) as $field) {
             $this->getFields()->remove($field);
         }
 
