@@ -93,6 +93,11 @@ class DeleteFieldableFieldSubscriberTest extends DatabaseAwareTestCase
         }
 
         $this->em->flush();
+
+        // Delete the 2nd content.
+        $this->em->remove($content);
+        $this->em->flush();
+
         $this->em->refresh($this->domain);
     }
 
@@ -101,7 +106,10 @@ class DeleteFieldableFieldSubscriberTest extends DatabaseAwareTestCase
         // Before deleting, all content, setting and member objects contain the full data set.
         $data = ['f1' => 'foo', 'f2' => 'baa'];
 
+        $this->em->getFilters()->disable('gedmo_softdeleteable');
         $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->findAll();
+        $this->em->getFilters()->enable('gedmo_softdeleteable');
+
         $this->assertCount(2, $content);
         $this->assertEquals($data, $content[0]->getData());
         $this->assertEquals($data, $content[1]->getData());
@@ -123,8 +131,11 @@ class DeleteFieldableFieldSubscriberTest extends DatabaseAwareTestCase
 
         // On flush, the field content should get deleted.
         $this->em->flush();
+
+        $this->em->getFilters()->disable('gedmo_softdeleteable');
         $this->em->refresh($content[0]);
         $this->em->refresh($content[1]);
+        $this->em->getFilters()->enable('gedmo_softdeleteable');
 
         $this->em->refresh($setting[0]);
         $this->em->refresh($setting[1]);

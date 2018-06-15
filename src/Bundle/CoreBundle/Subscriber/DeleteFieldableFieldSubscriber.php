@@ -24,10 +24,22 @@ class DeleteFieldableFieldSubscriber
     {
         $object = $args->getObject();
 
-        $args->getEntityManager()->getFilters()->disable('gedmo_softdeleteable');
-
+        // Delete field values for all fieldable field instances.
         if ($object instanceof ContentTypeField) {
+
+            $softDeleteFilterEnabled = $args->getEntityManager()->getFilters()->isEnabled('gedmo_softdeleteable');
+
+            // If filter was enabled before, disable it for the following operation.
+            if($softDeleteFilterEnabled) {
+                $args->getEntityManager()->getFilters()->disable('gedmo_softdeleteable');
+            }
+
             $this->deleteFieldContent($args->getEntityManager()->getRepository('UniteCMSCoreBundle:Content'), $object);
+
+            // If filter was enabled before, enable it again.
+            if($softDeleteFilterEnabled) {
+                $args->getEntityManager()->getFilters()->enable('gedmo_softdeleteable');
+            }
         }
 
         if ($object instanceof SettingTypeField) {
@@ -37,8 +49,6 @@ class DeleteFieldableFieldSubscriber
         if ($object instanceof DomainMemberTypeField) {
             $this->deleteFieldContent($args->getEntityManager()->getRepository('UniteCMSCoreBundle:DomainMember'), $object);
         }
-
-        $args->getEntityManager()->getFilters()->enable('gedmo_softdeleteable');
     }
 
     private function deleteFieldContent(EntityRepository $repository, FieldableField $field) {
