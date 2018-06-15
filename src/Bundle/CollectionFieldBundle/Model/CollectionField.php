@@ -210,6 +210,6 @@ class CollectionField implements FieldableField
         // add this identifier.
         $pathParts[] = $this->getIdentifier();
 
-        return '$.'.join('[*].', $pathParts);
+        return '$."'.join('[*].', $pathParts).'"';
     }
 }

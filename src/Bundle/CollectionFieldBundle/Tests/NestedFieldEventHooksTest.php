@@ -207,19 +207,19 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Make sure, that nested create event was fired on mock.
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'foo',
+            '$."n1[*].n2[*].testct1"'.Content::class.'foo',
             $content->getData()['n1'][0]['n2'][0]['test']
         );
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'baa',
+            '$."n1[*].n2[*].testct1"'.Content::class.'baa',
             $content->getData()['n1'][0]['n2'][1]['test']
         );
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'luu',
+            '$."n1[*].n2[*].testct1"'.Content::class.'luu',
             $content->getData()['n1'][1]['n2'][0]['test']
         );
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'laa',
+            '$."n1[*].n2[*].testct1"'.Content::class.'laa',
             $content->getData()['n1'][1]['n2'][1]['test']
         );
 
@@ -247,19 +247,19 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Make sure, that nested create event was fired on mock.
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'updated_foo',
+            '$."n1[*].n2[*].testct1"'.Content::class.'updated_foo',
             $content->getData()['n1'][0]['n2'][0]['test']
         );
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'updated_baa',
+            '$."n1[*].n2[*].testct1"'.Content::class.'updated_baa',
             $content->getData()['n1'][0]['n2'][1]['test']
         );
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'updated_luu',
+            '$."n1[*].n2[*].testct1"'.Content::class.'updated_luu',
             $content->getData()['n1'][1]['n2'][0]['test']
         );
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'updated_laa',
+            '$."n1[*].n2[*].testct1"'.Content::class.'updated_laa',
             $content->getData()['n1'][1]['n2'][1]['test']
         );
 
@@ -269,8 +269,8 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // softDelete should be invoked.
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'soft_delete',
-            $mock->softDeleteString['$.n1[*].n2[*].test']
+            '"$.n1[*].n2[*].testct1"'.Content::class.'soft_delete',
+            $mock->softDeleteString['$."n1[*].n2[*].test"']
         );
 
         // Remove it for real.
@@ -288,8 +288,8 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // hardDelete should be invoked.
         $this->assertEquals(
-            '$.n1[*].n2[*].testct1'.Content::class.'hard_delete',
-            $mock->hardDeleteString['$.n1[*].n2[*].test']
+            '$."n1[*].n2[*].testct1"'.Content::class.'hard_delete',
+            $mock->hardDeleteString['$."n1[*].n2[*].test"']
         );
     }
 }
