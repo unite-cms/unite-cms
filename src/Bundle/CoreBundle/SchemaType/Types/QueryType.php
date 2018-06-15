@@ -276,7 +276,7 @@ class QueryType extends AbstractType
 
                 // if we sort by a nested content data field.
                 } else {
-                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.\"$key\"')", $order);
                 }
             }
         }

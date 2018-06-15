@@ -132,7 +132,7 @@ class GraphQLDoctrineFilterQueryBuilder
 
                         // if we filter by a nested content data field.
                     } else {
-                        $leftSide = "JSON_EXTRACT(".$this->contentEntityPrefix.".data, '$.".$filterInput['field']."')";
+                        $leftSide = "JSON_EXTRACT(".$this->contentEntityPrefix.".data, '$.\"".$filterInput['field']."\"')";
                     }
 
 
