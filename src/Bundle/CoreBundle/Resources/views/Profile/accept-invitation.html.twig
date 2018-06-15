@@ -53,10 +53,12 @@
                 </p>
 
                 {{ form_start(form, {attr: {class: 'uk-form-vertical', autocomplete: 'off'}}) }}
-                    <p class="uk-text-center">
-                        {{ form_widget(form.accept, {attr: {style: 'margin: 3px;'}}) }}
-                        {{ form_widget(form.reject, {attr: {style: 'margin: 3px;'}}) }}
-                    </p>
+                    {% if form.accept and form.reject %}
+                        <p class="uk-text-center">
+                            {{ form_widget(form.accept, {attr: {style: 'margin: 3px;'}}) }}
+                            {{ form_widget(form.reject, {attr: {style: 'margin: 3px;'}}) }}
+                        </p>
+                    {% endif %}
                 {{ form_end(form) }}
             {% else %}
                 <h3>{% trans %}profile.accept_invitation.success.headline{% endtrans %}</h3>

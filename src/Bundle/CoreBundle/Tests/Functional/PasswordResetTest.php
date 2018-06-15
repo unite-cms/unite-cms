@@ -90,11 +90,14 @@ class PasswordResetTest extends DatabaseAwareTestCase
 
         // Try to reset known email address.
         $form['form[username]'] = $this->users['domain_editor']->getEmail();
+
+        // Collect the next email.
         $crawler = $this->client->submit($form);
 
         // Should show the success message instead of the form
         $this->assertCount(0, $crawler->filter('form'));
-
+        $this->assertCount(1, $crawler->filter('p:contains("'.static::$container->get('translator')->trans('profile.reset_password.success.headline').'")'));
+        
         // And user should have a reset token.
         $this->users['domain_editor'] = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(
             ['email' => $this->users['domain_editor']->getEmail()]

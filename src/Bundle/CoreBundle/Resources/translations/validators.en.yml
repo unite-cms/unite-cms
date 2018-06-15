@@ -21,7 +21,7 @@ reserved_identifier: 'Please select an identifier different from the set of rese
 invalid_characters: 'This field contains invalid characters. Please check <a target="_blank" href="https://www.unitecms.io/docs">the docs</a> to see, which characters are allowed for this field.'
 content_not_found: 'The selected content object was not found. Please reload and try again.'
 invalid_email: 'This email address is not valid.'
-too_short: 'This field must ne at least {{ limit }} characters long.'
+too_short: 'This field must be at least {{ limit }} characters long.'
 too_long: 'This field cannot be longer than {{ limit }} characters.'
 not_blank: 'Please fill out this field.'
 not_null: 'This field cannot be empty.'
