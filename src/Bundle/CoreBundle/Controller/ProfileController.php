@@ -189,10 +189,9 @@ class ProfileController extends Controller
                     // Generate a secure token. This line was taken from https://github.com/FriendsOfSymfony/FOSUserBundle/blob/master/Util/TokenGenerator.php
                     $user->setResetToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
                     $user->setResetRequestedAt(new \DateTime());
-                    $this->getDoctrine()->getManager()->flush();
 
-                    // Send out email using the default mailer.
-                    $message = (new \Swift_Message('Reset Password'))
+                    // Create message.
+                    $message = (new \Swift_Message($this->get('translator')->trans('email.reset_password.headline')))
                         ->setFrom($this->getParameter('mailer_sender'))
                         ->setTo($user->getEmail())
                         ->setBody(
@@ -210,6 +209,11 @@ class ProfileController extends Controller
                             ),
                             'text/html'
                         );
+
+                    // Save token.
+                    $this->getDoctrine()->getManager()->flush();
+
+                    // Send out message.
                     $this->get('mailer')->send($message);
                 }
             }
@@ -361,8 +365,8 @@ class ProfileController extends Controller
 
                             if (!$alreadyMember) {
                                 $form = $this->createFormBuilder()
-                                    ->add('accept', SubmitType::class, ['label' => 'invitation.accept'])
-                                    ->add('reject', SubmitType::class, ['label' => 'invitation.reject'])
+                                    ->add('accept', SubmitType::class, ['label' => 'profile.accept_invitation.form.accept.button'])
+                                    ->add('reject', SubmitType::class, ['label' => 'profile.accept_invitation.form.reject.button', 'attr' => ['class' => 'uk-button-danger']])
                                     ->getForm();
 
                                 $form->handleRequest($request);
@@ -402,6 +406,22 @@ class ProfileController extends Controller
 
                                             // Save changes to database.
                                             $this->getDoctrine()->getManager()->flush();
+
+                                            // Redirect to index.
+                                            if($domainMember) {
+                                                return $this->redirect(
+                                                    $this->generateUrl('unitecms_core_domain_view', [
+                                                        'organization' => $organizationMember->getOrganization()->getIdentifier(),
+                                                        'domain' => $domainMember->getDomain()->getIdentifier(),
+                                                    ], Router::ABSOLUTE_URL)
+                                                );
+                                            } else {
+                                                return $this->redirect(
+                                                    $this->generateUrl('unitecms_core_domain_index', [
+                                                        'organization' => $organizationMember->getOrganization()->getIdentifier(),
+                                                    ], Router::ABSOLUTE_URL)
+                                                );
+                                            }
                                         }
 
                                         // If the user rejects the invitation, just delete it.
@@ -412,6 +432,9 @@ class ProfileController extends Controller
 
                                         // Save changes to database.
                                         $this->getDoctrine()->getManager()->flush();
+
+                                        // Redirect to index.
+                                        return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
                                     }
                                 }
                             }

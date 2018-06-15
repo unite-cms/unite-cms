@@ -366,7 +366,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Try to submit the form with operation accept
         $this->assertCount(0, $this->users['domain_editor2']->getDomains());
-        $form = $crawler->selectButton(static::$container->get('translator')->trans('invitation.accept'))->form();
+        $form = $crawler->selectButton(static::$container->get('translator')->trans('profile.accept_invitation.form.accept.button'))->form();
         $crawler = $this->client->submit($form);
 
         // Should not show a form
@@ -421,7 +421,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Try to submit the form with operation accept
         $this->assertCount(0, $this->users['domain_editor2']->getDomains());
-        $form = $crawler->selectButton(static::$container->get('translator')->trans('invitation.accept'))->form();
+        $form = $crawler->selectButton(static::$container->get('translator')->trans('profile.accept_invitation.form.accept.button'))->form();
         $crawler = $this->client->submit($form);
 
         // Should not show a form
@@ -469,7 +469,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Try to submit the form with operation reject
         $this->assertCount(0, $this->users['domain_editor2']->getDomains());
-        $form = $crawler->selectButton(static::$container->get('translator')->trans('invitation.reject'))->form();
+        $form = $crawler->selectButton(static::$container->get('translator')->trans('profile.accept_invitation.form.reject.button'))->form();
         $crawler = $this->client->submit($form);
 
         // Should not show a form

@@ -12,6 +12,7 @@ Encore
     .setManifestKeyPrefix('')
 
     .addEntry('main', './Resources/webpack/main.js')
+    .addEntry('email', './Resources/webpack/email.scss')
 
     // allow sass/scss files to be processed
     .enableSassLoader(function(sassConfigOptions){

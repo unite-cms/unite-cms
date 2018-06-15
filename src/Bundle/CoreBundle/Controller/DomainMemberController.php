@@ -204,7 +204,7 @@ class DomainMemberController extends Controller
                     $this->getDoctrine()->getManager()->flush();
 
                     // Send out email using the default mailer.
-                    $message = (new \Swift_Message('Invitation'))
+                    $message = (new \Swift_Message($this->get('translator')->trans('email.invitation.headline', ['%invitor%' => $this->getUser()])))
                         ->setFrom($this->getParameter('mailer_sender'))
                         ->setTo($invitation->getEmail())
                         ->setBody(
