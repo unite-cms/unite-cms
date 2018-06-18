@@ -1,0 +1,17 @@
+{% extends '@UniteCMSCore/layout.html.twig' %}
+{% block title %}{{ ('exception.http.' ~ code ~ '.title')|trans }}{% endblock title %}
+{% block navigation %}{% endblock %}
+{% block content %}
+
+<article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-xlarge organizations-list">
+    <header class="uk-card-header">
+        <h2 class="uk-text-danger"><i data-feather="alert-triangle" width="24" height="24"></i> {{ ('exception.http.' ~ code ~ '.title')|trans }}</h2>
+    </header>
+
+    <p>{{ ('exception.http.' ~ code ~ '.message')|trans }}</p>
+
+    <p>
+        <a class="uk-button uk-button-default" style="background: white;" href="{{ url('unitecms_core_index') }}">{% trans %}exception.dashboard.button{% endtrans %}</a>
+    </p>
+</article>
+{% endblock content %}
