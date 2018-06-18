@@ -1,12 +1,16 @@
 # Changelog
 
-## 0.5.1
+## 0.5.2 (2018-06-15)
 
-- Improved: Add cookie domain config to all repositories
-- Fixed: normalize identifier between hyphen (unite) and underscore (graphql)
-- Fixed: Fixing a bug, where the only org admin could devote himself_herself to user
-- Fixed: Fixed a bug, where domain types where not updated during domain save
-- Fixed: Hide content create button if user does not have create permissions
+- Fixed: Use hyphens for identifiers only in url and underscores for all internal identifier
+- Improved: Allow to delete content/setting/member fields when there is content present. Content for this field will be deleted
+- Improved: Show also field details no domain update/delete
+- Fixed: Fixed a bug, where the domain identifier could not be updated because unite manager uses the updated identifier instead of the original  
+- Fixed: Fixed the invitation form and add missing translations
+- Improved: Add css styling to all emails
+- Improved: Added nicer http error pages for 403, 404 and 500 errors.  
+
+## 0.5.1 (2018-06-14)
 
 ## 0.5.0
 
