@@ -11,5 +11,5 @@ security:
         - { path: ^/reset-password, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: '^profile\.%allowed_hostname%' }
         - { path: ^/reset-password-confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: '^profile\.%allowed_hostname%' }
         - { path: ^/accept-invitation, roles: IS_AUTHENTICATED_ANONYMOUSLY, host: '^profile\.%allowed_hostname%' }
-        - { path: '^/%identifier_pattern%/api(/|$)', roles: [ROLE_USER, IS_AUTHENTICATED_FULLY], host: '^%identifier_pattern%\.%allowed_hostname%' }
-        - { path: ^/*, roles: ROLE_USER, host: '^%identifier_pattern%\.%allowed_hostname%' }
+        - { path: '^/%identifier_url_pattern%/api(/|$)', roles: [ROLE_USER, IS_AUTHENTICATED_FULLY], host: '^%identifier_url_pattern%\.%allowed_hostname%' }
+        - { path: ^/*, roles: ROLE_USER, host: '^%identifier_url_pattern%\.%allowed_hostname%' }

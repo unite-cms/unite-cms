@@ -27,11 +27,6 @@ class MutationType extends AbstractType
     private $schemaTypeManager;
 
     /**
-     * @var FieldTypeManager $fieldTypeManager
-     */
-    private $fieldTypeManager;
-
-    /**
      * @var EntityManager $entityManager
      */
     private $entityManager;
@@ -58,7 +53,6 @@ class MutationType extends AbstractType
 
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
-        FieldTypeManager $fieldTypeManager,
         EntityManager $entityManager,
         UniteCMSManager $uniteCMSManager,
         AuthorizationChecker $authorizationChecker,
@@ -66,7 +60,6 @@ class MutationType extends AbstractType
         FieldableFormBuilder $fieldableFormBuilder
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
-        $this->fieldTypeManager = $fieldTypeManager;
         $this->entityManager = $entityManager;
         $this->uniteCMSManager = $uniteCMSManager;
         $this->authorizationChecker = $authorizationChecker;
@@ -185,11 +178,6 @@ class MutationType extends AbstractType
         $content = new Content();
         $form = $this->fieldableFormBuilder->createForm($contentType, $content);
 
-        // normalize data.
-        if(is_array($args['data'])) {
-            $args['data'] = IdentifierNormalizer::fromGraphQLData($args['data'], $this->fieldTypeManager, $contentType);
-        }
-
         // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
         if(is_array($args['data']) && !empty($context['csrf_token'])) {
             $args['data']['_token'] = $context['csrf_token'];
@@ -258,11 +246,6 @@ class MutationType extends AbstractType
         }
 
         $form = $this->fieldableFormBuilder->createForm($content->getContentType(), $content);
-
-        // normalize data.
-        if(is_array($args['data'])) {
-            $args['data'] = IdentifierNormalizer::fromGraphQLData($args['data'], $this->fieldTypeManager, $content->getContentType());
-        }
 
         // Update only changed fields on this entity. Note: nested values will get replaced, no recursively replacement possible here.
         $args['data'] = array_replace($content->getData(), $args['data']);

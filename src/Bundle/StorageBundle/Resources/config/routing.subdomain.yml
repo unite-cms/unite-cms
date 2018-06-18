@@ -5,8 +5,8 @@ unitecms_storage_sign:
     prefix:   /{domain}/api/storage/sign
     host:     '{organization}.{hostname}'
     requirements:
-        domain: '%identifier_pattern%'
-        organization: '%identifier_pattern%'
+        domain: '%identifier_url_pattern%'
+        organization: '%identifier_url_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
         hostname: '%default_hostname%'

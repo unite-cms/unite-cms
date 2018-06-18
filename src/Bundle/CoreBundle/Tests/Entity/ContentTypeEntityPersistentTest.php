@@ -69,17 +69,17 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $org2 = new Organization();
         $org2->setIdentifier('org2')->setTitle('Org 2');
         $domain1 = new Domain();
-        $domain1->setIdentifier('org1-domain1')->setTitle('Domain11');
+        $domain1->setIdentifier('org1_domain1')->setTitle('Domain11');
         $domain2 = new Domain();
-        $domain2->setIdentifier('org1-domain2')->setTitle('Domain12');
+        $domain2->setIdentifier('org1_domain2')->setTitle('Domain12');
         $domain21 = new Domain();
-        $domain21->setIdentifier('org2-domain1')->setTitle('Domain21');
+        $domain21->setIdentifier('org2_domain1')->setTitle('Domain21');
         $domain22 = new Domain();
-        $domain22->setIdentifier('org2-domain2')->setTitle('Domain22');
+        $domain22->setIdentifier('org2_domain2')->setTitle('Domain22');
         $org1->addDomain($domain1)->addDomain($domain21);
         $org2->addDomain($domain2)->addDomain($domain22);
         $contentType = new ContentType();
-        $contentType->setIdentifier('org1-domain1-ct1')->setTitle('org1_domain1_ct1')->setDomain($domain1);
+        $contentType->setIdentifier('org1_domain1_ct1')->setTitle('org1_domain1_ct1')->setDomain($domain1);
         $this->em->persist($org1);
         $this->em->persist($org2);
         $this->em->persist($domain1);
@@ -92,19 +92,19 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
 
         // CT2 one the same domain with the same identifier should not be valid.
         $ct2 = new ContentType();
-        $ct2->setIdentifier('org1-domain1-ct1')->setTitle('org1_domain1_ct1')->setDomain($domain1);
+        $ct2->setIdentifier('org1_domain1_ct1')->setTitle('org1_domain1_ct1')->setDomain($domain1);
         $this->assertCount(1, static::$container->get('validator')->validate($ct2));
 
-        $ct2->setIdentifier('org1-domain1-ct2');
+        $ct2->setIdentifier('org1_domain1_ct2');
         $this->assertCount(0, static::$container->get('validator')->validate($ct2));
 
-        $ct2->setIdentifier('org1-domain1-ct1')->setDomain($domain2);
+        $ct2->setIdentifier('org1_domain1_ct1')->setDomain($domain2);
         $this->assertCount(0, static::$container->get('validator')->validate($ct2));
 
-        $ct2->setIdentifier('org1-domain1-ct1')->setDomain($domain21);
+        $ct2->setIdentifier('org1_domain1_ct1')->setDomain($domain21);
         $this->assertCount(0, static::$container->get('validator')->validate($ct2));
 
-        $ct2->setIdentifier('org1-domain1-ct1')->setDomain($domain22);
+        $ct2->setIdentifier('org1_domain1_ct1')->setDomain($domain22);
         $this->assertCount(0, static::$container->get('validator')->validate($ct2));
 
 

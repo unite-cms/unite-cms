@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 /**
  * DomainMemberTypeRepository
@@ -20,9 +21,9 @@ class DomainMemberTypeRepository extends EntityRepository
             ->andWhere('dmt.identifier = :domainMemberType')
             ->setParameters(
                 [
-                    'organization' => $organization,
-                    'domain' => $domain,
-                    'domainMemberType' => $domainMemberType,
+                    'organization' => IdentifierNormalizer::normalize($organization),
+                    'domain' => IdentifierNormalizer::normalize($domain),
+                    'domainMemberType' => IdentifierNormalizer::normalize($domainMemberType),
                 ]
             )
             ->getQuery()->getResult();

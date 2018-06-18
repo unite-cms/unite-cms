@@ -5,7 +5,7 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <h2 class="uk-flex-1">{% trans %}organization.user.headline{% endtrans %}</h2>
-        <a href="{{ url('unitecms_core_organizationuser_createinvite', { organization: organization.identifier }) }}" class="uk-button uk-button-primary">
+        <a href="{{ url('unitecms_core_organizationuser_createinvite', { organization: organization.identifier|replace({'_':'-'}) }) }}" class="uk-button uk-button-primary">
             <i data-feather="plus" class="uk-margin-small-right-small"></i>
             {% trans %}organization.user.create_invite.button{% endtrans %}
         </a>
@@ -46,14 +46,14 @@
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
                                     <li><a href="{{ url('unitecms_core_organizationuser_update', {
-                                            organization: organization.identifier,
+                                            organization: organization.identifier|replace({'_':'-'}),
                                             member: member.id
                                         }) }}">
                                             <i class="uk-margin-small-right" data-feather="edit"></i>
                                             {% trans %}organization.user.update.button{% endtrans %}
                                         </a></li>
                                     <li><a class="uk-text-danger" href="{{ url('unitecms_core_organizationuser_delete', {
-                                            organization: organization.identifier,
+                                            organization: organization.identifier|replace({'_':'-'}),
                                             member: member.id
                                         }) }}">
                                             <i class="uk-margin-small-right" data-feather="trash-2"></i>
@@ -103,7 +103,7 @@
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a class="uk-text-danger" href="{{ url('unitecms_core_organizationuser_deleteinvite', { organization: organization.identifier, invite: invite.id }) }}">
+                                    <li><a class="uk-text-danger" href="{{ url('unitecms_core_organizationuser_deleteinvite', { organization: organization.identifier|replace({'_':'-'}), invite: invite.id }) }}">
                                             <i class="uk-margin-small-right" data-feather="trash-2"></i>
                                             {% trans %}organization.user.pending_invitations.delete.button{% endtrans %}
                                         </a></li>

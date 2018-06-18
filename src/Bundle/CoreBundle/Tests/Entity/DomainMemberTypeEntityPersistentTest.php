@@ -68,17 +68,17 @@ class DomainMemberTypeEntityPersistentTest extends DatabaseAwareTestCase
         $org2 = new Organization();
         $org2->setIdentifier('org2')->setTitle('Org 2');
         $domain1 = new Domain();
-        $domain1->setIdentifier('org1-domain1')->setTitle('Domain11');
+        $domain1->setIdentifier('org1_domain1')->setTitle('Domain11');
         $domain2 = new Domain();
-        $domain2->setIdentifier('org1-domain2')->setTitle('Domain12');
+        $domain2->setIdentifier('org1_domain2')->setTitle('Domain12');
         $domain21 = new Domain();
-        $domain21->setIdentifier('org2-domain1')->setTitle('Domain21');
+        $domain21->setIdentifier('org2_domain1')->setTitle('Domain21');
         $domain22 = new Domain();
-        $domain22->setIdentifier('org2-domain2')->setTitle('Domain22');
+        $domain22->setIdentifier('org2_domain2')->setTitle('Domain22');
         $org1->addDomain($domain1)->addDomain($domain21);
         $org2->addDomain($domain2)->addDomain($domain22);
         $domainMemberType = new DomainMemberType();
-        $domainMemberType->setIdentifier('org1-domain1-dmt1')->setTitle('org1_domain1_dmt1')->setDomain($domain1);
+        $domainMemberType->setIdentifier('org1_domain1_dmt1')->setTitle('org1_domain1_dmt1')->setDomain($domain1);
         $this->em->persist($org1);
         $this->em->persist($org2);
         $this->em->persist($domain1);
@@ -91,19 +91,19 @@ class DomainMemberTypeEntityPersistentTest extends DatabaseAwareTestCase
 
         // DMT2 one the same domain with the same identifier should not be valid.
         $dmt2 = new DomainMemberType();
-        $dmt2->setIdentifier('org1-domain1-dmt1')->setTitle('org1_domain1_dmt1')->setDomain($domain1);
+        $dmt2->setIdentifier('org1_domain1_dmt1')->setTitle('org1_domain1_dmt1')->setDomain($domain1);
         $this->assertCount(1, static::$container->get('validator')->validate($dmt2));
 
-        $dmt2->setIdentifier('org1-domain1-dmt2');
+        $dmt2->setIdentifier('org1_domain1_dmt2');
         $this->assertCount(0, static::$container->get('validator')->validate($dmt2));
 
-        $dmt2->setIdentifier('org1-domain1-dmt1')->setDomain($domain2);
+        $dmt2->setIdentifier('org1_domain1_dmt1')->setDomain($domain2);
         $this->assertCount(0, static::$container->get('validator')->validate($dmt2));
 
-        $dmt2->setIdentifier('org1-domain1-dmt1')->setDomain($domain21);
+        $dmt2->setIdentifier('org1_domain1_dmt1')->setDomain($domain21);
         $this->assertCount(0, static::$container->get('validator')->validate($dmt2));
 
-        $dmt2->setIdentifier('org1-domain1-dmt1')->setDomain($domain22);
+        $dmt2->setIdentifier('org1_domain1_dmt1')->setDomain($domain22);
         $this->assertCount(0, static::$container->get('validator')->validate($dmt2));
 
         // Test unique entity validation.

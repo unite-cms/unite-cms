@@ -27,7 +27,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
 {
 
     protected $data = [
-        'foo-organization' => [
+        'foo_organization' => [
             '{
   "title": "Marketing & PR",
   "identifier": "marketing",
@@ -54,7 +54,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
           "type": "reference",
           "settings": {
             "domain": "marketing",
-            "content_type": "news-category"
+            "content_type": "news_category"
           }
         }
       ],
@@ -70,7 +70,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
     },
     {
       "title": "News Category",
-      "identifier": "news-category",
+      "identifier": "news_category",
       "fields": [
         {
           "title": "Name",
@@ -219,7 +219,7 @@ class ApiMaximumNestingLevelTest extends DatabaseAwareTestCase
         $this->em->refresh($this->domains['marketing']->getContentTypes()->first());
         $this->em->refresh($this->domains['marketing']);
 
-        $news->setData(['category' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'news-category', 'content' => $category->getId()]]);
+        $news->setData(['category' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'news_category', 'content' => $category->getId()]]);
         $category->setData(['news' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'news', 'content' => $news->getId()]]);
 
         $this->em->flush();

@@ -70,7 +70,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
      */
     private $domainConfiguration = '{
     "title": "Test controller access check domain",
-    "identifier": "access-check", 
+    "identifier": "access_check", 
     "content_types": [
       {
         "title": "CT 1",
@@ -93,7 +93,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
-        $this->organization->setTitle('Test controller access check')->setIdentifier('access-check');
+        $this->organization->setTitle('Test controller access check')->setIdentifier('access_check');
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
         $this->domain->addPermission(DomainVoter::UPDATE, 'member.type == "editor"');
@@ -427,9 +427,9 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
         ], $parameter);
 
-        $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(['identifier' => 'access-check']);
+        $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(['identifier' => 'access_check']);
         $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
-        $domain2->setIdentifier('access-check2')->setTitle('Domain 2')->setOrganization($org);
+        $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org);
 
         $content2 = new Content();
         $content2->setContentType($domain2->getContentTypes()->get('ct1'));
@@ -696,9 +696,9 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         ], $parameter);
 
         $org2 = new Organization();
-        $org2->setTitle('Org 2')->setIdentifier('access-check2');
+        $org2->setTitle('Org 2')->setIdentifier('access_check2');
         $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
-        $domain2->setIdentifier('access-check2')->setTitle('Domain 2')->setOrganization($org2);
+        $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org2);
 
         $content2 = new Content();
         $content2->setContentType($domain2->getContentTypes()->get('ct1'));

@@ -11,5 +11,5 @@ security:
         - { path: ^/profile/reset-password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/profile/reset-password-confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/profile/accept-invitation, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: '^/%identifier_pattern%/%identifier_pattern%/api(/|$)', roles: [ROLE_USER, IS_AUTHENTICATED_FULLY] }
+        - { path: '^/%identifier_url_pattern%/%identifier_url_pattern%/api(/|$)', roles: [ROLE_USER, IS_AUTHENTICATED_FULLY] }
         - { path: ^/*, roles: ROLE_USER }

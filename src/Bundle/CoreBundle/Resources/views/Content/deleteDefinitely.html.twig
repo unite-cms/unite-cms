@@ -5,10 +5,10 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <a class="back-button" href="{{ url('unitecms_core_content_index', {
-            domain: domain.identifier,
-            organization: organization.identifier,
-            content_type: contentType.identifier,
-            view: view.identifier
+            domain: domain.identifier|replace({'_':'-'}),
+            organization: organization.identifier|replace({'_':'-'}),
+            content_type: contentType.identifier|replace({'_':'-'}),
+            view: view.identifier|replace({'_':'-'})
         }) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.delete_definitely.headline{% endtrans %}</h2>
     </header>
@@ -25,10 +25,10 @@
     <p class="uk-text-center">
 
         <a class="uk-button" style="background: white; margin: 10px;" href="{{ url('unitecms_core_content_index', {
-            domain: domain.identifier,
-            organization: organization.identifier,
-            content_type: contentType.identifier,
-            view: view.identifier
+            domain: domain.identifier|replace({'_':'-'}),
+            organization: organization.identifier|replace({'_':'-'}),
+            content_type: contentType.identifier|replace({'_':'-'}),
+            view: view.identifier|replace({'_':'-'})
         }) }}">{% trans %}content.delete.cancel{% endtrans %}</a>
 
         {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}

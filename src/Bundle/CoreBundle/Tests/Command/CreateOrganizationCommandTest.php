@@ -30,7 +30,7 @@ class CreateOrganizationCommandTest extends DatabaseAwareTestCase
         $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll());
 
         $title = 'My new created Organization';
-        $identifier = 'my-new-created-organization';
+        $identifier = 'my_new_created_organization';
 
         $commandTester->setInputs(array($title, '', 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
