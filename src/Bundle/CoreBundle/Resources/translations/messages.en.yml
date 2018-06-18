@@ -296,3 +296,11 @@ email.invitation.intro_organization: 'The user <strong>%invitor%</strong> invite
 email.invitation.intro_domain: 'The user <strong>%invitor%</strong> invited you to join the domain <strong>%domain%</strong> inside the organization <strong>%organization%</strong> on unite cms as a <em>%domain_type%</em>. After clicking the button, you can accept or reject the invitation.'
 email.invitation.button: 'See invitation'
 email.invitation.footer: 'This is a one-time email, sent by unite cms.'
+
+exception.http.500.title: 'Internal Server Error'
+exception.http.500.message: 'An internal server error occurred. Please try again later. We are monitoring this error and will work on a solution.'
+exception.http.404.title: 'Page not found'
+exception.http.404.message: 'The requested page was not found. Please check the URL you entered and try again.'
+exception.http.403.title: 'Not allowed'
+exception.http.403.message: 'You have not been granted access to this page. Please check the URL you entered and try again. If this problem persists, contact your system administrator.'
+exception.dashboard.button: 'Go to dashboard / login'

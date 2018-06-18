@@ -1,6 +1,7 @@
 twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
+    exception_controller: UniteCMS\CoreBundle\Controller\ExceptionController::showAction
     form_themes:
         - '@UniteCMSCore/Form/uikit_layout.html.twig'
         - '@UniteCMSCollectionField/Form/form_widgets.html.twig'
