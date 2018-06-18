@@ -9,15 +9,10 @@
 namespace UniteCMS\CoreBundle\SchemaType;
 
 use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\Fieldable;
-use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Field\FieldTypeInterface;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
-use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 
 /**
- * Normalizes identifiers between unite and GraphQL. GraphQL does not support "-", unite does not support "_".
+ * Normalizes identifiers between unite and GraphQL.
  * Class IdentifierNormalizer
  * @package UniteCMS\CoreBundle\SchemaType
  */
@@ -40,7 +35,7 @@ class IdentifierNormalizer
     }
 
     /**
-     * Returns a unite identifier from a GraphQL field name (findMy_Ct -> my-ct).
+     * Returns a unite identifier from a GraphQL field name (findMy_Ct -> my_ct).
      *
      * @param string $functionName
      * @return string
@@ -53,7 +48,7 @@ class IdentifierNormalizer
             return '';
         }
 
-        return str_replace('_', '-', strtolower($parts[1]));
+        return strtolower($parts[1]);
     }
 
     /**
@@ -70,51 +65,7 @@ class IdentifierNormalizer
             return '';
         }
 
-        return str_replace('_', '-', strtolower($parts[0]));
-    }
-
-    /**
-     * Normalizes array keys from graphQL data argument to unite data array.
-     *
-     * @param array $data
-     * @param FieldTypeManager $fieldTypeManager
-     * @param Fieldable $fieldable
-     * @return array
-     */
-    static function fromGraphQLData(array $data, FieldTypeManager $fieldTypeManager, Fieldable $fieldable) : array {
-        $normalizedData = [];
-
-        foreach ($data as $key => $value) {
-
-            $normalizedKey = str_replace('_', '-', $key);
-
-            // if this would be an known field, we need to normalize the key.
-            if($fieldable->getFields()->containsKey($normalizedKey)) {
-
-                /*** @var FieldableField $fieldableField */
-                $fieldableField = $fieldable->getFields()->get($normalizedKey);
-
-                /*** @var FieldTypeInterface $fieldType */
-                $fieldType = $fieldTypeManager->getFieldType($fieldableField->getType());
-
-                // If this field type could have children.
-                if($fieldType instanceof NestableFieldTypeInterface) {
-                    if(is_array($value)) {
-                        foreach($value as $rowNumber => $row) {
-                            $value[$rowNumber] = static::fromGraphQLData($row, $fieldTypeManager, $fieldType->getNestableFieldable($fieldableField));
-                        }
-                    }
-                }
-
-                $normalizedData[$normalizedKey] = $value;
-
-            // If this is not a known field, just pass the data to the normalized array.
-            } else {
-                $normalizedData[$key] = $value;
-            }
-        }
-
-        return $normalizedData;
+        return strtolower($parts[0]);
     }
 
     /**
@@ -134,7 +85,7 @@ class IdentifierNormalizer
             $identifier = $resource->getIdentifier();
         }
 
-        return str_replace('-', '_', $identifier);
+        return $identifier;
     }
 
     /**

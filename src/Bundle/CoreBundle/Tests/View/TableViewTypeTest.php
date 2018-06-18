@@ -21,7 +21,7 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $view
             ->setType('table')
             ->setTitle('New View')
-            ->setIdentifier('new-view')
+            ->setIdentifier('new_view')
             ->setContentType(new ContentType())
             ->getContentType()
             ->setTitle('ct')
@@ -66,7 +66,7 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $view
             ->setType('table')
             ->setTitle('New View')
-            ->setIdentifier('new-view')
+            ->setIdentifier('new_view')
             ->setContentType(new ContentType())
             ->getContentType()
             ->setTitle('ct')
@@ -188,7 +188,7 @@ class TableViewTypeTest extends DatabaseAwareTestCase
         $view
             ->setType('table')
             ->setTitle('New View')
-            ->setIdentifier('new-view')
+            ->setIdentifier('new_view')
             ->setContentType(new ContentType())
             ->getContentType()
             ->setTitle('ct')

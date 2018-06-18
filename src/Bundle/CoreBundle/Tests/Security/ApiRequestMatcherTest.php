@@ -13,7 +13,7 @@ class ApiRequestMatcherTest extends TestCase
      */
     public function testApiRequestMatcherForParameterApiRoute() {
 
-        $matcher = new ApiRequestMatcher('parameter', 'example.com', '[a-z0-9-]+');
+        $matcher = new ApiRequestMatcher('parameter', 'example.com', '^[a-z0-9]+[a-z0-9-]*[a-z0-9]+$');
 
         $this->assertTrue($matcher->matches(Request::create('/org1/domain1/api')));
         $this->assertTrue($matcher->matches(Request::create('/org1/domain1/api/graphql')));
@@ -35,7 +35,7 @@ class ApiRequestMatcherTest extends TestCase
      */
     public function testApiRequestMatcherForParameterApiRouteWithFallbackFlagRoute() {
 
-        $matcher = new ApiRequestMatcher('parameter', 'example.com', '[a-z0-9-]+');
+        $matcher = new ApiRequestMatcher('parameter', 'example.com', '^[a-z0-9]+[a-z0-9-]*[a-z0-9]+$');
 
         $request = Request::create('/org1/domain1/api');
         $request->headers->set('Authentication-Fallback', false);
@@ -151,7 +151,7 @@ class ApiRequestMatcherTest extends TestCase
      */
     public function testApiRequestMatcherForParameterOtherRoute() {
 
-        $matcher = new ApiRequestMatcher('parameter', 'example.com', '[a-z0-9-]+');
+        $matcher = new ApiRequestMatcher('parameter', 'example.com', '^[a-z0-9]+[a-z0-9-]*[a-z0-9]+$');
 
         $this->assertFalse($matcher->matches(Request::create('/org1/domain1/api1')));
         $this->assertFalse($matcher->matches(Request::create('/api')));
@@ -180,7 +180,7 @@ class ApiRequestMatcherTest extends TestCase
      */
     public function testApiRequestMatcherForSubdomainApiRoute() {
 
-        $matcher = new ApiRequestMatcher('subdomain', 'example.com', '[a-z0-9-]+');
+        $matcher = new ApiRequestMatcher('subdomain', 'example.com', '^[a-z0-9]+[a-z0-9-]*[a-z0-9]+$');
 
         $this->assertTrue($matcher->matches(Request::create('http://org1.example.com/domain1/api')));
         $this->assertTrue($matcher->matches(Request::create('http://org1.example.com/domain1/api/graphql')));
@@ -232,7 +232,7 @@ class ApiRequestMatcherTest extends TestCase
      */
     public function testApiRequestMatcherForSubdomainOtherRoute() {
 
-        $matcher = new ApiRequestMatcher('subdomain', 'example.com', '[a-z0-9-]+');
+        $matcher = new ApiRequestMatcher('subdomain', 'example.com', '^[a-z0-9]+[a-z0-9-]*[a-z0-9]+$');
 
         $this->assertFalse($matcher->matches(Request::create('http://org1.example.com/domain1/api1')));
         $this->assertFalse($matcher->matches(Request::create('http://org1.example.com/api')));

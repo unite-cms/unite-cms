@@ -26,45 +26,45 @@ unitecms_core_organization_user:
     type:     annotation
     prefix:   /{organization}/user
     requirements:
-        organization: '%identifier_pattern%'
+        organization: '%identifier_url_pattern%'
 
 unitecms_core_organization_api_key:
     resource: "@UniteCMSCoreBundle/Controller/OrganizationApiKeyController.php"
     type:     annotation
     prefix:   /{organization}/apikeys
     requirements:
-        organization: '%identifier_pattern%'
+        organization: '%identifier_url_pattern%'
 
 unitecms_core_domains:
     resource: "@UniteCMSCoreBundle/Controller/DomainController.php"
     type:     annotation
     prefix:   /{organization}
     requirements:
-        organization: '%identifier_pattern%'
+        organization: '%identifier_url_pattern%'
 
 unitecms_core_domain_member:
     resource: "@UniteCMSCoreBundle/Controller/DomainMemberController.php"
     type:     annotation
     prefix:   /{organization}/{domain}/member
     requirements:
-        organization: '%identifier_pattern%'
-        domain: '%identifier_pattern%'
+        organization: '%identifier_url_pattern%'
+        domain: '%identifier_url_pattern%'
 
 unitecms_core_content:
     resource: "@UniteCMSCoreBundle/Controller/ContentController.php"
     type:     annotation
     prefix:   /{organization}/{domain}/content
     requirements:
-        organization: '%identifier_pattern%'
-        domain: '%identifier_pattern%'
+        organization: '%identifier_url_pattern%'
+        domain: '%identifier_url_pattern%'
 
 unitecms_core_setting:
     resource: "@UniteCMSCoreBundle/Controller/SettingController.php"
     type:     annotation
     prefix:   /{organization}/{domain}/setting
     requirements:
-        organization: '%identifier_pattern%'
-        domain: '%identifier_pattern%'
+        organization: '%identifier_url_pattern%'
+        domain: '%identifier_url_pattern%'
 
 
 # Add a route to api that will return the default implementation (graphQL)
