@@ -197,7 +197,7 @@ class ContentTypeField implements FieldableField
      */
     public function getJsonExtractIdentifier()
     {
-        return '$.'.$this->getIdentifier();
+        return '$."'.$this->getIdentifier().'"';
     }
 
     /**

@@ -34,7 +34,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
                     public function getIdentifier() { return 'field1'; }
                     public function getTitle() { return 'Field 1'; }
                     public function getSettings() { return []; }
-                    public function getJsonExtractIdentifier() { return '$.' . $this->getIdentifier(); }
+                    public function getJsonExtractIdentifier() { return '$."'.$this->getIdentifier().'"'; }
                 }];
             }
             public function setFields($fields) {}

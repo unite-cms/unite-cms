@@ -15,7 +15,7 @@ class SettingTypeFieldEntityTest extends TestCase
         $field->setIdentifier('test123');
 
         $this->assertEquals('Title', $field->__toString());
-        $this->assertEquals('$.test123', $field->getJsonExtractIdentifier());
+        $this->assertEquals('$."test123"', $field->getJsonExtractIdentifier());
 
         $field->setId(300);
 
