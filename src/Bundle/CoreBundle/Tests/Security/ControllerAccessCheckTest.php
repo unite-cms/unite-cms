@@ -296,8 +296,8 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     public function testControllerActionAccessForAnonymous()
     {
         $parameter = [
-            'organization' => 'access_check',
-            'domain' => 'access_check',
+            'organization' => 'access-check',
+            'domain' => 'access-check',
             'content_type' => 'ct1',
             'setting_type' => 'st1',
             'view' => 'all',
@@ -366,8 +366,8 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->login($this->users['domain_editor']);
 
         $parameter = [
-            'organization' => 'access_check',
-            'domain' => 'access_check',
+            'organization' => 'access-check',
+            'domain' => 'access-check',
             'content_type' => 'ct1',
             'setting_type' => 'st1',
             'view' => 'all',
@@ -498,8 +498,8 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     {
         $this->login($this->users['domain_viewer']);
         $parameter = [
-            'organization' => 'access_check',
-            'domain' => 'access_check',
+            'organization' => 'access-check',
+            'domain' => 'access-check',
             'content_type' => 'ct1',
             'setting_type' => 'st1',
             'view' => 'all',
@@ -566,8 +566,8 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->login($this->users['organization_member']);
 
         $parameter = [
-            'organization' => 'access_check',
-            'domain' => 'access_check',
+            'organization' => 'access-check',
+            'domain' => 'access-check',
             'content_type' => 'ct1',
             'setting_type' => 'st1',
             'view' => 'all',
@@ -634,8 +634,8 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->login($this->users['organization_admin']);
 
         $parameter = [
-            'organization' => 'access_check',
-            'domain' => 'access_check',
+            'organization' => 'access-check',
+            'domain' => 'access-check',
             'content_type' => 'ct1',
             'setting_type' => 'st1',
             'view' => 'all',
@@ -770,8 +770,8 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->login($this->users['platform']);
 
         $parameter = [
-            'organization' => 'access_check',
-            'domain' => 'access_check',
+            'organization' => 'access-check',
+            'domain' => 'access-check',
             'content_type' => 'ct1',
             'setting_type' => 'st1',
             'view' => 'all',

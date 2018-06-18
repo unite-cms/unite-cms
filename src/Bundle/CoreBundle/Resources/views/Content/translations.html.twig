@@ -5,10 +5,10 @@
     <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
         <header class="uk-card-header uk-flex">
             <a class="back-button" href="{{ url('unitecms_core_content_index', {
-                domain: unite.domain.identifier,
-                organization: unite.organization.identifier,
-                content_type: contentType.identifier,
-                view: view.identifier
+                domain: unite.domain.identifier|replace({'_':'-'}),
+                organization: unite.organization.identifier|replace({'_':'-'}),
+                content_type: contentType.identifier|replace({'_':'-'}),
+                view: view.identifier|replace({'_':'-'})
             }) }}"><i data-feather="arrow-left"></i></a>
             <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.translations.headline{% endtrans %}</h2>
         </header>
@@ -35,10 +35,10 @@
                                 <ul class="uk-nav uk-dropdown-nav">
 
                                     <li><a href="{{ url('unitecms_core_content_update', {
-                                            'organization': unite.domain.organization.identifier,
-                                            'domain': unite.domain.identifier,
-                                            'content_type': contentType.identifier,
-                                            'view': view.identifier,
+                                            'organization': unite.domain.organization.identifier|replace({'_':'-'}),
+                                            'domain': unite.domain.identifier|replace({'_':'-'}),
+                                            'content_type': contentType.identifier|replace({'_':'-'}),
+                                            'view': view.identifier|replace({'_':'-'}),
                                             'content': translation.id
                                         }) }}">
                                             <i class="uk-margin-small-right" data-feather="edit"></i>
@@ -47,10 +47,10 @@
 
                                     {% if translation.translationOf %}
                                         <li><a class="uk-text-danger" href="{{ url('unitecms_core_content_removetranslation', {
-                                                'organization': unite.domain.organization.identifier,
-                                                'domain': unite.domain.identifier,
-                                                'content_type': contentType.identifier,
-                                                'view': view.identifier,
+                                                'organization': unite.domain.organization.identifier|replace({'_':'-'}),
+                                                'domain': unite.domain.identifier|replace({'_':'-'}),
+                                                'content_type': contentType.identifier|replace({'_':'-'}),
+                                                'view': view.identifier|replace({'_':'-'}),
                                                 'content': translation.translationOf.id,
                                                 'locale': translation.locale
                                             }) }}">
@@ -74,10 +74,10 @@
                                 <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                     <ul class="uk-nav uk-dropdown-nav">
                                         <li><a class="uk-text-success" href="{{ url('unitecms_core_content_create', {
-                                                'organization': unite.domain.organization.identifier,
-                                                'domain': unite.domain.identifier,
-                                                'content_type': contentType.identifier,
-                                                'view': view.identifier,
+                                                'organization': unite.domain.organization.identifier|replace({'_':'-'}),
+                                                'domain': unite.domain.identifier|replace({'_':'-'}),
+                                                'content_type': contentType.identifier|replace({'_':'-'}),
+                                                'view': view.identifier|replace({'_':'-'}),
                                                 'locale': locale,
                                                 'translation_of': content.id
                                             }) }}">
@@ -86,10 +86,10 @@
                                         </a></li>
 
                                         <li><a href="{{ url('unitecms_core_content_addtranslation', {
-                                                'organization': unite.domain.organization.identifier,
-                                                'domain': unite.domain.identifier,
-                                                'content_type': contentType.identifier,
-                                                'view': view.identifier,
+                                                'organization': unite.domain.organization.identifier|replace({'_':'-'}),
+                                                'domain': unite.domain.identifier|replace({'_':'-'}),
+                                                'content_type': contentType.identifier|replace({'_':'-'}),
+                                                'view': view.identifier|replace({'_':'-'}),
                                                 'content': content.id,
                                                 'locale': locale
                                             }) }}">

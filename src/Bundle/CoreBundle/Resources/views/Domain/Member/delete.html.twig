@@ -5,9 +5,9 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <a class="back-button" href="{{ url('unitecms_core_domainmember_index', {
-            organization: unite.organization.identifier,
-            domain: unite.domain.identifier,
-            member_type: memberType.identifier
+            organization: unite.organization.identifier|replace({'_':'-'}),
+            domain: unite.domain.identifier|replace({'_':'-'}),
+            member_type: memberType.identifier|replace({'_':'-'})
         }) }}">
             <i data-feather="arrow-left"></i>
         </a>
@@ -25,9 +25,9 @@
     {{ form_start(form) }}
     <p class="uk-text-center">
         <a class="uk-button" style="background: white; margin: 10px;" href="{{ url('unitecms_core_domainmember_index', {
-            organization: unite.organization.identifier,
-            domain: unite.domain.identifier,
-            member_type: memberType.identifier
+            organization: unite.organization.identifier|replace({'_':'-'}),
+            domain: unite.domain.identifier|replace({'_':'-'}),
+            member_type: memberType.identifier|replace({'_':'-'})
         }) }}">{% trans %}domain.member.delete.cancel{% endtrans %}</a>
         {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
     </p>

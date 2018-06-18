@@ -13,8 +13,9 @@
             {% for type in types %}
                 <li><i data-feather="chevron-right" style="margin-top: -3px;"></i> {{ type }}
 
-                    {% set left_fields = original_types[type.identifier].fieldTypesDiff(type, true) %}
-                    {% set right_fields = type.fieldTypesDiff(original_types[type.identifier], true) %}
+
+                    {% set left_fields = original_types[type.identifier] is defined ? original_types[type.identifier].fieldTypesDiff(type, true) : [] %}
+                    {% set right_fields = original_types[type.identifier] is defined ? type.fieldTypesDiff(original_types[type.identifier], true) : type.fields %}
 
                     <ul class="uk-margin-left uk-list uk-text-small">
                         {% for field in right_fields %}

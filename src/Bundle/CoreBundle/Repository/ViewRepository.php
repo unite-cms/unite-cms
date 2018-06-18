@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 /**
  * ViewRepository
@@ -22,10 +23,10 @@ class ViewRepository extends EntityRepository
             ->andWhere('v.identifier = :view')
             ->setParameters(
                 [
-                    'organization' => $organization,
-                    'domain' => $domain,
-                    'contentType' => $contentType,
-                    'view' => $view,
+                    'organization' => IdentifierNormalizer::normalize($organization),
+                    'domain' => IdentifierNormalizer::normalize($domain),
+                    'contentType' => IdentifierNormalizer::normalize($contentType),
+                    'view' => IdentifierNormalizer::normalize($view),
                 ]
             )
             ->getQuery()->getResult();

@@ -18,8 +18,8 @@
 
         <header class="uk-card-header uk-flex">
             <a class="back-button" href="{{ url('unitecms_core_domain_view', {
-                organization: unite.organization.identifier,
-                domain: unite.domain.identifier
+                organization: unite.organization.identifier|replace({'_':'-'}),
+                domain: unite.domain.identifier|replace({'_':'-'})
             }) }}">
                 <i data-feather="arrow-left"></i>
             </a>

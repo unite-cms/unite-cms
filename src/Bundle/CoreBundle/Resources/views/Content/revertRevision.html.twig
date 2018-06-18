@@ -5,10 +5,10 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <a class="back-button" href="{{ url('unitecms_core_content_revisions', {
-            domain: unite.domain.identifier,
-            organization: unite.organization.identifier,
-            content_type: contentType.identifier,
-            view: view.identifier,
+            domain: unite.domain.identifier|replace({'_':'-'}),
+            organization: unite.organization.identifier|replace({'_':'-'}),
+            content_type: contentType.identifier|replace({'_':'-'}),
+            view: view.identifier|replace({'_':'-'}),
             content: content.id
         }) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with { "%content%": content|escape, "%version%": version } %}content.revisions.revert.headline{% endtrans %}</h2>

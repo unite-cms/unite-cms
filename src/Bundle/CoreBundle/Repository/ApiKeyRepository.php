@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 /**
  * ApiKeyRepository
@@ -19,7 +20,7 @@ class ApiKeyRepository extends EntityRepository
             ->setParameters(
                 [
                     'token' => $token,
-                    'organization' => $organization,
+                    'organization' => IdentifierNormalizer::normalize($organization),
                 ]
             )
             ->getQuery()->getResult();
