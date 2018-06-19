@@ -49,7 +49,8 @@
         "unite-cms/collection-field-bundle": "0@dev",
         "unite-cms/registration-bundle": "0@dev",
         "unite-cms/storage-bundle": "0@dev",
-        "unite-cms/wysiwyg-field-bundle": "0@dev"
+        "unite-cms/wysiwyg-field-bundle": "0@dev",
+        "doctrine/data-fixtures": "^1.3"
     },
     "require-dev": {
         "symfony/thanks": "^1.0",
