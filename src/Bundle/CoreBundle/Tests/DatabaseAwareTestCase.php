@@ -17,25 +17,31 @@ abstract class DatabaseAwareTestCase extends ContainerAwareTestCase
     public function setUp()
     {
         parent::setUp();
+
         $this->em = static::$container->get('doctrine')->getManager();
+
+        $schema_manager = $this->em->getConnection()->getSchemaManager();
+
+        # create schema only if database is empty
+        if (!$schema_manager->tablesExist('content')) {
+            $schemaTool = new SchemaTool($this->em);
+            $metadata = $this->em->getMetadataFactory()->getAllMetadata();
+            $schemaTool->createSchema($metadata);
+        }
 
         $this->purgeDatabase();
 
-        #$schemaTool = new SchemaTool($this->em);
-        #$metadata = $this->em->getMetadataFactory()->getAllMetadata();
-        #$schemaTool->dropSchema($metadata);
-        #$schemaTool->createSchema($metadata);
     }
 
     public function tearDown()
     {
-
-        $this->purgeDatabase();
+        #$this->purgeDatabase();
         #$schemaTool = new SchemaTool($this->em);
         #$metadata = $this->em->getMetadataFactory()->getAllMetadata();
         #$schemaTool->dropSchema($metadata);
+        ##$this->purgeDatabase();
         #$this->em->getConnection()->close();
-        #parent::tearDown();
+        parent::tearDown();
         #$this->em = null;
     }
 
@@ -43,5 +49,12 @@ abstract class DatabaseAwareTestCase extends ContainerAwareTestCase
     {
         $purger = new ORMPurger($this->em);
         $purger->purge();
+    }
+
+    public function recreateSchema() {
+        $schemaTool = new SchemaTool($this->em);
+        $metadata = $this->em->getMetadataFactory()->getAllMetadata();
+        $schemaTool->dropSchema($metadata);
+        $schemaTool->createSchema($metadata);
     }
 }
