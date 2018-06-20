@@ -1,23 +1,23 @@
 <?php
 
-if (isset($_ENV['BOOTSTRAP_CLEAR_CACHE_ENV'])) {
+if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] == "test") {
 
     passthru(sprintf(
-      'php "%s/../bin/console" doctrine:schema:drop --force',
+      'php "%s/../bin/console" doctrine:schema:drop --force --quiet',
       __DIR__,
-      $_ENV['BOOTSTRAP_CLEAR_CACHE_ENV']
+      $_ENV['APP_ENV']
     ));
 
     passthru(sprintf(
-      'php "%s/../bin/console" doctrine:schema:update --force',
+      'php "%s/../bin/console" doctrine:schema:update --force --quiet',
       __DIR__,
-      $_ENV['BOOTSTRAP_CLEAR_CACHE_ENV']
+      $_ENV['APP_ENV']
     ));
 
     passthru(sprintf(
-      'php "%s/../bin/console" cache:clear --env=%s --no-warmup',
+      'php "%s/../bin/console" cache:clear --env=%s --no-warmup --quiet',
       __DIR__,
-      $_ENV['BOOTSTRAP_CLEAR_CACHE_ENV']
+      $_ENV['APP_ENV']
     ));
 
 }

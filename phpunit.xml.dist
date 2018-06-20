@@ -25,10 +25,6 @@
         <env name="MAILER_SENDER" value="unite@unite.co.at"/>
     </php>
 
-    <php>
-        <env name="BOOTSTRAP_CLEAR_CACHE_ENV" value="test" />
-    </php>
-
     <testsuites>
         <testsuite name="unite cms test cases">
             <directory>./src/Bundle/*/Tests/</directory>

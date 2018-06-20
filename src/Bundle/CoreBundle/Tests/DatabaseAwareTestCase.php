@@ -14,7 +14,7 @@ abstract class DatabaseAwareTestCase extends ContainerAwareTestCase
      */
     protected $em;
 
-    protected $testStrategy = "purge";
+    protected $databaseStrategy = "STRATEGY_PURGE";
 
     public function setUp()
     {
@@ -22,7 +22,7 @@ abstract class DatabaseAwareTestCase extends ContainerAwareTestCase
 
         $this->em = static::$container->get('doctrine')->getManager();
 
-        if ($this->testStrategy == "recreate") {
+        if ($this->databaseStrategy == "STRATEGY_RECREATE") {
             $schemaTool = new SchemaTool($this->em);
             $metadata = $this->em->getMetadataFactory()->getAllMetadata();
             $schemaTool->dropSchema($metadata);
@@ -35,7 +35,7 @@ abstract class DatabaseAwareTestCase extends ContainerAwareTestCase
 
     public function tearDown()
     {
-        if ($this->testStrategy == "recreate") {
+        if ($this->databaseStrategy == "STRATEGY_RECREATE") {
             $this->purgeDatabase();
             $this->em->getConnection()->close();
         }
