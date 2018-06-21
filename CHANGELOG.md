@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.3 (2018-06-21)
+
+- Fixed: #135 API field with underscore resolve error
+- Fixed: #134 API Error if no content types but setting types are defined
+- Improved: #118: Improve test performance
+
 ## 0.5.2 (2018-06-15)
 
 - Fixed: Use hyphens for identifiers only in url and underscores for all internal identifier
