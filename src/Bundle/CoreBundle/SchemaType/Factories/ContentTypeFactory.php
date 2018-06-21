@@ -194,20 +194,12 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                 return $value->getDeleted() ? $value->getDeleted()->getTimestamp() : null;
                             default:
 
-                                if (!array_key_exists($info->fieldName, $fieldTypes)) {
+                                if(!array_key_exists($info->fieldName, $fieldTypes)) {
                                     return null;
                                 }
 
-                                $normalizedFieldName = str_replace('_', '-', $info->fieldName);
-
-                                $fieldData = array_key_exists(
-                                    $normalizedFieldName,
-                                    $value->getData()
-                                ) ? $value->getData()[$normalizedFieldName] : null;
-
-                                $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($contentType->getFields()->get($normalizedFieldName), $fieldData);
-
-                                return $data;
+                                $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData()[$info->fieldName] : null;
+                                return $fieldTypes[$info->fieldName]->resolveGraphQLData($contentType->getFields()->get($info->fieldName), $fieldData);
                         }
                     },
                     'interfaces' => [$schemaTypeManager->getSchemaType('ContentInterface')],
