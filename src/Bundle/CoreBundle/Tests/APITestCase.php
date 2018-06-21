@@ -2,9 +2,13 @@
 
 namespace UniteCMS\CoreBundle\Tests;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\ObjectRepository;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Repository\RepositoryFactory;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,10 +18,10 @@ use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
-use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Field\Types\ReferenceFieldType;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
@@ -52,7 +56,27 @@ class MockedObjectRepository implements ObjectRepository {
      */
     public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
     {
-        return [];
+        // We mock all findBy calls here, that we need.
+        $result = [];
+
+        if(array_keys($criteria) == ['identifier']) {
+            foreach ($this->objects as $key => $object) {
+
+                if(!is_array($criteria['identifier'])) {
+                    $criteria['identifier'] = [$criteria['identifier']];
+                }
+
+                if(in_array($object->getIdentifier(), $criteria['identifier'])) {
+                    $result[$key] = $object;
+                }
+            }
+        } else {
+            dump("findBy");
+            dump($this->getClassName());
+            dump(array_keys($criteria));
+        }
+
+        return $result;
     }
 
     /**
@@ -60,7 +84,71 @@ class MockedObjectRepository implements ObjectRepository {
      */
     public function findOneBy(array $criteria)
     {
+        // We mock all findOneBy calls here, that we need.
+        if(array_keys($criteria) == ['domain', 'identifier']) {
+            foreach($this->objects as $object) {
+                if($object->getDomain()->getId() == $criteria['domain']->getId() && $object->getIdentifier() == $criteria['identifier']) {
+                    return $object;
+                }
+            }
+        }
+
+        if(array_key_exists('id', $criteria)) {
+            return $this->find($criteria['id']);
+        }
+
         return null;
+    }
+
+    public function createQueryBuilder($alias, $indexBy = null) {
+
+        $objects = $this->objects;
+
+        $mockedQueryBuilder = new class extends QueryBuilder {
+            public $objects;
+            public $contentTypeIdentifiers = [];
+
+            public function __construct() {}
+            public function setParameter($key, $value, $type = null) {
+
+                if($key === ':contentTypes') {
+
+                    if(!is_array($value)) {
+                        $value = [$value];
+                    }
+
+                    foreach($value as $type) {
+                        if($type instanceof ContentType) {
+                            $this->contentTypeIdentifiers[] = $type->getIdentifier();
+                        } else {
+                            $this->contentTypeIdentifiers[] = $type;
+                        }
+                    }
+                }
+
+                return $this;
+            }
+            public function getQuery()
+            {
+                $objects = [];
+
+                if(empty($this->contentTypeIdentifiers)) {
+                   $objects = $this->objects;
+                } else {
+                    foreach($this->objects as $object) {
+                        if(in_array($object->getContentType()->getIdentifier(), $this->contentTypeIdentifiers)) {
+                            $objects[] = $object;
+                        }
+                    }
+                }
+
+                // For the moment, just return all objects here.
+                return new ArrayCollection($objects);
+            }
+        };
+        $mockedQueryBuilder->objects = $objects;
+
+        return $mockedQueryBuilder;
     }
 
     /**
@@ -95,6 +183,18 @@ class MockedRepositoryFactory implements RepositoryFactory {
         if(!isset($this->repositories[$entityName])) {
             $this->repositories[$entityName] = new MockedObjectRepository($entityName);
         }
+
+        if(empty($object->getId())) {
+            try {
+                $reflector = new \ReflectionProperty(get_class($object), 'id');
+                $reflector->setAccessible(true);
+                $reflector->setValue($object, count($this->repositories[$entityName]->objects) + 1);
+            } catch (\ReflectionException $e) {
+                throw new \InvalidArgumentException('We can only handle objects with an id property');
+            }
+
+        }
+
         $this->repositories[$entityName]->objects[$object->getId()] = $object;
     }
 
@@ -148,7 +248,7 @@ abstract class APITestCase extends ContainerAwareTestCase
     private $controller;
 
     /**
-     * @var
+     * @var MockedRepositoryFactory $repositoryFactory
      */
     protected $repositoryFactory;
 
@@ -159,25 +259,28 @@ abstract class APITestCase extends ContainerAwareTestCase
 
         // Mock database repository factory.
         $this->repositoryFactory = new MockedRepositoryFactory();
-        $repoFactory = $this->repositoryFactory;
 
         // Use our mocked repositoryFactory that just returns the objects from memory.
+        $em = static::$container->get('doctrine.orm.entity_manager');
         $reflector = new \ReflectionProperty(EntityManager::class, 'repositoryFactory');
         $reflector->setAccessible(true);
-        $reflector->setValue(static::$container->get('doctrine.orm.entity_manager'), $this->repositoryFactory);
+        $reflector->setValue($em, $this->repositoryFactory);
+
+        // We also need to set this to the reference field type. Not 100% sure, why the field type is not getting our overridden doctrine.orm.entity_manager instance.
+        $reflector = new \ReflectionProperty(ReferenceFieldType::class, 'entityManager');
+        $reflector->setAccessible(true);
+        $reflector->setValue(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference'), $em);
+
+
 
         $this->organization = new Organization();
-        $this->organization->setTitle('Org')->setIdentifier('org')->setId(1);
+        $this->organization->setTitle('Org')->setIdentifier('org');
         $this->repositoryFactory->add($this->organization);
 
         // Parse all domains configurations and create domain objects.
-        $cnt = 0;
         foreach($this->domainConfig as $identifier => $config) {
-            $cnt++;
-
             $this->domains[$identifier] = static::$container->get('unite.cms.domain_definition_parser')->parse($config);
             $this->domains[$identifier]->setIdentifier($identifier);
-            $this->domains[$identifier]->setId($cnt);
 
             $this->repositoryFactory->add($this->domains[$identifier]);
 
@@ -186,43 +289,37 @@ abstract class APITestCase extends ContainerAwareTestCase
             }
             $this->organization->addDomain($this->domains[$identifier]);
 
-            $this->domains[$identifier]->getContentTypes()->forAll(function( $key, ContentType $type ) use ($cnt, $repoFactory) {
-                $type->setId($cnt);
-                $repoFactory->add($type);
-            });
-            $this->domains[$identifier]->getSettingTypes()->forAll(function( $key, SettingType $type ) use ($cnt, $repoFactory) {
-                $type->setId($cnt);
-                $repoFactory->add($type);
-            });
-            $this->domains[$identifier]->getDomainMemberTypes()->forAll(function( $key, DomainMemberType $type ) use ($cnt, $repoFactory) {
-                $type->setId($cnt);
-                $repoFactory->add($type);
-            });
+            foreach($this->domains[$identifier]->getContentTypes() as $type) { $this->repositoryFactory->add($type); }
+            foreach($this->domains[$identifier]->getSettingTypes() as $type) { $this->repositoryFactory->add($type); }
+            foreach($this->domains[$identifier]->getDomainMemberTypes() as $type) { $this->repositoryFactory->add($type); }
 
             // Create users & api keys
-            $cnt1 = 0;
             foreach($this->domains[$identifier]->getDomainMemberTypes() as $domainMemberType) {
-                $cnt1++;
+
+                $orgMember = new OrganizationMember();
+                $orgMember->setOrganization($this->organization);
 
                 $user = new User();
                 $user
+                    ->addOrganization($orgMember)
                     ->setName($domainMemberType->getIdentifier())
                     ->setEmail($domainMemberType->getIdentifier().'@test.com')
                     ->setPassword('password');
 
                 $userMember = new DomainMember();
-                $userMember->setId($cnt1);
-                $userMember->setDomainMemberType($domainMemberType)->setAccessor($user);
+                $userMember->setDomainMemberType($domainMemberType)->setAccessor($user)->setDomain($this->domains[$identifier]);
+                $user->addDomain($userMember);
                 $this->domains[$identifier]->addMember($userMember);
 
                 $apiKey = new ApiKey();
                 $apiKey
+                    ->setOrganization($this->organization)
                     ->setName($domainMemberType->getIdentifier())
                     ->setToken('token');
 
                 $apiKeyMember = new DomainMember();
-                $apiKeyMember->setId($cnt1);
-                $apiKeyMember->setDomainMemberType($domainMemberType)->setAccessor($apiKey);
+                $apiKeyMember->setDomainMemberType($domainMemberType)->setAccessor($apiKey)->setDomain($this->domains[$identifier]);
+                $apiKey->addDomain($apiKeyMember);
                 $this->domains[$identifier]->addMember($apiKeyMember);
             }
         }
