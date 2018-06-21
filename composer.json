@@ -25,23 +25,38 @@
     "repositories": [
         {
             "type": "path",
-            "url": "./src/Bundle/CoreBundle"
+            "url": "./src/Bundle/CoreBundle",
+            "options": {
+                "symlink": true
+            }
         },
         {
             "type": "path",
-            "url": "./src/Bundle/CollectionFieldBundle"
+            "url": "./src/Bundle/CollectionFieldBundle",
+            "options": {
+                "symlink": true
+            }
         },
         {
             "type": "path",
-            "url": "./src/Bundle/RegistrationBundle"
+            "url": "./src/Bundle/RegistrationBundle",
+            "options": {
+                "symlink": true
+            }
         },
         {
             "type": "path",
-            "url": "./src/Bundle/StorageBundle"
+            "url": "./src/Bundle/StorageBundle",
+            "options": {
+                "symlink": true
+            }
         },
         {
             "type": "path",
-            "url": "./src/Bundle/WysiwygFieldBundle"
+            "url": "./src/Bundle/WysiwygFieldBundle",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "require": {
@@ -49,10 +64,10 @@
         "unite-cms/collection-field-bundle": "0@dev",
         "unite-cms/registration-bundle": "0@dev",
         "unite-cms/storage-bundle": "0@dev",
-        "unite-cms/wysiwyg-field-bundle": "0@dev",
-        "doctrine/data-fixtures": "^1.3"
+        "unite-cms/wysiwyg-field-bundle": "0@dev"
     },
     "require-dev": {
+        "doctrine/data-fixtures": "^1.3",
         "symfony/thanks": "^1.0",
         "symfony/browser-kit": "^4.0"
     },

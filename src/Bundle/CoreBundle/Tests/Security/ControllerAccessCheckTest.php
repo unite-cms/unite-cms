@@ -85,7 +85,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     ]
   }';
 
-    protected $databaseStrategy = "STRATEGY_RECREATE";
+    protected $databaseStrategy = DatabaseAwareTestCase::STRATEGY_RECREATE;
 
     public function setUp()
     {
