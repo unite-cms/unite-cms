@@ -148,13 +148,8 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                                 return null;
                             }
 
-                            $normalizedFieldName = str_replace('_', '-', $info->fieldName);
-
-                            $fieldData = array_key_exists($normalizedFieldName, $value->getData()) ? $value->getData(
-                            )[$normalizedFieldName] : null;
-                            $data = $fieldTypes[$info->fieldName]->resolveGraphQLData($settingType->getFields()->get($normalizedFieldName), $fieldData);
-
-                            return $data;
+                            $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData()[$info->fieldName] : null;
+                            return $fieldTypes[$info->fieldName]->resolveGraphQLData($settingType->getFields()->get($info->fieldName), $fieldData);
                     }
                 },
                 'interfaces' => [$schemaTypeManager->getSchemaType('SettingInterface')],
