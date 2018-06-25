@@ -39,7 +39,7 @@ class DomainController extends Controller
         $domains = $organization->getDomains();
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain:index.html.twig',
+            '@UniteCMSCore/Domain/index.html.twig',
             ['organization' => $organization, 'domains' => $domains]
         );
     }
@@ -106,7 +106,7 @@ class DomainController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain:create.html.twig',
+            '@UniteCMSCore/Domain/create.html.twig',
             ['organization' => $organization, 'form' => $form->createView()]
         );
     }
@@ -128,7 +128,7 @@ class DomainController extends Controller
         $settingTypes = $domain->getSettingTypes();
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain:view.html.twig',
+            '@UniteCMSCore/Domain/view.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -234,7 +234,7 @@ class DomainController extends Controller
             }
         }
 
-        return $this->render('UniteCMSCoreBundle:Domain:update.html.twig', [
+        return $this->render('@UniteCMSCore/Domain/update.html.twig', [
             'form' => $formView,
             'originalDomain' => $originalDomain,
             'updatedDomain' => $updatedDomain
@@ -288,7 +288,7 @@ class DomainController extends Controller
         $deletedDomain->setDomainMemberTypes([]);
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain:delete.html.twig',
+            '@UniteCMSCore/Domain/delete.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,

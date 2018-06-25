@@ -38,7 +38,7 @@ class OrganizationUserController extends Controller
         $invites = $this->get('knp_paginator')->paginate($organization->getInvites());
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/User:index.html.twig',
+            '@UniteCMSCore/Organization/User/index.html.twig',
             [
                 'organization' => $organization,
                 'users' => $users,
@@ -101,7 +101,7 @@ class OrganizationUserController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/User:update.html.twig',
+            '@UniteCMSCore/Organization/User/update.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),
@@ -160,7 +160,7 @@ class OrganizationUserController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/User:delete.html.twig',
+            '@UniteCMSCore/Organization/User/delete.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),
@@ -236,7 +236,7 @@ class OrganizationUserController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/User:create_invite.html.twig',
+            '@UniteCMSCore/Organization/User/create_invite.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),
@@ -276,7 +276,7 @@ class OrganizationUserController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/User:delete_invite.html.twig',
+            '@UniteCMSCore/Organization/User/delete_invite.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),
