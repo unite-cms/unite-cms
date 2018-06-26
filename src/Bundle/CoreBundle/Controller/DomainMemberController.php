@@ -49,7 +49,7 @@ class DomainMemberController extends Controller
         $invites = $this->get('knp_paginator')->paginate($memberType->getInvites());
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:index.html.twig',
+            '@UniteCMSCore/Domain/Member/index.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -238,7 +238,7 @@ class DomainMemberController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:create.html.twig',
+            '@UniteCMSCore/Domain/Member/create.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -304,7 +304,7 @@ class DomainMemberController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:update.html.twig',
+            '@UniteCMSCore/Domain/Member/update.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -356,7 +356,7 @@ class DomainMemberController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:delete.html.twig',
+            '@UniteCMSCore/Domain/Member/delete.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -414,7 +414,7 @@ class DomainMemberController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:delete_invite.html.twig',
+            '@UniteCMSCore/Domain/Member/delete_invite.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,

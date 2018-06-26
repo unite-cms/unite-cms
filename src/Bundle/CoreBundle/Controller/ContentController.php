@@ -35,7 +35,7 @@ class ContentController extends Controller
     public function indexAction(View $view)
     {
         return $this->render(
-            'UniteCMSCoreBundle:Content:index.html.twig',
+            '@UniteCMSCore/Content/index.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -126,7 +126,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:create.html.twig',
+            '@UniteCMSCore/Content/create.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -197,7 +197,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:update.html.twig',
+            '@UniteCMSCore/Content/update.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -263,7 +263,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:delete.html.twig',
+            '@UniteCMSCore/Content/delete.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -357,7 +357,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:deleteDefinitely.html.twig',
+            '@UniteCMSCore/Content/deleteDefinitely.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -600,7 +600,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:addTranslation.html.twig',
+            '@UniteCMSCore/Content/addTranslation.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -671,7 +671,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:removeTranslation.html.twig',
+            '@UniteCMSCore/Content/removeTranslation.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
