@@ -24,11 +24,10 @@ services:
   - mysql
 
 before_install:
-  - sudo apt-get wget
   - composer self-update
   - mysql -e 'CREATE DATABASE unite_test;'
   - cp .env.dist .env
-  - wget https://phar.phpunit.de/phpunit-7.1.0.phar
+  - curl -O https://phar.phpunit.de/phpunit-7.1.0.phar
 
 install:
   - composer install
