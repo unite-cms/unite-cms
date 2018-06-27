@@ -12,7 +12,6 @@ matrix:
         - php: 7.2
           env: ROUTING_APPROACH=parameter
         - php: 7.2
-          if: branch = master
           env: coverage=true
 
     fast_finish: true
