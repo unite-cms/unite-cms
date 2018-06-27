@@ -12,57 +12,30 @@ class WysiwygFieldType extends FieldType
 {
     const TYPE                      = "wysiwyg";
     const FORM_TYPE                 = WysiwygType::class;
-    const SETTINGS                  = ['toolbar', 'theme', 'placeholder'];
-    const REQUIRED_SETTINGS         = ['toolbar'];
-
-    const ALLOWED_THEMES            = ['snow', 'bubble'];
-    const ALLOWED_TOOLBAR_OPTIONS   = [
-        'bold', 'italic', 'underline', 'strike',
-        'blockquote', 'clean', 'link',
-        ['header' => 1], ['header' => 2], ['header' => 3], ['header' => 4], ['header' => 5], ['header' => 6],
-        ['list' => 'ordered'], ['list' => 'bullet'], ['list' => 'checked'],
-        ['indent' => '-1'], ['indent' => '+1'],
-        ['script' => 'sub'], ['script' => 'super'],
-        ['direction' => 'rtl'],
-    ];
-
+    const SETTINGS                  = ['toolbar', 'heading', 'placeholder'];
+    const REQUIRED_SETTINGS         = [];
+    const ALLOWED_TOOLBAR           = ['|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'];
+    const ALLOWED_HEADING           = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code'];
+    const DEFAULT_TOOLBAR           = ['bold', 'italic', 'link'];
+    const DEFAULT_HEADING           = ['p', 'h1', 'h2'];
 
     /**
      * {@inheritdoc}
      */
     function getFormOptions(FieldableField $field): array
     {
-        $theme = $field->getSettings()->theme ?? 'snow';
-        $placeholder = $field->getSettings()->placeholder ?? '';
-
         return array_merge(
             parent::getFormOptions($field),
             [
                 'attr' => [
                     'data-options' => json_encode([
-                        'theme' => $theme,
-                        'placeholder' => $placeholder,
-                        'modules' => [
-                            'toolbar' => $field->getSettings()->toolbar,
-                        ],
+                        'placeholder' => $field->getSettings()->placeholder ?? '',
+                        'toolbar' => $field->getSettings()->toolbar ?? static::DEFAULT_TOOLBAR,
+                        'heading' => $field->getSettings()->heading ?? Static::DEFAULT_HEADING,
                     ]),
                 ],
             ]
         );
-    }
-
-    protected function getOptionPath($option) {
-        $path = 'toolbar';
-
-        if(is_string($option)) {
-            $path .= '.'.$option;
-        }
-
-        elseif(is_array($option) && !empty($option)) {
-            $path .= '.'.array_keys($option)[0].':'.array_values($option)[0];
-        }
-
-        return $path;
     }
 
     /**
@@ -78,39 +51,33 @@ class WysiwygFieldType extends FieldType
             return;
         }
 
-        // Check allowed theme.
-        if(!empty($settings->theme)) {
-            if(!in_array($settings->theme, self::ALLOWED_THEMES)) {
-                $context->buildViolation('wysiwygfield.unknown_theme')->atPath('theme')->addViolation();
+        // Validate toolbar options
+        if(!empty($settings->toolbar)) {
+            if (!is_array($settings->toolbar)) {
+                $context->buildViolation('wysiwygfield.not_an_array')->atPath('toolbar')->addViolation();
+            }
+            if ($context->getViolations()->count() == 0) {
+                foreach ($settings->toolbar as $option) {
+                    if (!in_array($option, self::ALLOWED_TOOLBAR)) {
+                        $context->buildViolation('wysiwygfield.unknown_option')->atPath(
+                            $this->getOptionPath('toolbar'.$option)
+                        )->addViolation();
+                    }
+                }
             }
         }
 
-        // Check available toolbar options.
-        if(empty($settings->toolbar)) {
-            $context->buildViolation('not_blank')->atPath('toolbar')->addViolation();
-        }
-
-        if(!is_array($settings->toolbar)) {
-            $context->buildViolation('wysiwygfield.invalid_toolbar_definition')->atPath('toolbar')->addViolation();
-        }
-
-        // Validate toolbar options
-        if($context->getViolations()->count() == 0) {
-            foreach ($settings->toolbar as $option) {
-
-                // case 1: option is a option group
-                if (is_array($option) && count(array_filter(array_keys($option), 'is_string')) === 0) {
-                    foreach ($option as $child) {
-                        if (!in_array($child, self::ALLOWED_TOOLBAR_OPTIONS)) {
-                            $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($this->getOptionPath($child))->addViolation();
-                        }
-                    }
-                }
-
-                // case 2: option is a string or object option
-                else {
-                    if (!in_array($option, self::ALLOWED_TOOLBAR_OPTIONS)) {
-                        $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($this->getOptionPath($option))->addViolation();
+        // Validate heading options
+        if(!empty($settings->heading)) {
+            if (!is_array($settings->heading)) {
+                $context->buildViolation('wysiwygfield.not_an_array')->atPath('heading')->addViolation();
+            }
+            if ($context->getViolations()->count() == 0) {
+                foreach ($settings->heading as $option) {
+                    if (!in_array($option, self::ALLOWED_HEADING)) {
+                        $context->buildViolation('wysiwygfield.unknown_option')->atPath(
+                            $this->getOptionPath('heading'.$option)
+                        )->addViolation();
                     }
                 }
             }
