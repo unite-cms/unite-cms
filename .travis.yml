@@ -33,6 +33,9 @@ install:
   - composer install
 
 before_script:
+  - ulimit -a
+  - ulimit -n 500000
+  - ulimit -a
   - bash .travis.install-mysql-5.7.sh
   - |
     if [[ $coverage ]]; then
@@ -45,7 +48,6 @@ before_script:
 script:
   - |
     if [[ $coverage ]]; then
-      ulimit -n 10000
       phpdbg -qrr phpunit-7.1.0.phar --coverage-clover clover.xml
     else
       phpunit
