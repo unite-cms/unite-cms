@@ -18,7 +18,7 @@ class WysiwygFieldType extends FieldType
     const ALLOWED_THEMES            = ['snow', 'bubble'];
     const ALLOWED_TOOLBAR_OPTIONS   = [
         'bold', 'italic', 'underline', 'strike',
-        'blockquote', 'clean', 'link',
+        'blockquote', 'clean', 'link', 'code-block',
         ['header' => 1], ['header' => 2], ['header' => 3], ['header' => 4], ['header' => 5], ['header' => 6],
         ['list' => 'ordered'], ['list' => 'bullet'], ['list' => 'checked'],
         ['indent' => '-1'], ['indent' => '+1'],
