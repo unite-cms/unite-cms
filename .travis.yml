@@ -7,10 +7,10 @@ os: linux
 
 matrix:
     include:
-        - php: 7.1
-        - php: 7.2
-        - php: 7.2
-          env: ROUTING_APPROACH=parameter
+        #- php: 7.1
+        #- php: 7.2
+        #- php: 7.2
+        #  env: ROUTING_APPROACH=parameter
         - php: 7.2
           env: coverage=true
 
@@ -24,9 +24,11 @@ services:
   - mysql
 
 before_install:
+  - sudo apt-get wget
   - composer self-update
   - mysql -e 'CREATE DATABASE unite_test;'
   - cp .env.dist .env
+  - wget https://phar.phpunit.de/phpunit-7.1.0.phar
 
 install:
   - composer install
@@ -44,7 +46,8 @@ before_script:
 script:
   - |
     if [[ $coverage ]]; then
-      phpdbg -qrr phpunit --coverage-clover clover.xml
+      ulimit -n 10000
+      phpdbg -qrr phpunit-7.1.0.phar --coverage-clover clover.xml
     else
       phpunit
     fi
