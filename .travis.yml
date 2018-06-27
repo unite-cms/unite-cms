@@ -36,6 +36,7 @@ before_script:
   - bash .travis.install-mysql-5.7.sh
   - |
     if [[ $coverage ]]; then
+      phpenv config-rm xdebug.ini
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
       chmod +x ./cc-test-reporter
       ./cc-test-reporter before-build
@@ -44,7 +45,7 @@ before_script:
 script:
   - |
     if [[ $coverage ]]; then
-      phpunit --coverage-clover clover.xml
+      phpdbg -qrr phpunit --coverage-clover clover.xml
     else
       phpunit
     fi
