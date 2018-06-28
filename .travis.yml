@@ -7,12 +7,11 @@ os: linux
 
 matrix:
     include:
-        - php: 7.1
+        #- php: 7.1
+        #- php: 7.2
+        #- php: 7.2
+        #  env: ROUTING_APPROACH=parameter
         - php: 7.2
-        - php: 7.2
-          env: ROUTING_APPROACH=parameter
-        - php: 7.2
-          if: branch = master
           env: coverage=true
 
     fast_finish: true
@@ -28,14 +27,19 @@ before_install:
   - composer self-update
   - mysql -e 'CREATE DATABASE unite_test;'
   - cp .env.dist .env
+  - curl -O https://phar.phpunit.de/phpunit-7.1.0.phar
 
 install:
   - composer install
 
 before_script:
+  - sudo ulimit -a
+  - sudo ulimit -n 500000
+  - sudo ulimit -a
   - bash .travis.install-mysql-5.7.sh
   - |
     if [[ $coverage ]]; then
+      phpenv config-rm xdebug.ini
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
       chmod +x ./cc-test-reporter
       ./cc-test-reporter before-build
@@ -44,7 +48,7 @@ before_script:
 script:
   - |
     if [[ $coverage ]]; then
-      phpunit --coverage-clover clover.xml
+      phpdbg -qrr phpunit-7.1.0.phar --coverage-clover clover.xml
     else
       phpunit
     fi
