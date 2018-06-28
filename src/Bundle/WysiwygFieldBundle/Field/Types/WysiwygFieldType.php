@@ -58,10 +58,13 @@ class WysiwygFieldType extends FieldType
             }
             if ($context->getViolations()->count() == 0) {
                 foreach ($settings->toolbar as $option) {
-                    if (!in_array($option, self::ALLOWED_TOOLBAR)) {
-                        $context->buildViolation('wysiwygfield.unknown_option')->atPath(
-                            $this->getOptionPath('toolbar'.$option)
-                        )->addViolation();
+
+                    if(!is_string($option)) {
+                        $context->buildViolation('wysiwygfield.not_an_array')->atPath('toolbar')->addViolation();
+                    }
+
+                    else if (!in_array($option, self::ALLOWED_TOOLBAR)) {
+                        $context->buildViolation('wysiwygfield.unknown_option')->atPath('toolbar.'.$option)->addViolation();
                     }
                 }
             }
@@ -74,10 +77,13 @@ class WysiwygFieldType extends FieldType
             }
             if ($context->getViolations()->count() == 0) {
                 foreach ($settings->heading as $option) {
-                    if (!in_array($option, self::ALLOWED_HEADING)) {
-                        $context->buildViolation('wysiwygfield.unknown_option')->atPath(
-                            $this->getOptionPath('heading'.$option)
-                        )->addViolation();
+
+                    if(!is_string($option)) {
+                        $context->buildViolation('wysiwygfield.not_an_array')->atPath('heading')->addViolation();
+                    }
+
+                    else if (!in_array($option, self::ALLOWED_HEADING)) {
+                        $context->buildViolation('wysiwygfield.unknown_option')->atPath('heading.'.$option)->addViolation();
                     }
                 }
             }
