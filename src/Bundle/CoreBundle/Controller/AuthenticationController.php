@@ -29,7 +29,7 @@ class AuthenticationController extends Controller
         $lastUsername = $this->get('security.authentication_utils')->getLastUsername();
 
         return $this->render(
-            'UniteCMSCoreBundle:Authentication:login.html.twig',
+            '@UniteCMSCore/Authentication/login.html.twig',
             array(
                 'last_username' => $lastUsername,
                 'error' => $error,

@@ -143,7 +143,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Profile:update.html.twig', [
+            '@UniteCMSCore/Profile/update.html.twig', [
                 'forms' => array_map(function($form) { return $form->createView(); }, $forms),
             ]
         );
@@ -220,7 +220,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Profile:reset-password.html.twig',
+            '@UniteCMSCore/Profile/reset-password.html.twig',
             array(
                 'form' => $form->createView(),
             )
@@ -297,7 +297,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Profile:reset-password-confirm.html.twig',
+            '@UniteCMSCore/Profile/reset-password-confirm.html.twig',
             array(
                 'userFound' => $userFound,
                 'tokenExpired' => $tokenExpired,
@@ -546,7 +546,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Profile:accept-invitation.html.twig',
+            '@UniteCMSCore/Profile/accept-invitation.html.twig',
             array(
                 'tokenPresent' => $tokenPresent,
                 'tokenFound' => $tokenFound,

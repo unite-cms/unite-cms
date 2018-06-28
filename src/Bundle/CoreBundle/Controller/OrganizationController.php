@@ -55,7 +55,7 @@ class OrganizationController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization:index.html.twig',
+            '@UniteCMSCore/Organization/index.html.twig',
             [
                 'organizations' => $allowedOrganizations,
             ]
@@ -88,7 +88,7 @@ class OrganizationController extends Controller
             return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
         }
 
-        return $this->render('UniteCMSCoreBundle:Organization:create.html.twig', [ 'form' => $form->createView()]);
+        return $this->render('@UniteCMSCore/Organization/create.html.twig', [ 'form' => $form->createView()]);
     }
 
     /**
@@ -116,7 +116,7 @@ class OrganizationController extends Controller
             return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
         }
 
-        return $this->render('UniteCMSCoreBundle:Organization:update.html.twig', [ 'form' => $form->createView(), 'organization' => $organization]);
+        return $this->render('@UniteCMSCore/Organization/update.html.twig', [ 'form' => $form->createView(), 'organization' => $organization]);
     }
 
     /**
@@ -152,6 +152,6 @@ class OrganizationController extends Controller
             }
         }
 
-        return $this->render('UniteCMSCoreBundle:Organization:delete.html.twig', [ 'form' => $form->createView(), 'organization' => $organization]);
+        return $this->render('@UniteCMSCore/Organization/delete.html.twig', [ 'form' => $form->createView(), 'organization' => $organization]);
     }
 }

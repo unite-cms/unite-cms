@@ -85,7 +85,7 @@ class SettingController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Setting:index.html.twig',
+            '@UniteCMSCore/Setting/index.html.twig',
             [
                 'organization' => $settingType->getDomain()->getOrganization(),
                 'domain' => $settingType->getDomain(),

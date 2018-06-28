@@ -31,7 +31,7 @@ class OrganizationApiKeyController extends Controller
         $apiKeys = $this->get('knp_paginator')->paginate($organization->getApiKeys());
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/ApiKey:index.html.twig',
+            '@UniteCMSCore/Organization/ApiKey/index.html.twig',
             [
                 'organization' => $organization,
                 'apiKeys' => $apiKeys,
@@ -79,7 +79,7 @@ class OrganizationApiKeyController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/ApiKey:create.html.twig',
+            '@UniteCMSCore/Organization/ApiKey/create.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),
@@ -125,7 +125,7 @@ class OrganizationApiKeyController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/ApiKey:update.html.twig',
+            '@UniteCMSCore/Organization/ApiKey/update.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),
@@ -170,7 +170,7 @@ class OrganizationApiKeyController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Organization/ApiKey:delete.html.twig',
+            '@UniteCMSCore/Organization/ApiKey/delete.html.twig',
             [
                 'organization' => $organization,
                 'form' => $form->createView(),
