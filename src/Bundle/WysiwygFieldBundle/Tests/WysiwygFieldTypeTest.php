@@ -11,17 +11,16 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
 
     public function testAllowedFieldSettings()
     {
+        // Empty settings are valid.
         $field = $this->createContentTypeField('wysiwyg');
-        $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
+
 
         $field->setSettings(
             new FieldableFieldSettings(
                 [
                     'toolbar' => ['bold'],
-                    'theme' => 'snow',
+                    'heading' => ['p'],
                     'placeholder' => 'foo',
                     'foo' => 'baa',
                 ]
@@ -37,30 +36,21 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
     {
         $field = $this->createContentTypeField('wysiwyg');
 
-        // Empty toolbar is not valid
-        $field->setSettings(
-            new FieldableFieldSettings(['toolbar' => []]));
-        $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
-
         // Toolbar must be an array
         $field->setSettings(
             new FieldableFieldSettings(['toolbar' => 'foo']));
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('wysiwygfield.invalid_toolbar_definition', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('wysiwygfield.not_an_array', $errors->get(0)->getMessageTemplate());
 
-        // Fields can be set as direct toolbar child or in child groups
+        // Fields can be only be set as direct option. There are no groups.
         $field->setSettings(
-            new FieldableFieldSettings(['toolbar' => ['bold']]));
-        $this->assertCount(0, static::$container->get('validator')->validate($field));
-
-        $field->setSettings(
-            new FieldableFieldSettings(['toolbar' => [['bold', 'italic']]]));
-        $this->assertCount(0, static::$container->get('validator')->validate($field));
+            new FieldableFieldSettings(['toolbar' => [['bold']]]));
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.toolbar', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('wysiwygfield.not_an_array', $errors->get(0)->getMessageTemplate());
 
         // Only defined options can be set.
         $field->setSettings(
@@ -68,72 +58,36 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.toolbar.foo', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('wysiwygfield.unknown_toolbar_option', $errors->get(0)->getMessageTemplate());
-
-        $field->setSettings(
-            new FieldableFieldSettings(['toolbar' => [['bold', 'foo']]]));
-        $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('settings.toolbar.foo', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('wysiwygfield.unknown_toolbar_option', $errors->get(0)->getMessageTemplate());
-
-        // Some options are nested. They should be validated as well.
-        $field->setSettings(
-            new FieldableFieldSettings(['toolbar' => [ ['header' => 1], [ [ 'header' => 5 ] ] ]]));
-        $this->assertCount(0, static::$container->get('validator')->validate($field));
-
-        $field->setSettings(
-            new FieldableFieldSettings(['toolbar' => [ ['header' => 7] ]]));
-        $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('settings.toolbar.header:7', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('wysiwygfield.unknown_toolbar_option', $errors->get(0)->getMessageTemplate());
-
-        $field->setSettings(
-            new FieldableFieldSettings(['toolbar' => [[ ['header' => 8] ]]]));
-        $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('settings.toolbar.header:8', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('wysiwygfield.unknown_toolbar_option', $errors->get(0)->getMessageTemplate());
-
+        $this->assertEquals('wysiwygfield.unknown_option', $errors->get(0)->getMessageTemplate());
     }
 
-    public function testAllowedTheme()
+    public function testAllowedHeadingOptions()
     {
         $field = $this->createContentTypeField('wysiwyg');
 
+        // Heading must be an array
         $field->setSettings(
-            new FieldableFieldSettings(
-                [
-                    'toolbar' => ['bold'],
-                    'theme' => 'foo',
-                ]
-            )
-        );
+            new FieldableFieldSettings(['heading' => 'foo']));
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
-        $this->assertEquals('settings.theme', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('wysiwygfield.unknown_theme', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings.heading', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('wysiwygfield.not_an_array', $errors->get(0)->getMessageTemplate());
 
+        // Fields can be only be set as direct option. There are no groups.
         $field->setSettings(
-            new FieldableFieldSettings(
-                [
-                    'toolbar' => ['bold'],
-                    'theme' => 'snow',
-                ]
-            )
-        );
-        $this->assertCount(0, static::$container->get('validator')->validate($field));
+            new FieldableFieldSettings(['heading' => [['p']]]));
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.heading', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('wysiwygfield.not_an_array', $errors->get(0)->getMessageTemplate());
 
+        // Only defined options can be set.
         $field->setSettings(
-            new FieldableFieldSettings(
-                [
-                    'toolbar' => ['bold'],
-                    'theme' => 'bubble',
-                ]
-            )
-        );
-        $this->assertCount(0, static::$container->get('validator')->validate($field));
+            new FieldableFieldSettings(['heading' => ['foo']]));
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.heading.foo', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('wysiwygfield.unknown_option', $errors->get(0)->getMessageTemplate());
     }
 
     public function testSettingPassing()
@@ -142,8 +96,8 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         $field->setSettings(
             new FieldableFieldSettings(
                 [
-                    'toolbar' => [['bold'], ['italic']],
-                    'theme' => 'bubble',
+                    'toolbar' => ['bold', 'italic'],
+                    'heading' => ['p', 'h1', 'h2'],
                     'placeholder' => 'foo',
                 ]
             )
@@ -153,11 +107,9 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
         $formOptions = $fieldType->getFormOptions($field);
         $this->assertNotEmpty($formOptions['attr']['data-options']);
         $this->assertEquals([
-            'theme' => 'bubble',
             'placeholder' => 'foo',
-            'modules' => [
-                'toolbar' => [['bold'], ['italic']],
-            ],
+            'toolbar' => ['bold', 'italic'],
+            'heading' => ['p', 'h1', 'h2'],
         ], json_decode($formOptions['attr']['data-options'], true));
     }
 }
