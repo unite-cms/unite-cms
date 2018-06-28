@@ -45,19 +45,15 @@ class GraphQLApiController extends Controller
             ]
         );
 
-
-        $serverconfig = ServerConfig::create();
-        # set debug flag according to kernel debug
-        $serverconfig->setDebug($this->getParameter('kernel.debug'));
-        $serverconfig->setSchema($schema)->setQueryBatching(true)->setDebug(true)->setContext(
+        $server = new StandardServer(
+          ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug($this->getParameter('kernel.debug'))->setContext(
             function () use ($request) {
                 return [
                     'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
                 ];
             }
+          )
         );
-
-        $server = new StandardServer($serverconfig);
 
         $serverHelper = new Helper();
 
