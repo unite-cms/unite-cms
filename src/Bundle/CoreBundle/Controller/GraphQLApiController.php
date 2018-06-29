@@ -46,14 +46,15 @@ class GraphQLApiController extends Controller
         );
 
         $server = new StandardServer(
-            ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug(true)->setContext(
-                function () use ($request) {
-                    return [
-                        'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
-                    ];
-                }
-            )
+          ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug($this->getParameter('kernel.debug'))->setContext(
+            function () use ($request) {
+                return [
+                    'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
+                ];
+            }
+          )
         );
+
         $serverHelper = new Helper();
 
         try {
