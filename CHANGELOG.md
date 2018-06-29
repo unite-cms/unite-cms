@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.4 (2018-06-29)
+
+- Fixed: #141 When user is logged in, he_she should not be able to access registration page
+- Fixed: #139 API debug flag should be set according to kernel.debug
+- Fixed: #138 All composer requirements must be included in bundles as well
+- Improved: #151: WYSIWYG: Allow to insert br
+- Improved: #150: WYSIWYG: Allow h1-h6
+- Improved: #147: Replace Editor and allow code block
+- Improved: #142: Change Template Paths to logical paths in CoreBundle
+
 ## 0.5.3 (2018-06-21)
 
 - Fixed: #135 API field with underscore resolve error
