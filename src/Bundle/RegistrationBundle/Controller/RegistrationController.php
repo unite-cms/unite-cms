@@ -37,6 +37,12 @@ class RegistrationController extends Controller
      */
     public function registrationAction(Request $request)
     {
+
+        // Redirect the user to / if logged in
+        if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
+        }
+
         $form = $this->createForm(RegistrationType::class);
         $registrationModelClass = $form->getConfig()->getDataClass();
 
