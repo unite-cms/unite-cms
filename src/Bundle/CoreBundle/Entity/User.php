@@ -15,7 +15,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @ORM\Table(name="unite_user")
  * @ORM\Entity
- * @UniqueEntity(fields={"email"}, message="validation.email_already_taken")
+ * @UniqueEntity(fields={"email"}, message="email_already_member")
  * @UniqueEntity(fields={"resetToken"}, message="reset_token_present")
  */
 class User extends DomainAccessor implements UserInterface, \Serializable
