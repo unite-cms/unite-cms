@@ -15,6 +15,24 @@ class CollectionFormType extends CollectionType
     {
         parent::buildView($view, $form, $options);
         $view->vars['tag'] = 'unite-cms-collection-field';
+        $view->vars['assets'] = [
+            ['css' => 'main.css', 'package' => 'UniteCMSCollectionFieldBundle'],
+            ['js' => 'main.js', 'package' => 'UniteCMSCollectionFieldBundle'],
+        ];
+
+        if(!empty($view->vars['prototype'])) {
+            $this->mergeChildAssets($view->vars['prototype'], $view->vars['assets']);
+        }
+    }
+
+    private function mergeChildAssets(FormView $view, &$assets) {
+        if(!empty($view->vars['assets'])) {
+            $assets = array_merge($assets, $view->vars['assets']);
+        }
+
+        foreach($view->children as $formView) {
+            $this->mergeChildAssets($formView, $assets);
+        }
     }
 
     /**
