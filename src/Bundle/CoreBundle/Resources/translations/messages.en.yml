@@ -272,6 +272,7 @@ profile.accept_invitation.name.label: 'Your name'
 profile.accept_invitation.email.label: 'Your email address'
 profile.accept_invitation.password.label: 'Enter a strong password'
 profile.accept_invitation.password_repeat.label: 'Enter the password again'
+profile.accept_invitation.please_login: 'Please login in see the invitation'
 
 profile.accept_invitation.form.accept.button: 'Accept invitation'
 profile.accept_invitation.form.reject.button: 'Reject invitation'

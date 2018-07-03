@@ -351,6 +351,12 @@ class ProfileController extends Controller
 
                         // If no user is logged in, redirect the user to the login page
                         if (!$this->getUser()) {
+
+                            $this->addFlash(
+                                'success',
+                                $this->get('translator')->trans('profile.accept_invitation.please_login')
+                            );
+
                             throw $this->createAccessDeniedException();
                         }
 
