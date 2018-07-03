@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.5 (2018-07-03)
+- Fixed #156: Registration via invitation form rendering bug fix
+- Fixed #153: Show form violation errors on registration form
+- Fixed #158: Ensure that field assets will get rendered, even when they are only part of a nested collection form element
+- Improved #158: Show a message, if the user was redirected to the login page during invitation process
+- Improved #163: Allow to define complex WYSIWYG editor headings 
+
 ## 0.5.4 (2018-06-29)
 
 - Fixed: #141 When user is logged in, he_she should not be able to access registration page

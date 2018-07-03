@@ -28,4 +28,13 @@ all core bundles and all core configuration. You can find all details in the [do
 Feel free to report bugs, ask questions, give feedback or help us working on the code base of unite cms. The issue queue 
 of this repository is the place for all of this contributions.  
 
+#### Releasing versions
 
+Because the code splitter we are using at the moment is only listening to code push and not to tag push, you need to 
+modify files in every bundle that needs to get updated. After that you can add a new git tag version and push the new 
+tag to the repository:
+
+    git commit -m "Release version 0.X.X"
+    git tag -a v0.X.X -m ""
+    git push origin --tags
+    git push origin master
