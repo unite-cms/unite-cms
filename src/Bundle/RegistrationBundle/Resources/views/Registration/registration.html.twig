@@ -7,6 +7,7 @@
         <h2>{% trans %}registration.registration.headline{% endtrans %}</h2>
     </header>
     <div class="uk-flex-1">
+        {{ form_errors(form) }}
         {{ form_start(form) }}
             <fieldset class="uk-fieldset">
                 {{ form_row(form.name) }}

@@ -88,11 +88,11 @@ class RegistrationController extends Controller
                 $violationMapper = new ViolationMapper();
 
                 foreach ($organizationViolations as $violation) {
-                    $violationMapper->mapViolation($violation, $form);
+                    $violationMapper->mapViolation($violation, $form->get('organizationIdentifier'));
                 }
 
                 foreach ($userViolations as $violation) {
-                    $violationMapper->mapViolation($violation, $form);
+                    $violationMapper->mapViolation($violation, $form->get('email'));
                 }
 
                 $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_FAILURE, new RegistrationEvent($registration, 'registration'));
