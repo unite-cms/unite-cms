@@ -9,6 +9,8 @@
 namespace UniteCMS\WysiwygFieldBundle\Form;
 
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UniteCMS\CoreBundle\Form\WebComponentType;
 use voku\helper\AntiXSS;
@@ -28,6 +30,18 @@ class WysiwygType extends WebComponentType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->addModelTransformer($this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        parent::buildView($view, $form, $options);
+        $view->vars['assets'] = [
+            [ 'css' => 'main.css', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+            [ 'js' => 'main.js', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+        ];
     }
 
     public function configureOptions(OptionsResolver $resolver)

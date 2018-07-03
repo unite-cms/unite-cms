@@ -9,6 +9,11 @@
     {{- parent() -}}
 {%- endblock form_start -%}
 
+{%- block form_end -%}
+    {{- parent() -}}
+    {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: form }) }}
+{%- endblock form_end -%}
+
 {%- block form_row -%}
     {% if label is not same as(false) -%}
         <div class="uk-margin">
