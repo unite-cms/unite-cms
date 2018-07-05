@@ -9,14 +9,11 @@ unite cms is a decoupled content management system that allows you to manage all
 ![unite CMS admin UI](https://www.unitecms.io/screens/poster.png)
 
 
-
-[See what makes unite cms different from other CMS](https://www.unitecms.io)
-
 ### Demo
 
 🎉 Our totally free public beta is online! [Try out unite cms.](https://www.unitecms.io) 🎉
 
-### Getting Started
+### Getting started
 
 [See the docs](https://www.unitecms.io/docs)
 
