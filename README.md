@@ -6,10 +6,17 @@ unite cms
 
 unite cms is a decoupled content management system that allows you to manage all kind of content in a single application using a clean and simple user interface. Developers can access the content via a graphQL API to build all kind of websites, apps or IoT applications.   
 
+![unite CMS admin UI](https://www.unitecms.io/screens/poster.png)
+
+
+
 [See what makes unite cms different from other CMS](https://www.unitecms.io)
 
-### Getting Started
+### Demo
 
+🎉 Our totally free public beta is online! [Try out unite cms.](https://www.unitecms.io) 🎉
+
+### Getting Started
 
 [See the docs](https://www.unitecms.io/docs)
 
@@ -26,7 +33,7 @@ all core bundles and all core configuration. You can find all details in the [do
 ### Contributing
 
 Feel free to report bugs, ask questions, give feedback or help us working on the code base of unite cms. The issue queue 
-of this repository is the place for all of this contributions.  
+of this repository is the place for all of this contributions. 
 
 #### Releasing versions
 
