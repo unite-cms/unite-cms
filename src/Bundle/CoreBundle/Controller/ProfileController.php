@@ -28,6 +28,7 @@ use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Form\InvitationRegistrationType;
 use UniteCMS\CoreBundle\Form\Model\ChangePassword;
 use UniteCMS\CoreBundle\Form\Model\InvitationRegistrationModel;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class ProfileController extends Controller
 {
@@ -417,14 +418,14 @@ class ProfileController extends Controller
                                             if($domainMember) {
                                                 return $this->redirect(
                                                     $this->generateUrl('unitecms_core_domain_view', [
-                                                        'organization' => $organizationMember->getOrganization()->getIdentifier(),
+                                                        'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
                                                         'domain' => $domainMember->getDomain()->getIdentifier(),
                                                     ], Router::ABSOLUTE_URL)
                                                 );
                                             } else {
                                                 return $this->redirect(
                                                     $this->generateUrl('unitecms_core_domain_index', [
-                                                        'organization' => $organizationMember->getOrganization()->getIdentifier(),
+                                                        'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
                                                     ], Router::ABSOLUTE_URL)
                                                 );
                                             }
@@ -535,12 +536,12 @@ class ProfileController extends Controller
 
                                     if($domainMember) {
                                         return $this->redirect($this->generateUrl('unitecms_core_domain_view', [
-                                            'organization' => $organizationMember->getOrganization()->getIdentifier(),
+                                            'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
                                             'domain' => $domainMember->getDomain()->getIdentifier(),
                                         ], Router::ABSOLUTE_URL));
                                     } else {
                                         return $this->redirect($this->generateUrl('unitecms_core_domain_index', [
-                                            'organization' => $organizationMember->getOrganization()->getIdentifier(),
+                                            'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
                                         ], Router::ABSOLUTE_URL));
                                     }
                                 }

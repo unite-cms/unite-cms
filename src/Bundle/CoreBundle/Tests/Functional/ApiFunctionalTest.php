@@ -21,6 +21,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -437,7 +438,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // For each request, initialize the cms manager.
         $requestStack = new RequestStack();
         $requestStack->push(new Request([], [], [
-            'organization' => $domain->getOrganization()->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($domain->getOrganization()->getIdentifier()),
             'domain' => $domain->getIdentifier(),
         ]));
 

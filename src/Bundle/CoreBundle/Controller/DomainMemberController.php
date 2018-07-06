@@ -27,6 +27,7 @@ use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class DomainMemberController extends Controller
 {
@@ -177,7 +178,7 @@ class DomainMemberController extends Controller
                     return $this->redirect($this->generateUrl(
                         'unitecms_core_domainmember_index',
                         [
-                            'organization' => $organization->getIdentifier(),
+                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                             'domain' => $domain->getIdentifier(),
                             'member_type' => $memberType->getIdentifier(),
                         ], Router::ABSOLUTE_URL
@@ -228,7 +229,7 @@ class DomainMemberController extends Controller
                     return $this->redirect($this->generateUrl(
                         'unitecms_core_domainmember_index',
                         [
-                            'organization' => $organization->getIdentifier(),
+                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                             'domain' => $domain->getIdentifier(),
                             'member_type' => $memberType->getIdentifier(),
                         ], Router::ABSOLUTE_URL
@@ -295,7 +296,7 @@ class DomainMemberController extends Controller
                 return $this->redirect($this->generateUrl(
                     'unitecms_core_domainmember_index',
                     [
-                        'organization' => $organization->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                         'domain' => $domain->getIdentifier(),
                         'member_type' => $memberType->getIdentifier(),
                     ], Router::ABSOLUTE_URL
@@ -348,7 +349,7 @@ class DomainMemberController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_domainmember_index',
                 [
-                    'organization' => $organization->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                     'domain' => $domain->getIdentifier(),
                     'member_type' => $memberType->getIdentifier(),
                 ], Router::ABSOLUTE_URL
@@ -406,7 +407,7 @@ class DomainMemberController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_domainmember_index',
                 [
-                    'organization' => $organization->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                     'domain' => $domain->getIdentifier(),
                     'member_type' => $memberType->getIdentifier(),
                 ], Router::ABSOLUTE_URL

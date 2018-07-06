@@ -15,6 +15,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -116,7 +117,7 @@ class ContentController extends Controller
                 return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -187,7 +188,7 @@ class ContentController extends Controller
                 return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -253,7 +254,7 @@ class ContentController extends Controller
                 return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -347,7 +348,7 @@ class ContentController extends Controller
                 return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -433,7 +434,7 @@ class ContentController extends Controller
                 return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -483,7 +484,7 @@ class ContentController extends Controller
                 return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
@@ -585,8 +586,8 @@ class ContentController extends Controller
                             return $this->redirect($this->generateUrl(
                                 'unitecms_core_content_translations',
                                 [
-                                    'organization' => $view->getContentType()->getDomain()->getOrganization(
-                                    )->getIdentifier(),
+                                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization(
+                                    )->getIdentifier()),
                                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                                     'content_type' => $view->getContentType()->getIdentifier(),
                                     'view' => $view->getIdentifier(),
@@ -661,7 +662,7 @@ class ContentController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_content_translations',
                 [
-                    'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                     'content_type' => $view->getContentType()->getIdentifier(),
                     'view' => $view->getIdentifier(),
@@ -741,7 +742,7 @@ class ContentController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_content_revisions',
                 [
-                    'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                     'content_type' => $view->getContentType()->getIdentifier(),
                     'view' => $view->getIdentifier(),

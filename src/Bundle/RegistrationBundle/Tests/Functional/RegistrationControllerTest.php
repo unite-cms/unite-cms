@@ -4,6 +4,7 @@ namespace UniteCMS\RegistrationBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
@@ -46,7 +47,7 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
         $form['registration[password][first]'] = 'password';
         $form['registration[password][second]'] = 'password1';
         $form['registration[organizationTitle]'] = 'New Organization';
-        $form['registration[organizationIdentifier]'] = 'neworg';
+        $form['registration[organizationIdentifier]'] = 'new_org';
         $crawler = $this->client->submit($form);
 
         // make sure, that we stay on the same page, because password was not correct.
@@ -66,12 +67,12 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
         $form = $form->form();
         $form['registration[password][first]'] = 'password';
         $form['registration[password][second]'] = 'password';
-        $form['registration[organizationIdentifier]'] = 'new';
+        $form['registration[organizationIdentifier]'] = 'new_new';
         $this->client->submit($form);
 
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate(
             'unitecms_core_domain_index',
-            ['organization' => 'new'],
+            ['organization' => IdentifierNormalizer::denormalize('new_new')],
             Router::ABSOLUTE_URL
         )));
     }
@@ -89,7 +90,7 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
     public function testRegistrationRouteLoggedIn() {
 
         $org = new Organization();
-        $org->setTitle('registration access check')->setIdentifier('test3');
+        $org->setTitle('registration access check')->setIdentifier('test_3');
 
         $this->em->persist($org);
         $this->em->flush();

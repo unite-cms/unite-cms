@@ -74,7 +74,7 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
-        $this->organization->setTitle('Organization')->setIdentifier('org1');
+        $this->organization->setTitle('Organization')->setIdentifier('org1_org1');
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
@@ -92,7 +92,7 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
 
         static::$container->get('request_stack')->push(new Request(
             [], [], [
-                'organization' => 'foo',
+                'organization' => 'foo_foo',
                 'domain' => 'baa',
             ]
         ));
@@ -101,7 +101,7 @@ class UniteCMSManagerTest extends DatabaseAwareTestCase
     public function testGettingOrgAndDomainWithInvalidOrganizationIdentifier() {
         static::$container->get('request_stack')->push(new Request(
             [], [], [
-                'organization' => 'foo',
+                'organization' => 'foo_foo',
                 'domain' => 'baa',
             ]
         ));

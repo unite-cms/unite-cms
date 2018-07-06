@@ -12,6 +12,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -73,7 +74,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->organization->setTitle('Test password reset')->setIdentifier('password_reset');
 
         $org2 = new Organization();
-        $org2->setTitle('Org2')->setIdentifier('org2');
+        $org2->setTitle('Org2')->setIdentifier('org2_org2');
 
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
@@ -513,7 +514,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // There should be a user token in the client session.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => $invitation->getDomainMemberType()->getDomain()->getOrganization()->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($invitation->getDomainMemberType()->getDomain()->getOrganization()->getIdentifier()),
             'domain' => $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
         ], Router::ABSOLUTE_URL)));
         $token = $this->client->getContainer()->get('security.token_storage')->getToken();
@@ -550,7 +551,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // There should be a user token in the client session.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $invitation->getOrganization()->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($invitation->getOrganization()->getIdentifier()),
         ], Router::ABSOLUTE_URL)));
         $token = $this->client->getContainer()->get('security.token_storage')->getToken();
         $this->assertNotNull($token);

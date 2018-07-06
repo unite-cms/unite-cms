@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\ReferenceType;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer as ParamNormalizer;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
@@ -168,7 +169,7 @@ class ReferenceFieldType extends FieldType
                     'content_type' => $contentType->getIdentifier(),
                 ],
                 'attr' => [
-                    'base-url' => '/'.$this->uniteCMSManager->getOrganization()->getIdentifier().'/',
+                    'base-url' => '/'.ParamNormalizer::denormalize($this->uniteCMSManager->getOrganization()->getIdentifier()).'/',
                     'content-label' => $settings->content_label ?? (empty(
                         $contentType->getContentLabel()
                         ) ? (string)$contentType.' #{id}' : $contentType->getContentLabel()),

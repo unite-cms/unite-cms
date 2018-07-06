@@ -17,6 +17,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -51,7 +52,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
-        $this->organization->setTitle('Organization')->setIdentifier('org1');
+        $this->organization->setTitle('Organization')->setIdentifier('org1_org1');
         $this->em->persist($this->organization);
         $this->em->flush();
         $this->em->refresh($this->organization);
@@ -90,7 +91,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // List all domains.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
         ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -130,7 +131,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1" }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => 'd1',
         ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
@@ -200,7 +201,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => 'd1',
         ], Router::ABSOLUTE_URL)));
 
@@ -250,7 +251,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
         ], Router::ABSOLUTE_URL)));
         $this->client->followRedirect();
 
@@ -277,7 +278,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // List all domains.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
         ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 

@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class IndexControllerTest extends DatabaseAwareTestCase
@@ -29,11 +30,6 @@ class IndexControllerTest extends DatabaseAwareTestCase
      * @var User $admin
      */
     private $admin;
-
-    /**
-     * @var Organization $organization
-     */
-    private $organization;
 
     public function setUp()
     {
@@ -72,7 +68,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
 
         // Add an organization, but not for this user.
         $org1 = new Organization();
-        $org1->setIdentifier('o1')->setTitle('Org 1');
+        $org1->setIdentifier('o1_o1')->setTitle('Org 1');
         $this->em->persist($org1);
         $this->em->flush();
 
@@ -94,7 +90,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
         // Index should now redirect to first organization.
         $this->client->request('GET', $url);
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $org1->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($org1->getIdentifier()),
         ], Router::ABSOLUTE_URL)));
 
         // Create a 2nd organization.
@@ -106,7 +102,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
         // Should be the same result.
         $this->client->request('GET', $url);
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $org1->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($org1->getIdentifier()),
         ], Router::ABSOLUTE_URL)));
 
         // Now invite the user to the 2nd organization.

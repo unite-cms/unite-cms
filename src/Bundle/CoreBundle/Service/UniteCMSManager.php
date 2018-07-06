@@ -89,6 +89,9 @@ class UniteCMSManager
             }
         }
 
+        // Normalize organization identifier.
+        $organizationIdentifier = IdentifierNormalizer::normalize($organizationIdentifier);
+
         // Get organization information from db.
         $data = $this->em->createQueryBuilder()
             ->select('o.id', 'o.identifier', 'o.title')

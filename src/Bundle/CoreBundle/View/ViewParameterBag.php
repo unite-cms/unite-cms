@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\View;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class ViewParameterBag implements \JsonSerializable
 {
@@ -78,7 +79,7 @@ class ViewParameterBag implements \JsonSerializable
 
         $urlParameter = [
             'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-            'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
         ];
         $bag->setApiEndpointPattern($generator->generate('unitecms_core_api', $urlParameter, Router::ABSOLUTE_URL));
 

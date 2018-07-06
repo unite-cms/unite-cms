@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class OrganizationApiKeyController extends Controller
 {
@@ -73,7 +74,7 @@ class OrganizationApiKeyController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_organizationapikey_index',
                 [
-                    'organization' => $organization->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                 ], Router::ABSOLUTE_URL
             ));
         }
@@ -119,7 +120,7 @@ class OrganizationApiKeyController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_organizationapikey_index',
                 [
-                    'organization' => $organization->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                 ], Router::ABSOLUTE_URL
             ));
         }
@@ -164,7 +165,7 @@ class OrganizationApiKeyController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_organizationapikey_index',
                 [
-                    'organization' => $organization->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                 ], Router::ABSOLUTE_URL
             ));
         }
