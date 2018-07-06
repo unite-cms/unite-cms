@@ -26,7 +26,7 @@ abstract class FieldTypeTestCase extends DatabaseAwareTestCase
             ->setDomain(new Domain())
             ->getDomain()
             ->setTitle($this->generateRandomMachineName(100))
-            ->setIdentifier($this->generateRandomMachineName(100))
+            ->setIdentifier($this->generateRandomMachineName(20) . '_' . $this->generateRandomMachineName(20))
             ->setOrganization(new Organization())
             ->getOrganization()
             ->setTitle($this->generateRandomMachineName(100))

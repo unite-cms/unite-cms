@@ -21,6 +21,7 @@ use Symfony\Component\Validator\ConstraintViolationList;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Form\WebComponentType;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class DomainController extends Controller
 {
@@ -93,7 +94,7 @@ class DomainController extends Controller
                     return $this->redirect($this->generateUrl(
                         'unitecms_core_domain_view',
                         [
-                            'organization' => $organization->getIdentifier(),
+                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                             'domain' => $domain->getIdentifier(),
                         ], Router::ABSOLUTE_URL
                     ));
@@ -201,7 +202,7 @@ class DomainController extends Controller
                         $this->getDoctrine()->getManager()->flush();
 
                         return $this->redirect($this->generateUrl('unitecms_core_domain_view', [
-                            'organization' => $organization->getIdentifier(),
+                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                             'domain' => $domain->getIdentifier(),
                         ], Router::ABSOLUTE_URL));
                     }
@@ -279,7 +280,7 @@ class DomainController extends Controller
                 $this->getDoctrine()->getManager()->remove($domain);
                 $this->getDoctrine()->getManager()->flush($domain);
                 return $this->redirect($this->generateUrl('unitecms_core_domain_index', [
-                    'organization' => $organization->getIdentifier()
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())
                 ], Router::ABSOLUTE_URL));
             }
         }

@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class SettingController extends Controller
 {
@@ -175,7 +176,7 @@ class SettingController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_setting_revisions',
                 [
-                    'organization' => $settingType->getDomain()->getOrganization()->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($settingType->getDomain()->getOrganization()->getIdentifier()),
                     'domain' => $settingType->getDomain()->getIdentifier(),
                     'setting_type' => $settingType->getIdentifier(),
                     'setting' => $setting->getId(),

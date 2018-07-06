@@ -19,6 +19,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Event\RegistrationEvent;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\RegistrationBundle\Form\Model\RegistrationModel;
 use UniteCMS\RegistrationBundle\Form\RegistrationType;
 
@@ -112,7 +113,7 @@ class RegistrationController extends Controller
                 $this->container->get('session')->set('_security_main', serialize($userToken));
 
                 $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration, 'registration'));
-                return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
+                return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())], Router::ABSOLUTE_URL));
             }
         }
 

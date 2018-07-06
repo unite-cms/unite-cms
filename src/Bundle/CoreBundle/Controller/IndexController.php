@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 
 class IndexController extends Controller
@@ -41,7 +42,7 @@ class IndexController extends Controller
         if (count($allowedOrganizations) == 1) {
             return $this->redirect($this->generateUrl(
                 'unitecms_core_domain_index',
-                ['organization' => $allowedOrganizations[0]->getIdentifier()],
+                ['organization' => IdentifierNormalizer::denormalize($allowedOrganizations[0]->getIdentifier())],
                 Router::ABSOLUTE_URL
             ));
         }

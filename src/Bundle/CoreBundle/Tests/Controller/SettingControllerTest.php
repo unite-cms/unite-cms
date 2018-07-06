@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -88,7 +89,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
-        $this->organization->setTitle('Organization')->setIdentifier('org1');
+        $this->organization->setTitle('Organization')->setIdentifier('org1_org1');
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
@@ -122,7 +123,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
     public function testCRUDActions() {
 
         $url_list = static::$container->get('router')->generate('unitecms_core_setting_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
         ], Router::ABSOLUTE_URL);
@@ -175,7 +176,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Test update content validation.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
         ], Router::ABSOLUTE_URL));
@@ -234,7 +235,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         // Try to access translations page with invalid content id.
         $doctrineUUIDGenerator = new UuidGenerator();
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $doctrineUUIDGenerator->generate($this->em, $setting),
@@ -244,7 +245,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Try to access translations page with valid setting id.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $setting->getId(),
@@ -287,7 +288,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Try to access translations page with valid setting id.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $setting->getId(),
@@ -309,7 +310,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
 
         $revisions_url = static::$container->get('router')->generate('unitecms_core_setting_revisions', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $setting->getId(),
@@ -318,7 +319,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         // Try to get revisions page of unknown setting.
         $doctrineUUIDGenerator = new UuidGenerator();
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_revisions', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
             'setting' => $doctrineUUIDGenerator->generate($this->em, $setting),

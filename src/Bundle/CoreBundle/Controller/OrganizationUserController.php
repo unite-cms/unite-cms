@@ -20,6 +20,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class OrganizationUserController extends Controller
 {
@@ -95,7 +96,7 @@ class OrganizationUserController extends Controller
             return $this->redirect($this->generateUrl(
                 'unitecms_core_organizationuser_index',
                 [
-                    'organization' => $organization->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                 ], Router::ABSOLUTE_URL
             ));
         }
@@ -152,7 +153,7 @@ class OrganizationUserController extends Controller
                 return $this->redirect($this->generateUrl(
                     'unitecms_core_organizationuser_index',
                     [
-                        'organization' => $organization->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                     ],
                     Router::ABSOLUTE_URL
                 ));
@@ -231,7 +232,7 @@ class OrganizationUserController extends Controller
                         'text/html'
                     );
                 $this->get('mailer')->send($message);
-                return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
+                return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', ['organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())], Router::ABSOLUTE_URL));
             }
         }
 
@@ -271,7 +272,7 @@ class OrganizationUserController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', [
-                'organization' => $organization->getIdentifier(),
+                'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
             ], Router::ABSOLUTE_URL));
         }
 

@@ -22,6 +22,7 @@ use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 
 class OrganizationController extends Controller
@@ -85,7 +86,7 @@ class OrganizationController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->persist($organization);
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())], Router::ABSOLUTE_URL));
         }
 
         return $this->render('@UniteCMSCore/Organization/create.html.twig', [ 'form' => $form->createView()]);
@@ -113,7 +114,7 @@ class OrganizationController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())], Router::ABSOLUTE_URL));
         }
 
         return $this->render('@UniteCMSCore/Organization/update.html.twig', [ 'form' => $form->createView(), 'organization' => $organization]);

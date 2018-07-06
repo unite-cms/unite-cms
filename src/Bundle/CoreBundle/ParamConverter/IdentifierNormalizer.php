@@ -13,7 +13,7 @@ use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Entity\View;
 
 /**
- * Converts identifiers from URL (including "-") to internal identifier (including "_").
+ * Converts identifiers from URL (including "-") to internal identifier (including "_") and vis-vi.
  */
 class IdentifierNormalizer implements ParamConverterInterface
 {
@@ -28,6 +28,10 @@ class IdentifierNormalizer implements ParamConverterInterface
 
     static function normalize($identifier) {
         return str_replace('-', '_', $identifier);
+    }
+
+    static function denormalize($identifier) {
+        return str_replace('_', '-', $identifier);
     }
 
     /**
