@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.6 (2018-07-09)
+- Fixed #171: When using an underscore in the organization name, the system is not working
+
 ## 0.5.5 (2018-07-03)
 - Fixed #156: Registration via invitation form rendering bug fix
 - Fixed #153: Show form violation errors on registration form
