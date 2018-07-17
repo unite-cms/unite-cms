@@ -71,7 +71,7 @@ class ProfileController extends Controller
             ])
             ->add('newPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'invalid_message' => 'validation.passwords_must_match',
+                'invalid_message' => 'passwords_must_match',
                 'required' => true,
                 'first_options' => array('label' => 'profile.change_password.form.new_password'),
                 'second_options' => array('label' => 'profile.change_password.form.new_password_repeat'),
@@ -269,7 +269,7 @@ class ProfileController extends Controller
                         RepeatedType::class,
                         [
                             'type' => PasswordType::class,
-                            'invalid_message' => 'validation.passwords_must_match',
+                            'invalid_message' => 'passwords_must_match',
                             'required' => true,
                             'first_options' => array('label' => 'New password'),
                             'second_options' => array('label' => 'Repeat new password'),

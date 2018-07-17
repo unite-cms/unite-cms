@@ -61,7 +61,7 @@ class View
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @ViewType(message="validation.invalid_view_type")
+     * @ViewType(message="invalid_view_type")
      * @ORM\Column(name="type", type="string", length=255)
      * @Expose
      */

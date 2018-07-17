@@ -32,7 +32,7 @@ class InvitationRegistrationType extends AbstractType
             ->add('email', EmailType::class, ['label' => $options['label_prefix'].'.email.label', 'disabled' => true ])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'invalid_message' => 'validation.passwords_must_match',
+                'invalid_message' => 'passwords_must_match',
                 'required' => true,
                 'first_options' => array('label' => $options['label_prefix'].'.password.label'),
                 'second_options' => array('label' => $options['label_prefix'].'.password_repeat.label'),
