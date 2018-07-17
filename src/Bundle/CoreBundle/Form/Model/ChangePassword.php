@@ -10,7 +10,7 @@ class ChangePassword
 
     /**
      * @UserPassword(
-     *     message = "validation.invalid_password",
+     *     message = "passwords_must_match",
      *     groups={"UPDATE"}
      * )
      */
