@@ -35,6 +35,7 @@ services:
   - mysql
 
 before_install:
+  - if ! [[ $coverage ]]; then phpenv config-rm xdebug.ini fi
   - composer self-update
   - mysql -e 'CREATE DATABASE unite_test;'
   - cp .env.dist .env
