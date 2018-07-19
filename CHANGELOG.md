@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.7 (2018-07-19)
+- Fixed #175: 500 error in invitation form for existing user
+- Fixed #170: Add some missing translations
+- Fixed #168: CSS Height problem
+- Fixed #167: CSS Responsive problem
+- Fixed #164: CSS cut-off problem
+- Improved #173: Update all dependencies and refactor code so there are no deprecation warnings anymore
+- Improved #157: Registration template structure for easy override
+- Improved #140: Refactor tests to improve performance. With coverage is now ~25' on travis
+- Improved: Update npm dependencies for all core bundles 
+
 ## 0.5.6 (2018-07-09)
 - Fixed #171: When using an underscore in the organization name, the system is not working
 
