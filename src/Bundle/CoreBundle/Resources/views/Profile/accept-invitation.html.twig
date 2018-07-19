@@ -2,7 +2,7 @@
 {% block title %}{% trans %}profile.accept_invitation.title{% endtrans %}{% endblock title %}
 {% block navigation %}{% endblock %}
 {% block content %}
-    <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-large">
+    <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-xlarge">
     <header class="uk-card-header uk-flex">
             <h2 class="uk-flex-1">{% trans %}profile.accept_invitation.headline{% endtrans %}</h2>
     </header>
@@ -52,8 +52,13 @@
                     {% endif %}
                 </p>
 
-                {{ form_start(form, {attr: {class: 'uk-form-vertical', autocomplete: 'off'}}) }}
+                <hr />
 
+                {% if newUser %}
+                    {{ include('@UniteCMSCore/Form/_registration-form.html.twig', { form: form }) }}
+                {% else %}
+                    {{ form_errors(form) }}
+                    {{ form_start(form) }}
                     {% if form.accept is defined and form.reject is defined %}
                         {% if form.accept and form.reject %}
                             <p class="uk-text-center">
@@ -62,8 +67,9 @@
                             </p>
                         {% endif %}
                     {% endif %}
-                    
-                {{ form_end(form) }}
+                    {{ form_end(form) }}
+                {% endif %}
+
             {% else %}
                 <h3>{% trans %}profile.accept_invitation.success.headline{% endtrans %}</h3>
             {% endif %}

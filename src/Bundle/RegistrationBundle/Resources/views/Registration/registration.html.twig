@@ -7,24 +7,7 @@
         <h2>{% trans %}registration.registration.headline{% endtrans %}</h2>
     </header>
     <div class="uk-flex-1">
-        {{ form_errors(form) }}
-        {{ form_start(form) }}
-            <fieldset class="uk-fieldset">
-                {{ form_row(form.name) }}
-                {{ form_row(form.email) }}
-                {{ form_row(form.password) }}
-            </fieldset>
-            <hr />
-            <fieldset class="uk-fieldset">
-                {{ form_row(form.organizationTitle) }}
-                {{ form_row(form.organizationIdentifier) }}
-            </fieldset>
-            <hr />
-            <div class="uk-flex uk-flex-between uk-flex-middle uk-flex-wrap">
-                <a class="uk-button uk-button-text" style="margin: 10px;" href="{{ url('unitecms_core_authentication_login') }}">{% trans %}registration.registration.login.button{% endtrans %}</a>
-                {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
-            </div>
-        {{ form_rest(form) }}
+        {{ include('@UniteCMSRegistration/Form/_registration-form.html.twig', { form: form }) }}
     </div>
 </article>
 <style type="text/css" rel="stylesheet">
