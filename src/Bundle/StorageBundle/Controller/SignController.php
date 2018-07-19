@@ -9,8 +9,7 @@
 namespace UniteCMS\StorageBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,8 +25,7 @@ class SignController extends Controller
 
 
     /**
-     * @Route("/content/{content_type}/upload")
-     * @Method({"POST"})
+     * @Route("/content/{content_type}/upload", methods={"POST"})
      * @Entity("contentType", expr="repository.findByIdentifiers(organization, domain, content_type)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), contentType)")
      *
@@ -64,8 +62,7 @@ class SignController extends Controller
     }
 
     /**
-     * @Route("/setting/{setting_type}/upload")
-     * @Method({"POST"})
+     * @Route("/setting/{setting_type}/upload", methods={"POST"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), settingType)")
      *

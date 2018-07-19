@@ -1,7 +1,7 @@
 unitecms_core_index:
     path:     /
     methods: ['GET']
-    defaults: { _controller: UniteCMSCoreBundle:Index:index }
+    defaults: { _controller: UniteCMS\CoreBundle\Controller\IndexController::indexAction }
 
 unitecms_core_authentication:
     resource: "@UniteCMSCoreBundle/Controller/AuthenticationController.php"
@@ -71,9 +71,9 @@ unitecms_core_setting:
 unitecms_core_api:
     path:     /{organization}/{domain}/api
     methods: ['POST']
-    defaults: { _controller: UniteCMSCoreBundle:GraphQLApi:index }
+    defaults: { _controller: UniteCMS\CoreBundle\Controller\GraphQLApiController::indexAction }
 
 unitecms_core_graph_api:
     path:     /{organization}/{domain}/api/graphql
     methods: ['POST']
-    defaults: { _controller: UniteCMSCoreBundle:GraphQLApi:index }
+    defaults: { _controller: UniteCMS\CoreBundle\Controller\GraphQLApiController::indexAction }

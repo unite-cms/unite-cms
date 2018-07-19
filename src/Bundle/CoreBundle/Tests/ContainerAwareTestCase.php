@@ -3,7 +3,6 @@
 namespace UniteCMS\CoreBundle\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class ContainerAwareTestCase extends KernelTestCase
 {

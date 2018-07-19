@@ -2,9 +2,8 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -25,8 +24,7 @@ use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 class OrganizationUserController extends Controller
 {
     /**
-     * @Route("/")
-     * @Method({"GET"})
+     * @Route("/", methods={"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
@@ -49,8 +47,7 @@ class OrganizationUserController extends Controller
     }
 
     /**
-     * @Route("/update/{member}")
-     * @Method({"GET", "POST"})
+     * @Route("/update/{member}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("member")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
@@ -112,8 +109,7 @@ class OrganizationUserController extends Controller
     }
 
     /**
-     * @Route("/delete/{member}")
-     * @Method({"GET", "POST"})
+     * @Route("/delete/{member}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("member")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
@@ -171,8 +167,7 @@ class OrganizationUserController extends Controller
     }
 
     /**
-     * @Route("/create-invite")
-     * @Method({"GET", "POST"})
+     * @Route("/create-invite", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
@@ -246,8 +241,7 @@ class OrganizationUserController extends Controller
     }
 
     /**
-     * @Route("/delete-invite/{invite}")
-     * @Method({"GET", "POST"})
+     * @Route("/delete-invite/{invite}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("invite")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")

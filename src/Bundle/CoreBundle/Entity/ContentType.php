@@ -124,7 +124,7 @@ class ContentType implements Fieldable
     /**
      * @var array
      * @Assert\All({
-     *     @Assert\Locale(),
+     *     @Assert\Locale(canonicalize=true),
      *     @Assert\NotBlank()
      * })
      * @ORM\Column(name="locales", type="array", nullable=true)

@@ -8,9 +8,8 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -28,8 +27,7 @@ use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 class OrganizationController extends Controller
 {
     /**
-     * @Route("/")
-     * @Method({"GET"})
+     * @Route("/", methods={"GET"})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::LIST'), 'UniteCMS\\CoreBundle\\Entity\\Organization')")
      *
      * @param Request $request
@@ -64,8 +62,7 @@ class OrganizationController extends Controller
     }
 
     /**
-     * @Route("/create")
-     * @Method({"GET", "POST"})
+     * @Route("/create", methods={"GET", "POST"})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::CREATE'), 'UniteCMS\\CoreBundle\\Entity\\Organization')")
      *
      * @param Request $request
@@ -93,8 +90,7 @@ class OrganizationController extends Controller
     }
 
     /**
-     * @Route("/update/{organization}")
-     * @Method({"GET", "POST"})
+     * @Route("/update/{organization}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
@@ -121,8 +117,7 @@ class OrganizationController extends Controller
     }
 
     /**
-     * @Route("/delete/{organization}")
-     * @Method({"GET", "POST"})
+     * @Route("/delete/{organization}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::DELETE'), organization)")
      *

@@ -43,7 +43,7 @@ class Content implements FieldableContent
 
     /**
      * @var string
-     * @Assert\Locale()
+     * @Assert\Locale(canonicalize=true)
      * @ValidFieldableContentLocale(message="invalid_locale")
      * @ORM\Column(type="string", nullable=true)
      */

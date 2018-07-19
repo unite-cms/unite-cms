@@ -2,9 +2,8 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -19,8 +18,7 @@ use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 class OrganizationApiKeyController extends Controller
 {
     /**
-     * @Route("/")
-     * @Method({"GET"})
+     * @Route("/", methods={"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
@@ -41,8 +39,7 @@ class OrganizationApiKeyController extends Controller
     }
 
     /**
-     * @Route("/create")
-     * @Method({"GET", "POST"})
+     * @Route("/create", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
@@ -89,8 +86,7 @@ class OrganizationApiKeyController extends Controller
     }
 
     /**
-     * @Route("/update/{apiKey}")
-     * @Method({"GET", "POST"})
+     * @Route("/update/{apiKey}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      * @ParamConverter("apiKey")
@@ -136,8 +132,7 @@ class OrganizationApiKeyController extends Controller
     }
 
     /**
-     * @Route("/delete/{apiKey}")
-     * @Method({"GET", "POST"})
+     * @Route("/delete/{apiKey}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      * @ParamConverter("apiKey")

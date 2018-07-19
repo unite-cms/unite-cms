@@ -2,8 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -11,8 +10,7 @@ class AuthenticationController extends Controller
 {
 
     /**
-     * @Route("/login")
-     * @Method({"GET", "POST"})
+     * @Route("/login", methods={"GET", "POST"})
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function loginAction()

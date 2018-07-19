@@ -3,9 +3,8 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -32,8 +31,7 @@ use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 class DomainMemberController extends Controller
 {
     /**
-     * @Route("/{member_type}")
-     * @Method({"GET"})
+     * @Route("/{member_type}", methods={"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -62,8 +60,7 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/{member_type}/create")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_type}/create", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -250,8 +247,7 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/{member_type}/update/{member}")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_type}/update/{member}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -260,6 +256,7 @@ class DomainMemberController extends Controller
      *
      * @param Organization $organization
      * @param Domain $domain
+     * @param DomainMemberType $memberType
      * @param \UniteCMS\CoreBundle\Entity\DomainMember $member
      * @param Request $request
      *
@@ -317,8 +314,7 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/{member_type}/delete/{member}")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_type}/delete/{member}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -369,8 +365,7 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/{member_type}/delete-invite/{invite}")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_type}/delete-invite/{invite}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")

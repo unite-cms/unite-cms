@@ -3,13 +3,11 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
@@ -20,8 +18,7 @@ use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 class SettingController extends Controller
 {
     /**
-     * @Route("/{setting_type}/{locale}", defaults={"locale"=null})
-     * @Method({"GET", "POST"})
+     * @Route("/{setting_type}/{locale}", defaults={"locale"=null}, methods={"GET", "POST"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), settingType)")
      *
@@ -98,8 +95,7 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/{setting_type}/translations/{setting}")
-     * @Method({"GET"})
+     * @Route("/{setting_type}/translations/{setting}", methods={"GET"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
@@ -121,8 +117,7 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/{setting_type}/revisions/{setting}")
-     * @Method({"GET"})
+     * @Route("/{setting_type}/revisions/{setting}", methods={"GET"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
@@ -147,8 +142,7 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/{setting_type}/revisions/{setting}/revert/{version}")
-     * @Method({"GET", "POST"})
+     * @Route("/{setting_type}/revisions/{setting}/revert/{version}", methods={"GET", "POST"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
