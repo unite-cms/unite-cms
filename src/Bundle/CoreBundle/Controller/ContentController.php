@@ -4,9 +4,7 @@ namespace UniteCMS\CoreBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -25,8 +23,7 @@ use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 class ContentController extends Controller
 {
     /**
-     * @Route("/{content_type}/{view}")
-     * @Method({"GET"})
+     * @Route("/{content_type}/{view}", methods={"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), view.getContentType())")
      *
@@ -52,8 +49,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/create")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/create", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), view.getContentType())")
      *
@@ -139,8 +135,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/update/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/update/{content}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -211,8 +206,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/delete/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/delete/{content}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::DELETE'), content)")
@@ -277,13 +271,15 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/delete-definitely/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/delete-definitely/{content}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @param View $view
      * @param string $content
      * @param Request $request
      * @return Response
+     *
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function deleteDefinitelyAction(View $view, string $content, Request $request)
     {
@@ -371,8 +367,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/recover/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/recover/{content}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @param View $view
      * @param string $content
@@ -457,8 +452,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/translations/{content}")
-     * @Method({"GET"})
+     * @Route("/{content_type}/{view}/translations/{content}", methods={"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -504,8 +498,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/translations/{content}/add/{locale}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/translations/{content}/add/{locale}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -615,8 +608,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/translations/{content}/remove/{locale}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/translations/{content}/remove/{locale}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -686,8 +678,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/revisions/{content}")
-     * @Method({"GET"})
+     * @Route("/{content_type}/{view}/revisions/{content}", methods={"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -713,8 +704,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/revisions/{content}/revert/{version}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/revisions/{content}/revert/{version}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")

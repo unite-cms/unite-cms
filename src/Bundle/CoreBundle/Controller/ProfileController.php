@@ -2,8 +2,8 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -34,13 +34,11 @@ class ProfileController extends Controller
 {
 
     /**
-     * @Route("/update")
-     * @Method({"GET", "POST"})
+     * @Route("/update", methods={"GET", "POST"})
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function updateAction(Request $request)
     {
@@ -151,11 +149,10 @@ class ProfileController extends Controller
     }
 
     /**
-     * @Route("/reset-password")
-     * @Method({"GET", "POST"})
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @Route("/reset-password", methods={"GET", "POST"})
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function resetPasswordAction(Request $request)
     {
@@ -229,11 +226,10 @@ class ProfileController extends Controller
     }
 
     /**
-     * @Route("/reset-password-confirm")
-     * @Method({"GET", "POST"})
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @Route("/reset-password-confirm", methods={"GET", "POST"})
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function resetPasswordConfirmAction(Request $request)
     {
@@ -308,11 +304,10 @@ class ProfileController extends Controller
     }
 
     /**
-     * @Route("/accept-invitation")
-     * @Method({"GET", "POST"})
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @Route("/accept-invitation", methods={"GET", "POST"})
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function acceptInvitationAction(Request $request)
     {

@@ -5,7 +5,7 @@ unitecms_core_index:
     requirements:
         hostname: '%allowed_hostname%'
     defaults:
-        _controller: UniteCMSCoreBundle:Index:index
+        _controller: UniteCMS\CoreBundle\Controller\IndexController::indexAction
         hostname: '%default_hostname%'
 
 unitecms_core_authentication:
@@ -126,7 +126,7 @@ unitecms_core_api:
         organization: '%identifier_url_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
-        _controller: UniteCMSCoreBundle:GraphQLApi:index
+        _controller: UniteCMS\CoreBundle\Controller\GraphQLApiController::indexAction
         hostname: '%default_hostname%'
 
 unitecms_core_graph_api:
@@ -138,7 +138,7 @@ unitecms_core_graph_api:
         organization: '%identifier_url_pattern%'
         hostname: '%allowed_hostname%'
     defaults:
-        _controller: UniteCMSCoreBundle:GraphQLApi:index
+        _controller: UniteCMS\CoreBundle\Controller\GraphQLApiController::indexAction
         hostname: '%default_hostname%'
 
 # add a fallback route that redirects to regular index
