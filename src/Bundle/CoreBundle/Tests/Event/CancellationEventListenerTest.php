@@ -37,6 +37,7 @@ class CancellationEventListenerTest extends DatabaseAwareTestCase
 
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         $this->user = new User();
         $this->user->setEmail('test@example.com')->setPassword('password')->setName('Name');

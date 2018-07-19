@@ -68,6 +68,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
@@ -207,6 +208,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $form['invitation_registration[password][second]'] = "pw2";
         $crawler = $this->client->submit($form);
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         // Should show the form with form errors.
         $this->assertCount(1, $crawler->filter('form'));
         $this->assertGreaterThan(0, $crawler->filter('form div.uk-alert-danger')->count());
@@ -271,6 +275,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $form['invitation_registration[password][first]'] = "pw1";
         $form['invitation_registration[password][second]'] = "pw2";
         $crawler = $this->client->submit($form);
+
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
 
         // Should show the form with form errors.
         $this->assertCount(1, $crawler->filter('form'));
@@ -354,6 +361,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->em->persist($invitation);
         $this->em->flush();
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         $this->login($this->users['domain_editor2']);
 
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
@@ -412,6 +422,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         // Make sure, that the invitation exists.
         $this->assertNotNull(
             $this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId())
@@ -462,6 +475,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
+
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
 
         // Make sure, that the invitation exists.
         $this->assertNotNull(

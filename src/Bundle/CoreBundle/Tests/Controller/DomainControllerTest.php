@@ -8,8 +8,8 @@
 
 namespace UniteCMS\CoreBundle\Tests\Controller;
 
+use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
-use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -49,6 +49,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
@@ -124,17 +125,26 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
         $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("identifier: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         // Submit valid Domain definition.
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
         $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1" }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        $this->client->enableReboot();
+
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => 'd1',
         ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
+
+        $this->client->disableReboot();
+
         $updateButton = $crawler->filter('a:contains("' . static::$container->get('translator')->trans('domain.menu.manage.update') .'")');
         $this->assertGreaterThanOrEqual(1, $updateButton->count());
         $crawler = $this->client->click($updateButton->first()->link());
@@ -295,6 +305,9 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->flush($domainMember);
         $this->em->refresh($domainMember);
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         $crawler = $this->client->reload();
 
         // editor now sees domain.
@@ -313,8 +326,11 @@ class DomainControllerTest extends DatabaseAwareTestCase
         ]);
         $this->editor->setName('Domain Admin');
         $this->em->flush($this->editor);
+        $this->em->refresh($this->editor);
 
+        $this->client->enableReboot();
         $crawler = $this->client->reload();
+        $this->client->disableReboot();
 
         // org editors, that are domain admins are allowed to edit domain.
         $this->assertCount(1, $crawler->filter('a:contains("' . static::$container->get('translator')->trans('domain.menu.manage.update') .'")'));

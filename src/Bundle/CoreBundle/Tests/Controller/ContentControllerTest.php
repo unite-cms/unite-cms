@@ -83,6 +83,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
@@ -591,6 +592,9 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $form['form[_token]'] = 'invalid';
         $crawler = $this->client->submit($form);
 
+        // For performance reasons we do not reboot the kernel on each request, so we need to clear em by hand.
+        $this->em->clear();
+
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
         $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains(" The CSRF token is invalid. Please try to resubmit the form.")'));
@@ -662,6 +666,9 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $form['fieldable_form[f1]'] = 'Any';
         $form['fieldable_form[f2]'] = 'b';
         $this->client->submit($form);
+
+        // For performance reasons we do not reboot the kernel on each request, so we need to clear em by hand.
+        $this->em->clear();
 
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_index', [
@@ -763,6 +770,9 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $form = $crawler->filter('form');
         $form = $form->form();
         $this->client->submit($form);
+
+        // For performance reasons we do not reboot the kernel on each request, so we need to clear em by hand.
+        $this->em->clear();
 
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_translations', [

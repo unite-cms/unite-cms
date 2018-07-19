@@ -4,7 +4,6 @@ namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
 use UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory;
@@ -27,13 +26,11 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     const SETTINGS                  = ['fields', 'min_rows', 'max_rows'];
     const REQUIRED_SETTINGS         = ['fields'];
 
-    private $validator;
     private $collectionFieldTypeFactory;
     private $fieldTypeManager;
 
-    function __construct(ValidatorInterface $validator, CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager)
+    function __construct(CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager)
     {
-        $this->validator = $validator;
         $this->collectionFieldTypeFactory = $collectionFieldTypeFactory;
         $this->fieldTypeManager = $fieldTypeManager;
     }

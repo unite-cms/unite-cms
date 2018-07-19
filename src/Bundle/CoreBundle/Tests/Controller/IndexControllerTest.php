@@ -36,6 +36,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         $this->admin = new User();
         $this->admin->setEmail('editor@example.com')->setName('Domain Admin')->setRoles([User::ROLE_USER])->setPassword('XXX');
@@ -87,6 +88,9 @@ class IndexControllerTest extends DatabaseAwareTestCase
         $this->em->persist($orgMember);
         $this->em->flush();
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         // Index should now redirect to first organization.
         $this->client->request('GET', $url);
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
@@ -112,6 +116,9 @@ class IndexControllerTest extends DatabaseAwareTestCase
         $org2Member->setUser($admin)->setOrganization($org2);
         $this->em->persist($org2Member);
         $this->em->flush();
+
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
 
         // Index should now show a menu with all organizations for this user.
         $this->client->request('GET', $url);

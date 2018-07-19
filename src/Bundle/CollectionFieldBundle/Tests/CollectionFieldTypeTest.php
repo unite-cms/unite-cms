@@ -9,6 +9,7 @@ use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use Symfony\Component\Validator\Context\ExecutionContext;
+use UniteCMS\CollectionFieldBundle\Field\Types\CollectionFieldType;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\DomainMember;

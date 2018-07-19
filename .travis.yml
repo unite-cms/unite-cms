@@ -1,9 +1,15 @@
 language: php
 
-# because we need to install mysql 5.7 first
-sudo: required
+sudo: false
 dist: trusty
 os: linux
+
+addons:
+  apt:
+    sources:
+      - mysql-5.7-trusty
+    packages:
+      - mysql-server
 
 matrix:
     include:
@@ -25,6 +31,10 @@ services:
   - mysql
 
 before_install:
+  - |
+    if ! [[ $coverage ]]; then
+      phpenv config-rm xdebug.ini
+    fi
   - composer self-update
   - mysql -e 'CREATE DATABASE unite_test;'
   - cp .env.dist .env
@@ -33,7 +43,6 @@ install:
   - composer install
 
 before_script:
-  - bash .travis.install-mysql-5.7.sh
   - |
     if [[ $coverage ]]; then
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
