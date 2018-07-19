@@ -87,11 +87,14 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
     protected $databaseStrategy = DatabaseAwareTestCase::STRATEGY_RECREATE;
 
+    protected $loginUrl = null;
+
     public function setUp()
     {
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
@@ -205,12 +208,14 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->refresh($this->content1);
         $this->em->refresh($this->invite1);
         $this->em->refresh($this->apiKey1);
+
+        $this->loginUrl = static::$container->get('router')->generate('unitecms_core_authentication_login', [], Router::ABSOLUTE_URL);
     }
 
     private function assertAccess($route, $canAccess, $methods = ['GET'], $parameters = [])
     {
-
-        $login_url = static::$container->get('router')->generate('unitecms_core_authentication_login', [], Router::ABSOLUTE_URL);
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
 
         foreach ($methods as $method) {
             $this->client->request($method, $route, $parameters);
@@ -219,13 +224,13 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
                 // Only check redirection if it is redirecting to another route.
                 if (!$this->client->getResponse()->isRedirect($route) && !$this->client->getResponse()->isRedirect($route)) {
-                    $this->assertFalse($this->client->getResponse()->isRedirect($login_url));
+                    $this->assertFalse($this->client->getResponse()->isRedirect($this->loginUrl));
                 }
                 $this->assertFalse($this->client->getResponse()->isForbidden());
                 $this->assertFalse($this->client->getResponse()->isServerError());
                 $this->assertFalse($this->client->getResponse()->isClientError());
             } else {
-                $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect($login_url)));
+                $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect($this->loginUrl)));
                 $this->assertTrue($forbidden);
             }
         }
@@ -233,7 +238,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         // Check, that all other methods are not allowed (Http 405).
         // This check does not works for the login action, because this action will
         // redirect the user to the invalid route login/ if method is not GET or POST.
-        if ($canAccess && $route != $login_url) {
+        if ($canAccess && $route != $this->loginUrl) {
             $methodsAvailable = ['GET', 'POST', 'PUT', 'DELETE'];
             foreach (array_diff($methodsAvailable, $methods) as $method) {
                 $this->client->request($method, $route);
