@@ -35,6 +35,7 @@ class PasswordResetTest extends DatabaseAwareTestCase
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();

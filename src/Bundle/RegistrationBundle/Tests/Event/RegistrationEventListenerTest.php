@@ -34,6 +34,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
 
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         $org = new Organization();
         $org->setIdentifier('taken')->setTitle('Taken');

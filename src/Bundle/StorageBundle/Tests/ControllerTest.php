@@ -144,6 +144,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
     }
 

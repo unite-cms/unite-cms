@@ -2,6 +2,7 @@
 
 namespace UniteCMS\RegistrationBundle\Tests\Functional;
 
+use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
@@ -13,11 +14,17 @@ use Symfony\Component\BrowserKit\Cookie;
 
 class RegistrationControllerTest extends DatabaseAwareTestCase {
 
+    /**
+     * @var Client $client
+     */
+    private $client;
+
     public function setUp()
     {
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
     }
 
     protected static function bootKernel(array $options = array())

@@ -22,6 +22,7 @@ class AuthenticationControllerTest extends DatabaseAwareTestCase {
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
     }
 
     public function testLoginWithValidUser() {
