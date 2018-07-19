@@ -56,7 +56,6 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
 
         $this->repository = $this->createMock(EntityRepository::class);
         $this->collectionFieldType = new CollectionFieldType(
-            $this->createMock(ValidatorInterface::class),
             $this->createMock(CollectionFieldTypeFactory::class),
             $fieldTypeManager
         );
