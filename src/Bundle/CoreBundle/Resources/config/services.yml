@@ -7,5 +7,6 @@ imports:
   - { resource: services.viewTypes.yml }
   - { resource: services.validators.yml }
   - { resource: services.doctrineListener.yml }
+  - { resource: services.kernelListener.yml }
   - { resource: services.serialization.yml }
   - { resource: services.twig.yml }

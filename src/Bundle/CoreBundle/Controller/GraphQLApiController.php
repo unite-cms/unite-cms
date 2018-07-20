@@ -71,6 +71,10 @@ class GraphQLApiController extends Controller
             return new JsonResponse([], 500);
         }
 
-        return new JsonResponse($result);
+        return new JsonResponse($result, 200, [
+            'Access-Control-Allow-Headers' => 'origin, content-type, accept',
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'POST, OPTIONS',
+        ]);
     }
 }

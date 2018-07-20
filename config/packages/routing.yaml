@@ -3,5 +3,5 @@ framework:
         strict_requirements: ~
 
 sensio_framework_extra:
-                              router:
-                                  annotations: false
+    router:
+        annotations: false
