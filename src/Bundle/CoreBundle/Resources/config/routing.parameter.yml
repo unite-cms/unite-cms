@@ -70,10 +70,10 @@ unitecms_core_setting:
 # Add a route to api that will return the default implementation (graphQL)
 unitecms_core_api:
     path:     /{organization}/{domain}/api
-    methods: ['POST']
+    methods: ['POST', 'OPTIONS']
     defaults: { _controller: UniteCMS\CoreBundle\Controller\GraphQLApiController::indexAction }
 
 unitecms_core_graph_api:
     path:     /{organization}/{domain}/api/graphql
-    methods: ['POST']
+    methods: ['POST', 'OPTIONS']
     defaults: { _controller: UniteCMS\CoreBundle\Controller\GraphQLApiController::indexAction }

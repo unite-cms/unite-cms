@@ -119,7 +119,7 @@ unitecms_core_setting:
 # Add a route to api that will return the default implementation (graphQL)
 unitecms_core_api:
     path:     /{domain}/api
-    methods: ['POST']
+    methods: ['POST', 'OPTIONS']
     host:     '{organization}.{hostname}'
     requirements:
         domain: '%identifier_url_pattern%'
@@ -131,7 +131,7 @@ unitecms_core_api:
 
 unitecms_core_graph_api:
     path:     /{domain}/api/graphql
-    methods: ['POST']
+    methods: ['POST', 'OPTIONS']
     host:     '{organization}.{hostname}'
     requirements:
         domain: '%identifier_url_pattern%'

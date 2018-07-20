@@ -37,6 +37,14 @@ class ApiKey extends DomainAccessor implements UserInterface, \Serializable
     protected $token;
 
     /**
+     * @var string
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @ORM\Column(name="origin", type="string", length=255)
+     */
+    private $origin = '*';
+
+    /**
      * @var Organization
      * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Organization", inversedBy="apiKeys")
@@ -209,13 +217,33 @@ class ApiKey extends DomainAccessor implements UserInterface, \Serializable
     /**
      * @param string $token
      *
-     * @return  ApiKey
+     * @return ApiKey
      */
     public function setToken(string $token)
     {
         $this->token = $token;
 
         return $this;
+    }
+
+    /**
+     * @param string $origin
+     *
+     * @return ApiKey
+     */
+    public function setOrigin(string $origin)
+    {
+        $this->origin = $origin;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOrigin()
+    {
+        return $this->origin;
     }
 
     /**
