@@ -69,8 +69,7 @@ class CorsListener
         if($token instanceof PostAuthenticationGuardToken) {
             $user = $token->getUser();
             if($user instanceof ApiKey) {
-                // TODO
-                //$response->headers->set('Access-Control-Allow-Origin', $user->getId());
+                $response->headers->set('Access-Control-Allow-Origin', empty($user->getOrigin()) ? '*' : $user->getOrigin());
             }
         }
     }

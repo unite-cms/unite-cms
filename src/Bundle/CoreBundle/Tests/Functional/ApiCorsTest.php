@@ -44,7 +44,6 @@ class ApiCorsTest extends DatabaseAwareTestCase
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
-        $this->client->disableReboot();
 
         $org = new Organization();
         $org
@@ -59,23 +58,27 @@ class ApiCorsTest extends DatabaseAwareTestCase
 
         $this->apiKey = new ApiKey();
         $this->apiKey
-            ->setOrganization($org)
             ->setToken('XXX')
-            ->setName('API KEY');
+            ->setName('API KEY')
+            ->setOrigin('https://example.com');
+
+        $org->addApiKey($this->apiKey);
 
         $domainMember = new DomainMember();
         $domainMember
-            ->setDomain($this->domain)
             ->setDomainMemberType($this->domain->getDomainMemberTypes()->first())
             ->setAccessor($this->apiKey);
+
+        $this->domain->addMember($domainMember);
 
         $this->em->persist($org);
         $this->em->persist($this->domain);
         $this->em->persist($this->apiKey);
+        $this->em->persist($domainMember);
         $this->em->flush();
 
         $this->apiUrl = static::$container->get('router')->generate('unitecms_core_api', [
-            'organization' => $this->domain->getIdentifier(),
+            'organization' => $org->getIdentifier(),
             'domain' => $this->domain->getIdentifier(),
         ], Router::ABSOLUTE_URL);
     }
@@ -96,9 +99,8 @@ class ApiCorsTest extends DatabaseAwareTestCase
         // Now, do a real POST request by using the api key. Now the access-control-allow-origin value should be API KEY specific.
         $this->client->request('POST', $this->apiUrl, [], [], [
             'HTTP_AUTHORIZATION' => $this->apiKey->getToken(),
+            'CONTENT_TYPE' => 'application/json',
         ], json_encode(['query' => '{ find { total } }']));
-
-        dump($this->client->getRequest()->headers->all());
 
         // The response should include all required response headers and should be successful.
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());

@@ -59,6 +59,11 @@ class OrganizationApiKeyController extends Controller
                 TextType::class,
                 ['label' => 'organization.api_key.create.form.name', 'required' => true]
             )
+            ->add(
+                'origin',
+                TextType::class,
+                ['label' => 'organization.api_key.create.form.origin', 'required' => true]
+            )
             ->add('submit', SubmitType::class, ['label' => 'organization.api_key.create.form.submit'])
             ->getForm();
 
@@ -104,6 +109,11 @@ class OrganizationApiKeyController extends Controller
                 'name',
                 TextType::class,
                 ['label' => 'organization.api_key.update.form.name', 'required' => true]
+            )
+            ->add(
+                'origin',
+                TextType::class,
+                ['label' => 'organization.api_key.create.form.origin', 'required' => true]
             )
             ->add('submit', SubmitType::class, ['label' => 'organization.api_key.update.form.submit'])
             ->getForm();
