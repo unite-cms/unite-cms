@@ -39,6 +39,26 @@ class FileFieldType extends FieldType
     }
 
     /**
+     * Returns the bucket endpoint, including an optional sub-path.
+     *
+     * @param FieldableFieldSettings $settings
+     * @return string
+     */
+    protected function generateEndpoint(FieldableFieldSettings $settings) : string {
+        $endpoint = $settings->bucket['endpoint'].'/'.$settings->bucket['bucket'];
+
+        if (!empty($settings->bucket['path'])) {
+            $path = trim($settings->bucket['path'], "/ \t\n\r\0\x0B");
+
+            if (!empty($path)) {
+                $endpoint = $endpoint.'/'.$path;
+            }
+        }
+
+        return $endpoint;
+    }
+
+    /**
      * {@inheritdoc}
      */
     function getFormOptions(FieldableField $field): array
@@ -69,22 +89,11 @@ class FileFieldType extends FieldType
         array_shift($identifier_path_parts);
         $identifier_path_parts[] = $field->getIdentifier();
 
-
-        $endpoint = $field->getSettings()->bucket['endpoint'].'/'.$field->getSettings()->bucket['bucket'];
-
-        if (!empty($field->getSettings()->bucket['path'])) {
-            $path = trim($field->getSettings()->bucket['path'], "/ \t\n\r\0\x0B");
-
-            if (!empty($path)) {
-                $endpoint = $endpoint.'/'.$path;
-            }
-        }
-
         return array_merge(parent::getFormOptions($field), [
           'attr' => [
             'file-types' => $field->getSettings()->file_types,
             'field-path' => join('/', $identifier_path_parts),
-            'endpoint' => $endpoint,
+            'endpoint' => $this->generateEndpoint($field->getSettings()),
             'upload-sign-url' => $url,
             'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
           ],
@@ -111,7 +120,7 @@ class FileFieldType extends FieldType
     function resolveGraphQLData(FieldableField $field, $value)
     {
         // Create full URL to file.
-        $value['url'] = $field->getSettings()->bucket['endpoint'] . '/' . $field->getSettings()->bucket['bucket'] . '/' . $value['id'] . '/' . $value['name'];
+        $value['url'] = $this->generateEndpoint($field->getSettings()) . '/' . $value['id'] . '/' . $value['name'];
         return $value;
     }
 
