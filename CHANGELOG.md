@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.8 (2018-07-20)
+- Fixed #185: API: Rename header header (Authentication -> Authorization)
+- Added #184: API: Handle CORS-preflight requests and allow API Keys to set allowed origin header
+- Fixed #188: Add missing path in image api response + fixed a image field setting bug 
+
 ## 0.5.7 (2018-07-19)
 - Fixed #175: 500 error in invitation form for existing user
 - Fixed #170: Add some missing translations
