@@ -27,15 +27,15 @@ class ApiClientAuthenticatorTest extends TestCase
         $this->assertNull($authenticator->getCredentials($request));
 
         $request = new Request();
-        $request->headers->set('Authentication', 'Bearer MyToken');
+        $request->headers->set('Authorization', 'Bearer MyToken');
         $this->assertEquals('MyToken', $authenticator->getCredentials($request));
 
         $request = new Request();
-        $request->headers->set('Authentication', 'MyToken');
+        $request->headers->set('Authorization', 'MyToken');
         $this->assertEquals('MyToken', $authenticator->getCredentials($request));
 
         $request = new Request();
-        $request->headers->set('Authentication', 'Bearer Bearer');
+        $request->headers->set('Authorization', 'Bearer Bearer');
         $this->assertEquals('Bearer', $authenticator->getCredentials($request));
 
         $request = new Request();

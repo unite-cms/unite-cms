@@ -53,7 +53,7 @@
 {% for domain in organization.domains %}{{ domain }}: {{ url('unitecms_core_api', { organization: organization.identifier|replace({'_':'-'}), domain: domain.identifier|replace({'_':'-'}) }) }}<br /><br />{% endfor %}
 
 
-<strong>HEADER: </strong> <em>Authentication=TOKEN</em>
+<strong>HEADER: </strong> <em>Authorization=TOKEN</em>
 = or =
 <strong>QUERY: </strong> <em>?token=TOKEN</em>
                                     {% endspaceless %}</pre>

@@ -24,7 +24,7 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        return $request->headers->has('Authentication') || $request->query->has('token');
+        return $request->headers->has('Authorization') || $request->query->has('token');
     }
 
     /**
@@ -34,7 +34,7 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
     public function getCredentials(Request $request)
     {
         // Try to get the token from authentication header.
-        if ($authentication = $request->headers->get('Authentication')) {
+        if ($authentication = $request->headers->get('Authorization')) {
             $prefix = 'Bearer ';
             if (substr($authentication, 0, strlen($prefix)) === $prefix) {
                 return substr($authentication, strlen($prefix));
