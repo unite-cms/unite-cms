@@ -12,8 +12,8 @@ Install docker and docker compose
     cp .env.docker .env
     
     # set the following env vars
-    CONTAINER_DIR=/app/unite-cms // folder inside container
-    SOURCE_DIR=/private/var/www/unite-cms // unite-cms project dir
+    CONTAINER_DIR=/app/unite-cms // project folder inside container
+    SOURCE_DIR=/private/var/www/unite-cms // unite-cms project dir on your computer
 
     # run shellscript to set up nfs share 
     bash config/docker/setup-nfs-osx.sh 
