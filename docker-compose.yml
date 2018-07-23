@@ -1,37 +1,42 @@
 version: '3.6'
 
 volumes:
-  db_data:
+  mysql_data:
+  minio_data:
+  nfsmount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+      device: ":/var/www/unite-cms"
 
 services:
-  
-  centos:
-    image: unitecms/unite-cms-docker-centos
-    command: /bin/true
 
-  #mysql:
-  #  image: centos/mysql-57-centos7
-  #  container_name: mysql
-  #  restart: always
-  #  environment:
-  #  - MYSQL_USER=root
-  #  - MYSQL_PASSWORD=root
-  #  - MYSQL_DATABASE=unite
-  #  ports:
-  #  - "3307:3306"
-  #  volumes:
-  #  - /tmp/db:/var/lib/mysql
+  mysql:
+    image: centos/mysql-57-centos7
+    container_name: mysql
+    restart: always
+    environment:
+    - MYSQL_USER=${DATABASE_USER}
+    - MYSQL_PASSWORD=${DATABASE_PASSWORD}
+    - MYSQL_DATABASE=${DATABASE_NAME}
+    - MYSQL_ROOT_PASSWORD=root123456
+    ports:
+    - "3307:3306"
+    volumes:
+    - mysql_data:/var/lib/mysql
   
   unite:
-    image: unitecms/unite-cms-docker
-    build: ./docker/unite
+    image: unitecms/docker-unite
+    build: ./config/docker/unite
     container_name: unitecms
     working_dir: /app/unite-cms
     restart: always
     depends_on:
-    - centos
+    - mysql
     environment:
-    - APPLICATION_DOMAIN=unitetest.local
+    - ROUTING_APPROACH=${ROUTING_APPROACH}
+    - DEFAULT_HOSTNAME=${DEFAULT_HOSTNAME}
     - DATABASE_NAME=${DATABASE_NAME}
     - DATABASE_USER=${DATABASE_USER}
     - DATABASE_PASSWORD=${DATABASE_PASSWORD}
@@ -43,21 +48,23 @@ services:
     - MAILER_SENDER=${MAILER_SENDER}
     - MAILER_URL=${MAILER_URL}
     volumes:
-      - .:/app/unite-cms
-      #- /tmp/logs:/app/unite-cms/var/logs
-      #- /tmp/cache:/app/unite-cms/var/cache
+    - "nfsmount:/app/unite-cms"
+    - ./config/docker/unite/etc/nginx/conf.d/app.conf:/etc/nginx/conf.d/app.conf
+    - ./config/docker/unite/etc/php-fpm.d/www.conf:/etc/php-fpm.d/www.conf
+    #- ./var/log/php:/var/log/php
+    #- ./var/log/nginx:/var/log/nginx
     ports:
     - "8080:8080"
 
-  minio:
-    image: unitecms/unite-cms-docker-minio
-    container_name: minio
-    restart: always
-    ports:
-    - "9001:9000"
-    volumes:
-    - /tmp/minio:/data
-    environment:
-    - "MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}"
-    - "MINIO_SECRET_KEY=${MINIO_SECRET_KEY}"
-    command: server /data
+  #minio:
+  #  image: unitecms/docker-minio
+  #  container_name: minio
+  #  restart: always
+  #  ports:
+  #  - "9000:9000"
+  #  volumes:
+  #  - minio_data:/data
+  #  environment:
+  #  - "MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}"
+  #  - "MINIO_SECRET_KEY=${MINIO_SECRET_KEY}"
+  #  command: server /data
