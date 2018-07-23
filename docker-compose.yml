@@ -3,12 +3,12 @@ version: '3.6'
 volumes:
   mysql_data:
   minio_data:
-  nfsmount:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
-      device: ":/var/www/unite-cms"
+  #nfsmount:
+  #  driver: local
+  #  driver_opts:
+  #    type: nfs
+  #    o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+  #    device: ":/var/www/unite-cms"
 
 services:
 
@@ -48,9 +48,10 @@ services:
     - MAILER_SENDER=${MAILER_SENDER}
     - MAILER_URL=${MAILER_URL}
     volumes:
-    - "nfsmount:/app/unite-cms"
-    - ./config/docker/unite/etc/nginx/conf.d/app.conf:/etc/nginx/conf.d/app.conf
-    - ./config/docker/unite/etc/php-fpm.d/www.conf:/etc/php-fpm.d/www.conf
+    #- "nfsmount:/app/unite-cms"
+    - "./:/app/unite-cms"
+    #- ./config/docker/unite/etc/nginx/conf.d/app.conf:/etc/nginx/conf.d/app.conf
+    #- ./config/docker/unite/etc/php-fpm.d/www.conf:/etc/php-fpm.d/www.conf
     #- ./var/log/php:/var/log/php
     #- ./var/log/nginx:/var/log/nginx
     ports:
@@ -68,3 +69,9 @@ services:
   #  - "MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}"
   #  - "MINIO_SECRET_KEY=${MINIO_SECRET_KEY}"
   #  command: server /data
+
+  #mailcatcher:
+  #  image: yappabe/mailcatcher
+  #  ports:
+  #  - 1025:1025
+  #  - 1080:1080
