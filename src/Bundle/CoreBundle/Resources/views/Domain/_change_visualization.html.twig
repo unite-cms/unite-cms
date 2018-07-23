@@ -1,0 +1,27 @@
+<div class="unite-domain-change-visualization">
+
+    {{ include('@UniteCMSCore/Domain/_change_visualization_block.html.twig', {
+        headline: 'Content Types',
+        types: updated.contentTypes,
+        original_types: original.contentTypes,
+        left_types: original.contentTypesDiff(updated, true),
+        right_types: updated.contentTypesDiff(original, true)
+    }) }}
+
+    {{ include('@UniteCMSCore/Domain/_change_visualization_block.html.twig', {
+        headline: 'Setting Types',
+        types: updated.settingTypes,
+        original_types: original.settingTypes,
+        left_types: original.settingTypesDiff(updated, true),
+        right_types: updated.settingTypesDiff(original, true)
+    }) }}
+
+    {{ include('@UniteCMSCore/Domain/_change_visualization_block.html.twig', {
+        headline: 'Member Types',
+        types: updated.domainMemberTypes,
+        original_types: original.domainMemberTypes,
+        left_types: original.domainMemberTypesDiff(updated, true),
+        right_types: updated.domainMemberTypesDiff(original, true)
+    }) }}
+
+</div>

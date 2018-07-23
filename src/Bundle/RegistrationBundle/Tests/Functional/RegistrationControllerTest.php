@@ -2,10 +2,36 @@
 
 namespace UniteCMS\RegistrationBundle\Tests\Functional;
 
+use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\BrowserKit\Cookie;
 
 class RegistrationControllerTest extends DatabaseAwareTestCase {
+
+    /**
+     * @var Client $client
+     */
+    private $client;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->client = static::$container->get('test.client');
+        $this->client->followRedirects(false);
+        $this->client->disableReboot();
+    }
+
+    protected static function bootKernel(array $options = array())
+    {
+        $options['environment'] = 'test_registration';
+        return parent::bootKernel($options);
+    }
 
     public function testSubmitRegistrationForm() {
 
@@ -14,9 +40,12 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
         $this->em->persist($org);
         $this->em->flush();
 
-        $client = static::$container->get('test.client');
-        $crawler = $client->request('GET', $client->getContainer()->get('router')->generate('unitecms_registration_registration_registration'));
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $crawler = $this->client->request('GET', $this->client->getContainer()->get('router')->generate(
+            'unitecms_registration_registration_registration',
+            [],
+            Router::ABSOLUTE_URL
+        ));
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         $form = $crawler->filter('form');
         $form = $form->form();
@@ -25,8 +54,8 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
         $form['registration[password][first]'] = 'password';
         $form['registration[password][second]'] = 'password1';
         $form['registration[organizationTitle]'] = 'New Organization';
-        $form['registration[organizationIdentifier]'] = 'neworg';
-        $crawler = $client->submit($form);
+        $form['registration[organizationIdentifier]'] = 'new_org';
+        $crawler = $this->client->submit($form);
 
         // make sure, that we stay on the same page, because password was not correct.
         $this->assertCount(1, $crawler->filter('h2:contains("' . static::$container->get('translator')->trans('registration.registration.headline') . '")'));
@@ -36,7 +65,7 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
         $form['registration[password][first]'] = 'password';
         $form['registration[password][second]'] = 'password';
         $form['registration[organizationIdentifier]'] = 'taken';
-        $crawler = $client->submit($form);
+        $crawler = $this->client->submit($form);
 
         // make sure, that we stay on the same page, because organization identifier is already taken.
         $this->assertCount(1, $crawler->filter('h2:contains("' . static::$container->get('translator')->trans('registration.registration.headline') . '")'));
@@ -45,9 +74,64 @@ class RegistrationControllerTest extends DatabaseAwareTestCase {
         $form = $form->form();
         $form['registration[password][first]'] = 'password';
         $form['registration[password][second]'] = 'password';
-        $form['registration[organizationIdentifier]'] = 'new';
-        $client->submit($form);
+        $form['registration[organizationIdentifier]'] = 'new_new';
+        $this->client->submit($form);
 
-        $this->assertTrue($client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', ['organization' => 'new'])));
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate(
+            'unitecms_core_domain_index',
+            ['organization' => IdentifierNormalizer::denormalize('new_new')],
+            Router::ABSOLUTE_URL
+        )));
+    }
+
+    private function login(User $user)
+    {
+        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
+        $session = $this->client->getContainer()->get('session');
+        $session->set('_security_main', serialize($token));
+        $session->save();
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $this->client->getCookieJar()->set($cookie);
+    }
+
+    public function testRegistrationRouteLoggedIn() {
+
+        $org = new Organization();
+        $org->setTitle('registration access check')->setIdentifier('test_3');
+
+        $this->em->persist($org);
+        $this->em->flush();
+        $this->em->refresh($org);
+
+        $user = new User();
+        $user->setEmail('domain_editor@example.com')
+             ->setName('Domain Editor')
+             ->setRoles([User::ROLE_USER])
+             ->setPassword('XXX');
+
+        $orgMember = new OrganizationMember();
+        $orgMember->setRoles([Organization::ROLE_USER])->setOrganization($org);
+
+        $user->addOrganization($orgMember);
+        $this->em->persist($user);
+        $this->em->flush();
+        $this->em->refresh($user);
+
+        $this->login($user);
+
+        $this->client->request('GET', $this->client->getContainer()->get('router')->generate(
+            'unitecms_registration_registration_registration',
+            [],
+            Router::ABSOLUTE_URL
+        ));
+
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
+
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate(
+            'unitecms_core_index',
+            [],
+            Router::ABSOLUTE_URL
+        )));
+
     }
 }

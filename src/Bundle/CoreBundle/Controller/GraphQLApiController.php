@@ -34,7 +34,9 @@ class GraphQLApiController extends Controller
         $schema = new Schema(
             [
                 'query' => $schemaTypeManager->getSchemaType('Query'),
-                'mutation' => ($domain->hasContentOrSettingTypes()) ? $schemaTypeManager->getSchemaType(
+
+                // at the moment only content (and not setting) can be mutated.
+                'mutation' => ($domain->getContentTypes()->count() > 0) ? $schemaTypeManager->getSchemaType(
                     'Mutation'
                 ) : null,
                 'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
@@ -44,14 +46,15 @@ class GraphQLApiController extends Controller
         );
 
         $server = new StandardServer(
-            ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug(true)->setContext(
-                function () use ($request) {
-                    return [
-                        'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
-                    ];
-                }
-            )
+          ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug($this->getParameter('kernel.debug'))->setContext(
+            function () use ($request) {
+                return [
+                    'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
+                ];
+            }
+          )
         );
+
         $serverHelper = new Helper();
 
         try {
@@ -68,6 +71,10 @@ class GraphQLApiController extends Controller
             return new JsonResponse([], 500);
         }
 
-        return new JsonResponse($result);
+        return new JsonResponse($result, 200, [
+            'Access-Control-Allow-Headers' => 'origin, content-type, accept',
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'POST, OPTIONS',
+        ]);
     }
 }

@@ -6,15 +6,15 @@
     <div uk-dropdown="mode: click; pos: top-center">
         <ul class="uk-nav uk-dropdown-nav">
             <li class="uk-nav-header uk-hidden@m">{{ app.user }}</li>
-            <li><a href="{{ path('unitecms_core_profile_organizations') }}">
+            <li><a href="{{ url('unitecms_core_organization_index') }}">
                     <i class="uk-margin-small-right" data-feather="home"></i>
                     {% trans %}user_menu.organizations{% endtrans %}
                 </a></li>
-            <li><a href="{{ path('unitecms_core_profile_update') }}">
+            <li><a href="{{ url('unitecms_core_profile_update') }}">
                 <i class="uk-margin-small-right" data-feather="user"></i>
                     {% trans %}user_menu.edit_profile{% endtrans %}
             </a></li>
-            <li><a class="uk-text-danger" href="{{ path('unitecms_core_logout') }}">
+            <li><a class="uk-text-danger" href="{{ url('unitecms_core_logout') }}">
                 <i class="uk-margin-small-right" data-feather="log-out"></i>
                 {% trans %}user_menu.sign_out{% endtrans %}
             </a></li>

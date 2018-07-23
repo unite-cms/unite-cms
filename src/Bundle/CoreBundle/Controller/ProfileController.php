@@ -2,8 +2,8 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -16,9 +16,11 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\EqualTo;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Event\CancellationEvent;
@@ -26,19 +28,17 @@ use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Form\InvitationRegistrationType;
 use UniteCMS\CoreBundle\Form\Model\ChangePassword;
 use UniteCMS\CoreBundle\Form\Model\InvitationRegistrationModel;
-use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class ProfileController extends Controller
 {
 
     /**
-     * @Route("/update")
-     * @Method({"GET", "POST"})
+     * @Route("/update", methods={"GET", "POST"})
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function updateAction(Request $request)
     {
@@ -57,7 +57,7 @@ class ProfileController extends Controller
 
         if ($forms['personal']->isSubmitted() && $forms['personal']->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
 
@@ -69,7 +69,7 @@ class ProfileController extends Controller
             ])
             ->add('newPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'invalid_message' => 'validation.passwords_must_match',
+                'invalid_message' => 'passwords_must_match',
                 'required' => true,
                 'first_options' => array('label' => 'profile.change_password.form.new_password'),
                 'second_options' => array('label' => 'profile.change_password.form.new_password_repeat'),
@@ -88,7 +88,7 @@ class ProfileController extends Controller
             $changePassword->eraseCredentials();
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
 
@@ -142,61 +142,23 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Profile:update.html.twig', [
+            '@UniteCMSCore/Profile/update.html.twig', [
                 'forms' => array_map(function($form) { return $form->createView(); }, $forms),
             ]
         );
     }
 
     /**
-     * @Route("/organizations")
-     * @Method({"GET"})
-     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
+     * @Route("/reset-password", methods={"GET", "POST"})
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function organizationsAction(Request $request) {
-
-        // Platform admins are allowed to view all organizations.
-        if ($this->isGranted(User::ROLE_PLATFORM_ADMIN)) {
-            $organizations = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Organization')->findAll();
-        } else {
-            $organizations = $this->getUser()->getOrganizations()->map(
-                function (OrganizationMember $member) {
-                    return $member->getOrganization();
-                }
-            );
-        }
-
-        $allowedOrganizations = [];
-        foreach ($organizations as $organization) {
-            if ($this->isGranted(OrganizationVoter::VIEW, $organization)) {
-                $allowedOrganizations[] = $organization;
-            }
-        }
-
-        return $this->render(
-            'UniteCMSCoreBundle:Profile:organizations.html.twig',
-            [
-                'organizations' => $allowedOrganizations,
-            ]
-        );
-    }
-
-    /**
-     * @Route("/reset-password")
-     * @Method({"GET", "POST"})
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function resetPasswordAction(Request $request)
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
         $form = $this->createFormBuilder()
@@ -225,10 +187,9 @@ class ProfileController extends Controller
                     // Generate a secure token. This line was taken from https://github.com/FriendsOfSymfony/FOSUserBundle/blob/master/Util/TokenGenerator.php
                     $user->setResetToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
                     $user->setResetRequestedAt(new \DateTime());
-                    $this->getDoctrine()->getManager()->flush();
 
-                    // Send out email using the default mailer.
-                    $message = (new \Swift_Message('Reset Password'))
+                    // Create message.
+                    $message = (new \Swift_Message($this->get('translator')->trans('email.reset_password.headline')))
                         ->setFrom($this->getParameter('mailer_sender'))
                         ->setTo($user->getEmail())
                         ->setBody(
@@ -246,13 +207,18 @@ class ProfileController extends Controller
                             ),
                             'text/html'
                         );
+
+                    // Save token.
+                    $this->getDoctrine()->getManager()->flush();
+
+                    // Send out message.
                     $this->get('mailer')->send($message);
                 }
             }
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Profile:reset-password.html.twig',
+            '@UniteCMSCore/Profile/reset-password.html.twig',
             array(
                 'form' => $form->createView(),
             )
@@ -260,17 +226,16 @@ class ProfileController extends Controller
     }
 
     /**
-     * @Route("/reset-password-confirm")
-     * @Method({"GET", "POST"})
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @Route("/reset-password-confirm", methods={"GET", "POST"})
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function resetPasswordConfirmAction(Request $request)
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
         $userFound = false;
@@ -300,7 +265,7 @@ class ProfileController extends Controller
                         RepeatedType::class,
                         [
                             'type' => PasswordType::class,
-                            'invalid_message' => 'validation.passwords_must_match',
+                            'invalid_message' => 'passwords_must_match',
                             'required' => true,
                             'first_options' => array('label' => 'New password'),
                             'second_options' => array('label' => 'Repeat new password'),
@@ -329,7 +294,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Profile:reset-password-confirm.html.twig',
+            '@UniteCMSCore/Profile/reset-password-confirm.html.twig',
             array(
                 'userFound' => $userFound,
                 'tokenExpired' => $tokenExpired,
@@ -339,11 +304,10 @@ class ProfileController extends Controller
     }
 
     /**
-     * @Route("/accept-invitation")
-     * @Method({"GET", "POST"})
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @Route("/accept-invitation", methods={"GET", "POST"})
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function acceptInvitationAction(Request $request)
     {
@@ -352,7 +316,13 @@ class ProfileController extends Controller
         $tokenExpired = true;
         $wrongUser = true;
         $token = null;
+
+        /*** @var Invitation $invitation */
         $invitation = null;
+
+        /*** @var User $user */
+        $existingUser = null;
+
         $newUser = true;
         $alreadyMember = false;
         $form = null;
@@ -360,7 +330,7 @@ class ProfileController extends Controller
         if (!empty($token = $request->query->get('token'))) {
             $tokenPresent = true;
 
-            if ($invitation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:DomainInvitation')->findOneBy(
+            if ($invitation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Invitation')->findOneBy(
                 ['token' => $token]
             )) {
                 $tokenFound = true;
@@ -377,33 +347,49 @@ class ProfileController extends Controller
 
                         // If no user is logged in, redirect the user to the login page
                         if (!$this->getUser()) {
+
+                            $this->addFlash(
+                                'success',
+                                $this->get('translator')->trans('profile.accept_invitation.please_login')
+                            );
+
                             throw $this->createAccessDeniedException();
                         }
 
                         if ($existingUser == $this->getUser()) {
                             $wrongUser = false;
 
-                            foreach ($existingUser->getDomains() as $domainMember) {
-                                if ($domainMember->getDomainMemberType() === $invitation->getDomainMemberType()) {
+                            foreach ($existingUser->getOrganizations() as $orgMember) {
+                                if ($orgMember->getOrganization() === $invitation->getOrganization()) {
                                     $alreadyMember = true;
                                 }
                             }
 
                             if (!$alreadyMember) {
                                 $form = $this->createFormBuilder()
-                                    ->add('accept', SubmitType::class, ['label' => 'invitation.accept'])
-                                    ->add('reject', SubmitType::class, ['label' => 'invitation.reject'])
+                                    ->add('accept', SubmitType::class, ['label' => 'profile.accept_invitation.form.accept.button'])
+                                    ->add('reject', SubmitType::class, ['label' => 'profile.accept_invitation.form.reject.button', 'attr' => ['class' => 'uk-button-danger']])
                                     ->getForm();
 
                                 $form->handleRequest($request);
 
                                 if ($form->isSubmitted() && $form->isValid()) {
                                     if ($form->get('accept')->isClicked()) {
-                                        $domainMember = new DomainMember();
-                                        $domainMember
-                                            ->setDomain($invitation->getDomainMemberType()->getDomain())
-                                            ->setDomainMemberType($invitation->getDomainMemberType());
-                                        $existingUser->addDomain($domainMember);
+
+                                        $organizationMember = new OrganizationMember();
+                                        $organizationMember->setOrganization($invitation->getOrganization());
+                                        $existingUser->addOrganization($organizationMember);
+
+                                        $domainMember = null;
+
+                                        // If this invitation includes a domain membership, we create it.
+                                        if($invitation->getDomainMemberType()) {
+                                            $domainMember = new DomainMember();
+                                            $domainMember
+                                                ->setDomain($invitation->getDomainMemberType()->getDomain())
+                                                ->setDomainMemberType($invitation->getDomainMemberType());
+                                            $existingUser->addDomain($domainMember);
+                                        }
 
                                         // Validate user.
                                         if (!$this->get('validator')->validate($existingUser)) {
@@ -413,11 +399,31 @@ class ProfileController extends Controller
                                             // Delete invitation.
                                             $this->getDoctrine()->getManager()->remove($invitation);
 
-                                            // Save domainMember.
-                                            $this->getDoctrine()->getManager()->persist($domainMember);
+                                            // Save orgMember.
+                                            $this->getDoctrine()->getManager()->persist($organizationMember);
+
+                                            if($domainMember) {
+                                                $this->getDoctrine()->getManager()->persist($domainMember);
+                                            }
 
                                             // Save changes to database.
                                             $this->getDoctrine()->getManager()->flush();
+
+                                            // Redirect to index.
+                                            if($domainMember) {
+                                                return $this->redirect(
+                                                    $this->generateUrl('unitecms_core_domain_view', [
+                                                        'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
+                                                        'domain' => $domainMember->getDomain()->getIdentifier(),
+                                                    ], Router::ABSOLUTE_URL)
+                                                );
+                                            } else {
+                                                return $this->redirect(
+                                                    $this->generateUrl('unitecms_core_domain_index', [
+                                                        'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
+                                                    ], Router::ABSOLUTE_URL)
+                                                );
+                                            }
                                         }
 
                                         // If the user rejects the invitation, just delete it.
@@ -428,6 +434,9 @@ class ProfileController extends Controller
 
                                         // Save changes to database.
                                         $this->getDoctrine()->getManager()->flush();
+
+                                        // Redirect to index.
+                                        return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
                                     }
                                 }
                             }
@@ -459,10 +468,6 @@ class ProfileController extends Controller
                             if ($form->isSubmitted() && $form->isValid()) {
 
                                 $user = new User();
-                                $domainMember = new DomainMember();
-                                $domainMember
-                                    ->setDomain($invitation->getDomainMemberType()->getDomain())
-                                    ->setDomainMemberType($invitation->getDomainMemberType());
                                 $user
                                     ->setEmail($invitation->getEmail())
                                     ->setName($registration->getName())
@@ -471,12 +476,23 @@ class ProfileController extends Controller
                                             $user,
                                             $registration->getPassword()
                                         )
-                                    )
-                                    ->addDomain($domainMember);
+                                    );
 
+                                // Create organization membership for this user.
                                 $organizationMember = new OrganizationMember();
-                                $organizationMember->setOrganization($domainMember->getDomain()->getOrganization());
+                                $organizationMember->setOrganization($invitation->getOrganization());
                                 $user->addOrganization($organizationMember);
+
+                                $domainMember = null;
+
+                                // If this invitation includes a domain membership, we create it.
+                                if($invitation->getDomainMemberType()) {
+                                    $domainMember = new DomainMember();
+                                    $domainMember
+                                        ->setDomain($invitation->getDomainMemberType()->getDomain())
+                                        ->setDomainMemberType($invitation->getDomainMemberType());
+                                    $user->addDomain($domainMember);
+                                }
 
                                 // Clear plaintext password, so it can't be accessed later in this request.
                                 $registration->eraseCredentials();
@@ -492,8 +508,13 @@ class ProfileController extends Controller
 
                                     $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_SUCCESS, new RegistrationEvent($registration));
 
-                                    $this->getDoctrine()->getManager()->persist($domainMember);
                                     $this->getDoctrine()->getManager()->persist($user);
+
+                                    $this->getDoctrine()->getManager()->persist($organizationMember);
+
+                                    if($domainMember) {
+                                        $this->getDoctrine()->getManager()->persist($domainMember);
+                                    }
 
                                     // Delete invitation.
                                     $this->getDoctrine()->getManager()->remove($invitation);
@@ -507,10 +528,17 @@ class ProfileController extends Controller
                                     $this->container->get('session')->set('_security_main', serialize($userToken));
 
                                     $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration));
-                                    return $this->redirectToRoute('unitecms_core_domain_view', [
-                                        'organization' => $domainMember->getDomain()->getOrganization()->getIdentifier(),
-                                        'domain' => $domainMember->getDomain()->getIdentifier(),
-                                    ]);
+
+                                    if($domainMember) {
+                                        return $this->redirect($this->generateUrl('unitecms_core_domain_view', [
+                                            'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
+                                            'domain' => $domainMember->getDomain()->getIdentifier(),
+                                        ], Router::ABSOLUTE_URL));
+                                    } else {
+                                        return $this->redirect($this->generateUrl('unitecms_core_domain_index', [
+                                            'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
+                                        ], Router::ABSOLUTE_URL));
+                                    }
                                 }
                             }
                         }
@@ -520,7 +548,7 @@ class ProfileController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Profile:accept-invitation.html.twig',
+            '@UniteCMSCore/Profile/accept-invitation.html.twig',
             array(
                 'tokenPresent' => $tokenPresent,
                 'tokenFound' => $tokenFound,

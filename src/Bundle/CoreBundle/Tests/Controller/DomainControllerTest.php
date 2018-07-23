@@ -8,8 +8,8 @@
 
 namespace UniteCMS\CoreBundle\Tests\Controller;
 
-
-use Symfony\Component\HttpKernel\Client;
+use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -17,6 +17,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -48,10 +49,11 @@ class DomainControllerTest extends DatabaseAwareTestCase
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
-        $this->organization->setTitle('Organization')->setIdentifier('org1');
+        $this->organization->setTitle('Organization')->setIdentifier('org1_org1');
         $this->em->persist($this->organization);
         $this->em->flush();
         $this->em->refresh($this->organization);
@@ -90,8 +92,8 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // List all domains.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
-        ]));
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Check that there is a add domain button.
@@ -123,17 +125,26 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
         $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("identifier: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         // Submit valid Domain definition.
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
         $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1" }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        $this->client->enableReboot();
+
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => 'd1',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
+
+        $this->client->disableReboot();
+
         $updateButton = $crawler->filter('a:contains("' . static::$container->get('translator')->trans('domain.menu.manage.update') .'")');
         $this->assertGreaterThanOrEqual(1, $updateButton->count());
         $crawler = $this->client->click($updateButton->first()->link());
@@ -157,6 +168,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $form->form();
         $form->disableValidation();
         $values['form']['definition'] = '{ "foo": "baa" }';
+        $values['form']['submit'] = '';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertFalse($this->client->getResponse()->isRedirect());
         $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
@@ -170,11 +182,39 @@ class DomainControllerTest extends DatabaseAwareTestCase
             "view domain": "true",
             "update domain": "member.type == \"user\""
         }}';
-        $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+        $values['form']['submit'] = '';
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        // assert confirmation page.
+        $this->assertCount(1, $crawler->filter('.unite-domain-change-visualization'));
+        $this->assertCount(1, $crawler->filter('button[name="form[back]"]'));
+
+        // click on back button.
+        $values['form']['back'] = '';
+        unset($values['form']['submit']);
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        // we should see the edit page again.
+        $this->assertCount(0, $crawler->filter('.unite-domain-change-visualization'));
+        $this->assertCount(1, $crawler->filter('button[name="form[submit]"]'));
+
+        // submit.
+        $values['form']['submit'] = '';
+        unset($values['form']['back']);
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+        $this->assertCount(1, $crawler->filter('.unite-domain-change-visualization'));
+        $this->assertCount(1, $crawler->filter('button[name="form[confirm]"]'));
+
+        // click on confirmation button.
+        $values['form']['confirm'] = '';
+        unset($values['form']['submit']);
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => 'd1',
-        ])));
+        ], Router::ABSOLUTE_URL)));
+
         $crawler = $this->client->followRedirect();
 
         // make sure, that the domain was updated.
@@ -221,8 +261,8 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
-        ])));
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+        ], Router::ABSOLUTE_URL)));
         $this->client->followRedirect();
 
         // Assert domain was deleted.
@@ -248,8 +288,8 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // List all domains.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $this->organization->getIdentifier(),
-        ]));
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // org editors are not automatically domain editors.
@@ -264,6 +304,9 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->persist($domainMember);
         $this->em->flush($domainMember);
         $this->em->refresh($domainMember);
+
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
 
         $crawler = $this->client->reload();
 
@@ -283,8 +326,11 @@ class DomainControllerTest extends DatabaseAwareTestCase
         ]);
         $this->editor->setName('Domain Admin');
         $this->em->flush($this->editor);
+        $this->em->refresh($this->editor);
 
+        $this->client->enableReboot();
         $crawler = $this->client->reload();
+        $this->client->disableReboot();
 
         // org editors, that are domain admins are allowed to edit domain.
         $this->assertCount(1, $crawler->filter('a:contains("' . static::$container->get('translator')->trans('domain.menu.manage.update') .'")'));

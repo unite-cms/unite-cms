@@ -13,6 +13,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -76,6 +77,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
@@ -126,7 +128,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         // Try to access without token.
         $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
         ], Router::ABSOLUTE_URL), [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode(['query' => '{}']));
@@ -136,7 +138,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         // Try to access with wrong token.
         $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'token' => $this->apiClient2->getToken(),
         ], Router::ABSOLUTE_URL), [], [], [
             'CONTENT_TYPE' => 'application/json',
@@ -147,7 +149,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         // Try to access with valid token.
         $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'token' => $this->apiClient1->getToken(),
         ], Router::ABSOLUTE_URL), [], [], ['CONTENT_TYPE' => 'application/json'], json_encode(['query' => '{}']));
 
@@ -156,7 +158,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         // Try to access with fallback but no user loggedin.
         $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
         ], Router::ABSOLUTE_URL), [], [], [
             'CONTENT_TYPE' => 'application/json',
             'HTTP_AUTHENTICATION_FALLBACK' => 'true',
@@ -179,7 +181,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->client->getCookieJar()->set($cookie);
         $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
         ], Router::ABSOLUTE_URL), [], [], [
             'CONTENT_TYPE' => 'application/json',
             'HTTP_AUTHENTICATION_FALLBACK' => 'true',
@@ -202,7 +204,7 @@ class ApiClientFunctionalTest extends DatabaseAwareTestCase
         $this->client->getCookieJar()->set($cookie);
         $this->client->request('POST', static::$container->get('router')->generate('unitecms_core_api', [
             'domain' => $this->domain->getIdentifier(),
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
         ], Router::ABSOLUTE_URL), [], [], [
             'CONTENT_TYPE' => 'application/json',
             'HTTP_AUTHENTICATION_FALLBACK' => 'true',

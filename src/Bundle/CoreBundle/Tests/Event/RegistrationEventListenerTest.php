@@ -9,9 +9,10 @@
 namespace UniteCMS\CoreBundle\Tests\Event;
 
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
@@ -24,9 +25,14 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
     private $client;
 
     /**
-     * @var DomainInvitation $domainInvitation
+     * @var Invitation $invitation
      */
-    private $domainInvitation;
+    private $invitation;
+
+    /**
+     * @var Domain $domain
+     */
+    private $domain;
 
     public function setUp()
     {
@@ -34,22 +40,23 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
 
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         $org = new Organization();
         $org->setIdentifier('org')->setTitle('Org');
-        $domain = new Domain();
-        $domain->setIdentifier('domain')->setTitle('Domain')->setOrganization($org);
+        $this->domain = new Domain();
+        $this->domain->setIdentifier('domain')->setTitle('Domain')->setOrganization($org);
 
-        $this->domainInvitation = new DomainInvitation();
-        $this->domainInvitation
+        $this->invitation = new Invitation();
+        $this->invitation
             ->setEmail('test@example.com')
             ->setToken('token')
-            ->setDomainMemberType($domain->getDomainMemberTypes()->first())
+            ->setOrganization($org)
             ->setRequestedAt(new \DateTime('now'));
 
         static::$container->get('doctrine.orm.entity_manager')->persist($org);
-        static::$container->get('doctrine.orm.entity_manager')->persist($domain);
-        static::$container->get('doctrine.orm.entity_manager')->persist($this->domainInvitation);
+        static::$container->get('doctrine.orm.entity_manager')->persist($this->domain);
+        static::$container->get('doctrine.orm.entity_manager')->persist($this->invitation);
         static::$container->get('doctrine.orm.entity_manager')->flush();
     }
 
@@ -86,7 +93,11 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->domainInvitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate(
+            'unitecms_core_profile_acceptinvitation',
+            ['token' => $this->invitation->getToken()],
+            Router::ABSOLUTE_URL
+        ));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -146,7 +157,11 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $this->domainInvitation->getToken()]));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate(
+            'unitecms_core_profile_acceptinvitation',
+            ['token' => $this->invitation->getToken()],
+            Router::ABSOLUTE_URL
+        ));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -160,7 +175,7 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         // Manipulate domain org, so user validation will fail.
         $org2 = new Organization();
         $org2->setIdentifier('org2')->setTitle('org2')->setId(2);
-        $this->domainInvitation->getDomainMemberType()->getDomain()->setOrganization($org2);
+        $this->invitation->setOrganization($org2)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
         $org2->setDomains([]);
 
         // Submitting valid data should result in an success and complete invitation action.

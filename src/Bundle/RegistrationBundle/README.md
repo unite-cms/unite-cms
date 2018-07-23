@@ -2,7 +2,7 @@
 unite cms Registration Bundle
 =============================
 
-This extends the unite cms core bundle and allows users to self-register and self-cancel an unite cms user account.
+This extends the unite cms core bundle and allows users to self-register and self-cancel an unite cms user account. 
 
 This bundle is not part of the unite cms standard distribution and must therefore be installed manually:
 

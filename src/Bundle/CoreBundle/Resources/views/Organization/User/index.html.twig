@@ -5,6 +5,10 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <h2 class="uk-flex-1">{% trans %}organization.user.headline{% endtrans %}</h2>
+        <a href="{{ url('unitecms_core_organizationuser_createinvite', { organization: organization.identifier|replace({'_':'-'}) }) }}" class="uk-button uk-button-primary">
+            <i data-feather="plus" class="uk-margin-small-right-small"></i>
+            {% trans %}organization.user.create_invite.button{% endtrans %}
+        </a>
     </header>
 
     <div class="unite-card-table">
@@ -25,7 +29,7 @@
                         <td>
 
                             {% if constant('UniteCMS\\CoreBundle\\Entity\\Organization::ROLE_ADMINISTRATOR') in member.roles %}
-                                <span class="uk-badge uk-badge-danger">Organization Admin</span>
+                                <span class="uk-badge uk-badge-danger uk-text-nowrap">Organization Admin</span>
                                 <br />
                             {% endif %}
 
@@ -41,15 +45,15 @@
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a href="{{ path('unitecms_core_organizationuser_update', {
-                                            organization: organization.identifier,
+                                    <li><a href="{{ url('unitecms_core_organizationuser_update', {
+                                            organization: organization.identifier|replace({'_':'-'}),
                                             member: member.id
                                         }) }}">
                                             <i class="uk-margin-small-right" data-feather="edit"></i>
                                             {% trans %}organization.user.update.button{% endtrans %}
                                         </a></li>
-                                    <li><a class="uk-text-danger" href="{{ path('unitecms_core_organizationuser_delete', {
-                                            organization: organization.identifier,
+                                    <li><a class="uk-text-danger" href="{{ url('unitecms_core_organizationuser_delete', {
+                                            organization: organization.identifier|replace({'_':'-'}),
                                             member: member.id
                                         }) }}">
                                             <i class="uk-margin-small-right" data-feather="trash-2"></i>
@@ -66,11 +70,55 @@
     <div class="navigation">
         {{ knp_pagination_render(users) }}
     </div>
-
-    <p class="uk-placeholder uk-text-center uk-width-xlarge uk-align-center">
-        <i data-feather="info"></i>
-        {% trans %}organization.user.description{% endtrans %}
-    </p>
 </article>
 
+{% if invites|length > 0 %}
+    <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+        <header class="uk-card-header">
+            <h2>{% trans %}organization.user.pending_invitations.headline{% endtrans %}</h2>
+        </header>
+
+        <div class="unite-card-table">
+            <table class="uk-table uk-table-justify uk-table-divider uk-table-middle">
+                <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Memberships</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for invite in invites %}
+                    <tr>
+                        <td>{{ invite.email }}</td>
+                        <td>
+                            {% if invite.domainMemberType %}
+                                <span class="uk-badge split">
+                                    <span>{{ invite.domainMemberType.domain }}</span>
+                                    <span>{{ invite.domainMemberType }}</span>
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
+                            <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
+                                <ul class="uk-nav uk-dropdown-nav">
+                                    <li><a class="uk-text-danger" href="{{ url('unitecms_core_organizationuser_deleteinvite', { organization: organization.identifier|replace({'_':'-'}), invite: invite.id }) }}">
+                                            <i class="uk-margin-small-right" data-feather="trash-2"></i>
+                                            {% trans %}organization.user.pending_invitations.delete.button{% endtrans %}
+                                        </a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="navigation">
+            {{ knp_pagination_render(invites) }}
+        </div>
+    </article>
+{% endif %}
 {% endblock content %}

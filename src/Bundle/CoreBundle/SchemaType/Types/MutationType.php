@@ -10,7 +10,9 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -77,7 +79,7 @@ class MutationType extends AbstractType
 
         // Append Content types.
         foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
-            $key = ucfirst($contentType->getIdentifier());
+            $key = IdentifierNormalizer::graphQLType($contentType, '');
 
             $fields['create' . $key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
@@ -128,7 +130,7 @@ class MutationType extends AbstractType
         // Resolve create content type
         if(substr($info->fieldName, 0, 6) == 'create') {
             return $this->resolveCreateContent(
-                strtolower(substr($info->fieldName, 6)),
+                IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
                 $value, $args, $context, $info
             );
         }
@@ -136,7 +138,7 @@ class MutationType extends AbstractType
         // Resolve update content type
         elseif(substr($info->fieldName, 0, 6) == 'update') {
             return $this->resolveUpdateContent(
-                strtolower(substr($info->fieldName, 6, -strlen('Content'))),
+                IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
                 $value, $args, $context, $info
             );
         }

@@ -4,11 +4,11 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitecms_core_content_translations', {
-            domain: domain.identifier,
-            organization: organization.identifier,
-            content_type: contentType.identifier,
-            view: view.identifier,
+        <a class="back-button" href="{{ url('unitecms_core_content_translations', {
+            domain: domain.identifier|replace({'_':'-'}),
+            organization: organization.identifier|replace({'_':'-'}),
+            content_type: contentType.identifier|replace({'_':'-'}),
+            view: view.identifier|replace({'_':'-'}),
             content: content.id
         }) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with { "%locale%": content.locale, "%content%": content|escape } %}content.translations.remove.headline{% endtrans %}</h2>

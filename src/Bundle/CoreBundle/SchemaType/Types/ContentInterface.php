@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\SchemaType\Types;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class ContentInterface extends InterfaceType
@@ -30,7 +31,7 @@ class ContentInterface extends InterfaceType
                         );
                     }
 
-                    $type = ucfirst($value->getContentType()->getIdentifier()).'Content';
+                    $type = IdentifierNormalizer::graphQLType($value->getContentType());
 
                     return $schemaTypeManager->getSchemaType($type);
                 },

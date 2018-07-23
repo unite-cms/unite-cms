@@ -4,7 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitecms_core_organizationapikey_index', { organization: unite.organization.identifier }) }}">
+        <a class="back-button" href="{{ url('unitecms_core_organizationapikey_index', { organization: unite.organization.identifier|replace({'_':'-'}) }) }}">
             <i data-feather="arrow-left"></i>
         </a>
         <h2 class="uk-flex-1">{% trans %}organization.api_key.create.headline{% endtrans %}</h2>

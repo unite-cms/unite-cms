@@ -8,6 +8,8 @@
 
 namespace UniteCMS\StorageBundle\Form;
 
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UniteCMS\CoreBundle\Form\WebComponentType;
 
@@ -27,6 +29,18 @@ class StorageFileType extends WebComponentType
     public function getParent()
     {
         return WebComponentType::class;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        parent::buildView($view, $form, $options);
+        $view->vars['assets'] = [
+            [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ],
+            [ 'js' => 'main.js', 'package' => 'UniteCMSStorageBundle' ],
+        ];
     }
 
     public function configureOptions(OptionsResolver $resolver)

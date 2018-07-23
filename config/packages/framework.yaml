@@ -8,6 +8,7 @@ framework:
     # Remove or comment this section to explicitly disable session support.
     session:
         handler_id: ~
+        cookie_domain: '.%default_hostname%'
 
     #esi: true
     #fragments: true
@@ -28,6 +29,8 @@ framework:
 
         # APCu (not recommended with heavy random-write workloads as memory fragmentation can cause perf issues)
         #app: cache.adapter.apcu
+
+    annotations: true
 
     validation: { enable_annotations: true }
     form: ~

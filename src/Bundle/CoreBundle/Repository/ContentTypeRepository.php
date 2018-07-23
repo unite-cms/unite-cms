@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 /**
  * ContentTypeRepository
@@ -20,9 +21,9 @@ class ContentTypeRepository extends EntityRepository
             ->andWhere('ct.identifier = :contentType')
             ->setParameters(
                 [
-                    'organization' => $organization,
-                    'domain' => $domain,
-                    'contentType' => $contentType,
+                    'organization' => IdentifierNormalizer::normalize($organization),
+                    'domain' => IdentifierNormalizer::normalize($domain),
+                    'contentType' => IdentifierNormalizer::normalize($contentType),
                 ]
             )
             ->getQuery()->getResult();

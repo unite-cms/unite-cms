@@ -19,6 +19,12 @@ services:
     tags:
       - { name: doctrine.event_listener, event: preRemove }
 
+  # When deleting a fieldable field, remove all content for this field.
+  UniteCMS\CoreBundle\Subscriber\DeleteFieldableFieldSubscriber:
+    public: false
+    tags:
+      - { name: doctrine.event_listener, event: preRemove }
+
   # When inserting, updating or deleting content, the dispatcher notifies all parts of unite CMS about this change.
   UniteCMS\CoreBundle\Subscriber\ContentEventDispatcher:
     public: false

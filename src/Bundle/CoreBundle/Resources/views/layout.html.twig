@@ -14,9 +14,19 @@
     </section>
 {% endif %}
 
-    <section class="unite-main-section uk-flex-center uk-flex uk-flex-middle uk-flex-column" uk-height-viewport="offset-top: true; offset-bottom: true">
+    <section class="unite-main-section uk-flex-center uk-flex uk-flex-middle uk-flex-column" uk-height-viewport="offset-top: true">
         {% include '@UniteCMSCore/_messages.html.twig' %}
+
+        {% if block('navigation') is empty %}
+            <div class="uk-flex-1 uk-flex-center uk-flex uk-flex-middle uk-flex-column">
+        {% endif %}
+
         {{ block('content') }}
+
+        {% if block('navigation') is empty %}
+            </div>
+        {% endif %}
+
     </section>
 
 </body>

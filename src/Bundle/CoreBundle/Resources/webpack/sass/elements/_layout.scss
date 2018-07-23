@@ -2,7 +2,10 @@
 .unite-main-section {
   position: relative;
   overflow: hidden;
-  flex-wrap: wrap;
+
+  > * {
+    max-width: 100%;
+  }
 }
 
 .unite-main-menu + .unite-main-section {

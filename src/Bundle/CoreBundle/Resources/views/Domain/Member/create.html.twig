@@ -5,10 +5,10 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <h2 class="uk-flex-1" id="domain_member_create_headline_select_add_type">
-            <a class="back-button" href="{{ path('unitecms_core_domainmember_index', {
-                organization: unite.organization.identifier,
-                domain: unite.domain.identifier,
-                member_type: memberType.identifier
+            <a class="back-button" href="{{ url('unitecms_core_domainmember_index', {
+                organization: unite.organization.identifier|replace({'_':'-'}),
+                domain: unite.domain.identifier|replace({'_':'-'}),
+                member_type: memberType.identifier|replace({'_':'-'})
             }) }}"><i data-feather="arrow-left"></i></a>
             {% trans with {'%type%': memberType|escape } %}domain.member.create.headline.select_add_type{% endtrans %}
         </h2>
@@ -26,6 +26,7 @@
         </h2>
     </header>
 
+    {{ form_errors(form) }}
     {{ form_start(form) }}
 
     <div id="domain_member_create_select_add_type">
@@ -53,14 +54,23 @@
         let add_types = document.getElementById('domain_member_create_select_add_type').querySelectorAll('input[type="radio"]');
 
         let disableRequired = function(input){
+
+            console.log("DISABLE");
+            console.log(input);
+            console.log(input.dataset);
+
             if(input.hasAttribute('required')) {
                 input.removeAttribute('required');
-                input.dataset['virtual_required'] = true;
+                input.dataset.virtual_required = true;
             }
         };
 
         let enableRequired = function(input){
-            if(input.dataset['virtual_required'] === true) {
+            console.log("ENABLE");
+            console.log(input);
+            console.log(input.dataset);
+
+            if(input.dataset.virtual_required === true) {
                 input.setAttribute('required', 'required');
             }
         };
@@ -130,6 +140,10 @@
             add_types[i].addEventListener('change', function(){
                 domainMemberCreateShowSelectedType(this.value);
             });
+
+            if(add_types[i].checked) {
+                domainMemberCreateShowSelectedType(add_types[i].value);
+            }
         }
     </script>
 </article>

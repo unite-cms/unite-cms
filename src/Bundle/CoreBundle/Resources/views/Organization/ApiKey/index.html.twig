@@ -5,7 +5,7 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <h2 class="uk-flex-1">{% trans %}organization.api_key.headline{% endtrans %}</h2>
-        <a href="{{ path('unitecms_core_organizationapikey_create', { organization: organization.identifier }) }}" class="uk-button uk-button-primary">
+        <a href="{{ url('unitecms_core_organizationapikey_create', { organization: organization.identifier|replace({'_':'-'}) }) }}" class="uk-button uk-button-primary">
             <i data-feather="plus" class="uk-margin-small-right-small"></i>
             {% trans %}organization.api_key.create.button{% endtrans %}
         </a>
@@ -18,6 +18,7 @@
                 <th>Name</th>
                 <th>Created</th>
                 <th>Memberships</th>
+                <th>Allowed Origin</th>
                 <th>Token</th>
                 <th>Actions</th>
             </tr>
@@ -36,6 +37,7 @@
                             <br />
                         {% endfor %}
                     </td>
+                    <td>{{ apiKey.origin }}</td>
                     <td class="unite-token-cell">
                         <button class="uk-button uk-button-default" type="button" uk-toggle="target: #key-modal-{{ apiKey.id }}">
                             <i data-feather="eye" class="uk-margin-small-right-small" width="16" height="16"></i>
@@ -47,11 +49,16 @@
 
                                 <unite-cms-core-api-token-field token="{{ apiKey.token }}" success-message="{% trans %}organization.api_key.token.copied{% endtrans %}"></unite-cms-core-api-token-field>
 
-                                <pre><strong>ENDPOINT: </strong> https://{BASEURL}/{{ organization.identifier }}/{DOMAIN}/api
+                                <pre>{% spaceless %}
+<strong>ENDPOINT(S):</strong>
 
-<strong>HEADER: </strong> <em>Authentication=TOKEN</em>
+{% for domain in organization.domains %}{{ domain }}: {{ url('unitecms_core_api', { organization: organization.identifier|replace({'_':'-'}), domain: domain.identifier|replace({'_':'-'}) }) }}<br /><br />{% endfor %}
+
+
+<strong>HEADER: </strong> <em>Authorization=TOKEN</em>
 = or =
-<strong>QUERY: </strong> <em>token=TOKEN</em></pre>
+<strong>QUERY: </strong> <em>?token=TOKEN</em>
+                                    {% endspaceless %}</pre>
 
                             </div>
                         </div>
@@ -60,11 +67,11 @@
                         <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                             <ul class="uk-nav uk-dropdown-nav">
-                                <li><a href="{{ path('unitecms_core_organizationapikey_update', { organization: organization.identifier, apiKey: apiKey.id }) }}">
+                                <li><a href="{{ url('unitecms_core_organizationapikey_update', { organization: organization.identifier|replace({'_':'-'}), apiKey: apiKey.id }) }}">
                                         <i class="uk-margin-small-right" data-feather="edit"></i>
                                         {% trans %}organization.api_key.update.button{% endtrans %}
                                     </a></li>
-                                <li><a class="uk-text-danger" href="{{ path('unitecms_core_organizationapikey_delete', { organization: organization.identifier, apiKey: apiKey.id }) }}">
+                                <li><a class="uk-text-danger" href="{{ url('unitecms_core_organizationapikey_delete', { organization: organization.identifier|replace({'_':'-'}), apiKey: apiKey.id }) }}">
                                         <i class="uk-margin-small-right" data-feather="trash-2"></i>
                                         {% trans %}organization.api_key.delete.button{% endtrans %}
                                     </a></li>

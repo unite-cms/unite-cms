@@ -13,6 +13,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\FieldType;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
 /**
  * Field
@@ -48,7 +49,7 @@ class DomainMemberTypeField implements FieldableField
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\DomainMemberTypeField::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose

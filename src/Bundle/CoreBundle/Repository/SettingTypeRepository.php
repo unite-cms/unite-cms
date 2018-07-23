@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 /**
  * SettingTypeRepository
@@ -20,9 +21,9 @@ class SettingTypeRepository extends EntityRepository
             ->andWhere('st.identifier = :settingType')
             ->setParameters(
                 [
-                    'organization' => $organization,
-                    'domain' => $domain,
-                    'settingType' => $settingType,
+                    'organization' => IdentifierNormalizer::normalize($organization),
+                    'domain' => IdentifierNormalizer::normalize($domain),
+                    'settingType' => IdentifierNormalizer::normalize($settingType),
                 ]
             )
             ->getQuery()->getResult();

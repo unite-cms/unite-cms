@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\SchemaType\Types;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
 use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class SettingInterface extends InterfaceType
@@ -25,7 +26,7 @@ class SettingInterface extends InterfaceType
                         throw new \InvalidArgumentException('Value must be instance of '.Setting::class.'.');
                     }
 
-                    $type = ucfirst($value->getSettingType()->getIdentifier()).'Setting';
+                    $type = IdentifierNormalizer::graphQLType($value->getSettingType());
 
                     return $schemaTypeManager->getSchemaType($type);
                 },

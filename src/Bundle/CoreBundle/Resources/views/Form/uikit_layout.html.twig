@@ -9,6 +9,11 @@
     {{- parent() -}}
 {%- endblock form_start -%}
 
+{%- block form_end -%}
+    {{- parent() -}}
+    {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: form }) }}
+{%- endblock form_end -%}
+
 {%- block form_row -%}
     {% if label is not same as(false) -%}
         <div class="uk-margin">
@@ -72,12 +77,16 @@
 {%- endblock range_widget %}
 
 {%- block submit_widget -%}
-    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button-primary')|trim}) %}
+    {% if (attr.class is not defined) %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button-primary')|trim}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock submit_widget -%}
 
 {%- block reset_widget -%}
-    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button-default')|trim}) %}
+    {% if (attr.class is not defined) %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button-default')|trim}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock reset_widget -%}
 

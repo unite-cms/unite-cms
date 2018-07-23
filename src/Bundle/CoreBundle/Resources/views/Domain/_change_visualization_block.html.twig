@@ -1,0 +1,46 @@
+
+<div class="uk-card uk-card-default uk-card-body uk-margin-small uk-card-small">
+    <div class="uk-card-header">
+        <h5>{{ headline }}</h5>
+    </div>
+
+    {% if types is not empty or left_types is not empty or right_types is not empty %}
+        <ul class="uk-list uk-list-divider">
+            {% for type in right_types %}
+                <li><i data-feather="plus-circle" class="uk-text-success uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.added{% endtrans %}</li>
+            {% endfor %}
+
+            {% for type in types %}
+                <li><i data-feather="chevron-right" style="margin-top: -3px;"></i> {{ type }}
+
+
+                    {% set left_fields = original_types[type.identifier] is defined ? original_types[type.identifier].fieldTypesDiff(type, true) : [] %}
+                    {% set right_fields = original_types[type.identifier] is defined ? type.fieldTypesDiff(original_types[type.identifier], true) : type.fields %}
+
+                    <ul class="uk-margin-left uk-list uk-text-small">
+                        {% for field in right_fields %}
+                            <li><i width="16" data-feather="plus-circle" class="uk-text-success" style="margin-top: -3px;"></i> {% trans with { '%field%': field|escape } %}domain.change_visualization.field.added{% endtrans %}</li>
+                        {% endfor %}
+
+                        {% for field in type.fields %}
+                            {% if field not in right_fields %}
+                                <li><i width="16" data-feather="chevron-right" style="margin-top: -3px;"></i> {{ field }}</li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% for field in left_fields %}
+                            <li><i width="16" data-feather="minus-circle" class="uk-text-danger" style="margin-top: -3px;"></i> {% trans with { '%field%': field|escape } %}domain.change_visualization.field.removed{% endtrans %}</li>
+                        {% endfor %}
+                    </ul>
+
+                </li>
+            {% endfor %}
+
+            {% for type in left_types %}
+                <li><i data-feather="minus-circle" class="uk-text-danger uk-margin-small-right" style="margin-top: -3px;"></i> {% trans with { '%type%': type|escape } %}domain.change_visualization.removed{% endtrans %}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>{% trans %}domain.change_visualization.empty{% endtrans %}</p>
+    {% endif %}
+</div>

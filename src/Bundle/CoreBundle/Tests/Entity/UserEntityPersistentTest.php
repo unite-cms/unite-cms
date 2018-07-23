@@ -115,7 +115,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($user2);
         $this->assertCount(1, $errors);
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.email_already_taken', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('email_already_member', $errors->get(0)->getMessageTemplate());
 
         $user3 = new User();
         $user3->setName('User 3')->setEmail('user2@example.com')->setPassword(
@@ -131,7 +131,7 @@ class UserEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($user4);
         $this->assertCount(1, $errors);
         $this->assertEquals('email', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.email_already_taken', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('email_already_member', $errors->get(0)->getMessageTemplate());
     }
 
     public function testDeleteOrganizationShouldNotDeleteUsers()

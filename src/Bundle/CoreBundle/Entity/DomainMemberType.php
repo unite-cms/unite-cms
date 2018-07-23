@@ -13,6 +13,7 @@ use JMS\Serializer\Annotation\Accessor;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
 /**
  * DomainMemberType
@@ -46,7 +47,7 @@ class DomainMemberType implements Fieldable
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\DomainMemberType::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
@@ -63,7 +64,7 @@ class DomainMemberType implements Fieldable
     /**
      * @var string
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="invalid_characters")
+     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/", message="invalid_characters")
      * @ORM\Column(name="icon", type="string", length=255, nullable=true)
      * @Expose
      */
@@ -105,18 +106,13 @@ class DomainMemberType implements Fieldable
     /**
      * @var DomainMember[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMember>")
-     * @Assert\Valid()
-     *
-     * TODO: Checking that all the domain members are valid will become very expensive for large sets. We most likely will need another approach.
-     *
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domainMemberType", fetch="EXTRA_LAZY", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $domainMembers;
 
     /**
-     * @var DomainInvitation[]
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainInvitation", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
+     * @var Invitation[]
+     * @ORM\OneToMany(targetEntity="Invitation", mappedBy="domainMemberType", fetch="EXTRA_LAZY")
      */
     private $invites;
 
@@ -130,6 +126,30 @@ class DomainMemberType implements Fieldable
     public function __toString()
     {
         return ''.$this->title;
+    }
+
+    /**
+     * Returns fieldTypes that are present in this domainMemberType but not in $domainMemberType.
+     *
+     * @param DomainMemberType $domainMemberType
+     * @param bool $objects , return keys or objects
+     *
+     * @return DomainMemberTypeField[]
+     */
+    public function getFieldTypesDiff(DomainMemberType $domainMemberType, $objects = false)
+    {
+        $keys = array_diff($this->getFields()->getKeys(), $domainMemberType->getFields()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getFields()->get($key);
+        }
+
+        return $objects;
     }
 
     /**
@@ -150,7 +170,7 @@ class DomainMemberType implements Fieldable
             ->setDescription($domainMemberType->getDescription());
 
         // Fields to delete
-        foreach (array_diff($this->getFields()->getKeys(), $domainMemberType->getFields()->getKeys()) as $field) {
+        foreach ($this->getFieldTypesDiff($domainMemberType) as $field) {
             $this->getFields()->remove($field);
         }
 
@@ -448,7 +468,7 @@ class DomainMemberType implements Fieldable
     }
 
     /**
-     * @return DomainInvitation[]|ArrayCollection
+     * @return Invitation[]|ArrayCollection
      */
     public function getInvites()
     {

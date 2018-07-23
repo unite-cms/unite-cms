@@ -4,9 +4,9 @@
 {% block content %}
     <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
         <header class="uk-card-header uk-flex">
-            <a class="back-button" href="{{ path('unitecms_core_domain_view', {
-                organization: unite.organization.identifier,
-                domain: unite.domain.identifier
+            <a class="back-button" href="{{ url('unitecms_core_domain_view', {
+                organization: unite.organization.identifier|replace({'_':'-'}),
+                domain: unite.domain.identifier|replace({'_':'-'})
             }) }}">
                 <i data-feather="arrow-left"></i>
             </a>
@@ -21,12 +21,14 @@
             {% trans with {'%domain%': domain|escape } %}domain.delete.text{% endtrans %}
         </p>
 
+        {{ include('@UniteCMSCore/Domain/_change_visualization.html.twig', { original: domain, updated: deletedDomain}) }}
+
         {{ form_start(form) }}
         <p class="uk-text-center">
 
-            <a class="uk-button" style="background: white; margin: 10px;" href="{{ path('unitecms_core_domain_view', {
-                domain: domain.identifier,
-                organization: organization.identifier
+            <a class="uk-button" style="background: white; margin: 10px;" href="{{ url('unitecms_core_domain_view', {
+                domain: domain.identifier|replace({'_':'-'}),
+                organization: organization.identifier|replace({'_':'-'})
             }) }}">{% trans %}domain.delete.cancel{% endtrans %}</a>
 
             {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}

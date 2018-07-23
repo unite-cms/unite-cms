@@ -3,9 +3,8 @@
 namespace UniteCMS\CollectionFieldBundle\Tests;
 
 use GraphQL\GraphQL;
-use GraphQL\Schema;
+use GraphQL\Type\Schema;
 use GraphQL\Type\Definition\ObjectType;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\User;
@@ -102,6 +101,8 @@ class ImageFieldTypeTest extends FieldTypeTestCase
                         "path" => "/any",
                         'foo' => 'baa',
                     ],
+                    'file_types' => 'png',
+                    'thumbnail_url' => '{endpoint}/{id}/{name}',
                 ]
             )
         );
@@ -125,6 +126,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
                         'endpoint' => 'https://example.com',
                         'key' => 'XXX',
                         'secret' => 'XXX',
+                        'path' => 'foo-path',
                         'bucket' => 'foo',
                     ],
                 ]
@@ -180,6 +182,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
                         'endpoint' => 'https://example.com',
                         'key' => 'XXX',
                         'secret' => 'XXX',
+                        'path' => 'foo-path',
                         'bucket' => 'foo',
                     ],
                 ]
@@ -288,7 +291,20 @@ class ImageFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals(12345, $result->data->createCt1->f1->size);
         $this->assertEquals('image/jpeg', $result->data->createCt1->f1->type);
         $this->assertEquals('XXX-YYY-ZZZ', $result->data->createCt1->f1->id);
-        $this->assertEquals('https://example.com/foo/XXX-YYY-ZZZ/cat.jpg', $result->data->createCt1->f1->url);
+        $this->assertEquals('https://example.com/foo/foo-path/XXX-YYY-ZZZ/cat.jpg', $result->data->createCt1->f1->url);
+
+        // Remove path from field settings should result in an url without path.
+        $field->getSettings()->bucket['path'] = null;
+        $this->em->flush();
+
+        $result = GraphQL::executeQuery($schema, 'query { getCt1(id: "'.$result->data->createCt1->id.'") {
+            f1 {
+                url
+            }
+        }}'
+        );
+        $result = json_decode(json_encode($result->toArray(true)));
+        $this->assertEquals('https://example.com/foo/XXX-YYY-ZZZ/cat.jpg', $result->data->getCt1->f1->url);
     }
 
     public function testFormBuild()
@@ -305,7 +321,10 @@ class ImageFieldTypeTest extends FieldTypeTestCase
                         'key' => 'XXX',
                         'secret' => 'XXX',
                         'bucket' => 'foo',
+                        'path' => 'sub-path',
                     ],
+                    'thumbnail_url' => 'https://thumbnail.com/{endpoint}/{id}/{name}',
+                    'file_types' => 'jpg'
                 ]
             )
         );
@@ -332,5 +351,10 @@ class ImageFieldTypeTest extends FieldTypeTestCase
 
         // Assert values
         $this->assertEquals(json_encode($content->getData()['f1']), $root->vars['value']);
+
+        // Assert attribute passing
+        $this->assertEquals('https://thumbnail.com/{endpoint}/{id}/{name}', $root->vars['attr']['thumbnail-url']);
+        $this->assertEquals('jpg', $root->vars['attr']['file-types']);
+        $this->assertEquals('https://example.com/foo/sub-path', $root->vars['attr']['endpoint']);
     }
 }

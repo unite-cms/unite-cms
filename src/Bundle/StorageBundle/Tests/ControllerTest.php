@@ -22,6 +22,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 use UniteCMS\StorageBundle\Form\PreSignFormType;
 use UniteCMS\StorageBundle\Model\PreSignedUrl;
@@ -115,7 +116,7 @@ class ControllerTest extends DatabaseAwareTestCase
         parent::setUp();
 
         $this->org1 = new Organization();
-        $this->org1->setIdentifier('org1')->setTitle('org1');
+        $this->org1->setIdentifier('org1_org1')->setTitle('org1');
         $this->em->persist($this->org1);
         $this->em->flush($this->org1);
 
@@ -143,6 +144,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
     }
 
@@ -168,7 +170,7 @@ class ControllerTest extends DatabaseAwareTestCase
             'unitecms_storage_sign_uploadcontenttype',
             [
                 'domain' => $this->domain1->getIdentifier(),
-                'organization' => $this->org1->getIdentifier(),
+                'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                 'content_type' => 'ct1',
                 'token' => $apiClient->getToken(),
             ],
@@ -213,7 +215,8 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to access with invalid method.
         $baseUrl = static::$container->get('router')->generate(
             'unitecms_storage_sign_uploadcontenttype',
-            ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo']
+            ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo'],
+            Router::ABSOLUTE_URL
         );
         $this->client->request('GET', $baseUrl);
         $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
@@ -224,7 +227,8 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $baseUrl = static::$container->get('router')->generate(
             'unitecms_storage_sign_uploadsettingtype',
-            ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo']
+            ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo'],
+            Router::ABSOLUTE_URL
         );
         $this->client->request('GET', $baseUrl);
         $this->assertEquals(405, $this->client->getResponse()->getStatusCode());
@@ -236,9 +240,9 @@ class ControllerTest extends DatabaseAwareTestCase
         // Try to pre sign for invalid organization domain content type and setting type.
         foreach ([
                      ['organization' => 'foo', 'domain' => 'baa', 'content_type' => 'foo'],
-                     ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'content_type' => 'foo'],
+                     ['organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()), 'domain' => 'baa', 'content_type' => 'foo'],
                      [
-                         'organization' => $this->org1->getIdentifier(),
+                         'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                          'domain' => $this->domain1->getIdentifier(),
                          'content_type' => 'foo',
                      ],
@@ -246,7 +250,7 @@ class ControllerTest extends DatabaseAwareTestCase
 
             $this->client->request(
                 'POST',
-                static::$container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params),
+                static::$container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', $params, Router::ABSOLUTE_URL),
                 []
             );
             $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
@@ -254,16 +258,16 @@ class ControllerTest extends DatabaseAwareTestCase
 
         foreach ([
                      ['organization' => 'foo', 'domain' => 'baa', 'setting_type' => 'foo'],
-                     ['organization' => $this->org1->getIdentifier(), 'domain' => 'baa', 'setting_type' => 'foo'],
+                     ['organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()), 'domain' => 'baa', 'setting_type' => 'foo'],
                      [
-                         'organization' => $this->org1->getIdentifier(),
+                         'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                          'domain' => $this->domain1->getIdentifier(),
                          'setting_type' => 'foo',
                      ],
                  ] as $params) {
             $this->client->request(
                 'POST',
-                static::$container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params),
+                static::$container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', $params, Router::ABSOLUTE_URL),
                 []
             );
             $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
@@ -275,10 +279,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct2',
-                ]
+                ], Router::ABSOLUTE_URL
             )
         );
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
@@ -288,10 +292,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st2',
-                ]
+                ], Router::ABSOLUTE_URL
             )
         );
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
@@ -302,10 +306,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'foo'],
@@ -319,10 +323,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'foo'],
@@ -336,10 +340,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'foo/baa'],
@@ -352,10 +356,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'nested/baa'],
@@ -369,10 +373,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'foo/baa'],
@@ -385,10 +389,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => ['field' => 'nested/baa'],
@@ -402,10 +406,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => [
@@ -421,10 +425,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => [
@@ -442,10 +446,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadcontenttype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'content_type' => 'ct1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => [
@@ -504,10 +508,10 @@ class ControllerTest extends DatabaseAwareTestCase
             static::$container->get('router')->generate(
                 'unitecms_storage_sign_uploadsettingtype',
                 [
-                    'organization' => $this->org1->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($this->org1->getIdentifier()),
                     'domain' => $this->domain1->getIdentifier(),
                     'setting_type' => 'st1',
-                ]
+                ], Router::ABSOLUTE_URL
             ),
             [
                 'pre_sign_form' => [

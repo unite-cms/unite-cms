@@ -14,6 +14,10 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
 
         // Validate empty ApiClient
         $apiClient = new ApiKey();
+
+        // Make sure, default origin was set.
+        $this->assertEquals('*', $apiClient->getOrigin());
+
         $errors = static::$container->get('validator')->validate($apiClient);
         $this->assertCount(3, $errors);
 
@@ -26,15 +30,16 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('organization', $errors->get(2)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
 
-        // Validate too long name and token.
+        // Validate too long name, token and origin.
         $apiClient
             ->setOrganization(new Organization())
             ->setToken($this->generateRandomMachineName(181))
-            ->setName($this->generateRandomUTF8String(256));
+            ->setName($this->generateRandomUTF8String(256))
+            ->setOrigin($this->generateRandomUTF8String(256));
         $apiClient->getOrganization()->setTitle('Org')->setIdentifier('org');
 
         $errors = static::$container->get('validator')->validate($apiClient);
-        $this->assertCount(2, $errors);
+        $this->assertCount(3, $errors);
 
         $this->assertEquals('name', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
@@ -42,10 +47,14 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('token', $errors->get(1)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(1)->getMessageTemplate());
 
+        $this->assertEquals('origin', $errors->get(2)->getPropertyPath());
+        $this->assertEquals('too_long', $errors->get(2)->getMessageTemplate());
+
         // Validate invalid token.
         $apiClient
             ->setToken('   '.$this->generateRandomUTF8String(150))
-            ->setName($this->generateRandomUTF8String(255));
+            ->setName($this->generateRandomUTF8String(255))
+            ->setOrigin($this->generateRandomUTF8String(255));
 
         $errors = static::$container->get('validator')->validate($apiClient);
         $this->assertCount(1, $errors);
@@ -58,6 +67,17 @@ class ApiKeyEntityPersistentTest extends DatabaseAwareTestCase
         // Validate valid token
         $errors = static::$container->get('validator')->validate($apiClient);
         $this->assertCount(0, $errors);
+
+        // Validate empty origin
+        $apiClient->setOrigin('');
+
+        $errors = static::$container->get('validator')->validate($apiClient);
+        $this->assertCount(1, $errors);
+
+        $this->assertEquals('origin', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
+
+        $apiClient->setOrigin('https://example.com');
 
         $this->em->persist($apiClient->getOrganization());
         $this->em->persist($apiClient);

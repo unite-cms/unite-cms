@@ -2,53 +2,76 @@
 {% block title %}{% trans %}profile.accept_invitation.title{% endtrans %}{% endblock title %}
 {% block navigation %}{% endblock %}
 {% block content %}
-    <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-large">
+    <article class="uk-card uk-card-default uk-card-body centered-content-card uk-width-xlarge">
     <header class="uk-card-header uk-flex">
             <h2 class="uk-flex-1">{% trans %}profile.accept_invitation.headline{% endtrans %}</h2>
     </header>
     <div class="uk-flex-1">
         {% if not tokenPresent %}
             <div class="uk-alert-danger" uk-alert>
-                <a class="uk-alert-close" uk-close></a>
                 <p>{% trans %}profile.accept_invitation.token_missing{% endtrans %}</p>
             </div>
+            <p><a href="{{ url('unitecms_core_index') }}" class="uk-button uk-button-default" style="background: white;">{% trans %}profile.accept_invitation.dashboard.button{% endtrans %}</a></p>
         {% elseif not tokenFound %}
             <div class="uk-alert-danger" uk-alert>
-                <a class="uk-alert-close" uk-close></a>
                 <p>{% trans %}profile.accept_invitation.token_not_found{% endtrans %}</p>
             </div>
+            <p><a href="{{ url('unitecms_core_index') }}" class="uk-button uk-button-default" style="background: white;">{% trans %}profile.accept_invitation.dashboard.button{% endtrans %}</a></p>
         {% elseif tokenExpired %}
             <div class="uk-alert-danger" uk-alert>
-                <a class="uk-alert-close" uk-close></a>
                 <p>{% trans %}profile.accept_invitation.token_expired{% endtrans %}</p>
             </div>
+            <p><a href="{{ url('unitecms_core_index') }}" class="uk-button uk-button-default" style="background: white;">{% trans %}profile.accept_invitation.dashboard.button{% endtrans %}</a></p>
         {% elseif wrongUser %}
             <div class="uk-alert-warning" uk-alert>
-                <a class="uk-alert-close" uk-close></a>
                 <p>{% trans %}profile.accept_invitation.wrong_user{% endtrans %}</p>
             </div>
-            <p><a class="uk-button uk-button-default" href="{{ path('unitecms_core_index') }}">Dashboard</a></p>
+            <p><a class="uk-button uk-button-default" href="{{ url('unitecms_core_index') }}">Dashboard</a></p>
         {% elseif alreadyMember %}
             <div class="uk-alert-warning" uk-alert>
-                <a class="uk-alert-close" uk-close></a>
-                <p>{% trans %}profile.accept_invitation.already_member{% endtrans %}</p>
+                <p>{% trans with { '%organization%': invitation.organization|escape } %}profile.accept_invitation.already_member{% endtrans %}</p>
             </div>
+            <p><a href="{{ url('unitecms_core_index') }}" class="uk-button uk-button-default" style="background: white;">{% trans %}profile.accept_invitation.dashboard.button{% endtrans %}</a></p>
         {% elseif form %}
 
             {% if not form.vars.submitted or not form.vars.valid %}
-                {{ form_start(form, {attr: {class: 'uk-form-vertical', autocomplete: 'off'}}) }}
-                {{ form_end(form) }}
-            {% else %}
-                <h3>{% trans %}profile.accept_invitation.success.headline{% endtrans %}</h3>
 
-                {% if app.user %}
-                    <p>{% trans with {"%domain%": invitation.domainMemberType.domain } %}profile.accept_invitation.success.message{% endtrans %}.</p>
-                    <p><a href="{{ path('unitecms_core_domain_view', {
-                            organization: invitation.domainMemberType.domain.organization,
-                            domain: invitation.domainMemberType.domain
-                        }) }}" class="uk-button uk-button-default uk-button-small">{% trans %}profile.accept_invitation.success.view_domain.button{% endtrans %}</a></p>
+                <p>
+                    {% if invitation.domainMemberType %}
+                        {% trans with {
+                            '%invitor%': app.user|escape,
+                            '%domain%': invitation.domainMemberType.domain|escape,
+                            '%organization%': invitation.organization|escape,
+                            '%domain_type%': invitation.domainMemberType|escape
+                            } %}profile.accept_invitation.intro_domain{% endtrans %}
+                    {% else %}
+                        {% trans with {
+                            '%invitor%': app.user|escape,
+                            '%organization%': invitation.organization|escape
+                            } %}profile.accept_invitation.intro_organization{% endtrans %}
+                    {% endif %}
+                </p>
+
+                <hr />
+
+                {% if newUser %}
+                    {{ include('@UniteCMSCore/Form/_registration-form.html.twig', { form: form }) }}
+                {% else %}
+                    {{ form_errors(form) }}
+                    {{ form_start(form) }}
+                    {% if form.accept is defined and form.reject is defined %}
+                        {% if form.accept and form.reject %}
+                            <p class="uk-text-center">
+                                {{ form_widget(form.accept, {attr: {style: 'margin: 3px;'}}) }}
+                                {{ form_widget(form.reject, {attr: {style: 'margin: 3px;'}}) }}
+                            </p>
+                        {% endif %}
+                    {% endif %}
+                    {{ form_end(form) }}
                 {% endif %}
 
+            {% else %}
+                <h3>{% trans %}profile.accept_invitation.success.headline{% endtrans %}</h3>
             {% endif %}
 
         {% endif %}
@@ -56,8 +79,7 @@
 </article>
 <style type="text/css" rel="stylesheet">
     body {
-        background: url({{ site_background }}) no-repeat;
-        background-size: cover;
+        background-image: radial-gradient(50% 100%, #073B4C 0%, #02212B 100%);
     }
 </style>
 {% endblock content %}

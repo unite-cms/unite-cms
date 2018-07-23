@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Tests\Controller;
 use Doctrine\ORM\Id\UuidGenerator;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpKernel\Client;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -12,6 +13,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -81,10 +83,11 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
-        $this->organization->setTitle('Organization')->setIdentifier('org1');
+        $this->organization->setTitle('Organization')->setIdentifier('org1_org1');
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
@@ -119,21 +122,21 @@ class ContentControllerTest extends DatabaseAwareTestCase {
     public function testCRUDActions() {
 
         $url_other_list = static::$container->get('router')->generate('unitecms_core_content_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'other',
-        ]);
+        ], Router::ABSOLUTE_URL);
 
         $this->client->request('GET', $url_other_list);
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         $url_list = static::$container->get('router')->generate('unitecms_core_content_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ]);
+        ], Router::ABSOLUTE_URL);
 
         $crawler = $this->client->request('GET', $url_list);
 
@@ -187,23 +190,23 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         // Try to update invalid content
         $doctrineUUIDGenerator = new UuidGenerator();
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_update', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to update valid content
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_update', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId()
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -246,22 +249,22 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Try to delete invalid content.
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_delete', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to delete valid content
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_delete', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId()
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -306,11 +309,11 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // On Create.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_create', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -355,12 +358,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // On Update.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_update', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert add form
@@ -416,22 +419,22 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         // Try to definitely delete unknown content.
         $doctrineUUIDGenerator = new UuidGenerator();
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_deletedefinitely', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to definitely delete non-deleted content.
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_deletedefinitely', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Delete content.
@@ -452,12 +455,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->em->flush($ct);
 
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_deletedefinitely', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
         $ct->addPermission(ContentVoter::UPDATE, 'true');
@@ -465,12 +468,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Delete content definitely.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_deletedefinitely', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert delete form
@@ -493,11 +496,11 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert deletion message.
@@ -523,22 +526,22 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         // Try to recover unknown content.
         $doctrineUUIDGenerator = new UuidGenerator();
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_recover', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to recover non-deleted content.
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_recover', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Delete content.
@@ -559,12 +562,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->em->flush($ct);
 
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_recover', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
 
         $ct->addPermission(ContentVoter::UPDATE, 'true');
@@ -572,12 +575,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Recover delete content.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_recover', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Assert recover form
@@ -588,6 +591,9 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $form = $form->form();
         $form['form[_token]'] = 'invalid';
         $crawler = $this->client->submit($form);
+
+        // For performance reasons we do not reboot the kernel on each request, so we need to clear em by hand.
+        $this->em->clear();
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
@@ -600,11 +606,11 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert recover message.
@@ -624,23 +630,23 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         // Try to access translations page with invalid content id.
         $doctrineUUIDGenerator = new UuidGenerator();
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 
         // Try to access translations page with valid content id.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -661,13 +667,16 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $form['fieldable_form[f2]'] = 'b';
         $this->client->submit($form);
 
+        // For performance reasons we do not reboot the kernel on each request, so we need to clear em by hand.
+        $this->em->clear();
+
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert recover message.
@@ -688,12 +697,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Try to access translations page with valid content id.
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
@@ -707,18 +716,18 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Try to access translation page of soft-deleted content.
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $translated_content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_index', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert warning.
@@ -734,12 +743,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->em->clear();
 
         $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $translated_content->getId(),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         // Remove english translation.
         $crawler = $this->client->click($crawler->filter('a.uk-text-danger:contains("Remove as translation")')->link());
@@ -762,14 +771,17 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $form = $form->form();
         $this->client->submit($form);
 
+        // For performance reasons we do not reboot the kernel on each request, so we need to clear em by hand.
+        $this->em->clear();
+
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert remove translation message.
@@ -812,12 +824,12 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Assert redirect to index.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_content_translations', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $crawler = $this->client->followRedirect();
 
         // Assert remove translation message.
@@ -840,22 +852,22 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Content')->findAll());
 
         $revisions_url = static::$container->get('router')->generate('unitecms_core_content_revisions', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $content->getId(),
-        ]);
+        ], Router::ABSOLUTE_URL);
 
         // Try to get revisions page of unknown content.
         $doctrineUUIDGenerator = new UuidGenerator();
         $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_content_revisions', [
-            'organization' => $this->organization->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'content_type' => $this->domain->getContentTypes()->first()->getIdentifier(),
             'view' => 'all',
             'content' => $doctrineUUIDGenerator->generate($this->em, $content),
-        ]));
+        ], Router::ABSOLUTE_URL));
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
 

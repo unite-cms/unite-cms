@@ -11,7 +11,6 @@ namespace UniteCMS\CoreBundle\Tests\Functional;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Controller\GraphQLApiController;
@@ -22,6 +21,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -47,7 +47,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       "fields": [
         {
           "title": "Title",
-          "identifier": "title",
+          "identifier": "title_title",
           "type": "text",
           "settings": {}
         },
@@ -106,7 +106,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       "fields": [
         {
           "title": "Title",
-          "identifier": "title",
+          "identifier": "title_title",
           "type": "text",
           "settings": {}
         },
@@ -168,7 +168,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       "fields": [
         {
           "title": "Title",
-          "identifier": "title",
+          "identifier": "title_title",
           "type": "text",
           "settings": {}
         }
@@ -202,7 +202,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       "fields": [
         {
           "title": "Title",
-          "identifier": "title",
+          "identifier": "title_title",
           "type": "text",
           "settings": {}
         },
@@ -261,7 +261,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       "fields": [
         {
           "title": "Title",
-          "identifier": "title",
+          "identifier": "title_title",
           "type": "text",
           "settings": {}
         },
@@ -320,7 +320,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       "fields": [
         {
           "title": "Title",
-          "identifier": "title",
+          "identifier": "title_title",
           "type": "text",
           "settings": {}
         }
@@ -438,7 +438,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         // For each request, initialize the cms manager.
         $requestStack = new RequestStack();
         $requestStack->push(new Request([], [], [
-            'organization' => $domain->getOrganization()->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($domain->getOrganization()->getIdentifier()),
             'domain' => $domain->getIdentifier(),
         ]));
 
@@ -518,7 +518,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ], $this->api(
             $this->domains['marketing'],
             $this->users['marketing_viewer'],'query {
-            findNews(filter: { field: "title", operator: "IS NULL" }) {
+            findNews(filter: { field: "title_title", operator: "IS NULL" }) {
                 total
             }
         }'));
@@ -531,7 +531,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ], $this->api(
             $this->domains['marketing'],
             $this->users['marketing_viewer'],'query {
-            findNews(filter: { field: "title", operator: "IS NOT NULL" }) {
+            findNews(filter: { field: "title_title", operator: "IS NOT NULL" }) {
                 total
             }
         }'));
@@ -548,7 +548,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
               type
               
               ... on NewsContent {
-                title
+                title_title
               }
               
               ... on News_categoryContent {
@@ -585,32 +585,32 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                     total,
                     result {
                         id,
-                        title,
+                        title_title,
                         content
                     }
                 }
             }');
 
-        // Get title and content partial strings from any random content.
+        // Get title_title and content partial strings from any random content.
         $content1 = $news->data->findNews->result[rand(1, $news->data->findNews->total - 1)];
         $content2 = $news->data->findNews->result[rand(1, $news->data->findNews->total - 1)];
-        $content1_title_part = substr($content1->title, rand(1, 50), rand(1, 20));
+        $content1_title_title_part = substr($content1->title_title, rand(1, 50), rand(1, 20));
         $content2_content_part = substr($content2->content, rand(1, 50), rand(1, 20));
 
-        // Filter by exact title.
+        // Filter by exact title_title.
         $result = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_viewer'],'query($value: String) {
-                findNews(filter: { field: "title", operator: "=", value: $value }) {
+                findNews(filter: { field: "title_title", operator: "=", value: $value }) {
                     total,
                     result {
                         id,
-                        title,
+                        title_title,
                         content
                     }
                 }
             }', [
-                'value' => $content1->title
+                'value' => $content1->title_title
             ]
         );
 
@@ -622,23 +622,23 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertContains($content1->id, $ids);
 
 
-        // Filter by exact title and exact content.
+        // Filter by exact title_title and exact content.
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_viewer'],'query($title: String, $content: String) {
+            $this->users['marketing_viewer'],'query($title_title: String, $content: String) {
                 findNews(filter: { AND: [
-                    { field: "title", operator: "=", value: $title },
+                    { field: "title_title", operator: "=", value: $title_title },
                     { field: "content", operator: "=", value: $content }
                 ]}) {
                     total,
                     result {
                         id,
-                        title,
+                        title_title,
                         content
                     }
                 }
             }', [
-                'title' => $content1->title,
+                'title_title' => $content1->title_title,
                 'content' => $content1->content,
             ]
         );
@@ -651,26 +651,34 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertContains($content1->id, $ids);
 
 
-        // Filter by part title or part content.
+        // Filter by part title_title or part content.
         $result = $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_viewer'],'query($title: String, $content: String) {
+            $this->users['marketing_viewer'],'query($title_title: String, $content: String) {
                 findNews(filter: { OR: [
-                    { field: "title", operator: "LIKE", value: $title },
+                    { field: "title_title", operator: "LIKE", value: $title_title },
                     { field: "content", operator: "LIKE", value: $content }
                 ]}) {
                     total,
                     result {
                         id,
-                        title,
+                        title_title,
                         content
                     }
                 }
             }', [
-                'title' => '%' . $content1_title_part . '%',
+                'title_title' => '%' . $content1_title_title_part . '%',
                 'content' => '%' . $content2_content_part . '%',
             ]
         );
+
+        // This happens only sometimes, so for getting a chance to debug this we inject some debugging output here.
+        if($result->data->findNews->total < 2) {
+            dump($content1_title_title_part);
+            dump($content1->title_title);
+            dump($content2_content_part);
+            dump($content2->content);
+        }
 
         $this->assertGreaterThan(1, $result->data->findNews->total);
     }
@@ -688,14 +696,14 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
             if($i == 1) {
                 $c->setData([
-                    'title' => 'test_nested_sorting',
+                    'title_title' => 'test_nested_sorting',
                     'content' => 'AAA',
                 ]);
             }
 
             if($i == 2) {
                 $c->setData([
-                    'title' => 'test_nested_sorting',
+                    'title_title' => 'test_nested_sorting',
                     'content' => 'ZZZ',
                 ]);
             }
@@ -741,7 +749,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $this->domains['marketing'],
             $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, 
-                    filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
+                    filter: { field: "title_title", operator: "=", value: "test_nested_sorting" }, 
                     sort: { field: "content", order: "ASC" }) {
                     
                     total,
@@ -759,7 +767,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $this->domains['marketing'],
             $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, 
-                    filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
+                    filter: { field: "title_title", operator: "=", value: "test_nested_sorting" }, 
                     sort: { field: "content", order: "DESC" }) {
                     
                     total,
@@ -777,9 +785,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $this->domains['marketing'],
             $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, 
-                    filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
+                    filter: { field: "title_title", operator: "=", value: "test_nested_sorting" }, 
                     sort: [
-                        { field: "title", order: "ASC" },
+                        { field: "title_title", order: "ASC" },
                         { field: "content", order: "ASC" }
                     ]) {
                     
@@ -798,9 +806,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $this->domains['marketing'],
             $this->users['marketing_viewer'], 'query {
                 findNews(limit: 2, 
-                    filter: { field: "title", operator: "=", value: "test_nested_sorting" }, 
+                    filter: { field: "title_title", operator: "=", value: "test_nested_sorting" }, 
                     sort: [
-                        { field: "title", order: "ASC" },
+                        { field: "title_title", order: "ASC" },
                         { field: "content", order: "DESC" }
                     ]) {
                     
@@ -822,7 +830,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $news = $this->domains['marketing']->getContentTypes()->first()->getContent()->get(0);
 
         $news->setData([
-            'title' => 'with_category',
+            'title_title' => 'with_category',
             'category' => [
                 'domain' => 'marketing',
                 'content_type' => 'news_category',
@@ -852,7 +860,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ], $this->api(
             $this->domains['marketing'],
             $this->users['marketing_viewer'], 'query {
-                findNews(limit: 1, filter: { field: "title", operator: "=", value: "with_category" }) {
+                findNews(limit: 1, filter: { field: "title_title", operator: "=", value: "with_category" }) {
                     total,
                     result {
                         id,
@@ -869,7 +877,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $setting = $this->domains['marketing']->getSettingTypes()->first()->getSetting();
         $setting->setData([
-            'title' => $this->generateRandomMachineName(100),
+            'title_title' => $this->generateRandomMachineName(100),
             'imprint' => $this->generateRandomMachineName(100)
         ]);
 
@@ -884,11 +892,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             $this->users['marketing_viewer'], 'query($newsID: ID!) {
                 getNews(id: $newsID) {
                     id,
-                    title,
+                    title_title,
                     content
                 },
                 WebsiteSetting {
-                    title,
+                    title_title,
                     imprint
                 }
             }', [
@@ -899,11 +907,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             'data' => [
                 'getNews' => [
                     'id' => $content->getId(),
-                    'title' => $content->getData()['title'],
+                    'title_title' => $content->getData()['title_title'],
                     'content' => $content->getData()['content']
                 ],
                 'WebsiteSetting' => [
-                    'title' => $setting->getData()['title'],
+                    'title_title' => $setting->getData()['title_title'],
                     'imprint' => $setting->getData()['imprint']
                 ],
             ],
@@ -1019,9 +1027,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
-                createNews(data: { title: "First News", content: "<p>Hello World</p>", category: $category }) {
+                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category }) {
                     id, 
-                    title,
+                    title_title,
                     content,
                     category {
                       id,
@@ -1043,9 +1051,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
-                createNews(data: { title: "First News", content: "<p>Hello World</p>", category: $category }) {
+                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category }) {
                     id, 
-                    title,
+                    title_title,
                     content,
                     category {
                       id,
@@ -1063,7 +1071,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $news = $response->data->createNews;
         $this->assertTrue(empty($response->errors));
         $this->assertNotEmpty($news->id);
-        $this->assertNotEmpty($news->title);
+        $this->assertNotEmpty($news->title_title);
         $this->assertNotEmpty($news->content);
         $this->assertNotEmpty($news->category);
         $this->assertEquals($category, $news->category);
@@ -1101,9 +1109,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
-                updateNews(id: $id, data: { title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
+                updateNews(id: $id, data: { title_title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
                     id, 
-                    title,
+                    title_title,
                     content,
                     category {
                       id,
@@ -1126,9 +1134,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
-                updateNews(id: $id, data: { title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
+                updateNews(id: $id, data: { title_title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
                     id, 
-                    title,
+                    title_title,
                     content,
                     category {
                       id,
@@ -1142,7 +1150,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals($news->id, $response->data->updateNews->id);
-        $this->assertEquals("Updated News", $response->data->updateNews->title);
+        $this->assertEquals("Updated News", $response->data->updateNews->title_title);
         $this->assertEquals("<p>Hello new World</p>", $response->data->updateNews->content);
         $this->assertNull($response->data->updateNews->category);
 
@@ -1150,9 +1158,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!) {
-                updateNews(id: $id, data: { title: "Updated News2" }) {
+                updateNews(id: $id, data: { title_title: "Updated News2" }) {
                     id, 
-                    title,
+                    title_title,
                     content,
                     category {
                       id,
@@ -1166,7 +1174,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals($news->id, $response->data->updateNews->id);
-        $this->assertEquals("Updated News2", $response->data->updateNews->title);
+        $this->assertEquals("Updated News2", $response->data->updateNews->title_title);
         $this->assertEquals("<p>Hello new World</p>", $response->data->updateNews->content);
         $this->assertNull($response->data->updateNews->category);
     }
@@ -1212,9 +1220,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation {
-                createNews(data: { title: "First News" }) {
+                createNews(data: { title_title: "First News" }) {
                     id, 
-                    title
+                    title_title
                 }
             }', [], false, 'main');
 
@@ -1225,21 +1233,21 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation {
-                createNews(data: { title: "First News" }) {
+                createNews(data: { title_title: "First News" }) {
                     id, 
-                    title
+                    title_title
                 }
             }', [], true, 'main');
 
         $this->assertNotNull($response->data->createNews->id);
-        $this->assertEquals('First News', $response->data->createNews->title);
+        $this->assertEquals('First News', $response->data->createNews->title_title);
 
         // Try Update
         $responseUpdate = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!) {
-                updateNews(id: $id, data: { title: "Updated News" }) { 
-                    title
+                updateNews(id: $id, data: { title_title: "Updated News" }) { 
+                    title_title
                 }
             }', [
                 'id' => $response->data->createNews->id,
@@ -1251,14 +1259,14 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $responseUpdate = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!) {
-                updateNews(id: $id, data: { title: "Updated News" }) { 
-                    title
+                updateNews(id: $id, data: { title_title: "Updated News" }) { 
+                    title_title
                 }
             }', [
             'id' => $response->data->createNews->id,
         ], true, 'main');
 
-        $this->assertEquals('Updated News', $responseUpdate->data->updateNews->title);
+        $this->assertEquals('Updated News', $responseUpdate->data->updateNews->title_title);
 
     }
 }

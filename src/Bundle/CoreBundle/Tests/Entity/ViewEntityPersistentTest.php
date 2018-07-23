@@ -31,7 +31,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
 
         $this->assertEquals('type', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.invalid_view_type', $errors->get(3)->getMessageTemplate());
+        $this->assertEquals('invalid_view_type', $errors->get(3)->getMessageTemplate());
 
         $this->assertEquals('contentType', $errors->get(4)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(4)->getMessageTemplate());
@@ -60,7 +60,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('too_long', $errors->get(2)->getMessageTemplate());
 
         $this->assertEquals('type', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('validation.invalid_view_type', $errors->get(3)->getMessageTemplate());
+        $this->assertEquals('invalid_view_type', $errors->get(3)->getMessageTemplate());
 
         // Try to validate invalid type
         $view
@@ -70,7 +70,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
         $this->assertEquals('type', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('validation.invalid_view_type', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_view_type', $errors->get(0)->getMessageTemplate());
 
         // Try to validate invalid identifier
         $view

@@ -3,13 +3,11 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -17,22 +15,23 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class DomainMemberController extends Controller
 {
     /**
-     * @Route("/{member_type}")
-     * @Method({"GET"})
+     * @Route("/{member_type}", methods={"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -49,7 +48,7 @@ class DomainMemberController extends Controller
         $invites = $this->get('knp_paginator')->paginate($memberType->getInvites());
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:index.html.twig',
+            '@UniteCMSCore/Domain/Member/index.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -61,8 +60,7 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/{member_type}/create")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_type}/create", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -154,57 +152,91 @@ class DomainMemberController extends Controller
                 $member = new DomainMember();
                 $member
                     ->setDomain($domain)
-                    ->setDomainMemberType($memberType)
-                    ->setAccessor($data['select_add_type'] == 'existing_user' ? $data['existing_user'] : $data['existing_api_key']);
-                $this->getDoctrine()->getManager()->persist($member);
-                $this->getDoctrine()->getManager()->flush();
+                    ->setDomainMemberType($memberType);
+
+                if($data['select_add_type'] == 'existing_user' && !empty($data['existing_user'])) {
+                    $member->setAccessor($data['existing_user']);
+                }
+
+                if($data['select_add_type'] == 'existing_api_key' && !empty($data['existing_api_key'])) {
+                    $member->setAccessor($data['existing_api_key']);
+                }
+
+                $violations = $this->get('validator')->validate($member);
+                if($violations->count() > 0) {
+                    $violationMapper = new ViolationMapper();
+                    foreach ($violations as $violation) {
+                        $violationMapper->mapViolation($violation, ($data['select_add_type'] == 'existing_user' ? $form->get('existing_user') : $form->get('existing_api_key')));
+                    }
+                } else {
+                    $this->getDoctrine()->getManager()->persist($member);
+                    $this->getDoctrine()->getManager()->flush();
+
+                    return $this->redirect($this->generateUrl(
+                        'unitecms_core_domainmember_index',
+                        [
+                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
+                            'domain' => $domain->getIdentifier(),
+                            'member_type' => $memberType->getIdentifier(),
+                        ], Router::ABSOLUTE_URL
+                    ));
+                }
 
             } elseif($data['select_add_type'] == 'invite_user') {
 
-                $invitation = new DomainInvitation();
+                $invitation = new Invitation();
                 $invitation->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
                 $invitation->setRequestedAt(new \DateTime());
+                $invitation->setOrganization($organization);
                 $invitation->setDomainMemberType($memberType);
                 $invitation->setEmail($data['invite_user']);
-                $this->getDoctrine()->getManager()->persist($invitation);
-                $this->getDoctrine()->getManager()->flush();
 
-                // Send out email using the default mailer.
-                $message = (new \Swift_Message('Invitation'))
-                    ->setFrom($this->getParameter('mailer_sender'))
-                    ->setTo($invitation->getEmail())
-                    ->setBody(
-                        $this->renderView(
-                            '@UniteCMSCore/Emails/invitation.html.twig',
-                            [
-                                'invitation' => $invitation,
-                                'invitation_url' => $this->generateUrl(
-                                    'unitecms_core_profile_acceptinvitation',
-                                    [
-                                        'token' => $invitation->getToken(),
-                                    ],
-                                    UrlGeneratorInterface::ABSOLUTE_URL
-                                ),
-                            ]
-                        ),
-                        'text/html'
-                    );
-                $this->get('mailer')->send($message);
+                $violations = $this->get('validator')->validate($invitation);
+                if($violations->count() > 0) {
+                    $violationMapper = new ViolationMapper();
+                    foreach ($violations as $violation) {
+                        $violationMapper->mapViolation($violation, $form->get('invite_user'));
+                    }
+                } else {
+                    $this->getDoctrine()->getManager()->persist($invitation);
+                    $this->getDoctrine()->getManager()->flush();
 
+                    // Send out email using the default mailer.
+                    $message = (new \Swift_Message($this->get('translator')->trans('email.invitation.headline', ['%invitor%' => $this->getUser()])))
+                        ->setFrom($this->getParameter('mailer_sender'))
+                        ->setTo($invitation->getEmail())
+                        ->setBody(
+                            $this->renderView(
+                                '@UniteCMSCore/Emails/invitation.html.twig',
+                                [
+                                    'invitation' => $invitation,
+                                    'invitation_url' => $this->generateUrl(
+                                        'unitecms_core_profile_acceptinvitation',
+                                        [
+                                            'token' => $invitation->getToken(),
+                                        ],
+                                        UrlGeneratorInterface::ABSOLUTE_URL
+                                    ),
+                                ]
+                            ),
+                            'text/html'
+                        );
+                    $this->get('mailer')->send($message);
+
+                    return $this->redirect($this->generateUrl(
+                        'unitecms_core_domainmember_index',
+                        [
+                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
+                            'domain' => $domain->getIdentifier(),
+                            'member_type' => $memberType->getIdentifier(),
+                        ], Router::ABSOLUTE_URL
+                    ));
+                }
             }
-
-            return $this->redirectToRoute(
-                'unitecms_core_domainmember_index',
-                [
-                    'organization' => $organization->getIdentifier(),
-                    'domain' => $domain->getIdentifier(),
-                    'member_type' => $memberType->getIdentifier(),
-                ]
-            );
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:create.html.twig',
+            '@UniteCMSCore/Domain/Member/create.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -215,8 +247,7 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/{member_type}/update/{member}")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_type}/update/{member}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -225,6 +256,7 @@ class DomainMemberController extends Controller
      *
      * @param Organization $organization
      * @param Domain $domain
+     * @param DomainMemberType $memberType
      * @param \UniteCMS\CoreBundle\Entity\DomainMember $member
      * @param Request $request
      *
@@ -258,19 +290,19 @@ class DomainMemberController extends Controller
 
                 $this->getDoctrine()->getManager()->flush();
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_domainmember_index',
                     [
-                        'organization' => $organization->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                         'domain' => $domain->getIdentifier(),
                         'member_type' => $memberType->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:update.html.twig',
+            '@UniteCMSCore/Domain/Member/update.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -282,8 +314,7 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/{member_type}/delete/{member}")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_type}/delete/{member}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -311,18 +342,18 @@ class DomainMemberController extends Controller
             $this->getDoctrine()->getManager()->remove($member);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_domainmember_index',
                 [
-                    'organization' => $organization->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                     'domain' => $domain->getIdentifier(),
                     'member_type' => $memberType->getIdentifier(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:delete.html.twig',
+            '@UniteCMSCore/Domain/Member/delete.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,
@@ -334,8 +365,7 @@ class DomainMemberController extends Controller
     }
 
     /**
-     * @Route("/{member_type}/delete-invite/{invite}")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_type}/delete-invite/{invite}", methods={"GET", "POST"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
@@ -345,7 +375,7 @@ class DomainMemberController extends Controller
      * @param Organization $organization
      * @param Domain $domain
      * @param DomainMemberType $memberType
-     * @param DomainInvitation $invite
+     * @param Invitation $invite
      * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
@@ -354,7 +384,7 @@ class DomainMemberController extends Controller
         Organization $organization,
         Domain $domain,
         DomainMemberType $memberType,
-        DomainInvitation $invite,
+        Invitation $invite,
         Request $request
     ) {
         $form = $this->createFormBuilder()
@@ -369,18 +399,18 @@ class DomainMemberController extends Controller
             $this->getDoctrine()->getManager()->remove($invite);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_domainmember_index',
                 [
-                    'organization' => $organization->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
                     'domain' => $domain->getIdentifier(),
                     'member_type' => $memberType->getIdentifier(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Domain/Member:delete_invite.html.twig',
+            '@UniteCMSCore/Domain/Member/delete_invite.html.twig',
             [
                 'organization' => $organization,
                 'domain' => $domain,

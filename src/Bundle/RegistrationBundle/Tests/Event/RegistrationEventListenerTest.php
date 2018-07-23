@@ -9,6 +9,7 @@
 namespace UniteCMS\RegistrationBundle\Tests\Event;
 
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Event\RegistrationEvent;
@@ -21,12 +22,19 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
      */
     private $client;
 
+    protected static function bootKernel(array $options = array())
+    {
+        $options['environment'] = 'test_registration';
+        return parent::bootKernel($options);
+    }
+
     public function setUp()
     {
         parent::setUp();
 
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         $org = new Organization();
         $org->setIdentifier('taken')->setTitle('Taken');
@@ -67,7 +75,11 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_registration_registration_registration'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate(
+            'unitecms_registration_registration_registration',
+            [],
+            Router::ABSOLUTE_URL
+        ));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -121,7 +133,11 @@ class RegistrationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_registration_registration_registration'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate(
+            'unitecms_registration_registration_registration',
+            [],
+            Router::ABSOLUTE_URL
+        ));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);

@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\View\Types\TableViewType;
 use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Accessor;
@@ -50,7 +51,7 @@ class ContentType implements Fieldable
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\ContentType::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
@@ -67,7 +68,7 @@ class ContentType implements Fieldable
     /**
      * @var string
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="invalid_characters")
+     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/", message="invalid_characters")
      * @ORM\Column(name="icon", type="string", length=255, nullable=true)
      * @Expose
      */
@@ -123,7 +124,7 @@ class ContentType implements Fieldable
     /**
      * @var array
      * @Assert\All({
-     *     @Assert\Locale(),
+     *     @Assert\Locale(canonicalize=true),
      *     @Assert\NotBlank()
      * })
      * @ORM\Column(name="locales", type="array", nullable=true)
@@ -141,10 +142,6 @@ class ContentType implements Fieldable
     /**
      * @var Content[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Content>")
-     * @Assert\Valid()
-     *
-     * TODO: Checking that all the content is valid will become very expensive for large content sets. We most likely will need another approach.
-     *
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Content", mappedBy="contentType", fetch="EXTRA_LAZY", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $content;
@@ -191,6 +188,30 @@ class ContentType implements Fieldable
     }
 
     /**
+     * Returns fieldTypes that are present in this contentType but not in $contentType.
+     *
+     * @param ContentType $contentType
+     * @param bool $objects , return keys or objects
+     *
+     * @return ContentTypeField[]
+     */
+    public function getFieldTypesDiff(ContentType $contentType, $objects = false)
+    {
+        $keys = array_diff($this->getFields()->getKeys(), $contentType->getFields()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getFields()->get($key);
+        }
+
+        return $objects;
+    }
+
+    /**
      * This function sets all structure fields from the given entity and calls setFromEntity for all updated
      * views and fields.
      *
@@ -210,7 +231,7 @@ class ContentType implements Fieldable
             ->setLocales($contentType->getLocales());
 
         // Fields to delete
-        foreach (array_diff($this->getFields()->getKeys(), $contentType->getFields()->getKeys()) as $field) {
+        foreach ($this->getFieldTypesDiff($contentType) as $field) {
             $this->getFields()->remove($field);
         }
 

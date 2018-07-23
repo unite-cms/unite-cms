@@ -4,7 +4,6 @@ namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
 use UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory;
@@ -27,13 +26,11 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     const SETTINGS                  = ['fields', 'min_rows', 'max_rows'];
     const REQUIRED_SETTINGS         = ['fields'];
 
-    private $validator;
     private $collectionFieldTypeFactory;
     private $fieldTypeManager;
 
-    function __construct(ValidatorInterface $validator, CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager)
+    function __construct(CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager)
     {
-        $this->validator = $validator;
         $this->collectionFieldTypeFactory = $collectionFieldTypeFactory;
         $this->fieldTypeManager = $fieldTypeManager;
     }
@@ -70,7 +67,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             'attr' => [
                 'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
                 'min-rows' => $settings->min_rows ?? 0,
-                'max-rows' => $settings->max_rows ?? 0,
+                'max-rows' => $settings->max_rows ?? null,
             ],
             'entry_type' => FieldableFormType::class,
             'entry_options' => $options,
@@ -202,11 +199,11 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
      * Delegate onCreate call to all child fields, that implement it.
      *
      * @param FieldableField $field
-     * @param Content $content
+     * @param FieldableContent $content
      * @param EntityRepository $repository
      * @param $data
      */
-    public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data) {
+    public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {
 
         // If child field implements onCreate, call it!
         foreach(self::getNestableFieldable($field)->getFields() as $subField) {
@@ -266,9 +263,13 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
             // Case 3: row was present in old data but is not present in new data: HARD DELETE
             if(method_exists($fieldType, 'onHardDelete')) {
-                foreach($old_data[$field->getIdentifier()] as $key => $subOldData) {
-                    if(!empty($old_data[$field->getIdentifier()][$key]) && empty($data[$field->getIdentifier()][$key])) {
-                        $fieldType->onHardDelete($subField, $content, $repository, $subOldData);
+                if(isset($old_data[$field->getIdentifier()])) {
+                    foreach ($old_data[$field->getIdentifier()] as $key => $subOldData) {
+                        if (!empty($old_data[$field->getIdentifier()][$key]) && empty(
+                            $data[$field->getIdentifier()][$key]
+                            )) {
+                            $fieldType->onHardDelete($subField, $content, $repository, $subOldData);
+                        }
                     }
                 }
             }

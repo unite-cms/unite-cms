@@ -9,6 +9,7 @@ use JMS\Serializer\Annotation\Type;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\Validator\Constraints\ViewType;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidViewSettings;
@@ -49,7 +50,7 @@ class View
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\View::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
@@ -60,7 +61,7 @@ class View
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @ViewType(message="validation.invalid_view_type")
+     * @ViewType(message="invalid_view_type")
      * @ORM\Column(name="type", type="string", length=255)
      * @Expose
      */
@@ -77,7 +78,7 @@ class View
     /**
      * @var string
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="invalid_characters")
+     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/", message="invalid_characters")
      * @ORM\Column(name="icon", type="string", length=255, nullable=true)
      * @Expose
      */

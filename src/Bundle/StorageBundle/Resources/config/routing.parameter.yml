@@ -1,0 +1,8 @@
+
+unitecms_storage_sign:
+    resource: "@UniteCMSStorageBundle/Controller/SignController.php"
+    type:     annotation
+    prefix:   /{organization}/{domain}/api/storage/sign
+    requirements:
+        organization: '%identifier_url_pattern%'
+        domain: '%identifier_url_pattern%'

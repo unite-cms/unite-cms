@@ -31,10 +31,18 @@ class ApiKey extends DomainAccessor implements UserInterface, \Serializable
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="180", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="invalid_characters")
+     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/", message="invalid_characters")
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
      */
     protected $token;
+
+    /**
+     * @var string
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @ORM\Column(name="origin", type="string", length=255)
+     */
+    private $origin = '*';
 
     /**
      * @var Organization
@@ -209,13 +217,33 @@ class ApiKey extends DomainAccessor implements UserInterface, \Serializable
     /**
      * @param string $token
      *
-     * @return  ApiKey
+     * @return ApiKey
      */
     public function setToken(string $token)
     {
         $this->token = $token;
 
         return $this;
+    }
+
+    /**
+     * @param string $origin
+     *
+     * @return ApiKey
+     */
+    public function setOrigin(string $origin)
+    {
+        $this->origin = $origin;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOrigin()
+    {
+        return $this->origin;
     }
 
     /**

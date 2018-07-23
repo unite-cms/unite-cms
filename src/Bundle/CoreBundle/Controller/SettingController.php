@@ -3,23 +3,22 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class SettingController extends Controller
 {
     /**
-     * @Route("/{setting_type}/{locale}", defaults={"locale"=null})
-     * @Method({"GET", "POST"})
+     * @Route("/{setting_type}/{locale}", defaults={"locale"=null}, methods={"GET", "POST"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), settingType)")
      *
@@ -84,7 +83,7 @@ class SettingController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Setting:index.html.twig',
+            '@UniteCMSCore/Setting/index.html.twig',
             [
                 'organization' => $settingType->getDomain()->getOrganization(),
                 'domain' => $settingType->getDomain(),
@@ -96,7 +95,7 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/{setting_type}/translations/{setting}")
+     * @Route("/{setting_type}/translations/{setting}", methods={"GET"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
@@ -118,7 +117,7 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/{setting_type}/revisions/{setting}")
+     * @Route("/{setting_type}/revisions/{setting}", methods={"GET"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
@@ -143,7 +142,7 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/{setting_type}/revisions/{setting}/revert/{version}")
+     * @Route("/{setting_type}/revisions/{setting}/revert/{version}", methods={"GET", "POST"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
@@ -168,15 +167,16 @@ class SettingController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Setting reverted.');
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_setting_revisions',
                 [
-                    'organization' => $settingType->getDomain()->getOrganization()->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($settingType->getDomain()->getOrganization()->getIdentifier()),
                     'domain' => $settingType->getDomain()->getIdentifier(),
                     'setting_type' => $settingType->getIdentifier(),
                     'setting' => $setting->getId(),
-                ]
-            );
+                ],
+                Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(

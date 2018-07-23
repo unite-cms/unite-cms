@@ -3,14 +3,16 @@
 namespace src\UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -66,18 +68,24 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
         $this->organization->setTitle('Test password reset')->setIdentifier('password_reset');
 
+        $org2 = new Organization();
+        $org2->setTitle('Org2')->setIdentifier('org2_org2');
+
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
+        $this->em->persist($org2);
         $this->em->persist($this->domain);
         $this->em->flush();
         $this->em->refresh($this->organization);
+        $this->em->refresh($org2);
         $this->em->refresh($this->domain);
 
         $this->users['domain_editor'] = new User();
@@ -110,7 +118,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
                 )
             );
         $domainEditorOrgMember = new OrganizationMember();
-        $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
+        $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($org2);
         $this->users['domain_editor2']->addOrganization($domainEditorOrgMember);
 
         foreach ($this->users as $key => $user) {
@@ -140,11 +148,11 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testAcceptInvitationWithInvalidToken()
     {
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', [], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-danger'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.token_missing'), trim($crawler->filter('div.uk-alert-danger')->text()));
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token=XXX');
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => 'XXX'], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-danger'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.token_not_found'), trim($crawler->filter('div.uk-alert-danger')->text()));
     }
@@ -155,8 +163,8 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testAcceptInvitationForLoggedOutNewUser()
     {
 
-        $invitation = new DomainInvitation();
-        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation = new Invitation();
+        $invitation->setOrganization($this->organization)->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             'another_email@example.com'
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -164,7 +172,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
@@ -175,14 +183,14 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testAcceptInvitationForLoggedInNewUser()
     {
 
-        $invitation = new DomainInvitation();
-        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation = new Invitation();
+        $invitation->setOrganization($this->organization)->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             'another_email@example.com'
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
         $form = $crawler->filter('form')->form();
@@ -192,13 +200,16 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
             $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(['email' => $invitation->getEmail()])
         );
         $this->assertNotNull(
-            $this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId())
+            $this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId())
         );
 
         // Try to create a new, invalid user (full validation is tested somewhere else)
         $form['invitation_registration[password][first]'] = "pw1";
         $form['invitation_registration[password][second]'] = "pw2";
         $crawler = $this->client->submit($form);
+
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
 
         // Should show the form with form errors.
         $this->assertCount(1, $crawler->filter('form'));
@@ -220,6 +231,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         // Check all user fields that should be filled upon registration.
         $this->assertEquals($invitation->getEmail(), $user->getEmail());
         $this->assertCount(1, $user->getDomains());
+        $this->assertEquals($invitation->getOrganization()->getIdentifier(), $user->getOrganizations()->first()->getOrganization()->getIdentifier());
         $this->assertEquals(
             $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
             $user->getDomains()->first()->getDomain()->getIdentifier()
@@ -228,7 +240,71 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertTrue(static::$container->get('security.password_encoder')->isPasswordValid($user, 'password1'));
 
         // Also make sure, that the invitation got deleted.
-        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
+        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
+    }
+
+    /**
+     * An invitation for a new user can be accepted if no user is logged in.
+     */
+    public function testAcceptInvitationWithoutDomainForLoggedInNewUser()
+    {
+
+        $invitation = new Invitation();
+        $invitation
+            ->setOrganization($this->organization)
+            ->setEmail('another_email@example.com')
+            ->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))
+            ->setRequestedAt(new \DateTime());
+        $this->em->persist($invitation);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
+        $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
+        $this->assertCount(1, $crawler->filter('form'));
+        $form = $crawler->filter('form')->form();
+
+        // Make sure, that a user with this email address does not exist but the invitation does.
+        $this->assertNull(
+            $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(['email' => $invitation->getEmail()])
+        );
+        $this->assertNotNull(
+            $this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId())
+        );
+
+        // Try to create a new, invalid user (full validation is tested somewhere else)
+        $form['invitation_registration[password][first]'] = "pw1";
+        $form['invitation_registration[password][second]'] = "pw2";
+        $crawler = $this->client->submit($form);
+
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
+        // Should show the form with form errors.
+        $this->assertCount(1, $crawler->filter('form'));
+        $this->assertGreaterThan(0, $crawler->filter('form div.uk-alert-danger')->count());
+
+        // Try to create a new, valid user
+        $form['invitation_registration[password][first]'] = "password1";
+        $form['invitation_registration[password][second]'] = "password1";
+        $form['invitation_registration[name]'] = "This is my name";
+        $crawler = $this->client->submit($form);
+
+        // Should not show a form
+        $this->assertCount(0, $crawler->filter('form'));
+
+        // User should be created.
+        $user = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(['email' => $invitation->getEmail()]);
+        $this->assertNotNull($user);
+
+        // Check all user fields that should be filled upon registration.
+        $this->assertEquals($invitation->getEmail(), $user->getEmail());
+        $this->assertCount(0, $user->getDomains());
+        $this->assertEquals($invitation->getOrganization()->getIdentifier(), $user->getOrganizations()->first()->getOrganization()->getIdentifier());
+        $this->assertEquals('This is my name', $user->getName());
+        $this->assertTrue(static::$container->get('security.password_encoder')->isPasswordValid($user, 'password1'));
+
+        // Also make sure, that the invitation got deleted.
+        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
     }
 
     /**
@@ -237,8 +313,8 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testAcceptInvitationForKnownLoggedOutUser()
     {
 
-        $invitation = new DomainInvitation();
-        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation = new Invitation();
+        $invitation->setOrganization($this->organization)->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             $this->users['domain_editor']->getEmail()
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -246,7 +322,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
         $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.wrong_user'), trim($crawler->filter('div.uk-alert-warning')->text()));
     }
@@ -258,8 +334,8 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testAcceptInvitationForMember()
     {
 
-        $invitation = new DomainInvitation();
-        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation = new Invitation();
+        $invitation->setOrganization($this->organization)->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             $this->users['domain_editor']->getEmail()
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -267,9 +343,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(1, $crawler->filter('div.uk-alert-warning'));
-        $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.already_member'), trim($crawler->filter('div.uk-alert-warning')->text()));
+        $this->assertEquals(static::$container->get('translator')->trans('profile.accept_invitation.already_member', ['%organization%' => (string)$this->organization]), trim($crawler->filter('div.uk-alert-warning p')->html()));
     }
 
     /**
@@ -278,27 +354,30 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testAcceptInvitationForKnownLoggedInUser()
     {
 
-        $invitation = new DomainInvitation();
-        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation = new Invitation();
+        $invitation->setOrganization($this->organization)->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             $this->users['domain_editor2']->getEmail()
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
         $this->em->flush();
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
 
         // Make sure, that the invitation exists.
         $this->assertNotNull(
-            $this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId())
+            $this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId())
         );
 
         // Try to submit the form with operation accept
         $this->assertCount(0, $this->users['domain_editor2']->getDomains());
-        $form = $crawler->selectButton(static::$container->get('translator')->trans('invitation.accept'))->form();
+        $form = $crawler->selectButton(static::$container->get('translator')->trans('profile.accept_invitation.form.accept.button'))->form();
         $crawler = $this->client->submit($form);
 
         // Should not show a form
@@ -316,9 +395,66 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
             $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
             $existingUser->getDomains()->first()->getDomain()->getIdentifier()
         );
+        $this->assertEquals(Organization::ROLE_USER, $existingUser->getOrganizations()->first()->getSingleRole());
 
         // Also make sure, that the invitation got deleted.
-        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
+        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
+    }
+
+    /**
+     * An invitation for a known user can only be accepted if the user is logged in.
+     */
+    public function testAcceptInvitationWithoutDomainForKnownLoggedInUser()
+    {
+
+        $invitation = new Invitation();
+        $invitation
+            ->setOrganization($this->organization)
+            ->setEmail($this->users['domain_editor2']->getEmail())
+            ->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))
+            ->setRequestedAt(new \DateTime());
+        $this->em->persist($invitation);
+        $this->em->flush();
+
+        $this->login($this->users['domain_editor2']);
+
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
+        $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
+        $this->assertCount(1, $crawler->filter('form'));
+
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
+        // Make sure, that the invitation exists.
+        $this->assertNotNull(
+            $this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId())
+        );
+
+        // Before submitting, the user is member of one org.
+        $this->assertCount(1, $this->users['domain_editor2']->getOrganizations());
+
+        // Try to submit the form with operation accept
+        $this->assertCount(0, $this->users['domain_editor2']->getDomains());
+        $form = $crawler->selectButton(static::$container->get('translator')->trans('profile.accept_invitation.form.accept.button'))->form();
+        $crawler = $this->client->submit($form);
+
+        // Should not show a form
+        $this->assertCount(0, $crawler->filter('form'));
+
+        // Refresh user
+        $existingUser = $this->em->getRepository('UniteCMSCoreBundle:User')->findOneBy(
+            ['email' => $this->users['domain_editor2']->getEmail()]
+        );
+
+        // Check all user fields that should be filled upon accept.
+        $this->assertNotNull($existingUser);
+        $this->assertCount(2, $existingUser->getOrganizations());
+        $this->assertCount(0, $existingUser->getDomains());
+        $this->assertEquals($invitation->getOrganization()->getIdentifier(), $existingUser->getOrganizations()->last()->getOrganization()->getIdentifier());
+        $this->assertEquals(Organization::ROLE_USER, $existingUser->getOrganizations()->last()->getSingleRole());
+
+        // Also make sure, that the invitation got deleted.
+        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
     }
 
     /**
@@ -327,8 +463,8 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testRejectInvitationForKnownLoggedInUser()
     {
 
-        $invitation = new DomainInvitation();
-        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation = new Invitation();
+        $invitation->setOrganization($this->organization)->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             $this->users['domain_editor2']->getEmail()
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
@@ -336,18 +472,21 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         $this->login($this->users['domain_editor2']);
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
         $this->assertCount(0, $crawler->filter('div.uk-alert-danger'));
         $this->assertCount(1, $crawler->filter('form'));
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         // Make sure, that the invitation exists.
         $this->assertNotNull(
-            $this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId())
+            $this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId())
         );
 
         // Try to submit the form with operation reject
         $this->assertCount(0, $this->users['domain_editor2']->getDomains());
-        $form = $crawler->selectButton(static::$container->get('translator')->trans('invitation.reject'))->form();
+        $form = $crawler->selectButton(static::$container->get('translator')->trans('profile.accept_invitation.form.reject.button'))->form();
         $crawler = $this->client->submit($form);
 
         // Should not show a form
@@ -362,7 +501,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertCount(0, $existingUser->getDomains());
 
         // Also make sure, that the invitation got deleted.
-        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:DomainInvitation')->find($invitation->getId()));
+        $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
     }
 
     /**
@@ -371,14 +510,14 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     public function testAcceptInvitationAutoLogin()
     {
 
-        $invitation = new DomainInvitation();
-        $invitation->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
+        $invitation = new Invitation();
+        $invitation->setOrganization($this->organization)->setDomainMemberType($this->domain->getDomainMemberTypes()->first())->setEmail(
             'test@example.com'
         )->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))->setRequestedAt(new \DateTime());
         $this->em->persist($invitation);
         $this->em->flush();
 
-        $crawler = $this->client->request('GET', '/profile/accept-invitation?token='.$invitation->getToken());
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
 
         $form = $crawler->filter('form');
         $this->assertCount(1, $form);
@@ -391,13 +530,48 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // There should be a user token in the client session.
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => $invitation->getDomainMemberType()->getDomain()->getOrganization()->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($invitation->getDomainMemberType()->getDomain()->getOrganization()->getIdentifier()),
             'domain' => $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
-        ])));
+        ], Router::ABSOLUTE_URL)));
         $token = $this->client->getContainer()->get('security.token_storage')->getToken();
         $this->assertNotNull($token);
         $this->assertEquals('New User', $token->getUser()->getName());
         $this->assertEquals($invitation->getEmail(), $token->getUser()->getEmail());
+    }
 
+    /**
+     * After creating a new user account during invitation, the user should get logged in automatically.
+     */
+    public function testAcceptInvitationWithoutDomainAutoLogin()
+    {
+
+        $invitation = new Invitation();
+        $invitation
+            ->setOrganization($this->organization)
+            ->setEmail('test@example.com')
+            ->setToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='))
+            ->setRequestedAt(new \DateTime());
+        $this->em->persist($invitation);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()], Router::ABSOLUTE_URL));
+
+        $form = $crawler->filter('form');
+        $this->assertCount(1, $form);
+        $form = $form->form();
+
+        $form['invitation_registration[name]'] = 'New User';
+        $form['invitation_registration[password][first]'] = 'password';
+        $form['invitation_registration[password][second]'] = 'password';
+        $this->client->submit($form);
+
+        // There should be a user token in the client session.
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
+            'organization' => IdentifierNormalizer::denormalize($invitation->getOrganization()->getIdentifier()),
+        ], Router::ABSOLUTE_URL)));
+        $token = $this->client->getContainer()->get('security.token_storage')->getToken();
+        $this->assertNotNull($token);
+        $this->assertEquals('New User', $token->getUser()->getName());
+        $this->assertEquals($invitation->getEmail(), $token->getUser()->getEmail());
     }
 }

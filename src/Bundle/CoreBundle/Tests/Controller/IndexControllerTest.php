@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class IndexControllerTest extends DatabaseAwareTestCase
@@ -30,16 +31,12 @@ class IndexControllerTest extends DatabaseAwareTestCase
      */
     private $admin;
 
-    /**
-     * @var Organization $organization
-     */
-    private $organization;
-
     public function setUp()
     {
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         $this->admin = new User();
         $this->admin->setEmail('editor@example.com')->setName('Domain Admin')->setRoles([User::ROLE_USER])->setPassword('XXX');
@@ -57,8 +54,8 @@ class IndexControllerTest extends DatabaseAwareTestCase
 
     public function testIndexAction() {
 
-        $url = static::$container->get('router')->generate('unitecms_core_index');
-        $profile_orgs_url = static::$container->get('router')->generate('unitecms_core_profile_organizations',  [], Router::ABSOLUTE_PATH);
+        $url = static::$container->get('router')->generate('unitecms_core_index', [], Router::ABSOLUTE_URL);
+        $profile_orgs_url = static::$container->get('router')->generate('unitecms_core_organization_index',  [], Router::ABSOLUTE_URL);
 
         // index redirects to profile organizations route
         $this->client->request('GET', $url);
@@ -72,7 +69,7 @@ class IndexControllerTest extends DatabaseAwareTestCase
 
         // Add an organization, but not for this user.
         $org1 = new Organization();
-        $org1->setIdentifier('o1')->setTitle('Org 1');
+        $org1->setIdentifier('o1_o1')->setTitle('Org 1');
         $this->em->persist($org1);
         $this->em->flush();
 
@@ -91,11 +88,14 @@ class IndexControllerTest extends DatabaseAwareTestCase
         $this->em->persist($orgMember);
         $this->em->flush();
 
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
+
         // Index should now redirect to first organization.
         $this->client->request('GET', $url);
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $org1->getIdentifier(),
-        ])));
+            'organization' => IdentifierNormalizer::denormalize($org1->getIdentifier()),
+        ], Router::ABSOLUTE_URL)));
 
         // Create a 2nd organization.
         $org2 = new Organization();
@@ -106,8 +106,8 @@ class IndexControllerTest extends DatabaseAwareTestCase
         // Should be the same result.
         $this->client->request('GET', $url);
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_index', [
-            'organization' => $org1->getIdentifier(),
-        ])));
+            'organization' => IdentifierNormalizer::denormalize($org1->getIdentifier()),
+        ], Router::ABSOLUTE_URL)));
 
         // Now invite the user to the 2nd organization.
         $org2 = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll()[1];
@@ -116,6 +116,9 @@ class IndexControllerTest extends DatabaseAwareTestCase
         $org2Member->setUser($admin)->setOrganization($org2);
         $this->em->persist($org2Member);
         $this->em->flush();
+
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
 
         // Index should now show a menu with all organizations for this user.
         $this->client->request('GET', $url);

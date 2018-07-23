@@ -11,6 +11,7 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class UniteCMSManager
 {
@@ -65,31 +66,31 @@ class UniteCMSManager
             return;
         }
 
-        // Get organization and domain form current request.
-        $requestOrganization = $request->attributes->get('organization');
-        $requestDomain = $request->attributes->get('domain');
+        $route_params = $request->attributes->get('_route_params');
 
-        if ($requestOrganization instanceof Organization) {
-            $requestOrganizationOriginal = $this->em->getUnitOfWork()->getOriginalEntityData($requestOrganization);
-            if (!empty($requestOrganizationOriginal['identifier'])) {
-                $organizationIdentifier = $requestOrganizationOriginal['identifier'];
-            } else {
-                $organizationIdentifier = $requestOrganization->getIdentifier();
+        // Get raw organization and domain form current route. This prevents us from getting any unsaved updated identifier from memory.
+        $organizationIdentifier = !empty($route_params['organization']) ? IdentifierNormalizer::normalize($route_params['organization']) : null;
+        $domainIdentifier = !empty($route_params['domain']) ? IdentifierNormalizer::normalize($route_params['domain']) : null;
+
+        // Fallback to request parameters.
+        if(empty($organizationIdentifier) && $request->attributes->has('organization')) {
+            if($request->attributes->get('organization') instanceof Organization) {
+                $organizationIdentifier = $request->attributes->get('organization')->getIdentifier();
+            } elseif(is_string($request->attributes->get('organization'))) {
+                $organizationIdentifier = $request->attributes->get('organization');
             }
-        } else {
-            $organizationIdentifier = $requestOrganization;
         }
 
-        if ($requestDomain instanceof Domain) {
-            $requestDomainOriginal = $this->em->getUnitOfWork()->getOriginalEntityData($requestDomain);
-            if (!empty($requestOrganizationOriginal['identifier'])) {
-                $domainIdentifier = $requestDomainOriginal['identifier'];
-            } else {
-                $domainIdentifier = $requestDomain->getIdentifier();
+        if(empty($domainIdentifier) && $request->attributes->has('domain')) {
+            if($request->attributes->get('domain') instanceof Domain) {
+                $domainIdentifier = $request->attributes->get('domain')->getIdentifier();
+            } elseif(is_string($request->attributes->get('domain'))) {
+                $domainIdentifier = $request->attributes->get('domain');
             }
-        } else {
-            $domainIdentifier = $requestDomain;
         }
+
+        // Normalize organization identifier.
+        $organizationIdentifier = IdentifierNormalizer::normalize($organizationIdentifier);
 
         // Get organization information from db.
         $data = $this->em->createQueryBuilder()

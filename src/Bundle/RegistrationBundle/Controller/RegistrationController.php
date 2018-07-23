@@ -8,16 +8,17 @@
 
 namespace UniteCMS\RegistrationBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Event\RegistrationEvent;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\RegistrationBundle\Form\Model\RegistrationModel;
 use UniteCMS\RegistrationBundle\Form\RegistrationType;
 
@@ -25,17 +26,22 @@ class RegistrationController extends Controller
 {
 
     /**
-     * @Route("/registration")
-     * @Method({"GET", "POST"})
+     * @Route("/registration", methods={"GET", "POST"})
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\Response
+     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function registrationAction(Request $request)
     {
+
+        // Redirect the user to / if logged in
+        if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
+        }
+
         $form = $this->createForm(RegistrationType::class);
         $registrationModelClass = $form->getConfig()->getDataClass();
 
@@ -81,11 +87,11 @@ class RegistrationController extends Controller
                 $violationMapper = new ViolationMapper();
 
                 foreach ($organizationViolations as $violation) {
-                    $violationMapper->mapViolation($violation, $form);
+                    $violationMapper->mapViolation($violation, $form->get('organizationIdentifier'));
                 }
 
                 foreach ($userViolations as $violation) {
-                    $violationMapper->mapViolation($violation, $form);
+                    $violationMapper->mapViolation($violation, $form->get('email'));
                 }
 
                 $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_FAILURE, new RegistrationEvent($registration, 'registration'));
@@ -105,7 +111,7 @@ class RegistrationController extends Controller
                 $this->container->get('session')->set('_security_main', serialize($userToken));
 
                 $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration, 'registration'));
-                return $this->redirectToRoute('unitecms_core_domain_index', ['organization' => $organization->getIdentifier()]);
+                return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())], Router::ABSOLUTE_URL));
             }
         }
 

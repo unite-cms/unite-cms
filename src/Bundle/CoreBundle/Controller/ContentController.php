@@ -4,8 +4,7 @@ namespace UniteCMS\CoreBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -13,7 +12,8 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\Translator;
+use Symfony\Component\Routing\Router;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -23,8 +23,7 @@ use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 class ContentController extends Controller
 {
     /**
-     * @Route("/{content_type}/{view}")
-     * @Method({"GET"})
+     * @Route("/{content_type}/{view}", methods={"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), view.getContentType())")
      *
@@ -34,7 +33,7 @@ class ContentController extends Controller
     public function indexAction(View $view)
     {
         return $this->render(
-            'UniteCMSCoreBundle:Content:index.html.twig',
+            '@UniteCMSCore/Content/index.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -50,8 +49,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/create")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/create", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), view.getContentType())")
      *
@@ -112,20 +110,20 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content created.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:create.html.twig',
+            '@UniteCMSCore/Content/create.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -137,8 +135,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/update/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/update/{content}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -183,20 +180,20 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content updated.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:update.html.twig',
+            '@UniteCMSCore/Content/update.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -209,8 +206,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/delete/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/delete/{content}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::DELETE'), content)")
@@ -249,20 +245,20 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content deleted.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:delete.html.twig',
+            '@UniteCMSCore/Content/delete.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -275,13 +271,15 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/delete-definitely/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/delete-definitely/{content}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @param View $view
      * @param string $content
      * @param Request $request
      * @return Response
+     *
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function deleteDefinitelyAction(View $view, string $content, Request $request)
     {
@@ -343,20 +341,20 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content deleted.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:deleteDefinitely.html.twig',
+            '@UniteCMSCore/Content/deleteDefinitely.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -369,8 +367,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/recover/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/recover/{content}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @param View $view
      * @param string $content
@@ -429,15 +426,15 @@ class ContentController extends Controller
                 $this->getDoctrine()->getManager()->flush();
                 $this->addFlash('success', 'Deleted content was restored.');
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -455,8 +452,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/translations/{content}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/translations/{content}", methods={"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -479,15 +475,15 @@ class ContentController extends Controller
                     'You cannot manage translations for this content, because it is a translation of soft-deleted content.'
                 );
 
-                return $this->redirectToRoute(
+                return $this->redirect($this->generateUrl(
                     'unitecms_core_content_index',
                     [
-                        'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                         'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                         'content_type' => $view->getContentType()->getIdentifier(),
                         'view' => $view->getIdentifier(),
-                    ]
-                );
+                    ], Router::ABSOLUTE_URL
+                ));
             }
         }
 
@@ -502,8 +498,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/translations/{content}/add/{locale}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/translations/{content}/add/{locale}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -581,17 +576,17 @@ class ContentController extends Controller
                             $this->getDoctrine()->getManager()->flush();
                             $this->addFlash('success', 'Translation added.');
 
-                            return $this->redirectToRoute(
+                            return $this->redirect($this->generateUrl(
                                 'unitecms_core_content_translations',
                                 [
-                                    'organization' => $view->getContentType()->getDomain()->getOrganization(
-                                    )->getIdentifier(),
+                                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization(
+                                    )->getIdentifier()),
                                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                                     'content_type' => $view->getContentType()->getIdentifier(),
                                     'view' => $view->getIdentifier(),
                                     'content' => $content->getId(),
-                                ]
-                            );
+                                ], Router::ABSOLUTE_URL
+                            ));
                         }
                     }
                 }
@@ -599,7 +594,7 @@ class ContentController extends Controller
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:addTranslation.html.twig',
+            '@UniteCMSCore/Content/addTranslation.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -613,8 +608,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/translations/{content}/remove/{locale}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/translations/{content}/remove/{locale}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -657,20 +651,20 @@ class ContentController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Translation removed.');
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_content_translations',
                 [
-                    'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                     'content_type' => $view->getContentType()->getIdentifier(),
                     'view' => $view->getIdentifier(),
                     'content' => $content->getId(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(
-            'UniteCMSCoreBundle:Content:removeTranslation.html.twig',
+            '@UniteCMSCore/Content/removeTranslation.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
@@ -684,8 +678,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/revisions/{content}")
-     * @Method({"GET"})
+     * @Route("/{content_type}/{view}/revisions/{content}", methods={"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -711,8 +704,7 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/revisions/{content}/revert/{version}")
-     * @Method({"GET", "POST"})
+     * @Route("/{content_type}/{view}/revisions/{content}/revert/{version}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
@@ -737,16 +729,16 @@ class ContentController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Content reverted.');
 
-            return $this->redirectToRoute(
+            return $this->redirect($this->generateUrl(
                 'unitecms_core_content_revisions',
                 [
-                    'organization' => $view->getContentType()->getDomain()->getOrganization()->getIdentifier(),
+                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
                     'domain' => $view->getContentType()->getDomain()->getIdentifier(),
                     'content_type' => $view->getContentType()->getIdentifier(),
                     'view' => $view->getIdentifier(),
                     'content' => $content->getId(),
-                ]
-            );
+                ], Router::ABSOLUTE_URL
+            ));
         }
 
         return $this->render(

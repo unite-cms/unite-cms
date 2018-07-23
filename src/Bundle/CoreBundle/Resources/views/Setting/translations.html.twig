@@ -4,10 +4,10 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ path('unitecms_core_setting_index', {
-            domain: unite.domain.identifier,
-            organization: unite.organization.identifier,
-            setting_type: settingType.identifier
+        <a class="back-button" href="{{ url('unitecms_core_setting_index', {
+            domain: unite.domain.identifier|replace({'_':'-'}),
+            organization: unite.organization.identifier|replace({'_':'-'}),
+            setting_type: settingType.identifier|replace({'_':'-'})
         }) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with { "%type%": settingType|escape } %}setting.translations.headline{% endtrans %}</h2>
     </header>
@@ -33,10 +33,10 @@
                         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                             <ul class="uk-nav uk-dropdown-nav">
 
-                                <li><a href="{{ path('unitecms_core_setting_index', {
-                                        'organization': unite.domain.organization.identifier,
-                                        'domain': unite.domain.identifier,
-                                        'setting_type': settingType.identifier,
+                                <li><a href="{{ url('unitecms_core_setting_index', {
+                                        'organization': unite.domain.organization.identifier|replace({'_':'-'}),
+                                        'domain': unite.domain.identifier|replace({'_':'-'}),
+                                        'setting_type': settingType.identifier|replace({'_':'-'}),
                                         'locale': translation.locale
                                     }) }}">
                                         <i class="uk-margin-small-right" data-feather="edit"></i>
@@ -57,10 +57,10 @@
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
 
-                                    <li><a href="{{ path('unitecms_core_setting_index', {
-                                            'organization': unite.domain.organization.identifier,
-                                            'domain': unite.domain.identifier,
-                                            'setting_type': settingType.identifier,
+                                    <li><a href="{{ url('unitecms_core_setting_index', {
+                                            'organization': unite.domain.organization.identifier|replace({'_':'-'}),
+                                            'domain': unite.domain.identifier|replace({'_':'-'}),
+                                            'setting_type': settingType.identifier|replace({'_':'-'}),
                                             'locale': locale
                                         }) }}" class="uk-text-success">
                                             <i class="uk-margin-small-right" data-feather="plus-circle"></i>

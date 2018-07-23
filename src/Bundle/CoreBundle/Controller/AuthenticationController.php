@@ -2,23 +2,22 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
 class AuthenticationController extends Controller
 {
 
     /**
-     * @Route("/login")
-     * @Method({"GET", "POST"})
+     * @Route("/login", methods={"GET", "POST"})
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function loginAction()
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirectToRoute('unitecms_core_index');
+            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
         }
 
         // get the login error if there is one
@@ -28,7 +27,7 @@ class AuthenticationController extends Controller
         $lastUsername = $this->get('security.authentication_utils')->getLastUsername();
 
         return $this->render(
-            'UniteCMSCoreBundle:Authentication:login.html.twig',
+            '@UniteCMSCore/Authentication/login.html.twig',
             array(
                 'last_username' => $lastUsername,
                 'error' => $error,

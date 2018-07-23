@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
 /**
  * Organization
@@ -21,7 +22,7 @@ class Organization
     const ROLE_USER = "ROLE_USER";
     const ROLE_ADMINISTRATOR = "ROLE_ADMINISTRATOR";
 
-    const RESERVED_IDENTIFIERS = ["login", "profile"];
+    const RESERVED_IDENTIFIERS = ['profile', 'api', 'app'];
 
     /**
      * @var int
@@ -44,7 +45,7 @@ class Organization
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Organization::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255, unique=true)
      */
@@ -72,6 +73,13 @@ class Organization
      */
     private $apiKeys;
 
+    /**
+     * @var Invitation[]
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="Invitation", mappedBy="organization", fetch="EXTRA_LAZY")
+     */
+    private $invites;
+
     public function __toString()
     {
         return ''.$this->title;
@@ -82,6 +90,7 @@ class Organization
         $this->domains = new ArrayCollection();
         $this->members = new ArrayCollection();
         $this->apiKeys = new ArrayCollection();
+        $this->invites = new ArrayCollection();
     }
 
     /**
@@ -268,6 +277,14 @@ class Organization
         }
 
         return $this;
+    }
+
+    /**
+     * @return Invitation[]|ArrayCollection
+     */
+    public function getInvites()
+    {
+        return $this->invites;
     }
 }
 

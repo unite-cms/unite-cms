@@ -14,6 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
@@ -48,7 +49,7 @@ class SettingType implements Fieldable
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\SettingType::RESERVED_IDENTIFIERS")
      * @ORM\Column(name="identifier", type="string", length=255)
      * @Expose
@@ -57,7 +58,6 @@ class SettingType implements Fieldable
 
     /**
      * @var string
-     *
      * @ORM\Column(name="description", type="text", nullable=true)
      * @Expose
      */
@@ -66,7 +66,7 @@ class SettingType implements Fieldable
     /**
      * @var string
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/i", message="invalid_characters")
+     * @Assert\Regex(pattern="/^[a-z0-9_-]+$/", message="invalid_characters")
      * @ORM\Column(name="icon", type="string", length=255, nullable=true)
      * @Expose
      */
@@ -85,7 +85,7 @@ class SettingType implements Fieldable
      * @Assert\Valid()
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\SettingTypeField>")
      * @Accessor(getter="getFields",setter="setFields")
-     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier")
+     * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
      */
@@ -94,7 +94,6 @@ class SettingType implements Fieldable
     /**
      * @var Setting[]|ArrayCollection
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\Setting>")
-     * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\Setting", mappedBy="settingType", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     private $settings;
@@ -110,7 +109,7 @@ class SettingType implements Fieldable
     /**
      * @var array
      * @Assert\All({
-     *     @Assert\Locale(),
+     *     @Assert\Locale(canonicalize=true),
      *     @Assert\NotBlank()
      * })
      * @ORM\Column(name="locales", type="array", nullable=true)
@@ -144,18 +143,33 @@ class SettingType implements Fieldable
         $this->permissions[SettingVoter::UPDATE] = 'member.type == "editor"';
     }
 
-    public function allowedPermissionRoles(): array
-    {
-        if ($this->getDomain()) {
-            return $this->getDomain()->getRoles();
-        }
-
-        return [];
-    }
-
     public function allowedPermissionKeys(): array
     {
         return SettingVoter::ENTITY_PERMISSIONS;
+    }
+
+    /**
+     * Returns fieldTypes that are present in this settingType but not in $settingType.
+     *
+     * @param SettingType $settingType
+     * @param bool $objects , return keys or objects
+     *
+     * @return SettingTypeField[]
+     */
+    public function getFieldTypesDiff(SettingType $settingType, $objects = false)
+    {
+        $keys = array_diff($this->getFields()->getKeys(), $settingType->getFields()->getKeys());
+
+        if (!$objects) {
+            return $keys;
+        }
+
+        $objects = [];
+        foreach ($keys as $key) {
+            $objects[] = $this->getFields()->get($key);
+        }
+
+        return $objects;
     }
 
     /**
@@ -176,7 +190,7 @@ class SettingType implements Fieldable
             ->setPermissions($settingType->getPermissions());
 
         // Fields to delete
-        foreach (array_diff($this->getFields()->getKeys(), $settingType->getFields()->getKeys()) as $field) {
+        foreach ($this->getFieldTypesDiff($settingType) as $field) {
             $this->getFields()->remove($field);
         }
 

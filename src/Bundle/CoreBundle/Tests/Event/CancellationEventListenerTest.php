@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Tests\Event;
 
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -36,6 +37,7 @@ class CancellationEventListenerTest extends DatabaseAwareTestCase
 
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         $this->user = new User();
         $this->user->setEmail('test@example.com')->setPassword('password')->setName('Name');
@@ -84,7 +86,7 @@ class CancellationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_update'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_update', [], Router::ABSOLUTE_URL));
 
         $form = $crawler->filter('form[name="delete_account"]');
         $this->assertCount(1, $form);
@@ -135,7 +137,7 @@ class CancellationEventListenerTest extends DatabaseAwareTestCase
         $this->client->getContainer()->get('event_dispatcher')->addSubscriber($subscriberMock);
         $this->client->disableReboot();
 
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_update'));
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_profile_update', [], Router::ABSOLUTE_URL));
 
         $form = $crawler->filter('form[name="delete_account"]');
         $this->assertCount(1, $form);

@@ -21,8 +21,7 @@ class CreateOrganizationCommandTest extends DatabaseAwareTestCase
         $application = new Application(self::$kernel);
         $application->add(new CreateOrganizationCommand(
             static::$container->get('doctrine.orm.default_entity_manager'),
-            static::$container->get('validator'),
-            static::$container->get('unite.cms.domain_definition_parser')
+            static::$container->get('validator')
         ));
 
         $command = $application->find('unite:organization:create');

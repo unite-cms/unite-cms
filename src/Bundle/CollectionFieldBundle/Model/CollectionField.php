@@ -10,6 +10,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\FieldType;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
 /**
  * We use this model only for validation!
@@ -31,7 +32,7 @@ class CollectionField implements FieldableField
      * @var string
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9_]+$/i", message="invalid_characters")
+     * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CollectionFieldBundle\Model\CollectionField::RESERVED_IDENTIFIERS")
      */
     private $identifier;

@@ -12,57 +12,81 @@ class WysiwygFieldType extends FieldType
 {
     const TYPE                      = "wysiwyg";
     const FORM_TYPE                 = WysiwygType::class;
-    const SETTINGS                  = ['toolbar', 'theme', 'placeholder'];
-    const REQUIRED_SETTINGS         = ['toolbar'];
-
-    const ALLOWED_THEMES            = ['snow', 'bubble'];
-    const ALLOWED_TOOLBAR_OPTIONS   = [
-        'bold', 'italic', 'underline', 'strike',
-        'blockquote', 'clean', 'link',
-        ['header' => 1], ['header' => 2], ['header' => 3], ['header' => 4], ['header' => 5], ['header' => 6],
-        ['list' => 'ordered'], ['list' => 'bullet'], ['list' => 'checked'],
-        ['indent' => '-1'], ['indent' => '+1'],
-        ['script' => 'sub'], ['script' => 'super'],
-        ['direction' => 'rtl'],
-    ];
-
+    const SETTINGS                  = ['toolbar', 'heading', 'placeholder'];
+    const REQUIRED_SETTINGS         = [];
+    const ALLOWED_TOOLBAR           = ['|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'];
+    const ALLOWED_HEADING           = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code'];
+    const DEFAULT_TOOLBAR           = ['bold', 'italic', 'link'];
+    const DEFAULT_HEADING           = ['p', 'h1', 'h2'];
 
     /**
      * {@inheritdoc}
      */
     function getFormOptions(FieldableField $field): array
     {
-        $theme = $field->getSettings()->theme ?? 'snow';
-        $placeholder = $field->getSettings()->placeholder ?? '';
+        $toolbar = $field->getSettings()->toolbar ?? static::DEFAULT_TOOLBAR;
+        $heading = $field->getSettings()->heading ?? static::DEFAULT_HEADING;
+
+        if(!empty($heading)) {
+            $heading = array_map(function($option){
+
+                // If the option was defined as full heading.
+                if(is_array($option)) {
+                    $heading_option['view'] = $option['view'];
+                    $heading_option['model'] = $option['model'];
+                    $heading_option['title'] = $option['title'] ?? ucfirst($heading_option['model']);
+                    if(!empty($option['class'])) {
+                        $heading_option['class'] = $option['class'];
+                    }
+
+                // If the option was defined as simple string.
+                } else {
+                    $heading_option = [
+                        'view' => $option,
+                        'model' => null,
+                    ];
+                }
+
+                $compare_view = is_string($heading_option['view']) ? $heading_option['view'] : $heading_option['view']['name'];
+
+                if($compare_view === 'p') {
+                    $heading_option['model'] = $heading_option['model'] ?? 'paragraph';
+                    $heading_option['class'] = $heading_option['class'] ?? 'ck-heading_paragraph';
+                    $heading_option['title'] = $heading_option['title'] ?? 'Paragraph';
+                }
+
+                if(preg_match('/^h([1-6]+)$/', $compare_view, $matches)) {
+                    $heading_option['model'] = $heading_option['model'] ?? 'heading'.$matches[1];
+                    $heading_option['title'] = $heading_option['title'] ?? 'Heading '.$matches[1];
+                    $heading_option['class'] = $heading_option['class'] ?? 'ck-heading_heading'.$matches[1];
+                }
+
+                if(empty($heading_option['model'])) {
+                    $heading_option['model'] = $heading_option['view'];
+                }
+
+                if(empty($heading_option['title'])) {
+                    $heading_option['title'] = ucfirst($heading_option['model']);
+                }
+
+                return $heading_option;
+
+            }, $heading);
+            $toolbar = array_merge(['heading', '|'], $toolbar);
+        }
 
         return array_merge(
             parent::getFormOptions($field),
             [
                 'attr' => [
                     'data-options' => json_encode([
-                        'theme' => $theme,
-                        'placeholder' => $placeholder,
-                        'modules' => [
-                            'toolbar' => $field->getSettings()->toolbar,
-                        ],
+                        'placeholder' => $field->getSettings()->placeholder ?? '',
+                        'toolbar' => $toolbar,
+                        'heading' => $heading,
                     ]),
                 ],
             ]
         );
-    }
-
-    protected function getOptionPath($option) {
-        $path = 'toolbar';
-
-        if(is_string($option)) {
-            $path .= '.'.$option;
-        }
-
-        elseif(is_array($option) && !empty($option)) {
-            $path .= '.'.array_keys($option)[0].':'.array_values($option)[0];
-        }
-
-        return $path;
     }
 
     /**
@@ -78,39 +102,73 @@ class WysiwygFieldType extends FieldType
             return;
         }
 
-        // Check allowed theme.
-        if(!empty($settings->theme)) {
-            if(!in_array($settings->theme, self::ALLOWED_THEMES)) {
-                $context->buildViolation('wysiwygfield.unknown_theme')->atPath('theme')->addViolation();
+        // Validate toolbar options
+        if(!empty($settings->toolbar)) {
+            if (!is_array($settings->toolbar)) {
+                $context->buildViolation('wysiwygfield.not_an_array')->atPath('toolbar')->addViolation();
+            }
+            if ($context->getViolations()->count() == 0) {
+                foreach ($settings->toolbar as $option) {
+
+                    if(!is_string($option)) {
+                        $context->buildViolation('wysiwygfield.not_an_array')->atPath('toolbar')->addViolation();
+                    }
+
+                    else if (!in_array($option, self::ALLOWED_TOOLBAR)) {
+                        $context->buildViolation('wysiwygfield.unknown_option')->atPath('toolbar.'.$option)->addViolation();
+                    }
+                }
             }
         }
 
-        // Check available toolbar options.
-        if(empty($settings->toolbar)) {
-            $context->buildViolation('not_blank')->atPath('toolbar')->addViolation();
-        }
+        // Validate heading options
+        if(!empty($settings->heading)) {
+            if (!is_array($settings->heading)) {
+                $context->buildViolation('wysiwygfield.not_an_array')->atPath('heading')->addViolation();
+            }
+            if ($context->getViolations()->count() == 0) {
+                foreach ($settings->heading as $option) {
 
-        if(!is_array($settings->toolbar)) {
-            $context->buildViolation('wysiwygfield.invalid_toolbar_definition')->atPath('toolbar')->addViolation();
-        }
+                    // Options can be defined as simple strings or as full heading objects.
+                    if(is_array($option)) {
 
-        // Validate toolbar options
-        if($context->getViolations()->count() == 0) {
-            foreach ($settings->toolbar as $option) {
-
-                // case 1: option is a option group
-                if (is_array($option) && count(array_filter(array_keys($option), 'is_string')) === 0) {
-                    foreach ($option as $child) {
-                        if (!in_array($child, self::ALLOWED_TOOLBAR_OPTIONS)) {
-                            $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($this->getOptionPath($child))->addViolation();
+                        // Make sure, that all required heading options are set.
+                        if(!array_key_exists('view', $option) || !array_key_exists('model', $option)) {
+                            $context->buildViolation('wysiwygfield.invalid_heading_definition')->atPath('heading')->addViolation();
+                            return;
                         }
-                    }
-                }
 
-                // case 2: option is a string or object option
-                else {
-                    if (!in_array($option, self::ALLOWED_TOOLBAR_OPTIONS)) {
-                        $context->buildViolation('wysiwygfield.unknown_toolbar_option')->atPath($this->getOptionPath($option))->addViolation();
+                        // Make sure, that heading view is an array with the required name property.
+                        if(!is_array($option['view']) || empty($option['view']['name'])) {
+                            $context->buildViolation('wysiwygfield.invalid_heading_definition')->atPath('heading')->addViolation();
+                            return;
+                        }
+
+                        // Make sure, that there are only allowed heading options defined.
+                        foreach($option as $key => $value) {
+                            if(!in_array($key, ['view', 'model', 'title'])) {
+                                $context->buildViolation('wysiwygfield.invalid_heading_definition')->atPath('heading.'.$option['view']['name'])->addViolation();
+                                return;
+                            }
+                        }
+
+                        // Make sure, that there are only allowed view options defined.
+                        foreach($option['view'] as $key => $value) {
+                            if(!in_array($key, ['name', 'classes'])) {
+                                $context->buildViolation('wysiwygfield.invalid_heading_definition')->atPath('heading.'.$option['view']['name'])->addViolation();
+                                return;
+                            }
+                        }
+
+                        $option = $option['view']['name'];
+                    }
+
+                    if(!is_string($option)) {
+                        $context->buildViolation('wysiwygfield.not_an_array')->atPath('heading')->addViolation();
+                    }
+
+                    else if (!in_array($option, self::ALLOWED_HEADING)) {
+                        $context->buildViolation('wysiwygfield.unknown_option')->atPath('heading.'.$option)->addViolation();
                     }
                 }
             }

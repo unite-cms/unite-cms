@@ -15,7 +15,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @ORM\Table(name="unite_user")
  * @ORM\Entity
- * @UniqueEntity(fields={"email"}, message="validation.email_already_taken")
+ * @UniqueEntity(fields={"email"}, message="email_already_member")
  * @UniqueEntity(fields={"resetToken"}, message="reset_token_present")
  */
 class User extends DomainAccessor implements UserInterface, \Serializable
@@ -59,7 +59,7 @@ class User extends DomainAccessor implements UserInterface, \Serializable
     /**
      * @var string
      * @Assert\Length(max="180", maxMessage="too_long")
-     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/i", message="invalid_characters")
+     * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/", message="invalid_characters")
      * @ORM\Column(name="reset_token", type="string", length=180, unique=true, nullable=true)
      */
     protected $resetToken;

@@ -5,14 +5,16 @@ namespace src\UniteCMS\CoreBundle\Tests\Security;
 
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\DomainInvitation;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
@@ -49,7 +51,12 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     private $content1;
 
     /**
-     * @var DomainInvitation
+     * @var Setting
+     */
+    private $setting1;
+
+    /**
+     * @var Invitation
      */
     private $invite1;
 
@@ -78,11 +85,16 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     ]
   }';
 
+    protected $databaseStrategy = DatabaseAwareTestCase::STRATEGY_RECREATE;
+
+    protected $loginUrl = null;
+
     public function setUp()
     {
         parent::setUp();
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
+        $this->client->disableReboot();
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
@@ -170,8 +182,13 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->content1->setContentType($this->domain->getContentTypes()->get('ct1'));
         $this->em->persist($this->content1);
 
+        // Create Test Setting
+        $this->setting1 = new Setting();
+        $this->setting1->setSettingType($this->domain->getSettingTypes()->get('st1'));
+        $this->em->persist($this->setting1);
+
         // Create Test invite
-        $this->invite1 = new DomainInvitation();
+        $this->invite1 = new Invitation();
         $this->invite1->setEmail('invite@example.com')->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
         $this->em->persist($this->invite1);
 
@@ -191,16 +208,14 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->refresh($this->content1);
         $this->em->refresh($this->invite1);
         $this->em->refresh($this->apiKey1);
+
+        $this->loginUrl = static::$container->get('router')->generate('unitecms_core_authentication_login', [], Router::ABSOLUTE_URL);
     }
 
-    private function assertAccess($route, $canAccess, $substitutions = [], $methods = ['GET'], $parameters = [])
+    private function assertAccess($route, $canAccess, $methods = ['GET'], $parameters = [])
     {
-
-        $route = 'http://localhost'.$route;
-
-        foreach ($substitutions as $substitution => $value) {
-            $route = str_replace($substitution, $value, $route);
-        }
+        // Because we don't reboot the kernel on each request, clear all previous created but not persisted entities.
+        $this->em->clear();
 
         foreach ($methods as $method) {
             $this->client->request($method, $route, $parameters);
@@ -208,18 +223,14 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             if ($canAccess) {
 
                 // Only check redirection if it is redirecting to another route.
-                if (!$this->client->getResponse()->isRedirect($route) && !$this->client->getResponse()->isRedirect(
-                        $route.'/'
-                    )) {
-                    $this->assertFalse($this->client->getResponse()->isRedirect('http://localhost/profile/login'));
+                if (!$this->client->getResponse()->isRedirect($route) && !$this->client->getResponse()->isRedirect($route)) {
+                    $this->assertFalse($this->client->getResponse()->isRedirect($this->loginUrl));
                 }
                 $this->assertFalse($this->client->getResponse()->isForbidden());
                 $this->assertFalse($this->client->getResponse()->isServerError());
                 $this->assertFalse($this->client->getResponse()->isClientError());
             } else {
-                $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect(
-                        'http://localhost/profile/login'
-                    )));
+                $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect($this->loginUrl)));
                 $this->assertTrue($forbidden);
             }
         }
@@ -227,7 +238,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         // Check, that all other methods are not allowed (Http 405).
         // This check does not works for the login action, because this action will
         // redirect the user to the invalid route login/ if method is not GET or POST.
-        if ($canAccess && $route != 'http://localhost/profile/login') {
+        if ($canAccess && $route != $this->loginUrl) {
             $methodsAvailable = ['GET', 'POST', 'PUT', 'DELETE'];
             foreach (array_diff($methodsAvailable, $methods) as $method) {
                 $this->client->request($method, $route);
@@ -242,18 +253,40 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         }
     }
 
-    private function assertRedirect($route, $destination, $substitutions = [], $methods = ['GET'])
+    private function assertRedirect($route, $destination, $methods = ['GET'])
     {
-        $route = 'http://localhost'.$route;
-
-        foreach ($substitutions as $substitution => $value) {
-            $route = str_replace($substitution, $value, $route);
-        }
-
         foreach ($methods as $method) {
             $this->client->request($method, $route);
             $this->assertTrue($this->client->getResponse()->isRedirect($destination));
         }
+    }
+
+    private function checkRoutes($routes, $parameter) {
+        foreach($routes as $route => $settings) {
+
+            $url = static::$container->get('router')->generate($route, $parameter, Router::ABSOLUTE_URL);
+            $url_parts = explode('?', $url);
+            $url = $url_parts[0];
+
+            if(!empty($settings['query'])) {
+                $url .= '?' . $settings['query'];
+            }
+
+            if(isset($settings['access'])) {
+                $this->assertAccess(
+                    $url,
+                    $settings['access'],
+                    $settings['methods'],
+                    $settings['params'] ?? []
+                );
+            } else {
+                $redirect = static::$container->get('router')->generate('unitecms_core_index', [], Router::ABSOLUTE_URL);
+                $this->assertRedirect($url, $redirect, $settings['methods']);
+            }
+
+
+        }
+
     }
 
     private function login(User $user)
@@ -269,151 +302,139 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
     public function testControllerActionAccessForAnonymous()
     {
-        $substitutions = [
-            '{organization}' => 'access_check',
-            '{domain}' => 'access_check',
-            '{content_type}' => 'ct1',
-            '{setting_type}' => 'st1',
-            '{view}' => 'all',
-            '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getId(),
-            '{invite}' => $this->invite1->getId(),
-            '{apiKey}' => $this->apiKey1->getId(),
-            '{member_type}' => $this->domain->getDomainMemberTypes()->first(),
+        $parameter = [
+            'organization' => 'access-check',
+            'domain' => 'access-check',
+            'content_type' => 'ct1',
+            'setting_type' => 'st1',
+            'view' => 'all',
+            'content' => $this->content1->getId(),
+            'setting' => $this->setting1->getId(),
+            'member' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
+            'invite' => $this->invite1->getId(),
+            'apiKey' => $this->apiKey1->getId(),
+            'member_type' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+            'locale' => 'de',
+            'version' => 1,
         ];
-
-        $this->assertAccess('/', false, $substitutions);
-        $this->assertAccess('/profile/login', true, $substitutions, ['GET', 'POST'], [
-            '_username' => '',
-            '_password' => '',
-        ]);
-        $this->assertAccess('/profile/reset-password', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/reset-password-confirm', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            false,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
+        $this->checkRoutes([
+            'unitecms_core_authentication_login'            => [ 'access' => true, 'methods' => ['GET', 'POST'], 'params' => ['_username' => '', '_password' => ''] ],
+            'unitecms_core_profile_resetpassword'           => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_resetpasswordconfirm'    => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_acceptinvitation'        => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_index'                           => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_logout'                          => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_profile_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organization_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_index'          => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationuser_update'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_delete'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_createinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_deleteinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_index'        => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationapikey_create'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_update'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_delete'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_index'                    => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domain_create'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_view'                     => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_deletedefinitely'        => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_recover'                 => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_removetranslation'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+            'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
     }
 
     public function testControllerActionAccessForDomainEditor()
     {
         $this->login($this->users['domain_editor']);
 
-        $substitutions = [
-            '{organization}' => 'access_check',
-            '{domain}' => 'access_check',
-            '{content_type}' => 'ct1',
-            '{setting_type}' => 'st1',
-            '{view}' => 'all',
-            '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
-            '{invite}' => $this->invite1->getId(),
-            '{apiKey}' => $this->apiKey1->getId(),
-            '{member_type}' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+        $parameter = [
+            'organization' => 'access-check',
+            'domain' => 'access-check',
+            'content_type' => 'ct1',
+            'setting_type' => 'st1',
+            'view' => 'all',
+            'content' => $this->content1->getId(),
+            'setting' => $this->setting1->getId(),
+            'member' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
+            'invite' => $this->invite1->getId(),
+            'apiKey' => $this->apiKey1->getId(),
+            'member_type' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+            'locale' => 'de',
+            'version' => 1,
         ];
+        $this->checkRoutes([
+            'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_resetpassword'           => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_resetpasswordconfirm'    => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_acceptinvitation'        => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_index'                           => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organization_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_index'          => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationuser_update'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_delete'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_createinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_deleteinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_index'        => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationapikey_create'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_update'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_delete'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_index'                    => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_create'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_view'                     => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_update'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_delete'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_addtranslation'          => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_removetranslation'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_index'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+            'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
 
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/profile/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', true, $substitutions, ['GET', 'POST']);
-
-        $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(
-            ['identifier' => 'access_check',]
-        );
+        $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(['identifier' => 'access_check']);
         $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org);
 
@@ -423,348 +444,263 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->persist($content2);
         $this->em->flush();
 
-        $substitutions['{domain}'] = $domain2->getIdentifier();
-        $substitutions['{content}'] = $content2->getId();
+        $setting2 = new Setting();
+        $setting2->setSettingType($domain2->getSettingTypes()->get('st1'));
+        $this->em->persist($setting2);
+        $this->em->flush();
 
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/profile/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            false,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
+        $parameter['domain'] = $domain2->getIdentifier();
+        $parameter['content'] = $content2->getId();
+        $parameter['setting'] = $setting2->getId();
+
+        $this->checkRoutes([
+            'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_resetpassword'           => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_resetpasswordconfirm'    => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_acceptinvitation'        => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_index'                           => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organization_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_index'          => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationuser_update'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_delete'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_createinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_deleteinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_index'        => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationapikey_create'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_update'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_delete'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_index'                    => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_create'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_view'                     => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_removetranslation'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+            'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
     }
 
     public function testControllerActionAccessForDomainViewer()
     {
         $this->login($this->users['domain_viewer']);
-
-        $substitutions = [
-            '{organization}' => 'access_check',
-            '{domain}' => 'access_check',
-            '{content_type}' => 'ct1',
-            '{setting_type}' => 'st1',
-            '{view}' => 'all',
-            '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_viewer']->getOrganizations()->first()->getId(),
-            '{invite}' => $this->invite1->getId(),
-            '{apiKey}' => $this->apiKey1->getId(),
-            '{member_type}' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+        $parameter = [
+            'organization' => 'access-check',
+            'domain' => 'access-check',
+            'content_type' => 'ct1',
+            'setting_type' => 'st1',
+            'view' => 'all',
+            'content' => $this->content1->getId(),
+            'setting' => $this->setting1->getId(),
+            'member' => $this->users['domain_viewer']->getOrganizations()->first()->getId(),
+            'invite' => $this->invite1->getId(),
+            'apiKey' => $this->apiKey1->getId(),
+            'member_type' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+            'locale' => 'de',
+            'version' => 1,
         ];
 
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/profile/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
+        $this->checkRoutes([
+            'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_resetpassword'           => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_resetpasswordconfirm'    => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_acceptinvitation'        => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_index'                           => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organization_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_index'          => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationuser_update'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_delete'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_createinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_deleteinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_index'        => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationapikey_create'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_update'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_delete'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_index'                    => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_create'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_view'                     => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_removetranslation'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+            'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
     }
 
     public function testControllerActionAccessForOrganizationMember()
     {
         $this->login($this->users['organization_member']);
 
-        $substitutions = [
-            '{organization}' => 'access_check',
-            '{domain}' => 'access_check',
-            '{content_type}' => 'ct1',
-            '{setting_type}' => 'st1',
-            '{view}' => 'all',
-            '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
-            '{invite}' => $this->invite1->getId(),
-            '{apiKey}' => $this->apiKey1->getId(),
-            '{member_type}' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+        $parameter = [
+            'organization' => 'access-check',
+            'domain' => 'access-check',
+            'content_type' => 'ct1',
+            'setting_type' => 'st1',
+            'view' => 'all',
+            'content' => $this->content1->getId(),
+            'setting' => $this->setting1->getId(),
+            'member' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
+            'invite' => $this->invite1->getId(),
+            'apiKey' => $this->apiKey1->getId(),
+            'member_type' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+            'locale' => 'de',
+            'version' => 1,
         ];
 
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/profile/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            false,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
-
-        $org2 = new Organization();
-        $org2->setTitle('Org 2')->setIdentifier('access_check2');
-        $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
-        $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org2);
-
-        $content2 = new Content();
-        $content2->setContentType($domain2->getContentTypes()->get('ct1'));
-        $this->em->persist($org2);
-        $this->em->persist($domain2);
-        $this->em->persist($content2);
-        $this->em->flush();
-
-        $substitutions['{organization}'] = $org2->getIdentifier();
-        $substitutions['{domain}'] = $domain2->getIdentifier();
-        $substitutions['{content}'] = $content2->getId();
-
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/profile/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            false,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
+        $this->checkRoutes([
+            'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_resetpassword'           => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_resetpasswordconfirm'    => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_acceptinvitation'        => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_index'                           => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organization_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_index'          => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationuser_update'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_delete'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_createinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_deleteinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_index'        => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationapikey_create'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_update'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_delete'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_index'                    => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_create'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_view'                     => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_removetranslation'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+            'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
     }
 
     public function testControllerActionAccessForOrganizationAdmin()
     {
         $this->login($this->users['organization_admin']);
 
-        $substitutions = [
-            '{organization}' => 'access_check',
-            '{domain}' => 'access_check',
-            '{content_type}' => 'ct1',
-            '{setting_type}' => 'st1',
-            '{view}' => 'all',
-            '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
-            '{invite}' => $this->invite1->getId(),
-            '{apiKey}' => $this->apiKey1->getId(),
-            '{member_type}' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+        $parameter = [
+            'organization' => 'access-check',
+            'domain' => 'access-check',
+            'content_type' => 'ct1',
+            'setting_type' => 'st1',
+            'view' => 'all',
+            'content' => $this->content1->getId(),
+            'setting' => $this->setting1->getId(),
+            'member' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
+            'invite' => $this->invite1->getId(),
+            'apiKey' => $this->apiKey1->getId(),
+            'member_type' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+            'locale' => 'de',
+            'version' => 1,
         ];
-
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/profile/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', true, $substitutions, ['GET', 'POST']);
+        $this->checkRoutes([
+            'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_resetpassword'           => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_resetpasswordconfirm'    => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_acceptinvitation'        => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_index'                           => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organization_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_index'          => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organizationuser_update'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_delete'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_createinvite'   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_deleteinvite'   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_index'        => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organizationapikey_create'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_update'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_delete'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_index'                    => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_create'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_view'                     => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_update'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_delete'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_delete'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_addtranslation'          => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_removetranslation'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_index'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+            'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
 
         $org2 = new Organization();
         $org2->setTitle('Org 2')->setIdentifier('access_check2');
@@ -773,140 +709,134 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
 
         $content2 = new Content();
         $content2->setContentType($domain2->getContentTypes()->get('ct1'));
+
+        $setting2 = new Setting();
+        $setting2->setSettingType($domain2->getSettingTypes()->get('st1'));
+
         $this->em->persist($org2);
         $this->em->persist($domain2);
         $this->em->persist($content2);
+        $this->em->persist($setting2);
         $this->em->flush();
 
-        $substitutions['{organization}'] = $org2->getIdentifier();
-        $substitutions['{domain}'] = $domain2->getIdentifier();
-        $substitutions['{content}'] = $content2->getId();
+        $parameter['organization'] = $org2->getIdentifier();
+        $parameter['domain'] = $domain2->getIdentifier();
+        $parameter['content'] = $content2->getId();
+        $parameter['setting'] = $setting2->getId();
 
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/profile/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', false, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', false, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            false,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            false,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', false, $substitutions, ['GET', 'POST']);
+        $this->checkRoutes([
+            'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_resetpassword'           => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_resetpasswordconfirm'    => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_acceptinvitation'        => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_index'                           => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organization_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_index'          => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationuser_update'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_delete'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_createinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_deleteinvite'   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_index'        => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_organizationapikey_create'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_update'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_delete'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_index'                    => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domain_create'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_view'                     => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_removetranslation'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+            'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
     }
 
     public function testControllerActionAccessForPlatformAdmin()
     {
         $this->login($this->users['platform']);
 
-        $substitutions = [
-            '{organization}' => 'access_check',
-            '{domain}' => 'access_check',
-            '{content_type}' => 'ct1',
-            '{setting_type}' => 'st1',
-            '{view}' => 'all',
-            '{content}' => $this->content1->getId(),
-            '{member}' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
-            '{invite}' => $this->invite1->getId(),
-            '{apiKey}' => $this->apiKey1->getId(),
-            '{member_type}' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+        $parameter = [
+            'organization' => 'access-check',
+            'domain' => 'access-check',
+            'content_type' => 'ct1',
+            'setting_type' => 'st1',
+            'view' => 'all',
+            'content' => $this->content1->getId(),
+            'setting' => $this->setting1->getId(),
+            'member' => $this->users['domain_editor']->getOrganizations()->first()->getId(),
+            'invite' => $this->invite1->getId(),
+            'apiKey' => $this->apiKey1->getId(),
+            'member_type' => $this->domain->getDomainMemberTypes()->first()->getIdentifier(),
+            'locale' => 'de',
+            'version' => 1,
         ];
-
-        $this->assertAccess('/', true, $substitutions, ['GET']);
-        $this->assertRedirect('/profile/login', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password', '/', $substitutions);
-        $this->assertRedirect('/profile/reset-password-confirm', '/', $substitutions);
-        $this->assertAccess('/profile/accept-invitation', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/profile/update', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/user/update/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/user/delete/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/create', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/view/{domain}', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/update/{domain}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/delete/{domain}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/create', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/update/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/{domain}/member/{member_type}/delete/{member}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/member/{member_type}/delete-invite/{invite}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/apikeys/', true, $substitutions, ['GET']);
-        $this->assertAccess('/{organization}/apikeys/create', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/update/{apiKey}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess('/{organization}/apikeys/delete/{apiKey}', true, $substitutions, ['GET', 'POST']);
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}',
-            true,
-            $substitutions,
-            ['GET']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/create',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/update/{content}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess(
-            '/{organization}/{domain}/content/{content_type}/{view}/delete/{content}',
-            true,
-            $substitutions,
-            ['GET', 'POST']
-        );
-        $this->assertAccess('/{organization}/{domain}/setting/{setting_type}', true, $substitutions, ['GET', 'POST']);
+        $this->checkRoutes([
+            'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_resetpassword'           => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_resetpasswordconfirm'    => [ 'redirect' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_profile_acceptinvitation'        => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_index'                           => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_profile_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organization_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organization_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_index'          => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organizationuser_update'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_delete'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_createinvite'   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationuser_deleteinvite'   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_index'        => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_organizationapikey_create'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_update'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_organizationapikey_delete'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_index'                    => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_create'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_view'                     => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domain_update'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domain_delete'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_delete'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_addtranslation'          => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_removetranslation'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_content_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_index'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_setting_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+            'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
     }
 
 }
