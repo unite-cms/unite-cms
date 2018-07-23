@@ -24,9 +24,13 @@ Install docker and docker compose
     # bring up the containers in detached mode
     docker-compose up -d
     
-    # on first run
+    # on first run (with local php installed)
     bin/console assets:install
     bin/console doctrine:schema:update --force
+    
+    # on first run (without local php)
+    docker exec unitecms-web /app/unite-cms/bin/console assets:install
+    docker exec unitecms-web /app/unite-cms/bin/console doctrine:schema:update --force
     
     # check localhost
     http://localhost:8080
@@ -57,9 +61,13 @@ Install docker and docker compose
     # bring up the containers in detached mode
     docker-compose up -d
     
-    # on first run
+    # on first run (with local php installed)
     bin/console assets:install
     bin/console doctrine:schema:update --force
+    
+    # on first run (without local php)
+    docker exec unitecms-web /app/unite-cms/bin/console assets:install
+    docker exec unitecms-web /app/unite-cms/bin/console doctrine:schema:update --force
     
     # check localhost
     http://localhost:8080
