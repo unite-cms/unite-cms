@@ -13,9 +13,9 @@ volumes:
 
 services:
 
-  mysql:
+  unitecms-mysql:
     image: centos/mysql-57-centos7
-    container_name: mysql
+    container_name: unitecms-mysql
     restart: always
     environment:
     - MYSQL_USER=${DATABASE_USER}
@@ -27,22 +27,22 @@ services:
     volumes:
     - mysql_data:/var/lib/mysql
   
-  unite:
+  unitecms-web:
     image: unitecms/docker-unite
     build: ./config/docker/unite
-    container_name: unitecms
+    container_name: unitecms-web
     working_dir: /app/unite-cms
     restart: always
     depends_on:
-    - mysql
+    - unitecms-mysql
     environment:
     - ROUTING_APPROACH=${ROUTING_APPROACH}
     - DEFAULT_HOSTNAME=${DEFAULT_HOSTNAME}
     - DATABASE_NAME=${DATABASE_NAME}
     - DATABASE_USER=${DATABASE_USER}
     - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-    - DATABASE_HOST=${DATABASE_HOST}
-    - DATABASE_PORT=${DATABASE_PORT}
+    - DATABASE_HOST=unitecms-mysql
+    - DATABASE_PORT=3306
     - APP_ENV=${APP_ENV}
     - APP_SECRET=${APP_SECRET}
     - LOCALE_DEFAULT=${LOCALE_DEFAULT}
