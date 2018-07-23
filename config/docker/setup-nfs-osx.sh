@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+export CONTAINER_DIR=${CONTAINER_DIR:="/app/unite-cms"}
+export SOURCE_DIR=${SOURCE_DIR:="/private/var/www/unite-cms"}
+
+echo "CONTAINER_DIR: $CONTAINER_DIR"
+echo "SOURCE_DIR: $SOURCE_DIR"
+
 OS=`uname -s`
 
 if [ $OS != "Darwin" ]; then
@@ -50,7 +56,7 @@ G=`id -g`
 sudo chown -R "$U":"$G" .
 
 echo "== Setting up nfs..."
-LINE="/var/www -alldirs -mapall=$U:$G localhost"
+LINE="$SOURCE_DIR -alldirs -mapall=$U:$G localhost"
 FILE=/etc/exports
 sudo cp /dev/null $FILE
 grep -qF -- "$LINE" "$FILE" || sudo echo "$LINE" | sudo tee -a $FILE > /dev/null

@@ -3,12 +3,13 @@ version: '3.6'
 volumes:
   mysql_data:
   minio_data:
-  #nfsmount:
-  #  driver: local
-  #  driver_opts:
-  #    type: nfs
-  #    o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
-  #    device: ":/var/www/unite-cms"
+  # only needed for osX NFS share
+  nfsmount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+      device: ":${SOURCE_DIR}"
 
 services:
 
@@ -48,17 +49,21 @@ services:
     - MAILER_SENDER=${MAILER_SENDER}
     - MAILER_URL=${MAILER_URL}
     volumes:
-    #- "nfsmount:/app/unite-cms"
-    - "./:/app/unite-cms"
+    # osX NFS share
+    - "nfsmount:${CONTAINER_DIR}"
+
+    # mount on a general linux
+    #- "./:/app/unite-cms"
+
     #- ./config/docker/unite/etc/nginx/conf.d/app.conf:/etc/nginx/conf.d/app.conf
     #- ./config/docker/unite/etc/php-fpm.d/www.conf:/etc/php-fpm.d/www.conf
-    #- ./var/log/php:/var/log/php
-    #- ./var/log/nginx:/var/log/nginx
+    - ./var/log/php:/var/log/php
+    - ./var/log/nginx:/var/log/nginx
     ports:
     - "8080:8080"
 
   #minio:
-  #  image: unitecms/docker-minio
+  #  image: minio/minio
   #  container_name: minio
   #  restart: always
   #  ports:
