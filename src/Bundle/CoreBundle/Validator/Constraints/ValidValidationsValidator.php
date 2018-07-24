@@ -3,21 +3,21 @@
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use UniteCMS\CoreBundle\Field\FieldableValidation;
-use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use UniteCMS\CoreBundle\Security\ValidationExpressionChecker;
 
 class ValidValidationsValidator extends ConstraintValidator
 {
 
     /**
-     * @var AccessExpressionChecker $accessExpressionChecker
+     * @var ValidationExpressionChecker $expressionChecker
      */
-    private $accessExpressionChecker;
+    private $expressionChecker;
 
     public function __construct()
     {
-        $this->accessExpressionChecker = new AccessExpressionChecker();
+        $this->expressionChecker = new ValidationExpressionChecker();
     }
 
     public function validate($value, Constraint $constraint)
@@ -44,7 +44,7 @@ class ValidValidationsValidator extends ConstraintValidator
                 return;
             }
 
-            if(!$this->accessExpressionChecker->validate($validation->getExpression())) {
+            if(!$this->expressionChecker->validate($validation->getExpression())) {
                 $this->context->buildViolation($constraint->message)->atPath("[$index][expression]")->addViolation();
                 return;
             }

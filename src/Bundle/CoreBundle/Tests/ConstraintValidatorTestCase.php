@@ -20,13 +20,15 @@ abstract class ConstraintValidatorTestCase extends TestCase
      * @param null|ConstraintValidator $constraintValidator
      * @param null|Constraint $constraint
      * @param null|mixed $object
+     * @param string $group
      * @return ExecutionContext
      */
     protected function validate(
         $value = null,
         ConstraintValidator $constraintValidator = null,
         Constraint $constraint = null,
-        $object = null
+        $object = null,
+        $group = 'Default'
     ) {
         $translator = $this->getMockBuilder('Symfony\Component\Translation\TranslatorInterface')->getMock();
         $validator = $this->getMockBuilder('Symfony\Component\Validator\Validator\ValidatorInterface')->getMock();
@@ -35,6 +37,7 @@ abstract class ConstraintValidatorTestCase extends TestCase
         $constraintValidator = $constraintValidator ?? new $this->constraintValidatorClass();
         $context->setConstraint($constraint);
         $context->setNode($context->getValue(), $object, $context->getMetadata(), $context->getPropertyPath());
+        $context->setGroup($group);
         $constraintValidator->initialize($context);
         $constraintValidator->validate($value, $constraint);
 

@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use UniteCMS\CoreBundle\Field\FieldableValidation;
 
 /**
  * Defines a fieldable entity.
@@ -35,6 +36,11 @@ interface Fieldable
      * @return array
      */
     public function getLocales(): array;
+
+    /**
+     * @return FieldableValidation[]
+     */
+    public function getValidations(): array;
 
     /**
      * Returns the identifier of this fieldable.

@@ -12,6 +12,7 @@ use JMS\Serializer\Annotation\Accessor;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use UniteCMS\CoreBundle\Field\FieldableValidation;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
@@ -463,6 +464,14 @@ class DomainMemberType implements Fieldable
      * @return array
      */
     public function getLocales(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return FieldableValidation[]
+     */
+    public function getValidations(): array
     {
         return [];
     }

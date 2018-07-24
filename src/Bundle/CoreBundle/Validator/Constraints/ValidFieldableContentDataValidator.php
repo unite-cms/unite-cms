@@ -8,9 +8,15 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Security\ValidationExpressionChecker;
 
 class ValidFieldableContentDataValidator extends ConstraintValidator
 {
+    /**
+     * @var ValidationExpressionChecker $expressionChecker
+     */
+    private $expressionChecker;
+
     /**
      * @var FieldTypeManager
      */
@@ -19,6 +25,7 @@ class ValidFieldableContentDataValidator extends ConstraintValidator
     public function __construct(FieldTypeManager $fieldTypeManager)
     {
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->expressionChecker = new ValidationExpressionChecker();
     }
 
     public function validate($value, Constraint $constraint)
@@ -59,9 +66,29 @@ class ValidFieldableContentDataValidator extends ConstraintValidator
             return;
         }
 
+        // allow the field type to validate data.
         foreach ($value as $field_key => $field_value) {
             $field = $content->getEntity()->getFields()->get($field_key);
             $this->fieldTypeManager->validateFieldData($field, $field_value, $this->context);
+        }
+
+        // call all validators for the fieldable type if they are enabled for the current context group.
+        $group = $this->context->getGroup();
+        if($group != 'DELETE') {
+            $group = (method_exists($content, 'getId') && $content->getId()) ? 'UPDATE' : 'CREATE';
+        }
+
+        foreach ($content->getEntity()->getValidations() as $validation) {
+            if(in_array($group, $validation->getGroups()) && !$this->expressionChecker->evaluate($validation->getExpression(), $content)) {
+                $path = join('][', explode('.', $validation->getPath()));
+                $message = empty($validation->getMessage()) ? 'Invalid value' : $validation->getMessage();
+
+                if(!empty($path)) {
+                    $path = '['.$path.']';
+                }
+
+                $this->context->buildViolation($message)->atPath($path)->addViolation();
+            }
         }
     }
 }
