@@ -6,13 +6,13 @@ unite cms docker
 Install docker and docker compose
 
 ## Usage on OSX
+
     on osx we have to use a nfs share, otherwise it's painfully slow
     
     # copy over docker env file
     cp .env.docker .env
     
-    # set the following env vars
-    CONTAINER_DIR=/app/unite-cms // project folder inside container
+    # set the following env var
     SOURCE_DIR=/private/var/www/unite-cms // unite-cms project dir on your computer
 
     # run shellscript to set up nfs share 

@@ -50,7 +50,7 @@ services:
     - MAILER_URL=${MAILER_URL}
     volumes:
     # osX NFS share
-    - "nfsmount:${CONTAINER_DIR}"
+    - "nfsmount:/app/unite-cms"
 
     # mount on a general linux
     #- "./:/app/unite-cms"
