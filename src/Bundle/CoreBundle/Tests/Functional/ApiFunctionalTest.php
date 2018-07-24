@@ -674,10 +674,10 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         // This happens only sometimes, so for getting a chance to debug this we inject some debugging output here.
         if($result->data->findNews->total < 2) {
-            dump($content1_title_title_part);
-            dump($content1->title_title);
-            dump($content2_content_part);
-            dump($content2->content);
+            print_r($content1_title_title_part);
+            print_r($content1->title_title);
+            print_r($content2_content_part);
+            print_r($content2->content);
         }
 
         $this->assertGreaterThan(1, $result->data->findNews->total);
