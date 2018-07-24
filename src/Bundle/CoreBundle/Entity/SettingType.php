@@ -7,15 +7,18 @@ use Doctrine\ORM\Mapping as ORM;
 
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Accessor;
+use JMS\Serializer\Annotation\AccessType;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Type;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use UniteCMS\CoreBundle\Field\FieldableValidation;
 use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidValidations;
 
 /**
  * SettingType
@@ -102,9 +105,20 @@ class SettingType implements Fieldable
      * @var array
      * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="invalid_selection")
      * @ORM\Column(name="permissions", type="array", nullable=true)
+     * @AccessType("public_method")
      * @Expose
      */
     private $permissions;
+
+    /**
+     * @var array
+     * @ValidValidations(message="invalid_validations")
+     * @ORM\Column(name="validations", type="array", nullable=true)
+     * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
+     * @AccessType("public_method")
+     * @Expose
+     */
+    private $validations;
 
     /**
      * @var array
@@ -114,6 +128,7 @@ class SettingType implements Fieldable
      * })
      * @ORM\Column(name="locales", type="array", nullable=true)
      * @Type("array<string>")
+     * @AccessType("public_method")
      * @Expose
      */
     private $locales;
@@ -129,6 +144,8 @@ class SettingType implements Fieldable
         $this->fields = new ArrayCollection();
         $this->settings = new ArrayCollection();
         $this->locales = [];
+        $this->permissions = [];
+        $this->validations = [];
         $this->addDefaultPermissions();
     }
 
@@ -187,7 +204,8 @@ class SettingType implements Fieldable
             ->setIcon($settingType->getIcon())
             ->setDescription($settingType->getDescription())
             ->setLocales($settingType->getLocales())
-            ->setPermissions($settingType->getPermissions());
+            ->setPermissions($settingType->getPermissions())
+            ->setValidations($settingType->getValidations());
 
         // Fields to delete
         foreach ($this->getFieldTypesDiff($settingType) as $field) {
@@ -479,6 +497,8 @@ class SettingType implements Fieldable
      */
     public function getPermissions()
     {
+        // Prevent null values. We always need an array response.
+        $this->permissions = $this->permissions ?? [];
         return $this->permissions;
     }
 
@@ -505,11 +525,47 @@ class SettingType implements Fieldable
     }
 
     /**
+     * @return FieldableValidation[]
+     */
+    public function getValidations() : array
+    {
+        // Prevent null values. We always need an array response.
+        $this->validations = $this->validations ?? [];
+        return $this->validations;
+    }
+
+    /**
+     * @param FieldableValidation[] $validations
+     *
+     * @return SettingType
+     */
+    public function setValidations($validations)
+    {
+        $this->validations = [];
+
+        foreach ($validations as $validation) {
+            $this->addValidation($validation);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param FieldableValidation $validation
+     */
+    public function addValidation(FieldableValidation $validation)
+    {
+        $this->validations[] = $validation;
+    }
+
+    /**
      * @return array
      */
     public function getLocales(): array
     {
-        return $this->locales ?? [];
+        // Prevent null values. We always need an array response.
+        $this->locales = $this->locales ?? [];
+        return $this->locales;
     }
 
     /**

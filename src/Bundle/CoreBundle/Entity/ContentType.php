@@ -5,8 +5,10 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\AccessType;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use UniteCMS\CoreBundle\Field\FieldableValidation;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\View\Types\TableViewType;
 use JMS\Serializer\Annotation\Type;
@@ -18,6 +20,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UniteCMS\CoreBundle\Validator\Constraints\DefaultViewType;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidValidations;
 
 /**
  * ContentType
@@ -117,9 +120,20 @@ class ContentType implements Fieldable
      * @var array
      * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="invalid_selection")
      * @ORM\Column(name="permissions", type="array", nullable=true)
+     * @AccessType("public_method")
      * @Expose
      */
     private $permissions;
+
+    /**
+     * @var array
+     * @ValidValidations(message="invalid_validations")
+     * @ORM\Column(name="validations", type="array", nullable=true)
+     * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
+     * @AccessType("public_method")
+     * @Expose
+     */
+    private $validations;
 
     /**
      * @var array
@@ -129,6 +143,7 @@ class ContentType implements Fieldable
      * })
      * @ORM\Column(name="locales", type="array", nullable=true)
      * @Type("array<string>")
+     * @AccessType("public_method")
      * @Expose
      */
     private $locales;
@@ -151,6 +166,8 @@ class ContentType implements Fieldable
         $this->fields = new ArrayCollection();
         $this->views = new ArrayCollection();
         $this->locales = [];
+        $this->permissions = [];
+        $this->validations = [];
         $this->addDefaultView();
         $this->addDefaultPermissions();
     }
@@ -228,7 +245,8 @@ class ContentType implements Fieldable
             ->setContentLabel($contentType->getContentLabel())
             ->setPermissions($contentType->getPermissions())
             ->setDescription($contentType->getDescription())
-            ->setLocales($contentType->getLocales());
+            ->setLocales($contentType->getLocales())
+            ->setValidations($contentType->getValidations());
 
         // Fields to delete
         foreach ($this->getFieldTypesDiff($contentType) as $field) {
@@ -562,8 +580,10 @@ class ContentType implements Fieldable
     /**
      * @return array
      */
-    public function getPermissions()
+    public function getPermissions() : array
     {
+        // Prevent null values. We always need an array response.
+        $this->permissions = $this->permissions ?? [];
         return $this->permissions;
     }
 
@@ -590,11 +610,47 @@ class ContentType implements Fieldable
     }
 
     /**
+     * @return FieldableValidation[]
+     */
+    public function getValidations() : array
+    {
+        // Prevent null values. We always need an array response.
+        $this->validations = $this->validations ?? [];
+        return $this->validations;
+    }
+
+    /**
+     * @param FieldableValidation[] $validations
+     *
+     * @return ContentType
+     */
+    public function setValidations($validations)
+    {
+        $this->validations = [];
+
+        foreach ($validations as $validation) {
+            $this->addValidation($validation);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param FieldableValidation $validation
+     */
+    public function addValidation(FieldableValidation $validation)
+    {
+        $this->validations[] = $validation;
+    }
+
+    /**
      * @return array
      */
     public function getLocales(): array
     {
-        return $this->locales ?? [];
+        // Prevent null values. We always need an array response.
+        $this->locales = $this->locales ?? [];
+        return $this->locales;
     }
 
     /**

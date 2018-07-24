@@ -31,8 +31,30 @@ class ObjectConstructor implements ObjectConstructorInterface
         array $type,
         DeserializationContext $context
     ) {
-        $class = $metadata->name;
+        $instance = null;
 
-        return new $class();
+        // If this object has an constructor, try to fill in all required parameters.
+        if($metadata->reflection->hasMethod('__construct')) {
+            $parameters = [];
+            foreach($metadata->reflection->getMethod('__construct')->getParameters() as $parameter) {
+                if(array_key_exists($parameter->getName(), $data) && !$parameter->isOptional()) {
+                    $value = $data[$parameter->getName()];
+
+                    if(is_array($value) && $parameter->getType()->getName() === 'array') {
+                        $parameters[$parameter->getName()] = $value;
+                    }
+
+                    if(is_string($value) && $parameter->getType()->getName() === 'string') {
+                        $parameters[$parameter->getName()] = $value;
+                    }
+                }
+            }
+
+            $instance = $metadata->reflection->newInstanceArgs($parameters);
+        } else {
+            $instance = $metadata->reflection->newInstance();
+        }
+
+        return $instance;
     }
 }

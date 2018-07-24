@@ -35,3 +35,4 @@ missing_reference_definition: 'At least one required reference definition field 
 invalid_reference_definition: 'You cannot reference this content object. Either you are not allowed to select it, or it is not available. Please reload and try again or contact an administrator.'
 wrong_setting_definition: 'Wrong setting definition. Please check https://www.unitecms.io/docs for details.'
 unknown_column: 'There is no column with this name.'
+invalid_validations: 'Invalid validations definition. Validations must be set as array of validation objects.'

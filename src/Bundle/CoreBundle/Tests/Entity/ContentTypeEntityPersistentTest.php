@@ -6,6 +6,7 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Field\FieldableValidation;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
@@ -62,6 +63,15 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setIdentifier('valid')->setValidations([new FieldableValidation('invalid')]);
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('validations[0][expression]', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_validations', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setIdentifier('valid')->setValidations([new FieldableValidation('1 == 1')]);
+        $this->assertCount(0, static::$container->get('validator')->validate($contentType));
 
         // There can only be one identifier per domain with the same identifier.
         $org1 = new Organization();
@@ -263,5 +273,37 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $ct = new ContentType();
         $this->assertEquals('{type} #{id}', $ct->getContentLabel());
         $this->assertEquals('Foo', $ct->setContentLabel('Foo')->getContentLabel());
+    }
+
+    public function testPersistAndLoadFieldableValidations() {
+
+        $org = new Organization();
+        $org->setTitle('Org')->setIdentifier('org');
+        $this->em->persist($org);
+
+        $domain = new Domain();
+        $domain->setTitle('Domain')->setIdentifier('domain')->setOrganization($org);
+        $this->em->persist($domain);
+
+        $ct = new ContentType();
+        $ct->setIdentifier('ct1')->setTitle('Ct1')->setDomain($domain);
+        $ct->setValidations([
+            new FieldableValidation('true', 'first validation', 'field1'),
+            new FieldableValidation('true', '2nd validation', 'field2', ['DELETE'])
+        ]);
+        $ct->addValidation(new FieldableValidation('false', '3rd validation'));
+
+        $this->em->persist($ct);
+        $this->em->flush($ct);
+        $ct->setValidations([]);
+        $this->em->clear();
+
+        $ct_reloaded = $this->em->getRepository('UniteCMSCoreBundle:ContentType')->findOneBy(['title' => 'Ct1']);
+
+        $this->assertEquals($ct_reloaded->getValidations(), [
+            new FieldableValidation('true', 'first validation', 'field1'),
+            new FieldableValidation('true', '2nd validation', 'field2', ['DELETE']),
+            new FieldableValidation('false', '3rd validation')
+        ]);
     }
 }
