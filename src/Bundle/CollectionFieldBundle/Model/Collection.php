@@ -6,6 +6,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldableValidation;
 
 /**
  * We use this model only for validation!
@@ -106,6 +107,14 @@ class Collection implements Fieldable
      * @return array
      */
     public function getLocales(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return FieldableValidation[]
+     */
+    public function getValidations(): array
     {
         return [];
     }

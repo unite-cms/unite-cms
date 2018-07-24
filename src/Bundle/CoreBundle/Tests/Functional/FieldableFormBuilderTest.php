@@ -8,6 +8,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldableValidation;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
@@ -44,6 +45,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             public function getIdentifierPath($delimiter = '/') { return $this->getIdentifier(); }
             public function getParentEntity() { return null; }
             public function getRootEntity(): Fieldable { return $this; }
+            public function getValidations(): array { return []; }
         };
         $content = new class implements FieldableContent {
             private $data = ['field1' => 'Any Value'];
