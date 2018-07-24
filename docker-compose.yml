@@ -1,0 +1,82 @@
+version: '3.6'
+
+volumes:
+  mysql_data:
+  minio_data:
+  # only needed for osX NFS share
+  nfsmount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+      device: ":${SOURCE_DIR}"
+
+services:
+
+  unitecms-mysql:
+    image: centos/mysql-57-centos7
+    container_name: unitecms-mysql
+    restart: always
+    environment:
+    - MYSQL_USER=${DATABASE_USER}
+    - MYSQL_PASSWORD=${DATABASE_PASSWORD}
+    - MYSQL_DATABASE=${DATABASE_NAME}
+    - MYSQL_ROOT_PASSWORD=root123456
+    ports:
+    - "3307:3306"
+    volumes:
+    - mysql_data:/var/lib/mysql
+  
+  unitecms-web:
+    image: unitecms/docker-unite
+    build: ./.docker/unite-cms
+    container_name: unitecms-web
+    working_dir: /app/unite-cms
+    restart: always
+    depends_on:
+    - unitecms-mysql
+    environment:
+    - ROUTING_APPROACH=${ROUTING_APPROACH}
+    - DEFAULT_HOSTNAME=${DEFAULT_HOSTNAME}
+    - DATABASE_NAME=${DATABASE_NAME}
+    - DATABASE_USER=${DATABASE_USER}
+    - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+    - DATABASE_HOST=unitecms-mysql
+    - DATABASE_PORT=3306
+    - APP_ENV=${APP_ENV}
+    - APP_SECRET=${APP_SECRET}
+    - LOCALE_DEFAULT=${LOCALE_DEFAULT}
+    - MAILER_SENDER=${MAILER_SENDER}
+    - MAILER_URL=${MAILER_URL}
+    volumes:
+    # osX NFS share
+    - "nfsmount:/app/unite-cms"
+
+    # mount on a general linux
+    #- "./:/app/unite-cms"
+
+    #- ./.docker/unite-cms/root/etc/nginx/conf.d/app.conf:/etc/nginx/conf.d/app.conf
+    #- ./.docker/unite-cms/root/etc/php-fpm.d/www.conf:/etc/php-fpm.d/www.conf
+    - ./var/log/php:/var/log/php
+    - ./var/log/nginx:/var/log/nginx
+    ports:
+    - "8080:8080"
+
+  #minio:
+  #  image: minio/minio
+  #  container_name: minio
+  #  restart: always
+  #  ports:
+  #  - "9000:9000"
+  #  volumes:
+  #  - minio_data:/data
+  #  environment:
+  #  - "MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}"
+  #  - "MINIO_SECRET_KEY=${MINIO_SECRET_KEY}"
+  #  command: server /data
+
+  #mailcatcher:
+  #  image: yappabe/mailcatcher
+  #  ports:
+  #  - 1025:1025
+  #  - 1080:1080
