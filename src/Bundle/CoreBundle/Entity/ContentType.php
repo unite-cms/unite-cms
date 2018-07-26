@@ -80,6 +80,15 @@ class ContentType implements Fieldable
     /**
      * @var string
      * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Url(protocols={"http", "https"}, message="invalid_url")
+     * @ORM\Column(name="preview", type="string", length=255, nullable=true)
+     * @Expose
+     */
+    private $preview;
+
+    /**
+     * @var string
+     * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="content_label", type="string", length=255, nullable=true)
      * @Expose
      */
@@ -242,6 +251,7 @@ class ContentType implements Fieldable
             ->setIdentifier($contentType->getIdentifier())
             ->setWeight($contentType->getWeight())
             ->setIcon($contentType->getIcon())
+            ->setPreview($contentType->getPreview())
             ->setContentLabel($contentType->getContentLabel())
             ->setPermissions($contentType->getPermissions())
             ->setDescription($contentType->getDescription())
@@ -422,6 +432,30 @@ class ContentType implements Fieldable
     public function getIcon()
     {
         return $this->icon;
+    }
+
+    /**
+     * Set preview
+     *
+     * @param string $preview
+     *
+     * @return ContentType
+     */
+    public function setPreview($preview)
+    {
+        $this->preview = $preview;
+
+        return $this;
+    }
+
+    /**
+     * Get preview
+     *
+     * @return string
+     */
+    public function getPreview()
+    {
+        return $this->preview;
     }
 
     /**

@@ -73,6 +73,37 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $contentType->setIdentifier('valid')->setValidations([new FieldableValidation('1 == 1')]);
         $this->assertCount(0, static::$container->get('validator')->validate($contentType));
 
+        // Validate different previews.
+        $contentType->setPreview('');
+        $this->assertCount(0, static::$container->get('validator')->validate($contentType));
+
+        $contentType->setPreview('XXX');
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setPreview('example.com');
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setPreview('ftp://example.com');
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setPreview('https://example.com/' . $this->generateRandomMachineName('255'));
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setPreview('https://example.com');
+        $this->assertCount(0, static::$container->get('validator')->validate($contentType));
+
         // There can only be one identifier per domain with the same identifier.
         $org1 = new Organization();
         $org1->setIdentifier('org1')->setTitle('Org 1');

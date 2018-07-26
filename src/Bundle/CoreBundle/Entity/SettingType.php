@@ -76,6 +76,15 @@ class SettingType implements Fieldable
     private $icon;
 
     /**
+     * @var string
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Url(protocols={"http", "https"}, message="invalid_url")
+     * @ORM\Column(name="preview", type="string", length=255, nullable=true)
+     * @Expose
+     */
+    private $preview;
+
+    /**
      * @var Domain
      * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="settingTypes")
@@ -202,6 +211,7 @@ class SettingType implements Fieldable
             ->setIdentifier($settingType->getIdentifier())
             ->setWeight($settingType->getWeight())
             ->setIcon($settingType->getIcon())
+            ->setPreview($settingType->getPreview())
             ->setDescription($settingType->getDescription())
             ->setLocales($settingType->getLocales())
             ->setPermissions($settingType->getPermissions())
@@ -357,6 +367,30 @@ class SettingType implements Fieldable
     public function getIcon()
     {
         return $this->icon;
+    }
+
+    /**
+     * Set preview
+     *
+     * @param string $preview
+     *
+     * @return SettingType
+     */
+    public function setPreview($preview)
+    {
+        $this->preview = $preview;
+
+        return $this;
+    }
+
+    /**
+     * Get preview
+     *
+     * @return string
+     */
+    public function getPreview()
+    {
+        return $this->preview;
     }
 
     /**
