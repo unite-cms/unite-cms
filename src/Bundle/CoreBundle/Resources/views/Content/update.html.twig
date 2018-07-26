@@ -40,8 +40,11 @@
                     }) }}" class="uk-text-danger"><i class="uk-margin-small-right" data-feather="trash-2"></i>{% trans %}content.delete.button{% endtrans %}</a></li>
             </ul>
         </div>
-
     </header>
     {{ form(form) }}
+
+    {% if contentType.preview is not empty %}
+        <unite-cms-core-iframe-preview url="{{ contentType.preview }}"></unite-cms-core-iframe-preview>
+    {% endif %}
 </article>
 {% endblock content %}
