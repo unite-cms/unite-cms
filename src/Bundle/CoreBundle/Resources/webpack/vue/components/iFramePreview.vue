@@ -4,13 +4,15 @@
             <section class="uk-card uk-card-default no-padding uk-flex uk-flex-column" v-bind:style="{ width: width + 'px' }">
                 <header class="uk-card-header uk-text-center">
                     <span @mousedown.stop.prevent="startResize($event)" @touchstart.stop.prevent="startResize($event)" class="move uk-drag"></span>
-                    <button v-on:click="changeSize(320)" v-html="feather.icons['smartphone'].toSvg({ width: 18, height: 18 })"></button>
-                    <button v-on:click="changeSize(768)" v-html="feather.icons['tablet'].toSvg({ width: 18, height: 18 })"></button>
-                    <button v-on:click="changeSize(1200)" v-html="feather.icons['monitor'].toSvg({ width: 18, height: 18 })"></button>
+                    <button v-bind:class="{ active: (size === 320) }" v-on:click="setSize(320)" v-html="feather.icons['smartphone'].toSvg({ width: 18, height: 18 })"></button>
+                    <button v-bind:class="{ active: (size === 768) }" v-on:click="setSize(768)" v-html="feather.icons['tablet'].toSvg({ width: 18, height: 18 })"></button>
+                    <button v-bind:class="{ active: (size === 1200) }" v-on:click="setSize(1200)" v-html="feather.icons['monitor'].toSvg({ width: 18, height: 18 })"></button>
                     <button v-on:click="active = false" class="close" v-html="feather.icons['x'].toSvg({ width: 24, height: 24 })"></button>
                 </header>
                 <div class="uk-flex-1">
-                    <iframe v-bind:src="previewUrl"></iframe>
+                    <div class="iframe-transform-wrapper" v-bind:style="wrapperStyle">
+                        <iframe v-bind:src="previewUrl"></iframe>
+                    </div>
                 </div>
             </section>
         </div>
@@ -31,6 +33,7 @@
             return {
                 active: false,
                 previewUrl: this.url,
+                size: 0,
                 width: 0,
                 minWidth: 50,
                 feather: feather
@@ -51,6 +54,28 @@
                 if(active) {
                     this.width = window.innerWidth / 5;
                 }
+            }
+        },
+        computed: {
+            wrapperStyle: function(){
+
+                let wrapper = this.$el.querySelector('.iframe-transform-wrapper');
+                let size = this.size;
+                let width = this.width;
+
+                if(!wrapper) {
+                    return {}
+                }
+
+                let rect = wrapper.parentElement.getBoundingClientRect();
+                let scale = rect.width / size;
+
+                return {
+                    width: size + 'px',
+                    height: (100 / scale) + '%',
+                    transform: 'scale(' + scale + ')',
+                    transformOrigin: 'top left',
+                };
             }
         },
         mounted: function() {
@@ -77,20 +102,21 @@
             document.documentElement.addEventListener('touchend touchcancel', this.stopResize, true);
             document.documentElement.addEventListener('touchstart', this.stopResize, true);
 
+            setTimeout(() => {
+                this.size = 768;
+            }, 5);
         },
         beforeDestroy: function () {
             window.removeEventListener('resize', this.handleResize);
         },
         methods: {
-            changeSize: function(size){
-
-                // TODO: Change Size.
-                console.log("TODO: Change Size to: " + size);
-
-                // Reload
+            setSize: function(size) {
+                this.size = size;
                 let oldUrl = this.previewUrl;
-                this.previewUrl += '';
-                setTimeout(() => { this.previewUrl = oldUrl; }, 5);
+                this.previewUrl = '';
+                setTimeout(() => {
+                    this.previewUrl = oldUrl;
+                }, 10);
             },
             startResize: function($event) {
                 this.initialWidth = this.width;
@@ -205,9 +231,15 @@
         }
     }
 
-    iframe {
+    .iframe-transform-wrapper {
+
         width: 100%;
         height: 100%;
+
+        iframe {
+            width: 100%;
+            height: 100%;
+        }
     }
 
 </style>
