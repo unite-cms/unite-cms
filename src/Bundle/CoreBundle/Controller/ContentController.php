@@ -239,14 +239,14 @@ class ContentController extends Controller
 
             $content->setData($data);
 
-            $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Cont_cntContent', $view->getContentType()->getDomain());
-            $result = GraphQL::executeQuery(new Schema(['query' => $type]), 'query { title }', $content);
+            $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($view->getContentType()->getIdentifier()) . 'Content', $view->getContentType()->getDomain());
+            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $view->getContentType()->getPreview()->getQuery(), $content);
             $data_uri = urlencode(json_encode($result->data));
         }
 
-        $preview_url = $view->getContentType()->getPreview();
+        $preview_url = $view->getContentType()->getPreview()->getUrl();
         $param_seperator = strpos($preview_url, '?') === false ? '?' : '&';
-        return new Response($view->getContentType()->getPreview() . $param_seperator . 'data=' . $data_uri);
+        return new Response($preview_url . $param_seperator . 'data=' . $data_uri);
     }
 
     /**

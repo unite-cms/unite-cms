@@ -78,10 +78,10 @@ class ContentType implements Fieldable
     private $icon;
 
     /**
-     * @var string
-     * @Assert\Length(max="255", maxMessage="too_long")
-     * @Assert\Url(protocols={"http", "https"}, message="invalid_url")
-     * @ORM\Column(name="preview", type="string", length=255, nullable=true)
+     * @var FieldablePreview
+     * @ORM\Column(name="preview", type="object", nullable=true)
+     * @Assert\Valid()
+     * @Type("UniteCMS\CoreBundle\Entity\FieldablePreview")
      * @Expose
      */
     private $preview;
@@ -437,7 +437,7 @@ class ContentType implements Fieldable
     /**
      * Set preview
      *
-     * @param string $preview
+     * @param FieldablePreview $preview
      *
      * @return ContentType
      */
@@ -451,7 +451,7 @@ class ContentType implements Fieldable
     /**
      * Get preview
      *
-     * @return string
+     * @return FieldablePreview
      */
     public function getPreview()
     {
