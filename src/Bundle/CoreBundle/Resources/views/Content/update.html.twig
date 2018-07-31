@@ -44,7 +44,12 @@
     {{ form(form) }}
 
     {% if contentType.preview is not empty %}
-        <unite-cms-core-iframe-preview url="{{ contentType.preview }}"></unite-cms-core-iframe-preview>
+        <unite-cms-core-iframe-preview url="{{ url('unitecms_core_content_preview', {
+            domain: domain.identifier|replace({'_':'-'}),
+            organization: organization.identifier|replace({'_':'-'}),
+            content_type: contentType.identifier|replace({'_':'-'}),
+            view: view.identifier|replace({'_':'-'}),
+        }) }}"></unite-cms-core-iframe-preview>
     {% endif %}
 </article>
 {% endblock content %}

@@ -3,8 +3,9 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
+use GraphQL\GraphQL;
+use GraphQL\Type\Schema;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -204,6 +205,48 @@ class ContentController extends Controller
                 'form' => $form->createView(),
             ]
         );
+    }
+
+    /**
+     * @Route("/{content_type}/{view}/preview", methods={"POST"})
+     * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), view.getContentType())")
+     *
+     * @param View $view
+     * @param Request $request
+     * @return Response
+     */
+    public function previewAction(View $view, Request $request)
+    {
+        if(empty($view->getContentType()->getPreview())) {
+            throw $this->createNotFoundException('No preview defined for this content type.');
+        }
+
+        $data_uri = '';
+        $content = new Content();
+        $form = $this->get('unite.cms.fieldable_form_builder')->createForm($view->getContentType(), $content);
+        $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $data = $form->getData();
+
+            if (isset($data['locale'])) {
+                $content->setLocale($data['locale']);
+                unset($data['locale']);
+            }
+
+            $content->setData($data);
+
+            $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Cont_cntContent', $view->getContentType()->getDomain());
+            $result = GraphQL::executeQuery(new Schema(['query' => $type]), 'query { title }', $content);
+            $data_uri = urlencode(json_encode($result->data));
+        }
+
+        $preview_url = $view->getContentType()->getPreview();
+        $param_seperator = strpos($preview_url, '?') === false ? '?' : '&';
+        return new Response($view->getContentType()->getPreview() . $param_seperator . 'data=' . $data_uri);
     }
 
     /**

@@ -32,7 +32,7 @@
         data() {
             return {
                 active: false,
-                previewUrl: this.url,
+                previewUrl: '',
                 size: 0,
                 width: 0,
                 minWidth: 50,
@@ -40,7 +40,7 @@
             };
         },
         props: [
-            'url',
+            'url'
         ],
         watch: {
             width: function(width) {
@@ -61,7 +61,7 @@
 
                 let wrapper = this.$el.querySelector('.iframe-transform-wrapper');
                 let size = this.size;
-                let width = this.width;
+                let width = this.width; // Do not remove. Is needed to recalculate computed property!
 
                 if(!wrapper) {
                     return {}
@@ -102,8 +102,13 @@
             document.documentElement.addEventListener('touchend touchcancel', this.stopResize, true);
             document.documentElement.addEventListener('touchstart', this.stopResize, true);
 
+            this.form = document.querySelector('form[name="fieldable_form"]');
+            this.form.querySelectorAll('input, select, textarea').forEach((element) =>{
+                element.addEventListener('change', this.reload);
+            });
+
             setTimeout(() => {
-                this.size = 768;
+                this.setSize(768);
             }, 5);
         },
         beforeDestroy: function () {
@@ -112,11 +117,7 @@
         methods: {
             setSize: function(size) {
                 this.size = size;
-                let oldUrl = this.previewUrl;
-                this.previewUrl = '';
-                setTimeout(() => {
-                    this.previewUrl = oldUrl;
-                }, 10);
+                this.reload();
             },
             startResize: function($event) {
                 this.initialWidth = this.width;
@@ -150,6 +151,18 @@
                     this.width = 0;
                     this.active = false;
                 }
+            },
+            reload: function() {
+
+                this.previewUrl = '';
+
+                var request = new XMLHttpRequest();
+                request.onload = () => { this.previewUrl = request.responseText; };
+                request.open("POST", this.url, true);
+
+                let formData = new FormData(this.form);
+                formData.append('fieldable_form[submit]', '');
+                request.send(formData);
             }
         }
     }
