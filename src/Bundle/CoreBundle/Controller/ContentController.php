@@ -208,9 +208,9 @@ class ContentController extends Controller
     }
 
     /**
-     * @Route("/{content_type}/{view}/preview", methods={"POST"})
+     * @Route("/{content_type}/{view}/preview/generate", methods={"POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), view.getContentType())")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), view.getContentType())")
      *
      * @param View $view
      * @param Request $request
@@ -218,6 +218,14 @@ class ContentController extends Controller
      */
     public function previewAction(View $view, Request $request)
     {
+        // User must have create or update permissions for this content type.
+        $genericContent = new Content();
+        $genericContent->setContentType($view->getContentType());
+
+        if(!$this->isGranted(ContentVoter::CREATE, $view->getContentType()) && !$this->isGranted(ContentVoter::UPDATE, $genericContent)) {
+            throw $this->createAccessDeniedException();
+        }
+
         if(empty($view->getContentType()->getPreview())) {
             throw $this->createNotFoundException('No preview defined for this content type.');
         }
@@ -241,7 +249,7 @@ class ContentController extends Controller
 
             $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($view->getContentType()->getIdentifier()) . 'Content', $view->getContentType()->getDomain());
             $result = GraphQL::executeQuery(new Schema(['query' => $type]), $view->getContentType()->getPreview()->getQuery(), $content);
-            $data_uri = urlencode(json_encode($result->data));
+            $data_uri = urlencode($this->container->get('jms_serializer')->serialize($result->data, 'json'));
         }
 
         $preview_url = $view->getContentType()->getPreview()->getUrl();

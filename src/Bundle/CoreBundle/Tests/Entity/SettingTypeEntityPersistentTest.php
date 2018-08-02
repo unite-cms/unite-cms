@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\FieldablePreview;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -74,36 +75,25 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $settingType->setIdentifier('valid')->setValidations([new FieldableValidation('1 == 1')]);
         $this->assertCount(0, static::$container->get('validator')->validate($settingType));
 
-        // Validate different previews.
-        $settingType->setPreview('');
+        // Check that preview validation is working. Full validation is tested in ContentTypeEntityPersistentTest.
+        $settingType->setPreview(null);
         $this->assertCount(0, static::$container->get('validator')->validate($settingType));
 
-        $settingType->setPreview('XXX');
+        $settingType->setPreview(new FieldablePreview('', ''));
         $errors = static::$container->get('validator')->validate($settingType);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertCount(2, $errors);
+        $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('preview.query', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
+
+        $settingType->setPreview(new FieldablePreview('XXX', 'foo'));
+        $errors = static::$container->get('validator')->validate($settingType);
+        $this->assertCount(2, $errors);
+        $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
-
-        $settingType->setPreview('example.com');
-        $errors = static::$container->get('validator')->validate($settingType);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
-
-        $settingType->setPreview('ftp://example.com');
-        $errors = static::$container->get('validator')->validate($settingType);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
-
-        $settingType->setPreview('https://example.com/' . $this->generateRandomMachineName('255'));
-        $errors = static::$container->get('validator')->validate($settingType);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
-
-        $settingType->setPreview('https://example.com');
-        $this->assertCount(0, static::$container->get('validator')->validate($settingType));
+        $this->assertEquals('preview.query', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('invalid_query', $errors->get(1)->getMessageTemplate());
 
         // There can only be one identifier per domain with the same identifier.
         $org = new Organization();

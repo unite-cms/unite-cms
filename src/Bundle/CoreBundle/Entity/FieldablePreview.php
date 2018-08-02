@@ -11,6 +11,7 @@ namespace UniteCMS\CoreBundle\Entity;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Type;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidGraphQLQuery;
 
 /**
  * @ExclusionPolicy("none")
@@ -29,10 +30,16 @@ class FieldablePreview
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
-     * TODO:@ValidGraphQlQuery(message="invalid_query")
+     * @ValidGraphQLQuery(message="invalid_query")
      * @Type("string")
      */
     private $query;
+
+    public function __construct(string $url, string $query)
+    {
+        $this->url = $url;
+        $this->query = $query;
+    }
 
     /**
      * @return string

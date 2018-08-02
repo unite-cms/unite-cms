@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Tests\Entity;
 
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\FieldablePreview;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Field\FieldableValidation;
@@ -74,34 +75,72 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertCount(0, static::$container->get('validator')->validate($contentType));
 
         // Validate different previews.
-        $contentType->setPreview('');
+        $contentType->setPreview(null);
         $this->assertCount(0, static::$container->get('validator')->validate($contentType));
 
-        $contentType->setPreview('XXX');
+        $contentType->setPreview(new FieldablePreview('', ''));
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(2, $errors);
+        $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('preview.query', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
+
+        $contentType->setPreview(new FieldablePreview('XXX', 'query { type }'));
         $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
-        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
 
-        $contentType->setPreview('example.com');
+        $contentType->setPreview(new FieldablePreview('example.com', 'query { type }'));
         $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
-        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
 
-        $contentType->setPreview('ftp://example.com');
+        $contentType->setPreview(new FieldablePreview('ftp://example.com', 'query { type }'));
         $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
-        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
 
-        $contentType->setPreview('https://example.com/' . $this->generateRandomMachineName('255'));
+        $contentType->setPreview(new FieldablePreview('https://example.com/' . $this->generateRandomMachineName('255'), 'query { type }'));
         $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
-        $this->assertEquals('preview', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
 
-        $contentType->setPreview('https://example.com');
+        $contentType->setPreview(new FieldablePreview('https://example.com', 'XXX'));
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('preview.query', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_query', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setPreview(new FieldablePreview('https://example.com', 'type'));
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('preview.query', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_query', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setPreview(new FieldablePreview('https://example.com', 'query {}'));
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('preview.query', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_query', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setPreview(new FieldablePreview('https://example.com', 'foo { type }'));
+        $errors = static::$container->get('validator')->validate($contentType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('preview.query', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_query', $errors->get(0)->getMessageTemplate());
+
+        $contentType->setPreview(new FieldablePreview('https://example.com', 'query { foo }'));
+        $this->assertCount(0, static::$container->get('validator')->validate($contentType));
+
+        $contentType->setPreview(new FieldablePreview('https://example.com', 'query { foo { baa } }'));
+        $this->assertCount(0, static::$container->get('validator')->validate($contentType));
+
+        $contentType->setPreview(new FieldablePreview('https://example.com', '{ type }'));
         $this->assertCount(0, static::$container->get('validator')->validate($contentType));
 
         // There can only be one identifier per domain with the same identifier.
