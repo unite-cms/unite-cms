@@ -19,6 +19,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidValidations;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidWebhooks;
 
 /**
  * SettingType
@@ -112,6 +113,15 @@ class SettingType implements Fieldable
 
     /**
      * @var array
+     * @ValidWebhooks(message="invalid_selection")
+     * @ORM\Column(name="webhooks", type="array", nullable=true)
+     * @AccessType("public_method")
+     * @Expose
+     */
+    private $webhooks;
+
+    /**
+     * @var array
      * @ValidValidations(message="invalid_validations")
      * @ORM\Column(name="validations", type="array", nullable=true)
      * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
@@ -143,9 +153,11 @@ class SettingType implements Fieldable
     {
         $this->fields = new ArrayCollection();
         $this->settings = new ArrayCollection();
+        $this->webhooks = new ArrayCollection();
         $this->locales = [];
         $this->permissions = [];
         $this->validations = [];
+        $this->webhooks = [];
         $this->addDefaultPermissions();
     }
 
@@ -522,6 +534,27 @@ class SettingType implements Fieldable
     public function addPermission($attribute, string $expression)
     {
         $this->permissions[$attribute] = $expression;
+    }
+
+    /**
+     * @return array
+     */
+    public function getWebhooks() : array
+    {
+        $this->webhooks = $this->webhooks ?? [];
+        return $this->webhooks;
+    }
+
+    /**
+     * @param array webhooks
+     *
+     * @return ContentType
+     */
+    public function setWebhooks($webhooks)
+    {
+        $this->webhooks = $webhooks;
+
+        return $this;
     }
 
     /**
