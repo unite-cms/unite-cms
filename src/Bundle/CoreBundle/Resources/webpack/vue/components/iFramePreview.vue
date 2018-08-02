@@ -103,9 +103,32 @@
             document.documentElement.addEventListener('touchstart', this.stopResize, true);
 
             this.form = document.querySelector('form[name="fieldable_form"]');
+
+            // Listen to all actual form elements.
             this.form.querySelectorAll('input, select, textarea').forEach((element) =>{
                 element.addEventListener('change', this.reload);
             });
+
+            // Listen to all dynamic form elements.
+            let observer = new MutationObserver((mutationsList) => {
+                for(var mutation of mutationsList) {
+                    mutation.addedNodes.forEach((node) => {
+                        if(node instanceof HTMLElement) {
+                            node.querySelectorAll('input, select, textarea').forEach((element) => {
+                                element.addEventListener('change', this.reload);
+                            });
+                        }
+                    });
+                    mutation.removedNodes.forEach((node) => {
+                        if(node instanceof HTMLElement) {
+                            node.querySelectorAll('input, select, textarea').forEach((element) => {
+                                element.removeEventListener('change', this.reload);
+                            });
+                        }
+                    });
+                }
+            });
+            observer.observe(this.form, { childList: true, subtree: true });
 
             setTimeout(() => {
                 this.setSize(768);
