@@ -83,6 +83,12 @@ class MutationType extends AbstractType
 
             $fields['create' . $key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the content will be created. Data will be validated anyway.',
+                    ],
+                ],
             ];
 
             $fields['update' . $key] = [
@@ -91,6 +97,10 @@ class MutationType extends AbstractType
                     'id' => [
                         'type' => Type::nonNull(Type::id()),
                         'description' => 'The id of the content item to get.',
+                    ],
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the content will be updated. Data will be validated anyway.',
                     ],
                 ],
             ];
@@ -209,8 +219,11 @@ class MutationType extends AbstractType
 
             // If content is valid.
             } else {
-                $this->entityManager->persist($content);
-                $this->entityManager->flush();
+
+                if($args['persist']) {
+                    $this->entityManager->persist($content);
+                    $this->entityManager->flush();
+                }
 
                 return $content;
             }
@@ -278,7 +291,11 @@ class MutationType extends AbstractType
 
             // If content is valid.
             } else {
-                $this->entityManager->flush();
+
+                if($args['persist']) {
+                    $this->entityManager->flush();
+                }
+
                 return $content;
             }
         }
