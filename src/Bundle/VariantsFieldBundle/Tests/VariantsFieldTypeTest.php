@@ -89,18 +89,21 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                     'variants' => [
                         [
                             'title' => 'Foo',
-                            'identifier' => 'foo',
+                            'identifier' => 'type',
                             'fields' => 'foo',
                             'icon' => 'test',
+                            'description' => 'Foo',
                         ]
                     ],
                 ]
             )
         );
         $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('settings.variants[0].fields', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('variantsfield.not_an_array', $errors->get(0)->getMessageTemplate());
+        $this->assertCount(2, $errors);
+        $this->assertEquals('settings.variants[0].identifier', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('reserved_identifier', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings.variants[0].fields', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('variantsfield.not_an_array', $errors->get(1)->getMessageTemplate());
 
         // Define fields as array. All valid now.
         $field = $this->createContentTypeField('variants');
@@ -111,6 +114,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'identifier' => 'foo',
                             'fields' => [],
                             'icon' => 'test',
+                            'description' => 'Foo',
                         ]
                     ],
                 ]

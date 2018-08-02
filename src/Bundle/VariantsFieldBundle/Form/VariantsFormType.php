@@ -3,17 +3,67 @@
 namespace UniteCMS\VariantsFieldBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Form\ChoiceCardsType;
+use UniteCMS\CoreBundle\Form\FieldableFormField;
+use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
+use UniteCMS\VariantsFieldBundle\Model\Variant;
+use UniteCMS\VariantsFieldBundle\Model\Variants;
 
 class VariantsFormType extends AbstractType
 {
     /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
+
+    public function __construct(FieldTypeManager $fieldTypeManager)
+    {
+        $this->fieldTypeManager = $fieldTypeManager;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        parent::buildView($view, $form, $options);
+        /**
+         * @var Variants $variants
+         */
+        $variants = $options['variants'];
+
+        // Add choices type to select type.
+        $builder->add('type', ChoiceCardsType::class, [
+            'label' => false,
+            'choices' => array_map(function($variant){
+                return new ChoiceCardOption($variant['identifier'], $variant['title'], $variant['description'] ?? '', $variant['icon'] ?? '');
+            }, $variants->getVariantsMetadata()),
+            'expanded' => true,
+        ]);
+
+        // Add fieldable form types for each type.
+        foreach($variants->getVariantsMetadata() as $variant) {
+            $builder->add($variant['identifier'], FieldableFormType::class, [
+                'label' => false,
+                'attr' => [
+                    'data-variant' => $variant['identifier'],
+                ],
+                'fields' => array_map(function(Variant $variant){
+                    return new FieldableFormField($this->fieldTypeManager->getFieldType($variant->getType()), $variant);
+                }, $variants->getFieldsForVariant($variant['identifier'])),
+            ]);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setRequired('variants');
     }
 
     /**
