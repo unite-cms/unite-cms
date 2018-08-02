@@ -2,6 +2,8 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use GraphQL\GraphQL;
+use GraphQL\Type\Schema;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -92,6 +94,48 @@ class SettingController extends Controller
                 'form' => $form->createView(),
             ]
         );
+    }
+
+    /**
+     * @Route("/{setting_type}/preview/generate", methods={"POST"})
+     * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), settingType)")
+     *
+     * @param SettingType $settingType
+     * @param Request $request
+     * @return Response
+     */
+    public function previewAction(SettingType $settingType, Request $request)
+    {
+        if(empty($settingType->getPreview())) {
+            throw $this->createNotFoundException('No preview defined for this setting type.');
+        }
+
+        $data_uri = '';
+        $setting = $settingType->getSetting();
+        $form = $this->get('unite.cms.fieldable_form_builder')->createForm($settingType, $setting);
+        $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $data = $form->getData();
+
+            if (isset($data['locale'])) {
+                $setting->setLocale($data['locale']);
+                unset($data['locale']);
+            }
+
+            $setting->setData($data);
+
+            $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($settingType->getIdentifier()) . 'Setting', $settingType->getDomain());
+            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $settingType->getPreview()->getQuery(), $setting);
+            $data_uri = urlencode($this->container->get('jms_serializer')->serialize($result->data, 'json'));
+        }
+
+        $preview_url = $settingType->getPreview()->getUrl();
+        $param_seperator = strpos($preview_url, '?') === false ? '?' : '&';
+        return new Response($preview_url . $param_seperator . 'data=' . $data_uri);
     }
 
     /**

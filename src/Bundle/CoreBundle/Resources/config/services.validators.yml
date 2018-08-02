@@ -48,3 +48,8 @@ services:
     tags: [validator.constraint_validator]
     arguments: ['%identifier_pattern%']
     public: false
+
+  # Checks, that a GraphQL query for a fieldable (content or setting) is valid.
+  UniteCMS\CoreBundle\Validator\Constraints\ValidGraphQLQueryValidator:
+    tags: [validator.constraint_validator]
+    public: false

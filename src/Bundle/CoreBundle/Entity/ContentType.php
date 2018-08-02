@@ -78,6 +78,15 @@ class ContentType implements Fieldable
     private $icon;
 
     /**
+     * @var FieldablePreview
+     * @ORM\Column(name="preview", type="object", nullable=true)
+     * @Assert\Valid()
+     * @Type("UniteCMS\CoreBundle\Entity\FieldablePreview")
+     * @Expose
+     */
+    private $preview;
+
+    /**
      * @var string
      * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="content_label", type="string", length=255, nullable=true)
@@ -242,6 +251,7 @@ class ContentType implements Fieldable
             ->setIdentifier($contentType->getIdentifier())
             ->setWeight($contentType->getWeight())
             ->setIcon($contentType->getIcon())
+            ->setPreview($contentType->getPreview())
             ->setContentLabel($contentType->getContentLabel())
             ->setPermissions($contentType->getPermissions())
             ->setDescription($contentType->getDescription())
@@ -422,6 +432,30 @@ class ContentType implements Fieldable
     public function getIcon()
     {
         return $this->icon;
+    }
+
+    /**
+     * Set preview
+     *
+     * @param FieldablePreview $preview
+     *
+     * @return ContentType
+     */
+    public function setPreview($preview)
+    {
+        $this->preview = $preview;
+
+        return $this;
+    }
+
+    /**
+     * Get preview
+     *
+     * @return FieldablePreview
+     */
+    public function getPreview()
+    {
+        return $this->preview;
     }
 
     /**

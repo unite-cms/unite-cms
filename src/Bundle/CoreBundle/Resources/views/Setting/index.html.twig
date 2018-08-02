@@ -24,5 +24,13 @@
         </div>
     </header>
     {{ form(form) }}
+
+    {% if settingType.preview is not empty %}
+        <unite-cms-core-iframe-preview url="{{ url('unitecms_core_setting_preview', {
+            domain: domain.identifier|replace({'_':'-'}),
+            organization: organization.identifier|replace({'_':'-'}),
+            setting_type: settingType.identifier|replace({'_':'-'}),
+        }) }}"></unite-cms-core-iframe-preview>
+    {% endif %}
 </article>
 {% endblock content %}
