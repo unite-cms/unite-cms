@@ -1,0 +1,27 @@
+{
+    "name": "unite-cms/variants-field-bundle",
+    "type": "symfony-bundle",
+    "description": "Provides a field type for unite cms that allows to select one of different field group variants.",
+    "require": {
+        "unite-cms/core-bundle": "0@dev"
+    },
+    "autoload": {
+        "psr-4": { "UniteCMS\\VariantsFieldBundle\\": "" },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\app\\": "Tests/app/" }
+    },
+    "authors": [
+        {
+            "name": "Franz Wilding",
+            "email": "franz@unite.co.at"
+        },
+        {
+            "name": "Stefan Kamsker",
+            "email": "stefan@unite.co.at"
+        }
+    ]
+}

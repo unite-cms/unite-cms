@@ -1,0 +1,5 @@
+services:
+
+  # A field that allows to add one of different field group variants.
+  UniteCMS\VariantsFieldBundle\Field\Types\VariantsFieldType:
+    tags: [unite_cms.field_type]
