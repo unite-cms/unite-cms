@@ -229,6 +229,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             $schema,
             'mutation { 
       createCt1(
+        persist: true,
         data: {
           f1: {
             name: "cat.jpg",
@@ -262,6 +263,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             $schema,
             'mutation { 
       createCt1(
+        persist: true,
         data: {
           f1: {
             name: "cat.jpg",
