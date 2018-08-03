@@ -2,13 +2,16 @@
 
 namespace UniteCMS\WysiwygFieldBundle\Tests;
 
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
 
 class VariantsFieldTypeTest extends FieldTypeTestCase
 {
 
-    public function testInvalidSettings()
+    public function testValidateInvalidSettings()
     {
         // Empty settings are not valid.
         $field = $this->createContentTypeField('variants');
@@ -59,7 +62,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
     }
 
-    public function testVariantSettings()
+    public function testValidateVariantSettings()
     {
         // Variants must have a title, an identifier, an optional icon and a fields array.
         $field = $this->createContentTypeField('variants');
@@ -223,5 +226,160 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, static::$container->get('validator')->validate($field));
     }
 
-    // TODO: Validate fields
+    public function testBuildFormAndValidateData() {
+
+        // Create field and save it to the database.
+        $field = $this->createContentTypeField('variants');
+        $field->setSettings(new FieldableFieldSettings([
+                    'variants' => [
+                        [
+                            'title' => 'Foo',
+                            'identifier' => 'foo',
+                            'fields' => [
+                                [
+                                    'title' => 'Text',
+                                    'identifier' => 'text',
+                                    'type' => 'text',
+                                ]
+                            ],
+                        ],
+                        [
+                            'title' => 'Baa',
+                            'identifier' => 'baa',
+                            'description' => 'Fooo',
+                            'icon' => 'any',
+                            'fields' => [
+                                [
+                                    'title' => 'Ref',
+                                    'identifier' => 'ref',
+                                    'type' => 'reference',
+                                    'settings' => [
+                                        'content_type' => $field->getContentType()->getIdentifier(),
+                                        'domain' => $field->getContentType()->getDomain()->getIdentifier(),
+                                    ]
+                                ]
+                            ],
+                        ]
+                    ],
+                ]
+            )
+        );
+
+        $this->em->persist(
+            $field->getContentType()->getDomain()->getOrganization()
+        );
+        $this->em->persist($field->getContentType()->getDomain());
+        $this->em->persist($field->getContentType());
+        $this->em->flush();
+
+        $this->em->refresh($field->getContentType()->getDomain());
+        $this->em->refresh($field->getContentType());
+        $this->em->refresh($field);
+
+        // Inject org and domain into unite.cms.manager
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'organization');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.manager'), $field->getContentType()->getDomain()->getOrganization());
+
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+
+        // Fake user
+        $user = new User();
+        $user->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        static::$container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, null, 'main', $user->getRoles())
+        );
+
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
+
+        // Build form for this field.
+        $content = new Content();
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+        $formView = $form->createView();
+
+        // Assert type and 2 variants child of variants form type
+        $root = $formView->getIterator()->current();
+        $this->assertCount(3, $root->children);
+
+        $this->assertEquals('Foo', $root->children['type']->vars['choices'][0]->label);
+        $this->assertEquals('foo', $root->children['type']->vars['choices'][0]->value);
+        $this->assertEquals(['icon' => '', 'description' => ''], $root->children['type']->vars['choices'][0]->attr);
+        $this->assertEquals('Baa', $root->children['type']->vars['choices'][1]->label);
+        $this->assertEquals('baa', $root->children['type']->vars['choices'][1]->value);
+        $this->assertEquals(['icon' => 'any', 'description' => 'Fooo'], $root->children['type']->vars['choices'][1]->attr);
+        $this->assertEquals(['data-variant' => 'foo'], $root->children['foo']->vars['attr']);
+        $this->assertEquals(['data-variant' => 'baa'], $root->children['baa']->vars['attr']);
+
+        // Check, that child form fields get rendered.
+        $this->assertCount(1, $root->children['foo']->children);
+        $this->assertContains('text', $root->children['foo']->children['foo_text']->vars['block_prefixes']);
+        $this->assertCount(1, $root->children['baa']->children);
+        $this->assertContains('unite_cms_core_reference', $root->children['baa']->children['baa_ref']->vars['block_prefixes']);
+
+        //if (empty($data['domain']) || empty($data['content_type']) || empty($data['content'])) {
+
+        // Try to submit invalid type data
+        $form->submit([
+            $field->getIdentifier() => [
+                'type' => 'any',
+            ]
+        ]);
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertFalse($form->isValid());
+        $errors = $form->getErrors(true, true);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('type', $errors->current()->getOrigin()->getName());
+        $this->assertEquals('This value is not valid.', $errors->current()->getMessageTemplate());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+
+        // Try to submit nested invalid data
+        $form->submit([
+            $field->getIdentifier() => [
+                'baa' => [
+                    'baa_ref' => [
+                        'domain' => 'foo',
+                    ]
+                ]
+            ]
+        ]);
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertFalse($form->isValid());
+        $errors = $form->getErrors(true, true);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('baa_ref', $errors->current()->getOrigin()->getName());
+        $this->assertEquals('missing_reference_definition', $errors->current()->getMessageTemplate());
+
+        // Try to submit valid data and check, that content was updated correctly.
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+
+        // Try to submit nested invalid data
+        $form->submit([
+            $field->getIdentifier() => [
+                'foo' => [
+                    'foo_text' => 'This is my text'
+                ]
+            ]
+        ]);
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+        $this->assertEquals([
+            $field->getIdentifier() => [
+                'type' => 'foo',
+                'foo' => [
+                    'text' => 'This is my text'
+                ]
+            ],
+        ],$content->getData());
+    }
 }
