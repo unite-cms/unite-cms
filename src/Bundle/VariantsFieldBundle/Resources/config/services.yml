@@ -3,6 +3,8 @@ services:
   # A field that allows to add one of different field group variants.
   UniteCMS\VariantsFieldBundle\Field\Types\VariantsFieldType:
     tags: [unite_cms.field_type]
+    arguments:
+      ['@unite.cms.field_type_manager']
 
   # A form type that renders a variant choice field and all variants.
   UniteCMS\VariantsFieldBundle\Form\VariantsFormType:

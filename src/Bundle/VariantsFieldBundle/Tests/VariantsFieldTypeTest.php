@@ -296,6 +296,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
 
         // Build form for this field.
         $content = new Content();
+        $content->setContentType($field->getContentType());
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')
             ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
@@ -337,25 +338,32 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('This value is not valid.', $errors->current()->getMessageTemplate());
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')
-            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+            ->createForm($content->getContentType(), $content, [
+                'csrf_protection' => false,
+                'validation_groups' => ['Default']
+            ]);
 
         // Try to submit nested invalid data
         $form->submit([
             $field->getIdentifier() => [
+                'type' => 'baa',
                 'baa' => [
                     'baa_ref' => [
                         'domain' => 'foo',
+                        'content' => 'foo',
                     ]
+                ],
+                'foo' => [
+                    'foo_text' => 'baa',
                 ]
             ]
         ]);
 
-        $this->assertTrue($form->isSubmitted());
-        $this->assertFalse($form->isValid());
-        $errors = $form->getErrors(true, true);
+        $content->setData($form->getData());
+        $errors = static::$container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
-        $this->assertEquals('baa_ref', $errors->current()->getOrigin()->getName());
-        $this->assertEquals('missing_reference_definition', $errors->current()->getMessageTemplate());
+        $this->assertEquals('data[' . $field->getIdentifier() . '][baa][baa_ref]', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('missing_reference_definition', $errors->get(0)->getMessageTemplate());
 
         // Try to submit valid data and check, that content was updated correctly.
 
@@ -365,6 +373,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         // Try to submit nested invalid data
         $form->submit([
             $field->getIdentifier() => [
+                'type' => 'foo',
                 'foo' => [
                     'foo_text' => 'This is my text'
                 ]
@@ -373,6 +382,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
 
         $this->assertTrue($form->isSubmitted());
         $this->assertTrue($form->isValid());
+        $content->setData($form->getData());
         $this->assertEquals([
             $field->getIdentifier() => [
                 'type' => 'foo',

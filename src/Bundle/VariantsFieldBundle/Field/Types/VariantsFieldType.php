@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\VariantsFieldBundle\Form\VariantsFormType;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
@@ -25,6 +26,16 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     const FORM_TYPE                 = VariantsFormType::class;
     const SETTINGS                  = ['variants'];
     const REQUIRED_SETTINGS         = ['variants'];
+
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
+
+    function __construct(FieldTypeManager $fieldTypeManager)
+    {
+        $this->fieldTypeManager = $fieldTypeManager;
+    }
 
     /**
      * {@inheritdoc}
@@ -138,6 +149,43 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
     /**
      * {@inheritdoc}
+     */
+    function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
+    {
+        // When deleting content, we don't need to validate data.
+        if(strtoupper($context->getGroup()) === 'DELETE') {
+            return;
+        }
+
+        // If type is not set, this field is not filled out.
+        if(empty($data['type']) || empty($data[$data['type']])) {
+            return;
+        }
+
+        // Validate all fields for the given type.
+        $variants = self::getNestableFieldable($field);
+        $fields_per_key = [];
+        foreach($variants->getFieldsForVariant($data['type']) as $field) {
+            $fields_per_key[$field->getIdentifier()] = $field;
+        }
+
+        $context->setNode($context->getValue(), null, $context->getMetadata(), $context->getPropertyPath() . '[' . $field->getEntity()->getIdentifier() . '][' . $data['type'] . ']');
+
+        foreach($data[$data['type']] as $field_key => $field_value) {
+
+            $key = $data['type'] . '_' . $field_key;
+
+            if(!array_key_exists($key, $fields_per_key)) {
+                $context->buildViolation('additional_data')->atPath('['.$key.']')->addViolation();
+            } else {
+                $this->fieldTypeManager->validateFieldData($fields_per_key[$key], $field_value, $context);
+            }
+        }
+    }
+
+    /**
+     * @param FieldableField $field
+     * @return Variants
      */
     static function getNestableFieldable(FieldableField $field): Fieldable
     {

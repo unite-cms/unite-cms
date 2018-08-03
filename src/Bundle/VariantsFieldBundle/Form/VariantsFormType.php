@@ -3,6 +3,7 @@
 namespace UniteCMS\VariantsFieldBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
@@ -13,7 +14,7 @@ use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
 use UniteCMS\VariantsFieldBundle\Model\VariantsField;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
 
-class VariantsFormType extends AbstractType
+class VariantsFormType extends AbstractType implements DataTransformerInterface
 {
     /**
      * @var FieldTypeManager $fieldTypeManager
@@ -56,6 +57,9 @@ class VariantsFormType extends AbstractType
                 }, $variants->getFieldsForVariant($variant['identifier'])),
             ]);
         }
+
+        // Remove all unused variants.
+        $builder->addModelTransformer($this);
     }
 
     /**
@@ -72,5 +76,50 @@ class VariantsFormType extends AbstractType
     public function getBlockPrefix()
     {
         return 'unite_cms_variants';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transform($value)
+    {
+        if(!empty($value['type']) && !empty($value[$value['type']])) {
+            $normalized_values = [];
+            foreach($value[$value['type']] as $field_key => $field_value) {
+                $normalized_values[$value['type'] . '_' . $field_key] = $field_value;
+            }
+            $value[$value['type']] = $normalized_values;
+        }
+        return $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reverseTransform($value)
+    {
+        // If type is not set, variants field is empty.
+        if(empty($value['type'])) {
+            return null;
+        }
+
+        // If type is set, but there is no content for this variant, return an empty array for the variant.
+        if(empty($value[$value['type']])) {
+            return [
+                'type' => $value['type'],
+                $value['type'] => [],
+            ];
+        }
+
+        // Return type but only content for the selected variant.
+        $normalized_values = [];
+        foreach($value[$value['type']] as $field_key => $field_value) {
+            $normalized_values[substr($field_key, strlen($value['type'])+1)] = $field_value;
+        }
+
+        return [
+            'type' => $value['type'],
+            $value['type'] => $normalized_values,
+        ];
     }
 }

@@ -75,7 +75,7 @@ class Variants implements Fieldable
      * Returns all fields for a given variant identifier.
      *
      * @param string $variantIdentifier
-     * @return array
+     * @return array|VariantsField[]
      */
     public function getFieldsForVariant(string $variantIdentifier) {
         if(count(array_filter($this->variantMetadata, function($meta) use ($variantIdentifier) {
