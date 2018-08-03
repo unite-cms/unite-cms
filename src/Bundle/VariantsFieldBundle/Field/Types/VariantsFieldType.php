@@ -16,6 +16,7 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\VariantsFieldBundle\Form\VariantsFormType;
+use UniteCMS\VariantsFieldBundle\Model\Variant;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
 
 class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
@@ -59,9 +60,31 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             return;
         }
 
-        // Validate each variant.
+        $taken_identifiers = [];
+
         foreach($settings->variants as $delta => $variant) {
-            $this->validateVariant($variant, $delta, $context);
+            $this->validateVariant($variant, $delta, $context, $taken_identifiers);
+        }
+
+        if($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        // Validate virtual sub fields for all variants.
+        $field = $context->getObject();
+        if($field instanceof FieldableField) {
+            /**
+             * @var Variants $variants
+             */
+            $variants = self::getNestableFieldable($field);
+            foreach($variants->getVariantsMetadata() as $delta => $meta) {
+                $context->getValidator()->inContext($context)->atPath('variants['.$delta.']')->validate(new Variant(
+                    $variants->getFieldsForVariant($meta['identifier']),
+                    $meta['identifier'],
+                    $meta['title'],
+                    $field
+                ));
+            }
         }
     }
 
@@ -70,8 +93,9 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
      * @param $variant
      * @param $delta
      * @param ExecutionContextInterface $context
+     * @param $taken_identifiers
      */
-    function validateVariant($variant, $delta, ExecutionContextInterface $context) {
+    function validateVariant($variant, $delta, ExecutionContextInterface $context, &$taken_identifiers) {
 
         $path = 'variants[' . $delta . '].';
 
@@ -98,13 +122,18 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             $context->buildViolation('reserved_identifier')->atPath($path . 'identifier')->addViolation();
         }
 
+        // Check that variant identifier is not already taken.
+        if(in_array($variant['identifier'], $taken_identifiers)) {
+            $context->buildViolation('identifier_already_taken')->atPath($path . 'identifier')->addViolation();
+        } else {
+            $taken_identifiers[] = $variant['identifier'];
+        }
+
         // Check that fields is an array.
         if(!is_array($variant['fields'])) {
             $context->buildViolation('variantsfield.not_an_array')->atPath($path . 'fields')->addViolation();
             return;
         }
-
-        // TODO: Validate fields
     }
 
     /**

@@ -8,112 +8,118 @@
 
 namespace UniteCMS\VariantsFieldBundle\Model;
 
+use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
-use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
-class Variant implements FieldableField
+class Variant implements Fieldable
 {
     /**
+     * @var VariantsField[]|ArrayCollection
+     * @Assert\Valid()
+     */
+    private $fields;
+
+    /**
      * @var string
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @ValidIdentifier(message="invalid_characters")
      */
     private $identifier;
 
     /**
      * @var string
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
      */
     private $title;
 
     /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var FieldableFieldSettings
-     */
-    private $settings;
-
-    /**
-     * @var Variants $parent
+     * @var Fieldable $parent
      */
     private $parent;
 
-    public function __construct(Variants $parent, string $identifier, string $title, string $type, FieldableFieldSettings $settings)
+    public function __construct($fields, $identifier, $title, $parent = null)
     {
+        $this->fields = new ArrayCollection($fields);
         $this->identifier = $identifier;
         $this->title = $title;
-        $this->type = $type;
-        $this->settings = $settings;
         $this->parent = $parent;
     }
 
     /**
-     * @return Fieldable
+     * @return FieldableField[]|ArrayCollection
      */
-    public function getEntity()
+    public function getFields()
     {
-        return $this->parent;
+        return $this->fields;
     }
 
     /**
-     * @param Fieldable $entity
-     *
-     * @return FieldableField
+     * {@inheritdoc}
      */
-    public function setEntity($entity)
+    public function setFields($fields)
     {
-        $this->parent = $entity;
+        $this->fields = $fields;
 
         return $this;
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function getType()
+    public function addField(FieldableField $field)
     {
-        return $this->type;
+        $this->fields->add($field);
+
+        return $this;
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function getIdentifier()
+    public function getLocales(): array { return []; }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getValidations(): array { return []; }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIdentifier() { return $this->identifier; }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIdentifierPath($delimiter = '/')
     {
-        return $this->identifier;
+        $path = '';
+
+        if ($this->getParentEntity()) {
+            $path = $this->getParentEntity()->getIdentifierPath($delimiter).$delimiter;
+        }
+
+        return $path.$this->getIdentifier();
     }
 
     /**
-     * Returns the identifier, used for mysql's json_extract function.
-     * @return string
+     * {@inheritdoc}
      */
-    public function getJsonExtractIdentifier()
+    public function getParentEntity()
     {
-        return '$.'.$this->getEntity()->getIdentifier().'.'.$this->getIdentifier();
+        return $this->parent;
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function getTitle()
+    public function getRootEntity(): Fieldable
     {
-        return $this->title;
-    }
-
-    /**
-     * @return null|FieldableFieldSettings
-     */
-    public function getSettings()
-    {
-        return $this->settings;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return ''.$this->title;
+        return $this->getParentEntity() ? $this->parent->getRootEntity() : $this;
     }
 }

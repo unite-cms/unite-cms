@@ -8,7 +8,7 @@
 
 namespace UniteCMS\VariantsFieldBundle\Model;
 
-
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -22,7 +22,8 @@ class Variants implements Fieldable
     private $variantMetadata;
 
     /**
-     * @var Variant[]|ArrayCollection
+     * @var VariantsField[]|ArrayCollection
+     * @Assert\Valid()
      */
     private $fields;
 
@@ -53,7 +54,7 @@ class Variants implements Fieldable
             ];
 
             foreach($variant['fields'] as $field) {
-                $this->addField(new Variant($this, $variant['identifier'] . '_' . $field['identifier'], $field['title'], $field['type'], new FieldableFieldSettings($field['settings'] ?? [])));
+                $this->addField(new VariantsField($this, $variant['identifier'] . '_' . $field['identifier'], $field['title'], $field['type'], new FieldableFieldSettings($field['settings'] ?? [])));
             }
 
             $this->variantMetadata[] = $metaData;
@@ -80,7 +81,7 @@ class Variants implements Fieldable
         if(count(array_filter($this->variantMetadata, function($meta) use ($variantIdentifier) {
             return $meta['identifier'] === $variantIdentifier;
         })) == 1) {
-            return $this->getFields()->filter(function(Variant $variant) use ($variantIdentifier) {
+            return $this->getFields()->filter(function(VariantsField $variant) use ($variantIdentifier) {
                 $start = $variantIdentifier . '_';
                 return substr($variant->getIdentifier(), 0, strlen($start)) === $start;
             })->toArray();

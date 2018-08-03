@@ -10,7 +10,7 @@ use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
-use UniteCMS\VariantsFieldBundle\Model\Variant;
+use UniteCMS\VariantsFieldBundle\Model\VariantsField;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
 
 class VariantsFormType extends AbstractType
@@ -51,7 +51,7 @@ class VariantsFormType extends AbstractType
                 'attr' => [
                     'data-variant' => $variant['identifier'],
                 ],
-                'fields' => array_map(function(Variant $variant){
+                'fields' => array_map(function(VariantsField $variant){
                     return new FieldableFormField($this->fieldTypeManager->getFieldType($variant->getType()), $variant);
                 }, $variants->getFieldsForVariant($variant['identifier'])),
             ]);
