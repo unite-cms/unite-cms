@@ -66,6 +66,22 @@
   }
 }
 
+.uk-card.no-padding {
+  padding: 0;
+
+  .uk-card-header {
+    margin: 0;
+  }
+}
+
+@media (max-width: $breakpoint-medium) {
+  .uk-card.full-content-card {
+    &.iframe-preview-parent {
+      margin-right: 0 !important;
+    }
+  }
+}
+
 @media (min-width: $breakpoint-medium) {
   .uk-card-header {
     h1, h2, .uk-h1, .uk-h2 {

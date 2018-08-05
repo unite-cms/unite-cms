@@ -352,6 +352,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             $schema,
             'mutation { 
       createCt1(
+        persist: true,
         data: {
           f1: [
             {},
@@ -484,6 +485,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             $schema,
             'mutation { 
       createCt1(
+        persist: true,
         data: {
           f1: [
             {},

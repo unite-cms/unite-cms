@@ -74,13 +74,21 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     "content_types": [
       {
         "title": "CT 1",
-        "identifier": "ct1"
+        "identifier": "ct1",
+        "preview": {
+          "url": "https://example.com",
+          "query": "query { type }"
+        }
       }
     ], 
     "setting_types": [
       {
         "title": "ST 1",
-        "identifier": "st1"
+        "identifier": "st1",
+        "preview": {
+          "url": "https://example.com",
+          "query": "query { type }"
+        }
       }
     ]
   }';
@@ -231,6 +239,9 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
                 $this->assertFalse($this->client->getResponse()->isClientError());
             } else {
                 $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect($this->loginUrl)));
+                if(!$forbidden) {
+                    dump($this->client->getResponse()->getContent());
+                }
                 $this->assertTrue($forbidden);
             }
         }
@@ -351,6 +362,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_deletedefinitely'        => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_recover'                 => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -360,6 +372,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -420,6 +433,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_preview'                 => [ 'access' => true, 'methods' => ['POST'] ],
             'unitecms_core_content_delete'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_addtranslation'          => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
@@ -427,6 +441,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_setting_index'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_preview'                 => [ 'access' => true, 'methods' => ['POST'] ],
             'unitecms_core_setting_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
@@ -486,6 +501,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -493,6 +509,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -553,6 +570,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -560,6 +578,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -621,6 +640,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -628,6 +648,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -688,6 +709,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_preview'                 => [ 'access' => true, 'methods' => ['POST'] ],
             'unitecms_core_content_delete'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_addtranslation'          => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
@@ -695,6 +717,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_setting_index'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_preview'                 => [ 'access' => true, 'methods' => ['POST'] ],
             'unitecms_core_setting_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
@@ -757,6 +780,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_content_delete'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_addtranslation'          => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -764,6 +788,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_setting_index'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_preview'                 => [ 'access' => false, 'methods' => ['POST'] ],
             'unitecms_core_setting_translations'            => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisions'               => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -824,6 +849,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_content_preview'                 => [ 'access' => true, 'methods' => ['POST'] ],
             'unitecms_core_content_delete'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_addtranslation'          => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
@@ -831,6 +857,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_content_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_setting_index'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_setting_preview'                 => [ 'access' => true, 'methods' => ['POST'] ],
             'unitecms_core_setting_translations'            => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisions'               => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],

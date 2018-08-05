@@ -77,6 +77,15 @@ class SettingType implements Fieldable
     private $icon;
 
     /**
+     * @var FieldablePreview
+     * @ORM\Column(name="preview", type="object", nullable=true)
+     * @Assert\Valid()
+     * @Type("UniteCMS\CoreBundle\Entity\FieldablePreview")
+     * @Expose
+     */
+    private $preview;
+
+    /**
      * @var Domain
      * @Assert\NotBlank(message="not_blank")
      * @ORM\ManyToOne(targetEntity="UniteCMS\CoreBundle\Entity\Domain", inversedBy="settingTypes")
@@ -214,6 +223,7 @@ class SettingType implements Fieldable
             ->setIdentifier($settingType->getIdentifier())
             ->setWeight($settingType->getWeight())
             ->setIcon($settingType->getIcon())
+            ->setPreview($settingType->getPreview())
             ->setDescription($settingType->getDescription())
             ->setLocales($settingType->getLocales())
             ->setPermissions($settingType->getPermissions())
@@ -369,6 +379,30 @@ class SettingType implements Fieldable
     public function getIcon()
     {
         return $this->icon;
+    }
+
+    /**
+     * Set preview
+     *
+     * @param FieldablePreview $preview
+     *
+     * @return SettingType
+     */
+    public function setPreview($preview)
+    {
+        $this->preview = $preview;
+
+        return $this;
+    }
+
+    /**
+     * Get preview
+     *
+     * @return FieldablePreview
+     */
+    public function getPreview()
+    {
+        return $this->preview;
     }
 
     /**

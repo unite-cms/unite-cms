@@ -3,6 +3,8 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
+use GraphQL\GraphQL;
+use GraphQL\Type\Schema;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -203,6 +205,56 @@ class ContentController extends Controller
                 'form' => $form->createView(),
             ]
         );
+    }
+
+    /**
+     * @Route("/{content_type}/{view}/preview/generate", methods={"POST"})
+     * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), view.getContentType())")
+     *
+     * @param View $view
+     * @param Request $request
+     * @return Response
+     */
+    public function previewAction(View $view, Request $request)
+    {
+        // User must have create or update permissions for this content type.
+        $genericContent = new Content();
+        $genericContent->setContentType($view->getContentType());
+
+        if(!$this->isGranted(ContentVoter::CREATE, $view->getContentType()) && !$this->isGranted(ContentVoter::UPDATE, $genericContent)) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if(empty($view->getContentType()->getPreview())) {
+            throw $this->createNotFoundException('No preview defined for this content type.');
+        }
+
+        $data_uri = '';
+        $content = new Content();
+        $form = $this->get('unite.cms.fieldable_form_builder')->createForm($view->getContentType(), $content);
+        $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $data = $form->getData();
+
+            if (isset($data['locale'])) {
+                $content->setLocale($data['locale']);
+                unset($data['locale']);
+            }
+
+            $content->setData($data);
+
+            $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($view->getContentType()->getIdentifier()) . 'Content', $view->getContentType()->getDomain());
+            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $view->getContentType()->getPreview()->getQuery(), $content);
+            $data_uri = urlencode($this->container->get('jms_serializer')->serialize($result->data, 'json'));
+        }
+
+        $preview_url = $view->getContentType()->getPreview()->getUrl();
+        $param_seperator = strpos($preview_url, '?') === false ? '?' : '&';
+        return new Response($preview_url . $param_seperator . 'data=' . $data_uri);
     }
 
     /**

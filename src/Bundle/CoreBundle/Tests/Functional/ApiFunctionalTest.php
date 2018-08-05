@@ -999,7 +999,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_viewer'], 'mutation {
-                createNews_category(data: { name: "First Category" }) {
+                createNews_category(data: { name: "First Category" }, persist: true) {
                     id, 
                     name
                 }
@@ -1008,17 +1008,36 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertNotEmpty($response->errors);
         $this->assertEquals("You are not allowed to create content in content type 'News Category'.", $response->errors[0]->message);
 
-        // Try to create content with permissions.
+        // Try to create content with permissions but do not persist.
+        $initialCount = $this->em->getRepository('UniteCMSCoreBundle:Content')->count([]);
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation {
-                createNews_category(data: { name: "First Category" }) {
+                createNews_category(data: { name: "First Category" }, persist: false) {
                     id, 
                     name
                 }
             }');
 
+        $this->assertEquals($initialCount, $this->em->getRepository('UniteCMSCoreBundle:Content')->count([]));
         $this->assertTrue(empty($response->errors));
+        $category = $response->data->createNews_category;
+        $this->assertEmpty($category->id);
+        $this->assertEquals('First Category', $category->name);
+
+        // Try to create content with permissions.
+        $response = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_editor'], 'mutation {
+                createNews_category(data: { name: "First Category" }, persist: true) {
+                    id, 
+                    name
+                }
+            }');
+
+        $this->assertEquals($initialCount+1, $this->em->getRepository('UniteCMSCoreBundle:Content')->count([]));
+        $this->assertTrue(empty($response->errors));
+
         $category = $response->data->createNews_category;
         $this->assertEquals('First Category', $category->name);
         $this->assertNotEmpty($category->id);
@@ -1027,7 +1046,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
-                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category }) {
+                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category }, persist: true) {
                     id, 
                     title_title,
                     content,
@@ -1051,7 +1070,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
-                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category }) {
+                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category }, persist: true) {
                     id, 
                     title_title,
                     content,
@@ -1080,7 +1099,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_viewer'], 'mutation($id: ID!) {
-                updateNews_category(id: $id, data: { name: "Updated Category Title" }) {
+                updateNews_category(id: $id, data: { name: "Updated Category Title" }, persist: true) {
                     id, 
                     name
                 }
@@ -1093,7 +1112,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!) {
-                updateNews_category(id: $id, data: { name: "Updated Category Title" }) {
+                updateNews_category(id: $id, data: { name: "Updated Category Title" }, persist: true) {
                     id, 
                     name
                 }
@@ -1109,7 +1128,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
-                updateNews(id: $id, data: { title_title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
+                updateNews(id: $id, data: { title_title: "Updated News", content: "<p>Hello new World</p>", category: $category }, persist: true) {
                     id, 
                     title_title,
                     content,
@@ -1134,7 +1153,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!, $category: ReferenceFieldTypeInput) {
-                updateNews(id: $id, data: { title_title: "Updated News", content: "<p>Hello new World</p>", category: $category }) {
+                updateNews(id: $id, data: { title_title: "Updated News", content: "<p>Hello new World</p>", category: $category }, persist: true) {
                     id, 
                     title_title,
                     content,
@@ -1158,7 +1177,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!) {
-                updateNews(id: $id, data: { title_title: "Updated News2" }) {
+                updateNews(id: $id, data: { title_title: "Updated News2" }, persist: true) {
                     id, 
                     title_title,
                     content,
@@ -1220,7 +1239,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation {
-                createNews(data: { title_title: "First News" }) {
+                createNews(data: { title_title: "First News" }, persist: true) {
                     id, 
                     title_title
                 }
@@ -1233,7 +1252,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation {
-                createNews(data: { title_title: "First News" }) {
+                createNews(data: { title_title: "First News" }, persist: true) {
                     id, 
                     title_title
                 }
@@ -1246,7 +1265,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $responseUpdate = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!) {
-                updateNews(id: $id, data: { title_title: "Updated News" }) { 
+                updateNews(id: $id, data: { title_title: "Updated News" }, persist: true) { 
                     title_title
                 }
             }', [
@@ -1259,7 +1278,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $responseUpdate = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($id: ID!) {
-                updateNews(id: $id, data: { title_title: "Updated News" }) { 
+                updateNews(id: $id, data: { title_title: "Updated News" }, persist: true) { 
                     title_title
                 }
             }', [
