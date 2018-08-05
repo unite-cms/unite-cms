@@ -8,7 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
-use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
+use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
@@ -17,36 +17,59 @@ use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 class ValidWebhooksValidator extends ConstraintValidator
 {
     /**
-     * @var AccessExpressionChecker $accessExpressionChecker
+     * @var WebhookExpressionChecker $webhookExpressionChecker
      */
-    private $accessExpressionChecker;
+    private $webhookExpressionChecker;
+
+    const REQUIRED_OPTIONS =  ['url', 'fire'];
+    const ALLOWED_OPTIONS = ['url', 'fire', 'check_ssl', 'secret_key'];
 
     public function __construct()
     {
-        $this->accessExpressionChecker = new AccessExpressionChecker();
+        $this->webhookExpressionChecker = new WebhookExpressionChecker();
     }
 
     public function validate($value, Constraint $constraint)
     {
-        $allowedAttributes = [
-            'url',
-            'action',
-            'ssl_check',
-            'secret_key'
-        ];
+        # check for right array syntax
+        if (isset($value[0]) && !is_array($value[0])) {
+            $this->context->buildViolation($constraint->message)->addViolation();
+        }
 
-        print_r($value);
-        exit;
+        foreach ($value as $index => $hook) {
 
-        #foreach ($value as $attribute => $expression) {
-        #    if (!in_array($attribute, $allowedAttributes)) {
-        #        $this->context->buildViolation($constraint->message)->addViolation();
-        #    }
+            # check if allowed options are set
+            foreach (self::REQUIRED_OPTIONS as $required) {
+                if (!in_array($required, array_keys($hook))) {
+                    $this->context->buildViolation($constraint->requiredAttributeMissingMessage)->addViolation();
 
-            /*if(!$this->accessExpressionChecker->validate($expression)) {
-                $this->context->buildViolation($constraint->message)->addViolation();
-                return;
-            }*/
-        #}
+                }
+            }
+
+            # check for non allowed attributes
+            foreach ($hook as $key => $attribute) {
+                if (!in_array($key, self::ALLOWED_OPTIONS)) {
+                    $this->context->buildViolation($constraint->invalidAttributeMessage)->addViolation();
+                }
+            }
+
+            # validate if check_ssl is a boolean
+            $check_ssl = $hook['check_ssl'];
+            if (isset($hook['check_ssl']) && !is_bool($check_ssl)) {
+                $this->context->buildViolation($constraint->invalidCheckSSLMessage)->addViolation();
+            }
+
+            # validate secret key
+            if (isset($hook['secret_key']) && !strlen($hook['secret_key']) >= 8) {
+                $this->context->buildViolation($constraint->invalidSecretKeyMessage)->addViolation();
+            }
+
+            # validate fire expression
+            if (isset($hook['fire']) && !$this->webhookExpressionChecker->validate($hook['fire'])) {
+                $this->context->buildViolation($constraint->invalidExpressionMessage)->addViolation();
+            }
+
+        }
+
     }
 }

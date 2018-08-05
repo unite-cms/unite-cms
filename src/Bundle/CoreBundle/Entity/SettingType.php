@@ -227,6 +227,7 @@ class SettingType implements Fieldable
             ->setDescription($settingType->getDescription())
             ->setLocales($settingType->getLocales())
             ->setPermissions($settingType->getPermissions())
+            ->setWebhooks($settingType->getWebhooks())
             ->setValidations($settingType->getValidations());
 
         // Fields to delete
@@ -575,20 +576,31 @@ class SettingType implements Fieldable
      */
     public function getWebhooks() : array
     {
+        // Prevent null values. We always need an array response.
         $this->webhooks = $this->webhooks ?? [];
         return $this->webhooks;
     }
 
     /**
-     * @param array webhooks
+     * @param array $webhooks
      *
      * @return ContentType
      */
     public function setWebhooks($webhooks)
     {
-        $this->webhooks = $webhooks;
+        $this->webhooks = [];
+        foreach ($webhooks as $index => $webhook) {
+            if (is_array($webhook)) {
+                $this->addWebhook($index, $webhook);
+            }
+        }
 
         return $this;
+    }
+
+    public function addWebhook($index, array $webhook)
+    {
+        $this->webhooks[$index] = $webhook;
     }
 
     /**

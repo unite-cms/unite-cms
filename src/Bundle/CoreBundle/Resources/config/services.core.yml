@@ -49,4 +49,5 @@ services:
   # Service Class to fire webhooks
   unite.cms.webhook_manager:
     class: UniteCMS\CoreBundle\Service\WebHookManager
+    arguments: ['@logger']
     public: true

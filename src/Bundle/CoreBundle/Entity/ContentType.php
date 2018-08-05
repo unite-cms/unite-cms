@@ -266,6 +266,7 @@ class ContentType implements Fieldable
             ->setPreview($contentType->getPreview())
             ->setContentLabel($contentType->getContentLabel())
             ->setPermissions($contentType->getPermissions())
+            ->setWebhooks($contentType->getWebhooks())
             ->setDescription($contentType->getDescription())
             ->setLocales($contentType->getLocales())
             ->setValidations($contentType->getValidations());
@@ -661,22 +662,31 @@ class ContentType implements Fieldable
      */
     public function getWebhooks() : array
     {
+        // Prevent null values. We always need an array response.
         $this->webhooks = $this->webhooks ?? [];
         return $this->webhooks;
     }
 
     /**
-     * @param array webhooks
+     * @param array $webhooks
      *
      * @return ContentType
      */
     public function setWebhooks($webhooks)
     {
         $this->webhooks = [];
-
-        $this->webhooks = $webhooks;
+        foreach ($webhooks as $index => $webhook) {
+            if (is_array($webhook)) {
+                $this->addWebhook($index, $webhook);
+            }
+        }
 
         return $this;
+    }
+
+    public function addWebhook($index, array $webhook)
+    {
+        $this->webhooks[$index] = $webhook;
     }
 
     /**

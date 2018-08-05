@@ -9,19 +9,56 @@
 namespace UniteCMS\CoreBundle\Service;
 
 use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
+use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
 
 class WebHookManager
 {
-    public function fire() {
+    /**
+     * @var WebhookExpressionChecker $webhookExpressionChecker
+     */
+    private $webhookExpressionChecker;
+
+    /**
+     * @var LoggerInterface $logger
+     */
+    private $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->webhookExpressionChecker = new WebhookExpressionChecker();
+        $this->logger = $logger;
+    }
+
+    public function process(array $webhooks, array $postData, string $action) {
+
+        foreach ($webhooks as $webhook) {
+
+            if (!$this->webhookExpressionChecker->evaluate($webhook['fire'], $action)) {
+                continue;
+            }
+            $this->fire($webhook, $postData);
+            
+        }
+
+    }
+
+    private function fire(array $webhook, array $postData) {
 
         $client = new Client();
 
-        $res = $client->request('GET', 'https://www.orf.at');
-        #echo $res->getStatusCode();
-        #echo $res->getBody();
+        $headers = [
+            'Content-type' => 'application/json; charset=utf-8',
+            'Accept' => 'application/json',
+        ];
 
-        #exit;
-
+        try {
+            $response = $client->post($webhook['url'], $headers, json_encode($postData))->send();
+        } catch (\Exception $e) {
+            $this->logger->error('Webhook error: '.$e->getMessage());
+            return false;
+        }
+        
     }
 
 }
