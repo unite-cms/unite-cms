@@ -35,13 +35,17 @@ class GraphQLApiController extends Controller
             [
                 'query' => $schemaTypeManager->getSchemaType('Query'),
 
-                // at the moment only content (and not setting) can be mutated.
+                // At the moment only content (and not setting) can be mutated.
                 'mutation' => ($domain->getContentTypes()->count() > 0) ? $schemaTypeManager->getSchemaType(
                     'Mutation'
                 ) : null,
                 'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
                     return $schemaTypeManager->getSchemaType($name, $domain);
                 },
+
+                'types' => function() use ($schemaTypeManager)  {
+                    return $schemaTypeManager->getNonDetectableSchemaTypes();
+                }
             ]
         );
 

@@ -99,6 +99,8 @@ class VariantsGraphQLTest extends APITestCase
         $c->setContentType($this->domains['variants']->getContentTypes()->first());
         $this->repositoryFactory->add($c);
 
+        $s = $this->domains['variants']->getSettingTypes()->first()->getSetting();
+
         // 1. Content without any field data.
         $query = 'query {
             findVariants {
@@ -193,8 +195,46 @@ class VariantsGraphQLTest extends APITestCase
             ]], json_decode(json_encode($this->api($query)), true));
 
         // 3. Settings without any field data.
+        $query = 'query {
+            VariantsSetting {
+                variants {
+                    type,
+                    
+                    ... on VariantsSettingVariantsV1Variant {
+                        text
+                    }
+                }
+            }
+        }';
+
+        $this->assertEquals([
+            'data' => [
+                'VariantsSetting' => [
+                    'variants' => [
+                        'type' => null,
+                    ]
+                ]
+            ]], json_decode(json_encode($this->api($query)), true));
 
         // 4. Settings with field data.
+        $s->setData([
+            'variants' => [
+                'type' => 'v1',
+                'v1' => [
+                    'text' => 'Foo'
+                ],
+            ]
+        ]);
+
+        $this->assertEquals([
+            'data' => [
+                'VariantsSetting' => [
+                    'variants' => [
+                        'type' => 'v1',
+                        'text' => 'Foo'
+                    ],
+                ],
+            ]], json_decode(json_encode($this->api($query)), true));
 
     }
 

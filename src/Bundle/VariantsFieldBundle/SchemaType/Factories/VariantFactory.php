@@ -8,7 +8,6 @@
 
 namespace UniteCMS\VariantsFieldBundle\SchemaType\Factories;
 
-use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -107,7 +106,7 @@ class VariantFactory
                     $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$normalizedFieldName]);
                     return $return_value;
                 }
-            ]));
+            ]), false);
         }
         return $schemaTypeManager->getSchemaType($schemaTypeName);
     }
