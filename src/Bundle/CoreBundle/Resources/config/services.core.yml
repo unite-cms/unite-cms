@@ -50,4 +50,4 @@ services:
   unite.cms.webhook_manager:
     class: UniteCMS\CoreBundle\Service\WebHookManager
     arguments: ['@logger']
-    public: true
+    public: false
