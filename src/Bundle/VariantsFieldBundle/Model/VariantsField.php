@@ -18,7 +18,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
 /**
- * @UniqueFieldableField(message="identifier_already_taken")
+ * @UniqueFieldableField(message="identifier_already_taken", getter="getUniqueComparableIdentifier")
  */
 class VariantsField implements FieldableField
 {
@@ -28,6 +28,14 @@ class VariantsField implements FieldableField
      * @Assert\Length(max="255", maxMessage="too_long")
      */
     private $title;
+
+    /**
+     * @var string
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @ValidIdentifier(message="invalid_characters")
+     */
+    private $variantIdentifier;
 
     /**
      * @var string
@@ -57,8 +65,9 @@ class VariantsField implements FieldableField
      */
     private $parent;
 
-    public function __construct(Variants $parent, string $identifier, string $title, string $type, FieldableFieldSettings $settings)
+    public function __construct(Variants $parent, string $variantIdentifier, string $identifier, string $title, string $type, FieldableFieldSettings $settings)
     {
+        $this->variantIdentifier = $variantIdentifier;
         $this->identifier = $identifier;
         $this->title = $title;
         $this->type = $type;
@@ -103,12 +112,24 @@ class VariantsField implements FieldableField
     }
 
     /**
+     * @return string
+     */
+    public function getVariantIdentifier()
+    {
+        return $this->variantIdentifier;
+    }
+
+    public function getUniqueComparableIdentifier() {
+        return $this->getVariantIdentifier().$this->getIdentifier();
+    }
+
+    /**
      * Returns the identifier, used for mysql's json_extract function.
      * @return string
      */
     public function getJsonExtractIdentifier()
     {
-        return '$.'.$this->getEntity()->getIdentifier().'.'.$this->getIdentifier();
+        return '$.'.$this->getEntity()->getIdentifier().'.'.$this->getVariantIdentifier().'.'.$this->getIdentifier();
     }
 
     /**

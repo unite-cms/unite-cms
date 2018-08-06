@@ -83,13 +83,6 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
      */
     public function transform($value)
     {
-        if(!empty($value['type']) && !empty($value[$value['type']])) {
-            $normalized_values = [];
-            foreach($value[$value['type']] as $field_key => $field_value) {
-                $normalized_values[$value['type'] . '_' . $field_key] = $field_value;
-            }
-            $value[$value['type']] = $normalized_values;
-        }
         return $value;
     }
 
@@ -112,14 +105,9 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
         }
 
         // Return type but only content for the selected variant.
-        $normalized_values = [];
-        foreach($value[$value['type']] as $field_key => $field_value) {
-            $normalized_values[substr($field_key, strlen($value['type'])+1)] = $field_value;
-        }
-
         return [
             'type' => $value['type'],
-            $value['type'] => $normalized_values,
+            $value['type'] => $value[$value['type']],
         ];
     }
 }

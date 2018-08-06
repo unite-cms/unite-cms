@@ -54,7 +54,7 @@ class Variants implements Fieldable
             ];
 
             foreach($variant['fields'] as $field) {
-                $this->addField(new VariantsField($this, $variant['identifier'] . '_' . $field['identifier'], $field['title'], $field['type'], new FieldableFieldSettings($field['settings'] ?? [])));
+                $this->addField(new VariantsField($this, $variant['identifier'], $field['identifier'], $field['title'], $field['type'], new FieldableFieldSettings($field['settings'] ?? [])));
             }
 
             $this->variantMetadata[] = $metaData;
@@ -82,8 +82,7 @@ class Variants implements Fieldable
             return $meta['identifier'] === $variantIdentifier;
         })) == 1) {
             return $this->getFields()->filter(function(VariantsField $variant) use ($variantIdentifier) {
-                $start = $variantIdentifier . '_';
-                return substr($variant->getIdentifier(), 0, strlen($start)) === $start;
+                return $variant->getVariantIdentifier() === $variantIdentifier;
             })->toArray();
         }
         return [];

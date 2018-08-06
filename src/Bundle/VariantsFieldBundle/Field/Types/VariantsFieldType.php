@@ -229,12 +229,10 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
         foreach($data[$data['type']] as $field_key => $field_value) {
 
-            $key = $data['type'] . '_' . $field_key;
-
-            if(!array_key_exists($key, $fields_per_key)) {
-                $context->buildViolation('additional_data')->atPath('['.$key.']')->addViolation();
+            if(!array_key_exists($field_key, $fields_per_key)) {
+                $context->buildViolation('additional_data')->atPath('['.$field_key.']')->addViolation();
             } else {
-                $this->fieldTypeManager->validateFieldData($fields_per_key[$key], $field_value, $context);
+                $this->fieldTypeManager->validateFieldData($fields_per_key[$field_key], $field_value, $context);
             }
         }
     }

@@ -317,9 +317,9 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
 
         // Check, that child form fields get rendered.
         $this->assertCount(1, $root->children['foo']->children);
-        $this->assertContains('text', $root->children['foo']->children['foo_text']->vars['block_prefixes']);
+        $this->assertContains('text', $root->children['foo']->children['text']->vars['block_prefixes']);
         $this->assertCount(1, $root->children['baa']->children);
-        $this->assertContains('unite_cms_core_reference', $root->children['baa']->children['baa_ref']->vars['block_prefixes']);
+        $this->assertContains('unite_cms_core_reference', $root->children['baa']->children['ref']->vars['block_prefixes']);
 
         //if (empty($data['domain']) || empty($data['content_type']) || empty($data['content'])) {
 
@@ -348,13 +348,13 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
             $field->getIdentifier() => [
                 'type' => 'baa',
                 'baa' => [
-                    'baa_ref' => [
+                    'ref' => [
                         'domain' => 'foo',
                         'content' => 'foo',
                     ]
                 ],
                 'foo' => [
-                    'foo_text' => 'baa',
+                    'text' => 'baa',
                 ]
             ]
         ]);
@@ -362,7 +362,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $content->setData($form->getData());
         $errors = static::$container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
-        $this->assertEquals('data[' . $field->getIdentifier() . '][baa][baa_ref]', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('data[' . $field->getIdentifier() . '][baa][ref]', $errors->get(0)->getPropertyPath());
         $this->assertEquals('missing_reference_definition', $errors->get(0)->getMessageTemplate());
 
         // Try to submit valid data and check, that content was updated correctly.
@@ -375,7 +375,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
             $field->getIdentifier() => [
                 'type' => 'foo',
                 'foo' => [
-                    'foo_text' => 'This is my text'
+                    'text' => 'This is my text'
                 ]
             ]
         ]);

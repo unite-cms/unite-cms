@@ -77,7 +77,7 @@ class VariantFactory
              */
             $fieldTypes = [];
             foreach($variant->getFields() as $field) {
-                $fieldIdentifier = substr(IdentifierNormalizer::graphQLIdentifier($field), strlen($variant->getIdentifier()) + 1);
+                $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
                 $fields[$fieldIdentifier] = $field;
                 $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
                 $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType($field, $schemaTypeManager, $nestingLevel);
@@ -143,8 +143,7 @@ class VariantFactory
                 $variantFieldsSchemaTypes = [];
 
                 foreach($variant->getFields() as $field) {
-                    $fieldIdentifier = substr(IdentifierNormalizer::graphQLIdentifier($field), strlen($variant->getIdentifier()) + 1);
-                    $variantFieldsSchemaTypes[$meta['identifier'] . '_' . $fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLType($field, $schemaTypeManager, $nestingLevel);
+                    $variantFieldsSchemaTypes[IdentifierNormalizer::graphQLIdentifier($field)] = $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLType($field, $schemaTypeManager, $nestingLevel);
                 }
 
                 if($variantFieldsSchemaTypes) {
