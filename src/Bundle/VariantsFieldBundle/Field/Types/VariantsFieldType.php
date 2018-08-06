@@ -8,8 +8,6 @@
 
 namespace UniteCMS\VariantsFieldBundle\Field\Types;
 
-
-use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -82,7 +80,8 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
-        return Type::string();
+        // Creates a new schema type object for inserting variant field data and register it to schema type manager.
+        return $this->variantFactory->createVariantsInputType($schemaTypeManager, $nestingLevel, self::getNestableFieldable($field));
     }
 
     /**
