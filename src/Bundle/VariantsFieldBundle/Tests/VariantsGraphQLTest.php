@@ -135,8 +135,23 @@ class VariantsGraphQLTest extends APITestCase
             }
         }';
 
-        $result = $this->api($query);
-        dump($result);
+        $this->assertEquals([
+            'data' => [
+                'findVariants' => [
+                    'result' => [
+                        [
+                            'variants' => [
+                                'type' => null,
+                            ]
+                        ]
+                    ]
+                ],
+                'getVariants' => [
+                    'variants' => [
+                        'type' => null,
+                    ]
+                ],
+            ]], json_decode(json_encode($this->api($query)), true));
         
         // 2. Content with field data.
         $c->setData([
@@ -151,8 +166,31 @@ class VariantsGraphQLTest extends APITestCase
             ]
         ]);
 
-        $result = $this->api($query);
-        dump($result);
+        $this->assertEquals([
+            'data' => [
+                'findVariants' => [
+                    'result' => [
+                        [
+                            'variants' => [
+                                'type' => 'v2',
+                                'collection' => [
+                                    ['text' => 'Foo'],
+                                    ['text' => 'Baa'],
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                'getVariants' => [
+                    'variants' => [
+                        'type' => 'v2',
+                        'collection' => [
+                            ['text' => 'Foo'],
+                            ['text' => 'Baa'],
+                        ]
+                    ]
+                ],
+            ]], json_decode(json_encode($this->api($query)), true));
 
         // 3. Settings without any field data.
 

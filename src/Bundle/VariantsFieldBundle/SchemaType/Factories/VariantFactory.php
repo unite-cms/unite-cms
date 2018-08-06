@@ -83,7 +83,7 @@ class VariantFactory
                     ],
                     $fieldsSchemaTypes
                 ),
-                'interfaces' => [ $schemaTypeManager->getSchemaType('VariantsFieldInterface') ],
+                'interfaces' =>[ $schemaTypeManager->getSchemaType('VariantsFieldInterface') ],
                 'resolveField' => function($value, array $args, $context, ResolveInfo $info) use ($fields, $fieldTypes) {
 
                     if(!$value instanceof Variant) {
@@ -98,13 +98,13 @@ class VariantFactory
 
                     $normalizedFieldName = str_replace('_', '-', $info->fieldName);
 
-                    if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$normalizedFieldName])) {
+                    if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value->getData()[$normalizedFieldName])) {
                         return null;
                     }
 
                     $return_value = null;
                     $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$normalizedFieldName]);
+                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$normalizedFieldName]);
                     return $return_value;
                 }
             ]));
