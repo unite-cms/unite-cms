@@ -42,12 +42,18 @@ class Variant implements Fieldable
      */
     private $parent;
 
-    public function __construct($fields, $identifier, $title, $parent = null)
+    /**
+     * @var array $data
+     */
+    private $data;
+
+    public function __construct($fields, $identifier, $title, $parent = null, $data = [])
     {
         $this->fields = new ArrayCollection($fields);
         $this->identifier = $identifier;
         $this->title = $title;
         $this->parent = $parent;
+        $this->data = $data;
     }
 
     /**
@@ -121,5 +127,21 @@ class Variant implements Fieldable
     public function getRootEntity(): Fieldable
     {
         return $this->getParentEntity() ? $this->parent->getRootEntity() : $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param array $data
+     */
+    public function setData(array $data): void
+    {
+        $this->data = $data;
     }
 }

@@ -9,6 +9,7 @@
 namespace UniteCMS\VariantsFieldBundle\Field\Types;
 
 
+use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -16,9 +17,11 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\VariantsFieldBundle\Form\VariantsFormType;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
+use UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory;
 
 class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 {
@@ -32,9 +35,15 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
      */
     private $fieldTypeManager;
 
-    function __construct(FieldTypeManager $fieldTypeManager)
+    /**
+     * @var VariantFactory $variantFactory
+     */
+    private $variantFactory;
+
+    function __construct(FieldTypeManager $fieldTypeManager, VariantFactory $variantFactory)
     {
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->variantFactory = $variantFactory;
     }
 
     /**
@@ -46,6 +55,54 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
         return array_merge(parent::getFormOptions($field), [
             'variants' => self::getNestableFieldable($field),
         ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
+        $variants = self::getNestableFieldable($field);
+        foreach($variants->getVariantsMetadata() as $meta) {
+
+            // Creates a new schema type object for this variant and register it to schema type manager.
+            $this->variantFactory->createVariantType($schemaTypeManager, $nestingLevel, new Variant(
+                $variants->getFieldsForVariant($meta['identifier']),
+                $meta['identifier'],
+                $meta['title'],
+                $variants
+            ));
+        }
+
+        return $schemaTypeManager->getSchemaType('VariantsFieldInterface', $field->getEntity()->getRootEntity()->getDomain(), $nestingLevel);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
+        return Type::string();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function resolveGraphQLData(FieldableField $field, $value)
+    {
+        if(empty($value['type'])) {
+            return new Variant([], null, null);
+        }
+
+        $variants = self::getNestableFieldable($field);
+
+        return new Variant(
+            $variants->getFieldsForVariant($value['type']),
+            $value['type'],
+            $value['type'],
+            $variants,
+            $value[$value['type']] ?? []
+        );
     }
 
     /**
