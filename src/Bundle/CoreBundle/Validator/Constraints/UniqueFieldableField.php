@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraint;
 class UniqueFieldableField extends Constraint
 {
     public $message = 'The field identifier is already taken';
+    public $getter = 'getIdentifier';
 
     /**
      * Returns whether the constraint can be put onto classes, properties or
