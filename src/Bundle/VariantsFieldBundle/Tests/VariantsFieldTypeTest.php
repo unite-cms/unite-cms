@@ -1,6 +1,6 @@
 <?php
 
-namespace UniteCMS\WysiwygFieldBundle\Tests;
+namespace UniteCMS\VariantsFieldBundle\Tests;
 
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;

@@ -8,8 +8,11 @@
 
 namespace UniteCMS\VariantsFieldBundle\Field\Types;
 
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
@@ -80,7 +83,6 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
-        // Creates a new schema type object for inserting variant field data and register it to schema type manager.
         return $this->variantFactory->createVariantsInputType($schemaTypeManager, $nestingLevel, self::getNestableFieldable($field));
     }
 
@@ -248,5 +250,157 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             $field->getIdentifier(),
             $field->getEntity()
         );
+    }
+
+    /**
+     * Creates a virtual variant model for the given field and a variant identifier.
+     * @param FieldableField $field
+     * @param string $variant
+     * @param array $data
+     * @return Variant
+     */
+    static function createVariant(FieldableField $field, string $variant, array $data = []) : Variant {
+        $variants = self::getNestableFieldable($field);
+        return new Variant(
+            $variants->getFieldsForVariant($variant),
+            $variant,
+            $variant,
+            $variants,
+            $data
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data) {
+
+        // Only continue if we have data and a type for this field.
+        if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type']) || empty($data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']])) {
+            return;
+        }
+
+        $variant = static::createVariant($field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
+
+        // If child field implements onCreate, call it!
+        foreach($variant->getFields() as $subField) {
+            $fieldType = $this->fieldTypeManager->getFieldType($subField->getType());
+
+            if(method_exists($fieldType, 'onCreate')) {
+                if(isset($variant->getData()[$subField->getIdentifier()])) {
+                    $subData = $variant->getData()[$subField->getIdentifier()];
+                    $fieldType->onCreate($subField, $content, $repository, $subData );
+                    $data[$field->getIdentifier()][$variant->getIdentifier()][$subField->getIdentifier()] = $subData;
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
+
+        // Case1: Old and new data has no variant identifier.
+        if(empty($old_data[$field->getIdentifier()]['type']) && empty($data[$field->getIdentifier()]['type'])) {
+            return;
+        }
+
+        // Case2: Old had no variant, but new has => onCreate
+        if(empty($old_data[$field->getIdentifier()]['type']) && !empty($data[$field->getIdentifier()]['type'])) {
+
+            // This is a little hack until is implemented: https://github.com/unite-cms/unite-cms/issues/207
+            $this->onCreate($field, ($content instanceof Content ? $content : new Content()), $repository, $data);
+            return;
+        }
+
+        // Case3: Old has variant, but new has not => onHardDelete
+        if(!empty($old_data[$field->getIdentifier()]['type']) && empty($data[$field->getIdentifier()]['type'])) {
+
+            // This is a little hack until is implemented: https://github.com/unite-cms/unite-cms/issues/207
+            $this->onHardDelete($field, ($content instanceof Content ? $content : new Content()), $repository, $old_data);
+            return;
+        }
+
+        // Case4 (A&B): variant identifier in old and new data available.
+        if(!empty($old_data[$field->getIdentifier()]['type']) && !empty($data[$field->getIdentifier()]['type'])) {
+
+            // Case 4A: Old had other variant than new data => onHardDelete & onCreate
+            if($old_data[$field->getIdentifier()]['type'] != $data[$field->getIdentifier()]['type']) {
+
+                // This is a little hack until is implemented: https://github.com/unite-cms/unite-cms/issues/207
+                $this->onHardDelete($field, ($content instanceof Content ? $content : new Content()), $repository, $old_data);
+                $this->onCreate($field, ($content instanceof Content ? $content : new Content()), $repository, $data);
+            }
+
+            // Case 4B: Old has same variant as new.
+            else {
+                $variant = static::createVariant($field, $data[$field->getIdentifier()]['type']);
+
+                // If child field implements onUpdate, call it!
+                foreach($variant->getFields() as $subField) {
+                    $fieldType = $this->fieldTypeManager->getFieldType($subField->getType());
+
+                    if(method_exists($fieldType, 'onUpdate')) {
+
+                        $old_sub_data = $old_data[$field->getIdentifier()][$variant->getIdentifier()][$subField->getIdentifier()] ?? null;
+                        $new_sub_data = $data[$field->getIdentifier()][$variant->getIdentifier()][$subField->getIdentifier()] ?? null;
+
+                        if($old_sub_data || $new_sub_data) {
+                            $fieldType->onUpdate($subField, $content, $repository, $old_sub_data, $new_sub_data );
+                            $data[$field->getIdentifier()][$variant->getIdentifier()][$subField->getIdentifier()] = $new_sub_data;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+
+        // Only continue if we have data and a type for this field.
+        if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type']) || empty($data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']])) {
+            return;
+        }
+
+        $variant = static::createVariant($field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
+
+        // If child field implements onCreate, call it!
+        foreach($variant->getFields() as $subField) {
+            $fieldType = $this->fieldTypeManager->getFieldType($subField->getType());
+
+            if(method_exists($fieldType, 'onSoftDelete')) {
+                if(isset($variant->getData()[$subField->getIdentifier()])) {
+                    $fieldType->onSoftDelete($subField, $content, $repository, $variant->getData()[$subField->getIdentifier()] );
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+
+        // Only continue if we have data and a type for this field.
+        if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type']) || empty($data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']])) {
+            return;
+        }
+
+        $variant = static::createVariant($field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
+
+        // If child field implements onCreate, call it!
+        foreach($variant->getFields() as $subField) {
+            $fieldType = $this->fieldTypeManager->getFieldType($subField->getType());
+
+            if(method_exists($fieldType, 'onHardDelete')) {
+                if(isset($variant->getData()[$subField->getIdentifier()])) {
+                    $fieldType->onHardDelete($subField, $content, $repository, $variant->getData()[$subField->getIdentifier()] );
+                }
+            }
+        }
     }
 }
