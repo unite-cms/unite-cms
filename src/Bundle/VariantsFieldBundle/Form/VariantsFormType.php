@@ -42,7 +42,7 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
             'choices' => array_map(function($variant){
                 return new ChoiceCardOption($variant['identifier'], $variant['title'], $variant['description'] ?? '', $variant['icon'] ?? '');
             }, $variants->getVariantsMetadata()),
-            'expanded' => true,
+            'compact' => true,
         ]);
 
         // Add fieldable form types for each type.
@@ -50,7 +50,7 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
             $builder->add($variant['identifier'], FieldableFormType::class, [
                 'label' => false,
                 'attr' => [
-                    'data-variant' => $variant['identifier'],
+                    'data-variant-title' => $variant['title'],
                 ],
                 'fields' => array_map(function(VariantsField $variant){
                     return new FieldableFormField($this->fieldTypeManager->getFieldType($variant->getType()), $variant);

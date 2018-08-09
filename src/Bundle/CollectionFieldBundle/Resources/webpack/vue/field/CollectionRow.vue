@@ -14,6 +14,9 @@
                 feather: feather
             };
         },
+        mounted() {
+            feather.replace();
+        },
         props: [
             'delta',
             'prototype'

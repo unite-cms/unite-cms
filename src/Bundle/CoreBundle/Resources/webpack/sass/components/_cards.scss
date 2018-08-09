@@ -164,4 +164,35 @@
 .choice-cards-type {
   margin-top: 15px;
   margin-bottom: 25px;
+
+  &.compact {
+    justify-content: flex-start;
+
+    > .uk-flex-1 {
+      max-width: 150px;
+    }
+
+    .uk-card.choice-card {
+      min-width: 0;
+
+      svg {
+        width: 24px;
+        height: 24px;
+        margin: 0 0 10px 0;
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1.125rem;
+      }
+
+      .uk-card-body {
+        padding: 20px 15px;
+      }
+
+      .uk-card-footer {
+        display: none;
+      }
+    }
+  }
 }
