@@ -312,16 +312,14 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('Baa', $root->children['type']->vars['choices'][1]->label);
         $this->assertEquals('baa', $root->children['type']->vars['choices'][1]->value);
         $this->assertEquals(['icon' => 'any', 'description' => 'Fooo'], $root->children['type']->vars['choices'][1]->attr);
-        $this->assertEquals(['data-variant' => 'foo'], $root->children['foo']->vars['attr']);
-        $this->assertEquals(['data-variant' => 'baa'], $root->children['baa']->vars['attr']);
+        $this->assertEquals(['data-variant-title' => 'Foo'], $root->children['foo']->vars['attr']);
+        $this->assertEquals(['data-variant-title' => 'Baa'], $root->children['baa']->vars['attr']);
 
         // Check, that child form fields get rendered.
         $this->assertCount(1, $root->children['foo']->children);
         $this->assertContains('text', $root->children['foo']->children['text']->vars['block_prefixes']);
         $this->assertCount(1, $root->children['baa']->children);
         $this->assertContains('unite_cms_core_reference', $root->children['baa']->children['ref']->vars['block_prefixes']);
-
-        //if (empty($data['domain']) || empty($data['content_type']) || empty($data['content'])) {
 
         // Try to submit invalid type data
         $form->submit([
