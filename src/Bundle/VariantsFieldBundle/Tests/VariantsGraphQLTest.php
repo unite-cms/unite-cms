@@ -241,8 +241,33 @@ class VariantsGraphQLTest extends APITestCase
     public function testMutateVariants() {
 
         // Create nested content object.
-
-        // Create settings object.
-
+        $this->assertEquals([
+            'data' => [
+                'createVariants' => [
+                    'variants' => [
+                        'type' => 'v2',
+                        'collection' => [
+                            ['text' => 'Foo'],
+                            ['text' => 'Baa'],
+                        ]
+                    ]
+                ],
+            ]], json_decode(json_encode($this->api('mutation {
+                createVariants(data: { variants: {
+                    type: "v2",
+                    v1: { text: "Foo" },
+                    v2: { collection: [ { text: "Foo" }, { text: "Baa" } ] }
+                } }, persist: false) {
+                    variants {
+                        type,
+                        
+                        ... on VariantsContentVariantsV2Variant {
+                            collection {
+                                text
+                            }
+                        }
+                    }
+                }
+            }')), true));
     }
 }
