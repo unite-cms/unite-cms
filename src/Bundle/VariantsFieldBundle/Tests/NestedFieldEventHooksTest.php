@@ -147,14 +147,14 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
             public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data)
             {
-                $this->events[] = $this->createCompareAbleString($field, $content, $repository, 'create', $data);
-                $data .= '.onCreate';
+                $this->events[] = $this->createCompareAbleString($field, $content, $repository, 'create', $data[$field->getIdentifier()]);
+                $data[$field->getIdentifier()] .= '.onCreate';
 
             }
 
             public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
-                $this->events[] = $this->createCompareAbleString($field, $content, $repository, 'update', $data);
-                $data .= '.onUpdate';
+                $this->events[] = $this->createCompareAbleString($field, $content, $repository, 'update', $data[$field->getIdentifier()]);
+                $data[$field->getIdentifier()] .= '.onUpdate';
             }
 
             public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)

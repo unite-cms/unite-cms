@@ -198,15 +198,14 @@ class StorageService
     /**
      * Delete on object from s3 storage.
      *
-     * @param string $id
+     * @param string $uuid
      * @param string $filename
      * @param array $bucket_settings
      *
      * @return \Aws\Result
      */
-    public function deleteObject(string $id, string $filename, array $bucket_settings)
+    public function deleteObject(string $uuid, string $filename, array $bucket_settings)
     {
-
         $s3Client = new S3Client(
             [
                 'version' => 'latest',
@@ -220,10 +219,21 @@ class StorageService
             ]
         );
 
+        // Set the upload file path to an optional path + uuid + filename.
+        $filePath = $uuid.'/'.$filename;
+
+        if (!empty($bucket_settings['path'])) {
+            $path = trim($bucket_settings['path'], "/ \t\n\r\0\x0B");
+
+            if (!empty($path)) {
+                $filePath = $path.'/'.$filePath;
+            }
+        }
+
         return $s3Client->deleteObject(
             [
                 'Bucket' => $bucket_settings['bucket'],
-                'Key' => $id.'/'.$filename,
+                'Key' => $filePath,
             ]
         );
     }

@@ -288,9 +288,10 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
             if(method_exists($fieldType, 'onCreate')) {
                 if(isset($variant->getData()[$subField->getIdentifier()])) {
-                    $subData = $variant->getData()[$subField->getIdentifier()];
-                    $fieldType->onCreate($subField, $content, $repository, $subData );
-                    $data[$field->getIdentifier()][$variant->getIdentifier()][$subField->getIdentifier()] = $subData;
+                    $variantData = $variant->getData();
+                    $subData = $variantData[$subField->getIdentifier()];
+                    $fieldType->onCreate($subField, $content, $repository, $variantData );
+                    $data[$field->getIdentifier()][$variant->getIdentifier()] = $variantData;
                 }
             }
         }
@@ -343,12 +344,15 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
                     if(method_exists($fieldType, 'onUpdate')) {
 
-                        $old_sub_data = $old_data[$field->getIdentifier()][$variant->getIdentifier()][$subField->getIdentifier()] ?? null;
-                        $new_sub_data = $data[$field->getIdentifier()][$variant->getIdentifier()][$subField->getIdentifier()] ?? null;
+                        $old_variant_data = $old_data[$field->getIdentifier()][$variant->getIdentifier()];
+                        $new_variant_data = $data[$field->getIdentifier()][$variant->getIdentifier()];
+
+                        $old_sub_data = $old_variant_data[$subField->getIdentifier()] ?? null;
+                        $new_sub_data = $new_variant_data[$subField->getIdentifier()] ?? null;
 
                         if($old_sub_data || $new_sub_data) {
-                            $fieldType->onUpdate($subField, $content, $repository, $old_sub_data, $new_sub_data );
-                            $data[$field->getIdentifier()][$variant->getIdentifier()][$subField->getIdentifier()] = $new_sub_data;
+                            $fieldType->onUpdate($subField, $content, $repository, $old_variant_data, $new_variant_data );
+                            $data[$field->getIdentifier()][$variant->getIdentifier()] = $new_variant_data;
                         }
                     }
                 }
@@ -374,7 +378,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
             if(method_exists($fieldType, 'onSoftDelete')) {
                 if(isset($variant->getData()[$subField->getIdentifier()])) {
-                    $fieldType->onSoftDelete($subField, $content, $repository, $variant->getData()[$subField->getIdentifier()] );
+                    $fieldType->onSoftDelete($subField, $content, $repository, $variant->getData() );
                 }
             }
         }
@@ -398,7 +402,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
             if(method_exists($fieldType, 'onHardDelete')) {
                 if(isset($variant->getData()[$subField->getIdentifier()])) {
-                    $fieldType->onHardDelete($subField, $content, $repository, $variant->getData()[$subField->getIdentifier()] );
+                    $fieldType->onHardDelete($subField, $content, $repository, $variant->getData() );
                 }
             }
         }
