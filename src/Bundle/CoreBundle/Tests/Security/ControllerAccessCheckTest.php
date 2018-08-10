@@ -239,9 +239,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
                 $this->assertFalse($this->client->getResponse()->isClientError());
             } else {
                 $forbidden = ($this->client->getResponse()->isForbidden() || ($this->client->getResponse()->isRedirect($this->loginUrl)));
-                if(!$forbidden) {
-                    dump($this->client->getResponse()->getContent());
-                }
                 $this->assertTrue($forbidden);
             }
         }

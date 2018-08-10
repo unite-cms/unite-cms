@@ -12,139 +12,18 @@
             }) }}"><i data-feather="arrow-left"></i></a>
             {% trans with {'%type%': memberType|escape } %}domain.member.create.headline.select_add_type{% endtrans %}
         </h2>
-        <h2 class="uk-flex-1" id="domain_member_create_headline_existing_user" style="display: none">
-            <a class="back-button" href="#" onclick="domainMemberCreateUnSelectType();"><i data-feather="arrow-left"></i></a>
-            {% trans with {'%type%': memberType|escape } %}domain.member.create.headline.existing_user{% endtrans %}
-        </h2>
-        <h2 class="uk-flex-1" id="domain_member_create_headline_existing_api_key" style="display: none">
-            <a class="back-button" href="#" onclick="domainMemberCreateUnSelectType();"><i data-feather="arrow-left"></i></a>
-            {% trans with {'%type%': memberType|escape } %}domain.member.create.headline.existing_api_key{% endtrans %}
-        </h2>
-        <h2 class="uk-flex-1" id="domain_member_create_headline_invite_user" style="display: none">
-            <a class="back-button" href="#" onclick="domainMemberCreateUnSelectType();"><i data-feather="arrow-left"></i></a>
-            {% trans with {'%type%': memberType|escape } %}domain.member.create.headline.invite_user{% endtrans %}
-        </h2>
     </header>
 
     {{ form_errors(form) }}
     {{ form_start(form) }}
 
-    <div id="domain_member_create_select_add_type">
-        {{ form_row(form.select_add_type) }}
-    </div>
+    {% set input_selector = form.select_add_type.vars.full_name %}
 
-    <div id="domain_member_create_existing_user" style="display: none">
-        {{ form_row(form.existing_user) }}
-    </div>
+    <unite-cms-core-variants-select input="{{ input_selector }}" content="{{ form_row(form.select_add_type)|escape }}"></unite-cms-core-variants-select>
+    <unite-cms-core-variants-variant input="{{ input_selector }}" value="existing_user" title="{% trans with {'%type%': memberType|escape } %}domain.member.create.headline.existing_user{% endtrans %}" content="{{ form_row(form.existing_user)|escape }}"></unite-cms-core-variants-variant>
+    <unite-cms-core-variants-variant input="{{ input_selector }}" value="existing_api_key" title="{% trans with {'%type%': memberType|escape } %}domain.member.create.headline.existing_api_key{% endtrans %}" content="{{ form_row(form.existing_api_key)|escape }}"></unite-cms-core-variants-variant>
+    <unite-cms-core-variants-variant input="{{ input_selector }}" value="invite_user" title="{% trans with {'%type%': memberType|escape } %}domain.member.create.headline.invite_user{% endtrans %}" content="{{ form_row(form.invite_user)|escape }}"></unite-cms-core-variants-variant>
 
-    <div id="domain_member_create_existing_api_key" style="display: none">
-        {{ form_row(form.existing_api_key) }}
-    </div>
-
-    <div id="domain_member_create_invite_user" style="display: none">
-        {{ form_row(form.invite_user) }}
-    </div>
-
-    <div id="domain_member_create_form_rest" style="display: none">
-        {{ form_rest(form) }}
-    </div>
     {{ form_end(form) }}
-
-    <script>
-        let add_types = document.getElementById('domain_member_create_select_add_type').querySelectorAll('input[type="radio"]');
-
-        let disableRequired = function(input){
-
-            console.log("DISABLE");
-            console.log(input);
-            console.log(input.dataset);
-
-            if(input.hasAttribute('required')) {
-                input.removeAttribute('required');
-                input.dataset.virtual_required = true;
-            }
-        };
-
-        let enableRequired = function(input){
-            console.log("ENABLE");
-            console.log(input);
-            console.log(input.dataset);
-
-            if(input.dataset.virtual_required === true) {
-                input.setAttribute('required', 'required');
-            }
-        };
-
-        let domainMemberCreateResetSelectedType = function() {
-            document.getElementById('domain_member_create_existing_user').style.display = 'none';
-            document.getElementById('domain_member_create_existing_api_key').style.display = 'none';
-            document.getElementById('domain_member_create_invite_user').style.display = 'none';
-            document.getElementById('domain_member_create_headline_existing_user').style.display = 'none';
-            document.getElementById('domain_member_create_headline_existing_api_key').style.display = 'none';
-            document.getElementById('domain_member_create_headline_invite_user').style.display = 'none';
-            document.getElementById('domain_member_create_form_rest').style.display = 'none';
-
-            document.getElementById('domain_member_create_select_add_type').style.display = 'block';
-            document.getElementById('domain_member_create_headline_select_add_type').style.display = 'block';
-
-            let inputs = document.getElementById('domain_member_create_existing_user').querySelectorAll('input, select');
-            for(let i = 0; i < inputs.length; i++) {
-                disableRequired(inputs[i]);
-            }
-
-            inputs = document.getElementById('domain_member_create_existing_api_key').querySelectorAll('input, select');
-            for(let i = 0; i < inputs.length; i++) {
-                disableRequired(inputs[i]);
-            }
-
-            inputs = document.getElementById('domain_member_create_invite_user').querySelectorAll('input, select');
-            for(let i = 0; i < inputs.length; i++) {
-                disableRequired(inputs[i]);
-            }
-        };
-
-        let domainMemberCreateShowSelectedType = function(type) {
-
-            if(type !== 'existing_user' && type !== 'existing_api_key' && type !== 'invite_user') {
-                return;
-            }
-
-            domainMemberCreateResetSelectedType();
-
-            let inputs = document.getElementById('domain_member_create_select_add_type').querySelectorAll('input, select');
-            for(let i = 0; i < inputs.length; i++) {
-                disableRequired(inputs[i]);
-            }
-
-            document.getElementById('domain_member_create_select_add_type').style.display = 'none';
-            document.getElementById('domain_member_create_headline_select_add_type').style.display = 'none';
-
-            document.getElementById('domain_member_create_' + type).style.display = 'block';
-            document.getElementById('domain_member_create_headline_' + type).style.display = 'block';
-            document.getElementById('domain_member_create_form_rest').style.display = 'block';
-
-            inputs = document.getElementById('domain_member_create_' + type).querySelectorAll('input, select');
-            for(let i = 0; i < inputs.length; i++) {
-                enableRequired(inputs[i]);
-            }
-        };
-
-        let domainMemberCreateUnSelectType = function() {
-            for(let i = 0; i < add_types.length; i++) {
-                add_types[i].checked = false;
-            }
-            domainMemberCreateResetSelectedType();
-        };
-
-        for(let i = 0; i < add_types.length; i++) {
-            add_types[i].addEventListener('change', function(){
-                domainMemberCreateShowSelectedType(this.value);
-            });
-
-            if(add_types[i].checked) {
-                domainMemberCreateShowSelectedType(add_types[i].value);
-            }
-        }
-    </script>
 </article>
 {% endblock content %}

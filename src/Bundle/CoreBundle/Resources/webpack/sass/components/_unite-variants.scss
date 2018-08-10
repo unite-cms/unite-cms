@@ -1,0 +1,53 @@
+
+unite-cms-core-variants-select {
+  .choice-cards-type {
+    margin-top: 0;
+    margin-bottom: 0
+  }
+}
+
+unite-cms-core-variants-variant {
+  article {
+    header {
+      background: map-get($colors, grey);
+      margin: -16px -16px 15px -16px;
+      padding: 5px;
+      margin-bottom: 5px;
+      font-size: 1rem;
+      color: map-get($colors, grey-dark);
+      align-items: center;
+
+      a {
+        color: map-get($colors, white);
+        background: map-get($colors, grey-dark);
+        border-radius: 100%;
+        width: 18px;
+        height: 18px;
+        padding: 2px;
+        line-height: 0;
+        box-sizing: border-box;
+        display: inline-block;
+        margin-right: 8px;
+
+        svg {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
+
+  &:hover {
+    article {
+      header {
+
+        color: map-get($colors, grey-very-dark);
+
+        a {
+          color: map-get($colors, white);
+          background: map-get($colors, red);
+        }
+      }
+    }
+  }
+}

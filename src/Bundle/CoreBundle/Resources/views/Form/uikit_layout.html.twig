@@ -106,13 +106,13 @@
     <div {{ block('widget_container_attributes') }} uk-grid>
         {%- for child in form %}
             <div class="uk-flex-1">
-                <label class="uk-card uk-card-hover choice-card uk-card-default" for="{{ child.vars.id }}">
-                    <div class="uk-card-body">
-                        {% if child.vars.attr.icon is defined %}
+                <label class="uk-card uk-card-hover choice-card uk-card-default" for="{{ child.vars.id }}"{% if child.vars.attr.description and compact %} uk-tooltip="{{ child.vars.attr.description }}"{% endif %}>
+                    <div class="uk-card-body"{% if 'compact' in attr.class %}{% endif %}>
+                        {% if child.vars.attr.icon is defined and child.vars.attr.icon is not empty %}
                             <i data-feather="{{ child.vars.attr.icon }}" width="50" height="50"></i><br />
                         {% endif %}
                         <h3>{{ child.vars.label }}</h3>
-                        {% if child.vars.attr.description is defined %}
+                        {% if child.vars.attr.description is defined and not compact %}
                             <p>{{ child.vars.attr.description }}</p>
                         {% endif %}
                     </div>

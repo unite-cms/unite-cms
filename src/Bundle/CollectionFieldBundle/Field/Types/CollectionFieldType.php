@@ -162,17 +162,20 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
         $collection = self::getNestableFieldable($field);
 
+        $path = $context->getPropertyPath() . '[' . $collection->getIdentifier() . ']';
+
+        $current_property_path = $context->getPropertyPath();
+
         // Make sure, that there is no additional data in content that is not in settings.
-        foreach($data as $row) {
+        foreach($data as $delta => $row) {
+
+            $context->setNode($context->getValue(), null, $context->getMetadata(), $path . '['.$delta.']');
+
             foreach (array_keys($row) as $data_key) {
 
                 // If the field does not exists, add an error.
                 if (!$collection->getFields()->containsKey($data_key)) {
-                    $context->buildViolation('additional_data')->atPath('['.join('][', [
-                        $field->getEntity()->getIdentifierPath(']['),
-                        $field->getIdentifier(),
-                        $data_key
-                    ]).']')->addViolation();
+                    $context->buildViolation('additional_data')->atPath('[' . $data_key .']')->addViolation();
 
                 // If the field exists, let the fieldTypeManager validate it.
                 } else {
@@ -180,6 +183,9 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 }
             }
         }
+
+        // Reset propertypath to the original value.
+        $context->setNode($context->getValue(), null, $context->getMetadata(), $current_property_path);
     }
 
     /**

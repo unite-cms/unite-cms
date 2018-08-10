@@ -84,15 +84,10 @@ class FileFieldType extends FieldType
             ], Router::ABSOLUTE_URL);
         }
 
-        // Use the identifier path part, but exclude root entity and include field identifier.
-        $identifier_path_parts = explode('/', $field->getEntity()->getIdentifierPath());
-        array_shift($identifier_path_parts);
-        $identifier_path_parts[] = $field->getIdentifier();
-
         return array_merge(parent::getFormOptions($field), [
           'attr' => [
             'file-types' => $field->getSettings()->file_types,
-            'field-path' => join('/', $identifier_path_parts),
+            'field-path' => $field->getIdentifierPath('/', false),
             'endpoint' => $this->generateEndpoint($field->getSettings()),
             'upload-sign-url' => $url,
             'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
