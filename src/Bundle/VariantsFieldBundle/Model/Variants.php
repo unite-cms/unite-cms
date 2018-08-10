@@ -111,7 +111,7 @@ class Variants implements Fieldable
      */
     public function addField(FieldableField $field)
     {
-        $this->fields->set($field->getIdentifier(), $field);
+        $this->fields->add($field);
 
         return $this;
     }

@@ -18,7 +18,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
 /**
- * @UniqueFieldableField(message="identifier_already_taken", getter="getUniqueComparableIdentifier")
+ * @UniqueFieldableField(message="identifier_already_taken")
  */
 class VariantsField implements FieldableField
 {
@@ -135,10 +135,6 @@ class VariantsField implements FieldableField
     public function getVariantIdentifier()
     {
         return $this->variantIdentifier;
-    }
-
-    public function getUniqueComparableIdentifier() {
-        return $this->getVariantIdentifier().$this->getIdentifier();
     }
 
     /**
