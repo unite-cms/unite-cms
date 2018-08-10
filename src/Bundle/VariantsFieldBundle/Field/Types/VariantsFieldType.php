@@ -289,7 +289,6 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             if(method_exists($fieldType, 'onCreate')) {
                 if(isset($variant->getData()[$subField->getIdentifier()])) {
                     $variantData = $variant->getData();
-                    $subData = $variantData[$subField->getIdentifier()];
                     $fieldType->onCreate($subField, $content, $repository, $variantData );
                     $data[$field->getIdentifier()][$variant->getIdentifier()] = $variantData;
                 }
