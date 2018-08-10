@@ -162,7 +162,12 @@ class Variants implements Fieldable
         $variant_identifier = array_shift($parts);
         $field_identifier = array_shift($parts);
 
-        $field = $this->getFieldsForVariant($variant_identifier)[$field_identifier];
+        $field = null;
+        foreach($this->getFieldsForVariant($variant_identifier) as $variantsField) {
+            if($variantsField->getIdentifier() === $field_identifier) {
+                $field = $variantsField;
+            }
+        }
 
         if($reduce_path) {
             $path = join('/', $parts);
