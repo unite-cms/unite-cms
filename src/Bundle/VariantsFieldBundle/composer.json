@@ -11,9 +11,6 @@
             "/Tests/"
         ]
     },
-    "autoload-dev": {
-        "psr-4": { "Tests\\app\\": "Tests/app/" }
-    },
     "authors": [
         {
             "name": "Franz Wilding",
