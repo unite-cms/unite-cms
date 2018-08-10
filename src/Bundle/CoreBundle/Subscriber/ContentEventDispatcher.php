@@ -16,6 +16,9 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class ContentEventDispatcher
 {
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
     private $fieldTypeManager;
 
     public function __construct(FieldTypeManager $fieldTypeManager)
@@ -32,6 +35,13 @@ class ContentEventDispatcher
         if ($entity instanceof Content) {
             foreach ($entity->getContentType()->getFields() as $field) {
                 $this->fieldTypeManager->onContentInsert($field, $entity, $args);
+            }
+        }
+
+        // Notify all field types about an insert event.
+        if ($entity instanceof Setting) {
+            foreach ($entity->getSettingType()->getFields() as $field) {
+                $this->fieldTypeManager->onSettingInsert($field, $entity, $args);
             }
         }
 

@@ -309,12 +309,6 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $setting = new Setting();
         $setting->setSettingType($this->domain->getSettingTypes()->first());
 
-        // TODO: After fixing https://github.com/unite-cms/unite-cms/issues/209 we should be able to delete this.
-        $setting->setData([]);
-        $this->em->persist($setting);
-        $this->em->flush($setting);
-        $this->em->refresh($setting);
-
         // Create variant 1
         $mock->events = [];
         $setting->setData(
@@ -328,6 +322,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
             ]
         );
 
+        $this->em->persist($setting);
         $this->em->flush($setting);
 
         // Make sure, that nested create event was fired on fields for variant 1 but not variant 2.
