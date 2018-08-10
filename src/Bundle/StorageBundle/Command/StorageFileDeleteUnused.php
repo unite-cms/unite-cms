@@ -78,11 +78,7 @@ class StorageFileDeleteUnused extends Command
 
     private function findNestedFileDefinitions(FieldableField $field, &$buckets)
     {
-
-
-        $fieldPathParts = explode('/', $field->getEntity()->getIdentifierPath());
-        array_shift($fieldPathParts);
-        $fieldPathParts[] = $field->getIdentifier();
+        $fieldPathParts = explode('/', $field->getIdentifierPath('/', false));
 
         // Handle file fields.
         if ($field->getType() == FileFieldType::TYPE || $field->getType() == ImageFieldType::TYPE) {

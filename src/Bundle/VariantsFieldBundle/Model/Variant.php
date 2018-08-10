@@ -79,7 +79,7 @@ class Variant implements Fieldable
      */
     public function addField(FieldableField $field)
     {
-        $this->fields->add($field);
+        $this->fields->set($field->getIdentifier(), $field);
 
         return $this;
     }
@@ -102,15 +102,39 @@ class Variant implements Fieldable
     /**
      * {@inheritdoc}
      */
-    public function getIdentifierPath($delimiter = '/')
+    public function getIdentifierPath($delimiter = '/', $include_root = true)
     {
         $path = '';
 
         if ($this->getParentEntity()) {
-            $path = $this->getParentEntity()->getIdentifierPath($delimiter).$delimiter;
+            $path = $this->getParentEntity()->getIdentifierPath($delimiter, $include_root);
+        }
+
+        if(!empty($path)) {
+            $path .= $delimiter;
         }
 
         return $path.$this->getIdentifier();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function resolveIdentifierPath(&$path, $reduce_path = false)
+    {
+        $parts = explode('/', $path);
+        if(count($parts) < 0) {
+            return null;
+        }
+
+        $field_identifier = array_shift($parts);
+        $field = $this->getFields()->get($field_identifier);
+
+        if($reduce_path) {
+            $path = join('/', $parts);
+        }
+
+        return $field;
     }
 
     /**

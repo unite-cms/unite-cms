@@ -42,35 +42,22 @@ class StorageService
      */
     public function resolveFileFieldPath(Fieldable $fieldable, $path)
     {
-        $parts = explode('/', $path);
-
-        // field path cannot be null.
-        if (!$root = array_shift($parts)) {
-            return null;
-        }
-
         /**
          * @var FieldableField $field
          */
-        if (!$field = $fieldable->getFields()->get($root)) {
+        if (!$field = $fieldable->resolveIdentifierPath($path, true)) {
             return null;
         }
 
-        // If the path is not nested, we can just return the root element.
-        if (empty($parts)) {
-            if ($field->getType() == FileFieldType::TYPE || $field->getType() == ImageFieldType::TYPE) {
-                return $field;
-            }
+        // If we found an image field, we can return it
+        if ($field->getType() == FileFieldType::TYPE || $field->getType() == ImageFieldType::TYPE) {
+            return $field;
         } else {
+
             // If this field is nestable, continue resolving.
-            $nestedFieldType = $this->fieldTypeManager->getFieldType(
-                $field->getType()
-            );
+            $nestedFieldType = $this->fieldTypeManager->getFieldType($field->getType());
             if ($nestedFieldType instanceof NestableFieldTypeInterface) {
-                return $this->resolveFileFieldPath(
-                    $nestedFieldType::getNestableFieldable($field),
-                    join('/', $parts)
-                );
+                return $this->resolveFileFieldPath($nestedFieldType::getNestableFieldable($field), $path);
             }
         }
 
@@ -86,6 +73,7 @@ class StorageService
      * @param string $allowed_file_types
      *
      * @return PreSignedUrl
+     * @throws \Exception
      */
     public function createPreSignedUploadUrl(string $filename, array $bucket_settings, string $allowed_file_types = '*')
     {
@@ -172,6 +160,7 @@ class StorageService
      * @param string $field_path
      *
      * @return PreSignedUrl
+     * @throws \Exception
      */
     public function createPreSignedUploadUrlForFieldPath(string $filename, Fieldable $fieldable, string $field_path)
     {

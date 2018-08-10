@@ -737,9 +737,29 @@ class ContentType implements Fieldable
     /**
      * {@inheritdoc}
      */
-    public function getIdentifierPath($delimiter = '/')
+    public function getIdentifierPath($delimiter = '/', $include_root = true)
     {
-        return $this->getIdentifier();
+        return $include_root ? $this->getIdentifier() : '';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function resolveIdentifierPath(&$path, $reduce_path = false)
+    {
+        $parts = explode('/', $path);
+        if(count($parts) < 0) {
+            return null;
+        }
+
+        $field_identifier = array_shift($parts);
+        $field = $this->getFields()->get($field_identifier);
+
+        if($reduce_path) {
+            $path = join('/', $parts);
+        }
+
+        return $field;
     }
 
     /**

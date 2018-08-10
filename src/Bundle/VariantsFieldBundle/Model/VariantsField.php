@@ -112,6 +112,24 @@ class VariantsField implements FieldableField
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getIdentifierPath($delimiter = '/', $include_root = true)
+    {
+        $path = '';
+
+        if ($this->getEntity()) {
+            $path = $this->getEntity()->getIdentifierPath($delimiter, $include_root);
+        }
+
+        if(!empty($path)) {
+            $path .= $delimiter;
+        }
+
+        return $path.$this->getVariantIdentifier().$delimiter.$this->getIdentifier();
+    }
+
+    /**
      * @return string
      */
     public function getVariantIdentifier()
@@ -129,7 +147,7 @@ class VariantsField implements FieldableField
      */
     public function getJsonExtractIdentifier()
     {
-        return '$.'.$this->getEntity()->getIdentifier().'.'.$this->getVariantIdentifier().'.'.$this->getIdentifier();
+        return '$.'.$this->getIdentifierPath('.', false);
     }
 
     /**

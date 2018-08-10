@@ -308,6 +308,8 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         $setting = new Setting();
         $setting->setSettingType($this->domain->getSettingTypes()->first());
+
+        // TODO: After fixing https://github.com/unite-cms/unite-cms/issues/209 we should be able to delete this.
         $setting->setData([]);
         $this->em->persist($setting);
         $this->em->flush($setting);
