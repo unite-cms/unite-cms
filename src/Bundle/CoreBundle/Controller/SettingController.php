@@ -151,6 +151,11 @@ class SettingController extends Controller
      */
     public function translationsAction(SettingType $settingType, Setting $setting, Request $request)
     {
+        // Otherwise, a user could update setting, he_she has access to, from another domain.
+        if($setting->getSettingType() !== $settingType) {
+            throw $this->createNotFoundException();
+        }
+
         return $this->render(
             '@UniteCMSCore/Setting/translations.html.twig',
             [
@@ -173,6 +178,11 @@ class SettingController extends Controller
      */
     public function revisionsAction(SettingType $settingType, Setting $setting, Request $request)
     {
+        // Otherwise, a user could update setting, he_she has access to, from another domain.
+        if($setting->getSettingType() !== $settingType) {
+            throw $this->createNotFoundException();
+        }
+
         return $this->render(
             '@UniteCMSCore/Setting/revisions.html.twig',
             [
@@ -199,6 +209,11 @@ class SettingController extends Controller
      */
     public function revisionsRevertAction(SettingType $settingType, Setting $setting, int $version, Request $request)
     {
+        // Otherwise, a user could update setting, he_she has access to, from another domain.
+        if($setting->getSettingType() !== $settingType) {
+            throw $this->createNotFoundException();
+        }
+
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, ['label' => 'Revert'])
             ->getForm();
