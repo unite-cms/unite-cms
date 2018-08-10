@@ -145,7 +145,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
             const TYPE = 'testeventhook';
 
-            public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data)
+            public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data)
             {
                 $this->events[] = $this->createCompareAbleString($field, $content, $repository, 'create', $data[$field->getIdentifier()]);
                 $data[$field->getIdentifier()] .= '.onCreate';
@@ -157,12 +157,12 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
                 $data[$field->getIdentifier()] .= '.onUpdate';
             }
 
-            public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
+            public function onSoftDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data)
             {
                 $this->events[] = $this->createCompareAbleString($field, $content, $repository, 'soft_delete');
             }
 
-            public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
+            public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data)
             {
                 $this->events[] = $this->createCompareAbleString($field, $content, $repository, 'hard_delete');
             }
@@ -324,10 +324,11 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         $this->em->persist($setting);
         $this->em->flush($setting);
+        $this->em->refresh($setting);
 
         // Make sure, that nested create event was fired on fields for variant 1 but not variant 2.
         $this->assertEquals([
-            '$.n1.v1.n2'.Setting::class.'createfoo',
+            '$.n1.v1.n2st1'.Setting::class.'createfoo',
         ], $mock->events);
         $this->assertEquals('foo.onCreate', $setting->getData()['n1']['v1']['n2']);
 
@@ -367,8 +368,8 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Make sure, that delete was fired for variant 1 fields and create for variant 2 fields.
         $this->assertEquals([
-            '$.n1.v1.n2'.Setting::class.'hard_delete',
-            '$.n1.v2.n2'.Setting::class.'createfoo',
+            '$.n1.v1.n2st1'.Setting::class.'hard_delete',
+            '$.n1.v2.n2st1'.Setting::class.'createfoo',
         ], $mock->events);
         $this->assertEquals('foo.onCreate', $setting->getData()['n1']['v2']['n2']);
 
@@ -383,7 +384,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Make sure, that delete was fired for variant 2 and nothing was fired for variant 1.
         $this->assertEquals([
-            '$.n1.v2.n2'.Setting::class.'hard_delete',
+            '$.n1.v2.n2st1'.Setting::class.'hard_delete',
         ], $mock->events);
         $this->assertEquals([], $setting->getData()['n1']);
     }

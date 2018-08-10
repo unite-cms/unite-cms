@@ -212,11 +212,11 @@ class FileFieldType extends FieldType
      * On content hard delete, delete the file from s3 bucket.
      *
      * @param FieldableField $field
-     * @param Content $content
+     * @param FieldableContent $content
      * @param EntityRepository $repository
      * @param $data
      */
-    public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+    public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
         if(isset($data[$field->getIdentifier()])) {
 
             // If we hard delete this content, delete the attached file.

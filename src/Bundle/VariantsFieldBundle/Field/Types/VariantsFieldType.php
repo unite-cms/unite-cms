@@ -10,7 +10,6 @@ namespace UniteCMS\VariantsFieldBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -273,7 +272,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data) {
+    public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {
 
         // Only continue if we have data and a type for this field.
         if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type']) || empty($data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']])) {
@@ -308,17 +307,13 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
         // Case2: Old had no variant, but new has => onCreate
         if(empty($old_data[$field->getIdentifier()]['type']) && !empty($data[$field->getIdentifier()]['type'])) {
-
-            // This is a little hack until is implemented: https://github.com/unite-cms/unite-cms/issues/207
-            $this->onCreate($field, ($content instanceof Content ? $content : new Content()), $repository, $data);
+            $this->onCreate($field, $content, $repository, $data);
             return;
         }
 
         // Case3: Old has variant, but new has not => onHardDelete
         if(!empty($old_data[$field->getIdentifier()]['type']) && empty($data[$field->getIdentifier()]['type'])) {
-
-            // This is a little hack until is implemented: https://github.com/unite-cms/unite-cms/issues/207
-            $this->onHardDelete($field, ($content instanceof Content ? $content : new Content()), $repository, $old_data);
+            $this->onHardDelete($field, $content, $repository, $old_data);
             return;
         }
 
@@ -327,10 +322,8 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
             // Case 4A: Old had other variant than new data => onHardDelete & onCreate
             if($old_data[$field->getIdentifier()]['type'] != $data[$field->getIdentifier()]['type']) {
-
-                // This is a little hack until is implemented: https://github.com/unite-cms/unite-cms/issues/207
-                $this->onHardDelete($field, ($content instanceof Content ? $content : new Content()), $repository, $old_data);
-                $this->onCreate($field, ($content instanceof Content ? $content : new Content()), $repository, $data);
+                $this->onHardDelete($field, $content, $repository, $old_data);
+                $this->onCreate($field, $content, $repository, $data);
             }
 
             // Case 4B: Old has same variant as new.
@@ -362,7 +355,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+    public function onSoftDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
 
         // Only continue if we have data and a type for this field.
         if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type']) || empty($data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']])) {
@@ -386,7 +379,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+    public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
 
         // Only continue if we have data and a type for this field.
         if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type']) || empty($data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']])) {

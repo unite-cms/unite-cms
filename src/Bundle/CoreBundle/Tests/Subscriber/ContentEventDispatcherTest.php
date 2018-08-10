@@ -61,10 +61,10 @@ class ContentEventDispatcherTest extends DatabaseAwareTestCase
                     'new_data' => $args[4]?? null,
                 ];
             }
-            public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data) { $this->a('onCreate', func_get_args()); }
+            public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) { $this->a('onCreate', func_get_args()); }
             public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) { $this->a('onUpdate', func_get_args()); }
-            public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) { $this->a('onSoftDelete', func_get_args()); }
-            public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) { $this->a('onHardDelete', func_get_args()); }
+            public function onSoftDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) { $this->a('onSoftDelete', func_get_args()); }
+            public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) { $this->a('onHardDelete', func_get_args()); }
         };
         static::$container->get('unite.cms.field_type_manager')->registerFieldType($this->mockedFieldType);
     }
