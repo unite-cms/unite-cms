@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\View\Types\TableViewType;
 use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Accessor;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Entity\Webhook;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -21,7 +22,6 @@ use UniteCMS\CoreBundle\Validator\Constraints\DefaultViewType;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidValidations;
-use UniteCMS\CoreBundle\Validator\Constraints\ValidWebhooks;
 
 /**
  * ContentType
@@ -137,11 +137,13 @@ class ContentType implements Fieldable
 
     /**
      * @var array
-     * @ValidWebhooks(message="invalid_selection")
      * @ORM\Column(name="webhooks", type="array", nullable=true)
+     * @Assert\Valid()
+     * @Type("array<UniteCMS\CoreBundle\Entity\Webhook>")
      * @AccessType("public_method")
      * @Expose
      */
+
     private $webhooks;
 
     /**
@@ -184,7 +186,6 @@ class ContentType implements Fieldable
     {
         $this->fields = new ArrayCollection();
         $this->views = new ArrayCollection();
-        $this->webhooks = new ArrayCollection();
         $this->locales = [];
         $this->permissions = [];
         $this->validations = [];
@@ -658,7 +659,7 @@ class ContentType implements Fieldable
     }
 
     /**
-     * @return array
+     * @return Webhook[]
      */
     public function getWebhooks() : array
     {
@@ -668,25 +669,27 @@ class ContentType implements Fieldable
     }
 
     /**
-     * @param array $webhooks
+     * @param Webhook[] $webhooks
      *
      * @return ContentType
      */
     public function setWebhooks($webhooks)
     {
         $this->webhooks = [];
-        foreach ($webhooks as $index => $webhook) {
-            if (is_array($webhook)) {
-                $this->addWebhook($index, $webhook);
-            }
+
+        foreach ($webhooks as $webhook) {
+            $this->addWebhook($webhook);
         }
 
         return $this;
     }
 
-    public function addWebhook($index, array $webhook)
+    /**
+     * @param Webhook $webhook
+     */
+    public function addWebhook(Webhook $webhook)
     {
-        $this->webhooks[$index] = $webhook;
+        $this->webhooks[] = $webhook;
     }
 
     /**

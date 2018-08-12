@@ -19,7 +19,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidValidations;
-use UniteCMS\CoreBundle\Validator\Constraints\ValidWebhooks;
+use UniteCMS\CoreBundle\Entity\Webhook;
 
 /**
  * SettingType
@@ -122,16 +122,18 @@ class SettingType implements Fieldable
 
     /**
      * @var array
-     * @ValidWebhooks(message="invalid_selection")
+     * @ValidValidations(message="invalid_validations")
      * @ORM\Column(name="webhooks", type="array", nullable=true)
+     * @Assert\Valid()
+     * @Type("array<UniteCMS\CoreBundle\Entity\Webhook>")
      * @AccessType("public_method")
      * @Expose
      */
+
     private $webhooks;
 
     /**
      * @var array
-     * @ValidValidations(message="invalid_validations")
      * @ORM\Column(name="validations", type="array", nullable=true)
      * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
      * @AccessType("public_method")
@@ -162,7 +164,6 @@ class SettingType implements Fieldable
     {
         $this->fields = new ArrayCollection();
         $this->settings = new ArrayCollection();
-        $this->webhooks = new ArrayCollection();
         $this->locales = [];
         $this->permissions = [];
         $this->validations = [];
@@ -572,7 +573,7 @@ class SettingType implements Fieldable
     }
 
     /**
-     * @return array
+     * @return Webhook[]
      */
     public function getWebhooks() : array
     {
@@ -582,26 +583,29 @@ class SettingType implements Fieldable
     }
 
     /**
-     * @param array $webhooks
+     * @param Webhook[] $webhooks
      *
      * @return ContentType
      */
     public function setWebhooks($webhooks)
     {
         $this->webhooks = [];
-        foreach ($webhooks as $index => $webhook) {
-            if (is_array($webhook)) {
-                $this->addWebhook($index, $webhook);
-            }
+
+        foreach ($webhooks as $webhook) {
+            $this->addWebhook($webhook);
         }
 
         return $this;
     }
 
-    public function addWebhook($index, array $webhook)
+    /**
+     * @param Webhook $webhook
+     */
+    public function addWebhook(Webhook $webhook)
     {
-        $this->webhooks[$index] = $webhook;
+        $this->webhooks[] = $webhook;
     }
+
 
     /**
      * @return FieldableValidation[]
