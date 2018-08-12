@@ -88,10 +88,10 @@ class DomainVoter extends Voter
 
         if($subject instanceof Domain) {
 
-            $domainMember = $user->getDomainMember($subject);
+            $domainMembers = $user->getDomainMembers($subject);
 
             // We can only vote if this user is member of the domain.
-            if(!$domainMember) {
+            if(!$domainMembers) {
                 return self::ACCESS_ABSTAIN;
             }
 
@@ -101,8 +101,10 @@ class DomainVoter extends Voter
             }
 
             // If the expression evaluates to true, we grant access.
-            if($this->accessExpressionChecker->evaluate($subject->getPermissions()[$attribute], $domainMember)) {
-                return self::ACCESS_GRANTED;
+            foreach ($domainMembers as $domainMember) {
+                if($this->accessExpressionChecker->evaluate($subject->getPermissions()[$attribute], $domainMember)) {
+                    return self::ACCESS_GRANTED;
+                }
             }
         }
 

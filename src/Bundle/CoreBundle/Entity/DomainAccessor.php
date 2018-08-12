@@ -108,17 +108,22 @@ abstract class DomainAccessor
     }
 
     /**
-     * Returns the domain membership of this user for the given domain or null if this user is not member of the domain.
+     * Returns all matching domain memberships of this user for the given domain or null if this user is not member of the domain.
      *
      * @param Domain $domain
-     * @return DomainMember|null
+     * @return DomainMember[]|null
      */
-    public function getDomainMember(Domain $domain)
+    public function getDomainMembers(Domain $domain)
     {
+        $domainMembers = [];
         foreach ($this->getDomains() as $domainMember) {
             if (!empty($domain->getId()) && $domainMember->getDomain()->getId() === $domain->getId()) {
-                return $domainMember;
+                $domainMembers[] = $domainMember;
             }
+        }
+
+        if (count($domainMembers) > 0) {
+            return $domainMembers;
         }
 
         return null;

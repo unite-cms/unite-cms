@@ -78,7 +78,7 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        $domainMember = $token->getUser()->getDomainMember($contentType->getDomain());
+        $domainMembers = $token->getUser()->getDomainMembers($contentType->getDomain());
 
         // Only work for non-deleted content
         if ($subject instanceof Content && $subject->getDeleted() != null) {
@@ -86,7 +86,7 @@ class ContentVoter extends Voter
         }
 
         // We can only vote if this user is member of the subject's domain.
-        if(!$domainMember) {
+        if(!$domainMembers) {
             return self::ACCESS_ABSTAIN;
         }
 
@@ -96,8 +96,10 @@ class ContentVoter extends Voter
         }
 
         // If the expression evaluates to true, we grant access.
-        if($this->accessExpressionChecker->evaluate($contentType->getPermissions()[$attribute], $domainMember, $subject instanceof Content ? $subject : null)) {
-            return self::ACCESS_GRANTED;
+        foreach ($domainMembers as $domainMember) {
+            if($this->accessExpressionChecker->evaluate($contentType->getPermissions()[$attribute], $domainMember, $subject instanceof Content ? $subject : null)) {
+                return self::ACCESS_GRANTED;
+            }
         }
 
         return self::ACCESS_ABSTAIN;

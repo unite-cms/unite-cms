@@ -72,10 +72,10 @@ class SettingVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        $domainMember = $token->getUser()->getDomainMember($settingType->getDomain());
+        $domainMembers = $token->getUser()->getDomainMembers($settingType->getDomain());
 
         // We can only vote if this user is member of the subject's domain.
-        if(!$domainMember) {
+        if(!$domainMembers) {
             return self::ACCESS_ABSTAIN;
         }
 
@@ -85,8 +85,10 @@ class SettingVoter extends Voter
         }
 
         // If the expression evaluates to true, we grant access.
-        if($this->accessExpressionChecker->evaluate($settingType->getPermissions()[$attribute], $domainMember, $subject instanceof Setting ? $subject : $settingType->getSetting())) {
-            return self::ACCESS_GRANTED;
+        foreach ($domainMembers as $domainMember) {
+            if($this->accessExpressionChecker->evaluate($settingType->getPermissions()[$attribute], $domainMember, $subject instanceof Setting ? $subject : $settingType->getSetting())) {
+                return self::ACCESS_GRANTED;
+            }
         }
 
         return self::ACCESS_ABSTAIN;
