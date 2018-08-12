@@ -53,6 +53,13 @@
         },
         {
             "type": "path",
+            "url": "./src/Bundle/VariantsFieldBundle",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
             "url": "./src/Bundle/WysiwygFieldBundle",
             "options": {
                 "symlink": true
@@ -64,6 +71,7 @@
         "unite-cms/collection-field-bundle": "0@dev",
         "unite-cms/registration-bundle": "0@dev",
         "unite-cms/storage-bundle": "0@dev",
+        "unite-cms/variants-field-bundle": "0@dev",
         "unite-cms/wysiwyg-field-bundle": "0@dev"
     },
     "require-dev": {

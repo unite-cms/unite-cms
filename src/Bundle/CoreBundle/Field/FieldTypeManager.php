@@ -98,6 +98,22 @@ class FieldTypeManager
         }
     }
 
+    public function onSettingInsert(SettingTypeField $field, Setting $setting, LifecycleEventArgs $args)
+    {
+        $fieldType = $this->getFieldType($field->getType());
+        if (method_exists($fieldType, 'onUpdate')) {
+            $data = $setting->getData();
+            $fieldType->onUpdate(
+                $field,
+                $setting,
+                $args->getObjectManager()->getRepository('UniteCMSCoreBundle:Setting'),
+                [],
+                $data
+            );
+            $setting->setData($data);
+        }
+    }
+
     public function onSettingUpdate(SettingTypeField $field, Setting $setting, PreUpdateEventArgs $args)
     {
         $fieldType = $this->getFieldType($field->getType());

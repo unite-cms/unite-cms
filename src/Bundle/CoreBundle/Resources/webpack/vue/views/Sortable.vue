@@ -276,7 +276,7 @@ export default {
                 $id: ID!,
                 $position: Int
               ) {
-                ` + queryMethod + `(id: $id, data: {` + this.sortField + `: $position}) {
+                ` + queryMethod + `(id: $id, data: {` + this.sortField + `: $position}, persist: true) {
                     ` + this.sortField + `
                 }
               }`, {

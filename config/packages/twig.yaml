@@ -5,6 +5,7 @@ twig:
     form_themes:
         - '@UniteCMSCore/Form/uikit_layout.html.twig'
         - '@UniteCMSCollectionField/Form/form_widgets.html.twig'
+        - '@UniteCMSVariantsField/Form/form_widgets.html.twig'
     globals:
         unite: '@unite.cms.manager'
         site_name: '%site_name%'

@@ -59,7 +59,7 @@ class MockedObjectRepository implements ObjectRepository {
         // We mock all findBy calls here, that we need.
         $result = [];
 
-        if(array_keys($criteria) == ['identifier']) {
+        if(array_keys($criteria) == ['identifier', 'domain']) {
             foreach ($this->objects as $key => $object) {
 
                 if(!is_array($criteria['identifier'])) {

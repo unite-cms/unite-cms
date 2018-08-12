@@ -50,7 +50,7 @@
         ],
         methods: {
             rowPrototype(delta) {
-                return this.dataPrototype.replace(new RegExp('__' + this.dataIdentifier + 'Name__', 'g'), delta);
+                return this.dataPrototype.replace(new RegExp('__' + this.dataIdentifier + 'Name__', 'g'), (delta -1));
             },
             addRow() {
                 if(!this.maxRows || this.rows.length < this.maxRows) {

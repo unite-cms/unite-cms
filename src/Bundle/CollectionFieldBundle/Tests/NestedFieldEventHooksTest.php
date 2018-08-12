@@ -108,9 +108,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->em->flush($this->domain);
     }
 
-    public function testNestedEvents()
-    {
-
+    protected function createFieldTypeMock() {
         $mock = new class extends FieldType
         {
 
@@ -132,7 +130,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
             const TYPE = 'testeventhook';
 
-            public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data)
+            public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data)
             {
                 $data[$field->getIdentifier()] = $this->createCompareAbleString(
                     $field,
@@ -157,7 +155,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
                 );
             }
 
-            public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
+            public function onSoftDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data)
             {
                 $this->softDeleteString[$field->getJsonExtractIdentifier()] = $this->createCompareAbleString(
                     $field,
@@ -167,7 +165,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
                 );
             }
 
-            public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
+            public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data)
             {
                 $this->hardDeleteString[$field->getJsonExtractIdentifier()] = $this->createCompareAbleString(
                     $field,
@@ -177,8 +175,13 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
                 );
             }
         };
-
         static::$container->get('unite.cms.field_type_manager')->registerFieldType($mock);
+        return $mock;
+    }
+
+    public function testNestedEventsForContent()
+    {
+        $mock = $this->createFieldTypeMock();
 
         $content = new Content();
         $content->setContentType($this->domain->getContentTypes()->first());
@@ -290,6 +293,94 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
         $this->assertEquals(
             '$.n1[*].n2[*].testct1'.Content::class.'hard_delete',
             $mock->hardDeleteString['$.n1[*].n2[*].test']
+        );
+    }
+
+    public function testNestedEventsForSetting()
+    {
+        $mock = $this->createFieldTypeMock();
+
+        $setting = new Setting();
+        $setting->setSettingType($this->domain->getSettingTypes()->first());
+        $setting->setData(
+            [
+                'n1' => [
+                    [
+                        'n2' => [
+                            ['test' => 'foo'],
+                            ['test' => 'baa'],
+                        ],
+                    ],
+                    [
+                        'n2' => [
+                            ['test' => 'luu'],
+                            ['test' => 'laa'],
+                        ],
+                    ],
+                ],
+            ]
+        );
+
+        $this->em->persist($setting);
+        $this->em->flush($setting);
+        $this->em->refresh($setting);
+
+        // Make sure, that nested create event was fired on mock.
+        $this->assertEquals(
+            '$.n1[*].n2[*].testst1'.Setting::class.'foo',
+            $setting->getData()['n1'][0]['n2'][0]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testst1'.Setting::class.'baa',
+            $setting->getData()['n1'][0]['n2'][1]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testst1'.Setting::class.'luu',
+            $setting->getData()['n1'][1]['n2'][0]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testst1'.Setting::class.'laa',
+            $setting->getData()['n1'][1]['n2'][1]['test']
+        );
+
+        // Update setting
+        $setting->setData(
+            [
+                'n1' => [
+                    [
+                        'n2' => [
+                            ['test' => 'updated_foo'],
+                            ['test' => 'updated_baa'],
+                        ],
+                    ],
+                    [
+                        'n2' => [
+                            ['test' => 'updated_luu'],
+                            ['test' => 'updated_laa'],
+                        ],
+                    ],
+                ],
+            ]
+        );
+
+        $this->em->flush($setting);
+
+        // Make sure, that nested create event was fired on mock.
+        $this->assertEquals(
+            '$.n1[*].n2[*].testst1'.Setting::class.'updated_foo',
+            $setting->getData()['n1'][0]['n2'][0]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testst1'.Setting::class.'updated_baa',
+            $setting->getData()['n1'][0]['n2'][1]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testst1'.Setting::class.'updated_luu',
+            $setting->getData()['n1'][1]['n2'][0]['test']
+        );
+        $this->assertEquals(
+            '$.n1[*].n2[*].testst1'.Setting::class.'updated_laa',
+            $setting->getData()['n1'][1]['n2'][1]['test']
         );
     }
 }

@@ -21,9 +21,10 @@ class UniqueFieldableFieldValidator extends ConstraintValidator
         }
 
         if($value->getEntity()) {
-            $identifier = $value->getIdentifier();
+            $identifier = $value->getIdentifierPath('/', false);
             foreach ($value->getEntity()->getFields() as $field) {
-                if ($field->getIdentifier() == $identifier && $field !== $value) {
+
+                if ($field->getIdentifierPath('/', false) == $identifier && $field !== $value) {
                     $this->context->buildViolation($constraint->message)
                         ->setParameter('{{ identifier }}', $this->formatValue($identifier))
                         ->atPath('identifier')

@@ -21,6 +21,11 @@ class SchemaTypeManager
     private $schemaTypes = [];
 
     /**
+     * @var ObjectType|InputObjectType|InterfaceType|UnionType[]
+     */
+    private $nonDetectableSchemaTypes = [];
+
+    /**
      * @var SchemaTypeFactoryInterface[]
      */
     private $schemaTypeFactories = [];
@@ -31,6 +36,14 @@ class SchemaTypeManager
     public function getSchemaTypes(): array
     {
         return $this->schemaTypes;
+    }
+
+    /**
+     * @return ObjectType|InputObjectType|InterfaceType|UnionType[]
+     */
+    public function getNonDetectableSchemaTypes(): array
+    {
+        return $this->nonDetectableSchemaTypes;
     }
 
     /**
@@ -88,9 +101,12 @@ class SchemaTypeManager
     /**
      * @param Type $schemaType
      *
+     * @param bool $detectable, if set to false, this type type will always get added to schema. Otherwise types will
+     *   get automatically detected during query evaluation.
+     *
      * @return SchemaTypeManager
      */
-    public function registerSchemaType(Type $schemaType)
+    public function registerSchemaType(Type $schemaType, $detectable = true)
     {
         if (!$schemaType instanceof InputObjectType && !$schemaType instanceof ObjectType && !$schemaType instanceof InterfaceType && !$schemaType instanceof UnionType && !$schemaType instanceof ListOfType) {
             throw new \InvalidArgumentException(
@@ -100,6 +116,10 @@ class SchemaTypeManager
 
         if (!isset($this->schemaTypes[$schemaType->name])) {
             $this->schemaTypes[$schemaType->name] = $schemaType;
+        }
+
+        if(!$detectable) {
+            $this->nonDetectableSchemaTypes[$schemaType->name] = $schemaType;
         }
 
         return $this;

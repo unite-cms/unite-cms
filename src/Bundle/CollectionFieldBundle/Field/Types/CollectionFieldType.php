@@ -7,7 +7,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
 use UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory;
-use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -162,17 +161,20 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
         $collection = self::getNestableFieldable($field);
 
+        $path = $context->getPropertyPath() . '[' . $collection->getIdentifier() . ']';
+
+        $current_property_path = $context->getPropertyPath();
+
         // Make sure, that there is no additional data in content that is not in settings.
-        foreach($data as $row) {
+        foreach($data as $delta => $row) {
+
+            $context->setNode($context->getValue(), null, $context->getMetadata(), $path . '['.$delta.']');
+
             foreach (array_keys($row) as $data_key) {
 
                 // If the field does not exists, add an error.
                 if (!$collection->getFields()->containsKey($data_key)) {
-                    $context->buildViolation('additional_data')->atPath('['.join('][', [
-                        $field->getEntity()->getIdentifierPath(']['),
-                        $field->getIdentifier(),
-                        $data_key
-                    ]).']')->addViolation();
+                    $context->buildViolation('additional_data')->atPath('[' . $data_key .']')->addViolation();
 
                 // If the field exists, let the fieldTypeManager validate it.
                 } else {
@@ -180,6 +182,9 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 }
             }
         }
+
+        // Reset propertypath to the original value.
+        $context->setNode($context->getValue(), null, $context->getMetadata(), $current_property_path);
     }
 
     /**
@@ -285,11 +290,11 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
      * Delegate onSoftDelete call to all child fields, that implement it.
      *
      * @param FieldableField $field
-     * @param Content $content
+     * @param FieldableContent $content
      * @param EntityRepository $repository
      * @param $data
      */
-    public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+    public function onSoftDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
 
         // If child field implements onSoftDelete, call it!
         foreach(self::getNestableFieldable($field)->getFields() as $subField) {
@@ -309,11 +314,11 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
      * Delegate onHardDelete call to all child fields, that implement it.
      *
      * @param FieldableField $field
-     * @param Content $content
+     * @param FieldableContent $content
      * @param EntityRepository $repository
      * @param $data
      */
-    public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+    public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
 
         // If child field implements onHardDelete, call it!
         foreach(self::getNestableFieldable($field)->getFields() as $subField) {

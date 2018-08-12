@@ -29,6 +29,7 @@ return [
     UniteCMS\CollectionFieldBundle\UniteCMSCollectionFieldBundle::class => ['all' => true],
     UniteCMS\StorageBundle\UniteCMSStorageBundle::class => ['all' => true],
     UniteCMS\WysiwygFieldBundle\UniteCMSWysiwygFieldBundle::class => ['all' => true],
+    UniteCMS\VariantsFieldBundle\UniteCMSVariantsFieldBundle::class => ['all' => true],
 
     # unite cms bundles that are not part of the standard installation
     UniteCMS\RegistrationBundle\UniteCMSRegistrationBundle::class => ['dev_registration' => true, 'test_registration' => true],
