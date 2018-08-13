@@ -113,7 +113,7 @@ abstract class DomainAccessor
      * @param Domain $domain
      * @return DomainMember[]
      */
-    public function getDomainMembers(Domain $domain)
+    public function getDomainMembers(Domain $domain): array
     {
         $domainMembers = [];
         foreach ($this->getDomains() as $domainMember) {
