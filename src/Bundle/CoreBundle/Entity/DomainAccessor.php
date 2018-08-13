@@ -111,7 +111,7 @@ abstract class DomainAccessor
      * Returns all matching domain memberships of this user for the given domain or null if this user is not member of the domain.
      *
      * @param Domain $domain
-     * @return DomainMember[]|null
+     * @return DomainMember[]
      */
     public function getDomainMembers(Domain $domain)
     {
@@ -122,11 +122,7 @@ abstract class DomainAccessor
             }
         }
 
-        if (count($domainMembers) > 0) {
-            return $domainMembers;
-        }
-
-        return null;
+        return $domainMembers;
     }
 
     /**

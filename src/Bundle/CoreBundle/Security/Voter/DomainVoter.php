@@ -90,11 +90,6 @@ class DomainVoter extends Voter
 
             $domainMembers = $user->getDomainMembers($subject);
 
-            // We can only vote if this user is member of the domain.
-            if(!$domainMembers) {
-                return self::ACCESS_ABSTAIN;
-            }
-
             // If the requested permission is not defined, throw an exception.
             if (empty($subject->getPermissions()[$attribute])) {
                 throw new \InvalidArgumentException("Permission '$attribute' was not found in domain '$subject'");

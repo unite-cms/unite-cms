@@ -74,11 +74,6 @@ class SettingVoter extends Voter
 
         $domainMembers = $token->getUser()->getDomainMembers($settingType->getDomain());
 
-        // We can only vote if this user is member of the subject's domain.
-        if(!$domainMembers) {
-            return self::ACCESS_ABSTAIN;
-        }
-
         // If the requested permission is not defined, throw an exception.
         if (empty($settingType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in SettingType '$settingType'");

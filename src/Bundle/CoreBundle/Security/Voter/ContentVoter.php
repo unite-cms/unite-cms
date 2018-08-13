@@ -85,11 +85,6 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        // We can only vote if this user is member of the subject's domain.
-        if(!$domainMembers) {
-            return self::ACCESS_ABSTAIN;
-        }
-
         // If the requested permission is not defined, throw an exception.
         if (empty($contentType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
