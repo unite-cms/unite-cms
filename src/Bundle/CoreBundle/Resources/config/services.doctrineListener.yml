@@ -37,7 +37,7 @@ services:
   # When inserting, updating or deleting content, the webhooks (if any defined) should be fired
   UniteCMS\CoreBundle\Subscriber\WebHookSubscriber:
     public: false
-    arguments: ['@unite.cms.webhook_manager', '@unite.cms.graphql.schema_type_manager']
+    arguments: ['@unite.cms.webhook_manager']
     tags:
       - { name: doctrine.event_listener, event: postRemove, lazy: true }
       - { name: doctrine.event_listener, event: postPersist, lazy: true }

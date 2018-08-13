@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
-class ValidWebhooks extends Constraint
+class ValidWebhookAction extends Constraint
 {
     public $message = 'Invalid webhook expression found';
 }

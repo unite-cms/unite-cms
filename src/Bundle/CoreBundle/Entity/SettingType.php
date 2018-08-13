@@ -122,7 +122,6 @@ class SettingType implements Fieldable
 
     /**
      * @var array
-     * @ValidValidations(message="invalid_validations")
      * @ORM\Column(name="webhooks", type="array", nullable=true)
      * @Assert\Valid()
      * @Type("array<UniteCMS\CoreBundle\Entity\Webhook>")
@@ -585,7 +584,7 @@ class SettingType implements Fieldable
     /**
      * @param Webhook[] $webhooks
      *
-     * @return ContentType
+     * @return SettingType
      */
     public function setWebhooks($webhooks)
     {

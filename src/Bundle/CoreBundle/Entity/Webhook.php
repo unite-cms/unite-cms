@@ -6,7 +6,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Type;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidGraphQLQuery;
-use UniteCMS\CoreBundle\Validator\Constraints\ValidWebhooks;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidWebhookAction;
 
 /**
  * @ExclusionPolicy("none")
@@ -35,11 +35,11 @@ class Webhook
      * @var bool
      * @Type("bool")
      */
-    private $check_ssl = false;
+    private $check_ssl;
 
     /**
      * @var string
-     * @Assert\Length(min="8", max="32", maxMessage="too_long")
+     * @Assert\Length(min="8", max="32", minMessage="too_short", maxMessage="too_long")
      * @Type("string")
      */
     private $secret_key;
@@ -47,18 +47,18 @@ class Webhook
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
-     * @ValidWebhooks(message="invalid_expression")
+     * @ValidWebhookAction(message="invalid_expression")
      * @Type("string")
      */
-    private $expression;
+    private $action;
 
-    public function __construct(string $query, string $url, string $expression, bool $check_ssl = true, string $secret_key = '')
+    public function __construct(string $query, string $url, string $action, bool $check_ssl = true, string $secret_key = '')
     {
         $this->query = $query;
         $this->url = $url;
         $this->check_ssl = $check_ssl;
         $this->secret_key = $secret_key;
-        $this->expression = $expression;
+        $this->action = $action;
     }
 
     /**
@@ -128,16 +128,16 @@ class Webhook
     /**
      * @return string
      */
-    public function getExpression(): string
+    public function getAction(): string
     {
-        return $this->expression;
+        return $this->action;
     }
 
     /**
-     * @param string $expression
+     * @param string $action
      */
-    public function setExpression(string $expression): void
+    public function setAction(string $action): void
     {
-        $this->expression = $expression;
+        $this->action = $action;
     }
 }

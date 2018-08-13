@@ -45,11 +45,11 @@ class WebHookSubscriber
         $entity = $args->getEntity();
 
         if ($entity instanceof Content) {
-            $this->webHookManager->process($entity->getContentType()->getWebhooks(), $event);
+            $this->webHookManager->processContentType($entity->getContentType(), $event, $args->getObject()->getData());
         }
 
         if ($entity instanceof Setting) {
-            $this->webHookManager->process($entity->getSettingType()->getWebhooks(), $event);
+            $this->webHookManager->processSettingType($entity->getSettingType(), $event, $args->getObject()->getData());
         }
     }
 }

@@ -14,7 +14,7 @@ use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 
 
-class ValidWebhooksValidator extends ConstraintValidator
+class ValidWebhookActionValidator extends ConstraintValidator
 {
     /**
      * @var WebhookExpressionChecker $webhookExpressionChecker
