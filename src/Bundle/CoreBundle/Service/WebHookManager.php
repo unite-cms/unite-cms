@@ -16,9 +16,9 @@ use Psr\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
+use UniteCMS\CoreBundle\Entity\Webhook;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Entity\Webhook;
 
 class WebHookManager
 {
@@ -46,30 +46,45 @@ class WebHookManager
 
     public function processContent(Content $content, string $action) {
 
-        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($content->getContentType()->getIdentifier()) . 'Content', $content->getContentType()->getDomain());
-        $result = GraphQL::executeQuery(new Schema(['query' => $type]), 'query { type }', $content);
-        dump($result); exit;
+        if (!$content instanceof ContentType) return;
+
+        $contentType = $content->getContentType();
+
+        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($contentType->getIdentifier()) . 'Content', $contentType->getDomain());
+
         foreach ($contentType->getWebHooks() as $webhook) {
             if (!$this->webhookExpressionChecker->evaluate($webhook->getAction(), $action)) {
                 continue;
             }
+
+            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $content);
+            $data = $this->container->get('jms_serializer')->serialize($result->data, 'json');
             $this->fire($webhook, $data);
         }
 
     }
 
     public function processSetting(Setting $setting, string $action) {
-        
-        foreach ($setting->getSettingType()->getWebHooks() as $webhook) {
+
+        if (!$setting instanceof SettingType) return;
+
+        $settingType = $setting->getSettingType();
+
+        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($settingType->getIdentifier()) . 'Setting', $settingType->getDomain());
+
+        foreach ($settingType->getWebHooks() as $webhook) {
             if (!$this->webhookExpressionChecker->evaluate($webhook->getAction(), $action)) {
                 continue;
             }
-            //$this->fire($webhook, $data);
+
+            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $setting);
+            $data = $this->container->get('jms_serializer')->serialize($result->data, 'json');
+            $this->fire($webhook, $data);
         }
 
     }
 
-    private function fire(Webhook $webhook, array $postData) {
+    private function fire(Webhook $webhook, string $jsonData) {
 
         $ssl_verify = ($webhook->getCheckSSL())? true:false;
 
@@ -78,20 +93,19 @@ class WebHookManager
         $headers = [
             'Content-type' => 'application/json; charset=utf-8',
             'Accept' => 'application/json',
-            'Authorization' => $webhook->getSecretKey()
+            'Secret-Key' => sha1($webhook->getSecretKey())
         ];
 
-        /*try {
+        try {
 
-            $response = $client->post($webhook->getUrl(), $headers, json_encode($postData));
-            print_r($response->getBody()->getContents()); exit;
+            $response = $client->post($webhook->getUrl(), $headers, $jsonData);
 
         } catch (\Exception $e) {
             
             $this->logger->error('Webhook error: '.$e->getMessage());
             return false;
 
-        }*/
+        }
         
     }
 
