@@ -14,7 +14,6 @@ use UniteCMS\CoreBundle\View\Types\TableViewType;
 use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Accessor;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
-use UniteCMS\CoreBundle\Entity\Webhook;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;

@@ -42,14 +42,14 @@ class WebHookSubscriber
 
     public function fireHook(LifecycleEventArgs $args, string $event)
     {
-        $entity = $args->getEntity();
+        $entity = $args->getObject();
 
         if ($entity instanceof Content) {
-            $this->webHookManager->processContentType($entity->getContentType(), $event, $args->getObject()->getData());
+            $this->webHookManager->processContent($args->getObject(), $event);
         }
 
         if ($entity instanceof Setting) {
-            $this->webHookManager->processSettingType($entity->getSettingType(), $event, $args->getObject()->getData());
+            $this->webHookManager->processSetting($args->getObject(), $event);
         }
     }
 }

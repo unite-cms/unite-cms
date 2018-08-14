@@ -18,8 +18,6 @@ use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
-use UniteCMS\CoreBundle\Validator\Constraints\ValidValidations;
-use UniteCMS\CoreBundle\Entity\Webhook;
 
 /**
  * SettingType
