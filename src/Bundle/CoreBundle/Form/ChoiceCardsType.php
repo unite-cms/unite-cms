@@ -10,6 +10,8 @@ namespace UniteCMS\CoreBundle\Form;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -36,9 +38,27 @@ class ChoiceCardsType extends ChoiceType implements DataTransformerInterface
     /**
      * {@inheritdoc}
      */
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        parent::buildView($view, $form, $options);
+        $view->vars['compact'] = $options['compact'];
+
+        if($view->vars['compact']) {
+            if(!isset($view->vars['attr']['class'])) {
+                $view->vars['attr']['class'] = '';
+            }
+            $view->vars['attr']['class'] .= 'compact';
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
+        $resolver->setDefault('expanded', true);
+        $resolver->setDefault('compact', false);
         $resolver->setDefault('choice_value', function ($value) {
             if($value instanceof ChoiceCardOption) {
                 return $value->getValue();

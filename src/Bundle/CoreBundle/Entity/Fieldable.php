@@ -50,13 +50,23 @@ interface Fieldable
     public function getIdentifier();
 
     /**
-     * Returns a path from the root fieldable to this fieldable. Root types (e.g. ContentType) should return only the
-     * identifier.
+     * Returns a path from the root fieldable to this fieldable. Identifier of the root fieldable should only be
+     * included of include_root is set to true.
      *
      * @param string $delimiter
+     * @param bool $include_root
      * @return string
      */
-    public function getIdentifierPath($delimiter = '/');
+    public function getIdentifierPath($delimiter = '/', $include_root = true);
+
+    /**
+     * Finds a (possible) nested field in this fieldable by a path ("title", "blocks/0/title" etc.). If $reduce_path is
+     * set to true, the fieldable should remove all resolved parts from the path.
+     * @param $path
+     * @param bool $reduce_path
+     * @return mixed
+     */
+    public function resolveIdentifierPath(&$path, $reduce_path = false);
 
     /**
      * Returns the direct parent of this fieldable. Root types (e.g. ContentType) should return null.

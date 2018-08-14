@@ -36,16 +36,54 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
                     public function getTitle() { return 'Field 1'; }
                     public function getSettings() { return []; }
                     public function getJsonExtractIdentifier() { return '$.' . $this->getIdentifier(); }
+                    public function getIdentifierPath($delimiter = '/', $include_root = true)
+                    {
+                        $path = '';
+
+                        if ($this->getEntity()) {
+                            $path = $this->getEntity()->getIdentifierPath($delimiter, $include_root);
+                        }
+
+                        if(!empty($path)) {
+                            $path .= $delimiter;
+                        }
+
+                        return $path.$this->getIdentifier();
+                    }
                 }];
             }
             public function setFields($fields) {}
             public function addField(FieldableField $field) {}
             public function getLocales(): array { return []; }
             public function getIdentifier() { return ''; }
-            public function getIdentifierPath($delimiter = '/') { return $this->getIdentifier(); }
+            public function getIdentifierPath($delimiter = '/', $include_root = true) { return $include_root ? $this->getIdentifier() : ''; }
             public function getParentEntity() { return null; }
             public function getRootEntity(): Fieldable { return $this; }
             public function getValidations(): array { return []; }
+
+            /**
+             * Finds a (possible) nested field in this fieldable by a path ("title", "blocks/0/title" etc.). If $reduce_path is
+             * set to true, the fieldable should remove all resolved parts from the path.
+             * @param $path
+             * @param bool $reduce_path
+             * @return mixed
+             */
+            public function resolveIdentifierPath(&$path, $reduce_path = false)
+            {
+                $parts = explode('/', $path);
+                if(count($parts) < 0) {
+                    return null;
+                }
+
+                $field_identifier = array_shift($parts);
+                $field = $this->getFields()->get($field_identifier);
+
+                if($reduce_path) {
+                    $path = join('/', $parts);
+                }
+
+                return $field;
+            }
         };
         $content = new class implements FieldableContent {
             private $data = ['field1' => 'Any Value'];

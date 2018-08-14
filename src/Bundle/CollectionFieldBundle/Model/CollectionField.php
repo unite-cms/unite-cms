@@ -128,6 +128,24 @@ class CollectionField implements FieldableField
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getIdentifierPath($delimiter = '/', $include_root = true)
+    {
+        $path = '';
+
+        if ($this->getEntity()) {
+            $path = $this->getEntity()->getIdentifierPath($delimiter, $include_root);
+        }
+
+        if(!empty($path)) {
+            $path .= $delimiter;
+        }
+
+        return $path.$this->getIdentifier();
+    }
+
+    /**
      * Set type
      *
      * @param string $type
@@ -202,14 +220,6 @@ class CollectionField implements FieldableField
      */
     public function getJsonExtractIdentifier()
     {
-        $pathParts = explode('/', $this->getEntity()->getIdentifierPath());
-
-        // remove root entity path.
-        array_shift($pathParts);
-
-        // add this identifier.
-        $pathParts[] = $this->getIdentifier();
-
-        return '$.'.join('[*].', $pathParts);
+        return '$.'.$this->getIdentifierPath('[*].', false);
     }
 }

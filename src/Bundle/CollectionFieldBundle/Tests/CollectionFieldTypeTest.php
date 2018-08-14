@@ -682,15 +682,15 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
         $violations = $context->getViolations();
         $this->assertCount(4, $violations);
-        $this->assertEquals('['.$field->getEntity()->getIdentifierPath('][').']['.$field->getIdentifier().'][foo]',
+        $this->assertEquals('['.$field->getIdentifier().'][1][foo]',
             $violations[0]->getPropertyPath()
         );
         $this->assertEquals('additional_data', $violations[0]->getMessageTemplate());
-        $this->assertEquals('[f2]', $violations[1]->getPropertyPath());
+        $this->assertEquals('['.$field->getIdentifier().'][2][n1][0][n2][0][f2]', $violations[1]->getPropertyPath());
         $this->assertEquals('invalid_reference_definition', $violations[1]->getMessageTemplate());
-        $this->assertEquals('[f2]', $violations[2]->getPropertyPath());
+        $this->assertEquals('['.$field->getIdentifier().'][3][n1][0][n2][0][f2]', $violations[2]->getPropertyPath());
         $this->assertEquals('missing_reference_definition', $violations[2]->getMessageTemplate());
-        $this->assertEquals('['.$field->getEntity()->getIdentifierPath('][').']['.$field->getIdentifier().'][n1][n2][foo]',
+        $this->assertEquals('['.$field->getIdentifier().'][3][n1][0][n2][0][foo]',
             $violations[3]->getPropertyPath()
         );
         $this->assertEquals('additional_data', $violations[3]->getMessageTemplate());

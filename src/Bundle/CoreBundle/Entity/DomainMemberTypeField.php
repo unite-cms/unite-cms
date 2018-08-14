@@ -192,6 +192,29 @@ class DomainMemberTypeField implements FieldableField
     }
 
     /**
+     * Returns a path from the root fieldable to this fieldable. Identifier of the root fieldable should only be
+     * included of include_root is set to true.
+     *
+     * @param string $delimiter
+     * @param bool $include_root
+     * @return string
+     */
+    public function getIdentifierPath($delimiter = '/', $include_root = true)
+    {
+        $path = '';
+
+        if ($this->getEntity()) {
+            $path = $this->getEntity()->getIdentifierPath($delimiter, $include_root);
+        }
+
+        if(!empty($path)) {
+            $path .= $delimiter;
+        }
+
+        return $path.$this->getIdentifier();
+    }
+
+    /**
      * Returns the identifier, used for mysql's json_extract function.
      * @return string
      */

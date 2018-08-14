@@ -84,15 +84,10 @@ class FileFieldType extends FieldType
             ], Router::ABSOLUTE_URL);
         }
 
-        // Use the identifier path part, but exclude root entity and include field identifier.
-        $identifier_path_parts = explode('/', $field->getEntity()->getIdentifierPath());
-        array_shift($identifier_path_parts);
-        $identifier_path_parts[] = $field->getIdentifier();
-
         return array_merge(parent::getFormOptions($field), [
           'attr' => [
             'file-types' => $field->getSettings()->file_types,
-            'field-path' => join('/', $identifier_path_parts),
+            'field-path' => $field->getIdentifierPath('/', false),
             'endpoint' => $this->generateEndpoint($field->getSettings()),
             'upload-sign-url' => $url,
             'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
@@ -217,11 +212,11 @@ class FileFieldType extends FieldType
      * On content hard delete, delete the file from s3 bucket.
      *
      * @param FieldableField $field
-     * @param Content $content
+     * @param FieldableContent $content
      * @param EntityRepository $repository
      * @param $data
      */
-    public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {
+    public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {
         if(isset($data[$field->getIdentifier()])) {
 
             // If we hard delete this content, delete the attached file.

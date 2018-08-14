@@ -6,6 +6,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 abstract class ContainerAwareTestCase extends KernelTestCase
 {
+    const KERNEL_OPTIONS = ['debug' => false];
+
     protected function generateRandomMachineName($count = 0)
     {
         $return = '';
@@ -34,6 +36,6 @@ abstract class ContainerAwareTestCase extends KernelTestCase
 
     public function setUp()
     {
-        static::bootKernel(['debug' => false]);
+        static::bootKernel(static::KERNEL_OPTIONS);
     }
 }

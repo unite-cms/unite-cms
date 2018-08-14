@@ -59,10 +59,10 @@ abstract class FieldType implements FieldTypeInterface
         ];
     }
 
-    // OPTIONAL: public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data) {}
+    // OPTIONAL: public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {}
     // OPTIONAL: public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {}
-    // OPTIONAL: public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {}
-    // OPTIONAL: public function onHardDelete(FieldableField $field, Content $content, EntityRepository $repository, $data) {}
+    // OPTIONAL: public function onSoftDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {}
+    // OPTIONAL: public function onHardDelete(FieldableField $field, FieldableContent $content, EntityRepository $repository, $data) {}
 
     /**
      * {@inheritdoc}

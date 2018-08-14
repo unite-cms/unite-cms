@@ -149,6 +149,11 @@ class ContentController extends Controller
      */
     public function updateAction(View $view, Content $content, Request $request)
     {
+        // Otherwise, a user could update content, he_she has access to, from another domain.
+        if($content->getContentType() !== $view->getContentType()) {
+            throw $this->createNotFoundException();
+        }
+
         $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
             $view->getContentType(),
             $content,
@@ -270,6 +275,10 @@ class ContentController extends Controller
      */
     public function deleteAction(View $view, Content $content, Request $request)
     {
+        // Otherwise, a user could update content, he_she has access to, from another domain.
+        if($content->getContentType() !== $view->getContentType()) {
+            throw $this->createNotFoundException();
+        }
 
         $form = $this->createFormBuilder()
             ->add(
@@ -516,6 +525,10 @@ class ContentController extends Controller
      */
     public function translationsAction(View $view, Content $content, Request $request)
     {
+        // Otherwise, a user could update content, he_she has access to, from another domain.
+        if($content->getContentType() !== $view->getContentType()) {
+            throw $this->createNotFoundException();
+        }
 
         if (!empty($content->getTranslationOf())) {
             // Check if the translationOf content was soft deleted.
@@ -563,6 +576,10 @@ class ContentController extends Controller
      */
     public function addTranslationAction(View $view, Content $content, String $locale, Request $request)
     {
+        // Otherwise, a user could update content, he_she has access to, from another domain.
+        if($content->getContentType() !== $view->getContentType()) {
+            throw $this->createNotFoundException();
+        }
 
         $form = $this->createFormBuilder()
             ->add(
@@ -673,6 +690,11 @@ class ContentController extends Controller
      */
     public function removeTranslationAction(View $view, Content $content, String $locale, Request $request)
     {
+        // Otherwise, a user could update content, he_she has access to, from another domain.
+        if($content->getContentType() !== $view->getContentType()) {
+            throw $this->createNotFoundException();
+        }
+
         $translations = $content->getTranslations()->filter(
             function (Content $content) use ($locale) {
                 return $content->getLocale() == $locale;
@@ -742,6 +764,11 @@ class ContentController extends Controller
      */
     public function revisionsAction(View $view, Content $content, Request $request)
     {
+        // Otherwise, a user could update content, he_she has access to, from another domain.
+        if($content->getContentType() !== $view->getContentType()) {
+            throw $this->createNotFoundException();
+        }
+
         return $this->render(
             '@UniteCMSCore/Content/revisions.html.twig',
             [
@@ -769,6 +796,11 @@ class ContentController extends Controller
      */
     public function revisionsRevertAction(View $view, Content $content, int $version, Request $request)
     {
+        // Otherwise, a user could update content, he_she has access to, from another domain.
+        if($content->getContentType() !== $view->getContentType()) {
+            throw $this->createNotFoundException();
+        }
+
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, ['label' => 'content.revisions.revert.submit'])
             ->getForm();
