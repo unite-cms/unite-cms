@@ -101,10 +101,16 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->editor->setEmail('editor@example.com')->setName('Domain Editor')->setRoles([User::ROLE_USER])->setPassword('XXX');
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setOrganization($this->organization);
-        $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('editor'));
+
+        $domainEditorDomainMemberViewer = new DomainMember();
+        $domainEditorDomainMemberViewer->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('viewer'));
+
+        $domainEditorDomainMemberEditor = new DomainMember();
+        $domainEditorDomainMemberEditor->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('editor'));
+
         $this->editor->addOrganization($domainEditorOrgMember);
-        $this->editor->addDomain($domainEditorDomainMember);
+        $this->editor->addDomain($domainEditorDomainMemberViewer);
+        $this->editor->addDomain($domainEditorDomainMemberEditor);
 
         $this->em->persist($this->editor);
 
