@@ -44,7 +44,16 @@ class WebHookManager
         $this->webhookExpressionChecker = new WebhookExpressionChecker();
     }
 
-    public function processContent(Content $content, string $action) {
+    /**
+     * Processes the given webhooks of ContentType
+     *
+     * @param Setting $setting
+     * @param string $action
+     *
+     * @return void
+     */
+    public function processContent(Content $content, string $action) : void
+    {
 
         if (!$content instanceof ContentType) return;
 
@@ -64,7 +73,16 @@ class WebHookManager
 
     }
 
-    public function processSetting(Setting $setting, string $action) {
+    /**
+     * Processes the given webhooks of SettingType
+     *
+     * @param Setting $setting
+     * @param string $action
+     *
+     * @return void
+     */
+    public function processSetting(Setting $setting, string $action) : void
+    {
 
         if (!$setting instanceof SettingType) return;
 
@@ -84,7 +102,16 @@ class WebHookManager
 
     }
 
-    private function fire(Webhook $webhook, string $jsonData) {
+    /**
+     * Executes the given webhooks
+     *
+     * @param Webhook[]
+     * @param string $jsonData
+     *
+     * @return bool
+     */
+    private function fire(Webhook $webhook, string $jsonData) : bool
+    {
 
         $ssl_verify = ($webhook->getCheckSSL())? true:false;
 
@@ -96,11 +123,13 @@ class WebHookManager
             'Secret-Key' => sha1($webhook->getSecretKey())
         ];
 
-        try {
-
+        try
+        {
             $response = $client->post($webhook->getUrl(), $headers, $jsonData);
+            return true;
 
-        } catch (\Exception $e) {
+        } catch (\Exception $e)
+        {
             
             $this->logger->error('Webhook error: '.$e->getMessage());
             return false;

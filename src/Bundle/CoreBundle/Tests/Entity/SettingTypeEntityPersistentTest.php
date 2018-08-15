@@ -96,6 +96,9 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('preview.query', $errors->get(1)->getPropertyPath());
         $this->assertEquals('invalid_query', $errors->get(1)->getMessageTemplate());
 
+        $settingType->setPreview(new FieldablePreview('https://example.com', '{ type }'));
+        $this->assertCount(0, static::$container->get('validator')->validate($settingType));
+
         // validate Webhooks 
         $settingType->setWebhooks([]);
         $this->assertCount(0, static::$container->get('validator')->validate($settingType));
@@ -105,7 +108,7 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
             new Webhook('XXX', 'XXX', 'csd <= ', 'csd <= ', -1),
         ]);
         $errors = static::$container->get('validator')->validate($settingType);
-        $this->assertCount(8, $errors);
+        $this->assertCount(7, $errors);
         $this->assertEquals('webhooks[0].query', $errors->get(0)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('webhooks[0].url', $errors->get(1)->getPropertyPath());

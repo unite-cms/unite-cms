@@ -142,7 +142,6 @@ class ContentType implements Fieldable
      * @AccessType("public_method")
      * @Expose
      */
-
     private $webhooks;
 
     /**
@@ -187,8 +186,8 @@ class ContentType implements Fieldable
         $this->views = new ArrayCollection();
         $this->locales = [];
         $this->permissions = [];
-        $this->validations = [];
         $this->webhooks = [];
+        $this->validations = [];
         $this->addDefaultView();
         $this->addDefaultPermissions();
     }
@@ -266,9 +265,9 @@ class ContentType implements Fieldable
             ->setPreview($contentType->getPreview())
             ->setContentLabel($contentType->getContentLabel())
             ->setPermissions($contentType->getPermissions())
-            ->setWebhooks($contentType->getWebhooks())
             ->setDescription($contentType->getDescription())
             ->setLocales($contentType->getLocales())
+            ->setWebhooks($contentType->getWebhooks())
             ->setValidations($contentType->getValidations());
 
         // Fields to delete

@@ -18,6 +18,7 @@ use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidValidations;
 
 /**
  * SettingType
@@ -126,11 +127,11 @@ class SettingType implements Fieldable
      * @AccessType("public_method")
      * @Expose
      */
-
     private $webhooks;
 
     /**
      * @var array
+     * @ValidValidations(message="invalid_validations")
      * @ORM\Column(name="validations", type="array", nullable=true)
      * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
      * @AccessType("public_method")
@@ -163,8 +164,8 @@ class SettingType implements Fieldable
         $this->settings = new ArrayCollection();
         $this->locales = [];
         $this->permissions = [];
-        $this->validations = [];
         $this->webhooks = [];
+        $this->validations = [];
         $this->addDefaultPermissions();
     }
 
