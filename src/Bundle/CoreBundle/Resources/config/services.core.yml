@@ -45,9 +45,14 @@ services:
     arguments: ['@security.token_storage']
     tags: [form.type]
 
+  # add guzzle as a service
+  unite.cms.guzzle:
+    class: \GuzzleHttp\Client
+    public: true
 
   # Service Class to fire webhooks
   unite.cms.webhook_manager:
     class: UniteCMS\CoreBundle\Service\WebHookManager
-    arguments: ['@service_container', '@logger']
+    arguments: ['@service_container', '@logger', '@unite.cms.guzzle']
     public: false
+

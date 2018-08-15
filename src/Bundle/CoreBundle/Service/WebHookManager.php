@@ -37,11 +37,17 @@ class WebHookManager
      */
     private $logger;
 
-    public function __construct(ContainerInterface $container, LoggerInterface $logger)
+    /**
+     * @var Client $client
+     */
+    private $client;
+
+    public function __construct(ContainerInterface $container, LoggerInterface $logger, Client $client)
     {
         $this->container = $container;
         $this->logger = $logger;
         $this->webhookExpressionChecker = new WebhookExpressionChecker();
+        $this->client = $client;
     }
 
     /**
@@ -54,10 +60,11 @@ class WebHookManager
      */
     public function processContent(Content $content, string $action) : void
     {
-
-        if (!$content instanceof ContentType) return;
-
         $contentType = $content->getContentType();
+
+        if (empty($contentType->getWebHooks())) {
+           return;
+        }
 
         $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($contentType->getIdentifier()) . 'Content', $contentType->getDomain());
 
@@ -84,9 +91,11 @@ class WebHookManager
     public function processSetting(Setting $setting, string $action) : void
     {
 
-        if (!$setting instanceof SettingType) return;
-
         $settingType = $setting->getSettingType();
+
+        if (empty($settingType->getWebHooks())) {
+            return;
+        }
 
         $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($settingType->getIdentifier()) . 'Setting', $settingType->getDomain());
 
@@ -115,8 +124,6 @@ class WebHookManager
 
         $ssl_verify = ($webhook->getCheckSSL())? true:false;
 
-        $client = new Client(['verify' => $ssl_verify]);
-
         $headers = [
             'Content-type' => 'application/json; charset=utf-8',
             'Accept' => 'application/json',
@@ -125,7 +132,8 @@ class WebHookManager
 
         try
         {
-            $response = $client->post($webhook->getUrl(), $headers, $jsonData);
+            $response = $this->client->post($webhook->getUrl(), $headers, $jsonData);
+            #print_r($response->getBody()->getContents());
             return true;
 
         } catch (\Exception $e)
