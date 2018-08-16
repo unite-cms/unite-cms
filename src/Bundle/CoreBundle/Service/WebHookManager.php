@@ -17,8 +17,6 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
 use UniteCMS\CoreBundle\Entity\Webhook;
-use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\SettingType;
 
 class WebHookManager
 {
@@ -42,12 +40,12 @@ class WebHookManager
      */
     private $client;
 
-    public function __construct(ContainerInterface $container, LoggerInterface $logger, Client $client)
+    public function __construct(ContainerInterface $container, LoggerInterface $logger)
     {
         $this->container = $container;
         $this->logger = $logger;
         $this->webhookExpressionChecker = new WebhookExpressionChecker();
-        $this->client = $client;
+        $this->client = new Client();
     }
 
     /**
@@ -74,8 +72,7 @@ class WebHookManager
             }
 
             $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $content);
-            $data = $this->container->get('jms_serializer')->serialize($result->data, 'json');
-            $this->fire($webhook, $data);
+            $this->fire($webhook, $result->data);
         }
 
     }
@@ -105,8 +102,7 @@ class WebHookManager
             }
 
             $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $setting);
-            $data = $this->container->get('jms_serializer')->serialize($result->data, 'json');
-            $this->fire($webhook, $data);
+            $this->fire($webhook, $result->data);
         }
 
     }
@@ -115,30 +111,29 @@ class WebHookManager
      * Executes the given webhooks
      *
      * @param Webhook[]
-     * @param string $jsonData
+     * @param array $data
      *
      * @return bool
      */
-    private function fire(Webhook $webhook, string $jsonData) : bool
+    private function fire(Webhook $webhook, array $data) : bool
     {
-
         $ssl_verify = ($webhook->getCheckSSL())? true:false;
-
-        $headers = [
-            'Content-type' => 'application/json; charset=utf-8',
-            'Accept' => 'application/json',
-            'Secret-Key' => sha1($webhook->getSecretKey())
-        ];
 
         try
         {
-            $response = $this->client->post($webhook->getUrl(), $headers, $jsonData);
-            #print_r($response->getBody()->getContents());
+            $response = $this->client->request('POST', $webhook->getUrl(), [
+               'verify' => $ssl_verify,
+               'json' => $data,
+               'headers' => [
+                   'Content-type' => 'application/json; charset=utf-8',
+                   'Accept' => 'application/json',
+                   'Authorization' => sha1($webhook->getSecretKey())
+                ],
+            ]);
             return true;
 
         } catch (\Exception $e)
         {
-            
             $this->logger->error('Webhook error: '.$e->getMessage());
             return false;
 

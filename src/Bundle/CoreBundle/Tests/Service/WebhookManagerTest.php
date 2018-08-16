@@ -12,17 +12,13 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Exception\RequestException;
-
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -35,6 +31,11 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
      * @var Client $client
      */
     private $client;
+
+    /**
+     * @var MockHandler $mockHandler
+     */
+    private $mockHandler;
 
     /**
      * @var Organization
@@ -50,68 +51,86 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
      * @var string
      */
     private $domainConfiguration = '{
-      "title": "Test controller webhook test",
-      "identifier": "webhook_test", 
-      "content_types": [
-        {
-          "title": "CT 1",
-          "identifier": "ct1",
-          "fields": [
-              {
-                "title": "Text",
-                "identifier": "text",
-                "type": "text",
-                "settings": {}
-              },
-              {
-                "title": "LongText",
-                "identifier": "longtext",
-                "type": "textarea",
-                "settings": {}
-              }
+          "title": "Test controller webhook test",
+          "identifier": "webhook_test",
+          "content_types": [
+            {
+              "title": "Website",
+              "identifier": "website",
+              "fields": [
+                  {
+                    "title": "Text",
+                    "identifier": "text",
+                    "type": "text",
+                    "settings": {}
+                  },
+                  {
+                    "title": "LongText",
+                    "identifier": "longtext",
+                    "type": "textarea",
+                    "settings": {}
+                  }
+              ],
+              "webhooks": [
+                  {
+                    "query": "query { type, text, longtext  }",
+                    "url": "http://www.example1.com",
+                    "check_ssl": true,
+                    "secret_key": "key1212494949494",
+                    "action": "event == \"update\""
+                  },
+                  {
+                    "query": "query { type, text, longtext }",
+                    "url": "http://www.example.com",
+                    "check_ssl": true,
+                    "secret_key": "asdfasdf234234234234",
+                    "action": "event == \"create\""
+                  }
+              ]
+            }
           ],
-          "webhooks": [
-              {
-                "query": "query {type}",
-                "url": "http://www.orf.at",
-                "check_ssl": true,
-                "secret_key": "asdfasdf234234234234",
-                "action": "event == \"create\""
-              },
-              {
-                "query": "query {type}",
-                "url": "http://www.orf.at",
-                "check_ssl": true,
-                "secret_key": "asdfasdf234234234234",
-                "action": "event == \"update\""
-              }
-          ]
-        }
-      ], 
-      "setting_types": [
-        {
-          "title": "ST 1",
-          "identifier": "st1",
-          "fields": [
-              {
-                "title": "Setting",
-                "identifier": "text",
-                "type": "text",
-                "settings": {}
-              }
+          "setting_types": [
+            {
+              "title": "Setting",
+              "identifier": "setting",
+              "fields": [
+                  {
+                    "title": "Setting",
+                    "identifier": "text",
+                    "type": "text",
+                    "settings": {}
+                  }
+              ],
+              "webhooks": [
+                  {
+                    "query": "query { type, text }",
+                    "url": "http://www.example.com",
+                    "check_ssl": true,
+                    "secret_key": "key12124949456",
+                    "action": "event == \"delete\""
+                  }
+              ]
+            }
           ],
-          "webhooks": [
-              {
-                "query": "query {type}",
-                "url": "http://www.orf.at",
-                "check_ssl": true,
-                "secret_key": "",
-                "action": "event == \"delete\""
-              }
-          ]
-        }
-      ]
-    }';
+          "domain_member_types": [
+            {
+              "title": "Editor",
+              "identifier": "editor",
+              "domain_member_label": "{accessor}",
+              "fields": []
+            },
+            {
+              "title": "Viewer",
+              "identifier": "viewer",
+              "domain_member_label": "{accessor}",
+              "fields": []
+            }
+           ],
+          "permissions": {
+            "view domain": "true",
+            "update domain": "false"
+          }
+        }';
 
     /**
      * @var User[]
@@ -123,6 +142,17 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
     public function setUp()
     {
         parent::setUp();
+
+        $this->mockHandler = new MockHandler([
+           new Response(200, []),
+           new Response(200, [])
+        ]);
+        $handler = HandlerStack::create($this->mockHandler);
+        $this->client = new Client(['handler' => $handler, 'verify' => false]);
+
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.webhook_manager'), 'client');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.webhook_manager'), $this->client);
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
@@ -157,7 +187,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $domainEditorOrgMember = new OrganizationMember();
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
         $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->first());
+        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('editor'));
         $this->users['domain_editor']->addOrganization($domainEditorOrgMember);
         $this->users['domain_editor']->addDomain($domainEditorDomainMember);
 
@@ -177,59 +207,62 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
      */
     public function testContentTypeWebhooks()
     {
+
         $ct = $this->domain->getContentTypes()->first();
-
-        #$this->client = static::$container->get('unite.cms.guzzle');
-
-        #static::$container->set('unite.cms.guzzle', new Client());
-
-        #print_r($this->client);
-        #exit;
-
 
         $content = new Content();
         $content->setContentType($ct);
 
         $content_data = [
-            'text' => $this->generateRandomMachineName(100),
-            'textarea' => $this->generateRandomMachineName(100)
+            'text' => "my text",
+            'longtext' => "my longtext"
         ];
 
         $content->setData($content_data);
-
-        // Create a mock and queue two responses.
-        $mock = new MockHandler([
-              new Response(200, ['X-Foo' => 'Bar']),
-              new Response(202, ['Content-Length' => 0]),
-              new RequestException("Error Communicating with Server", new Request('GET', 'test'))
-        ]);
-        
-        $handler = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handler]);
-
-
         $this->em->persist($content);
         $this->em->flush($content);
 
-        $this->em->refresh($ct);
-        
+        $this->assertNotNull($this->mockHandler->getLastRequest());
+        $this->assertEquals(sha1('asdfasdf234234234234'), $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
+        $this->assertEquals('{"type":"website","text":"my text","longtext":"my longtext"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
 
+        $content_data = [
+          'text' => "my text 1",
+          'longtext' => "my longtext 1"
+        ];
 
+        $content->setData($content_data);
+        $this->em->flush($content);
 
-        // The first request is intercepted with the first response.
-        #echo $client->request('GET', '/')->getStatusCode();
-        //> 200
-        // The second request is intercepted with the second response.
-        #echo $client->request('GET', '/')->getStatusCode();
+        $this->assertNotNull($this->mockHandler->getLastRequest());
+        $this->assertEquals(sha1('key1212494949494'), $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
+        $this->assertEquals('{"type":"website","text":"my text 1","longtext":"my longtext 1"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
        
     }
-
 
     /**
      * Test webhooks on SettingType
      */
-    /*public function testSettingTypeWebhooks()
+    public function testSettingTypeWebhooks()
     {
-        
-    }*/
+        $st = $this->domain->getSettingTypes()->first();
+        $setting = new Setting();
+        $setting->setSettingType($st);
+
+        $setting_data = [
+          'text' => "my text",
+        ];
+
+        $setting->setData($setting_data);
+        $this->em->persist($setting);
+        $this->em->flush($setting);
+        $this->em->refresh($setting);
+
+        $this->em->remove($setting);
+        $this->em->flush();
+
+        $this->assertNotNull($this->mockHandler->getLastRequest());
+        $this->assertEquals(sha1('key12124949456'), $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
+        $this->assertEquals('{"type":"setting","text":"my text"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
+    }
 }
