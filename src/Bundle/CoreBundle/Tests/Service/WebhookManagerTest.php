@@ -80,14 +80,14 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
                   },
                   {
                     "query": "query { type, text, longtext }",
-                    "url": "http://www.example.com",
+                    "url": "http://www.example1.com",
                     "condition": "event == \"create\""
                   },
                   {
                     "query": "query { type, text }",
-                    "url": "http://www.example.com",
+                    "url": "http://www.example2.com",
                     "check_ssl": true,
-                    "authentication_header": "key12124949456",
+                    "authentication_header": "key1212494949494",
                     "condition": "event == \"delete\""
                   }
               ],
@@ -112,7 +112,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
               "webhooks": [
                   {
                     "query": "query { type, text }",
-                    "url": "http://www.example.com",
+                    "url": "http://www.example3.com",
                     "check_ssl": true,
                     "authentication_header": "key121277543",
                     "condition": "event == \"delete\""
@@ -145,7 +145,6 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         parent::setUp();
 
         $this->mockHandler = new MockHandler([
-           new Response(200, []),
            new Response(200, []),
            new Response(200, []),
            new Response(200, [])
@@ -207,17 +206,14 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals('key1212494949494', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
         $this->assertEquals('{"type":"website","text":"my text 1","longtext":"my longtext 1"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
 
-        $content_data = [
-          'text' => "my text 2",
-          'longtext' => "my longtext 2"
-        ];
+        $this->em->refresh($content);
 
-        $content->setData($content_data);
-        $this->em->flush($content);
+        $this->em->remove($content);
+        $this->em->flush();
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
         $this->assertEquals('key1212494949494', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
-        $this->assertEquals('{"type":"website","text":"my text 2","longtext":"my longtext 2"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
+        $this->assertEquals('', $this->mockHandler->getLastRequest()->getBody()->getContents());
        
     }
 
@@ -239,8 +235,8 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $this->em->flush($setting);
         $this->em->refresh($setting);
 
-        #$this->em->remove($setting);
-        #$this->em->flush();
+        $this->em->remove($setting);
+        $this->em->flush();
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
         $this->assertEquals('key121277543', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
