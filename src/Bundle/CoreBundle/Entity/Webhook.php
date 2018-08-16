@@ -42,7 +42,7 @@ class Webhook
      * @Assert\Length(min="8", max="32", minMessage="too_short", maxMessage="too_long")
      * @Type("string")
      */
-    private $secret_key;
+    private $authentication_header;
 
     /**
      * @var string
@@ -50,15 +50,15 @@ class Webhook
      * @ValidWebhookAction(message="invalid_expression")
      * @Type("string")
      */
-    private $action;
+    private $condition;
 
-    public function __construct(string $query, string $url, string $action, bool $check_ssl = true, string $secret_key = '')
+    public function __construct(string $query, string $url, string $condition, bool $check_ssl = true, string $authentication_header = null)
     {
         $this->query = $query;
         $this->url = $url;
         $this->check_ssl = $check_ssl;
-        $this->secret_key = $secret_key;
-        $this->action = $action;
+        $this->authentication_header = $authentication_header;
+        $this->condition = $condition;
     }
 
     /**
@@ -112,32 +112,32 @@ class Webhook
     /**
      * @return string
      */
-    public function getSecretKey(): string
+    public function getAuthenticationHeader(): string
     {
-        return $this->secret_key;
+        return $this->authentication_header;
     }
 
     /**
-     * @param string $secret_key
+     * @param string $authentication_header
      */
-    public function setSecretKey(string $secret_key): void
+    public function setAuthenticationHeader(string $authentication_header): void
     {
-        $this->secret_key = $secret_key;
+        $this->authentication_header = $authentication_header;
     }
 
     /**
      * @return string
      */
-    public function getAction(): string
+    public function getCondition(): string
     {
-        return $this->action;
+        return $this->condition;
     }
 
     /**
-     * @param string $action
+     * @param string $condition
      */
-    public function setAction(string $action): void
+    public function setCondition(string $condition): void
     {
-        $this->action = $action;
+        $this->condition = $condition;
     }
 }

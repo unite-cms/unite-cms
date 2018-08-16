@@ -113,15 +113,15 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('webhooks[0].url', $errors->get(1)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('webhooks[0].action', $errors->get(2)->getPropertyPath());
+        $this->assertEquals('webhooks[0].condition', $errors->get(2)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
         $this->assertEquals('webhooks[1].query', $errors->get(3)->getPropertyPath());
         $this->assertEquals('invalid_query', $errors->get(3)->getMessageTemplate());
         $this->assertEquals('webhooks[1].url', $errors->get(4)->getPropertyPath());
         $this->assertEquals('invalid_url', $errors->get(4)->getMessageTemplate());
-        $this->assertEquals('webhooks[1].secret_key', $errors->get(5)->getPropertyPath());
+        $this->assertEquals('webhooks[1].authentication_header', $errors->get(5)->getPropertyPath());
         $this->assertEquals('too_short', $errors->get(5)->getMessageTemplate());
-        $this->assertEquals('webhooks[1].action', $errors->get(6)->getPropertyPath());
+        $this->assertEquals('webhooks[1].condition', $errors->get(6)->getPropertyPath());
         $this->assertEquals('invalid_expression', $errors->get(6)->getMessageTemplate());
 
         $settingType->setWebhooks([

@@ -27,12 +27,24 @@ class WebHookSubscriber
 
     public function postRemove(LifecycleEventArgs $args)
     {
-        $this->fireHook($args, 'delete');
+        $entity = $args->getObject();
+
+        if ($entity instanceof Content) {
+            $this->fireHook($args, 'delete');
+        }
     }
 
     public function postPersist(LifecycleEventArgs $args)
     {
-        $this->fireHook($args, 'create');
+        $entity = $args->getObject();
+
+        if ($entity instanceof Content) {
+            $this->fireHook($args, 'create');
+        }
+
+        if ($entity instanceof Setting) {
+            $this->fireHook($args, 'update');
+        }
     }
 
     public function postUpdate(LifecycleEventArgs $args)
@@ -44,12 +56,15 @@ class WebHookSubscriber
     {
         $entity = $args->getObject();
 
-        if ($entity instanceof Content) {
-            $this->webHookManager->processContent($args->getObject(), $event);
+        if ($entity instanceof Content)
+        {
+            $this->webHookManager->process($args->getObject(), $event, 'Content');
         }
 
-        if ($entity instanceof Setting) {
-            $this->webHookManager->processSetting($args->getObject(), $event);
+        if ($entity instanceof Setting)
+        {
+            $this->webHookManager->process($args->getObject(), $event, 'Setting');
         }
+
     }
 }

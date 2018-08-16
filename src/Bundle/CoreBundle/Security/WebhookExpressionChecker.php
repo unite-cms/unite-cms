@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Security;
 
 use Symfony\Component\ExpressionLanguage\SyntaxError;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 
 class WebhookExpressionChecker
 {
@@ -12,11 +13,17 @@ class WebhookExpressionChecker
      *
      * @param string $expression
      * @param string $eventName
+     * @param FieldableContent|null $fieldableContent
      * @return bool
      */
-    public function evaluate(string $expression, string $eventName) : bool {
+    public function evaluate(string $expression, string $eventName, FieldableContent $fieldableContent) : bool {
         $expressionLanguage = new PlainExpressionLanguage();
-        $variables['event'] = $eventName;
+
+        $variables = [
+          'locale' => $fieldableContent->getLocale(),
+          'data' => json_decode(json_encode($fieldableContent->getData())),
+          'event' => $eventName
+        ];
 
         try {
             return (bool) $expressionLanguage->evaluate($expression, $variables);
@@ -36,7 +43,7 @@ class WebhookExpressionChecker
      */
     public function validate(string $expression) : bool {
         $expressionLanguage = new PlainExpressionLanguage();
-        $variables = ['event'];
+        $variables = ['event', 'locale', 'data'];
 
         try {
             $expressionLanguage->parse($expression, $variables);

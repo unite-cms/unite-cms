@@ -37,3 +37,4 @@ invalid_reference_definition: 'You cannot reference this content object. Either 
 wrong_setting_definition: 'Wrong setting definition. Please check https://www.unitecms.io/docs for details.'
 unknown_column: 'There is no column with this name.'
 invalid_validations: 'Invalid validations definition. Validations must be set as array of validation objects.'
+invalid_expression: 'Invalid Expression definition. Please correct that and try again.'

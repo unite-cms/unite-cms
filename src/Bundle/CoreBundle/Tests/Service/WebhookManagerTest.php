@@ -15,10 +15,7 @@ use GuzzleHttp\Psr7\Response;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\OrganizationMember;
-use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -76,15 +73,15 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
                     "query": "query { type, text, longtext  }",
                     "url": "http://www.example1.com",
                     "check_ssl": true,
-                    "secret_key": "key1212494949494",
-                    "action": "event == \"update\""
+                    "authentication_header": "key1212494949494",
+                    "condition": "event == \"update\""
                   },
                   {
                     "query": "query { type, text, longtext }",
                     "url": "http://www.example.com",
                     "check_ssl": true,
-                    "secret_key": "asdfasdf234234234234",
-                    "action": "event == \"create\""
+                    "authentication_header": "asdfasdf234234234234",
+                    "condition": "event == \"create\""
                   }
               ]
             }
@@ -106,8 +103,8 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
                     "query": "query { type, text }",
                     "url": "http://www.example.com",
                     "check_ssl": true,
-                    "secret_key": "key12124949456",
-                    "action": "event == \"delete\""
+                    "authentication_header": "key12124949456",
+                    "condition": "event == \"delete\""
                   }
               ]
             }
@@ -132,13 +129,6 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
           }
         }';
 
-    /**
-     * @var User[]
-     */
-    private $users;
-
-    private $userPassword = 'XXXXXXXXX';
-
     public function setUp()
     {
         parent::setUp();
@@ -156,50 +146,15 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
 
         // Create Test Organization and import Test Domain.
         $this->organization = new Organization();
-        $this->organization->setTitle('Test password reset')->setIdentifier('password_reset');
-
-        $org2 = new Organization();
-        $org2->setTitle('Org2')->setIdentifier('org2_org2');
+        $this->organization->setTitle('Test wekhooks')->setIdentifier('webhook_test');
 
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
-        $this->em->persist($org2);
         $this->em->persist($this->domain);
         $this->em->flush();
-        $this->em->refresh($this->organization);
-        $this->em->refresh($org2);
-        $this->em->refresh($this->domain);
 
-        $this->users['domain_editor'] = new User();
-        $this->users['domain_editor']
-          ->setEmail('domain_editor@example.com')
-          ->setName('Domain Editor')
-          ->setRoles([User::ROLE_USER])
-          ->setPassword(
-            static::$container->get('security.password_encoder')->encodePassword(
-              $this->users['domain_editor'],
-              $this->userPassword
-            )
-          );
-
-        $domainEditorOrgMember = new OrganizationMember();
-        $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($this->organization);
-        $domainEditorDomainMember = new DomainMember();
-        $domainEditorDomainMember->setDomain($this->domain)->setDomainMemberType($this->domain->getDomainMemberTypes()->get('editor'));
-        $this->users['domain_editor']->addOrganization($domainEditorOrgMember);
-        $this->users['domain_editor']->addDomain($domainEditorDomainMember);
-
-        foreach ($this->users as $key => $user) {
-            $this->em->persist($this->users[$key]);
-        }
-
-        $this->em->flush();
-
-        foreach ($this->users as $key => $user) {
-            $this->em->refresh($this->users[$key]);
-        }
     }
 
     /**
@@ -223,7 +178,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $this->em->flush($content);
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
-        $this->assertEquals(sha1('asdfasdf234234234234'), $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
+        $this->assertEquals('asdfasdf234234234234', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
         $this->assertEquals('{"type":"website","text":"my text","longtext":"my longtext"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
 
         $content_data = [
@@ -235,7 +190,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $this->em->flush($content);
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
-        $this->assertEquals(sha1('key1212494949494'), $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
+        $this->assertEquals('key1212494949494', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
         $this->assertEquals('{"type":"website","text":"my text 1","longtext":"my longtext 1"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
        
     }
@@ -262,7 +217,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
-        $this->assertEquals(sha1('key12124949456'), $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
+        $this->assertEquals('key12124949456', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
         $this->assertEquals('{"type":"setting","text":"my text"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
     }
 }

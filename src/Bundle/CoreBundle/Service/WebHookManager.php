@@ -11,12 +11,12 @@ namespace UniteCMS\CoreBundle\Service;
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\TransferException;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
 use UniteCMS\CoreBundle\Entity\Webhook;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 
 class WebHookManager
 {
@@ -51,57 +51,28 @@ class WebHookManager
     /**
      * Processes the given webhooks of ContentType
      *
-     * @param Setting $setting
+     * @param FieldableContent $content
      * @param string $action
+     * @param string $type
      *
      * @return void
      */
-    public function processContent(Content $content, string $action) : void
+    public function process(FieldableContent $content, string $action, string $type) : void
     {
-        $contentType = $content->getContentType();
+        $entity = $content->getEntity();
 
-        if (empty($contentType->getWebHooks())) {
+        if (empty($entity->getWebHooks())) {
            return;
         }
 
-        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($contentType->getIdentifier()) . 'Content', $contentType->getDomain());
+        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($entity->getIdentifier()) . $type, $entity->getDomain());
 
-        foreach ($contentType->getWebHooks() as $webhook) {
-            if (!$this->webhookExpressionChecker->evaluate($webhook->getAction(), $action)) {
+        foreach ($entity->getWebHooks() as $webhook) {
+            if (!$this->webhookExpressionChecker->evaluate($webhook->getCondition(), $action, $content)) {
                 continue;
             }
 
             $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $content);
-            $this->fire($webhook, $result->data);
-        }
-
-    }
-
-    /**
-     * Processes the given webhooks of SettingType
-     *
-     * @param Setting $setting
-     * @param string $action
-     *
-     * @return void
-     */
-    public function processSetting(Setting $setting, string $action) : void
-    {
-
-        $settingType = $setting->getSettingType();
-
-        if (empty($settingType->getWebHooks())) {
-            return;
-        }
-
-        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($settingType->getIdentifier()) . 'Setting', $settingType->getDomain());
-
-        foreach ($settingType->getWebHooks() as $webhook) {
-            if (!$this->webhookExpressionChecker->evaluate($webhook->getAction(), $action)) {
-                continue;
-            }
-
-            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $setting);
             $this->fire($webhook, $result->data);
         }
 
@@ -113,6 +84,8 @@ class WebHookManager
      * @param Webhook[]
      * @param array $data
      *
+     * @throws TransferException if the request fails
+     *
      * @return bool
      */
     private function fire(Webhook $webhook, array $data) : bool
@@ -121,20 +94,26 @@ class WebHookManager
 
         try
         {
-            $response = $this->client->request('POST', $webhook->getUrl(), [
-               'verify' => $ssl_verify,
-               'json' => $data,
-               'headers' => [
-                   'Content-type' => 'application/json; charset=utf-8',
-                   'Accept' => 'application/json',
-                   'Authorization' => sha1($webhook->getSecretKey())
-                ],
-            ]);
+            $post_data = [
+                'verify' => $ssl_verify,
+                'json' => $data,
+                'headers' => [
+                     'Content-type' => 'application/json; charset=utf-8'
+                 ]
+            ];
+
+            if ($webhook->getAuthenticationHeader()) {
+                $post_data['headers']['Authorization'] = $webhook->getAuthenticationHeader();
+            }
+
+            $response = $this->client->request('POST', $webhook->getUrl(), $post_data);
+
             return true;
 
-        } catch (\Exception $e)
+        } catch (TransferException $exception)
         {
-            $this->logger->error('Webhook error: '.$e->getMessage());
+
+            $this->logger->error('A network error occurred. Webhook was not sent.', array('exception' => $exception));
             return false;
 
         }
