@@ -32,6 +32,10 @@ class WebHookSubscriber
         if ($entity instanceof Content) {
             $this->fireHook($args, 'delete');
         }
+
+        if ($entity instanceof Setting) {
+            $this->fireHook($args, 'update');
+        }
     }
 
     public function postPersist(LifecycleEventArgs $args)
@@ -63,7 +67,7 @@ class WebHookSubscriber
 
         if ($entity instanceof Setting)
         {
-            $this->webHookManager->process($args->getObject(), $event, 'Setting');
+            $this->webHookManager->process($args->getObject(), 'all', 'Setting');
         }
 
     }

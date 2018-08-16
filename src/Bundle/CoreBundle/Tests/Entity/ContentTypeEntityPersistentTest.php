@@ -151,10 +151,10 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $contentType->setWebhooks([
             new Webhook('', '', ''),
             new Webhook('XXX', 'XXX', 'csd <= ', 'csd <= ', -1),
-            new Webhook('query { foo { baa } }', 'https://www.orf.at', 'event == "delete"', true, 'asdfasdfasdfasdfasdfasdfasdfasdfasdfasdasdfasdfasdfasdfasdfasdfasdfasdf'),
+            new Webhook('query { foo { baa } }', 'https://www.orf.at' . $this->generateRandomUTF8String(255), 'event == "'.$this->generateRandomUTF8String(255).'"', true, $this->generateRandomUTF8String(255)),
         ]);
         $errors = static::$container->get('validator')->validate($contentType);
-        $this->assertCount(8, $errors);
+        $this->assertCount(10, $errors);
         $this->assertEquals('webhooks[0].query', $errors->get(0)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('webhooks[0].url', $errors->get(1)->getPropertyPath());
@@ -169,8 +169,12 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('too_short', $errors->get(5)->getMessageTemplate());
         $this->assertEquals('webhooks[1].condition', $errors->get(6)->getPropertyPath());
         $this->assertEquals('invalid_expression', $errors->get(6)->getMessageTemplate());
-        $this->assertEquals('webhooks[2].authentication_header', $errors->get(7)->getPropertyPath());
+        $this->assertEquals('webhooks[2].url', $errors->get(7)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(7)->getMessageTemplate());
+        $this->assertEquals('webhooks[2].authentication_header', $errors->get(8)->getPropertyPath());
+        $this->assertEquals('too_long', $errors->get(8)->getMessageTemplate());
+        $this->assertEquals('webhooks[2].condition', $errors->get(9)->getPropertyPath());
+        $this->assertEquals('too_long', $errors->get(9)->getMessageTemplate());
 
         $contentType->setWebhooks([
             new Webhook('{ type }', 'http://www.orf.at', 'event == "update"', false, 'abc12234234basdf'),

@@ -6,7 +6,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Type;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidGraphQLQuery;
-use UniteCMS\CoreBundle\Validator\Constraints\ValidWebhookAction;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidWebhookCondition;
 
 /**
  * @ExclusionPolicy("none")
@@ -47,7 +47,8 @@ class Webhook
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
-     * @ValidWebhookAction(message="invalid_expression")
+     * @Assert\Length(min="4", max="255", minMessage="too_short", maxMessage="too_long")
+     * @ValidWebhookCondition(message="invalid_expression")
      * @Type("string")
      */
     private $condition;
@@ -110,9 +111,9 @@ class Webhook
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getAuthenticationHeader(): string
+    public function getAuthenticationHeader(): ?string
     {
         return $this->authentication_header;
     }

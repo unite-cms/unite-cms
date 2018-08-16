@@ -17,6 +17,7 @@ class WebhookExpressionChecker
      * @return bool
      */
     public function evaluate(string $expression, string $eventName, FieldableContent $fieldableContent) : bool {
+
         $expressionLanguage = new PlainExpressionLanguage();
 
         $variables = [

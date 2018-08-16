@@ -10,6 +10,7 @@ namespace UniteCMS\CoreBundle\Service;
 
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
+use GraphQL\Error\Debug;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
 use Psr\Container\ContainerInterface;
@@ -52,12 +53,14 @@ class WebHookManager
      * Processes the given webhooks of ContentType
      *
      * @param FieldableContent $content
-     * @param string $action
+     * @param string $event_name
      * @param string $type
+     *
+     * @todo Log errors to a Log entity which will be presented to the user
      *
      * @return void
      */
-    public function process(FieldableContent $content, string $action, string $type) : void
+    public function process(FieldableContent $content, string $event_name, string $type) : void
     {
         $entity = $content->getEntity();
 
@@ -68,12 +71,24 @@ class WebHookManager
         $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($entity->getIdentifier()) . $type, $entity->getDomain());
 
         foreach ($entity->getWebHooks() as $webhook) {
-            if (!$this->webhookExpressionChecker->evaluate($webhook->getCondition(), $action, $content)) {
+
+            // in case of SettingType always fire update event
+            if (!$this->webhookExpressionChecker->evaluate($webhook->getCondition(), $event_name, $content) && $event_name != 'all') {
                 continue;
             }
 
             $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $content);
-            $this->fire($webhook, $result->data);
+            
+            if (empty($result->errors)) {
+                $this->fire($webhook, $result->data);
+            }
+            else {
+                // @todo Log errors to a Log entity which will be presented to the user
+                foreach ($result->errors as $error) {
+                    $this->logger->error('Error Resolving Webhook query.', array('exception' => $error));
+                }
+            }
+            
         }
 
     }
@@ -85,6 +100,8 @@ class WebHookManager
      * @param array $data
      *
      * @throws TransferException if the request fails
+     * 
+     * @todo Log errors to a Log entity which will be presented to the user
      *
      * @return bool
      */
@@ -113,6 +130,7 @@ class WebHookManager
         } catch (TransferException $exception)
         {
 
+            // @todo Log errors to a Log entity which will be presented to the user
             $this->logger->error('A network error occurred. Webhook was not sent.', array('exception' => $exception));
             return false;
 
