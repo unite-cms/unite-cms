@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 (2018-08-17)
+- Added #38: Implement CRUD Webhooks
+- Added #37: Implement variants field type
+- Added #39: Implement custom, configurable field validations for content and setting types  
+- Added #41: Implement iFrame live preview for content and setting edit form
+- Added #193: Implement required persist input option for mutation api to test mutation without persisting changes to the database
+- Added #82: Add docker setup to project dir for local development
+- Fixed #191: Authorization issues when user has multiple memberships on the same domain
+- Fixed #210: Fixed an issue where user sees content form another organization he_she has access to
+- Improved #207, #209, #208: Trigger nested setting field events for create & delete, not only update
+
 ## 0.5.8 (2018-07-20)
 - Fixed #185: API: Rename header header (Authentication -> Authorization)
 - Added #184: API: Handle CORS-preflight requests and allow API Keys to set allowed origin header
