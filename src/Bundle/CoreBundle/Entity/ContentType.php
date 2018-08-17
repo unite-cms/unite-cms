@@ -136,6 +136,16 @@ class ContentType implements Fieldable
 
     /**
      * @var array
+     * @ORM\Column(name="webhooks", type="array", nullable=true)
+     * @Assert\Valid()
+     * @Type("array<UniteCMS\CoreBundle\Entity\Webhook>")
+     * @AccessType("public_method")
+     * @Expose
+     */
+    private $webhooks;
+
+    /**
+     * @var array
      * @ValidValidations(message="invalid_validations")
      * @ORM\Column(name="validations", type="array", nullable=true)
      * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
@@ -176,6 +186,7 @@ class ContentType implements Fieldable
         $this->views = new ArrayCollection();
         $this->locales = [];
         $this->permissions = [];
+        $this->webhooks = [];
         $this->validations = [];
         $this->addDefaultView();
         $this->addDefaultPermissions();
@@ -256,6 +267,7 @@ class ContentType implements Fieldable
             ->setPermissions($contentType->getPermissions())
             ->setDescription($contentType->getDescription())
             ->setLocales($contentType->getLocales())
+            ->setWebhooks($contentType->getWebhooks())
             ->setValidations($contentType->getValidations());
 
         // Fields to delete
@@ -621,6 +633,7 @@ class ContentType implements Fieldable
         return $this->permissions;
     }
 
+
     /**
      * @param array $permissions
      *
@@ -641,6 +654,40 @@ class ContentType implements Fieldable
     public function addPermission($attribute, string $expression)
     {
         $this->permissions[$attribute] = $expression;
+    }
+
+    /**
+     * @return Webhook[]
+     */
+    public function getWebhooks() : array
+    {
+        // Prevent null values. We always need an array response.
+        $this->webhooks = $this->webhooks ?? [];
+        return $this->webhooks;
+    }
+
+    /**
+     * @param Webhook[] $webhooks
+     *
+     * @return ContentType
+     */
+    public function setWebhooks($webhooks)
+    {
+        $this->webhooks = [];
+
+        foreach ($webhooks as $webhook) {
+            $this->addWebhook($webhook);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Webhook $webhook
+     */
+    public function addWebhook(Webhook $webhook)
+    {
+        $this->webhooks[] = $webhook;
     }
 
     /**

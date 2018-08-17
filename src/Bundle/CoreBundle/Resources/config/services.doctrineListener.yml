@@ -33,3 +33,12 @@ services:
       - { name: doctrine.event_listener, event: prePersist }
       - { name: doctrine.event_listener, event: preUpdate }
       - { name: doctrine.event_listener, event: preRemove }
+
+  # When inserting, updating or deleting content, the webhooks (if any defined) should be fired
+  UniteCMS\CoreBundle\Subscriber\WebHookSubscriber:
+    public: false
+    arguments: ['@unite.cms.webhook_manager']
+    tags:
+      - { name: doctrine.event_listener, event: postRemove, lazy: true }
+      - { name: doctrine.event_listener, event: postPersist, lazy: true }
+      - { name: doctrine.event_listener, event: postUpdate, lazy: true }

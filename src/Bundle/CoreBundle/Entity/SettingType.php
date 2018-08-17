@@ -121,6 +121,16 @@ class SettingType implements Fieldable
 
     /**
      * @var array
+     * @ORM\Column(name="webhooks", type="array", nullable=true)
+     * @Assert\Valid()
+     * @Type("array<UniteCMS\CoreBundle\Entity\Webhook>")
+     * @AccessType("public_method")
+     * @Expose
+     */
+    private $webhooks;
+
+    /**
+     * @var array
      * @ValidValidations(message="invalid_validations")
      * @ORM\Column(name="validations", type="array", nullable=true)
      * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
@@ -154,6 +164,7 @@ class SettingType implements Fieldable
         $this->settings = new ArrayCollection();
         $this->locales = [];
         $this->permissions = [];
+        $this->webhooks = [];
         $this->validations = [];
         $this->addDefaultPermissions();
     }
@@ -215,6 +226,7 @@ class SettingType implements Fieldable
             ->setDescription($settingType->getDescription())
             ->setLocales($settingType->getLocales())
             ->setPermissions($settingType->getPermissions())
+            ->setWebhooks($settingType->getWebhooks())
             ->setValidations($settingType->getValidations());
 
         // Fields to delete
@@ -557,6 +569,41 @@ class SettingType implements Fieldable
     {
         $this->permissions[$attribute] = $expression;
     }
+
+    /**
+     * @return Webhook[]
+     */
+    public function getWebhooks() : array
+    {
+        // Prevent null values. We always need an array response.
+        $this->webhooks = $this->webhooks ?? [];
+        return $this->webhooks;
+    }
+
+    /**
+     * @param Webhook[] $webhooks
+     *
+     * @return SettingType
+     */
+    public function setWebhooks($webhooks)
+    {
+        $this->webhooks = [];
+
+        foreach ($webhooks as $webhook) {
+            $this->addWebhook($webhook);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Webhook $webhook
+     */
+    public function addWebhook(Webhook $webhook)
+    {
+        $this->webhooks[] = $webhook;
+    }
+
 
     /**
      * @return FieldableValidation[]

@@ -44,3 +44,10 @@ services:
     class: UniteCMS\CoreBundle\Form\FieldableFormType
     arguments: ['@security.token_storage']
     tags: [form.type]
+
+  # Service Class to fire webhooks
+  unite.cms.webhook_manager:
+    class: UniteCMS\CoreBundle\Service\WebHookManager
+    arguments: ['@service_container', '@logger']
+    public: false
+

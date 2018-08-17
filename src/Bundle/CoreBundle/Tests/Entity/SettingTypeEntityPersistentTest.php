@@ -7,13 +7,14 @@ use UniteCMS\CoreBundle\Entity\FieldablePreview;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\Webhook;
 use UniteCMS\CoreBundle\Field\FieldableValidation;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
 {
 
-    public function testValidateContentType()
+    public function testValidateSettingType()
     {
 
         // Try to validate empty SettingType.
@@ -94,6 +95,40 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('preview.query', $errors->get(1)->getPropertyPath());
         $this->assertEquals('invalid_query', $errors->get(1)->getMessageTemplate());
+
+        $settingType->setPreview(new FieldablePreview('https://example.com', '{ type }'));
+        $this->assertCount(0, static::$container->get('validator')->validate($settingType));
+
+        // validate Webhooks 
+        $settingType->setWebhooks([]);
+        $this->assertCount(0, static::$container->get('validator')->validate($settingType));
+
+        $settingType->setWebhooks([
+            new Webhook('', '', ''),
+            new Webhook('XXX', 'XXX', 'csd <= ', 'csd <= ', -1),
+        ]);
+        $errors = static::$container->get('validator')->validate($settingType);
+        $this->assertCount(7, $errors);
+        $this->assertEquals('webhooks[0].query', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('webhooks[0].url', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('webhooks[0].condition', $errors->get(2)->getPropertyPath());
+        $this->assertEquals('not_blank', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('webhooks[1].query', $errors->get(3)->getPropertyPath());
+        $this->assertEquals('invalid_query', $errors->get(3)->getMessageTemplate());
+        $this->assertEquals('webhooks[1].url', $errors->get(4)->getPropertyPath());
+        $this->assertEquals('invalid_url', $errors->get(4)->getMessageTemplate());
+        $this->assertEquals('webhooks[1].authentication_header', $errors->get(5)->getPropertyPath());
+        $this->assertEquals('too_short', $errors->get(5)->getMessageTemplate());
+        $this->assertEquals('webhooks[1].condition', $errors->get(6)->getPropertyPath());
+        $this->assertEquals('invalid_expression', $errors->get(6)->getMessageTemplate());
+
+        $settingType->setWebhooks([
+            new Webhook('{ type }', 'http://www.orf.at', 'event == "update"', false, 'abc12234234basdf'),
+            new Webhook('query { foo { baa } }', 'https://www.orf.at', 'event == "delete"', true, ''),
+        ]);
+        $this->assertCount(0, static::$container->get('validator')->validate($settingType));
 
         // There can only be one identifier per domain with the same identifier.
         $org = new Organization();
