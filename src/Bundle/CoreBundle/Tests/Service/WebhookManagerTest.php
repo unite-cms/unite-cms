@@ -115,7 +115,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
                     "url": "http://www.example3.com",
                     "check_ssl": true,
                     "authentication_header": "key121277543",
-                    "condition": "event == \"delete\""
+                    "condition": "event == \"update\""
                   }
               ]
             }
@@ -234,9 +234,6 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $this->em->persist($setting);
         $this->em->flush($setting);
         $this->em->refresh($setting);
-
-        $this->em->remove($setting);
-        $this->em->flush();
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
         $this->assertEquals('key121277543', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);

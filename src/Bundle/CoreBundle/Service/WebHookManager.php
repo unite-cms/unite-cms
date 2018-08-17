@@ -10,7 +10,6 @@ namespace UniteCMS\CoreBundle\Service;
 
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
-use GraphQL\Error\Debug;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
 use Psr\Container\ContainerInterface;
@@ -73,7 +72,7 @@ class WebHookManager
         foreach ($entity->getWebHooks() as $webhook) {
 
             // in case of SettingType always fire update event
-            if (!$this->webhookExpressionChecker->evaluate($webhook->getCondition(), $event_name, $content) && $event_name != 'all') {
+            if (!$this->webhookExpressionChecker->evaluate($webhook->getCondition(), $event_name, $content)) {
                 continue;
             }
 

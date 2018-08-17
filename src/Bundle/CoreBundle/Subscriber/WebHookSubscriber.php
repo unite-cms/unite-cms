@@ -67,7 +67,7 @@ class WebHookSubscriber
 
         if ($entity instanceof Setting)
         {
-            $this->webHookManager->process($args->getObject(), 'all', 'Setting');
+            $this->webHookManager->process($args->getObject(), $event, 'Setting');
         }
 
     }
