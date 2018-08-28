@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
@@ -43,6 +44,7 @@ class ReferenceFieldType extends FieldType
     private $entityManager;
     private $templating;
     private $csrfTokenManager;
+    private $router;
 
     function __construct(
         ValidatorInterface $validator,
@@ -51,6 +53,7 @@ class ReferenceFieldType extends FieldType
         EntityManager $entityManager,
         ViewTypeManager $viewTypeManager,
         TwigEngine $templating,
+        Router $router,
         CsrfTokenManager $csrfTokenManager
     ) {
         $this->validator = $validator;
@@ -59,6 +62,7 @@ class ReferenceFieldType extends FieldType
         $this->viewTypeManager = $viewTypeManager;
         $this->entityManager = $entityManager;
         $this->templating = $templating;
+        $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
     }
 
@@ -169,7 +173,9 @@ class ReferenceFieldType extends FieldType
                     'content_type' => $contentType->getIdentifier(),
                 ],
                 'attr' => [
-                    'base-url' => '/'.ParamNormalizer::denormalize($this->uniteCMSManager->getOrganization()->getIdentifier()).'/',
+                    'base-url' => $this->router->generate('unitecms_core_domain_index', [
+                        'organization' => $this->uniteCMSManager->getOrganization()->getIdentifier(),
+                    ], Router::ABSOLUTE_URL),
                     'content-label' => $settings->content_label ?? (empty(
                         $contentType->getContentLabel()
                         ) ? (string)$contentType.' #{id}' : $contentType->getContentLabel()),

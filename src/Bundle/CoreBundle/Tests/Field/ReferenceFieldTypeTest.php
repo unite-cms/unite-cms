@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -65,6 +66,61 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
+    }
+
+    public function testFormOptionGeneration() {
+
+        $ctField = $this->createContentTypeField('reference');
+        $ctField->getContentType()->getDomain()->setIdentifier('foo');
+        $ctField->getContentType()->setIdentifier('baa');
+        $ctField->setSettings(new FieldableFieldSettings([
+            'domain' => 'foo',
+            'content_type' => 'baa',
+            'content_label' => 'laa',
+        ]));
+
+        // Fake organization and domain
+        $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
+
+        $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o1->setAccessible(true);
+        $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
+        $authMock->expects($this->any())->method('isGranted')->willReturn(true);
+        $o1->setValue($fieldType, $authMock);
+
+        $o2 = new \ReflectionProperty($fieldType, 'uniteCMSManager');
+        $o2->setAccessible(true);
+        $cmsManager = $this->createMock(UniteCMSManager::class);
+        $cmsManager->expects($this->any())->method('getOrganization')->willReturn($ctField->getContentType()->getDomain()->getOrganization());
+        $cmsManager->expects($this->any())->method('getDomain')->willReturn($ctField->getContentType()->getDomain());
+        $o2->setValue($fieldType, $cmsManager);
+
+        $o3 = new \ReflectionProperty($fieldType, 'entityManager');
+        $o3->setAccessible(true);
+        $viewRepositoryMock = $this->createMock(EntityRepository::class);
+        $viewRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getView('all'));
+        $domainRepositoryMock = $this->createMock(EntityRepository::class);
+        $domainRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getDomain());
+
+        $cmsManager = $this->createMock(EntityManager::class);
+        $cmsManager->expects($this->any())->method('getRepository')->will($this->returnValueMap([
+            ['UniteCMSCoreBundle:View', $viewRepositoryMock],
+            ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
+        ]));
+        $o3->setValue($fieldType, $cmsManager);
+
+        $options = $fieldType->getFormOptions($ctField);
+        $this->assertEquals(false, $options['required']);
+        $this->assertEquals([
+            'domain' => 'foo',
+            'content_type' => 'baa',
+        ], $options['empty_data']);
+        $this->assertEquals('laa', $options['attr']['content-label']);
+        $this->assertEquals(static::$container->get('router')->generate(
+            'unitecms_core_domain_index',
+            ['organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier()],
+            Router::ABSOLUTE_URL
+        ), $options['attr']['base-url']);
     }
 
     public function testContentTypeFieldContentLabelFallback() {

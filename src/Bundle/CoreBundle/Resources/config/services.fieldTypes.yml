@@ -30,7 +30,7 @@ services:
   UniteCMS\CoreBundle\Field\Types\ReferenceFieldType:
     public: false
     tags: [unite_cms.field_type]
-    arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@unite.cms.view_type_manager', '@templating.engine.twig', '@security.csrf.token_manager']
+    arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@unite.cms.view_type_manager', '@templating.engine.twig', '@router', '@security.csrf.token_manager']
 
   # An integer input field that automatically handles position indexing (on INSERT, UPDATE, DELETE).
   UniteCMS\CoreBundle\Field\Types\SortIndexFieldType:
