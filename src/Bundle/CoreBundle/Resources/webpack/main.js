@@ -14,6 +14,8 @@ import VariantsSelect from "./vue/components/VariantsSelect.vue";
 import VariantsVariant from "./vue/components/VariantsVariant.vue";
 import Reference from "./vue/field/Reference.vue";
 
+import UnloadManager from "./js/pageUnload";
+
 require("./sass/unite.scss");
 
 // Use VueCustomElement
@@ -33,6 +35,10 @@ Vue.customElement('unite-cms-core-reference-field', Reference);
 
 
 window.onload = function(e) {
+
     // Use feather icon set.
     feather.replace();
+
+    // Add a generic unload warning message to all pages with forms.
+    UnloadManager.init('You have unsaved changes! Do you really want to navigate away and discard them?');
 };
