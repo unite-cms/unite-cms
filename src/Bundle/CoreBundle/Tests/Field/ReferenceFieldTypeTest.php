@@ -71,11 +71,12 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
     public function testFormOptionGeneration() {
 
         $ctField = $this->createContentTypeField('reference');
-        $ctField->getContentType()->getDomain()->setIdentifier('foo');
-        $ctField->getContentType()->setIdentifier('baa');
+        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('luu_luu');
+        $ctField->getContentType()->getDomain()->setIdentifier('foo_foo');
+        $ctField->getContentType()->setIdentifier('baa_baa');
         $ctField->setSettings(new FieldableFieldSettings([
-            'domain' => 'foo',
-            'content_type' => 'baa',
+            'domain' => 'foo_foo',
+            'content_type' => 'baa_baa',
             'content_label' => 'laa',
         ]));
 
@@ -112,15 +113,18 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $options = $fieldType->getFormOptions($ctField);
         $this->assertEquals(false, $options['required']);
         $this->assertEquals([
-            'domain' => 'foo',
-            'content_type' => 'baa',
+            'domain' => 'foo_foo',
+            'content_type' => 'baa_baa',
         ], $options['empty_data']);
         $this->assertEquals('laa', $options['attr']['content-label']);
         $this->assertEquals(static::$container->get('router')->generate(
-            'unitecms_core_domain_index',
-            ['organization' => $ctField->getContentType()->getDomain()->getOrganization()->getIdentifier()],
+            'unitecms_core_api',
+            [
+                'organization' => 'luu-luu',
+                'domain' => 'foo-foo',
+            ],
             Router::ABSOLUTE_URL
-        ), $options['attr']['base-url']);
+        ), $options['attr']['api-url']);
     }
 
     public function testContentTypeFieldContentLabelFallback() {

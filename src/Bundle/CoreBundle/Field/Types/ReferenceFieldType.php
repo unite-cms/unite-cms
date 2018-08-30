@@ -173,8 +173,9 @@ class ReferenceFieldType extends FieldType
                     'content_type' => $contentType->getIdentifier(),
                 ],
                 'attr' => [
-                    'base-url' => $this->router->generate('unitecms_core_domain_index', [
-                        'organization' => $this->uniteCMSManager->getOrganization()->getIdentifier(),
+                    'api-url' => $this->router->generate('unitecms_core_api', [
+                        'organization' => ParamNormalizer::denormalize($this->uniteCMSManager->getOrganization()->getIdentifier()),
+                        'domain' => ParamNormalizer::denormalize($this->uniteCMSManager->getDomain()->getIdentifier()),
                     ], Router::ABSOLUTE_URL),
                     'content-label' => $settings->content_label ?? (empty(
                         $contentType->getContentLabel()

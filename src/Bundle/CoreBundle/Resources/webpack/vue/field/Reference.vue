@@ -58,12 +58,12 @@
             'name',
             'value',
             'modalHtml',
-            'baseUrl',
+            'apiUrl',
             'contentLabel'
         ],
         created() {
 
-            this.client = new GraphQLClient(this.baseUrl + this.domain + '/api', {
+            this.client = new GraphQLClient(this.apiUrl, {
                 credentials: "same-origin",
                 headers: {
                     "Authentication-Fallback": true
