@@ -5,8 +5,10 @@ namespace UniteCMS\CollectionFieldBundle\Tests;
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use GraphQL\Type\Definition\ObjectType;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
@@ -298,12 +300,14 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('https://example.com/foo/XXX-YYY-ZZZ/cat.jpg', $result->data->createCt1->f1->url);
     }
 
-    public function testFormBuild()
+    public function testContentFormBuild()
     {
 
         $field = $this->createContentTypeField('file');
         $field->setIdentifier('f1');
-        $field->getContentType()->setIdentifier('ct1');
+        $field->getContentType()->getDomain()->getOrganization()->setIdentifier('baa_baa');
+        $field->getContentType()->getDomain()->setIdentifier('foo_foo');
+        $field->getContentType()->setIdentifier('ct1_ct1');
         $field->setSettings(
             new FieldableFieldSettings(
                 [
@@ -340,5 +344,71 @@ class FileFieldTypeTest extends FieldTypeTestCase
 
         // Assert values
         $this->assertEquals(json_encode($content->getData()['f1']), $root->vars['value']);
+
+        // Assert correct sign url generation.
+        $this->assertEquals(
+            static::$container->get('router')->generate('unitecms_storage_sign_uploadcontenttype', [
+                'organization' => 'baa-baa',
+                'domain' => 'foo-foo',
+                'content_type' => 'ct1-ct1',
+            ], Router::ABSOLUTE_URL),
+            $root->vars['attr']['upload-sign-url']
+        );
+    }
+
+    public function testSettingFormBuild()
+    {
+
+        $field = $this->createSettingTypeField('file');
+        $field->setIdentifier('f1');
+        $field->getSettingType()->getDomain()->getOrganization()->setIdentifier('baa_baa');
+        $field->getSettingType()->getDomain()->setIdentifier('foo_foo');
+        $field->getSettingType()->setIdentifier('st1_st1');
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => '*',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                    ],
+                ]
+            )
+        );
+        $setting = new Setting();
+        $setting->setData(
+            [
+                'f1' => [
+                    'name' => "cat.jpg",
+                    'size' => 12345,
+                    'type' => "image/jpeg",
+                    'id' => "XXX-YYY-ZZZ",
+                ],
+            ]
+        )->setSettingType($field->getSettingType());
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $field->getSettingType(),
+            $setting
+        );
+        $formView = $form->createView();
+
+        // Check root file field.
+        $root = $formView->getIterator()->current();
+        $this->assertEquals('unite-cms-storage-file-field', $root->vars['tag']);
+
+        // Assert values
+        $this->assertEquals(json_encode($setting->getData()['f1']), $root->vars['value']);
+
+        // Assert correct sign url generation.
+        $this->assertEquals(
+            static::$container->get('router')->generate('unitecms_storage_sign_uploadsettingtype', [
+                'organization' => 'baa-baa',
+                'domain' => 'foo-foo',
+                'setting_type' => 'st1-st1',
+            ], Router::ABSOLUTE_URL),
+            $root->vars['attr']['upload-sign-url']
+        );
     }
 }

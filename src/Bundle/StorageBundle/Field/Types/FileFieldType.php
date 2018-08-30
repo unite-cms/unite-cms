@@ -13,6 +13,7 @@ use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\StorageBundle\Form\StorageFileType;
 use UniteCMS\StorageBundle\Model\PreSignedUrl;
@@ -70,17 +71,17 @@ class FileFieldType extends FieldType
 
         if($fieldable instanceof ContentType) {
             $url = $this->router->generate('unitecms_storage_sign_uploadcontenttype', [
-              'organization' => $fieldable->getDomain()->getOrganization()->getIdentifier(),
-              'domain' => $fieldable->getDomain()->getIdentifier(),
-              'content_type' => $fieldable->getIdentifier(),
+              'organization' => IdentifierNormalizer::denormalize($fieldable->getDomain()->getOrganization()->getIdentifier()),
+              'domain' => IdentifierNormalizer::denormalize($fieldable->getDomain()->getIdentifier()),
+              'content_type' => IdentifierNormalizer::denormalize($fieldable->getIdentifier()),
             ], Router::ABSOLUTE_URL);
         }
 
         else if($fieldable instanceof SettingType) {
             $url = $this->router->generate('unitecms_storage_sign_uploadsettingtype', [
-              'organization' => $fieldable->getDomain()->getOrganization()->getIdentifier(),
-              'domain' => $fieldable->getDomain()->getIdentifier(),
-              'content_type' => $fieldable->getIdentifier(),
+              'organization' => IdentifierNormalizer::denormalize($fieldable->getDomain()->getOrganization()->getIdentifier()),
+              'domain' => IdentifierNormalizer::denormalize($fieldable->getDomain()->getIdentifier()),
+              'setting_type' => IdentifierNormalizer::denormalize($fieldable->getIdentifier()),
             ], Router::ABSOLUTE_URL);
         }
 
