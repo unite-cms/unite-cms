@@ -6,6 +6,7 @@ use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
+use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
@@ -28,6 +29,7 @@ use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class ReferenceFieldType extends FieldType
 {
@@ -80,6 +82,12 @@ class ReferenceFieldType extends FieldType
 
         // Only allow to resolve a content type from the same organization.
         $organization = $this->uniteCMSManager->getOrganization();
+
+        if (!$organization) {
+            throw new MissingOrganizationException(
+              "Organization Missing."
+            );
+        }
 
         $domain = $organization->getDomains()->filter(
             function (Domain $domain) use ($domain_identifier) {
@@ -294,5 +302,55 @@ class ReferenceFieldType extends FieldType
                 $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
+    {
+        // Validate allowed and required settings.
+        parent::validateSettings($settings, $context);
+
+        // Only continue, if there are no violations yet.
+        if ($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        $current_domain = $context->getRoot();
+
+        # if a new domain, things aren't persisted yet
+        if ($current_domain instanceof Domain && !$current_domain->getId()) {
+
+            if ($current_domain->getIdentifier() != $settings->domain) {
+                $context->buildViolation('invalid_domain')
+                  ->atPath('domain')
+                  ->addViolation();
+            }
+
+            $content_types = [];
+            foreach ($current_domain->getContentTypes() as $contentType) {
+                $content_types[] = $contentType->getIdentifier();
+            }
+
+            if (!in_array($settings->content_type, $content_types)) {
+                $context->buildViolation('invalid_content_type')->atPath(
+                  'content_type'
+                )->addViolation();
+            }
+
+        }
+
+        try {
+
+            $this->resolveContentType(
+                $settings->domain,
+                $settings->content_type
+            );
+
+        } catch (InvalidFieldConfigurationException $e) {
+            $context->buildViolation('invalid_configuration')->atPath('content_type')->addViolation();
+        }
+
     }
 }

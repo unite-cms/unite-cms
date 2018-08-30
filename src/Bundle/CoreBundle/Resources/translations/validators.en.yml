@@ -38,3 +38,4 @@ wrong_setting_definition: 'Wrong setting definition. Please check https://www.un
 unknown_column: 'There is no column with this name.'
 invalid_validations: 'Invalid validations definition. Validations must be set as array of validation objects.'
 invalid_expression: 'Invalid Expression definition. Please correct that and try again.'
+invalid_configuration: 'Invalid Content Type or Domain given'
