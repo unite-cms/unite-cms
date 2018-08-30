@@ -99,18 +99,18 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         // ContentType and Domain does not exist.
         $errors = static::$container->get('validator')->validate($domain);
-        $this->assertEquals('invalid_configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
 
         // Domain exist, content type does not exist.
         $ctField->getSettings()->domain = 'foo';
         $errors = static::$container->get('validator')->validate($domain);
-        $this->assertEquals('invalid_configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_content_type', $errors->get(0)->getMessageTemplate());
 
         // Content type exist, domain does not exist.
         $ctField->getSettings()->domain = 'wrong';
         $ctField->getSettings()->content_type = 'baa';
         $errors = static::$container->get('validator')->validate($domain);
-        $this->assertEquals('invalid_configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
 
         // No view access on domain.
         $ctField->getSettings()->domain = 'foo';
@@ -122,7 +122,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($domain);
         $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
 
         $o1->setValue($fieldType, new class implements AuthorizationCheckerInterface {
             public function isGranted($attributes, $subject = null) { return true; }
@@ -140,7 +140,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($domain);
 
         $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_content_type', $errors->get(0)->getMessageTemplate());
 
         $ctField->getSettings()->domain = 'foo';
         $ctField->getSettings()->content_type = 'new_ct';
@@ -157,18 +157,18 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $ctField->getSettings()->domain = 'wrong';
         $ctField->getSettings()->content_type = 'wrong';
         $errors = static::$container->get('validator')->validate($domain);
-        $this->assertEquals('invalid_configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
 
         // wrong content_type
         $ctField->getSettings()->domain = 'new';
         $errors = static::$container->get('validator')->validate($domain);
-        $this->assertEquals('invalid_configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_content_type', $errors->get(0)->getMessageTemplate());
 
         // wrong domain
         $ctField->getSettings()->domain = 'wrong';
         $ctField->getSettings()->content_type = 'baa';
         $errors = static::$container->get('validator')->validate($domain);
-        $this->assertEquals('invalid_configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
 
         // Correct content_type and domain
         $ctField->getSettings()->domain = 'new';

@@ -337,11 +337,10 @@ class ReferenceFieldType extends FieldType
             $this->resolveContentType($settings->domain, $settings->content_type);
         }
         catch (DomainAccessDeniedException $e) {
-            $context->buildViolation('invalid_configuration')->atPath('content_type')->addViolation();
+            $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
         } catch (MissingOrganizationException $e) {
-            $context->buildViolation('invalid_configuration')->atPath('content_type')->addViolation();
+            $context->buildViolation('invalid_organization')->atPath('domain')->addViolation();
         }
-
 
 
         // Special case 1: We are validating a new domain, that is not already persisted.
@@ -351,7 +350,7 @@ class ReferenceFieldType extends FieldType
 
                 // If we don't reference the new domain, but the domain also does not exist, we can't reference it.
                 if($context->getRoot()->getIdentifier() != $settings->domain) {
-                    $context->buildViolation('invalid_configuration')->atPath('content_type')->addViolation();
+                    $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
                     return;
                 }
 
@@ -363,34 +362,34 @@ class ReferenceFieldType extends FieldType
 
                 // If we referenced content_type was not found in our new domain, we can't reference it.
                 if(!$contentType) {
-                    $context->buildViolation('invalid_configuration')->atPath('content_type')->addViolation();
+                    $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
                     return;
                 }
 
                 return;
             }
 
-            $context->buildViolation('invalid_configuration')->atPath('content_type')->addViolation();
+            $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
 
 
 
         // Special case 2: Domain does exist, but we are updating the domain at the moment, adding a new content_type.
         } catch (MissingContentTypeException $e) {
 
-            if($context->getRoot() instanceof Domain && $context->getRoot()->getId() === $this->uniteCMSManager->getDomain()->getId()) {
+            if($context->getRoot() instanceof Domain && $this->uniteCMSManager->getDomain()  && $context->getRoot()->getId() === $this->uniteCMSManager->getDomain()->getId()) {
                 if(!$context->getRoot()->getContentTypes()->filter(
                     function (ContentType $contentType) use ($settings) {
                         return $contentType->getIdentifier() == $settings->content_type;
                     }
                 )->first()) {
-                    $context->buildViolation('invalid_configuration')->atPath('content_type')->addViolation();
+                    $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
                     return;
                 }
 
                 return;
             }
 
-            $context->buildViolation('invalid_configuration')->atPath('content_type')->addViolation();
+            $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
         }
     }
 }
