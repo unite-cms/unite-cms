@@ -82,6 +82,10 @@ class StateFieldType extends FieldType
                 break;
             }
 
+            print_r(array_diff_key(array_flip($required_transition_keys), $transition));
+            exit;
+
+
         }
 
     }
