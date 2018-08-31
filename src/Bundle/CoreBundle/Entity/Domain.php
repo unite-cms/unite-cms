@@ -7,7 +7,6 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
-use JMS\Serializer\Annotation\SkipWhenEmpty;
 use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Accessor;
 
@@ -74,7 +73,6 @@ class Domain
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
-     * @SkipWhenEmpty
      */
     private $contentTypes;
 
@@ -86,7 +84,6 @@ class Domain
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
-     * @SkipWhenEmpty
      */
     private $settingTypes;
 
@@ -112,7 +109,7 @@ class Domain
 
     /**
      * @var array
-     * @ORM\Column(name="config_variables", type="json", nullable=true)
+     * @ORM\Column(name="config_variables", type="array", nullable=true)
      */
     private $configVariables;
 
@@ -615,7 +612,10 @@ class Domain
      */
     public function getConfigVariables(): array
     {
-        return $this->configVariables ?? [];
+        if(empty($this->configVariables)) {
+            $this->configVariables = [];
+        }
+        return $this->configVariables;
     }
 
     /**

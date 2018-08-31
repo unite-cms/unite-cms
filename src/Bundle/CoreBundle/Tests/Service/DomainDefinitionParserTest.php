@@ -43,6 +43,7 @@ class DomainDefinitionParserTest extends DatabaseAwareTestCase
             }, 
             "@ct3"
         ],
+        "setting_types": [],
         "domain_member_types": [
             {
                 "title": "Editor",

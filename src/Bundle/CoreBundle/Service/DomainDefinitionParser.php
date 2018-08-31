@@ -62,14 +62,15 @@ class DomainDefinitionParser
      * If the domain contains variables, all occurrences will be replaced before returning the JSON.
      *
      * @param Domain $domain
+     * @param bool $find_and_replace_variables
      *
      * @return string
      */
-    public function serialize(Domain $domain): string
+    public function serialize(Domain $domain, $find_and_replace_variables = true): string
     {
         $JSON = $this->serializer->serialize($domain, 'json');
 
-        if(!empty($domain->getConfigVariables())) {
+        if($find_and_replace_variables && !empty($domain->getConfigVariables())) {
             foreach($domain->getConfigVariables() as $variable => $value) {
                 $value = json_encode($value);
                 $JSON = str_replace($value, '"'.$variable.'"', $JSON);
