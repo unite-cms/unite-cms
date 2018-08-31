@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 (2018-08-31)
+- Fixed #221: Reference Field not working 404 
+- Fixed #205: Reference & storage field cannot resolve domains with underscore
+- Improved #206: Missing validation: Reference domain and content_type 
+- Improved #199: Add window#beforeunload js to all pages with forms
+
 ## 0.6.0 (2018-08-17)
 - Added #38: Implement CRUD Webhooks
 - Added #37: Implement variants field type
