@@ -10,6 +10,7 @@ use JMS\Serializer\Annotation\Accessor;
 use JMS\Serializer\Annotation\AccessType;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\SkipWhenEmpty;
 use JMS\Serializer\Annotation\Type;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -126,6 +127,7 @@ class SettingType implements Fieldable
      * @Type("array<UniteCMS\CoreBundle\Entity\Webhook>")
      * @AccessType("public_method")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $webhooks;
 
@@ -136,6 +138,7 @@ class SettingType implements Fieldable
      * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
      * @AccessType("public_method")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $validations;
 
@@ -149,6 +152,7 @@ class SettingType implements Fieldable
      * @Type("array<string>")
      * @AccessType("public_method")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $locales;
 

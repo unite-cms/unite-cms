@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\SkipWhenEmpty;
 use JMS\Serializer\Annotation\Type;
 
 use Symfony\Component\Validator\Constraints as Assert;
@@ -100,6 +101,7 @@ class View
      * @Assert\NotNull(message="not_null")
      * @Type("UniteCMS\CoreBundle\View\ViewSettings")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $settings;
 

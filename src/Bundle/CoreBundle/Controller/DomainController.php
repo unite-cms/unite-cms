@@ -52,17 +52,16 @@ class DomainController extends Controller
     {
         $domain = new Domain();
         $domain->setTitle('Untitled Domain')->setIdentifier('untitled');
-        $form = $this->createFormBuilder(
-            [
+        $form = $this->createFormBuilder([
+            'domain' => [
                 'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
+                'variables' => '{}',
             ]
-        )
-            ->add(
-                'definition',
-                WebComponentType::class,
-                ['tag' => 'unite-cms-core-domaineditor']
-            )->getForm()
-            ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']]);
+        ])
+        ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
+        ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
+        ->getForm();
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -70,9 +69,9 @@ class DomainController extends Controller
             $domain = null;
 
             try {
-                $domain = $this->get('unite.cms.domain_definition_parser')->parse($form->getData()['definition']);
+                $domain = $this->get('unite.cms.domain_definition_parser')->parse($form->getData()['domain']['definition'], $form->getData()['domain']['variables'] ?? null);
             } catch (\Exception $e) {
-                $form->get('definition')->addError(new FormError('Could not parse domain definition JSON.'));
+                $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
             }
 
             if ($domain) {
@@ -147,12 +146,18 @@ class DomainController extends Controller
         $originalDomain = null;
         $updatedDomain = null;
 
-        $form = $this->createFormBuilder(['definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain)])
-            ->add('definition', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'error_bubbling' => true])
-            ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
-            ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
-            ->add('confirm', SubmitType::class, ['label' => 'domain.update.form.confirm', 'attr' => ['class' => 'uk-button uk-button-primary']])
-            ->getForm();
+        $form = $this->createFormBuilder([
+            'domain' => [
+                'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
+                'variables' => empty($domain->getConfigVariables()) ? '{}': json_encode($domain->getConfigVariables()),
+            ],
+        ])
+        ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'error_bubbling' => true])
+        ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
+        ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
+        ->add('confirm', SubmitType::class, ['label' => 'domain.update.form.confirm', 'attr' => ['class' => 'uk-button uk-button-primary']])
+        ->getForm();
+
         $form->handleRequest($request);
         $formView = $form->createView();
 
@@ -160,17 +165,20 @@ class DomainController extends Controller
 
             try {
                 $updatedDomain = $this->get('unite.cms.domain_definition_parser')->parse(
-                    $form->getData()['definition']
+                    $form->getData()['domain']['definition'],
+                    $form->getData()['domain']['variables'] ?? null
                 );
             } catch (\Exception $e) {
-                $form->get('definition')->addError(new FormError('Could not parse domain definition JSON.'));
+                $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
                 $formView = $form->createView();
             }
 
             if (isset($updatedDomain)) {
 
                 // In order to avoid persistence conflicts, we create a new domain from serialized domain.
-                $originalDomain = $this->get('unite.cms.domain_definition_parser')->parse($this->get('unite.cms.domain_definition_parser')->serialize($domain));
+                $originalDomain = $this->get('unite.cms.domain_definition_parser')->parse(
+                    $this->get('unite.cms.domain_definition_parser')->serialize($domain, false)
+                );
                 $domain->setFromEntity($updatedDomain);
                 $violations = $this->get('validator')->validate($domain);
 
@@ -181,7 +189,7 @@ class DomainController extends Controller
 
                     // Case 1: form was submitted but not confirmed yet.
                     if($form->get('submit')->isClicked()) {
-                        $formView->children['definition']->vars['disabled'] = true;
+                        $formView->children['domain']->vars['disabled'] = true;
                         $formView->children['submit']->vars['disabled'] = true;
                         $formView->children['back']->vars['disabled'] = false;
                         $formView->children['confirm']->vars['disabled'] = false;

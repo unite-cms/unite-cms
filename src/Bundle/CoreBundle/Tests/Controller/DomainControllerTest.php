@@ -109,7 +109,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $form->form();
         $form->disableValidation();
         $values = $form->getPhpValues();
-        $values['form']['definition'] = 'foo baa';
+        $values['form']['domain']['definition'] = 'foo baa';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->assertFalse($this->client->getResponse()->isRedirect());
@@ -119,7 +119,8 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['definition'] = '{ "foo": "baa" }';
+        $values['form']['domain']['definition'] = '{ "foo": "baa" }';
+
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertFalse($this->client->getResponse()->isRedirect());
         $this->assertCount(1, $crawler->filter('.uk-alert-danger p:contains("title: '.static::$container->get('translator')->trans('not_blank', [], 'validators').'")'));
@@ -132,7 +133,8 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1" }';
+        $values['form']['domain']['definition'] = '{ "title": "Domain 1", "identifier": "d1" }';
+        $values['form']['domain']['variables'] = '{}';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->client->enableReboot();
@@ -157,7 +159,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $form->form();
         $form->disableValidation();
         $values = $form->getPhpValues();
-        $values['form']['definition'] = 'foo baa';
+        $values['form']['domain']['definition'] = 'foo baa';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->assertFalse($this->client->getResponse()->isRedirect());
@@ -167,7 +169,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['definition'] = '{ "foo": "baa" }';
+        $values['form']['domain']['definition'] = '{ "foo": "baa" }';
         $values['form']['submit'] = '';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertFalse($this->client->getResponse()->isRedirect());
@@ -178,10 +180,11 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['definition'] = '{ "title": "Domain 1", "identifier": "d1", "permissions": {
+        $values['form']['domain']['definition'] = '{ "title": "@replaced_by_variable", "identifier": "d1", "permissions": {
             "view domain": "true",
             "update domain": "member.type == \"user\""
         }}';
+        $values['form']['domain']['variables'] = '{ "@replaced_by_variable": "Domain 1" }';
         $values['form']['submit'] = '';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
@@ -223,6 +226,9 @@ class DomainControllerTest extends DatabaseAwareTestCase
             'view domain' => 'true',
             'update domain' => 'member.type == "user"',
         ], $domain->getPermissions());
+
+        // Make sure, that domain title was replaced correctly.
+        $this->assertEquals('Domain 1', $domain->getTitle());
 
         // Click on domain delete.
         $deleteButton = $crawler->filter('a:contains("' . static::$container->get('translator')->trans('domain.menu.manage.trash') .'")');

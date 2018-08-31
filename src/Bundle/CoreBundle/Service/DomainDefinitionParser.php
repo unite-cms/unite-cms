@@ -4,7 +4,6 @@ namespace UniteCMS\CoreBundle\Service;
 
 use JMS\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 
 class DomainDefinitionParser
@@ -29,23 +28,55 @@ class DomainDefinitionParser
      * Parses the given domain definition in JSON format and returns a new domain object.
      *
      * @param string $JSON
-     * @throws \InvalidArgumentException
+     * @param string $variablesJSON
+     *   If a variables array is passed, all occurrences will be replaced before parsing.
+     *
      * @return Domain
      */
-    public function parse(string $JSON): Domain
+    public function parse(string $JSON, string $variablesJSON = null): Domain
     {
-        return $this->serializer->deserialize($JSON, Domain::class, 'json');
+        if(!empty($variablesJSON)) {
+            $variables = json_decode($variablesJSON);
+            foreach(get_object_vars($variables) as $variable => $value) {
+                $value = json_encode($value);
+                $JSON = str_replace('"'.$variable.'"', $value, $JSON);
+            }
+        }
+
+        /**
+         * @var Domain $domain
+         */
+        $domain = $this->serializer->deserialize($JSON, Domain::class, 'json');
+
+        // Save variables to the domain.
+        if($variablesJSON) {
+            $domain->setConfigVariables(json_decode($variablesJSON, true));
+        }
+
+        return $domain;
     }
 
     /**
-     * Returns a JSON string for the given Domain
+     * Returns a JSON string for the given Domain.
+     *
+     * If the domain contains variables, all occurrences will be replaced before returning the JSON.
      *
      * @param Domain $domain
-     * @throws \InvalidArgumentException
+     * @param bool $find_and_replace_variables
+     *
      * @return string
      */
-    public function serialize(Domain $domain): string
+    public function serialize(Domain $domain, $find_and_replace_variables = true): string
     {
-        return $this->serializer->serialize($domain, 'json');
+        $JSON = $this->serializer->serialize($domain, 'json');
+
+        if($find_and_replace_variables && !empty($domain->getConfigVariables())) {
+            foreach($domain->getConfigVariables() as $variable => $value) {
+                $value = json_encode($value);
+                $JSON = str_replace($value, '"'.$variable.'"', $JSON);
+            }
+        }
+
+        return $JSON;
     }
 }
