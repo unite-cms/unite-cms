@@ -376,7 +376,7 @@ class ReferenceFieldType extends FieldType
         // Special case 2: Domain does exist, but we are updating the domain at the moment, adding a new content_type.
         } catch (MissingContentTypeException $e) {
 
-            if($context->getRoot() instanceof Domain && $this->uniteCMSManager->getDomain()  && $context->getRoot()->getId() === $this->uniteCMSManager->getDomain()->getId()) {
+            if($context->getRoot() instanceof Domain && !empty($this->uniteCMSManager->getDomain())  && $context->getRoot()->getId() === $this->uniteCMSManager->getDomain()->getId()) {
                 if(!$context->getRoot()->getContentTypes()->filter(
                     function (ContentType $contentType) use ($settings) {
                         return $contentType->getIdentifier() == $settings->content_type;
