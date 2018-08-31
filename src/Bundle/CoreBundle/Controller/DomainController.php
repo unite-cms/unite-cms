@@ -69,7 +69,7 @@ class DomainController extends Controller
             $domain = null;
 
             try {
-                $domain = $this->get('unite.cms.domain_definition_parser')->parse($form->getData()['domain']['definition'], $form->getData()['domain']['variables']);
+                $domain = $this->get('unite.cms.domain_definition_parser')->parse($form->getData()['domain']['definition'], $form->getData()['domain']['variables'] ?? null);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
             }
@@ -166,7 +166,7 @@ class DomainController extends Controller
             try {
                 $updatedDomain = $this->get('unite.cms.domain_definition_parser')->parse(
                     $form->getData()['domain']['definition'],
-                    $form->getData()['domain']['variables']
+                    $form->getData()['domain']['variables'] ?? null
                 );
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));

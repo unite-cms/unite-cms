@@ -105,12 +105,12 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_url', $errors->get(0)->getMessageTemplate());
 
-        $contentType->setPreview(new FieldablePreview('https://example.com/' . $this->generateRandomMachineName('255'), 'query { type }'));
+        $contentType->setPreview(new FieldablePreview('https://example.com/' . str_replace('_', 'a', $this->generateRandomMachineName(255)), 'query { type }'));
         $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('preview.url', $errors->get(0)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(0)->getMessageTemplate());
-
+        
         $contentType->setPreview(new FieldablePreview('https://example.com', 'XXX'));
         $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
@@ -151,7 +151,7 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $contentType->setWebhooks([
             new Webhook('', '', ''),
             new Webhook('XXX', 'XXX', 'csd <= ', 'csd <= ', -1),
-            new Webhook('query { foo { baa } }', 'https://www.orf.at' . $this->generateRandomUTF8String(255), 'event == "'.$this->generateRandomUTF8String(255).'"', true, $this->generateRandomUTF8String(255)),
+            new Webhook('query { foo { baa } }', 'https://www.orf.at' . str_replace('_', 'a', $this->generateRandomMachineName(255)), 'event == "'.$this->generateRandomUTF8String(255).'"', true, $this->generateRandomUTF8String(255)),
         ]);
         $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(10, $errors);
