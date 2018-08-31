@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\SkipWhenEmpty;
 use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Accessor;
 
@@ -73,6 +74,7 @@ class Domain
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
+     * @SkipWhenEmpty
      */
     private $contentTypes;
 
@@ -84,6 +86,7 @@ class Domain
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
+     * @SkipWhenEmpty
      */
     private $settingTypes;
 
@@ -106,6 +109,12 @@ class Domain
      * @Expose
      */
     private $permissions;
+
+    /**
+     * @var array
+     * @ORM\Column(name="config_variables", type="json", nullable=true)
+     */
+    private $configVariables;
 
     /**
      * @var DomainMember[]
@@ -255,7 +264,8 @@ class Domain
         $this
             ->setTitle($domain->getTitle())
             ->setIdentifier($domain->getIdentifier())
-            ->setPermissions($domain->getPermissions());
+            ->setPermissions($domain->getPermissions())
+            ->setConfigVariables($domain->getConfigVariables());
 
         // ContentTypes to delete
         foreach ($this->getContentTypesDiff($domain) as $ct) {
@@ -582,6 +592,30 @@ class Domain
     public function addPermission($attribute, string $expression)
     {
         $this->permissions[$attribute] = $expression;
+    }
+
+    /**
+     * Set configVariables
+     *
+     * @param array configVariables
+     *
+     * @return Domain
+     */
+    public function setConfigVariables(array $configVariables)
+    {
+        $this->configVariables = $configVariables;
+
+        return $this;
+    }
+
+    /**
+     * Get configVariables
+     *
+     * @return array
+     */
+    public function getConfigVariables(): array
+    {
+        return $this->configVariables ?? [];
     }
 
     /**

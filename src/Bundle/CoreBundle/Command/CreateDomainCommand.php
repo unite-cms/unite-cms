@@ -82,8 +82,12 @@ class CreateDomainCommand extends Command
 
         $helper = $this->getHelper('question');
         $question = new Question('<info>Please insert the domain definition JSON string:</info> ');
-        $definition = $helper->ask($input, $output, $question);
-        $domain = $this->definiton_parser->parse($definition);
+        $domainDefinition = $helper->ask($input, $output, $question);
+
+        $question = new Question('<info>If you have used any variables in the domain definition, please pass dem as JSON string here. Otherwise, just hit enter:</info> ');
+        $variablesDefinition = $helper->ask($input, $output, $question);
+
+        $domain = $this->definiton_parser->parse($domainDefinition, $variablesDefinition);
         $domain->setOrganization($organization);
 
         $output->writeln(['', '', '<info>*****Domain definition*****</info>', '']);

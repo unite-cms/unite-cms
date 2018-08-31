@@ -8,6 +8,7 @@ use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\AccessType;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\SkipWhenEmpty;
 use UniteCMS\CoreBundle\Field\FieldableValidation;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 use UniteCMS\CoreBundle\View\Types\TableViewType;
@@ -141,6 +142,7 @@ class ContentType implements Fieldable
      * @Type("array<UniteCMS\CoreBundle\Entity\Webhook>")
      * @AccessType("public_method")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $webhooks;
 
@@ -151,6 +153,7 @@ class ContentType implements Fieldable
      * @Type("array<UniteCMS\CoreBundle\Field\FieldableValidation>")
      * @AccessType("public_method")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $validations;
 
@@ -164,6 +167,7 @@ class ContentType implements Fieldable
      * @Type("array<string>")
      * @AccessType("public_method")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $locales;
 
