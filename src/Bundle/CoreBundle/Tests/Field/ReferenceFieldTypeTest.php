@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Validator\Context\ExecutionContext;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -53,16 +54,177 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
     }
 
+    public function testContentTypeFieldTypeWithInvalidDomainAndContentTypeSetting() {
+
+        // Content Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('reference');
+        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('luu_luu');
+        $ctField->getContentType()->getDomain()->setIdentifier('foo')->setTitle('Foo');
+        $ctField->getContentType()->setIdentifier('baa');
+
+        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($ctField->getContentType()->getDomain());
+        $this->em->persist($ctField->getContentType());
+        $this->em->persist($ctField);
+        $this->em->flush();
+        $this->em->refresh($ctField->getContentType()->getDomain());
+
+        $domain = $ctField->getContentType()->getDomain();
+
+        $this->assertNotNull($ctField->getContentType()->getDomain()->getId());
+
+        $ctField->setSettings(new FieldableFieldSettings([
+            'domain' => 'foo234',
+            'content_type' => 'baa2323',
+            'view' => 'foo',
+            'content_label' => 'laa',
+        ]));
+
+        // Fake organization
+        $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
+
+        $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o1->setAccessible(true);
+        $o1->setValue($fieldType, new class implements AuthorizationCheckerInterface {
+            public function isGranted($attributes, $subject = null) { return true; }
+        });
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'organization');
+        $reflector->setAccessible(true);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $ctField->getContentType()->getDomain()->getOrganization());
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'domain');
+        $reflector->setAccessible(true);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $ctField->getContentType()->getDomain());
+
+        // ContentType and Domain does not exist.
+        $errors = static::$container->get('validator')->validate($domain);
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
+
+        // Domain exist, content type does not exist.
+        $ctField->getSettings()->domain = 'foo';
+        $errors = static::$container->get('validator')->validate($domain);
+        $this->assertEquals('invalid_content_type', $errors->get(0)->getMessageTemplate());
+
+        // Content type exist, domain does not exist.
+        $ctField->getSettings()->domain = 'wrong';
+        $ctField->getSettings()->content_type = 'baa';
+        $errors = static::$container->get('validator')->validate($domain);
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
+
+        // No view access on domain.
+        $ctField->getSettings()->domain = 'foo';
+        $ctField->getSettings()->content_type = 'baa';
+
+        $o1->setValue($fieldType, new class implements AuthorizationCheckerInterface {
+            public function isGranted($attributes, $subject = null) { return false; }
+        });
+
+        $errors = static::$container->get('validator')->validate($domain);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
+
+        $o1->setValue($fieldType, new class implements AuthorizationCheckerInterface {
+            public function isGranted($attributes, $subject = null) { return true; }
+        });
+
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
+
+        // Test if this domain is currently updated for the new content_type but not saved.
+        $contentType = new ContentType();
+        $contentType->setIdentifier('new_ct')->setTitle('new_ct');
+        $domain->addContentType($contentType);
+
+        $ctField->getSettings()->domain = 'foo';
+        $ctField->getSettings()->content_type = 'wrong_new_ct';
+        $errors = static::$container->get('validator')->validate($domain);
+
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_content_type', $errors->get(0)->getMessageTemplate());
+
+        $ctField->getSettings()->domain = 'foo';
+        $ctField->getSettings()->content_type = 'new_ct';
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
+
+        // Test for freshly created domains.
+        $ctField = $this->createContentTypeField('reference');
+        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('luu_luu');
+        $ctField->getContentType()->getDomain()->setIdentifier('new')->setTitle('Foo');
+        $ctField->getContentType()->setIdentifier('baa');
+        $domain = $ctField->getContentType()->getDomain();
+
+        // wrong domain name and wrong content_type
+        $ctField->getSettings()->domain = 'wrong';
+        $ctField->getSettings()->content_type = 'wrong';
+        $errors = static::$container->get('validator')->validate($domain);
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
+
+        // wrong content_type
+        $ctField->getSettings()->domain = 'new';
+        $errors = static::$container->get('validator')->validate($domain);
+        $this->assertEquals('invalid_content_type', $errors->get(0)->getMessageTemplate());
+
+        // wrong domain
+        $ctField->getSettings()->domain = 'wrong';
+        $ctField->getSettings()->content_type = 'baa';
+        $errors = static::$container->get('validator')->validate($domain);
+        $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
+
+        // Correct content_type and domain
+        $ctField->getSettings()->domain = 'new';
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
+
+    }
+
     public function testContentTypeFieldTypeWithValidSettings() {
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('reference');
+
+        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('luu_luu');
+        $ctField->getContentType()->getDomain()->setIdentifier('foo');
+
         $ctField->setSettings(new FieldableFieldSettings([
             'domain' => 'foo',
             'content_type' => 'baa',
             'view' => 'foo',
             'content_label' => 'laa',
         ]));
+
+        // Fake organization
+        $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
+
+        $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o1->setAccessible(true);
+        $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
+        $authMock->expects($this->any())->method('isGranted')->willReturn(true);
+        $o1->setValue($fieldType, $authMock);
+
+        $domain = new Domain();
+        $domain->setTitle('Domain')->setIdentifier("domain");
+        $domain->setOrganization($ctField->getContentType()->getDomain()->getOrganization());
+
+        $contentType = new ContentType();
+        $contentType->setIdentifier('baa')->setTitle('Baaa')->setDescription('TEST')->setDomain($domain);
+
+        $ctField->getContentType()->getDomain()->getContentTypes()->clear();
+        $ctField->getContentType()->getDomain()->addContentType($contentType);
+
+        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($ctField->getContentType()->getDomain());
+        $this->em->persist($ctField->getContentType());
+        $this->em->persist($ctField);
+        $this->em->persist($domain);
+        $this->em->persist($contentType);
+        $this->em->flush();
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'organization');
+        $reflector->setAccessible(true);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $ctField->getContentType()->getDomain()->getOrganization());
+
+        $reflector = new \ReflectionProperty(UniteCMSManager::class, 'domain');
+        $reflector->setAccessible(true);
+        $reflector->setValue(static::$container->get('unite.cms.manager'), $ctField->getContentType()->getDomain());
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
@@ -162,8 +324,6 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
             ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
         ]));
         $o3->setValue($fieldType, $cmsManager);
-
-
 
         // No content_label fallback and no content_label set.
         $ctField->getContentType()->setContentLabel('');

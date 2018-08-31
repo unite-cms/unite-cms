@@ -7,6 +7,9 @@ use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
+use UniteCMS\CoreBundle\Exception\MissingContentTypeException;
+use UniteCMS\CoreBundle\Exception\MissingDomainException;
+use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
@@ -29,6 +32,7 @@ use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class ReferenceFieldType extends FieldType
 {
@@ -72,8 +76,10 @@ class ReferenceFieldType extends FieldType
      * @param string $domain_identifier
      * @param string $content_type_identifier
      * @return ContentType
-     * @throws InvalidFieldConfigurationException
      * @throws DomainAccessDeniedException
+     * @throws MissingContentTypeException
+     * @throws MissingDomainException
+     * @throws MissingOrganizationException
      */
     private function resolveContentType($domain_identifier, $content_type_identifier): ContentType
     {
@@ -85,6 +91,12 @@ class ReferenceFieldType extends FieldType
         // Only allow to resolve a content type from the same organization.
         $organization = $this->uniteCMSManager->getOrganization();
 
+        if (!$organization) {
+            throw new MissingOrganizationException(
+              "Organization Missing."
+            );
+        }
+
         $domain = $organization->getDomains()->filter(
             function (Domain $domain) use ($domain_identifier) {
                 return $domain->getIdentifier() == $domain_identifier;
@@ -92,7 +104,7 @@ class ReferenceFieldType extends FieldType
         )->first();
 
         if (!$domain) {
-            throw new InvalidFieldConfigurationException(
+            throw new MissingDomainException(
                 "A reference field was configured to reference to domain \"{$domain_identifier}\". However \"{$domain_identifier}\" does not exist, or you don't have access to it."
             );
         }
@@ -118,7 +130,7 @@ class ReferenceFieldType extends FieldType
         )->first();
 
         if (!$contentType) {
-            throw new InvalidFieldConfigurationException(
+            throw new MissingContentTypeException(
                 "A reference field was configured to reference to content type \"{$content_type_identifier}\" on domain \"{$domain_identifier}\". However \"{$content_type_identifier}\" does not exist."
             );
         }
@@ -132,6 +144,7 @@ class ReferenceFieldType extends FieldType
      * @throws InvalidFieldConfigurationException
      * @throws \Twig\Error\Error
      * @throws DomainAccessDeniedException
+     * @throws MissingOrganizationException
      */
     function getFormOptions(FieldableField $field): array
     {
@@ -199,6 +212,7 @@ class ReferenceFieldType extends FieldType
      * @throws InvalidFieldConfigurationException
      * @throws ContentTypeAccessDeniedException
      * @throws DomainAccessDeniedException
+     * @throws MissingOrganizationException
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
@@ -225,6 +239,7 @@ class ReferenceFieldType extends FieldType
      * @throws InvalidFieldConfigurationException
      * @throws ContentTypeAccessDeniedException
      * @throws DomainAccessDeniedException
+     * @throws MissingOrganizationException
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
@@ -248,6 +263,7 @@ class ReferenceFieldType extends FieldType
      * @throws InvalidFieldConfigurationException
      * @throws ContentAccessDeniedException
      * @throws DomainAccessDeniedException
+     * @throws MissingOrganizationException
      */
     function resolveGraphQLData(FieldableField $field, $value)
     {
@@ -300,6 +316,80 @@ class ReferenceFieldType extends FieldType
             } catch (\Exception $e) {
                 $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
+    {
+        // Validate allowed and required settings.
+        parent::validateSettings($settings, $context);
+
+        // Only continue, if there are no violations yet.
+        if ($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        // Try to resolve content type. If it don't throw an exception, the domain and content_type exist and the user can access it.
+        try {
+            $this->resolveContentType($settings->domain, $settings->content_type);
+        }
+        catch (DomainAccessDeniedException $e) {
+            $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
+        } catch (MissingOrganizationException $e) {
+            $context->buildViolation('invalid_organization')->atPath('domain')->addViolation();
+        }
+
+
+        // Special case 1: We are validating a new domain, that is not already persisted.
+        catch (MissingDomainException $e) {
+
+            if($context->getRoot() instanceof Domain && empty($context->getRoot()->getId())) {
+
+                // If we don't reference the new domain, but the domain also does not exist, we can't reference it.
+                if($context->getRoot()->getIdentifier() != $settings->domain) {
+                    $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
+                    return;
+                }
+
+                $contentType = $context->getRoot()->getContentTypes()->filter(
+                    function (ContentType $contentType) use ($settings) {
+                        return $contentType->getIdentifier() == $settings->content_type;
+                    }
+                )->first();
+
+                // If we referenced content_type was not found in our new domain, we can't reference it.
+                if(!$contentType) {
+                    $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
+                    return;
+                }
+
+                return;
+            }
+
+            $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
+
+
+
+        // Special case 2: Domain does exist, but we are updating the domain at the moment, adding a new content_type.
+        } catch (MissingContentTypeException $e) {
+
+            if($context->getRoot() instanceof Domain && !empty($this->uniteCMSManager->getDomain())  && $context->getRoot()->getId() === $this->uniteCMSManager->getDomain()->getId()) {
+                if(!$context->getRoot()->getContentTypes()->filter(
+                    function (ContentType $contentType) use ($settings) {
+                        return $contentType->getIdentifier() == $settings->content_type;
+                    }
+                )->first()) {
+                    $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
+                    return;
+                }
+
+                return;
+            }
+
+            $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
         }
     }
 }
