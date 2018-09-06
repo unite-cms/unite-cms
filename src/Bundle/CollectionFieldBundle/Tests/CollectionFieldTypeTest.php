@@ -803,5 +803,22 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('f2', $row2N1Row1N2Row1F2->vars['name']);
         $this->assertEquals('foo', $row2N1Row1N2Row1F2->vars['value']);
 
+
+        // Try to submit form data with any keys. Keys should get deleted automatically.
+        $form->submit([$field->getIdentifier() => [
+            0 => ['f1' => '1', 'n1' => [['n2' => [5 => ['f2' => '1',], 3 => ['f2' => '2',]]]],],
+            2 => ['f1' => '2'],
+            5 => ['f1' => '3'],
+            1 => ['f1' => '4'],
+            'foo' => ['f1' => '5'],
+        ]]);
+
+        $this->assertEquals([$field->getIdentifier() => [
+            ['f1' => '1', 'n1' => [['n2' => [['f2' => '1',], ['f2' => '2',]]]],],
+            ['f1' => '2', 'n1' => []],
+            ['f1' => '3', 'n1' => []],
+            ['f1' => '4', 'n1' => []],
+            ['f1' => '5', 'n1' => []],
+        ]],$form->getData());
     }
 }
