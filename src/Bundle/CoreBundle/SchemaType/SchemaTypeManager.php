@@ -13,7 +13,7 @@ use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
 
 class SchemaTypeManager
 {
-    const MAXIMUM_NESTING_LEVEL = 5;
+    const MAXIMUM_NESTING_LEVEL = 8;
 
     /**
      * @var ObjectType|InputObjectType|InterfaceType|UnionType[]
