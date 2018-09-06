@@ -52,20 +52,19 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
+        $this->assertCount(3, $errors);
 
         # test invalid initial place
         $this->assertEquals('invalid_initial_place', $errors->get(0)->getMessageTemplate());
 
         # test places values all strings
-        $this->assertEquals('invalid_places', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_places', $errors->get(1)->getMessageTemplate());
 
         # test invalid from to transition, no place
-        $this->assertEquals('invalid_transitions', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_to', $errors->get(2)->getMessageTemplate());
 
         # test all transition params set
-        $this->assertEquals('invalid_transitions', $errors->get(0)->getMessageTemplate());
-
+        #$this->assertEquals('invalid_initial_place', $errors->get(0)->getMessageTemplate());
 
     }
 
@@ -90,12 +89,13 @@ class StateFieldTypeTest extends FieldTypeTestCase
                 ],
                 'review'=> [
                     'label' => 'Put into review mode',
-                    'from' => ['review2','published'],
-                    'to' => 'Publish Content',
+                    'from' => ['review2','review'],
+                    'to' => 'published',
                 ],
                 'review2' => [
+                    'label' => 'Put into review mode',
                     'from' => 'review2',
-                    'to' => 'Publish Content'
+                    'to' => 'published'
                 ]
             ]
         ];
