@@ -189,7 +189,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertEquals('User with email "'.$email.'" accepted an invitation for the organization Test password reset.', $this->mockedMailer->messages[1]->getSubject());
         $this->assertContains('<a href="'.self::$container->get('router')->generate('unitecms_core_organizationuser_index', ['organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier())], Router::ABSOLUTE_URL), $this->mockedMailer->messages[0]->getBody());
         $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_accepted.subject', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
-        $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_accepted.content', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
+        $this->assertContains(self::$container->get('translator')->trans('email.invitation.user_accepted.content', ['%email%' => $email, '%organization%' => $this->organization->getTitle()]), $this->mockedMailer->messages[0]->getBody());
         $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_accepted.button', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
     }
 
@@ -205,7 +205,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->assertEquals('User with email "'.$email.'" rejected an invitation for the organization Test password reset.', $this->mockedMailer->messages[1]->getSubject());
         $this->assertContains('<a href="'.self::$container->get('router')->generate('unitecms_core_organizationuser_index', ['organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier())], Router::ABSOLUTE_URL), $this->mockedMailer->messages[0]->getBody());
         $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_rejected.subject', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
-        $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_rejected.content', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
+        $this->assertContains(self::$container->get('translator')->trans('email.invitation.user_rejected.content', ['%email%' => $email, '%organization%' => $this->organization->getTitle()]), $this->mockedMailer->messages[0]->getBody());
         $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_rejected.button', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
     }
 
