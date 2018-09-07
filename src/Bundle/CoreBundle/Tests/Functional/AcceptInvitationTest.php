@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Tests\Mocks\MailerMock;
 
 /**
  * @group slow
@@ -62,6 +63,11 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
     private $users;
 
     private $userPassword = 'XXXXXXXXX';
+
+    /**
+     * @var MailerMock $mockedMailer
+     */
+    private $mockedMailer;
 
     public function setUp()
     {
@@ -121,6 +127,28 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $domainEditorOrgMember->setRoles([Organization::ROLE_USER])->setOrganization($org2);
         $this->users['domain_editor2']->addOrganization($domainEditorOrgMember);
 
+        // Create two org admins that should receive notifications on invitation accepted / rejected.
+        $this->users['admin1'] = new User();
+        $this->users['admin1']
+            ->setEmail('admin1@example.com')
+            ->setName('Admin 1')
+            ->setRoles([User::ROLE_USER])
+            ->setPassword('XXX');
+        $admin1Member = new OrganizationMember();
+        $admin1Member->setRoles([Organization::ROLE_ADMINISTRATOR])->setOrganization($this->organization);
+        $this->users['admin1']->addOrganization($admin1Member);
+
+        $this->users['admin2'] = new User();
+        $this->users['admin2']
+            ->setEmail('admin2@example.com')
+            ->setName('Admin 2')
+            ->setRoles([User::ROLE_USER])
+            ->setPassword('XXX');
+        $admin2Member = new OrganizationMember();
+        $admin2Member->setRoles([Organization::ROLE_ADMINISTRATOR])->setOrganization($this->organization);
+        $this->users['admin2']->addOrganization($admin2Member);
+
+
         foreach ($this->users as $key => $user) {
             $this->em->persist($this->users[$key]);
         }
@@ -130,6 +158,13 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         foreach ($this->users as $key => $user) {
             $this->em->refresh($this->users[$key]);
         }
+
+        // Mock mailer so we can check if notifications were sent.
+        $notifier = self::$container->get('UniteCMS\CoreBundle\EventSubscriber\InvitationAdminNotifier');
+        $this->mockedMailer = new MailerMock();
+        $o = new \ReflectionProperty($notifier, 'mailer');
+        $o->setAccessible(true);
+        $o->setValue($notifier, $this->mockedMailer);
     }
 
     private function login(User $user)
@@ -140,6 +175,38 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $session->save();
         $cookie = new Cookie($session->getName(), $session->getId());
         $this->client->getCookieJar()->set($cookie);
+    }
+
+    /**
+     * Make sure, that all org admins got notified about the new user.
+     * @param $email
+     */
+    private function assertAcceptMessagesSent($email) {
+        $this->assertCount(2, $this->mockedMailer->messages);
+        $this->assertEquals(['admin1@example.com' => null], $this->mockedMailer->messages[0]->getTo());
+        $this->assertEquals(['admin2@example.com' => null], $this->mockedMailer->messages[1]->getTo());
+        $this->assertEquals('User with email "'.$email.'" accepted an invitation for the organization Test password reset.', $this->mockedMailer->messages[0]->getSubject());
+        $this->assertEquals('User with email "'.$email.'" accepted an invitation for the organization Test password reset.', $this->mockedMailer->messages[1]->getSubject());
+        $this->assertContains('<a href="'.self::$container->get('router')->generate('unitecms_core_organizationuser_index', ['organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier())], Router::ABSOLUTE_URL), $this->mockedMailer->messages[0]->getBody());
+        $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_accepted.subject', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
+        $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_accepted.content', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
+        $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_accepted.button', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
+    }
+
+    /**
+     * Make sure, that all org admins got notified about the new user.
+     * @param $email
+     */
+    private function assertRejectMessagesSent($email) {
+        $this->assertCount(2, $this->mockedMailer->messages);
+        $this->assertEquals(['admin1@example.com' => null], $this->mockedMailer->messages[0]->getTo());
+        $this->assertEquals(['admin2@example.com' => null], $this->mockedMailer->messages[1]->getTo());
+        $this->assertEquals('User with email "'.$email.'" rejected an invitation for the organization Test password reset.', $this->mockedMailer->messages[0]->getSubject());
+        $this->assertEquals('User with email "'.$email.'" rejected an invitation for the organization Test password reset.', $this->mockedMailer->messages[1]->getSubject());
+        $this->assertContains('<a href="'.self::$container->get('router')->generate('unitecms_core_organizationuser_index', ['organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier())], Router::ABSOLUTE_URL), $this->mockedMailer->messages[0]->getBody());
+        $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_rejected.subject', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
+        $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_rejected.content', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
+        $this->assertContains(htmlspecialchars(self::$container->get('translator')->trans('email.invitation.user_rejected.button', ['%email%' => $email, '%organization%' => $this->organization->getTitle()])), $this->mockedMailer->messages[0]->getBody());
     }
 
     /**
@@ -241,6 +308,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
+
+        // Make sure, that all org admins got notified about the new user.
+        $this->assertAcceptMessagesSent($invitation->getEmail());
     }
 
     /**
@@ -305,6 +375,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
+
+        // Make sure, that all org admins got notified about the new user.
+        $this->assertAcceptMessagesSent($invitation->getEmail());
     }
 
     /**
@@ -399,6 +472,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
+
+        // Make sure, that all org admins got notified about the new user.
+        $this->assertAcceptMessagesSent($invitation->getEmail());
     }
 
     /**
@@ -455,6 +531,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
+
+        // Make sure, that all org admins got notified about the new user.
+        $this->assertAcceptMessagesSent($invitation->getEmail());
     }
 
     /**
@@ -502,6 +581,9 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
 
         // Also make sure, that the invitation got deleted.
         $this->assertNull($this->em->getRepository('UniteCMSCoreBundle:Invitation')->find($invitation->getId()));
+
+        // Make sure, that all org admins got notified about the new user.
+        $this->assertRejectMessagesSent($invitation->getEmail());
     }
 
     /**
