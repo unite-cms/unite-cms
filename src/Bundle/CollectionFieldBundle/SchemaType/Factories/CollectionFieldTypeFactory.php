@@ -46,6 +46,13 @@ class CollectionFieldTypeFactory
           $schemaTypeRowName .= 'Input';
         }
 
+        else {
+            if ($nestingLevel > 0) {
+                $schemaTypeName .= 'Level'.$nestingLevel;
+                $schemaTypeRowName .= 'Level'.$nestingLevel;
+            }
+        }
+
         if(!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
             if(!$schemaTypeManager->hasSchemaType($schemaTypeRowName)) {
 
