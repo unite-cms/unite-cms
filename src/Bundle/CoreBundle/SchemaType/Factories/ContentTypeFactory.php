@@ -143,13 +143,6 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
         }
 
         if($isInputType) {
-
-            if(count($contentType->getLocales()) > 0) {
-                $fields = array_merge([
-                    'locale' => Type::nonNull(Type::string())
-                ], $fields);
-            }
-
             return new InputObjectType(
                 [
                     'name' => IdentifierNormalizer::graphQLType($identifier, 'ContentInput') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
@@ -164,6 +157,9 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                         [
                             'id' => Type::id(),
                             'type' => Type::string(),
+                        ],
+                        empty($contentType->getLocales()) ? [] : [ 'locale' => Type::string(), ],
+                        [
                             'created' => Type::int(),
                             'updated' => Type::int(),
                             'deleted' => Type::int(),
@@ -186,6 +182,8 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                 return $value->getId();
                             case 'type':
                                 return $value->getContentType()->getIdentifier();
+                            case 'locale':
+                                return $value->getLocale();
                             case 'created':
                                 return $value->getCreated()->getTimestamp();
                             case 'updated':
