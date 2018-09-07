@@ -97,6 +97,19 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }
       ],
       "locales": []
+    },
+    {
+      "title": "Lang test",
+      "identifier": "lang",
+      "fields": [
+        {
+          "title": "Title",
+          "identifier": "title",
+          "type": "text",
+          "settings": {}
+        }
+      ],
+      "locales": ["de", "en"]
     }
   ],
   "setting_types": [
@@ -826,8 +839,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
     public function testAccessReferencedValue() {
 
-        $category = $this->domains['marketing']->getContentTypes()->last()->getContent()->get(0);
-        $news = $this->domains['marketing']->getContentTypes()->first()->getContent()->get(0);
+        $category = $this->domains['marketing']->getContentTypes()->get('news_category')->getContent()->get(0);
+        $news = $this->domains['marketing']->getContentTypes()->get('news')->getContent()->get(0);
 
         $news->setData([
             'title_title' => 'with_category',
@@ -1196,6 +1209,60 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals("Updated News2", $response->data->updateNews->title_title);
         $this->assertEquals("<p>Hello new World</p>", $response->data->updateNews->content);
         $this->assertNull($response->data->updateNews->category);
+    }
+
+    public function testAPICreateAndUpdateMethodForCTWithLang() {
+
+        // Test that locale should be required for create.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
+            createLang(data: { title: "With language" }, persist: true) {
+              id,
+              title
+            }
+        }');
+
+        $this->assertNotEmpty($response->errors);
+        $this->assertEquals('Field "createLang" argument "locale" of type "String!" is required but not provided.', $response->errors[0]->message);
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
+            createLang(data: { title: "With language" }, locale: "de", persist: true) {
+              id,
+              title,
+              locale
+            }
+        }');
+
+        $this->assertTrue(empty($response->errors));
+        $this->assertNotNull($response->data->createLang->id);
+        $this->assertEquals('With language', $response->data->createLang->title);
+        $this->assertEquals('de', $response->data->createLang->locale);
+
+        // Test that locale should not be required for update but can be set.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+            updateLang(id: $id, data: { title: "Updated title" }, persist: true) {
+              id,
+              title,
+              locale
+            }
+        }', ['id' => $response->data->createLang->id]);
+
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals('Updated title', $response->data->updateLang->title);
+        $this->assertEquals('de', $response->data->updateLang->locale);
+
+        // Test that locale should not be required for update but can be set.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+            updateLang(id: $id, data: {}, locale: "en", persist: true) {
+              id,
+              title,
+              locale
+            }
+        }', ['id' => $response->data->updateLang->id]);
+
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals('Updated title', $response->data->updateLang->title);
+        $this->assertEquals('en', $response->data->updateLang->locale);
+
     }
 
     public function testAPICRUDActionsWithCookieAuthentication() {

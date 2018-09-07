@@ -117,6 +117,18 @@ class MutationType extends AbstractType
                     'description' => 'The content data to save.',
                 ];
             }
+
+            // If this content type has defined locales, we can add set them via the locale argument.
+            if(!empty($fullContentType->getLocales())) {
+                $fields['create' . $key]['args']['locale'] = [
+                    'type' => Type::nonNull(Type::string()),
+                    'description' => 'Content will be created in this locale.',
+                ];
+                $fields['update' . $key]['args']['locale'] = [
+                    'type' => Type::string(),
+                    'description' => 'Update locale of this content.',
+                ];
+            }
         }
 
         return $fields;
@@ -193,6 +205,11 @@ class MutationType extends AbstractType
             $args['data']['_token'] = $context['csrf_token'];
         }
 
+        // Set locale from arg to form data.
+        if(!empty($contentType->getLocales()) && !empty($args['locale'])) {
+            $args['data']['locale'] = $args['locale'];
+        }
+
         $form->submit($args['data']);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -266,6 +283,11 @@ class MutationType extends AbstractType
         // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
         if(is_array($args['data']) && !empty($context['csrf_token'])) {
             $args['data']['_token'] = $context['csrf_token'];
+        }
+
+        // Set default locale if non was set by the api.
+        if (!empty($content->getContentType()->getLocales())) {
+            $args['data']['locale'] = $args['locale'] ?? $content->getLocale();
         }
 
         $form->submit($args['data']);
