@@ -229,24 +229,24 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             )->getType()->getWrappedType()->getFields()
         );
 
-        $this->assertEquals('Ct1F1CollectionField', $type->getField('f1')->getType()->name);
-        $this->assertEquals('Ct1F1CollectionFieldRow', $type->getField('f1')->getType()->getWrappedType()->name);
+        $this->assertEquals('Ct1F1CollectionFieldLevel1', $type->getField('f1')->getType()->name);
+        $this->assertEquals('Ct1F1CollectionFieldRowLevel1', $type->getField('f1')->getType()->getWrappedType()->name);
         $this->assertEquals(
-            'Ct1F1N1CollectionField',
+            'Ct1F1N1CollectionFieldLevel2',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->name
         );
         $this->assertEquals(
-            'Ct1F1N1CollectionFieldRow',
+            'Ct1F1N1CollectionFieldRowLevel2',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->name
         );
         $this->assertEquals(
-            'Ct1F1N1N2CollectionField',
+            'Ct1F1N1N2CollectionFieldLevel3',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getField(
                 'n2'
             )->getType()->name
         );
         $this->assertEquals(
-            'Ct1F1N1N2CollectionFieldRow',
+            'Ct1F1N1N2CollectionFieldRowLevel3',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getField(
                 'n2'
             )->getType()->getWrappedType()->name

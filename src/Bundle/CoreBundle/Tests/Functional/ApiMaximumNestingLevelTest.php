@@ -46,7 +46,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
                             "type": "reference",
                             "settings": {
                                 "domain": "marketing",
-                                "content_type": "collection"
+                                "content_type": "self"
                             }
                         }
                         ]
@@ -247,50 +247,78 @@ class ApiMaximumNestingLevelTest extends APITestCase
                 ]
             ]
         ], $result);
+    }
+
+    public function testReachingMaximumNestingLevelForSelfReferenceInCollection() {
+
+        $self = new Content();
+        $sibling = new Content();
+        $self->setContentType($this->domains['marketing']->getContentTypes()->get('self'));
+        $sibling->setContentType($this->domains['marketing']->getContentTypes()->get('self'));
+
+        $this->repositoryFactory->add($self);
+        $this->repositoryFactory->add($sibling);
+
+        $self->setData([
+            'collection' => [
+                [
+                    'sibling' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'self', 'content' => $sibling->getId()]
+                ]
+            ]
+        ]);
+        $sibling->setData([
+            'collection' => [
+                [
+                    'sibling' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'self', 'content' => $self->getId()]
+                ]
+            ]
+        ]);
+
 
         $result = json_decode(json_encode($this->api('query {
-                getSelf(id: '.$self->getId().') {
-                    collection {
-                        sibling {
+            getSelf(id: '.$self->getId().') {
+                collection {
+                    sibling {
                         collection {
-                          sibling {
-                            collection {
-                              sibling {
+                            sibling {
                                 collection {
-                                  sibling {
-                                    message
-                                  }
+                                    sibling {
+                                        collection {
+                                            sibling {
+                                                message
+                                            }
+                                        }
+                                    }
                                 }
-                              }
                             }
-                          }
                         }
-                      }
-                  }
-            }')), true);
+                    }
+                }
+            }
+        }')), true);
 
         $this->assertEquals([
             'data' => [
                 'getSelf' => [
                     'collection' => [
-                        'sibling' => [
+                        [ 'sibling' => [
                             'collection' => [
-                                'sibling' => [
+                                [ 'sibling' => [
                                     'collection' => [
-                                        'sibling' => [
+                                        [ 'sibling' => [
                                             'collection' => [
-                                                'sibling' => [
+                                                [ 'sibling' => [
                                                     'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
-                                                ]
-                                            ]
-                                        ],
+                                                ]],
+                                            ],
+                                        ]],
                                     ],
-                                ]
+                                ]],
                             ],
-                        ],
+                        ]],
                     ],
-                ]
-            ]
+                ],
+            ],
         ], $result);
     }
 }

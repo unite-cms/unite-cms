@@ -72,11 +72,7 @@ class SchemaTypeManager
      */
     public function getSchemaType($key, Domain $domain = null, $nestingLevel = 0)
     {
-        if ($nestingLevel > self::MAXIMUM_NESTING_LEVEL) {
-            throw new \InvalidArgumentException("Maximum nesting level: ".self::MAXIMUM_NESTING_LEVEL." reached.");
-        }
-
-        if ($nestingLevel == self::MAXIMUM_NESTING_LEVEL) {
+        if ($nestingLevel >= self::MAXIMUM_NESTING_LEVEL) {
             $key = 'MaximumNestingLevel';
         }
 
