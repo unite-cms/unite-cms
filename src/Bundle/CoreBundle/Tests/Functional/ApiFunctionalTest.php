@@ -42,19 +42,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
   ],
   "content_types": [
     {
-      "title": "Lang test",
-      "identifier": "lang",
-      "fields": [
-        {
-          "title": "Title",
-          "identifier": "title",
-          "type": "text",
-          "settings": {}
-        }
-      ],
-      "locales": ["de", "en"]
-    },
-    {
       "title": "News",
       "identifier": "news",
       "fields": [
@@ -110,6 +97,19 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }
       ],
       "locales": []
+    },
+    {
+      "title": "Lang test",
+      "identifier": "lang",
+      "fields": [
+        {
+          "title": "Title",
+          "identifier": "title",
+          "type": "text",
+          "settings": {}
+        }
+      ],
+      "locales": ["de", "en"]
     }
   ],
   "setting_types": [
@@ -839,8 +839,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
     public function testAccessReferencedValue() {
 
-        $category = $this->domains['marketing']->getContentTypes()->last()->getContent()->get(0);
-        $news = $this->domains['marketing']->getContentTypes()->first()->getContent()->get(0);
+        $category = $this->domains['marketing']->getContentTypes()->get('news_category')->getContent()->get(0);
+        $news = $this->domains['marketing']->getContentTypes()->get('news')->getContent()->get(0);
 
         $news->setData([
             'title_title' => 'with_category',

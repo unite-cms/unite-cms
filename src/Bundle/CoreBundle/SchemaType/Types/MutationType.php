@@ -206,7 +206,9 @@ class MutationType extends AbstractType
         }
 
         // Set locale from arg to form data.
-        $args['data']['locale'] = $args['locale'];
+        if(!empty($contentType->getLocales()) && !empty($args['locale'])) {
+            $args['data']['locale'] = $args['locale'];
+        }
 
         $form->submit($args['data']);
 
