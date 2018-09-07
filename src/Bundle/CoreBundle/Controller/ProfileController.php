@@ -24,6 +24,7 @@ use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Event\CancellationEvent;
+use UniteCMS\CoreBundle\Event\InvitationEvent;
 use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Form\InvitationRegistrationType;
 use UniteCMS\CoreBundle\Form\Model\ChangePassword;
@@ -396,6 +397,8 @@ class ProfileController extends Controller
                                             $form->addError(new FormError('invitation.invalid_user'));
                                         } else {
 
+                                            $this->get('event_dispatcher')->dispatch(InvitationEvent::INVITATION_ACCEPTED, new InvitationEvent($invitation));
+
                                             // Delete invitation.
                                             $this->getDoctrine()->getManager()->remove($invitation);
 
@@ -428,6 +431,8 @@ class ProfileController extends Controller
 
                                         // If the user rejects the invitation, just delete it.
                                     } elseif ($form->get('reject')->isClicked()) {
+
+                                        $this->get('event_dispatcher')->dispatch(InvitationEvent::INVITATION_REJECTED, new InvitationEvent($invitation));
 
                                         // Delete invitation.
                                         $this->getDoctrine()->getManager()->remove($invitation);
@@ -515,6 +520,8 @@ class ProfileController extends Controller
                                     if($domainMember) {
                                         $this->getDoctrine()->getManager()->persist($domainMember);
                                     }
+
+                                    $this->get('event_dispatcher')->dispatch(InvitationEvent::INVITATION_ACCEPTED, new InvitationEvent($invitation));
 
                                     // Delete invitation.
                                     $this->getDoctrine()->getManager()->remove($invitation);
