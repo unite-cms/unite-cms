@@ -1,5 +1,7 @@
 
-let Encore = require('@symfony/webpack-encore');
+const Encore = require('@symfony/webpack-encore');
+const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 Encore
     // the project directory where all compiled assets will be stored
@@ -35,14 +37,15 @@ Encore
     // show OS notifications when builds finish/fail
     //.enableBuildNotifications();
 
-let config = Encore.getWebpackConfig();
+const webpackConfig = Encore.getWebpackConfig();
 
-// At the moment, ckeditor cannot be used with uglify. So we just disable the plugin here.
-config.plugins.forEach(function(plugin, index){
-    if(plugin.constructor.name === 'UglifyJsPlugin') {
-        config.plugins.splice(index, 1);
-    }
-});
+// Remove the old version first
+webpackConfig.plugins = webpackConfig.plugins.filter(
+    plugin => !(plugin instanceof webpack.optimize.UglifyJsPlugin)
+);
+
+// Add the new one
+webpackConfig.plugins.push(new UglifyJsPlugin());
 
 // export the final configuration
-module.exports = config;
+module.exports = webpackConfig;

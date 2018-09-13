@@ -299,6 +299,14 @@ email.invitation.intro_domain: 'The user <strong>%invitor%</strong> invited you 
 email.invitation.button: 'See invitation'
 email.invitation.footer: 'This is a one-time email, sent by unite cms.'
 
+email.invitation.user_accepted.subject: 'User with email "%email%" accepted an invitation for the organization %organization%.'
+email.invitation.user_accepted.content: 'You receive this message, because you are an administrator of the organization <strong>%organization%</strong>. User with email <strong>"%email%"</strong> just accepted an invitation for this organization and is now a member of %organization%.'
+email.invitation.user_accepted.button: 'Manage organization members'
+
+email.invitation.user_rejected.subject: 'User with email "%email%" rejected an invitation for the organization %organization%.'
+email.invitation.user_rejected.content: 'You receive this message, because you are an administrator of the organization <strong>%organization%</strong>. User with email <strong>"%email%"</strong> just rejected an invitation for this organization.'
+email.invitation.user_rejected.button: 'Manage organization members'
+
 exception.http.500.title: 'Internal Server Error'
 exception.http.500.message: 'An internal server error occurred. Please try again later. We are monitoring this error and will work on a solution.'
 exception.http.404.title: 'Page not found'

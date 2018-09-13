@@ -8,3 +8,10 @@ services:
     tags:
       - { name: kernel.event_listener, event: kernel.request, priority: 10 }
       - { name: kernel.event_listener, event: kernel.response }
+
+  # When accepting or rejecting an invitation, org admins should be notified.
+  UniteCMS\CoreBundle\EventSubscriber\InvitationAdminNotifier:
+    arguments: ['@mailer', '@templating.engine.twig', '@translator', '@logger', '%mailer_sender%']
+    public: false
+    tags:
+      - { name: kernel.event_subscriber }

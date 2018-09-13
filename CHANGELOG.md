@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.2 (2018-09-07)
+- Added #227: Added an experimental variable feature for domain JSON
+- Added #177: Send an internal event and an email to org admins after a user accepts / rejects an invitation.
+- Improved #215: Collection field can now be sort and have an updated interface
+- Fixed #237: Make locale optional for update mutation
+- Fixed #233: Fixed nested collection and reference fields always throws MaximumNestingLevel exception
+- Fixed #234: Fixed a bug, where collection field data could not be saved because of invalid form field name  
+
 ## 0.6.1 (2018-08-31)
 - Fixed #221: Reference Field not working 404 
 - Fixed #205: Reference & storage field cannot resolve domains with underscore
