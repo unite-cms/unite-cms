@@ -150,6 +150,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                 ]
             );
         } else {
+
             return new ObjectType(
                 [
                     'name' => IdentifierNormalizer::graphQLType($identifier, 'Content') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
@@ -158,7 +159,10 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             'id' => Type::id(),
                             'type' => Type::string(),
                         ],
-                        empty($contentType->getLocales()) ? [] : [ 'locale' => Type::string(), ],
+                        empty($contentType->getLocales()) ? [] : [
+                            'locale' => Type::string(),
+                            'translations' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($identifier, 'ContentTranslations') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''), $domain, $nestingLevel)
+                        ],
                         [
                             'created' => Type::int(),
                             'updated' => Type::int(),
@@ -190,6 +194,12 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                 return $value->getUpdated()->getTimestamp();
                             case 'deleted':
                                 return $value->getDeleted() ? $value->getDeleted()->getTimestamp() : null;
+                            case 'translations':
+
+                                // TODO
+                                var_dump($value);
+
+                                return null;
                             default:
 
                                 if(!array_key_exists($info->fieldName, $fieldTypes)) {

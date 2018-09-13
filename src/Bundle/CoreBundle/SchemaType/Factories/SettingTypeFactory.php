@@ -129,6 +129,10 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                     [
                         'type' => Type::string(),
                     ],
+                    empty($settingType->getLocales()) ? [] : [
+                        'locale' => Type::string(),
+                        'translations' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($identifier, 'SettingTranslations') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''), $domain, $nestingLevel)
+                    ],
                     $fields
                 ),
                 'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use (
@@ -142,6 +146,12 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                     switch ($info->fieldName) {
                         case 'type':
                             return IdentifierNormalizer::graphQLIdentifier($value->getSettingType());
+                        case 'locale':
+                            return $value->getLocale();
+                        case 'translations':
+                            var_dump($value);
+                            // TODO
+                            return null;
                         default:
 
                             if (!array_key_exists($info->fieldName, $fieldTypes)) {

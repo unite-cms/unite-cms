@@ -19,6 +19,7 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
@@ -109,7 +110,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "locales": ["de", "en"]
+      "locales": ["de", "en", "fr"]
     }
   ],
   "setting_types": [
@@ -135,6 +136,19 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         "update setting": "true"
       },
       "locales": []
+    },
+    {
+      "title": "Lang test",
+      "identifier": "lang",
+      "fields": [
+        {
+          "title": "Title",
+          "identifier": "title",
+          "type": "text",
+          "settings": {}
+        }
+      ],
+      "locales": ["de", "en", "fr"]
     }
   ]
 }',
@@ -1211,7 +1225,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertNull($response->data->updateNews->category);
     }
 
-    public function testAPICreateAndUpdateMethodForCTWithLang() {
+    public function testAPICRUDForCTWithLang() {
 
         // Test that locale should be required for create.
         $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
@@ -1237,6 +1251,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals('With language', $response->data->createLang->title);
         $this->assertEquals('de', $response->data->createLang->locale);
 
+        $id = $response->data->createLang->id;
+
         // Test that locale should not be required for update but can be set.
         $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
             updateLang(id: $id, data: { title: "Updated title" }, persist: true) {
@@ -1244,7 +1260,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
               title,
               locale
             }
-        }', ['id' => $response->data->createLang->id]);
+        }', ['id' => $id]);
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals('Updated title', $response->data->updateLang->title);
@@ -1257,11 +1273,91 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
               title,
               locale
             }
-        }', ['id' => $response->data->updateLang->id]);
+        }', ['id' => $id]);
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals('Updated title', $response->data->updateLang->title);
         $this->assertEquals('en', $response->data->updateLang->locale);
+
+        // Find content by locale
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
+            findLang(filter: { field: "locale", operator: "=", value: "foo"}) {
+                total
+            }
+        }');
+        $this->assertEquals(0, $response->data->findLang->total);
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
+            findLang(filter: { field: "locale", operator: "=", value: "en"}) {
+                total
+            }
+        }');
+        $this->assertGreaterThanOrEqual(1, $response->data->findLang->total);
+
+        // Add a translation for english content.
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($id);
+        $trans = new Content();
+        $trans->setContentType($content->getContentType());
+        $trans->setLocale('de');
+        $content->addTranslation($trans);
+
+        $this->em->persist($trans);
+        $this->em->flush();
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query($id: ID!) {
+            getLang(id: $id) {
+                id,
+                locale,
+                title,
+                translations {
+                  de {
+                    id, 
+                    locale,
+                    title
+                  }
+                }
+            }
+        }', ['id' => $id]);
+
+        $this->assertTrue(empty($response->errors));
+
+        // Make sure, that only de translation is filled out.
+        $this->assertNull($response->data->getLang->translations->en);
+        $this->assertNull($response->data->getLang->translations->fr);
+        $this->assertEquals('Updated title', $response->data->getLang->translations->de->title);
+        $this->assertEquals('de', $response->data->getLang->translations->de->locale);
+
+    }
+
+    public function testAPICRUDForSTWithLang() {
+
+        $setting = new Setting();
+        $setting->setSettingType($this->domains['marketing']->getSettingTypes()->get('lang'));
+        $setting->setLocale('en');
+        $setting->setData(['title' => 'Updated title']);
+        $this->em->persist($setting);
+        $this->em->flush();
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            LangSetting {
+                locale,
+                title,
+                translations {
+                  de {
+                    id, 
+                    locale,
+                    title
+                  }
+                }
+            }
+        }');
+
+        $this->assertTrue(empty($response->errors));
+
+        // Make sure, that only de translation is filled out.
+        $this->assertNull($response->data->LangSetting->translations->en);
+        $this->assertNull($response->data->LangSetting->translations->fr);
+        $this->assertEquals('Updated title', $response->data->LangSetting->translations->de->title);
+        $this->assertEquals('de', $response->data->getLang->LangSetting->de->locale);
 
     }
 
