@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
@@ -149,9 +150,13 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                         case 'locale':
                             return $value->getLocale();
                         case 'translations':
-                            var_dump($value);
-                            // TODO
-                            return null;
+                            $translations = [];
+                            foreach($value->getSettingType()->getLocales() as $locale) {
+                                if($locale !== $value->getLocale()) {
+                                    $translations[$locale] = $value->getSettingType()->getSetting($locale);
+                                }
+                            }
+                            return $translations;
                         default:
 
                             if (!array_key_exists($info->fieldName, $fieldTypes)) {

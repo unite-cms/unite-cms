@@ -196,10 +196,26 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                 return $value->getDeleted() ? $value->getDeleted()->getTimestamp() : null;
                             case 'translations':
 
-                                // TODO
-                                var_dump($value);
+                                $translations = [];
 
-                                return null;
+                                // Case 1: This is the base translation
+                                if(empty($value->getTranslationOf())) {
+                                    foreach($value->getTranslations() as $translation) {
+                                        $translations[$translation->getLocale()] = $translation;
+                                    }
+                                }
+
+                                // Case 2: This is a translation of a base translation
+                                else {
+                                    $translations[$value->getTranslationOf()->getLocale()] = $value->getTranslationOf();
+
+                                    foreach($value->getTranslationOf()->getTranslations() as $translation) {
+                                        $translations[$translation->getLocale()] = $translation;
+                                    }
+                                }
+
+                                return $translations;
+
                             default:
 
                                 if(!array_key_exists($info->fieldName, $fieldTypes)) {

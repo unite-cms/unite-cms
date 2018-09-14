@@ -6,10 +6,14 @@ use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
 {
@@ -18,9 +22,15 @@ class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
      */
     private $entityManager;
 
-    public function __construct(EntityManager $entityManager)
+    /**
+     * @var AuthorizationChecker $authorizationChecker
+     */
+    private $authorizationChecker;
+
+    public function __construct(EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
     {
         $this->entityManager = $entityManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -95,8 +105,16 @@ class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
                 'fields' => $fields,
                 'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use ($contentType) {
 
-                    // TODO
-                    var_dump($value);
+                    if(!empty($value[$info->fieldName]) && $value[$info->fieldName] instanceof Content) {
+
+                        if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $value[$info->fieldName])) {
+                            throw new ContentTypeAccessDeniedException("You are not allowed to access \"{$info->fieldName}\" translation of \"{$value[$info->fieldName]->getContentType()->getTitle()}\" content.");
+                        }
+
+                        return $value[$info->fieldName];
+                    }
+
+                    return null;
                 },
             ]
         );

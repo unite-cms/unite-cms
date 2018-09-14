@@ -110,7 +110,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "locales": ["de", "en", "fr"]
+      "locales": ["de", "en", "fr"],
+      "permissions": {
+        "view setting": "content.locale != \"fr\"",
+        "update setting": "true"
+      }
     }
   ],
   "setting_types": [
@@ -148,7 +152,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "locales": ["de", "en", "fr"]
+      "locales": ["de", "en", "fr"],
+      "permissions": {
+        "view setting": "content.locale != \"fr\"",
+        "update setting": "true"
+      }
     }
   ]
 }',
@@ -1297,6 +1305,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($id);
         $trans = new Content();
         $trans->setContentType($content->getContentType());
+        $trans->setData(['title' => 'DE content']);
         $trans->setLocale('de');
         $content->addTranslation($trans);
 
@@ -1309,10 +1318,22 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 locale,
                 title,
                 translations {
-                  de {
+                  en {
                     id, 
                     locale,
                     title
+                  },
+                  de {
+                    id, 
+                    locale,
+                    title,
+                    translations {
+                      en {
+                        id,
+                        locale,
+                        title,
+                      }
+                    }
                   }
                 }
             }
@@ -1321,11 +1342,39 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertTrue(empty($response->errors));
 
         // Make sure, that only de translation is filled out.
+        $this->assertEquals('en', $response->data->getLang->locale);
         $this->assertNull($response->data->getLang->translations->en);
-        $this->assertNull($response->data->getLang->translations->fr);
-        $this->assertEquals('Updated title', $response->data->getLang->translations->de->title);
+        $this->assertEquals('DE content', $response->data->getLang->translations->de->title);
         $this->assertEquals('de', $response->data->getLang->translations->de->locale);
 
+        // Make sure, that also translations can access their translationOf
+        $this->assertEquals($id, $response->data->getLang->translations->de->translations->en->id);
+        $this->assertEquals('en', $response->data->getLang->translations->de->translations->en->locale);
+        $this->assertEquals('Updated title', $response->data->getLang->translations->de->translations->en->title);
+
+        $fr_trans = new Content();
+        $fr_trans->setContentType($content->getContentType());
+        $fr_trans->setLocale('fr');
+        $content->addTranslation($fr_trans);
+
+        $this->em->persist($fr_trans);
+        $this->em->flush();
+
+        // Try to access translation, the user do not have access to.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            getLang(id: $id) {
+                translations {
+                  fr {
+                    id, 
+                    locale,
+                    title
+                  }
+                }
+            }
+        }');
+
+        $this->assertNotEmpty($response->errors);
+        $this->assertTrue(empty($response->data->getLang->translations->fr));
     }
 
     public function testAPICRUDForSTWithLang() {
@@ -1335,6 +1384,19 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $setting->setLocale('en');
         $setting->setData(['title' => 'Updated title']);
         $this->em->persist($setting);
+
+        $trans = new Setting();
+        $trans->setSettingType($this->domains['marketing']->getSettingTypes()->get('lang'));
+        $trans->setLocale('de');
+        $trans->setData(['title' => 'DE title']);
+        $this->em->persist($trans);
+
+        $fr_trans = new Setting();
+        $fr_trans->setSettingType($this->domains['marketing']->getSettingTypes()->get('lang'));
+        $fr_trans->setLocale('fr');
+        $fr_trans->setData(['title' => 'FR title, no access']);
+        $this->em->persist($fr_trans);
+
         $this->em->flush();
 
         $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
@@ -1342,8 +1404,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 locale,
                 title,
                 translations {
+                  en {
+                    locale,
+                    title
+                  }
                   de {
-                    id, 
                     locale,
                     title
                   }
@@ -1354,11 +1419,37 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertTrue(empty($response->errors));
 
         // Make sure, that only de translation is filled out.
+        $this->assertEquals('en', $response->data->LangSetting->locale);
+        $this->assertEquals('Updated title', $response->data->LangSetting->title);
         $this->assertNull($response->data->LangSetting->translations->en);
-        $this->assertNull($response->data->LangSetting->translations->fr);
-        $this->assertEquals('Updated title', $response->data->LangSetting->translations->de->title);
-        $this->assertEquals('de', $response->data->getLang->LangSetting->de->locale);
+        $this->assertEquals('en', $response->data->LangSetting->locale);
+        $this->assertEquals('DE title', $response->data->LangSetting->translations->de->title);
+        $this->assertEquals('de', $response->data->LangSetting->translations->de->locale);
 
+        // Try to access translation, the user do not have access to.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            LangSetting {
+                locale,
+                title,
+                translations {
+                  en {
+                    locale,
+                    title
+                  }
+                  de {
+                    locale,
+                    title
+                  },
+                  fr {
+                    locale,
+                    title
+                  }
+                }
+            }
+        }');
+
+        $this->assertNotEmpty($response->errors);
+        $this->assertTrue(empty($response->data->LangSetting->translations->fr));
     }
 
     public function testAPICRUDActionsWithCookieAuthentication() {
