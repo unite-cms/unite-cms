@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
@@ -246,7 +247,12 @@ class MutationType extends AbstractType
             }
         }
 
-        throw new UserError($form->getErrors(true, true));
+        foreach($form->getErrors(true, true) as $error) {
+            $propertyPath = str_replace(']', '', $error->getCause()->getPropertyPath());
+            throw new UserErrorAtPath($error->getMessage(), explode('[', $propertyPath), 'validation');
+        }
+
+        return null;
     }
 
     /**
@@ -322,6 +328,11 @@ class MutationType extends AbstractType
             }
         }
 
-        throw new UserError($form->getErrors(true, true));
+        foreach($form->getErrors(true, true) as $error) {
+            $propertyPath = str_replace(']', '', $error->getCause()->getPropertyPath());
+            throw new UserErrorAtPath($error->getMessage(), explode('[', $propertyPath), 'validation');
+        }
+
+        return null;
     }
 }
