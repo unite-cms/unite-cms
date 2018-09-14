@@ -1099,7 +1099,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertContains("ERROR: ".static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertEquals(static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertEquals(['createNews', 'data', 'category'], $response->errors[0]->path);
 
         // Now create a news content with valid content.
         $response = $this->api(
@@ -1182,7 +1183,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertContains("ERROR: ".static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertContains(static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertEquals(['updateNews', 'data', 'category'], $response->errors[0]->path);
 
         // update a news content with valid content.
         $response = $this->api(
@@ -1500,7 +1502,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }', [], false, 'main');
 
         $this->assertNotEmpty($response->errors);
-        $this->assertStringStartsWith('ERROR: The CSRF token is invalid. Please try to resubmit the form.', $response->errors[0]->message);
+        $this->assertEquals('The CSRF token is invalid. Please try to resubmit the form.', $response->errors[0]->message);
+        $this->assertEquals(['createNews'], $response->errors[0]->path);
 
         // Try Create with csrf token
         $response = $this->api(
@@ -1527,7 +1530,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ], false, 'main');
 
         $this->assertNotEmpty($responseUpdate->errors);
-        $this->assertStringStartsWith("ERROR: The CSRF token is invalid. Please try to resubmit the form.", $responseUpdate->errors[0]->message);
+        $this->assertStringStartsWith("The CSRF token is invalid. Please try to resubmit the form.", $responseUpdate->errors[0]->message);
+        $this->assertEquals(['updateNews'], $responseUpdate->errors[0]->path);
 
         $responseUpdate = $this->api(
             $this->domains['marketing'],
