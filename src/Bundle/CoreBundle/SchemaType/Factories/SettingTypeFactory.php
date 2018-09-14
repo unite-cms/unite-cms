@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
@@ -129,6 +130,10 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                     [
                         'type' => Type::string(),
                     ],
+                    empty($settingType->getLocales()) ? [] : [
+                        'locale' => Type::string(),
+                        'translations' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($identifier, 'SettingTranslations') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''), $domain, $nestingLevel)
+                    ],
                     $fields
                 ),
                 'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use (
@@ -142,6 +147,16 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                     switch ($info->fieldName) {
                         case 'type':
                             return IdentifierNormalizer::graphQLIdentifier($value->getSettingType());
+                        case 'locale':
+                            return $value->getLocale();
+                        case 'translations':
+                            $translations = [];
+                            foreach($value->getSettingType()->getLocales() as $locale) {
+                                if($locale !== $value->getLocale()) {
+                                    $translations[$locale] = $value->getSettingType()->getSetting($locale);
+                                }
+                            }
+                            return $translations;
                         default:
 
                             if (!array_key_exists($info->fieldName, $fieldTypes)) {

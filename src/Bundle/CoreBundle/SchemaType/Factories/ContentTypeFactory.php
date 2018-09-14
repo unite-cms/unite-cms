@@ -150,6 +150,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                 ]
             );
         } else {
+
             return new ObjectType(
                 [
                     'name' => IdentifierNormalizer::graphQLType($identifier, 'Content') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
@@ -158,7 +159,10 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             'id' => Type::id(),
                             'type' => Type::string(),
                         ],
-                        empty($contentType->getLocales()) ? [] : [ 'locale' => Type::string(), ],
+                        empty($contentType->getLocales()) ? [] : [
+                            'locale' => Type::string(),
+                            'translations' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($identifier, 'ContentTranslations') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''), $domain, $nestingLevel)
+                        ],
                         [
                             'created' => Type::int(),
                             'updated' => Type::int(),
@@ -190,6 +194,28 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                 return $value->getUpdated()->getTimestamp();
                             case 'deleted':
                                 return $value->getDeleted() ? $value->getDeleted()->getTimestamp() : null;
+                            case 'translations':
+
+                                $translations = [];
+
+                                // Case 1: This is the base translation
+                                if(empty($value->getTranslationOf())) {
+                                    foreach($value->getTranslations() as $translation) {
+                                        $translations[$translation->getLocale()] = $translation;
+                                    }
+                                }
+
+                                // Case 2: This is a translation of a base translation
+                                else {
+                                    $translations[$value->getTranslationOf()->getLocale()] = $value->getTranslationOf();
+
+                                    foreach($value->getTranslationOf()->getTranslations() as $translation) {
+                                        $translations[$translation->getLocale()] = $translation;
+                                    }
+                                }
+
+                                return $translations;
+
                             default:
 
                                 if(!array_key_exists($info->fieldName, $fieldTypes)) {
