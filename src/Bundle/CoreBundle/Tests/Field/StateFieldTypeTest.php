@@ -21,6 +21,13 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
     }
 
+    public function testValidateStates()
+    {
+
+
+
+    }
+
     public function testStateFieldTypeWithInvalidSettings()
     {
 
