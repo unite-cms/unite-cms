@@ -2,7 +2,7 @@
 services:
 
   # Extends Symfony router to allow easy url generation for known entity routes.
-  UniteCMS\CoreBundle\Service\UniteRouter:
+  UniteCMS\CoreBundle\Service\UniteCMSRouter:
     parent: router
     decorates: router
 
