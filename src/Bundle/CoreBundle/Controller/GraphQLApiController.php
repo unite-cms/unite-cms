@@ -2,6 +2,8 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use GraphQL\Error\Error;
+use GraphQL\Error\FormattedError;
 use GraphQL\Server\Helper;
 use GraphQL\Server\RequestError;
 use GraphQL\Server\ServerConfig;
@@ -14,6 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
 
 class GraphQLApiController extends Controller
 {
@@ -49,14 +52,21 @@ class GraphQLApiController extends Controller
             ]
         );
 
-        $server = new StandardServer(
-          ServerConfig::create()->setSchema($schema)->setQueryBatching(true)->setDebug($this->getParameter('kernel.debug'))->setContext(
-            function () use ($request) {
-                return [
-                    'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
-                ];
-            }
-          )
+        $server = new StandardServer(ServerConfig::create()
+            ->setSchema($schema)
+            ->setQueryBatching(true)
+            ->setDebug($this->getParameter('kernel.debug'))
+            ->setContext(
+                function () use ($request) {
+                    return [
+                        'csrf_token' => $request->headers->get('X-CSRF-TOKEN'),
+                    ];
+                }
+            )->setErrorFormatter(
+                function (Error $error) {
+                    return UserErrorAtPath::createFormattedErrorFromException($error);
+                }
+            )
         );
 
         $serverHelper = new Helper();

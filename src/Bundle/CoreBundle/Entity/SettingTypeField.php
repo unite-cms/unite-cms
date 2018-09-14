@@ -26,7 +26,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
  */
 class SettingTypeField implements FieldableField
 {
-    const RESERVED_IDENTIFIERS = ['type', 'locale'];
+    const RESERVED_IDENTIFIERS = ['type', 'locale', 'translations'];
 
     /**
      * @var int

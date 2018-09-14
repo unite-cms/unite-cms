@@ -2,12 +2,14 @@
 
 namespace UniteCMS\CollectionFieldBundle\Tests;
 
+use GraphQL\Error\Error;
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
 use UniteCMS\StorageBundle\Model\PreSignedUrl;
@@ -249,10 +251,16 @@ class ImageFieldTypeTest extends FieldTypeTestCase
        }
     }'
         );
+
+        $result->setErrorFormatter(function (Error $error) {
+            return UserErrorAtPath::createFormattedErrorFromException($error);
+        });
+
         $result = json_decode(json_encode($result->toArray(true)));
 
         // Checksum should be invalid.
-        $this->assertEquals('ERROR: '.static::$container->get('translator')->trans('storage.invalid_checksum', [], 'validators'), trim($result->errors[0]->message));
+        $this->assertEquals(static::$container->get('translator')->trans('storage.invalid_checksum', [], 'validators'), trim($result->errors[0]->message));
+        $this->assertEquals(['createCt1', 'data', 'f1'], $result->errors[0]->path);
 
         // Try with valid checksum.
         $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');

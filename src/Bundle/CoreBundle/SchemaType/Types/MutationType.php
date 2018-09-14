@@ -10,7 +10,7 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -246,7 +246,11 @@ class MutationType extends AbstractType
             }
         }
 
-        throw new UserError($form->getErrors(true, true));
+        foreach($form->getErrors(true, true) as $error) {
+            throw UserErrorAtPath::createFromFormError($error);
+        }
+
+        return null;
     }
 
     /**
@@ -322,6 +326,10 @@ class MutationType extends AbstractType
             }
         }
 
-        throw new UserError($form->getErrors(true, true));
+        foreach($form->getErrors(true, true) as $error) {
+            throw UserErrorAtPath::createFromFormError($error);
+        }
+
+        return null;
     }
 }

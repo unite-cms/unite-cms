@@ -19,6 +19,7 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
@@ -109,7 +110,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {}
         }
       ],
-      "locales": ["de", "en"]
+      "locales": ["de", "en", "fr"],
+      "permissions": {
+        "view setting": "content.locale != \"fr\"",
+        "update setting": "true"
+      }
     }
   ],
   "setting_types": [
@@ -135,6 +140,23 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         "update setting": "true"
       },
       "locales": []
+    },
+    {
+      "title": "Lang test",
+      "identifier": "lang",
+      "fields": [
+        {
+          "title": "Title",
+          "identifier": "title",
+          "type": "text",
+          "settings": {}
+        }
+      ],
+      "locales": ["de", "en", "fr"],
+      "permissions": {
+        "view setting": "content.locale != \"fr\"",
+        "update setting": "true"
+      }
     }
   ]
 }',
@@ -1077,7 +1099,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertContains("ERROR: ".static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertEquals(static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertEquals(['createNews', 'data', 'category'], $response->errors[0]->path);
 
         // Now create a news content with valid content.
         $response = $this->api(
@@ -1160,7 +1183,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertContains("ERROR: ".static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertContains(static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
+        $this->assertEquals(['updateNews', 'data', 'category'], $response->errors[0]->path);
 
         // update a news content with valid content.
         $response = $this->api(
@@ -1211,7 +1235,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertNull($response->data->updateNews->category);
     }
 
-    public function testAPICreateAndUpdateMethodForCTWithLang() {
+    public function testAPICRUDForCTWithLang() {
 
         // Test that locale should be required for create.
         $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
@@ -1237,6 +1261,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals('With language', $response->data->createLang->title);
         $this->assertEquals('de', $response->data->createLang->locale);
 
+        $id = $response->data->createLang->id;
+
         // Test that locale should not be required for update but can be set.
         $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
             updateLang(id: $id, data: { title: "Updated title" }, persist: true) {
@@ -1244,7 +1270,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
               title,
               locale
             }
-        }', ['id' => $response->data->createLang->id]);
+        }', ['id' => $id]);
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals('Updated title', $response->data->updateLang->title);
@@ -1257,12 +1283,175 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
               title,
               locale
             }
-        }', ['id' => $response->data->updateLang->id]);
+        }', ['id' => $id]);
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals('Updated title', $response->data->updateLang->title);
         $this->assertEquals('en', $response->data->updateLang->locale);
 
+        // Find content by locale
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
+            findLang(filter: { field: "locale", operator: "=", value: "foo"}) {
+                total
+            }
+        }');
+        $this->assertEquals(0, $response->data->findLang->total);
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
+            findLang(filter: { field: "locale", operator: "=", value: "en"}) {
+                total
+            }
+        }');
+        $this->assertGreaterThanOrEqual(1, $response->data->findLang->total);
+
+        // Add a translation for english content.
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($id);
+        $trans = new Content();
+        $trans->setContentType($content->getContentType());
+        $trans->setData(['title' => 'DE content']);
+        $trans->setLocale('de');
+        $content->addTranslation($trans);
+
+        $this->em->persist($trans);
+        $this->em->flush();
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query($id: ID!) {
+            getLang(id: $id) {
+                id,
+                locale,
+                title,
+                translations {
+                  en {
+                    id, 
+                    locale,
+                    title
+                  },
+                  de {
+                    id, 
+                    locale,
+                    title,
+                    translations {
+                      en {
+                        id,
+                        locale,
+                        title,
+                      }
+                    }
+                  }
+                }
+            }
+        }', ['id' => $id]);
+
+        $this->assertTrue(empty($response->errors));
+
+        // Make sure, that only de translation is filled out.
+        $this->assertEquals('en', $response->data->getLang->locale);
+        $this->assertNull($response->data->getLang->translations->en);
+        $this->assertEquals('DE content', $response->data->getLang->translations->de->title);
+        $this->assertEquals('de', $response->data->getLang->translations->de->locale);
+
+        // Make sure, that also translations can access their translationOf
+        $this->assertEquals($id, $response->data->getLang->translations->de->translations->en->id);
+        $this->assertEquals('en', $response->data->getLang->translations->de->translations->en->locale);
+        $this->assertEquals('Updated title', $response->data->getLang->translations->de->translations->en->title);
+
+        $fr_trans = new Content();
+        $fr_trans->setContentType($content->getContentType());
+        $fr_trans->setLocale('fr');
+        $content->addTranslation($fr_trans);
+
+        $this->em->persist($fr_trans);
+        $this->em->flush();
+
+        // Try to access translation, the user do not have access to.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            getLang(id: $id) {
+                translations {
+                  fr {
+                    id, 
+                    locale,
+                    title
+                  }
+                }
+            }
+        }');
+
+        $this->assertNotEmpty($response->errors);
+        $this->assertTrue(empty($response->data->getLang->translations->fr));
+    }
+
+    public function testAPICRUDForSTWithLang() {
+
+        $setting = new Setting();
+        $setting->setSettingType($this->domains['marketing']->getSettingTypes()->get('lang'));
+        $setting->setLocale('en');
+        $setting->setData(['title' => 'Updated title']);
+        $this->em->persist($setting);
+
+        $trans = new Setting();
+        $trans->setSettingType($this->domains['marketing']->getSettingTypes()->get('lang'));
+        $trans->setLocale('de');
+        $trans->setData(['title' => 'DE title']);
+        $this->em->persist($trans);
+
+        $fr_trans = new Setting();
+        $fr_trans->setSettingType($this->domains['marketing']->getSettingTypes()->get('lang'));
+        $fr_trans->setLocale('fr');
+        $fr_trans->setData(['title' => 'FR title, no access']);
+        $this->em->persist($fr_trans);
+
+        $this->em->flush();
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            LangSetting {
+                locale,
+                title,
+                translations {
+                  en {
+                    locale,
+                    title
+                  }
+                  de {
+                    locale,
+                    title
+                  }
+                }
+            }
+        }');
+
+        $this->assertTrue(empty($response->errors));
+
+        // Make sure, that only de translation is filled out.
+        $this->assertEquals('en', $response->data->LangSetting->locale);
+        $this->assertEquals('Updated title', $response->data->LangSetting->title);
+        $this->assertNull($response->data->LangSetting->translations->en);
+        $this->assertEquals('en', $response->data->LangSetting->locale);
+        $this->assertEquals('DE title', $response->data->LangSetting->translations->de->title);
+        $this->assertEquals('de', $response->data->LangSetting->translations->de->locale);
+
+        // Try to access translation, the user do not have access to.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            LangSetting {
+                locale,
+                title,
+                translations {
+                  en {
+                    locale,
+                    title
+                  }
+                  de {
+                    locale,
+                    title
+                  },
+                  fr {
+                    locale,
+                    title
+                  }
+                }
+            }
+        }');
+
+        $this->assertNotEmpty($response->errors);
+        $this->assertTrue(empty($response->data->LangSetting->translations->fr));
     }
 
     public function testAPICRUDActionsWithCookieAuthentication() {
@@ -1313,7 +1502,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }', [], false, 'main');
 
         $this->assertNotEmpty($response->errors);
-        $this->assertStringStartsWith('ERROR: The CSRF token is invalid. Please try to resubmit the form.', $response->errors[0]->message);
+        $this->assertEquals('The CSRF token is invalid. Please try to resubmit the form.', $response->errors[0]->message);
+        $this->assertEquals(['createNews'], $response->errors[0]->path);
 
         // Try Create with csrf token
         $response = $this->api(
@@ -1340,7 +1530,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ], false, 'main');
 
         $this->assertNotEmpty($responseUpdate->errors);
-        $this->assertStringStartsWith("ERROR: The CSRF token is invalid. Please try to resubmit the form.", $responseUpdate->errors[0]->message);
+        $this->assertStringStartsWith("The CSRF token is invalid. Please try to resubmit the form.", $responseUpdate->errors[0]->message);
+        $this->assertEquals(['updateNews'], $responseUpdate->errors[0]->path);
 
         $responseUpdate = $this->api(
             $this->domains['marketing'],
