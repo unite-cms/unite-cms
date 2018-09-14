@@ -8,29 +8,15 @@
         <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
             <ul class="uk-nav uk-dropdown-nav">
-                {% if settingType.locales|length > 0 %}<li><a href="{{ url('unitecms_core_setting_translations', {
-                        'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                        'domain': unite.domain.identifier|replace({'_':'-'}),
-                        'setting_type': settingType.identifier|replace({'_':'-'}),
-                        'setting': setting.id
-                    }) }}"><i class="uk-margin-small-right" data-feather="globe"></i>{% trans %}setting.translations.button{% endtrans %}</a></li>{% endif %}
-                <li><a href="{{ url('unitecms_core_setting_revisions', {
-                        'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                        'domain': unite.domain.identifier|replace({'_':'-'}),
-                        'setting_type': settingType.identifier|replace({'_':'-'}),
-                        'setting': setting.id
-                    }) }}"><i class="uk-margin-small-right" data-feather="skip-back"></i>{% trans %}setting.revisions.button{% endtrans %}</a></li>
+                {% if settingType.locales|length > 0 %}<li><a href="{{ url('unitecms_core_setting_translations', [setting]) }}"><i class="uk-margin-small-right" data-feather="globe"></i>{% trans %}setting.translations.button{% endtrans %}</a></li>{% endif %}
+                <li><a href="{{ url('unitecms_core_setting_revisions', [setting]) }}"><i class="uk-margin-small-right" data-feather="skip-back"></i>{% trans %}setting.revisions.button{% endtrans %}</a></li>
             </ul>
         </div>
     </header>
     {{ form(form) }}
 
     {% if settingType.preview is not empty %}
-        <unite-cms-core-iframe-preview url="{{ url('unitecms_core_setting_preview', {
-            domain: domain.identifier|replace({'_':'-'}),
-            organization: organization.identifier|replace({'_':'-'}),
-            setting_type: settingType.identifier|replace({'_':'-'}),
-        }) }}"></unite-cms-core-iframe-preview>
+        <unite-cms-core-iframe-preview url="{{ url('unitecms_core_setting_preview', [setting_type]) }}"></unite-cms-core-iframe-preview>
     {% endif %}
 </article>
 {% endblock content %}

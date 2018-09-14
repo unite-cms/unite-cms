@@ -45,7 +45,7 @@ class IndexController extends Controller
 
         // Otherwise redirect to the organization overview page.
         else {
-            return $this->redirect($this->generateUrl('unitecms_core_organization_index', [], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_organization_index'));
         }
     }
 }

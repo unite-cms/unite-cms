@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Service;
 
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -19,6 +20,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 /**
@@ -103,6 +105,11 @@ class UniteCMSRouter extends Router
             $parameters['view'] = 'all';
         }
 
+        if($entity instanceof View) {
+            $this->replaceParametersForEntity($entity->getContentType(), $parameters);
+            $parameters['view'] = IdentifierNormalizer::denormalize($entity->getIdentifier());
+        }
+
         if($entity instanceof SettingType) {
             $this->replaceParametersForEntity($entity->getDomain(), $parameters);
             $parameters['setting_type'] = IdentifierNormalizer::denormalize($entity->getIdentifier());
@@ -135,6 +142,12 @@ class UniteCMSRouter extends Router
 
         if($entity instanceof Invitation) {
             $this->replaceParametersForEntity($entity->getDomainMemberType(), $parameters);
+            $parameters['invite'] = IdentifierNormalizer::denormalize($entity->getId());
+        }
+
+        if($entity instanceof ApiKey) {
+            $this->replaceParametersForEntity($entity->getOrganization(), $parameters);
+            $parameters['apiKey'] = IdentifierNormalizer::denormalize($entity->getId());
         }
     }
 }

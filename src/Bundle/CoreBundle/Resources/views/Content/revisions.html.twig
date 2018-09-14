@@ -4,12 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ url('unitecms_core_content_index', {
-            domain: unite.domain.identifier|replace({'_':'-'}),
-            organization: unite.organization.identifier|replace({'_':'-'}),
-            content_type: contentType.identifier|replace({'_':'-'}),
-            view: view.identifier|replace({'_':'-'})
-        }) }}"><i data-feather="arrow-left"></i></a>
+        <a class="back-button" href="{{ url('unitecms_core_content_index', [view]) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.revisions.headline{% endtrans %}</h2>
     </header>
 
@@ -43,14 +38,7 @@
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a href="{{ url('unitecms_core_content_revisionsrevert', {
-                                            'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                                            'domain': unite.domain.identifier|replace({'_':'-'}),
-                                            'content_type': contentType.identifier|replace({'_':'-'}),
-                                            'view': view.identifier|replace({'_':'-'}),
-                                            'content': content.id,
-                                            'version': revision.version
-                                        }) }}">
+                                    <li><a href="{{ url('unitecms_core_content_revisionsrevert', {'view': view, 'content': content, 'version': revision.version }) }}">
                                             <i class="uk-margin-small-right" data-feather="rewind"></i>
                                             {% trans %}content.revisions.revert.button{% endtrans %}
                                         </a></li>

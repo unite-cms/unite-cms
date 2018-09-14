@@ -144,7 +144,7 @@ class OrganizationController extends Controller
             } else {
                 $this->getDoctrine()->getManager()->remove($organization);
                 $this->getDoctrine()->getManager()->flush();
-                return $this->redirect($this->generateUrl('unitecms_core_organization_index', []));
+                return $this->redirect($this->generateUrl('unitecms_core_organization_index'));
             }
         }
 

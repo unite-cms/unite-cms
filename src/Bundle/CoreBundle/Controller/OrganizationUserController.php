@@ -89,13 +89,7 @@ class OrganizationUserController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_organizationuser_index',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                ], Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', [$organization]));
         }
 
         return $this->render(
@@ -145,14 +139,7 @@ class OrganizationUserController extends Controller
             } else {
                 $this->getDoctrine()->getManager()->remove($member);
                 $this->getDoctrine()->getManager()->flush();
-
-                return $this->redirect($this->generateUrl(
-                    'unitecms_core_organizationuser_index',
-                    [
-                        'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                    ],
-                    Router::ABSOLUTE_URL
-                ));
+                return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', [$organization]));
             }
         }
 
@@ -215,19 +202,13 @@ class OrganizationUserController extends Controller
                             '@UniteCMSCore/Emails/invitation.html.twig',
                             [
                                 'invitation' => $invitation,
-                                'invitation_url' => $this->generateUrl(
-                                    'unitecms_core_profile_acceptinvitation',
-                                    [
-                                        'token' => $invitation->getToken(),
-                                    ],
-                                    UrlGeneratorInterface::ABSOLUTE_URL
-                                ),
+                                'invitation_url' => $this->generateUrl('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]),
                             ]
                         ),
                         'text/html'
                     );
                 $this->get('mailer')->send($message);
-                return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', ['organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())], Router::ABSOLUTE_URL));
+                return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', [$organization]));
             }
         }
 
@@ -265,9 +246,7 @@ class OrganizationUserController extends Controller
             $this->getDoctrine()->getManager()->remove($invite);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', [
-                'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-            ], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', [$organization]));
         }
 
         return $this->render(

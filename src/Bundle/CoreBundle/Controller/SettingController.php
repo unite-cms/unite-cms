@@ -226,16 +226,7 @@ class SettingController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Setting reverted.');
 
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_setting_revisions',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($settingType->getDomain()->getOrganization()->getIdentifier()),
-                    'domain' => $settingType->getDomain()->getIdentifier(),
-                    'setting_type' => $settingType->getIdentifier(),
-                    'setting' => $setting->getId(),
-                ],
-                Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_setting_revisions', [$setting]));
         }
 
         return $this->render(
