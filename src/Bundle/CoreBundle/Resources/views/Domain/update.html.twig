@@ -17,10 +17,7 @@
         {% do form.back.setRendered %}
 
         <header class="uk-card-header uk-flex">
-            <a class="back-button" href="{{ url('unitecms_core_domain_view', {
-                organization: unite.organization.identifier|replace({'_':'-'}),
-                domain: unite.domain.identifier|replace({'_':'-'})
-            }) }}">
+            <a class="back-button" href="{{ url('unitecms_core_domain_view', [unite.domain]) }}">
                 <i data-feather="arrow-left"></i>
             </a>
             <h2 class="uk-flex-1">{% trans with { '%domain%': unite.domain|escape } %}domain.update.headline{% endtrans %}</h2>

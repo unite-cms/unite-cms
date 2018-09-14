@@ -14,7 +14,9 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
@@ -32,7 +34,7 @@ class UniteCMSRouter extends Router
      * Generates a url for the given route and given parameters.
      *
      * If a known entity is passed as parameter, tries to fill out other parameters by properties and referenced
-     * entities of the entity. Sets the default reference type to ABSOLUTE_URL, because when using the subdomain
+     * entities of the entity. Sets the reference type to ABSOLUTE_URL, because when using the subdomain
      * approach, absolute_url generation is required.
      *
      * @param $name
@@ -42,6 +44,9 @@ class UniteCMSRouter extends Router
      */
     public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_URL)
     {
+        // In unite cms we can only handle absolute urls, because of the subdomain routing approach.
+        $referenceType = self::ABSOLUTE_URL;
+
         $this->context->setParameters(array_merge($this->context->getParameters(), $this->findAdditionalParameters($parameters)));
         return parent::generate($name, $parameters, $referenceType);
     }
@@ -121,6 +126,15 @@ class UniteCMSRouter extends Router
         if($entity instanceof DomainMember) {
             $this->replaceParametersForEntity($entity->getDomainMemberType(), $parameters);
             $parameters['member'] = IdentifierNormalizer::denormalize($entity->getId());
+        }
+
+        if($entity instanceof OrganizationMember) {
+            $this->replaceParametersForEntity($entity->getOrganization(), $parameters);
+            $parameters['member'] = IdentifierNormalizer::denormalize($entity->getId());
+        }
+
+        if($entity instanceof Invitation) {
+            $this->replaceParametersForEntity($entity->getDomainMemberType(), $parameters);
         }
     }
 }

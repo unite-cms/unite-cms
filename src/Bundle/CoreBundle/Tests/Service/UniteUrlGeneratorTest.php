@@ -134,9 +134,9 @@ class UniteUrlGeneratorTest extends KernelTestCase
             self::$container->get('twig.extension.routing')->getUrl('unitecms_core_domain_index', ['organization' => $this->organization])
         );
 
-        // Make sure, that using path overrides default absolute url
+        // Make sure, that absolute url cannot be overriden
         $this->assertEquals(
-            $this->router->generate('unitecms_core_domain_index', ['organization' => 'org1-org1'], Router::ABSOLUTE_PATH),
+            $this->router->generate('unitecms_core_domain_index', ['organization' => 'org1-org1'], Router::ABSOLUTE_URL),
             self::$container->get('twig.extension.routing')->getPath('unitecms_core_domain_index', ['organization' => $this->organization])
         );
     }
