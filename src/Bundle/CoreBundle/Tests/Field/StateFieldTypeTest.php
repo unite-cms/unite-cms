@@ -29,15 +29,19 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $settings = [
             'initial_place' => 'draft1',
             'places' => [
-                'draft' => [],
-                'review2',
-                'review2',
-                '2published'
+                'draft' => [
+                    'type' => 'red'
+                ],
+                'review2' => [
+                    'type' => '000'
+                ],
+                'review2' => [],
+                '2published' => []
             ],
             'transitions' => [
                 'draft'=> [
                     'label' => 'Put into review mode',
-                    'from' => 'draft',
+                    'from' => 'draft1',
                     'to' => 'review234',
                 ],
                 'review'=> [
@@ -52,19 +56,25 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(3, $errors);
+        $this->assertCount(6, $errors);
 
         # test invalid initial place
         $this->assertEquals('invalid_initial_place', $errors->get(0)->getMessageTemplate());
 
-        # test places values all strings
-        $this->assertEquals('invalid_places', $errors->get(1)->getMessageTemplate());
+        # test valid places
+        $this->assertEquals('invalid_places_types', $errors->get(1)->getMessageTemplate());
 
         # test invalid from to transition, no place
         $this->assertEquals('invalid_transition_to', $errors->get(2)->getMessageTemplate());
 
-        # test all transition params set
-        #$this->assertEquals('invalid_initial_place', $errors->get(0)->getMessageTemplate());
+        # tests if transition from exists in places
+        $this->assertEquals('invalid_transition_from', $errors->get(3)->getMessageTemplate());
+
+        # tests if translation keys are missing
+        $this->assertEquals('invalid_transitions_keys_missing', $errors->get(4)->getMessageTemplate());
+
+        # test if transition is correct
+        $this->assertEquals('invalid_transitions', $errors->get(5)->getMessageTemplate());
 
     }
 
@@ -76,10 +86,14 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $settings = [
             'initial_place' => 'draft',
             'places' => [
-                'draft',
-                'review',
-                'review2',
-                'published'
+                'draft' => [
+                    'type' => 'notice'
+                ],
+                'review'=> [
+                    'type' => 'primary'
+                ],
+                'review2'  => [],
+                'published'  => []
             ],
             'transitions' => [
                 'draft'=> [
@@ -103,5 +117,6 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
+
     }
 }

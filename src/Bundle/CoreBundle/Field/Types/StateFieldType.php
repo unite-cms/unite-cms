@@ -25,6 +25,16 @@ class StateFieldType extends FieldType
     const SETTINGS = ['initial_place', 'places', 'transitions'];
 
     /**
+     * All places types
+     */
+    const TYPES = ['primary', 'notice', 'info','success', 'warning', 'danger'];
+
+    /**
+     * Required transition keys
+     */
+    const REQUIRED_TRANSITION_KEYS = ['label', 'from', 'to'];
+
+    /**
      * All required settings for this field type.
      */
     const REQUIRED_SETTINGS = ['initial_place', 'places', 'transitions'];
@@ -54,70 +64,98 @@ class StateFieldType extends FieldType
             return;
         }
 
-        # check if initial place is inside places
-        if (!is_string($settings->initial_place) or !in_array($settings->initial_place, $settings->places))
+        # check if initial place exists inside places
+        if (!is_string($settings->initial_place) or !in_array($settings->initial_place, array_keys($settings->places)))
         {
             $context->buildViolation('invalid_initial_place')->atPath('initial_place')->addViolation();
         }
 
-        # check if places array is correct
-        foreach ($settings->places as $place)
+        # check valid places
+        $this->validPlaces($settings->places, $context);
+
+        # check valid transitions
+        $this->validTransitions($settings->transitions, $settings->places, $context);
+
+    }
+
+    /**
+     * @param array $places
+     * @param ExecutionContextInterface $context
+     */
+    private function validPlaces(array $places, ExecutionContextInterface &$context)
+    {
+        foreach ($places as $place => $place_config)
         {
+
             # must be all strings
-            if (!is_string($place)) {
+            if (!is_string($place) or !is_array($place_config))
+            {
                 $context->buildViolation('invalid_places')->atPath('places')->addViolation();
                 break;
             }
-        }
 
-        $required_transition_keys = ['label', 'from', 'to'];
-        # validate transition elements
-        foreach ($settings->transitions as $name => $transition)
+            # validate color hexcode
+            if (isset($place_config['type']) && !in_array($place_config['type'], self::TYPES))
+            {
+                $context->buildViolation('invalid_places_types')->atPath('places')->addViolation();
+                break;
+            }
+
+        }
+    }
+
+    /**
+     * @param array transitions
+     * @param array $places
+     * @param ExecutionContextInterface $context
+     */
+    private function validTransitions(array $transitions, array $places, ExecutionContextInterface &$context)
+    {
+        foreach ($transitions as $name => $transition)
         {
             # if no array
             if (!is_array($transition))
             {
                 $context->buildViolation('invalid_transitions')->atPath('transitions')->addViolation();
-                break;
             }
 
             # check for all required keys
-            $missing = array_diff_key(array_flip($required_transition_keys), $transition);
+            $missing = array_diff_key(array_flip(self::REQUIRED_TRANSITION_KEYS), $transition);
             if (!empty($missing))
             {
                 $context->buildViolation('invalid_transitions_keys_missing')->atPath('transitions')->addViolation();
-                break;
             }
 
             # check if a single transition has the right types
-            if (!is_string($transition['label'])
+            if (!isset($transition['label'])
+                or !isset($transition['to'])
+                or !isset($transition['from'])
+                or !is_string($transition['label'])
                 or !is_string($transition['to'])
-                or (!is_string($transition['from']) && !is_array($transition['from']))) {
+                or (!is_string($transition['from']) && !is_array($transition['from'])))
+            {
 
-                $context->buildViolation('invalid_transitions2323')->atPath('transitions')->addViolation();
+                $context->buildViolation('invalid_transitions')->atPath('transitions')->addViolation();
                 break;
             }
 
             # check if transition to exists in places
-            if (!in_array($transition['to'], $settings->places))
+            if (!in_array($transition['to'], array_keys($places)))
             {
                 $context->buildViolation('invalid_transition_to')->atPath('transitions')->addViolation();
-                break;
             }
 
             # check if transition from exists in places
             $check_from = (!is_array($transition['from'])) ? array($transition['from']):$transition['from'];
             foreach ($check_from as $from)
             {
-                if (!in_array($from, $settings->places))
+                if (!in_array($from, array_keys($places)))
                 {
                     $context->buildViolation('invalid_transition_from')->atPath('transitions')->addViolation();
-                    break;
                 }
             }
 
         }
-
     }
 
 }

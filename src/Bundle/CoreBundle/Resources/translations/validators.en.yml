@@ -44,3 +44,4 @@ invalid_content_type: 'Invalid Content Type given. The Content Type does not exi
 invalid_transitions: 'Invalid Transition given. Please check if all Settings are correct.'
 invalid_initial_place: 'Invalid Initial Place. This Place must exists in Places.'
 invalid_transitions_keys_missing: 'Invalid Transition given. There are some required Settings missing.'
+invalid_places_types: 'Invalid Place Type given.'
