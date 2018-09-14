@@ -11,6 +11,8 @@ namespace UniteCMS\CoreBundle\Exception;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
 use GraphQL\Error\UserError;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * An user error at a specific path. Path will be shown to the user. Nodes will be set to null.
@@ -32,6 +34,20 @@ class UserErrorAtPath extends UserError
         $this->path = $path;
         $this->category = $category;
         parent::__construct($message);
+    }
+
+    /**
+     * @param FormError $error
+     * @return UserErrorAtPath
+     */
+    static function createFromFormError(FormError $error) {
+        $path = [];
+        if($error->getCause() && $error->getCause() instanceof ConstraintViolationInterface) {
+            $propertyPath = str_replace(']', '', $error->getCause()->getPropertyPath());
+            $path = explode('[', $propertyPath);
+        }
+
+        return new UserErrorAtPath($error->getMessage(), $path, 'validation');
     }
 
     /**

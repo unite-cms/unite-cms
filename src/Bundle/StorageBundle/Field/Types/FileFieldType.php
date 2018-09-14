@@ -135,13 +135,13 @@ class FileFieldType extends FieldType
         }
 
         if(empty($data['size']) || empty($data['id']) || empty($data['name']) || empty($data['checksum'])) {
-            $context->buildViolation('storage.missing_file_definition')->addViolation();
+            $context->buildViolation('storage.missing_file_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
         }
 
         if(empty($violations)) {
             $preSignedUrl = new PreSignedUrl('', $data['id'], $data['name'], $data['checksum']);
             if (!$preSignedUrl->check($this->secret)) {
-                $context->buildViolation('storage.invalid_checksum')->addViolation();
+                $context->buildViolation('storage.invalid_checksum')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
         }
     }
