@@ -115,6 +115,10 @@ class FileFieldType extends FieldType
      */
     function resolveGraphQLData(FieldableField $field, $value)
     {
+        if(empty($value['id']) || empty($value['name'])) {
+            return null;
+        }
+
         // Create full URL to file.
         $value['url'] = $this->generateEndpoint($field->getSettings()) . '/' . $value['id'] . '/' . $value['name'];
         return $value;
