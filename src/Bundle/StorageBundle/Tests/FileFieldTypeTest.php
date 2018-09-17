@@ -306,6 +306,57 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('image/jpeg', $result->data->createCt1->f1->type);
         $this->assertEquals('XXX-YYY-ZZZ', $result->data->createCt1->f1->id);
         $this->assertEquals('https://example.com/foo/XXX-YYY-ZZZ/cat.jpg', $result->data->createCt1->f1->url);
+        $content_id = $result->data->createCt1->id;
+
+        // Test getting empty data via api.
+        $empty_content = new Content();
+        $empty_content->setContentType($field->getContentType());
+        $this->em->persist($empty_content);
+        $this->em->flush();
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'query { 
+                getCt1(id: "'.$empty_content->getId().'") {
+                    f1 {
+                        name,
+                        size,
+                        type,
+                        id,
+                        url
+                    }
+                }
+            }');
+        $result = json_decode(json_encode($result->toArray(true)));
+        $this->assertTrue(empty($result->errors));
+        $this->assertNull($result->data->getCt1->f1);
+
+        // Test getting non-empty data via api.
+        $empty_content = new Content();
+        $empty_content->setContentType($field->getContentType());
+        $this->em->persist($empty_content);
+        $this->em->flush();
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'query { 
+                getCt1(id: "'.$content_id.'") {
+                    f1 {
+                        name,
+                        size,
+                        type,
+                        id,
+                        url
+                    }
+                }
+            }');
+        $result = json_decode(json_encode($result->toArray(true)));
+        $this->assertNotNull($result->data->getCt1->f1);
+        $this->assertEquals('cat.jpg', $result->data->getCt1->f1->name);
+        $this->assertEquals(12345, $result->data->getCt1->f1->size);
+        $this->assertEquals('image/jpeg', $result->data->getCt1->f1->type);
+        $this->assertEquals('XXX-YYY-ZZZ', $result->data->getCt1->f1->id);
+        $this->assertEquals('https://example.com/foo/XXX-YYY-ZZZ/cat.jpg', $result->data->getCt1->f1->url);
     }
 
     public function testContentFormBuild()
