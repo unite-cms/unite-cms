@@ -55,6 +55,14 @@
     {{- parent() -}}
 {%- endblock textarea_widget -%}
 
+{%- block link_widget -%}
+
+    {%- for child in form %}
+        {{- form_row(child) -}}
+    {% endfor -%}
+
+{%- endblock link_widget -%}
+
 {%- block checkbox_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-checkbox')|trim}) %}
 

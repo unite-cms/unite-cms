@@ -66,3 +66,8 @@ services:
   UniteCMS\CoreBundle\Field\Types\PhoneFieldType:
     public: false
     tags: [unite_cms.field_type]
+
+  # A Link field with open to set a target and title
+  UniteCMS\CoreBundle\Field\Types\LinkFieldType:
+    public: false
+    tags: [unite_cms.field_type]
