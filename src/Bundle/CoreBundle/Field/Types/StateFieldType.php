@@ -92,11 +92,10 @@ class StateFieldType extends FieldType
 
     /**
      * {@inheritdoc}
-     *
      */
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
-
+        echo "hahahahah"; exit;
         // When deleting content, we don't need to validate data.
         if (strtoupper($context->getGroup()) === 'DELETE') {
             return;
@@ -107,7 +106,11 @@ class StateFieldType extends FieldType
             return;
         }
 
+        print_r($data); exit;
+
         $state = new State($data);
+
+
 
         $workflow = $this->buildWorkflow($field);
 
