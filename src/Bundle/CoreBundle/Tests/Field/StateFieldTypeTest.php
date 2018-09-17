@@ -17,7 +17,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
     {
         $ctField = $this->createContentTypeField('state');
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(3, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
     }
 
@@ -34,14 +34,12 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('state');
 
         $settings = [
-            'initial_place' => 'draft1',
+            'initial_place' => 'draft',
             'places' => [
                 'draft' => [
-                    'type' => 'red'
+                    'category' => 'red'
                 ],
-                'review2' => [
-                    'type' => '000'
-                ],
+                'review'=> [],
                 'review2' => [],
                 '2published' => []
             ],
@@ -54,35 +52,42 @@ class StateFieldTypeTest extends FieldTypeTestCase
                 'review'=> [
                     'from' => ['review22','published'],
                     'to' => 'Publish Content',
-                ],
-                'review566' => [
-                    'from' => 'review2'
                 ]
             ]
         ];
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(6, $errors);
+        $this->assertCount(1, $errors);
 
-        # test invalid initial place
-        $this->assertEquals('invalid_initial_place', $errors->get(0)->getMessageTemplate());
+        # test invalid places category
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertContains('not a valid category', $errors->get(0)->getMessageTemplate());
 
-        # test valid places
-        $this->assertEquals('invalid_places_types', $errors->get(1)->getMessageTemplate());
+        # test transition from in place
+        $settings['places']['draft'] = [];
+        $ctField->setSettings(new FieldableFieldSettings($settings));
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertContains('referenced in from transition', $errors->get(0)->getMessageTemplate());
 
-        # test invalid from to transition, no place
-        $this->assertEquals('invalid_transition_to', $errors->get(2)->getMessageTemplate());
+        # test transition to in place
+        $settings['transitions']['draft']['from'] = "draft";
+        $ctField->setSettings(new FieldableFieldSettings($settings));
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertContains('referenced in to transition', $errors->get(0)->getMessageTemplate());
 
-        # tests if transition from exists in places
-        $this->assertEquals('invalid_transition_from', $errors->get(3)->getMessageTemplate());
+        # test mission transition settings
+        $settings['transitions']['draft']['to'] = "draft";
+        $ctField->setSettings(new FieldableFieldSettings($settings));
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertContains('Missing Transition Settings', $errors->get(0)->getMessageTemplate());
 
-        # tests if translation keys are missing
-        $this->assertEquals('invalid_transitions_keys_missing', $errors->get(4)->getMessageTemplate());
-
-        # test if transition is correct
-        $this->assertEquals('invalid_transitions', $errors->get(5)->getMessageTemplate());
-
+        # test initial place
+        unset($settings['transitions']['review']);
+        $settings['initial_place'] = "xxxyyy";
+        $ctField->setSettings(new FieldableFieldSettings($settings));
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertContains('initial place as it does not exist', $errors->get(0)->getMessageTemplate());
     }
 
     public function testStateFieldTypeWithValidSettings()
@@ -94,10 +99,10 @@ class StateFieldTypeTest extends FieldTypeTestCase
             'initial_place' => 'draft',
             'places' => [
                 'draft' => [
-                    'type' => 'notice'
+                    'category' => 'notice'
                 ],
                 'review'=> [
-                    'type' => 'primary'
+                    'category' => 'primary'
                 ],
                 'review2'  => [],
                 'published'  => []
