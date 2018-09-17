@@ -109,6 +109,8 @@ class StateFieldType extends FieldType
 
         $state = new State($data);
 
+        $workflow = $this->buildWorkflow($field);
+
         #dump($field->getSettings());
         #dump($data); exit;
 
@@ -133,10 +135,10 @@ class StateFieldType extends FieldType
             $state_settings = new StateSettings($settings->places, $settings->transitions, $settings->initial_place);
         }
         catch (InvalidStateSettingsPlacesException $e) {
-            $context->buildViolation($e->getMessage())->atPath('places')->addViolation();
+            $context->buildViolation($e->getMessage())->atPath('places')->setCause('invalid_place')->addViolation();
         }
         catch (InvalidStateSettingsTransitionsException $e) {
-            $context->buildViolation($e->getMessage())->atPath('transitions')->addViolation();
+            $context->buildViolation($e->getMessage())->atPath('transitions')->setCause('invalid_transition')->addViolation();
         }
 
     }

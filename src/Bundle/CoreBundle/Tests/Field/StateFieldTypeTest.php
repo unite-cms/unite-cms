@@ -62,32 +62,32 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         # test invalid places category
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertContains('not a valid category', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_place', $errors->get(0)->getCause());
 
         # test transition from in place
         $settings['places']['draft'] = [];
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertContains('referenced in from transition', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_transition', $errors->get(0)->getCause());
 
         # test transition to in place
         $settings['transitions']['draft']['from'] = "draft";
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertContains('referenced in to transition', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_transition', $errors->get(0)->getCause());
 
         # test mission transition settings
         $settings['transitions']['draft']['to'] = "draft";
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertContains('Missing Transition Settings', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_transition', $errors->get(0)->getCause());
 
         # test initial place
         unset($settings['transitions']['review']);
         $settings['initial_place'] = "xxxyyy";
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertContains('initial place as it does not exist', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_place', $errors->get(0)->getCause());
     }
 
     public function testStateFieldTypeWithValidSettings()
