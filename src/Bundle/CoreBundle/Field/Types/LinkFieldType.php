@@ -24,6 +24,17 @@ class LinkFieldType extends FieldType
      */
     const SETTINGS = ['allow_title', 'allow_target'];
 
+    function getFormOptions(FieldableField $field): array
+    {
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'allow_title' => $field->getSettings()->allow_title ?? false,
+                'allow_target' => $field->getSettings()->allow_target ?? false
+            ]
+        );
+    }
+
     /**
      * {@inheritdoc}
      */

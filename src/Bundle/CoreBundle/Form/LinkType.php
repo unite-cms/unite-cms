@@ -33,7 +33,9 @@ class LinkType extends AbstractType implements DataTransformerInterface
     {
 
         $resolver->setDefaults(array(
-            'compound' => true
+            'compound' => true,
+            'allow_title' => false,
+            'allow_target' => false
         ));
 
     }
@@ -44,31 +46,34 @@ class LinkType extends AbstractType implements DataTransformerInterface
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
-        $builder->add(
-            'url',
-            UrlType::class,
+        $builder->add('url', UrlType::class,
             [
                 'attr' => ['class' => 'link-url'],
             ]
         );
 
-        $builder->add(
-            'title',
-            TextType::class,
-            [
-                'attr' => ['class' => 'link-title'],
-            ]
-        );
+        if (isset($options['allow_title']) && $options['allow_title'])
+        {
 
-        $builder->add(
-            'target',
-            ChoiceType::class,
-            [
-                'choices' => self::URL_TARGETS,
-                'attr' => ['class' => 'link-target'],
-            ]
-        );
+            $builder->add('title', TextType::class,
+                [
+                    'attr' => ['class' => 'link-title'],
+                ]
+            );
 
+        }
+
+        if (isset($options['allow_target']) && $options['allow_target'])
+        {
+
+            $builder->add('target', ChoiceType::class,
+                [
+                    'choices' => self::URL_TARGETS,
+                    'attr' => ['class' => 'link-target'],
+                ]
+            );
+
+        }
 
         $builder->addViewTransformer($this);
 
@@ -80,6 +85,7 @@ class LinkType extends AbstractType implements DataTransformerInterface
     public function transform($data)
     {
         $data = json_decode($data);
+
         return (array) $data;
     }
 
@@ -88,6 +94,7 @@ class LinkType extends AbstractType implements DataTransformerInterface
      */
     public function reverseTransform($data)
     {
+
         if (!is_string($data) && null !== $data) {
             return json_encode($data);
         }

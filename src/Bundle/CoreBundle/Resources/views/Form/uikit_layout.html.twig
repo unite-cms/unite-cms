@@ -57,9 +57,13 @@
 
 {%- block link_widget -%}
 
-    {%- for child in form %}
-        {{- form_row(child) -}}
-    {% endfor -%}
+    {{ form_row(form.url) }}
+
+    <div class="link-attributes" style="border:1px solid red;">
+        {%- for child in form %}
+            {{- form_row(child) -}}
+        {% endfor -%}
+    </div>
 
 {%- endblock link_widget -%}
 
