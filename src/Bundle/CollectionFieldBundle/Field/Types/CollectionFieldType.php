@@ -62,6 +62,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             'allow_add' => true,
             'allow_delete' => true,
             'delete_empty' => true,
+            'error_bubbling' => false,
             'prototype_name' => '__' . str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')) . 'Name__',
             'attr' => [
                 'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
