@@ -136,8 +136,8 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
         $this->validateNestedFields($field, $data, $context);
 
-        $max_rows = $field->getSettings()->max_rows ?? 0;
-        $min_rows = $field->getSettings()->min_rows ?? 0;
+        $max_rows = (int)$field->getSettings()->max_rows ?? 0;
+        $min_rows = (int)$field->getSettings()->min_rows ?? 0;
 
         // Validate max_rows
         if($max_rows > 0 && $max_rows < count($data)) {
