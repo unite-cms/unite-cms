@@ -47,8 +47,9 @@ class StateSettings
     const REQUIRED_TRANSITION_KEYS = ['label', 'from', 'to'];
 
     /**
-     * @param array[]     $places
-     * @param Transition[] $transitions
+     * @param array[] $places
+     * @param array[] $transitions
+     * @param string $initialPlace
      */
     public function __construct(array $places, array $transitions, string $initialPlace = null)
     {
@@ -82,7 +83,7 @@ class StateSettings
     }
 
     /**
-     * @return Transition[]
+     * @return string[]
      */
     public function getTransitions(): array
     {

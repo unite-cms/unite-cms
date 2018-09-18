@@ -15,7 +15,6 @@ use Symfony\Component\Workflow\Transition;
 use Symfony\Component\Workflow\Workflow;
 use Symfony\Component\Workflow\MarkingStore\SingleStateMarkingStore;
 use Symfony\Component\Workflow\WorkflowInterface\InstanceOfSupportStrategy;
-use Symfony\Component\Workflow\Exception\LogicException;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
@@ -68,9 +67,7 @@ class StateFieldType extends FieldType
     }
 
     /**
-     * @param string $current_state
-     * @param array $places
-     * @param array $transitions
+     * @param FieldableField $field
      *
      * @return Workflow
      *
@@ -78,15 +75,15 @@ class StateFieldType extends FieldType
     function buildWorkflow(FieldableField $field) {
 
         $definitionBuilder = new DefinitionBuilder();
-        $definition = $definitionBuilder->addPlaces($places);
+        $definitionBuilder->addPlaces(array_keys($field->getSettings()->places));
 
         foreach ($field->getSettings()->transitions as $name => $transition) {
-            $definition->addTransition(new Transition($name, $transition['from'], $transition['to']));
+            $definitionBuilder->addTransition(new Transition($name, $transition['from'], $transition['to']));
         }
 
-        $definition->build();
+        $definition = $definitionBuilder->build();
 
-        $marking = new SingleStateMarkingStore($current_state);
+        $marking = new SingleStateMarkingStore('state');
         return new Workflow($definition, $marking);
     }
 
@@ -95,7 +92,6 @@ class StateFieldType extends FieldType
      */
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
-        echo "hahahahah"; exit;
         // When deleting content, we don't need to validate data.
         if (strtoupper($context->getGroup()) === 'DELETE') {
             return;
@@ -106,19 +102,15 @@ class StateFieldType extends FieldType
             return;
         }
 
-        print_r($data); exit;
+        $new_state = $data;
 
-        $state = new State($data);
-
-
+        $state = new State('draft');
 
         $workflow = $this->buildWorkflow($field);
 
-        #dump($field->getSettings());
-        #dump($data); exit;
-
-        #$context->buildViolation('missing_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
-
+        if (!$workflow->can($state, $new_state)) {
+            $context->buildViolation('invalid_workflow_transition')->atPath('['.$field->getIdentifier().']')->addViolation();
+        }
     }
 
     /**

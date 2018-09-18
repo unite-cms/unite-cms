@@ -14,7 +14,7 @@ class State
     /**
      * @var string
      */
-    private $state;
+    public $state;
 
     public function __construct($state)
     {
