@@ -20,8 +20,8 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'allow_title' => 123,
-                'allow_target' => 'baa',
+                'title_widget' => 123,
+                'target_widget' => 'baa',
             ]
         ));
 
@@ -39,8 +39,8 @@ class LinkFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'allow_title' => true,
-                'allow_target' => false,
+                'title_widget' => true,
+                'target_widget' => false,
             ]
         ));
 
@@ -48,8 +48,8 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
 
         $options = $fieldType->getFormOptions($ctField);
-        $this->assertEquals(true, $options['allow_title']);
-        $this->assertEquals(false, $options['allow_target']);
+        $this->assertEquals(true, $options['title_widget']);
+        $this->assertEquals(false, $options['target_widget']);
 
     }
 
@@ -60,8 +60,8 @@ class LinkFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'allow_title' => true,
-                'allow_target' => true,
+                'title_widget' => true,
+                'target_widget' => true,
             ]
         ));
 

@@ -72,3 +72,6 @@ services:
 
     UniteCMS\CoreBundle\SchemaType\Types\Input\ReferenceFieldTypeInput:
         tags: [unite_cms.graphql.schema_type]
+
+    UniteCMS\CoreBundle\SchemaType\Types\LinkResultType:
+        tags: [unite_cms.graphql.schema_type]

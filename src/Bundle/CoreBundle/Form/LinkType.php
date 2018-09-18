@@ -10,20 +10,17 @@ namespace UniteCMS\CoreBundle\Form;
 
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class LinkType extends AbstractType implements DataTransformerInterface
+class LinkType extends AbstractType
 {
 
     const URL_TARGETS = [
-        "Open the link in the same frame as it was clicked (default)" => "_self",
-        "Open the link in a new window or tab" => "_blank",
-        "Open the link  in the parent frame" => "_parent",
-        "Open the link in the full body of the window" => "_top"
+        "Open link in the same window" => "_self",
+        "Open link in a new window" => "_blank"
     ];
 
     /**
@@ -34,8 +31,8 @@ class LinkType extends AbstractType implements DataTransformerInterface
 
         $resolver->setDefaults(array(
             'compound' => true,
-            'allow_title' => false,
-            'allow_target' => false
+            'title_widget' => false,
+            'target_widget' => false
         ));
 
     }
@@ -48,58 +45,37 @@ class LinkType extends AbstractType implements DataTransformerInterface
 
         $builder->add('url', UrlType::class,
             [
+                'label' => 'link_type.url.label',
                 'attr' => ['class' => 'link-url'],
+                'default_protocol' => 'https'
             ]
         );
 
-        if (isset($options['allow_title']) && $options['allow_title'])
+        if (isset($options['title_widget']) && $options['title_widget'])
         {
 
             $builder->add('title', TextType::class,
                 [
-                    'attr' => ['class' => 'link-title'],
+                    'label' => 'link_type.title.label',
+                    'attr' => ['class' => 'link-title']
                 ]
             );
 
         }
 
-        if (isset($options['allow_target']) && $options['allow_target'])
+        if (isset($options['target_widget']) && $options['target_widget'])
         {
 
             $builder->add('target', ChoiceType::class,
                 [
+                    'label' => 'link_type.target.label',
                     'choices' => self::URL_TARGETS,
-                    'attr' => ['class' => 'link-target'],
+                    'attr' => ['class' => 'link-target']
                 ]
             );
 
         }
 
-        $builder->addViewTransformer($this);
-
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function transform($data)
-    {
-        $data = json_decode($data);
-
-        return (array) $data;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function reverseTransform($data)
-    {
-
-        if (!is_string($data) && null !== $data) {
-            return json_encode($data);
-        }
-
-        return $data;
     }
 
 }

@@ -13,6 +13,8 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\LinkType;
 use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\SchemaType\Types\LinkResultType;
 
 class LinkFieldType extends FieldType
 {
@@ -22,17 +24,41 @@ class LinkFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['allow_title', 'allow_target'];
+    const SETTINGS = ['title_widget', 'target_widget'];
 
     function getFormOptions(FieldableField $field): array
     {
         return array_merge(
             parent::getFormOptions($field),
             [
-                'allow_title' => $field->getSettings()->allow_title ?? false,
-                'allow_target' => $field->getSettings()->allow_target ?? false
+                'title_widget' => $field->getSettings()->title_widget ?? false,
+                'target_widget' => $field->getSettings()->target_widget ?? false
             ]
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
+        return $schemaTypeManager->getSchemaType('LinkResult');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
+        return $schemaTypeManager->getSchemaType('LinkResult');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function resolveGraphQLData(FieldableField $field, $value)
+    {
+        return (array) $value;
     }
 
     /**
@@ -49,12 +75,12 @@ class LinkFieldType extends FieldType
             return;
         }
 
-        if (!empty($settings->allow_title) && !is_bool($settings->allow_title)) {
-            $context->buildViolation('noboolean_value')->atPath('allow_title')->addViolation();
+        if (!empty($settings->title_widget) && !is_bool($settings->title_widget)) {
+            $context->buildViolation('noboolean_value')->atPath('title_widget')->addViolation();
         }
 
-        if (!empty($settings->allow_target) && !is_bool($settings->allow_target)) {
-            $context->buildViolation('noboolean_value')->atPath('allow_target')->addViolation();
+        if (!empty($settings->target_widget) && !is_bool($settings->target_widget)) {
+            $context->buildViolation('noboolean_value')->atPath('target_widget')->addViolation();
         }
 
     }
