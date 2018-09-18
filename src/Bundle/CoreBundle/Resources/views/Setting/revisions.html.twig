@@ -4,7 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ url('unitecms_core_setting_index', [setting_type]) }}"><i data-feather="arrow-left"></i></a>
+        <a class="back-button" href="{{ url('unitecms_core_setting_index', [settingType]) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with { "%type%": settingType|escape } %}setting.revisions.headline{% endtrans %}</h2>
     </header>
 
