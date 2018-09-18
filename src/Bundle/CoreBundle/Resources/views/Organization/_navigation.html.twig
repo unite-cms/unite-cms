@@ -14,13 +14,13 @@
             <li class="uk-nav-header">{% trans %}organization.menu.manage.header{% endtrans %}</li>
             <!--li><a href="#">{% trans %}organization.menu.manage.settings{% endtrans %}</a></li-->
             <li>
-                <a href="{{ url('unitecms_core_organizationuser_index', {organization: unite.organization.identifier|replace({'_':'-'})}) }}">
+                <a href="{{ url('unitecms_core_organizationuser_index', [unite.organization]) }}">
                     <i data-feather="users" class="uk-margin-small-right"></i>
                     {% trans %}organization.menu.manage.user{% endtrans %}
                 </a>
             </li>
             <li>
-                <a href="{{ url('unitecms_core_organizationapikey_index', {organization: unite.organization.identifier|replace({'_':'-'})}) }}">
+                <a href="{{ url('unitecms_core_organizationapikey_index', [unite.organization]) }}">
                     <i data-feather="lock" class="uk-margin-small-right"></i>
                     {% trans %}organization.menu.manage.api_keys{% endtrans %}
                 </a>
@@ -37,7 +37,7 @@
         {% for domain in unite.organization.domains %}
             {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), domain) %}
                 <li>
-                    <a href="{{ url('unitecms_core_domain_view', {organization: organization.identifier|replace({'_':'-'}), domain: domain.identifier|replace({'_':'-'})}) }}">
+                    <a href="{{ url('unitecms_core_domain_view', [domain]) }}">
                         <i data-feather="globe" class="uk-margin-small-right"></i>
                         {{ domain }}
                     </a>
@@ -47,7 +47,7 @@
 
         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization) %}
             <li>
-                <a class="uk-text-success" href="{{ url('unitecms_core_domain_create', {organization: unite.organization.identifier|replace({'_':'-'})}) }}">
+                <a class="uk-text-success" href="{{ url('unitecms_core_domain_create', [unite.organization]) }}">
                     <i data-feather="plus" class="uk-margin-small-right"></i>
                     {% trans %}organization.menu.domains.add{% endtrans %}
                 </a>

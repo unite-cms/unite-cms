@@ -5,11 +5,7 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
         <h2 class="uk-flex-1" id="domain_member_create_headline_select_add_type">
-            <a class="back-button" href="{{ url('unitecms_core_domainmember_index', {
-                organization: unite.organization.identifier|replace({'_':'-'}),
-                domain: unite.domain.identifier|replace({'_':'-'}),
-                member_type: memberType.identifier|replace({'_':'-'})
-            }) }}"><i data-feather="arrow-left"></i></a>
+            <a class="back-button" href="{{ url('unitecms_core_domainmember_index', [memberType]) }}"><i data-feather="arrow-left"></i></a>
             {% trans with {'%type%': memberType|escape } %}domain.member.create.headline.select_add_type{% endtrans %}
         </h2>
     </header>

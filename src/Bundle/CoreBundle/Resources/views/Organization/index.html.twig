@@ -15,15 +15,15 @@
             <ul class="uk-nav uk-nav-default">
                 {% for organization in organizations %}
                     <li class="uk-flex uk-flex-middle">
-                        <a class="uk-flex-1" href="{{ url('unitecms_core_domain_index', {organization: organization.identifier|replace({'_':'-'})|replace({'_':'-'}) }) }}">
+                        <a class="uk-flex-1" href="{{ url('unitecms_core_domain_index', [organization]) }}">
                             <i data-feather="home" class="uk-margin-small-right"></i> {{ organization }}
                         </a>
 
                         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization) %}
-                            <a class="action-edit" uk-tooltip title="{% trans %}organizations.button.edit{% endtrans %}" href="{{ url('unitecms_core_organization_update', { organization: organization.identifier|replace({'_':'-'})|replace({'_':'-'}) }) }}"><i data-feather="edit"></i></a>
+                            <a class="action-edit" uk-tooltip title="{% trans %}organizations.button.edit{% endtrans %}" href="{{ url('unitecms_core_organization_update', [organization]) }}"><i data-feather="edit"></i></a>
                         {% endif %}
                         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::DELETE'), organization) %}
-                            <a class="action-delete uk-text-danger" uk-tooltip title="{% trans %}organizations.button.delete{% endtrans %}" href="{{ url('unitecms_core_organization_delete', { organization: organization.identifier|replace({'_':'-'})|replace({'_':'-'}) }) }}"><i data-feather="trash-2"></i></a>
+                            <a class="action-delete uk-text-danger" uk-tooltip title="{% trans %}organizations.button.delete{% endtrans %}" href="{{ url('unitecms_core_organization_delete', [organization]) }}"><i data-feather="trash-2"></i></a>
                         {% endif %}
                     </li>
                 {% endfor %}

@@ -272,7 +272,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
     private function checkRoutes($routes, $parameter) {
         foreach($routes as $route => $settings) {
 
-            $url = static::$container->get('router')->generate($route, $parameter, Router::ABSOLUTE_URL);
+            $url = static::$container->get('router')->generate($route, $parameter);
             $url_parts = explode('?', $url);
             $url = $url_parts[0];
 
@@ -288,7 +288,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
                     $settings['params'] ?? []
                 );
             } else {
-                $redirect = static::$container->get('router')->generate('unitecms_core_index', [], Router::ABSOLUTE_URL);
+                $redirect = static::$container->get('router')->generate('unitecms_core_index');
                 $this->assertRedirect($url, $redirect, $settings['methods']);
             }
 

@@ -40,16 +40,12 @@ class IndexController extends Controller
 
         // If only one organization was found on the system, we can redirect to it.
         if (count($allowedOrganizations) == 1) {
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_domain_index',
-                ['organization' => IdentifierNormalizer::denormalize($allowedOrganizations[0]->getIdentifier())],
-                Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_domain_index', [$allowedOrganizations[0]]));
         }
 
         // Otherwise redirect to the organization overview page.
         else {
-            return $this->redirect($this->generateUrl('unitecms_core_organization_index', [], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_organization_index'));
         }
     }
 }

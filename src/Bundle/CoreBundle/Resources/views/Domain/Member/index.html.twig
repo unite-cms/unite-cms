@@ -6,11 +6,7 @@
     <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
         <header class="uk-card-header uk-flex">
             <h2 class="uk-flex-1">{% trans with {'%type%': memberType|escape} %}domain.member.headline{% endtrans %}</h2>
-            <a href="{{ url('unitecms_core_domainmember_create', {
-                domain: domain.identifier|replace({'_':'-'}),
-                organization: organization.identifier|replace({'_':'-'}),
-                member_type: memberType.identifier|replace({'_':'-'})
-    }) }}" class="uk-button uk-button-primary">
+            <a href="{{ url('unitecms_core_domainmember_create', [memberType]) }}" class="uk-button uk-button-primary">
                 <i data-feather="plus" class="uk-margin-small-right-small"></i>
                 {% trans with {'%type%': memberType|escape} %}domain.member.create.button{% endtrans %}
             </a>
@@ -40,21 +36,11 @@
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a href="{{ url('unitecms_core_domainmember_update', {
-                                            domain: domain.identifier|replace({'_':'-'}),
-                                            organization: organization.identifier|replace({'_':'-'}),
-                                            member_type: memberType.identifier|replace({'_':'-'}),
-                                            member: member.id
-                                        }) }}">
+                                    <li><a href="{{ url('unitecms_core_domainmember_update', [member]) }}">
                                             <i class="uk-margin-small-right" data-feather="edit"></i>
                                             {% trans %}domain.member.update.button{% endtrans %}
                                         </a></li>
-                                    <li><a class="uk-text-danger" href="{{ url('unitecms_core_domainmember_delete', {
-                                            domain: domain.identifier|replace({'_':'-'}),
-                                            organization: organization.identifier|replace({'_':'-'}),
-                                            member_type: memberType.identifier|replace({'_':'-'}),
-                                            member: member.id
-                                        }) }}">
+                                    <li><a class="uk-text-danger" href="{{ url('unitecms_core_domainmember_delete', [member]) }}">
                                             <i class="uk-margin-small-right" data-feather="trash-2"></i>
                                             {% trans %}domain.member.delete.button{% endtrans %}
                                     </a></li>
@@ -97,12 +83,7 @@
                                 <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
                                 <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                     <ul class="uk-nav uk-dropdown-nav">
-                                        <li><a class="uk-text-danger" href="{{ url('unitecms_core_domainmember_deleteinvite', {
-                                                organization: organization.identifier|replace({'_':'-'}),
-                                                domain: domain.identifier|replace({'_':'-'}),
-                                                member_type: memberType.identifier|replace({'_':'-'}),
-                                                invite: invite.id
-                                            }) }}">
+                                        <li><a class="uk-text-danger" href="{{ url('unitecms_core_domainmember_deleteinvite', [invite]) }}">
                                                 <i class="uk-margin-small-right" data-feather="trash-2"></i>
                                                 {% trans %}domain.member.pending_invitations.delete.button{% endtrans %}
                                             </a></li>

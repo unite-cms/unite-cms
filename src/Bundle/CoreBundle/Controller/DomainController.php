@@ -83,13 +83,7 @@ class DomainController extends Controller
                     $this->getDoctrine()->getManager()->persist($domain);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->redirect($this->generateUrl(
-                        'unitecms_core_domain_view',
-                        [
-                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                            'domain' => $domain->getIdentifier(),
-                        ], Router::ABSOLUTE_URL
-                    ));
+                    return $this->redirect($this->generateUrl('unitecms_core_domain_view', [$domain]));
                 } else {
                     foreach ($errors as $error) {
                         $this->addFlash('danger', $error->getPropertyPath().': '.$error->getMessage());
@@ -200,10 +194,7 @@ class DomainController extends Controller
 
                         $this->getDoctrine()->getManager()->flush();
 
-                        return $this->redirect($this->generateUrl('unitecms_core_domain_view', [
-                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                            'domain' => $domain->getIdentifier(),
-                        ], Router::ABSOLUTE_URL));
+                        return $this->redirect($this->generateUrl('unitecms_core_domain_view', [$domain]));
                     }
 
 
@@ -277,9 +268,7 @@ class DomainController extends Controller
             } else {
                 $this->getDoctrine()->getManager()->remove($domain);
                 $this->getDoctrine()->getManager()->flush($domain);
-                return $this->redirect($this->generateUrl('unitecms_core_domain_index', [
-                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())
-                ], Router::ABSOLUTE_URL));
+                return $this->redirect($this->generateUrl('unitecms_core_domain_index', [$organization]));
             }
         }
 

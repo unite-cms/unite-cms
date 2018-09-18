@@ -4,11 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ url('unitecms_core_domainmember_index', {
-            organization: unite.organization.identifier|replace({'_':'-'}),
-            domain: unite.domain.identifier|replace({'_':'-'}),
-            member_type: memberType.identifier|replace({'_':'-'})
-        }) }}">
+        <a class="back-button" href="{{ url('unitecms_core_domainmember_index', [memberType]) }}">
             <i data-feather="arrow-left"></i>
         </a>
         <h2>{% trans with { '%type%': memberType|escape, '%member%' : member|escape } %}domain.member.update.headline{% endtrans %}</h2>

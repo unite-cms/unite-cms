@@ -72,13 +72,7 @@ class OrganizationApiKeyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->persist($apiKey);
             $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_organizationapikey_index',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                ], Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_organizationapikey_index', [$organization]));
         }
 
         return $this->render(
@@ -123,12 +117,7 @@ class OrganizationApiKeyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_organizationapikey_index',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                ], Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_organizationapikey_index', [$organization]));
         }
 
         return $this->render(
@@ -166,13 +155,7 @@ class OrganizationApiKeyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->remove($apiKey);
             $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_organizationapikey_index',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                ], Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_organizationapikey_index', [$organization]));
         }
 
         return $this->render(

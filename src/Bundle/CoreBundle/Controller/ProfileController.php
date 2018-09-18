@@ -58,7 +58,7 @@ class ProfileController extends Controller
 
         if ($forms['personal']->isSubmitted() && $forms['personal']->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_index'));
         }
 
 
@@ -89,7 +89,7 @@ class ProfileController extends Controller
             $changePassword->eraseCredentials();
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_index'));
         }
 
 
@@ -159,7 +159,7 @@ class ProfileController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_index'));
         }
 
         $form = $this->createFormBuilder()
@@ -197,13 +197,7 @@ class ProfileController extends Controller
                             $this->renderView(
                                 '@UniteCMSCore/Emails/reset-password.html.twig',
                                 [
-                                    'reset_url' => $this->generateUrl(
-                                        'unitecms_core_profile_resetpasswordconfirm',
-                                        [
-                                            'token' => $user->getResetToken(),
-                                        ],
-                                        UrlGeneratorInterface::ABSOLUTE_URL
-                                    ),
+                                    'reset_url' => $this->generateUrl('unitecms_core_profile_resetpasswordconfirm', ['token' => $user->getResetToken()]),
                                 ]
                             ),
                             'text/html'
@@ -236,7 +230,7 @@ class ProfileController extends Controller
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
+            return $this->redirect($this->generateUrl('unitecms_core_index'));
         }
 
         $userFound = false;
@@ -415,17 +409,10 @@ class ProfileController extends Controller
                                             // Redirect to index.
                                             if($domainMember) {
                                                 return $this->redirect(
-                                                    $this->generateUrl('unitecms_core_domain_view', [
-                                                        'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
-                                                        'domain' => $domainMember->getDomain()->getIdentifier(),
-                                                    ], Router::ABSOLUTE_URL)
+                                                    $this->generateUrl('unitecms_core_domain_view', [$domainMember])
                                                 );
                                             } else {
-                                                return $this->redirect(
-                                                    $this->generateUrl('unitecms_core_domain_index', [
-                                                        'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
-                                                    ], Router::ABSOLUTE_URL)
-                                                );
+                                                return $this->redirect($this->generateUrl('unitecms_core_domain_index', [$organizationMember]));
                                             }
                                         }
 
@@ -441,7 +428,7 @@ class ProfileController extends Controller
                                         $this->getDoctrine()->getManager()->flush();
 
                                         // Redirect to index.
-                                        return $this->redirect($this->generateUrl('unitecms_core_index', [], Router::ABSOLUTE_URL));
+                                        return $this->redirect($this->generateUrl('unitecms_core_index'));
                                     }
                                 }
                             }
@@ -537,14 +524,9 @@ class ProfileController extends Controller
                                     $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration));
 
                                     if($domainMember) {
-                                        return $this->redirect($this->generateUrl('unitecms_core_domain_view', [
-                                            'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
-                                            'domain' => $domainMember->getDomain()->getIdentifier(),
-                                        ], Router::ABSOLUTE_URL));
+                                        return $this->redirect($this->generateUrl('unitecms_core_domain_view', [$domainMember]));
                                     } else {
-                                        return $this->redirect($this->generateUrl('unitecms_core_domain_index', [
-                                            'organization' => IdentifierNormalizer::denormalize($organizationMember->getOrganization()->getIdentifier()),
-                                        ], Router::ABSOLUTE_URL));
+                                        return $this->redirect($this->generateUrl('unitecms_core_domain_index', [$organizationMember]));
                                     }
                                 }
                             }
