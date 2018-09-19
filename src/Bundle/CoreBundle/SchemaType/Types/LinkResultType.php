@@ -41,6 +41,17 @@ class LinkResultType extends AbstractType
      */
     protected function resolveField($value, array $args, $context, ResolveInfo $info)
     {
-        return 'Maximum nesting level of ' . SchemaTypeManager::MAXIMUM_NESTING_LEVEL . ' reached.';
+        if (!is_array($value) or !array_key_exists($info->fieldName, $this->fields()))
+        {
+            throw new \InvalidArgumentException('Unknown fieldName "'.$info->fieldName.'"');
+        }
+
+        if (!isset($value[$info->fieldName])) 
+        {
+            $value[$info->fieldName] = null;
+        }
+
+        return $value[$info->fieldName];
+        
     }
 }

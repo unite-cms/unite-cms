@@ -14,14 +14,31 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class LinkType extends AbstractType
 {
+    /**
+     * @var Translator $translator
+     */
+    private $translator;
 
-    const URL_TARGETS = [
-        "Open link in the same window" => "_self",
-        "Open link in a new window" => "_blank"
-    ];
+    /**
+     * @var array $url_targets
+     */
+    private $url_targets;
+
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+
+        $this->url_targets = [
+            $this->translator->trans('link_type.choice.self.label') => "_self",
+            $this->translator->trans('link_type.choice.blank.label') => "_blank"
+        ];
+
+    }
 
     /**
      * {@inheritdoc}
@@ -29,11 +46,12 @@ class LinkType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
+            'label_prefix' => 'link_type',
             'compound' => true,
             'title_widget' => false,
             'target_widget' => false
-        ));
+        ]);
 
     }
 
@@ -45,7 +63,7 @@ class LinkType extends AbstractType
 
         $builder->add('url', UrlType::class,
             [
-                'label' => 'link_type.url.label',
+                'label' => $options['label_prefix'].'.url.label',
                 'attr' => ['class' => 'link-url'],
                 'default_protocol' => 'https'
             ]
@@ -56,7 +74,7 @@ class LinkType extends AbstractType
 
             $builder->add('title', TextType::class,
                 [
-                    'label' => 'link_type.title.label',
+                    'label' => $options['label_prefix'].'.title.label',
                     'attr' => ['class' => 'link-title']
                 ]
             );
@@ -68,8 +86,8 @@ class LinkType extends AbstractType
 
             $builder->add('target', ChoiceType::class,
                 [
-                    'label' => 'link_type.target.label',
-                    'choices' => self::URL_TARGETS,
+                    'label' => $options['label_prefix'].'.target.label',
+                    'choices' => $this->url_targets,
                     'attr' => ['class' => 'link-target']
                 ]
             );
