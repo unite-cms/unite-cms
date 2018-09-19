@@ -62,6 +62,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             'allow_add' => true,
             'allow_delete' => true,
             'delete_empty' => true,
+            'error_bubbling' => false,
             'prototype_name' => '__' . str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')) . 'Name__',
             'attr' => [
                 'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
@@ -136,8 +137,8 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
         $this->validateNestedFields($field, $data, $context);
 
-        $max_rows = $field->getSettings()->max_rows ?? 0;
-        $min_rows = $field->getSettings()->min_rows ?? 0;
+        $max_rows = (int)$field->getSettings()->max_rows ?? 0;
+        $min_rows = (int)$field->getSettings()->min_rows ?? 0;
 
         // Validate max_rows
         if($max_rows > 0 && $max_rows < count($data)) {

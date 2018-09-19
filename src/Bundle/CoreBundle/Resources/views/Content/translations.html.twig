@@ -4,12 +4,7 @@
 {% block content %}
     <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
         <header class="uk-card-header uk-flex">
-            <a class="back-button" href="{{ url('unitecms_core_content_index', {
-                domain: unite.domain.identifier|replace({'_':'-'}),
-                organization: unite.organization.identifier|replace({'_':'-'}),
-                content_type: contentType.identifier|replace({'_':'-'}),
-                view: view.identifier|replace({'_':'-'})
-            }) }}"><i data-feather="arrow-left"></i></a>
+            <a class="back-button" href="{{ url('unitecms_core_content_index', [view]) }}"><i data-feather="arrow-left"></i></a>
             <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.translations.headline{% endtrans %}</h2>
         </header>
 
@@ -34,29 +29,16 @@
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
 
-                                    <li><a href="{{ url('unitecms_core_content_update', {
-                                            'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                                            'domain': unite.domain.identifier|replace({'_':'-'}),
-                                            'content_type': contentType.identifier|replace({'_':'-'}),
-                                            'view': view.identifier|replace({'_':'-'}),
-                                            'content': translation.id
-                                        }) }}">
-                                            <i class="uk-margin-small-right" data-feather="edit"></i>
-                                            {% trans %}content.update.button{% endtrans %}
-                                        </a></li>
+                                    <li><a href="{{ url('unitecms_core_content_update', [view, translation]) }}">
+                                        <i class="uk-margin-small-right" data-feather="edit"></i>
+                                        {% trans %}content.update.button{% endtrans %}
+                                    </a></li>
 
                                     {% if translation.translationOf %}
-                                        <li><a class="uk-text-danger" href="{{ url('unitecms_core_content_removetranslation', {
-                                                'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                                                'domain': unite.domain.identifier|replace({'_':'-'}),
-                                                'content_type': contentType.identifier|replace({'_':'-'}),
-                                                'view': view.identifier|replace({'_':'-'}),
-                                                'content': translation.translationOf.id,
-                                                'locale': translation.locale
-                                            }) }}">
-                                                <i class="uk-margin-small-right" data-feather="minus-circle"></i>
-                                                {% trans %}content.translations.remove.button{% endtrans %}
-                                            </a></li>
+                                        <li><a class="uk-text-danger" href="{{ url('unitecms_core_content_removetranslation', {'view': view, 'content': translation.translationOf, 'locale': translation.locale}) }}">
+                                            <i class="uk-margin-small-right" data-feather="minus-circle"></i>
+                                            {% trans %}content.translations.remove.button{% endtrans %}
+                                        </a></li>
                                     {% endif %}
                                 </ul>
                             </div>
@@ -74,10 +56,7 @@
                                 <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                     <ul class="uk-nav uk-dropdown-nav">
                                         <li><a class="uk-text-success" href="{{ url('unitecms_core_content_create', {
-                                                'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                                                'domain': unite.domain.identifier|replace({'_':'-'}),
-                                                'content_type': contentType.identifier|replace({'_':'-'}),
-                                                'view': view.identifier|replace({'_':'-'}),
+                                                'view': view,
                                                 'locale': locale,
                                                 'translation_of': content.id
                                             }) }}">
@@ -85,14 +64,7 @@
                                                 {% trans %}content.translations.create.button{% endtrans %}
                                         </a></li>
 
-                                        <li><a href="{{ url('unitecms_core_content_addtranslation', {
-                                                'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                                                'domain': unite.domain.identifier|replace({'_':'-'}),
-                                                'content_type': contentType.identifier|replace({'_':'-'}),
-                                                'view': view.identifier|replace({'_':'-'}),
-                                                'content': content.id,
-                                                'locale': locale
-                                            }) }}">
+                                        <li><a href="{{ url('unitecms_core_content_addtranslation', {'view': view, 'content': content, 'locale': locale}) }}">
                                                 <i data-feather="list" class="uk-margin-small-right"></i>
                                                 {% trans %}content.translations.add_existing.button{% endtrans %}
                                         </a></li>

@@ -172,14 +172,7 @@ class DomainMemberController extends Controller
                     $this->getDoctrine()->getManager()->persist($member);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->redirect($this->generateUrl(
-                        'unitecms_core_domainmember_index',
-                        [
-                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                            'domain' => $domain->getIdentifier(),
-                            'member_type' => $memberType->getIdentifier(),
-                        ], Router::ABSOLUTE_URL
-                    ));
+                    return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
                 }
 
             } elseif($data['select_add_type'] == 'invite_user') {
@@ -210,27 +203,14 @@ class DomainMemberController extends Controller
                                 '@UniteCMSCore/Emails/invitation.html.twig',
                                 [
                                     'invitation' => $invitation,
-                                    'invitation_url' => $this->generateUrl(
-                                        'unitecms_core_profile_acceptinvitation',
-                                        [
-                                            'token' => $invitation->getToken(),
-                                        ],
-                                        UrlGeneratorInterface::ABSOLUTE_URL
-                                    ),
+                                    'invitation_url' => $this->generateUrl('unitecms_core_profile_acceptinvitation', ['token' => $invitation->getToken()]),
                                 ]
                             ),
                             'text/html'
                         );
                     $this->get('mailer')->send($message);
 
-                    return $this->redirect($this->generateUrl(
-                        'unitecms_core_domainmember_index',
-                        [
-                            'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                            'domain' => $domain->getIdentifier(),
-                            'member_type' => $memberType->getIdentifier(),
-                        ], Router::ABSOLUTE_URL
-                    ));
+                    return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
                 }
             }
         }
@@ -287,17 +267,8 @@ class DomainMemberController extends Controller
 
             // If member is valid.
             } else {
-
                 $this->getDoctrine()->getManager()->flush();
-
-                return $this->redirect($this->generateUrl(
-                    'unitecms_core_domainmember_index',
-                    [
-                        'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                        'domain' => $domain->getIdentifier(),
-                        'member_type' => $memberType->getIdentifier(),
-                    ], Router::ABSOLUTE_URL
-                ));
+                return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
             }
         }
 
@@ -342,14 +313,7 @@ class DomainMemberController extends Controller
             $this->getDoctrine()->getManager()->remove($member);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_domainmember_index',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                    'domain' => $domain->getIdentifier(),
-                    'member_type' => $memberType->getIdentifier(),
-                ], Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
         }
 
         return $this->render(
@@ -398,15 +362,7 @@ class DomainMemberController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->remove($invite);
             $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_domainmember_index',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($organization->getIdentifier()),
-                    'domain' => $domain->getIdentifier(),
-                    'member_type' => $memberType->getIdentifier(),
-                ], Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
         }
 
         return $this->render(

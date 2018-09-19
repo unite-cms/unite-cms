@@ -611,10 +611,7 @@ class AcceptInvitationTest extends DatabaseAwareTestCase
         $this->client->submit($form);
 
         // There should be a user token in the client session.
-        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
-            'organization' => IdentifierNormalizer::denormalize($invitation->getDomainMemberType()->getDomain()->getOrganization()->getIdentifier()),
-            'domain' => $invitation->getDomainMemberType()->getDomain()->getIdentifier(),
-        ], Router::ABSOLUTE_URL)));
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [$invitation])));
         $token = $this->client->getContainer()->get('security.token_storage')->getToken();
         $this->assertNotNull($token);
         $this->assertEquals('New User', $token->getUser()->getName());

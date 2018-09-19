@@ -16,7 +16,7 @@
             <div>
                 <ul class="uk-nav uk-dropdown-nav">
                     <li class="uk-nav-header">
-                        <a href="{{ url('unitecms_core_domain_index', {organization: unite.organization.identifier|replace({'_':'-'})}) }}">
+                        <a href="{{ url('unitecms_core_domain_index', [unite.organization]) }}">
                             <i data-feather="home"></i>
                             {{ unite.organization }}
                         </a>
@@ -24,7 +24,7 @@
                     {% for d in unite.organization.domains %}
                         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), d) %}
                             <li{% if d == unite.domain %} class="uk-active"{% endif %}>
-                                <a href="{{ url('unitecms_core_domain_view', {organization: unite.organization.identifier|replace({'_':'-'}), domain: d.identifier|replace({'_':'-'})}) }}">
+                                <a href="{{ url('unitecms_core_domain_view', [d]) }}">
                                     <i data-feather="globe" class="uk-margin-small-right"></i> {{ d }}
                                 </a>
                             </li>
@@ -37,14 +37,14 @@
                     <ul class="uk-nav uk-dropdown-nav secondary">
                         <li class="uk-nav-header">Manage this domain</li>
                         <li>
-                            <a href="{{ url('unitecms_core_domain_update', {organization: unite.organization.identifier|replace({'_':'-'}), domain: unite.domain.identifier|replace({'_':'-'}) }) }}">
+                            <a href="{{ url('unitecms_core_domain_update', [unite.domain]) }}">
                                 <i class="uk-margin-small-right" data-feather="settings"></i>
                                 {% trans %}domain.menu.manage.update{% endtrans %}
                             </a>
                         </li>
                         {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::DELETE'), unite.domain) %}
                             <li>
-                                <a class="uk-text-danger" href="{{ url('unitecms_core_domain_delete', { organization: unite.organization.identifier|replace({'_':'-'}), domain: unite.domain.identifier|replace({'_':'-'}) }) }}">
+                                <a class="uk-text-danger" href="{{ url('unitecms_core_domain_delete', [unite.domain]) }}">
                                     <i class="uk-margin-small-right" data-feather="trash-2"></i>
                                     {% trans %}domain.menu.manage.trash{% endtrans %}
                                 </a></li>
@@ -80,12 +80,7 @@
                             {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
                                 class="uk-active"
                             {% endif %}
-                        {% endspaceless %} href="{{ url('unitecms_core_content_index', {
-                            organization: unite.organization.identifier|replace({'_':'-'}),
-                            domain: unite.domain.identifier|replace({'_':'-'}),
-                            content_type: type.identifier|replace({'_':'-'}),
-                            view: 'all'
-                        }) }}">
+                        {% endspaceless %} href="{{ url('unitecms_core_content_index', [type]) }}">
                             <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'layers' }}"></i>
                             {{ type }}
                         </a>
@@ -98,12 +93,7 @@
                                             {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}
                                                 class="uk-active"
                                             {% endif %}
-                                            {% endspaceless %}href="{{ url('unitecms_core_content_index', {
-                                        organization: unite.organization.identifier|replace({'_':'-'}),
-                                        domain: unite.domain.identifier|replace({'_':'-'}),
-                                        content_type: type.identifier|replace({'_':'-'}),
-                                        view: v.identifier|replace({'_':'-'})
-                                    }) }}">
+                                            {% endspaceless %}href="{{ url('unitecms_core_content_index', [type]) }}">
                                         <i class="uk-margin-small-right" data-feather="{{ v.icon ? v.icon : 'layers' }}"></i>
                                         {{ v }}
                                     </a>
@@ -124,11 +114,7 @@
                                 {% if settingType is defined and settingType.identifier == type.identifier %}
                                     class="uk-active"
                                 {% endif %}
-                                {% endspaceless %} href="{{ url('unitecms_core_setting_index', {
-                            organization: unite.organization.identifier|replace({'_':'-'}),
-                            domain: unite.domain.identifier|replace({'_':'-'}),
-                            setting_type: type.identifier|replace({'_':'-'})
-                        }) }}">
+                                {% endspaceless %} href="{{ url('unitecms_core_setting_index', [type]) }}">
                             <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'settings' }}"></i>
                             {{ type }}
                         </a></li>
@@ -143,11 +129,7 @@
                         {% if memberType is defined and memberType.identifier == type.identifier %}
                             class="uk-active"
                         {% endif %}
-                    {% endspaceless %} href="{{ url('unitecms_core_domainmember_index', {
-                        organization: unite.organization.identifier|replace({'_':'-'}),
-                        domain: unite.domain.identifier|replace({'_':'-'}),
-                        member_type: type.identifier|replace({'_':'-'})
-                    }) }}">
+                    {% endspaceless %} href="{{ url('unitecms_core_domainmember_index', [type]) }}">
                         <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'users' }}"></i>
                         {{ type }}
                     </a>
