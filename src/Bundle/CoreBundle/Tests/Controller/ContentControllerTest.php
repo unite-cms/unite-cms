@@ -817,7 +817,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("content_not_found")'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains("'.static::$container->get('translator')->trans('translation_content_not_found', [], 'validators').'")'));
 
         // Submit valid form
         $form = $crawler->filter('form');
