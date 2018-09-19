@@ -43,4 +43,9 @@ invalid_domain: 'Invalid Domain given. The Domain does not exist or Access is pr
 invalid_content_type: 'Invalid Content Type given. The Content Type does not exist or Access is prohibited'
 translation_content_not_found: 'This content cannot be selected as translation. This can happen, if the selected content is a translation source for another translation set or if the selected content is already a translation of this content. Please select another content or create a new one.'
 invalid_workflow_transition: 'Invalid Workflow Transition'
-
+invalid_place_category: 'The Category is not allowed.'
+invalid_places: 'The given places are invalid'
+invalid_transitions: 'The given transitions are invalid.'
+invalid_initial_place: 'Initial Place does not exist inside Places.'
+invalid_transition_from: 'The Place referenced in "from" transition does not exist.'
+invalid_transition_to: 'The Place referenced in "to" transition does not exist.'

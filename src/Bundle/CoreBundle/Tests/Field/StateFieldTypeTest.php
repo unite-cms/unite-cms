@@ -26,22 +26,24 @@ class StateFieldTypeTest extends FieldTypeTestCase
             'review'=> [
                 'category' => 'primary'
             ],
-            'review2'  => [],
+            'review2'=> [
+                'category' => 'primary'
+            ],
             'published'  => []
         ],
         'transitions' => [
-            'draft'=> [
+            'to_review'=> [
                 'label' => 'Put into review mode',
                 'from' => 'draft',
                 'to' => 'review',
             ],
-            'review'=> [
-                'label' => 'Put into review mode',
-                'from' => ['review2','review'],
-                'to' => 'published',
+            'to_review2'=> [
+                'label' => 'Put into review 2 mode',
+                'from' => ['review','draft'],
+                'to' => 'review2',
             ],
-            'review2' => [
-                'label' => 'Put into review mode',
+            'to_published' => [
+                'label' => 'Publish Content',
                 'from' => 'review2',
                 'to' => 'published'
             ]
@@ -62,22 +64,75 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('state');
 
         $settings = [
-            'initial_place' => 'draft',
+            'initial_place' => [],
+            'places' => "",
+            'transitions' => true
+        ];
+
+        $ctField->setSettings(new FieldableFieldSettings($settings));
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+
+        $this->assertEquals('invalid_initial_place', $errors->get(0)->getMessageTemplate());
+        
+        $settings['initial_place'] = "draft";
+        $ctField->setSettings(new FieldableFieldSettings($settings));
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertEquals('invalid_places', $errors->get(0)->getMessageTemplate());
+        
+        $settings['places'] = [];
+        $ctField->setSettings(new FieldableFieldSettings($settings));
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertEquals('invalid_transitions', $errors->get(0)->getMessageTemplate());
+
+        $settings = [
+            'initial_place' => 'draft123123',
+            'places' => [
+                'draft' => "",
+                'review'=> true
+            ],
+            'transitions' => [
+                'to_review' => "tst",
+                'tp_published' => [
+                    'label' => [],
+                    'from' => ['review22','published'],
+                    'to' =>  ['Publish Content']
+                ]
+            ]
+        ];
+
+        $ctField->setSettings(new FieldableFieldSettings($settings));
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(11, $errors);
+        $this->assertEquals('invalid_transition_to', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_from', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_from', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_to', $errors->get(3)->getMessageTemplate());
+        $this->assertEquals('invalid_initial_place', $errors->get(4)->getMessageTemplate());
+        $this->assertEquals('invalid_transitions', $errors->get(5)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_from', $errors->get(6)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_to', $errors->get(7)->getMessageTemplate());
+        $this->assertEquals('invalid_transitions', $errors->get(8)->getMessageTemplate());
+        $this->assertEquals('invalid_transitions', $errors->get(9)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_to', $errors->get(10)->getMessageTemplate());
+
+        $settings = [
+            'initial_place' => 'draft123123',
             'places' => [
                 'draft' => [
-                    'category' => 'red'
+                    'category' => ['red']
                 ],
                 'review'=> [],
                 'review2' => [],
                 '2published' => []
             ],
             'transitions' => [
-                'draft'=> [
+                'to_review'=> [
                     'label' => 'Put into review mode',
                     'from' => 'draft1',
                     'to' => 'review234',
                 ],
-                'review'=> [
+                'tp_published'=> [
                     'from' => ['review22','published'],
                     'to' => 'Publish Content',
                 ]
@@ -86,36 +141,17 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
+        $this->assertCount(9, $errors);
 
-        # test invalid places category
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertEquals('invalid_place', $errors->get(0)->getCause());
-
-        # test transition from in place
-        $settings['places']['draft'] = [];
-        $ctField->setSettings(new FieldableFieldSettings($settings));
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertEquals('invalid_transition', $errors->get(0)->getCause());
-
-        # test transition to in place
-        $settings['transitions']['draft']['from'] = "draft";
-        $ctField->setSettings(new FieldableFieldSettings($settings));
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertEquals('invalid_transition', $errors->get(0)->getCause());
-
-        # test mission transition settings
-        $settings['transitions']['draft']['to'] = "draft";
-        $ctField->setSettings(new FieldableFieldSettings($settings));
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertEquals('invalid_transition', $errors->get(0)->getCause());
-
-        # test initial place
-        unset($settings['transitions']['review']);
-        $settings['initial_place'] = "xxxyyy";
-        $ctField->setSettings(new FieldableFieldSettings($settings));
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertEquals('invalid_place', $errors->get(0)->getCause());
+        $this->assertEquals('invalid_transition_from', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_to', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_from', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_from', $errors->get(3)->getMessageTemplate());
+        $this->assertEquals('invalid_transition_to', $errors->get(4)->getMessageTemplate());
+        $this->assertEquals('invalid_initial_place', $errors->get(5)->getMessageTemplate());
+        $this->assertEquals('invalid_places', $errors->get(6)->getMessageTemplate());
+        $this->assertEquals('invalid_place_category', $errors->get(7)->getMessageTemplate());
+        $this->assertEquals('invalid_transitions', $errors->get(8)->getMessageTemplate());
     }
 
     public function testStateFieldTypeWithValidSettings()
@@ -125,7 +161,6 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings($this->settings));
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
-
     }
 
     public function testStateFieldTypeWorkflowChange()
@@ -167,8 +202,6 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $this->em->persist($content);
         $this->em->flush();
-
-        exit;
 
     }
 

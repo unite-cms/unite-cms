@@ -8,9 +8,11 @@
 
 namespace UniteCMS\CoreBundle\Model;
 
+/**
+ * this model holds the current statuse (place), needed to work with symfony workflow
+ */
 class State
 {
-
     /**
      * @var string
      */

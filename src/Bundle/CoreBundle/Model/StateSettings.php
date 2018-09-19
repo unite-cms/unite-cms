@@ -9,8 +9,10 @@
 namespace UniteCMS\CoreBundle\Model;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use UniteCMS\CoreBundle\Exception\InvalidStateSettingsPlacesException;
-use UniteCMS\CoreBundle\Exception\InvalidStateSettingsTransitionsException;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+use UniteCMS\CoreBundle\Model\StatePlace;
+use UniteCMS\CoreBundle\Model\StateTransition;
 
 /**
  * We use this model only for validation!
@@ -20,50 +22,35 @@ class StateSettings
 
     /**
      * @var string
-     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Type(type="string", message="invalid_initial_place")
+     * @Assert\Choice(callback="getPlacesIdentifiers", message="invalid_initial_place")
      */
     private $initialPlace;
 
     /**
-     * @var array
-     * @Assert\NotBlank(message="not_blank")
+     * @var StatePlace[]
+     * @Assert\Valid
+     * @Assert\NotBlank(message="invalid_places")
      */
-    private $places = array();
+    private $places;
 
     /**
-     * @var array
-     * @Assert\NotBlank(message="not_blank")
+     * @var StateTransition[]
+     * @Assert\Valid
+     * @Assert\NotBlank(message="invalid_transitions")
      */
-    private $transitions = array();
+    private $transitions;
 
     /**
-     * All places categories
-     */
-    const CATEGORIES = ['primary', 'notice', 'info','success', 'warning', 'error', 'danger'];
-
-    /**
-     * Required transition keys
-     */
-    const REQUIRED_TRANSITION_KEYS = ['label', 'from', 'to'];
-
-    /**
-     * @param array[] $places
-     * @param array[] $transitions
+     * @param StatePlace[] $places
+     * @param StateTransition[] $transitions
      * @param string $initialPlace
      */
     public function __construct(array $places, array $transitions, string $initialPlace = null)
     {
-
-        foreach ($places as $place => $config) {
-            $this->addPlace($place, $config);
-        }
-
-        foreach ($transitions as $transition => $config) {
-            $this->addTransition($transition, $config);
-        }
-
+        $this->setPlaces($places);
+        $this->setTransitions($transitions);
         $this->setInitialPlace($initialPlace);
-        
     }
 
     /**
@@ -75,71 +62,126 @@ class StateSettings
     }
 
     /**
-     * @return string[]
+     * @return StatePlace[]
      */
-    public function getPlaces(): array
+    public function getPlaces()
     {
         return $this->places;
     }
 
     /**
-     * @return string[]
+     * @return StateTransition[]
      */
-    public function getTransitions(): array
+    public function getTransitions()
     {
         return $this->transitions;
     }
 
-    private function setInitialPlace(string $place = null)
+    /**
+     * @param string $initial_place
+     */
+    private function setInitialPlace(string $initial_place = null)
     {
-        if (null === $place) {
+        if (null === $initial_place) {
             return;
         }
 
-        if (!isset($this->places[$place])) {
-            throw new InvalidStateSettingsPlacesException(sprintf('Place "%s" cannot be the initial place as it does not exist.', $place));
-        }
-
-        $this->initialPlace = $place;
+        $this->initialPlace = $initial_place;
     }
 
-    private function addPlace(string $place, array $config)
+    /**
+     * @param StatePlace[] $places
+     *
+     * @return StateSettings
+     */
+    public function setPlaces(array $places)
     {
+        $this->places = [];
 
-        if (isset($config['category']) && !in_array($config['category'], self::CATEGORIES)) 
-        {
-            throw new InvalidStateSettingsPlacesException(sprintf('Category "%s" is not a valid category.', $config['category']));
+        foreach ($places as $place) {
+            $this->addPlace($place);
         }
 
-        $this->places[$place] = $config;
+        return $this;
     }
 
-    private function addTransition(string $transition, array $config)
+    /**
+     * @param StatePlace $place
+     */
+    private function addPlace(StatePlace $place)
     {
+        $this->places[] = $place;
+    }
 
-        $config['from'] = (!is_array($config['from']))? array($config['from']):$config['from'];
 
-        # check for all required keys
-        $missing = array_diff_key(array_flip(self::REQUIRED_TRANSITION_KEYS), $config);
-        if (!empty($missing))
-        {
-            throw new InvalidStateSettingsTransitionsException(sprintf('Missing Transition Settings.', $transition));
+    /**
+     * @param StateTransition[] $transitions
+     *
+     * @return StateSettings
+     */
+    public function setTransitions(array $transitions)
+    {
+        $this->transitions = [];
+
+        foreach ($transitions as $transition) {
+            
+            $this->addTransition($transition);
         }
 
-        foreach ($config['from'] as $from) 
+        return $this;
+    }
+
+    /**
+     * @param StateTransition $state_transition
+     */
+    private function addTransition(StateTransition $state_transition)
+    {
+        $this->transitions[] = $state_transition;
+    }
+
+    /*
+    * @return array
+    */
+    public function getPlacesIdentifiers() : array
+    {
+        $identifiers = [];
+
+        foreach ($this->places as $place) {
+            $identifiers[] = $place->getIdentifier();
+        }
+
+        return $identifiers;
+    }
+
+    /**
+     * @Assert\Callback
+     */
+    public function validate(ExecutionContextInterface $context, $payload)
+    {
+
+        foreach ($this->getTransitions() as $transition) 
         {
-            if (!isset($this->places[$from])) 
+            
+            foreach ($transition->getFroms() as $place) 
             {
-                throw new InvalidStateSettingsTransitionsException(sprintf('Place "%s" referenced in from transition "%s" does not exist.', $from, $transition));
+                if (!in_array($place, $this->getPlacesIdentifiers()))
+                {
+                    $context->buildViolation('invalid_transition_from')
+                        ->atPath('transitions')
+                        ->addViolation();
+
+                }
             }
-        }
 
-        if (!isset($this->places[$config['to']])) 
-        {
-                throw new InvalidStateSettingsTransitionsException(sprintf('Place "%s" referenced in to transition "%s" does not exist.', $config['to'], $transition));
-        }
+            if (!in_array($transition->getTo(), $this->getPlacesIdentifiers()))
+            {
+                $context->buildViolation('invalid_transition_to')
+                    ->atPath('transitions')
+                    ->addViolation();
 
-        $this->transitions[$transition] = $config;
+            }
+
+        }
 
     }
 

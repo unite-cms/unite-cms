@@ -8,6 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Workflow\DefinitionBuilder;
@@ -15,13 +16,14 @@ use Symfony\Component\Workflow\Transition;
 use Symfony\Component\Workflow\Workflow;
 use Symfony\Component\Workflow\MarkingStore\SingleStateMarkingStore;
 use Symfony\Component\Workflow\WorkflowInterface\InstanceOfSupportStrategy;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Model\State;
+use UniteCMS\CoreBundle\Model\StatePlace;
+use UniteCMS\CoreBundle\Model\StateTransition;
 use UniteCMS\CoreBundle\Model\StateSettings;
-use UniteCMS\CoreBundle\Exception\InvalidStateSettingsPlacesException;
-use UniteCMS\CoreBundle\Exception\InvalidStateSettingsTransitionsException;
 
 class StateFieldType extends FieldType
 {
@@ -38,6 +40,17 @@ class StateFieldType extends FieldType
      */
     const REQUIRED_SETTINGS = ['places', 'transitions'];
 
+    private $validator;
+    private $entityManager;
+
+    function __construct(
+        ValidatorInterface $validator,
+        EntityManager $entityManager
+    ) {
+        $this->validator = $validator;
+        $this->entityManager = $entityManager;
+    }
+
     function getFormOptions(FieldableField $field): array
     {
         return array_merge(
@@ -45,6 +58,7 @@ class StateFieldType extends FieldType
                 [
                     'empty_data' => $field->getSettings()->initial_place,
                     'choices' => $this->getChoices($field),
+                    'label' => 'State',
                     'required' => true
                 ]
         );
@@ -60,7 +74,7 @@ class StateFieldType extends FieldType
         $choices = [];
 
         foreach ($field->getSettings()->transitions as $transition_key => $transition) {
-            $choices[$transition['label']] = $transition_key;
+            $choices[$transition['label']] = $transition['to'];
         }
 
         return $choices;
@@ -102,15 +116,26 @@ class StateFieldType extends FieldType
             return;
         }
 
+        $old_object = $this->entityManager->getUnitOfWork()->getOriginalEntityData($context->getObject());
+
         $new_state = $data;
+
+        dump($field);
+        dump($data);
+        dump($old_object);
+        dump($context);
+        exit;
+        #dump($context->getObject()); exit;
 
         $state = new State('draft');
 
         $workflow = $this->buildWorkflow($field);
 
-        if (!$workflow->can($state, $new_state)) {
-            $context->buildViolation('invalid_workflow_transition')->atPath('['.$field->getIdentifier().']')->addViolation();
-        }
+        #if (!$workflow->can($state, "review")) {
+        #    $context->buildViolation('invalid_workflow_transition')->atPath('['.$field->getIdentifier().']')->addViolation();
+        #}
+
+        $data = 'draft12345';
     }
 
     /**
@@ -126,15 +151,82 @@ class StateFieldType extends FieldType
             return;
         }
 
-        try {
-            $state_settings = new StateSettings($settings->places, $settings->transitions, $settings->initial_place);
+        // initial place must be a string
+        if(!is_string($settings->initial_place)) {
+            $context->buildViolation('invalid_initial_place')->atPath('initial_place')->addViolation();
+            return;
         }
-        catch (InvalidStateSettingsPlacesException $e) {
-            $context->buildViolation($e->getMessage())->atPath('places')->setCause('invalid_place')->addViolation();
+
+        // places must be an array.
+        if(!is_array($settings->places)) {
+            $context->buildViolation('invalid_places')->atPath('places')->addViolation();
+            return;
         }
-        catch (InvalidStateSettingsTransitionsException $e) {
-            $context->buildViolation($e->getMessage())->atPath('transitions')->setCause('invalid_transition')->addViolation();
+
+        // transitions must be a array.
+        if(!is_array($settings->transitions)) {
+            $context->buildViolation('invalid_transitions')->atPath('transitions')->addViolation();
+            return;
         }
+
+
+        $state_settings = $this->createStateSettings($settings, $context);
+
+        $errors = $this->validator->validate($state_settings);
+
+        if (count($errors) > 0) {
+
+           foreach ($errors as $error) 
+           {
+                $context->buildViolation($error->getMessageTemplate())->atPath($error->getPropertyPath())->addViolation();
+           }
+    
+        }
+    }
+
+    /**
+     * @param FieldableFieldSettings $settings
+     *
+     * @return StateSettings
+     */
+    private function createStateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context) 
+    {
+        $places = [];
+        $transitions = [];
+        $initial_place = (isset($settings->initial_place))? $settings->initial_place : null;
+
+        foreach ($settings->places as $key => $place) 
+        {
+            # avoid illegal string offsets
+            if (!is_array($place)) 
+            {
+                $place = [];
+            }
+
+            $place['category'] = (!isset($place['category'])) ? "" : $place['category'];
+
+            $places[] = new StatePlace($key, $place['category']);
+           
+        }
+
+        foreach ($settings->transitions as $key => $transition) {
+            
+            if (!is_array($transition)) 
+            {
+                $transition = [];
+            }
+
+            # avoid illegal string offsets
+            $transition['label'] = (!isset($transition['label'])) ? "" : $transition['label'];
+            $transition['from'] = (!isset($transition['from'])) ? [] : $transition['from'];
+            $transition['from'] = (is_string($transition['from']))? [$transition['from']] : $transition['from'];
+            $transition['to'] = (!isset($transition['to'])) ? "" : $transition['to'];
+            
+            $transitions[] = new StateTransition($key, $transition['label'], $transition['from'], $transition['to']);
+            
+        }
+
+        return new StateSettings($places, $transitions, $initial_place);
 
     }
 
