@@ -4,12 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ url('unitecms_core_content_index', {
-            domain: domain.identifier|replace({'_':'-'}),
-            organization: organization.identifier|replace({'_':'-'}),
-            content_type: contentType.identifier|replace({'_':'-'}),
-            view: view.identifier|replace({'_':'-'})
-        }) }}"><i data-feather="arrow-left"></i></a>
+        <a class="back-button" href="{{ url('unitecms_core_content_index', [view]) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.recover.headline{% endtrans %}</h2>
     </header>
     {{ form(form) }}

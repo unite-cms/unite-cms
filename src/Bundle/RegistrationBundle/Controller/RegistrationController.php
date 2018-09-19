@@ -111,7 +111,7 @@ class RegistrationController extends Controller
                 $this->container->get('session')->set('_security_main', serialize($userToken));
 
                 $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration, 'registration'));
-                return $this->redirect($this->generateUrl('unitecms_core_domain_index', ['organization' => IdentifierNormalizer::denormalize($organization->getIdentifier())], Router::ABSOLUTE_URL));
+                return $this->redirect($this->generateUrl('unitecms_core_domain_index', [$organization]));
             }
         }
 

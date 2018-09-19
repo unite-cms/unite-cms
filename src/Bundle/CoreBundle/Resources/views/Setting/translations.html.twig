@@ -4,11 +4,7 @@
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex">
-        <a class="back-button" href="{{ url('unitecms_core_setting_index', {
-            domain: unite.domain.identifier|replace({'_':'-'}),
-            organization: unite.organization.identifier|replace({'_':'-'}),
-            setting_type: settingType.identifier|replace({'_':'-'})
-        }) }}"><i data-feather="arrow-left"></i></a>
+        <a class="back-button" href="{{ url('unitecms_core_setting_index', [settingType]) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with { "%type%": settingType|escape } %}setting.translations.headline{% endtrans %}</h2>
     </header>
 
@@ -33,12 +29,7 @@
                         <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                             <ul class="uk-nav uk-dropdown-nav">
 
-                                <li><a href="{{ url('unitecms_core_setting_index', {
-                                        'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                                        'domain': unite.domain.identifier|replace({'_':'-'}),
-                                        'setting_type': settingType.identifier|replace({'_':'-'}),
-                                        'locale': translation.locale
-                                    }) }}">
+                                <li><a href="{{ url('unitecms_core_setting_index', {'setting_type': settingType, 'locale': translation.locale}) }}">
                                         <i class="uk-margin-small-right" data-feather="edit"></i>
                                         {% trans %}setting.update.button{% endtrans %}
                                 </a></li>
@@ -57,12 +48,7 @@
                             <div uk-dropdown="mode: click; pos: bottom-right; offset: 5">
                                 <ul class="uk-nav uk-dropdown-nav">
 
-                                    <li><a href="{{ url('unitecms_core_setting_index', {
-                                            'organization': unite.domain.organization.identifier|replace({'_':'-'}),
-                                            'domain': unite.domain.identifier|replace({'_':'-'}),
-                                            'setting_type': settingType.identifier|replace({'_':'-'}),
-                                            'locale': locale
-                                        }) }}" class="uk-text-success">
+                                    <li><a href="{{ url('unitecms_core_setting_index', {'setting_type': settingType, 'locale': locale}) }}" class="uk-text-success">
                                             <i class="uk-margin-small-right" data-feather="plus-circle"></i>
                                             {% trans with {"%locale%": locale} %}setting.translations.create.button{% endtrans %}
                                         </a></li>

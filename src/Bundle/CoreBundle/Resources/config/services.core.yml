@@ -1,6 +1,11 @@
 # Contains all core services that can be used for core and extension development.
 services:
 
+  # Extends Symfony router to allow easy url generation for known entity routes.
+  UniteCMS\CoreBundle\Service\UniteCMSRouter:
+    parent: router
+    decorates: router
+
   # Converts identifiers from URL (including "-") to internal identifier (including "_").
   UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer:
     tags: [{ name: request.param_converter, priority: 100}]

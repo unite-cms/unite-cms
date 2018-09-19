@@ -15,6 +15,9 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\Validator\ConstraintViolation;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Form\ReferenceType;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\Entity\View;
@@ -112,15 +115,7 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content created.');
 
-                return $this->redirect($this->generateUrl(
-                    'unitecms_core_content_index',
-                    [
-                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
-                        'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                        'content_type' => $view->getContentType()->getIdentifier(),
-                        'view' => $view->getIdentifier(),
-                    ], Router::ABSOLUTE_URL
-                ));
+                return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
             }
         }
 
@@ -187,15 +182,7 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content updated.');
 
-                return $this->redirect($this->generateUrl(
-                    'unitecms_core_content_index',
-                    [
-                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
-                        'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                        'content_type' => $view->getContentType()->getIdentifier(),
-                        'view' => $view->getIdentifier(),
-                    ], Router::ABSOLUTE_URL
-                ));
+                return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
             }
         }
 
@@ -306,15 +293,7 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content deleted.');
 
-                return $this->redirect($this->generateUrl(
-                    'unitecms_core_content_index',
-                    [
-                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
-                        'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                        'content_type' => $view->getContentType()->getIdentifier(),
-                        'view' => $view->getIdentifier(),
-                    ], Router::ABSOLUTE_URL
-                ));
+                return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
             }
         }
 
@@ -402,15 +381,7 @@ class ContentController extends Controller
 
                 $this->addFlash('success', 'Content deleted.');
 
-                return $this->redirect($this->generateUrl(
-                    'unitecms_core_content_index',
-                    [
-                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
-                        'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                        'content_type' => $view->getContentType()->getIdentifier(),
-                        'view' => $view->getIdentifier(),
-                    ], Router::ABSOLUTE_URL
-                ));
+                return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
             }
         }
 
@@ -487,15 +458,7 @@ class ContentController extends Controller
                 $this->getDoctrine()->getManager()->flush();
                 $this->addFlash('success', 'Deleted content was restored.');
 
-                return $this->redirect($this->generateUrl(
-                    'unitecms_core_content_index',
-                    [
-                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
-                        'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                        'content_type' => $view->getContentType()->getIdentifier(),
-                        'view' => $view->getIdentifier(),
-                    ], Router::ABSOLUTE_URL
-                ));
+                return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
             }
         }
 
@@ -540,15 +503,7 @@ class ContentController extends Controller
                     'You cannot manage translations for this content, because it is a translation of soft-deleted content.'
                 );
 
-                return $this->redirect($this->generateUrl(
-                    'unitecms_core_content_index',
-                    [
-                        'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
-                        'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                        'content_type' => $view->getContentType()->getIdentifier(),
-                        'view' => $view->getIdentifier(),
-                    ], Router::ABSOLUTE_URL
-                ));
+                return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
             }
         }
 
@@ -581,82 +536,54 @@ class ContentController extends Controller
             throw $this->createNotFoundException();
         }
 
+        $virtualField = new ContentTypeField();
+        $virtualField->setTitle('Translation');
+        $virtualField->getSettings()->view = $view->getIdentifier();
+        $virtualField->getSettings()->content_type = $view->getContentType()->getIdentifier();
+        $virtualField->getSettings()->domain = $view->getContentType()->getDomain()->getIdentifier();
+
         $form = $this->createFormBuilder()
             ->add(
                 'translation',
-                WebComponentType::class,
-                [
-                    'tag' => 'unite-cms-core-reference-field',
-                    'empty_data' => [
-                        'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                        'content_type' => $view->getContentType()->getIdentifier(),
-                    ],
-                    'attr' => [
-                        'base-url' => '/'.$view->getContentType()->getDomain()->getOrganization().'/',
-                        'content-label' => '#{id}',
-                        'modal-html' => $this->render(
-                            $this->get('unite.cms.view_type_manager')->getViewType($view->getType())::getTemplate(),
-                            [
-                                'view' => $view,
-                                'parameters' => $this->get('unite.cms.view_type_manager')
-                                    ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
-                                    ->setCsrfToken(
-                                        $this->get('security.csrf.token_manager')->getToken('fieldable_form')
-                                    ),
-                            ]
-                        ),
-                    ],
-                ]
+                ReferenceType::class,
+                $this->get('unite.cms.field_type_manager')->getFieldType('reference')->getFormOptions($virtualField)
             )
             ->add('submit', SubmitType::class, ['label' => 'content.translations.add_existing.submit'])->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach ($form->getData() as $key => $translation_identifier) {
-                if (!empty($translation_identifier['content'])) {
-                    $translation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
-                        [
-                            'id' => $translation_identifier['content'],
-                            'translationOf' => null,
-                        ]
-                    );
-                    if (!$translation) {
 
-                        $form->addError(
-                            new FormError(
-                                'content_not_found',
-                                'content_not_found'
-                            )
-                        );
+            if(!empty($form->getData()['translation'])) {
+                $translation = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+                    [
+                        'id' => $form->getData()['translation']['content'],
+                        'translationOf' => null,
+                    ]
+                );
 
-                    } else {
-                        $content->addTranslation($translation);
+                if (!$translation) {
+                    $form->get('translation')->addError(new FormError($this->get('translator')->trans(
+                        'translation_content_not_found',
+                        [],
+                        'validators'
+                    ), 'translation_content_not_found'));
+                } else {
+                    $content->addTranslation($translation);
 
-                        // If content errors were found, map them to the form.
-                        $violations = $this->get('validator')->validate($content);
-                        if (count($violations) > 0) {
-                            $violationMapper = new ViolationMapper();
-                            foreach ($violations as $violation) {
-                                $violationMapper->mapViolation($violation, $form);
-                            }
-
-                            // If content is valid.
-                        } else {
-                            $this->getDoctrine()->getManager()->flush();
-                            $this->addFlash('success', 'Translation added.');
-
-                            return $this->redirect($this->generateUrl(
-                                'unitecms_core_content_translations',
-                                [
-                                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization(
-                                    )->getIdentifier()),
-                                    'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                                    'content_type' => $view->getContentType()->getIdentifier(),
-                                    'view' => $view->getIdentifier(),
-                                    'content' => $content->getId(),
-                                ], Router::ABSOLUTE_URL
-                            ));
+                    // If content errors were found, map them to the form.
+                    $violations = $this->get('validator')->validate($content);
+                    if (count($violations) > 0) {
+                        $violationMapper = new ViolationMapper();
+                        foreach ($violations as $violation) {
+                            $violationMapper->mapViolation($violation, $form->get('translation'));
                         }
+
+                        // If content is valid.
+                    } else {
+                        $this->getDoctrine()->getManager()->flush();
+                        $this->addFlash('success', 'Translation added.');
+
+                        return $this->redirect($this->generateUrl('unitecms_core_content_translations', [$view, $content]));
                     }
                 }
             }
@@ -725,16 +652,7 @@ class ContentController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Translation removed.');
 
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_content_translations',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
-                    'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                    'content_type' => $view->getContentType()->getIdentifier(),
-                    'view' => $view->getIdentifier(),
-                    'content' => $content->getId(),
-                ], Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_content_translations', [$view, $content]));
         }
 
         return $this->render(
@@ -813,16 +731,7 @@ class ContentController extends Controller
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Content reverted.');
 
-            return $this->redirect($this->generateUrl(
-                'unitecms_core_content_revisions',
-                [
-                    'organization' => IdentifierNormalizer::denormalize($view->getContentType()->getDomain()->getOrganization()->getIdentifier()),
-                    'domain' => $view->getContentType()->getDomain()->getIdentifier(),
-                    'content_type' => $view->getContentType()->getIdentifier(),
-                    'view' => $view->getIdentifier(),
-                    'content' => $content->getId(),
-                ], Router::ABSOLUTE_URL
-            ));
+            return $this->redirect($this->generateUrl('unitecms_core_content_revisions', [$view, $content]));
         }
 
         return $this->render(
