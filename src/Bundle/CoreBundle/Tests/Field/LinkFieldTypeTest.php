@@ -223,6 +223,8 @@ class LinkFieldTypeTest extends FieldTypeTestCase
                     id,
                     f1 {
                         url,
+                        title,
+                        target
                     }
                 }
             }'
@@ -242,8 +244,8 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         $this->assertNotNull($content);
         $this->assertNotNull($result->data->createCt1->f1);
         $this->assertEquals('https://www.orf.at', $result->data->createCt1->f1->url);
-        $this->assertObjectNotHasAttribute('target', $result->data->createCt1->f1);
-        $this->assertObjectNotHasAttribute('title', $result->data->createCt1->f1);
+        $this->assertNull($result->data->createCt1->f1->title);
+        $this->assertNull($result->data->createCt1->f1->target);
 
         $result = GraphQL::executeQuery(
             $schema,
