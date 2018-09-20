@@ -62,7 +62,7 @@ services:
     UniteCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType:
         tags: [unite_cms.graphql.schema_type]
 
-    UniteCMS\CoreBundle\SchemaType\Types\LinkResultType:
+    UniteCMS\CoreBundle\SchemaType\Types\LinkFieldType:
         tags: [unite_cms.graphql.schema_type]
 
     # Input Type implementations, that get registered in the schema_type_manager.
@@ -76,5 +76,5 @@ services:
     UniteCMS\CoreBundle\SchemaType\Types\Input\ReferenceFieldTypeInput:
         tags: [unite_cms.graphql.schema_type]
 
-    UniteCMS\CoreBundle\SchemaType\Types\Input\LinkInputType:
+    UniteCMS\CoreBundle\SchemaType\Types\Input\LinkFieldInputType:
         tags: [unite_cms.graphql.schema_type]

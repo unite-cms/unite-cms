@@ -12,7 +12,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
-class LinkResultType extends AbstractType
+class LinkFieldType extends AbstractType
 {
     /**
      * Define all fields of this type.

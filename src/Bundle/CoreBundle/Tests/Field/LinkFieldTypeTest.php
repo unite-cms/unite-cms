@@ -89,7 +89,7 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         $d->setValue(static::$container->get('unite.cms.manager'), $ctField->getContentType()->getDomain());
         
         $type = static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
-            'LinkResult',
+            'LinkField',
             $ctField->getContentType()->getDomain()
         );
 
@@ -132,6 +132,24 @@ class LinkFieldTypeTest extends FieldTypeTestCase
             ]
         )->setContentType($ctField->getContentType());
         
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content
+        );
+
+        $formView = $form->createView();
+        $root = $formView->getIterator()->current();
+        $this->assertEquals($content->getData()['f1'], $root->vars['value']);
+
+        $content->setData(
+            [
+                'f1' => [
+                    'url' => "https://www.orf.at",
+                    'title' => "AHAHAH"
+                ],
+            ]
+        )->setContentType($ctField->getContentType());
+
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $ctField->getContentType(),
             $content
@@ -189,6 +207,43 @@ class LinkFieldTypeTest extends FieldTypeTestCase
                 },
             ]
         );
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
+                createCt1(
+                    persist: true,
+                    data: {
+                        f1: {
+                            url: "https://www.orf.at",
+                        }
+                    }
+                ) 
+                {
+                    id,
+                    f1 {
+                        url,
+                    }
+                }
+            }'
+        );
+
+        $result->setErrorFormatter(function (Error $error) {
+            return UserErrorAtPath::createFormattedErrorFromException($error);
+        });
+
+        $result = json_decode(json_encode($result->toArray(true)));
+
+        # check if content
+        $this->assertNotEmpty($result->data->createCt1->id);
+
+        $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($result->data->createCt1->id);
+
+        $this->assertNotNull($content);
+        $this->assertNotNull($result->data->createCt1->f1);
+        $this->assertEquals('https://www.orf.at', $result->data->createCt1->f1->url);
+        $this->assertObjectNotHasAttribute('target', $result->data->createCt1->f1);
+        $this->assertObjectNotHasAttribute('title', $result->data->createCt1->f1);
 
         $result = GraphQL::executeQuery(
             $schema,
@@ -258,6 +313,22 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('https://www.orf.at', $result->data->getCt1->f1->url);
         $this->assertEquals('_blank', $result->data->getCt1->f1->target);
         $this->assertEquals('AHAHAH', $result->data->getCt1->f1->title);
+
+        // test return only some
+        $result = GraphQL::executeQuery(
+            $schema,
+            'query { 
+                getCt1(id: "'.$content_id.'") {
+                    f1 {
+                        url
+                    }
+                }
+            }'
+        );
+
+        $result = json_decode(json_encode($result->toArray(true)));
+        $this->assertTrue(empty($result->errors));
+        $this->assertEquals('https://www.orf.at', $result->data->getCt1->f1->url);
 
         // Test getting empty data via api.
         $empty_content = new Content();

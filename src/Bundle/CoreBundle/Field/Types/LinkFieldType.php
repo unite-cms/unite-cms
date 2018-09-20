@@ -14,8 +14,6 @@ use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\LinkType;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UniteCMS\CoreBundle\SchemaType\Types\LinkResultType;
-use UniteCMS\CoreBundle\SchemaType\Types\Input\LinkInputType;
 
 class LinkFieldType extends FieldType
 {
@@ -42,14 +40,14 @@ class LinkFieldType extends FieldType
      * {@inheritdoc}
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
-        return $schemaTypeManager->getSchemaType('LinkResult');
+        return $schemaTypeManager->getSchemaType('LinkField');
     }
 
     /**
      * {@inheritdoc}
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
-        return $schemaTypeManager->getSchemaType('LinkInput');
+        return $schemaTypeManager->getSchemaType('LinkFieldInput');
     }
 
     /**

@@ -32,12 +32,6 @@ class LinkType extends AbstractType
     public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
-
-        $this->url_targets = [
-            $this->translator->trans('link_type.choice.self.label') => "_self",
-            $this->translator->trans('link_type.choice.blank.label') => "_blank"
-        ];
-
     }
 
     /**
@@ -83,6 +77,11 @@ class LinkType extends AbstractType
 
         if (isset($options['target_widget']) && $options['target_widget'])
         {
+
+            $this->url_targets = [
+                $this->translator->trans('link_type.choice.self.label') => "_self",
+                $this->translator->trans('link_type.choice.blank.label') => "_blank"
+            ];
 
             $builder->add('target', ChoiceType::class,
                 [

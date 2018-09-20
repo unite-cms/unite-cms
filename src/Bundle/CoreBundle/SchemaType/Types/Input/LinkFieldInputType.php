@@ -11,7 +11,7 @@ namespace UniteCMS\CoreBundle\SchemaType\Types\Input;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type;
 
-class LinkInputType extends InputObjectType
+class LinkFieldInputType extends InputObjectType
 {
     public function __construct()
     {
