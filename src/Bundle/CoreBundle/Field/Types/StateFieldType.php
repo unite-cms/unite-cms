@@ -17,6 +17,8 @@ use Symfony\Component\Workflow\Workflow;
 use Symfony\Component\Workflow\MarkingStore\SingleStateMarkingStore;
 use Symfony\Component\Workflow\WorkflowInterface\InstanceOfSupportStrategy;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
@@ -42,13 +44,16 @@ class StateFieldType extends FieldType
 
     private $validator;
     private $entityManager;
+    private $translator;
 
     function __construct(
         ValidatorInterface $validator,
-        EntityManager $entityManager
+        EntityManager $entityManager,
+        TranslatorInterface $translator
     ) {
         $this->validator = $validator;
         $this->entityManager = $entityManager;
+        $this->translator = $translator;
     }
 
     function getFormOptions(FieldableField $field): array
@@ -56,10 +61,9 @@ class StateFieldType extends FieldType
         return array_merge(
             parent::getFormOptions($field),
                 [
-                    'empty_data' => $field->getSettings()->initial_place,
+                    'placeholder' => $this->translator->trans('state.field.placeholder'),
                     'choices' => $this->getChoices($field),
-                    'label' => 'State',
-                    'required' => true
+                    'label' => $this->translator->trans('state.field.label'),
                 ]
         );
     }
@@ -116,15 +120,17 @@ class StateFieldType extends FieldType
             return;
         }
 
+        #dump($context->getObject()); exit;
+
         $old_object = $this->entityManager->getUnitOfWork()->getOriginalEntityData($context->getObject());
 
         $new_state = $data;
 
-        dump($field);
-        dump($data);
-        dump($old_object);
-        dump($context);
-        exit;
+        #dump($field);
+        #dump($data);
+        #dump($old_object);
+        #dump($context);
+        #exit;
         #dump($context->getObject()); exit;
 
         $state = new State('draft');
@@ -134,8 +140,6 @@ class StateFieldType extends FieldType
         #if (!$workflow->can($state, "review")) {
         #    $context->buildViolation('workflow_transition_not_allowed')->atPath('['.$field->getIdentifier().']')->addViolation();
         #}
-
-        $data = 'draft12345';
     }
 
     /**
@@ -170,7 +174,9 @@ class StateFieldType extends FieldType
         }
 
 
-        $state_settings = $this->createStateSettings($settings, $context);
+        $state_settings = StateSettings::createSettingsFromArray($settings->places, $settings->transitions, $settings->initial_place);
+        dump($state_settings);
+        exit;
 
         $errors = $this->validator->validate($state_settings);
 
@@ -191,41 +197,9 @@ class StateFieldType extends FieldType
      */
     private function createStateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context) 
     {
-        $places = [];
-        $transitions = [];
-        $initial_place = (isset($settings->initial_place))? $settings->initial_place : null;
 
-        foreach ($settings->places as $key => $place) 
-        {
-            if (!is_array($place)) 
-            {
-                $place = [];
-            }
 
-            $place['category'] = (!isset($place['category'])) ? "" : $place['category'];
 
-            $places[] = new StatePlace($key, $place['category']);
-           
-        }
-
-        foreach ($settings->transitions as $key => $transition) {
-            
-            if (!is_array($transition)) 
-            {
-                $transition = [];
-            }
-
-            # check if things are set
-            $transition['label'] = (!isset($transition['label'])) ? "" : $transition['label'];
-            $transition['from'] = (!isset($transition['from'])) ? [] : $transition['from'];
-            $transition['from'] = (is_string($transition['from']))? [ $transition['from'] ] : $transition['from'];
-            $transition['to'] = (!isset($transition['to'])) ? "" : $transition['to'];
-            
-            $transitions[] = new StateTransition($key, $transition['label'], $transition['from'], $transition['to']);
-            
-        }
-
-        return new StateSettings($places, $transitions, $initial_place);
 
     }
 

@@ -20,6 +20,7 @@ class StateSettings
     /**
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_initial_place")
+     * @Assert\NotBlank(message="workflow_invalid_initial_place")
      * @Assert\Choice(callback="getPlacesIdentifiers", message="workflow_invalid_initial_place")
      */
     private $initialPlace;
@@ -38,12 +39,15 @@ class StateSettings
      */
     private $transitions;
 
+    const PLACES_KEYS = ['label', 'category'];
+    const TRANSITIONS_KEYS = ['label', 'from', 'to'];
+
     /**
      * @param StatePlace[] $places
      * @param StateTransition[] $transitions
      * @param string $initialPlace
      */
-    public function __construct(array $places, array $transitions, string $initialPlace = null)
+    public function __construct(array $places, array $transitions, string $initialPlace)
     {
         $this->setPlaces($places);
         $this->setTransitions($transitions);
@@ -151,9 +155,66 @@ class StateSettings
     }
 
     /**
+     * @param array $places
+     * @param array $transitions
+     * @param string $initial_place
+     *
+     * @return StateSettings
+     */
+    public static function createSettingsFromArray(array $places, array $transitions, string $initial_place)
+    {
+        $new_places = [];
+        $new_transitions = [];
+
+        #const PLACES_KEYS = ['label', 'category'];
+        #const TRANSITIONS_KEYS = ['label', 'from', 'to'];
+
+        foreach ($places as $key => $place)
+        {
+
+
+
+
+            if (!is_array($place))
+            {
+                $place = [];
+            }
+
+            foreach (self::PLACES_KEYS as $key) {
+
+            }
+
+            $place['category'] = (!isset($place['category'])) ? "" : $place['category'];
+            $place['label'] = (!isset($place['label'])) ? "" : $place['label'];
+
+            $new_places[] = new StatePlace($key, $place['label'], $place['category']);
+
+        }
+
+        foreach ($transitions as $key => $transition) {
+
+            if (!is_array($transition))
+            {
+                $transition = [];
+            }
+
+            # check if things are set
+            $transition['label'] = (!isset($transition['label'])) ? "" : $transition['label'];
+            $transition['from'] = (!isset($transition['from'])) ? [] : $transition['from'];
+            $transition['from'] = (is_string($transition['from']))? [ $transition['from'] ] : $transition['from'];
+            $transition['to'] = (!isset($transition['to'])) ? "" : $transition['to'];
+
+            $new_transitions[] = new StateTransition($key, $transition['label'], $transition['from'], $transition['to']);
+
+        }
+
+        return new StateSettings($new_places, $new_transitions, $initial_place);
+    }
+
+    /**
      * @Assert\Callback
      */
-    public function validate(ExecutionContextInterface $context, $payload)
+    public function validateTransitions(ExecutionContextInterface $context, $payload)
     {
 
         foreach ($this->getTransitions() as $transition) 

@@ -21,15 +21,21 @@ class StateFieldTypeTest extends FieldTypeTestCase
         'initial_place' => 'draft',
         'places' => [
             'draft' => [
+                'label' => 'Draft',
                 'category' => 'notice'
             ],
             'review'=> [
+                'label' => 'Review',
                 'category' => 'primary'
             ],
             'review2'=> [
+                'label' => 'Review2',
                 'category' => 'primary'
             ],
-            'published'  => []
+            'published' => [
+                'label' => 'Published',
+                'category' => 'primary'
+            ],
         ],
         'transitions' => [
             'to_review'=> [
@@ -40,7 +46,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
             'to_review2'=> [
                 'label' => 'Put into review 2 mode',
                 'from' => ['review','draft'],
-                'to' => 'review2',
+                'to' => 'review',
             ],
             'to_published' => [
                 'label' => 'Publish Content',
@@ -103,26 +109,33 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(11, $errors);
+        $this->assertCount(13, $errors);
         $this->assertEquals('workflow_invalid_transition_to', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_transition_from', $errors->get(1)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_transition_from', $errors->get(2)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_transition_to', $errors->get(3)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_initial_place', $errors->get(4)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition', $errors->get(5)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_from', $errors->get(6)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_to', $errors->get(7)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition', $errors->get(8)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition', $errors->get(9)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_to', $errors->get(10)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(5)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(6)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(7)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(8)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(9)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(10)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(11)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(12)->getMessageTemplate());
 
         $settings = [
             'initial_place' => 'draft123123',
             'places' => [
                 'draft' => [
-                    'category' => ['red']
+                    'category' => ['red'],
+                    'label' => true,
+                    'fofofof' => ''
                 ],
-                'review'=> [],
+                'review' => [
+                    'category' => 'red',
+                    'label' =>['red']
+                ],
                 'review2' => [],
                 '2published' => []
             ],
@@ -131,6 +144,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
                     'label' => 'Put into review mode',
                     'from' => 'draft1',
                     'to' => 'review234',
+                    'fofofof' => ''
                 ],
                 'tp_published'=> [
                     'from' => ['review22','published'],
@@ -141,7 +155,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(9, $errors);
+        $this->assertCount(14, $errors);
 
         $this->assertEquals('workflow_invalid_transition_from', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_transition_to', $errors->get(1)->getMessageTemplate());
@@ -149,9 +163,14 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('workflow_invalid_transition_from', $errors->get(3)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_transition_to', $errors->get(4)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_initial_place', $errors->get(5)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_category', $errors->get(6)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(6)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_category', $errors->get(7)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition', $errors->get(8)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_category', $errors->get(8)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(9)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_category', $errors->get(10)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(11)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(12)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(13)->getMessageTemplate());
     }
 
     public function testStateFieldTypeWithValidSettings()
@@ -163,7 +182,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
     }
 
-    public function testStateFieldTypeWorkflowChange()
+    public function testStateFieldTypeWorkflows()
     {
 
         $ctField = $this->createContentTypeField('state');
@@ -202,6 +221,8 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $this->em->persist($content);
         $this->em->flush();
+
+        exit;
 
     }
 

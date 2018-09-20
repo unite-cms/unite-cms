@@ -24,14 +24,22 @@ class StatePlace
 
     /**
      * @var string
+     * @Assert\Type(type="string", message="workflow_invalid_place")
+     * @Assert\NotBlank(message="workflow_invalid_place")
+     */
+    private $label;
+
+    /**
+     * @var string
      * @Assert\Type(type="string", message="workflow_invalid_category")
      * @Assert\Choice(choices={"", "primary", "notice", "info", "success", "warning", "error", "danger"}, message="workflow_invalid_category")
      */
     private $category;
     
-    public function __construct($identifier, $category = null)
+    public function __construct($identifier, $label, $category = null)
     {
         $this->identifier = $identifier;
+        $this->label = $label;
         $this->category = $category;
     }
 
@@ -53,6 +61,26 @@ class StatePlace
     public function setIdentifier($identifier)
     {
         $this->identifier = $identifier;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param string label
+     *
+     * @return StatePlace
+     */
+    public function setLabel($label)
+    {
+        $this->$label = $label;
 
         return $this;
     }
