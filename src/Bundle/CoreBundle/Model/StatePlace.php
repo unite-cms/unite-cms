@@ -17,15 +17,15 @@ class StatePlace
 {
     /**
      * @var string
-     * @Assert\Type(type="string", message="invalid_places")
-     * @Assert\NotBlank(message="invalid_places")
+     * @Assert\Type(type="string", message="workflow_invalid_place")
+     * @Assert\NotBlank(message="workflow_no_place")
      */
     private $identifier;
 
     /**
      * @var string
-     * @Assert\Type(type="string", message="invalid_places")
-     * @Assert\Choice(choices={"", "primary", "notice", "info", "success", "warning", "error", "danger"}, message="invalid_place_category")
+     * @Assert\Type(type="string", message="workflow_invalid_category")
+     * @Assert\Choice(choices={"", "primary", "notice", "info", "success", "warning", "error", "danger"}, message="workflow_invalid_category")
      */
     private $category;
     

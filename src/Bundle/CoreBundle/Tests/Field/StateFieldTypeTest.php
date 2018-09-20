@@ -73,17 +73,17 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
 
-        $this->assertEquals('invalid_initial_place', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_initial_place', $errors->get(0)->getMessageTemplate());
         
         $settings['initial_place'] = "draft";
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertEquals('invalid_places', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_places', $errors->get(0)->getMessageTemplate());
         
         $settings['places'] = [];
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertEquals('invalid_transitions', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transitions', $errors->get(0)->getMessageTemplate());
 
         $settings = [
             'initial_place' => 'draft123123',
@@ -104,17 +104,17 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(11, $errors);
-        $this->assertEquals('invalid_transition_to', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_from', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_from', $errors->get(2)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_to', $errors->get(3)->getMessageTemplate());
-        $this->assertEquals('invalid_initial_place', $errors->get(4)->getMessageTemplate());
-        $this->assertEquals('invalid_transitions', $errors->get(5)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_from', $errors->get(6)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_to', $errors->get(7)->getMessageTemplate());
-        $this->assertEquals('invalid_transitions', $errors->get(8)->getMessageTemplate());
-        $this->assertEquals('invalid_transitions', $errors->get(9)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_to', $errors->get(10)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(3)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_initial_place', $errors->get(4)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(5)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(6)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(7)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(8)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(9)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(10)->getMessageTemplate());
 
         $settings = [
             'initial_place' => 'draft123123',
@@ -143,15 +143,15 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(9, $errors);
 
-        $this->assertEquals('invalid_transition_from', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_to', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_from', $errors->get(2)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_from', $errors->get(3)->getMessageTemplate());
-        $this->assertEquals('invalid_transition_to', $errors->get(4)->getMessageTemplate());
-        $this->assertEquals('invalid_initial_place', $errors->get(5)->getMessageTemplate());
-        $this->assertEquals('invalid_places', $errors->get(6)->getMessageTemplate());
-        $this->assertEquals('invalid_place_category', $errors->get(7)->getMessageTemplate());
-        $this->assertEquals('invalid_transitions', $errors->get(8)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(3)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(4)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_initial_place', $errors->get(5)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_category', $errors->get(6)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_category', $errors->get(7)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(8)->getMessageTemplate());
     }
 
     public function testStateFieldTypeWithValidSettings()

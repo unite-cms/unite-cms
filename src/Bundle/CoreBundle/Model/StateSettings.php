@@ -11,9 +11,6 @@ namespace UniteCMS\CoreBundle\Model;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-use UniteCMS\CoreBundle\Model\StatePlace;
-use UniteCMS\CoreBundle\Model\StateTransition;
-
 /**
  * We use this model only for validation!
  */
@@ -22,22 +19,22 @@ class StateSettings
 
     /**
      * @var string
-     * @Assert\Type(type="string", message="invalid_initial_place")
-     * @Assert\Choice(callback="getPlacesIdentifiers", message="invalid_initial_place")
+     * @Assert\Type(type="string", message="workflow_invalid_initial_place")
+     * @Assert\Choice(callback="getPlacesIdentifiers", message="workflow_invalid_initial_place")
      */
     private $initialPlace;
 
     /**
      * @var StatePlace[]
      * @Assert\Valid
-     * @Assert\NotBlank(message="invalid_places")
+     * @Assert\NotBlank(message="workflow_invalid_places")
      */
     private $places;
 
     /**
      * @var StateTransition[]
      * @Assert\Valid
-     * @Assert\NotBlank(message="invalid_transitions")
+     * @Assert\NotBlank(message="workflow_invalid_transitions")
      */
     private $transitions;
 
@@ -166,7 +163,7 @@ class StateSettings
             {
                 if (!in_array($place, $this->getPlacesIdentifiers()))
                 {
-                    $context->buildViolation('invalid_transition_from')
+                    $context->buildViolation('workflow_invalid_transition_from')
                         ->atPath('transitions')
                         ->addViolation();
 
@@ -175,7 +172,7 @@ class StateSettings
 
             if (!in_array($transition->getTo(), $this->getPlacesIdentifiers()))
             {
-                $context->buildViolation('invalid_transition_to')
+                $context->buildViolation('workflow_invalid_transition_to')
                     ->atPath('transitions')
                     ->addViolation();
 

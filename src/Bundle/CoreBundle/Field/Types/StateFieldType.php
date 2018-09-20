@@ -132,7 +132,7 @@ class StateFieldType extends FieldType
         $workflow = $this->buildWorkflow($field);
 
         #if (!$workflow->can($state, "review")) {
-        #    $context->buildViolation('invalid_workflow_transition')->atPath('['.$field->getIdentifier().']')->addViolation();
+        #    $context->buildViolation('workflow_transition_not_allowed')->atPath('['.$field->getIdentifier().']')->addViolation();
         #}
 
         $data = 'draft12345';
@@ -153,19 +153,19 @@ class StateFieldType extends FieldType
 
         // initial place must be a string
         if(!is_string($settings->initial_place)) {
-            $context->buildViolation('invalid_initial_place')->atPath('initial_place')->addViolation();
+            $context->buildViolation('workflow_invalid_initial_place')->atPath('initial_place')->addViolation();
             return;
         }
 
         // places must be an array.
         if(!is_array($settings->places)) {
-            $context->buildViolation('invalid_places')->atPath('places')->addViolation();
+            $context->buildViolation('workflow_invalid_places')->atPath('places')->addViolation();
             return;
         }
 
         // transitions must be a array.
         if(!is_array($settings->transitions)) {
-            $context->buildViolation('invalid_transitions')->atPath('transitions')->addViolation();
+            $context->buildViolation('workflow_invalid_transitions')->atPath('transitions')->addViolation();
             return;
         }
 
@@ -197,7 +197,6 @@ class StateFieldType extends FieldType
 
         foreach ($settings->places as $key => $place) 
         {
-            # avoid illegal string offsets
             if (!is_array($place)) 
             {
                 $place = [];
@@ -216,10 +215,10 @@ class StateFieldType extends FieldType
                 $transition = [];
             }
 
-            # avoid illegal string offsets
+            # check if things are set
             $transition['label'] = (!isset($transition['label'])) ? "" : $transition['label'];
             $transition['from'] = (!isset($transition['from'])) ? [] : $transition['from'];
-            $transition['from'] = (is_string($transition['from']))? [$transition['from']] : $transition['from'];
+            $transition['from'] = (is_string($transition['from']))? [ $transition['from'] ] : $transition['from'];
             $transition['to'] = (!isset($transition['to'])) ? "" : $transition['to'];
             
             $transitions[] = new StateTransition($key, $transition['label'], $transition['from'], $transition['to']);
