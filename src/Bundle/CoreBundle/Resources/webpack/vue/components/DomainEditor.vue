@@ -22,6 +22,7 @@
     import 'brace/mode/json';
     import 'brace/theme/monokai';
     import 'brace/ext/language_tools';
+    import 'brace/ext/searchbox';
     import 'brace/snippets/json';
 
     import feather from 'feather-icons';
