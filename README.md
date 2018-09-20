@@ -6,7 +6,7 @@ unite cms
 
 unite cms is a decoupled content management system that allows you to manage all kind of content in a single application using a clean and simple user interface. Developers can access the content via a graphQL API to build all kind of websites, apps or IoT applications.   
 
-![unite CMS admin UI](https://www.unitecms.io/screens/poster.png)
+![unite CMS admin UI](https://minio.apps.unitecms.io/github/poster.png)
 
 
 ### Demo
