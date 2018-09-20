@@ -16,6 +16,7 @@ use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Controller\GraphQLApiController;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -112,8 +113,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       ],
       "locales": ["de", "en", "fr"],
       "permissions": {
-        "view setting": "content.locale != \"fr\"",
-        "update setting": "true"
+        "view content": "content.locale != \"fr\""
       }
     }
   ],
@@ -1296,6 +1296,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }
         }');
         $this->assertEquals(0, $response->data->findLang->total);
+
         $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
             findLang(filter: { field: "locale", operator: "=", value: "en"}) {
                 total
@@ -1545,5 +1546,49 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $this->assertEquals('Updated News', $responseUpdate->data->updateNews->title_title);
 
+    }
+
+    public function testFindForContentWithoutPermission() {
+
+        // On lang CT, view is only allowed if lang != fr.
+        foreach($this->em->getRepository('UniteCMSCoreBundle:Content')->findAll() as $content) {
+            $this->em->remove($content);
+        }
+
+        $content1 = new Content();
+        $content1->setLocale('de')->setContentType($this->domains['marketing']->getContentTypes()->get('lang'));
+
+        $content2 = new Content();
+        $content2->setLocale('fr')->setContentType($this->domains['marketing']->getContentTypes()->get('lang'));
+
+        $this->em->persist($content1);
+        $this->em->persist($content2);
+        $this->em->flush();
+
+        // Find content should only return one content (de)
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
+            findLang {
+                total,
+                result {
+                    locale
+                }
+            }
+        }');
+        $this->assertCount(1, $response->data->findLang->result);
+
+        // Total gets the total number of all items.
+        $this->assertEquals(2, $response->data->findLang->total);
+
+        // Find content should only return one content (de)
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
+            findLang {
+                total,
+                result {
+                    locale
+                }
+            }
+        }', [], false, 'main');
+        $this->assertCount(1, $response->data->findLang->result);
+        $this->assertEquals(2, $response->data->findLang->total);
     }
 }

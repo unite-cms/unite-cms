@@ -20,6 +20,15 @@ use UniteCMS\CoreBundle\Entity\User;
 
 class PlatformAdminVoter extends Voter
 {
+    const SUPPORTED_OBJECTS = [
+        Organization::class,
+        Domain::class,
+        SettingType::class,
+        ContentType::class,
+        Setting::class,
+        Content::class,
+    ];
+
     /**
      * The platform admin voter supports all subjects.
      *
@@ -34,14 +43,14 @@ class PlatformAdminVoter extends Voter
             $subject = get_class($subject);
         }
 
-        return in_array($subject, [
-            Organization::class,
-            Domain::class,
-            SettingType::class,
-            ContentType::class,
-            Setting::class,
-            Content::class,
-        ]);
+        if(!empty($subject)) {
+            foreach(self::SUPPORTED_OBJECTS as $class) {
+                if(is_a($subject, $class, true)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
