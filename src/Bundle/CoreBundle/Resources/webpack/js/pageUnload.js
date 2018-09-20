@@ -2,7 +2,7 @@ import * as ObjectHash from 'object-hash';
 
 export default {
     init(message) {
-        let forms = document.querySelectorAll('form');
+        let forms = document.querySelectorAll('form:not([data-disable-before-unload-message])');
         forms.forEach((form) => {
 
             // We need to know if the form was submitted. If so, we don't need to show the message later.
