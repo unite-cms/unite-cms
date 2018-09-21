@@ -56,6 +56,7 @@ class CollectionFieldTypeFactory
         if(!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
             if(!$schemaTypeManager->hasSchemaType($schemaTypeRowName)) {
 
+
                 /**
                  * @var FieldableField[] $fields
                  */
@@ -97,15 +98,13 @@ class CollectionFieldTypeFactory
                     },
                     'resolveField' => function($value, array $args, $context, ResolveInfo $info) use ($fields, $fieldTypes) {
 
-                      $normalizedFieldName = str_replace('_', '-', $info->fieldName);
-
-                      if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$normalizedFieldName])) {
+                      if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$info->fieldName])) {
                         return null;
                       }
 
                       $return_value = null;
                       $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$normalizedFieldName]);
+                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName]);
                       return $return_value;
                     }
                   ]));
