@@ -31,7 +31,7 @@ class LinkFieldType extends FieldType
             parent::getFormOptions($field),
             [
                 'title_widget' => $field->getSettings()->title_widget ?? false,
-                'target_widget' => $field->getSettings()->target_widget ?? false
+                'target_widget' => $field->getSettings()->target_widget ?? false,
             ]
         );
     }

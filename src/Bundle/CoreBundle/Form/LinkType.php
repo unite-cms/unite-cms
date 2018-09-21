@@ -11,6 +11,8 @@ namespace UniteCMS\CoreBundle\Form;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -44,7 +46,7 @@ class LinkType extends AbstractType
             'label_prefix' => 'link_type',
             'compound' => true,
             'title_widget' => false,
-            'target_widget' => false
+            'target_widget' => false,
         ]);
 
     }
@@ -58,7 +60,6 @@ class LinkType extends AbstractType
         $builder->add('url', UrlType::class,
             [
                 'label' => $options['label_prefix'].'.url.label',
-                'attr' => ['class' => 'link-url'],
                 'default_protocol' => 'https'
             ]
         );
@@ -69,7 +70,6 @@ class LinkType extends AbstractType
             $builder->add('title', TextType::class,
                 [
                     'label' => $options['label_prefix'].'.title.label',
-                    'attr' => ['class' => 'link-title']
                 ]
             );
 
@@ -87,12 +87,31 @@ class LinkType extends AbstractType
                 [
                     'label' => $options['label_prefix'].'.target.label',
                     'choices' => $this->url_targets,
-                    'attr' => ['class' => 'link-target']
+                    'attr' => ['class' => 'unite-choice-form-icon-toggle']
                 ]
             );
 
         }
+    }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        if(isset($view->vars['label'])) {
+            $view->vars['widget_label'] = $view->vars['label'];
+            $view->vars['label'] = false;
+        }
+        parent::buildView($view, $form, $options);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBlockPrefix()
+    {
+        return 'unite_cms_core_link';
     }
 
 }

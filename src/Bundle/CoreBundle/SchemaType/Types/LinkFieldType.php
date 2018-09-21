@@ -10,7 +10,6 @@ namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class LinkFieldType extends AbstractType
 {
