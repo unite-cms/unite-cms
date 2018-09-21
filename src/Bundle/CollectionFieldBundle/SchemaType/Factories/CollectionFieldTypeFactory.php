@@ -56,7 +56,6 @@ class CollectionFieldTypeFactory
         if(!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
             if(!$schemaTypeManager->hasSchemaType($schemaTypeRowName)) {
 
-
                 /**
                  * @var FieldableField[] $fields
                  */
