@@ -27,18 +27,18 @@ class VariantsGraphQLTest extends APITestCase
                     "variants": [
                         {
                             "title": "V1",
-                            "identifier": "v1",
+                            "identifier": "variant_1",
                             "fields": [
                                 {
                                     "title": "Text",
-                                    "identifier": "text",
+                                    "identifier": "field_text",
                                     "type": "text"
                                 }
                             ]
                         },
                         {
                             "title": "V2",
-                            "identifier": "v2",
+                            "identifier": "variant_2",
                             "fields": [
                                 {
                                     "title": "Collection",
@@ -48,7 +48,7 @@ class VariantsGraphQLTest extends APITestCase
                                         "fields": [
                                             {
                                                 "title": "Text",
-                                                "identifier": "text",
+                                                "identifier": "field_text",
                                                 "type": "text"
                                             }
                                         ]
@@ -108,13 +108,13 @@ class VariantsGraphQLTest extends APITestCase
                     variants {
                         type,
                         
-                        ... on VariantsContentVariantsV1Variant {
-                            text
+                        ... on VariantsContentVariantsVariant_1Variant {
+                            field_text
                         }
                         
-                        ... on VariantsContentVariantsV2Variant {
+                        ... on VariantsContentVariantsVariant_2Variant {
                             collection {
-                                text
+                                field_text
                             }
                         }
                     }
@@ -124,13 +124,13 @@ class VariantsGraphQLTest extends APITestCase
                 variants {
                     type,
                     
-                    ... on VariantsContentVariantsV1Variant {
-                        text
+                    ... on VariantsContentVariantsVariant_1Variant {
+                        field_text
                     }
                     
-                    ... on VariantsContentVariantsV2Variant {
+                    ... on VariantsContentVariantsVariant_2Variant {
                         collection {
-                            text
+                            field_text
                         }
                     }
                 }
@@ -158,11 +158,11 @@ class VariantsGraphQLTest extends APITestCase
         // 2. Content with field data.
         $c->setData([
             'variants' => [
-                'type' => 'v2',
-                'v2' => [
+                'type' => 'variant_2',
+                'variant_2' => [
                     'collection' => [
-                        ['text' => 'Foo'],
-                        ['text' => 'Baa'],
+                        ['field_text' => 'Foo'],
+                        ['field_text' => 'Baa'],
                     ]
                 ],
             ]
@@ -174,10 +174,10 @@ class VariantsGraphQLTest extends APITestCase
                     'result' => [
                         [
                             'variants' => [
-                                'type' => 'v2',
+                                'type' => 'variant_2',
                                 'collection' => [
-                                    ['text' => 'Foo'],
-                                    ['text' => 'Baa'],
+                                    ['field_text' => 'Foo'],
+                                    ['field_text' => 'Baa'],
                                 ]
                             ]
                         ]
@@ -185,10 +185,10 @@ class VariantsGraphQLTest extends APITestCase
                 ],
                 'getVariants' => [
                     'variants' => [
-                        'type' => 'v2',
+                        'type' => 'variant_2',
                         'collection' => [
-                            ['text' => 'Foo'],
-                            ['text' => 'Baa'],
+                            ['field_text' => 'Foo'],
+                            ['field_text' => 'Baa'],
                         ]
                     ]
                 ],
@@ -245,25 +245,25 @@ class VariantsGraphQLTest extends APITestCase
             'data' => [
                 'createVariants' => [
                     'variants' => [
-                        'type' => 'v2',
+                        'type' => 'variant_2',
                         'collection' => [
-                            ['text' => 'Foo'],
-                            ['text' => 'Baa'],
+                            ['field_text' => 'Foo'],
+                            ['field_text' => 'Baa'],
                         ]
                     ]
                 ],
             ]], json_decode(json_encode($this->api('mutation {
                 createVariants(data: { variants: {
-                    type: "v2",
-                    v1: { text: "Foo" },
-                    v2: { collection: [ { text: "Foo" }, { text: "Baa" } ] }
+                    type: "variant_2",
+                    variant_1: { field_text: "Foo" },
+                    variant_2: { collection: [ { field_text: "Foo" }, { field_text: "Baa" } ] }
                 } }, persist: false) {
                     variants {
                         type,
                         
-                        ... on VariantsContentVariantsV2Variant {
+                        ... on VariantsContentVariantsVariant_2Variant {
                             collection {
-                                text
+                                field_text
                             }
                         }
                     }

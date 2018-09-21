@@ -104,15 +104,13 @@ class VariantFactory
                         return $value->getIdentifier();
                     }
 
-                    $normalizedFieldName = str_replace('_', '-', $info->fieldName);
-
-                    if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value->getData()[$normalizedFieldName])) {
+                    if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value->getData()[$info->fieldName])) {
                         return null;
                     }
 
                     $return_value = null;
                     $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$normalizedFieldName]);
+                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$info->fieldName]);
                     return $return_value;
                 }
             ]), false);
