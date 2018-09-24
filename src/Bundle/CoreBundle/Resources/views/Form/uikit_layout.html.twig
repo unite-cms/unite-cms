@@ -72,9 +72,10 @@
 {%- endblock choice_widget_collapsed -%}
 
 {%- block state_widget -%}
-    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-select')|trim}) %}
 
-    {{- form_widget(form) -}}
+    {{ form_row(form.transition) }}
+    <label>{{ current_state }}</label>
+    {{ form_row(form.state) }}
 
 {%- endblock state_widget -%}
 

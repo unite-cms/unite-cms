@@ -22,13 +22,6 @@ class StateSettings
 {
 
     /**
-    * instance
-    *
-    * @var StateSettings
-    */
-    protected static $_instance = null;
-
-    /**
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_initial_place")
      * @Assert\NotBlank(message="workflow_invalid_initial_place")

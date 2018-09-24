@@ -55,4 +55,3 @@ services:
     class: UniteCMS\CoreBundle\Service\WebHookManager
     arguments: ['@service_container', '@logger']
     public: false
-

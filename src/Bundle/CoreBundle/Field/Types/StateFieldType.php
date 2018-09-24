@@ -44,35 +44,6 @@ class StateFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
-    {
-
-        // When deleting content, we don't need to validate data.
-        if (strtoupper($context->getGroup()) === 'DELETE') {
-            return;
-        }
-
-        // Only validate available data.
-        if (empty($data)) {
-            return;
-        }
-
-        $state = new State($data['state']);
-
-        if ($data['last_transition'])
-        {
-            $state->setSettings((array) $field->getSettings());
-
-            if (!$state->canTransist($data['last_transition']))
-            {
-                $context->buildViolation('workflow_transition_not_allowed')->atPath('['.$field->getIdentifier().'][last_transition]')->addViolation();
-            }
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         // Validate allowed and required settings.
@@ -103,7 +74,7 @@ class StateFieldType extends FieldType
 
         $state_settings = StateSettings::createFromArray((array) $settings);
 
-        $errors = $this->validator->validate($state_settings);
+        $errors = $context->getValidator()->validate($state_settings);
 
         if (count($errors) > 0) {
 

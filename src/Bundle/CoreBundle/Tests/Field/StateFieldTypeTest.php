@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Model\State;
 
 class StateFieldTypeTest extends FieldTypeTestCase
 {
@@ -38,6 +39,11 @@ class StateFieldTypeTest extends FieldTypeTestCase
             ],
         ],
         'transitions' => [
+            'to_draft'=> [
+                'label' => 'Back to draft',
+                'from' => [ 'published', 'review' ],
+                'to' => 'draft',
+            ],
             'to_review'=> [
                 'label' => 'Put into review mode',
                 'from' => [ 'draft' ],
@@ -45,8 +51,8 @@ class StateFieldTypeTest extends FieldTypeTestCase
             ],
             'to_review2'=> [
                 'label' => 'Put into review 2 mode',
-                'from' => ['review','draft'],
-                'to' => 'review',
+                'from' => [ 'review' ],
+                'to' => 'review2',
             ],
             'to_published' => [
                 'label' => 'Publish Content',
@@ -60,8 +66,10 @@ class StateFieldTypeTest extends FieldTypeTestCase
     {
         $ctField = $this->createContentTypeField('state');
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(2, $errors);
+        $this->assertCount(3, $errors);
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('required', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('required', $errors->get(2)->getMessageTemplate());
     }
 
     public function testStateFieldTypeWithInvalidSettings()
@@ -199,46 +207,111 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
     }
 
-    public function testStateFieldTypeWorkflows()
+    public function testStateFieldTypeState()
     {
+        $state = new State('draft');
+        
+        $state->setSettings($this->settings);
+        $this->assertTrue($state->canTransist('to_review'));
 
+        $state->setState('review');
+        $this->assertFalse($state->canTransist('to_published'));
 
+        $state->setState('review2');
+        $this->assertFalse($state->canTransist('to_draft'));
+        $this->assertFalse($state->canTransist('to_draft121212'));
+
+        $state->setState('review2');
+        $this->assertTrue($state->canTransist('to_published'));
+
+        $state->setState('published');
+        $this->assertTrue($state->canTransist('to_draft'));
+    }
+
+    public function testStateFieldTypeTestFormSubmit()
+    {
         $ctField = $this->createContentTypeField('state');
-        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('luu_luu');
-        $ctField->getContentType()->getDomain()->setIdentifier('foo');
-
         $ctField->setSettings(new FieldableFieldSettings($this->settings));
 
-        $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
-
-        $domain = new Domain();
-        $domain->setTitle('Domain')->setIdentifier("domain");
-        $domain->setOrganization($ctField->getContentType()->getDomain()->getOrganization());
-
-        $contentType = new ContentType();
-        $contentType->setIdentifier('baa')->setTitle('Baaa')->setDescription('TEST')->setDomain($domain);
-
-        $ctField->getContentType()->getDomain()->getContentTypes()->clear();
-        $ctField->getContentType()->getDomain()->addContentType($contentType);
-
-        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
-        $this->em->persist($ctField->getContentType()->getDomain());
-        $this->em->persist($ctField->getContentType());
-        $this->em->persist($ctField);
-        $this->em->persist($domain);
-        $this->em->persist($contentType);
-        $this->em->flush();
-
         $content = new Content();
+        $content->setContentType($ctField->getContentType());
 
-        $content->setData([
-            $ctField->getIdentifier() => 'draft',
-        ]);
+        // test a invalid place and transition choice
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content
+        );
 
-        $content->setContentType($contentType);
+        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
 
-        $this->em->persist($content);
-        $this->em->flush();
+        $form->submit(
+            [
+                '_token' => $csrf_token->getValue(),
+                $ctField->getIdentifier() => [
+                    'transition' => 'tox_published'
+                ],
+            ]
+        );
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertFalse($form->isValid());
+        $error_check = [];
+        foreach ($form->getErrors(true, true) as $error) {
+            $error_check[] = $error->getMessageTemplate();
+        }
+
+        $this->assertCount(2, $error_check);
+        $this->assertEquals('workflow_invalid_place', $error_check[0]);
+        $this->assertEquals('This value is not valid.', $error_check[1]);
+
+        // test a valid transition
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content
+        );
+
+        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
+
+        $form->submit(
+            [
+                '_token' => $csrf_token->getValue(),
+                $ctField->getIdentifier() => [
+                       'state' => 'review',
+                       'transition' => 'to_published'
+                ],
+            ]
+        );
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertFalse($form->isValid());
+        $error_check = [];
+        foreach ($form->getErrors(true, true) as $error) {
+            $error_check[] = $error->getMessageTemplate();
+        }
+
+        $this->assertCount(1, $error_check);
+        $this->assertEquals('workflow_transition_not_allowed', $error_check[0]);
+
+        // test a valid transition
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content
+        );
+
+        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
+
+        $form->submit(
+            [
+                '_token' => $csrf_token->getValue(),
+                $ctField->getIdentifier() => [
+                    'state' => 'draft',
+                    'transition' => 'to_review'
+                ],
+            ]
+        );
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
 
     }
 
