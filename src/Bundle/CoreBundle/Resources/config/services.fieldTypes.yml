@@ -71,4 +71,3 @@ services:
   UniteCMS\CoreBundle\Field\Types\StateFieldType:
     public: false
     tags: [unite_cms.field_type]
-    arguments: ['@validator', '@doctrine.orm.entity_manager', '@translator']

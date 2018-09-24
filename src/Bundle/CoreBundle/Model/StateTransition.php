@@ -98,7 +98,7 @@ class StateTransition
      */
     public function getFroms()
     {
-        return $this->froms;
+        return (array) $this->froms;
     }
 
     /**
@@ -138,7 +138,7 @@ class StateTransition
      */
     public function __toString()
     {
-        return ''.$this->label;
+        return $this->label;
     }
 
 }

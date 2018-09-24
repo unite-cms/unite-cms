@@ -71,6 +71,13 @@
     {{- parent() -}}
 {%- endblock choice_widget_collapsed -%}
 
+{%- block state_widget -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-select')|trim}) %}
+
+    {{- form_widget(form) -}}
+
+{%- endblock state_widget -%}
+
 {%- block range_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-range')|trim}) %}
     {{- parent() -}}

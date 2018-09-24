@@ -31,12 +31,11 @@ class StatePlace
 
     /**
      * @var string
-     * @Assert\Type(type="string", message="workflow_invalid_category")
      * @Assert\Choice(choices={"", "primary", "notice", "info", "success", "warning", "error", "danger"}, message="workflow_invalid_category")
      */
     private $category;
     
-    public function __construct($identifier, $label, $category = null)
+    public function __construct($identifier, $label, $category = "")
     {
         $this->identifier = $identifier;
         $this->label = $label;
@@ -103,6 +102,14 @@ class StatePlace
         $this->category = $category;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->label;
     }
 
 }

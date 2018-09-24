@@ -8,29 +8,18 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Workflow\DefinitionBuilder;
-use Symfony\Component\Workflow\Transition;
-use Symfony\Component\Workflow\Workflow;
-use Symfony\Component\Workflow\MarkingStore\SingleStateMarkingStore;
-use Symfony\Component\Workflow\WorkflowInterface\InstanceOfSupportStrategy;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Translation\Translator;
-use Symfony\Component\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Field\FieldType;
-use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
-use UniteCMS\CoreBundle\Model\State;
-use UniteCMS\CoreBundle\Model\StatePlace;
-use UniteCMS\CoreBundle\Model\StateTransition;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Form\StateType;
 use UniteCMS\CoreBundle\Model\StateSettings;
+use UniteCMS\CoreBundle\Model\State;
 
 class StateFieldType extends FieldType
 {
     const TYPE = "state";
-    const FORM_TYPE = ChoiceType::class;
+    const FORM_TYPE = StateType::class;
 
     /**
      * All settings of this field type by key with optional default value.
@@ -40,69 +29,16 @@ class StateFieldType extends FieldType
     /**
      * All required settings for this field type.
      */
-    const REQUIRED_SETTINGS = ['places', 'transitions'];
-
-    private $validator;
-    private $entityManager;
-    private $translator;
-
-    function __construct(
-        ValidatorInterface $validator,
-        EntityManager $entityManager,
-        TranslatorInterface $translator
-    ) {
-        $this->validator = $validator;
-        $this->entityManager = $entityManager;
-        $this->translator = $translator;
-    }
+    const REQUIRED_SETTINGS = ['initial_place', 'places', 'transitions'];
 
     function getFormOptions(FieldableField $field): array
     {
         return array_merge(
             parent::getFormOptions($field),
                 [
-                    'placeholder' => $this->translator->trans('state.field.placeholder'),
-                    'choices' => $this->getChoices($field),
-                    'label' => $this->translator->trans('state.field.label'),
+                    'settings' => (array) $field->getSettings()
                 ]
         );
-    }
-
-    /**
-     * @param FieldableField $field
-     *
-     * @return array
-     */
-    function getChoices(FieldableField $field) : array
-    {
-        $choices = [];
-
-        foreach ($field->getSettings()->transitions as $transition_key => $transition) {
-            $choices[$transition['label']] = $transition['to'];
-        }
-
-        return $choices;
-    }
-
-    /**
-     * @param FieldableField $field
-     *
-     * @return Workflow
-     *
-     */
-    function buildWorkflow(FieldableField $field) {
-
-        $definitionBuilder = new DefinitionBuilder();
-        $definitionBuilder->addPlaces(array_keys($field->getSettings()->places));
-
-        foreach ($field->getSettings()->transitions as $name => $transition) {
-            $definitionBuilder->addTransition(new Transition($name, $transition['from'], $transition['to']));
-        }
-
-        $definition = $definitionBuilder->build();
-
-        $marking = new SingleStateMarkingStore('state');
-        return new Workflow($definition, $marking);
     }
 
     /**
@@ -110,6 +46,7 @@ class StateFieldType extends FieldType
      */
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context)
     {
+
         // When deleting content, we don't need to validate data.
         if (strtoupper($context->getGroup()) === 'DELETE') {
             return;
@@ -120,26 +57,17 @@ class StateFieldType extends FieldType
             return;
         }
 
-        #dump($context->getObject()); exit;
+        $state = new State($data['state']);
 
-        $old_object = $this->entityManager->getUnitOfWork()->getOriginalEntityData($context->getObject());
+        if ($data['last_transition'])
+        {
+            $state->setSettings((array) $field->getSettings());
 
-        $new_state = $data;
-
-        #dump($field);
-        #dump($data);
-        #dump($old_object);
-        #dump($context);
-        #exit;
-        #dump($context->getObject()); exit;
-
-        $state = new State('draft');
-
-        $workflow = $this->buildWorkflow($field);
-
-        #if (!$workflow->can($state, "review")) {
-        #    $context->buildViolation('workflow_transition_not_allowed')->atPath('['.$field->getIdentifier().']')->addViolation();
-        #}
+            if (!$state->canTransist($data['last_transition']))
+            {
+                $context->buildViolation('workflow_transition_not_allowed')->atPath('['.$field->getIdentifier().'][last_transition]')->addViolation();
+            }
+        }
     }
 
     /**
@@ -173,10 +101,7 @@ class StateFieldType extends FieldType
             return;
         }
 
-
-        $state_settings = StateSettings::createSettingsFromArray($settings->places, $settings->transitions, $settings->initial_place);
-        dump($state_settings);
-        exit;
+        $state_settings = StateSettings::createFromArray((array) $settings);
 
         $errors = $this->validator->validate($state_settings);
 
@@ -188,19 +113,6 @@ class StateFieldType extends FieldType
            }
     
         }
-    }
-
-    /**
-     * @param FieldableFieldSettings $settings
-     *
-     * @return StateSettings
-     */
-    private function createStateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context) 
-    {
-
-
-
-
     }
 
 }

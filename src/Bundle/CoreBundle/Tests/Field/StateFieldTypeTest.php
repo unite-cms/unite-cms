@@ -40,7 +40,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
         'transitions' => [
             'to_review'=> [
                 'label' => 'Put into review mode',
-                'from' => 'draft',
+                'from' => [ 'draft' ],
                 'to' => 'review',
             ],
             'to_review2'=> [
@@ -50,7 +50,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
             ],
             'to_published' => [
                 'label' => 'Publish Content',
-                'from' => 'review2',
+                'from' => [ 'review2' ],
                 'to' => 'published'
             ]
         ]
@@ -69,6 +69,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $ctField = $this->createContentTypeField('state');
 
+        // check for completely crap
         $settings = [
             'initial_place' => [],
             'places' => "",
@@ -91,63 +92,85 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertEquals('workflow_invalid_transitions', $errors->get(0)->getMessageTemplate());
 
+        // check for invalid places
         $settings = [
             'initial_place' => 'draft123123',
             'places' => [
-                'draft' => "",
-                'review'=> true
+                'review234234'=> true,
+                'draft23' => [
+                    'category' => ['red'],
+                    'label' => true,
+                    'fofofof' => ''
+                ],
+                'draft' => [
+                    'label' => 'Draft',
+                    'fofofof' => '',
+                    'category' => true
+                ],
+                'review'=> [
+                    'label' =>  ['red']
+                ],
             ],
             'transitions' => [
-                'to_review' => "tst",
-                'tp_published' => [
-                    'label' => [],
-                    'from' => ['review22','published'],
-                    'to' =>  ['Publish Content']
-                ]
+                'to_review'=> [
+                    'label' => 'Put into review mode',
+                    'from' => ['draft'],
+                    'to' => 'review',
+                ],
             ]
         ];
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(13, $errors);
-        $this->assertEquals('workflow_invalid_transition_to', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_from', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_from', $errors->get(2)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_to', $errors->get(3)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_initial_place', $errors->get(4)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_place', $errors->get(5)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_place', $errors->get(6)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition', $errors->get(7)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_from', $errors->get(8)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_to', $errors->get(9)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition', $errors->get(10)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition', $errors->get(11)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_to', $errors->get(12)->getMessageTemplate());
+        $this->assertCount(8, $errors);
 
+        $this->assertEquals('workflow_invalid_places', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_initial_place', $errors->get(3)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(4)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_category', $errors->get(5)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_category', $errors->get(6)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(7)->getMessageTemplate());
+
+         // check for invalid transitions
         $settings = [
-            'initial_place' => 'draft123123',
+            'initial_place' => 'draft',
             'places' => [
                 'draft' => [
-                    'category' => ['red'],
-                    'label' => true,
-                    'fofofof' => ''
+                    'label' => 'Draft',
+                    'category' => 'notice'
                 ],
-                'review' => [
-                    'category' => 'red',
-                    'label' =>['red']
+                'review'=> [
+                    'label' => 'Review',
+                    'category' => 'primary'
                 ],
-                'review2' => [],
-                '2published' => []
+                'review2'=> [
+                    'label' => 'Review2',
+                    'category' => 'primary'
+                ],
+                'published' => [
+                    'label' => 'Published',
+                    'category' => 'primary'
+                ],
             ],
             'transitions' => [
                 'to_review'=> [
                     'label' => 'Put into review mode',
-                    'from' => 'draft1',
+                    'from' => [ 'draft1' ],
                     'to' => 'review234',
                     'fofofof' => ''
                 ],
+                'to_review2'=> [
+                    'label' => 'Put into review mode',
+                    'from' => [
+                         'draft1' => ['test']
+                    ],
+                    'to' => 'review234',
+                ],
                 'tp_published'=> [
-                    'from' => ['review22','published'],
+                    'label' => 'Put into review mode',
+                    'from' => ['review22','published34'],
                     'to' => 'Publish Content',
                 ]
             ]
@@ -155,27 +178,21 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(14, $errors);
+        $this->assertCount(8, $errors);
 
-        $this->assertEquals('workflow_invalid_transition_from', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_to', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition_from', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(2)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_transition_from', $errors->get(3)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_transition_to', $errors->get(4)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_initial_place', $errors->get(5)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_place', $errors->get(6)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_category', $errors->get(7)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_category', $errors->get(8)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_place', $errors->get(9)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_category', $errors->get(10)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_place', $errors->get(11)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_place', $errors->get(12)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_transition', $errors->get(13)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(5)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_from', $errors->get(6)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_transition_to', $errors->get(7)->getMessageTemplate());
+
     }
 
     public function testStateFieldTypeWithValidSettings()
     {
-
         $ctField = $this->createContentTypeField('state');
         $ctField->setSettings(new FieldableFieldSettings($this->settings));
         $errors = static::$container->get('validator')->validate($ctField);
@@ -184,6 +201,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
     public function testStateFieldTypeWorkflows()
     {
+
 
         $ctField = $this->createContentTypeField('state');
         $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('luu_luu');
@@ -221,8 +239,6 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $this->em->persist($content);
         $this->em->flush();
-
-        exit;
 
     }
 
