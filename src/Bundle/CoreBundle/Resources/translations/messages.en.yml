@@ -316,5 +316,5 @@ exception.http.403.message: 'You have not been granted access to this page. Plea
 exception.dashboard.button: 'Go to dashboard / login'
 
 state.field.label: 'State'
-state.field.currentstate: 'Current State: '
+state.field.current_state: 'Current State: '
 state.field.placeholder: 'Choose an Transition'

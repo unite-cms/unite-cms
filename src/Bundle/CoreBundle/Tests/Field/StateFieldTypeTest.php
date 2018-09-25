@@ -10,11 +10,7 @@ namespace UniteCMS\CoreBundle\Tests\Field;
 
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\ContentTypeField;
-use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Model\State;
+use UniteCMS\CoreBundle\Form\StateType;
 
 class StateFieldTypeTest extends FieldTypeTestCase
 {
@@ -209,23 +205,14 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
     public function testStateFieldTypeState()
     {
-        $state = new State('draft');
-        
-        $state->setSettings($this->settings);
-        $this->assertTrue($state->canTransist('to_review'));
+        $state_type = new StateType(static::$container->get('translator'));
+        $state_type->setSettings($this->settings);
 
-        $state->setState('review');
-        $this->assertFalse($state->canTransist('to_published'));
-
-        $state->setState('review2');
-        $this->assertFalse($state->canTransist('to_draft'));
-        $this->assertFalse($state->canTransist('to_draft121212'));
-
-        $state->setState('review2');
-        $this->assertTrue($state->canTransist('to_published'));
-
-        $state->setState('published');
-        $this->assertTrue($state->canTransist('to_draft'));
+        $this->assertTrue($state_type->canTransist('draft', 'to_review'));
+        $this->assertFalse($state_type->canTransist('review', 'to_published'));
+        $this->assertFalse($state_type->canTransist('review2', 'to_draft'));
+        $this->assertTrue($state_type->canTransist('review2', 'to_published'));
+        $this->assertTrue($state_type->canTransist('published', 'to_draft'));
     }
 
     public function testStateFieldTypeTestFormSubmit()

@@ -14,7 +14,6 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\StateType;
 use UniteCMS\CoreBundle\Model\StateSettings;
-use UniteCMS\CoreBundle\Model\State;
 
 class StateFieldType extends FieldType
 {

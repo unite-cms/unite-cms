@@ -73,8 +73,11 @@
 
 {%- block state_widget -%}
 
-    {{ form_row(form.transition) }}
-    <label>{{ current_state }}</label>
+    {% if form.transition is defined %}
+        {{ form_row(form.transition) }}
+    {% endif %}
+
+    <span class="state-info">{{ current_state }}</span>
     {{ form_row(form.state) }}
 
 {%- endblock state_widget -%}

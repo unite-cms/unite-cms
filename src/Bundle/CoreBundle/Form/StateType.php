@@ -17,11 +17,9 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Validator\Constraints\Choice;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Model\State;
 
@@ -31,35 +29,86 @@ class StateType extends AbstractType implements DataTransformerInterface
     private $settings;
 
     /**
+     * @var TranslatorInterface $translator
+     */
+    private $translator;
+
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $this->settings = $options['settings'];
-
-        $builder->add('transition', ChoiceType::class,
-            [
-                'label' => $options['label_prefix'].'.field.label',
-                'choices' => $this->getChoices($this->settings['transitions']),
-                'placeholder' => $options['label_prefix'].'.field.placeholder',
-                'constraints' => [
-                    new Callback(['callback' => [$this, 'validTransitions']]),
-                ],
-            ]
-        );
+        $this->setSettings($options['settings']);
 
         $builder->add('state', HiddenType::class,
             [
-                'label' => 'dere',
+                'label' => '',
                 'constraints' => [
                     new Callback(['callback' => [$this, 'validPlaces']]),
                 ],
             ]
         );
 
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
+
+            $state = $event->getData();
+            $form = $event->getForm();
+
+            $formOptions = array(
+                'label' => $options['label_prefix'].'.field.label',
+                'attr' => array('class' => 'state-transition'),
+                'choices' => $this->getChoices(
+                    $this->settings['transitions']
+                ),
+                'placeholder' => $options['label_prefix'].'.field.placeholder',
+                'constraints' => [
+                    new Callback(
+                        ['callback' => [$this, 'validTransitions']]
+                    ),
+                ],
+                'choice_attr' => function($key, $val, $index) {
+
+                    // disable all options for new content
+                    return [
+                        'class' => $this->getPlaceCategory($key),
+                        'disabled' => 'disabled'
+                    ];
+
+                }
+            );
+
+            // existing state, set attributes and disabled
+            if ($state)
+            {
+                $formOptions['choice_attr'] = function($key, $val, $index) use ($state) {
+
+                    $ret = [
+                        'class' => $this->getPlaceCategory($key),
+                        'disabled' => 'disabled'
+                    ];
+
+                    if ($this->canTransist($state, $key))
+                    {
+                        $ret['disabled'] = 'disabled';
+                    }
+
+                    return $ret;
+                };
+            }
+
+            $form->add('transition', ChoiceType::class, $formOptions);
+
+        });
+
         $builder->addModelTransformer($this);
 
     }
+
 
     public function validTransitions($value, ExecutionContextInterface $context, $payload)
     {
@@ -100,7 +149,8 @@ class StateType extends AbstractType implements DataTransformerInterface
         }
 
         if ($view->vars['value']['state']) {
-            $view->vars['current_state'] = 'Current State: '.$this->settings['places'][$view->vars['value']['state']]['label'];
+            $view->vars['current_state'] = $this->translator->trans('state.field.current_state');
+            $view->vars['current_state'] .= $this->settings['places'][$view->vars['value']['state']]['label'];
         }
 
         parent::buildView($view, $form, $options);
@@ -121,6 +171,32 @@ class StateType extends AbstractType implements DataTransformerInterface
 
     }
 
+    /**
+     * Check if can transist from current state
+     *
+     * @param string $current_state
+     * @param string $transition_to
+     *
+     * @return bool
+     */
+    public function canTransist(string $current_state, string $transition_to) : bool
+    {
+        // transitions not set
+        if (!isset($this->settings['transitions'][$transition_to]))
+        {
+            return FALSE;
+        }
+
+        $transition = $this->settings['transitions'][$transition_to];
+
+        if (in_array($current_state, $transition['from']))
+        {
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
      /**
      * @param array $transitions
      *
@@ -135,6 +211,22 @@ class StateType extends AbstractType implements DataTransformerInterface
         }
 
         return $choices;
+    }
+
+    /**
+     * @param string $transition_key
+     *
+     * @return string
+     */
+    private function getPlaceCategory(string $transition_key) : string
+    {
+        $place = $this->settings['transitions'][$transition_key]['to'];
+
+        if (isset($this->settings['places'][$place]['category'])) {
+            return $this->settings['places'][$place]['category'];
+        }
+
+        return "";
     }
 
     /**
@@ -162,22 +254,34 @@ class StateType extends AbstractType implements DataTransformerInterface
      * {@inheritdoc}
      */
     public function reverseTransform($value)
-    {   
-
-        $state = new State($value['state']);
-        $state->setSettings($this->settings);
-
+    {
         $new_value = $value['state'];
 
         // if transition is given, set value only if transition is posssible
         if (isset($value['transition'])
-            && $value['transition']
-            && $state->canTransist($value['transition']))
+            && $value['transition'])
         {
-            $new_value = $this->settings['transitions'][$value['transition']]['to'];
+            $transition_to = $this->settings['transitions'][$value['transition']]['to'];
+
+            if ($this->canTransist($value['state'], $value['transition']))
+            {
+                $new_value = $transition_to;
+            }
         }
 
         return $new_value;
+    }
+
+    /**
+     * @param array $settings
+     *
+     * @return StateType
+     */
+    public function setSettings(array $settings)
+    {
+        $this->settings = $settings;
+
+        return $this;
     }
 
     /**

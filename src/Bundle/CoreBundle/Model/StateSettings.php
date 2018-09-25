@@ -240,7 +240,7 @@ class StateSettings
         $cnt = 0;
         foreach ($settings['places'] as $key => $place)
         {
-
+            
             if (!is_array($place))
             {
                 $context->buildViolation('workflow_invalid_places')
