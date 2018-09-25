@@ -40,6 +40,16 @@
     {{- parent() -}}
 {%- endblock form_label %}
 
+{%- block form_errors -%}
+    {%- if errors|length > 0 -%}
+        {%- for error in errors -%}
+            <div style="margin-top: 5px; padding: 10px;" uk-alert class="uk-alert-danger uk-text-small">
+                <p>{{ error.message }}</p>
+            </div>
+        {%- endfor -%}
+    {%- endif -%}
+{%- endblock form_errors -%}
+
 {%- block form_widget_simple -%}
     {%- set attr = attr|merge({class: (attr.class|default('') ~ ' uk-input')|trim}) -%}
     {{- parent() -}}
@@ -138,6 +148,25 @@
     </div>
 {%- endblock unite_cms_choice_cards_widget -%}
 
+{%- block unite_cms_core_link_widget -%}
+    <unite-cms-core-link-field
+            label="{{ form.vars.widget_label }}"
+            name="{{ form.vars.full_name }}"
+            value="{{ form.url.vars.value }}"
+            {% if form.title is defined %}
+                title-widget='{ "label": "{% trans %}form.title.vars.label{% endtrans %}", "value": "{{ form.title.vars.value }}" }'
+            {% endif %}
+            {% if form.target is defined %}
+                target-widget='{
+                    "label": "{% trans %}form.target.var.label{% endtrans %}",
+                    "choices": {{ form.target.vars.choices|json_encode }},
+                    "value": "{{ form.target.vars.value }}"
+                }'
+            {% endif %}
+    >
+    </unite-cms-core-link-field>
+{%- endblock -%}
+
 {%- block unite_cms_core_state_widget -%}
     <unite-cms-core-state-field
         state='{
@@ -154,13 +183,3 @@
         }'
     ></unite-cms-core-state-field>
 {%- endblock unite_cms_core_state_widget -%}
-
-{%- block form_errors -%}
-    {%- if errors|length > 0 -%}
-        {%- for error in errors -%}
-            <div style="margin-top: 5px; padding: 10px;" uk-alert class="uk-alert-danger uk-text-small">
-                <p>{{ error.message }}</p>
-            </div>
-        {%- endfor -%}
-    {%- endif -%}
-{%- endblock form_errors -%}

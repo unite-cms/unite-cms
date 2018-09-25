@@ -67,6 +67,11 @@ services:
     public: false
     tags: [unite_cms.field_type]
 
+  # A Link field with open to set a target and title
+  UniteCMS\CoreBundle\Field\Types\LinkFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
   # State Field Type
   UniteCMS\CoreBundle\Field\Types\StateFieldType:
     public: false
