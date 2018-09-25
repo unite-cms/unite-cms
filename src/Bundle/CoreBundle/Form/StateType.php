@@ -163,10 +163,7 @@ class StateType extends AbstractType implements DataTransformerInterface
         $view->vars['current_state_label'] = "";
 
         if ($view->vars['value']['state']) {
-
-            $view->vars['current_state'] = $view->vars['value']['state'];
-            $view->vars['current_state_label'] = $this->translator->trans('state.field.current_state');
-            $view->vars['current_state_label'] .= $this->settings['places'][$view->vars['value']['state']]['label'];
+            $view->vars['current_state_label'] = $this->settings['places'][$view->vars['value']['state']]['label'];
         }
 
         parent::buildView($view, $form, $options);
