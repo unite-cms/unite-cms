@@ -69,6 +69,7 @@ class GraphQLApiController extends Controller
             )
         );
 
+        $status = 200;
         $serverHelper = new Helper();
 
         try {
@@ -79,13 +80,17 @@ class GraphQLApiController extends Controller
                     $request->request->all()
                 )
             );
-        } catch (RequestError $e) {
-            $this->get('logger')->critical($e->getMessage(), ['exception' => $e]);
+        } catch (\Exception $e) {
+            $status = 500;
 
-            return new JsonResponse([], 500);
+            try {
+                $result = ['errors' => [FormattedError::createFromException($e)]];
+            } catch (\Throwable $e) {
+                $result = ['errors' => 'Internal error'];
+            }
         }
 
-        return new JsonResponse($result, 200, [
+        return new JsonResponse($result, $status, [
             'Access-Control-Allow-Headers' => 'origin, content-type, accept',
             'Access-Control-Allow-Origin' => '*',
             'Access-Control-Allow-Methods' => 'POST, OPTIONS',

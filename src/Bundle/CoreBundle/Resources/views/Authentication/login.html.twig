@@ -14,7 +14,7 @@
             </div>
         {% endif %}
 
-        <form class="uk-form-vertical" action="{{ url('unitecms_core_authentication_login') }}" method="post">
+        <form class="uk-form-vertical" action="{{ url('unitecms_core_authentication_login') }}" method="post" data-disable-before-unload-message>
             <div class="uk-margin">
                 <label class="uk-form-label" for="username">{% trans %}authentication.login.username{% endtrans %}</label>
                 <div class="uk-form-controls">
