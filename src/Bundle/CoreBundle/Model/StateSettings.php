@@ -24,23 +24,21 @@ class StateSettings
     /**
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_initial_place")
-     * @Assert\NotBlank(message="workflow_invalid_initial_place")
+     * @Assert\NotBlank(message="not_blank")
      * @Assert\Choice(callback="getPlacesIdentifiers", message="workflow_invalid_initial_place")
      */
     private $initialPlace;
 
     /**
      * @var StatePlace[]
-     * @Assert\Valid
-     * @Assert\NotBlank(message="workflow_invalid_places")
+     * @Assert\NotBlank(message="not_blank")
      * @Assert\Type(type="array", message="workflow_invalid_place")
      */
     private $places;
 
     /**
      * @var StateTransition[]
-     * @Assert\Valid
-     * @Assert\NotBlank(message="workflow_invalid_transitions")
+     * @Assert\NotBlank(message="not_blank")
      * @Assert\Type(type="array", message="workflow_invalid_transition")
      */
     private $transitions;
@@ -203,7 +201,7 @@ class StateSettings
 
             if (!isset($place['category']))
             {
-                $place['category'] = "";
+                $place['category'] = null;
             }
 
             $new_places[] = new StatePlace($key, $place['label'], $place['category']);

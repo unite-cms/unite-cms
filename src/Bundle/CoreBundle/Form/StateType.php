@@ -47,7 +47,7 @@ class StateType extends AbstractType implements DataTransformerInterface
 
         $builder->add('state', HiddenType::class,
             [
-                'label' => '',
+                'empty_data' => $this->settings['initial_place'],
                 'constraints' => [
                     new Callback(['callback' => [$this, 'validPlaces']]),
                 ],
@@ -58,6 +58,11 @@ class StateType extends AbstractType implements DataTransformerInterface
 
             $state = $event->getData();
             $form = $event->getForm();
+
+            // new content, no state data
+            if (!$state) {
+                $state = $this->settings['initial_place'];
+            }
 
             $formOptions = array(
                 'label' => $options['label_prefix'].'.field.label',
@@ -71,36 +76,49 @@ class StateType extends AbstractType implements DataTransformerInterface
                         ['callback' => [$this, 'validTransitions']]
                     ),
                 ],
-                'choice_attr' => function($key, $val, $index) {
-
-                    // disable all options for new content
-                    return [
-                        'class' => $this->getPlaceCategory($key),
-                        'disabled' => 'disabled'
-                    ];
-
-                }
-            );
-
-            // existing state, set attributes and disabled
-            if ($state)
-            {
-                $formOptions['choice_attr'] = function($key, $val, $index) use ($state) {
+                'choice_attr' => function($key, $val, $index) use ($state) {
 
                     $ret = [
-                        'class' => $this->getPlaceCategory($key)
+                        'data-category' => $this->getPlaceCategory($key)
                     ];
 
-                    if ($this->canTransist($state, $key))
+                    if (!$this->canTransist($state, $key))
                     {
                         $ret['disabled'] = 'disabled';
                     }
 
                     return $ret;
-                };
-            }
+
+                }
+            );
 
             $form->add('transition', ChoiceType::class, $formOptions);
+
+        });
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+
+            $data = $event->getData();
+
+            // new content, no state data
+            if (!isset($data['state'])) {
+                $data['state'] = $this->settings['initial_place'];
+            }
+
+            // if transition is given, set value only if transition is posssible
+            if (isset($data['transition'])
+                && $data['transition']
+                && isset($this->settings['transitions'][$data['transition']]['to']))
+            {
+                $transition_to = $this->settings['transitions'][$data['transition']]['to'];
+
+                if ($this->canTransist($data['state'], $data['transition']))
+                {
+                    $data['state'] = $transition_to;
+                    $data['transition'] = null;
+                    $event->setData($data);
+                }
+            }
 
         });
 
@@ -117,10 +135,9 @@ class StateType extends AbstractType implements DataTransformerInterface
         }
 
         $current_state = $context->getObject()->getParent()->getData();
-        $transition_to = $this->settings['transitions'][$value]['to'];
+        $transition_to = $value;
 
-        // at this point, transition is already made, so we simply compare the values
-        if ($current_state && $current_state != $transition_to)
+        if (!$this->canTransist($current_state, $transition_to))
         {
             $context->buildViolation('workflow_transition_not_allowed')->atPath('transition')->addViolation();
         }
@@ -147,9 +164,14 @@ class StateType extends AbstractType implements DataTransformerInterface
             $view->vars['label'] = false;
         }
 
+        $view->vars['current_state'] = "";
+        $view->vars['current_state_label'] = "";
+
         if ($view->vars['value']['state']) {
-            $view->vars['current_state'] = $this->translator->trans('state.field.current_state');
-            $view->vars['current_state'] .= $this->settings['places'][$view->vars['value']['state']]['label'];
+
+            $view->vars['current_state'] = $view->vars['value']['state'];
+            $view->vars['current_state_label'] = $this->translator->trans('state.field.current_state');
+            $view->vars['current_state_label'] .= $this->settings['places'][$view->vars['value']['state']]['label'];
         }
 
         parent::buildView($view, $form, $options);
@@ -233,20 +255,7 @@ class StateType extends AbstractType implements DataTransformerInterface
      */
     public function transform($value)
     {
-        $new_values = [];
-        
-        $new_values['state'] = $value;
-        
-        // transition can be alway null
-        $new_values['transition'] = null;
-
-        // if no state set (new content), take initial place
-        if (empty($value))
-        {
-            $new_values['state'] = $this->settings['initial_place'];
-        }
-
-        return $new_values;
+        return ['state' => $value];
     }
 
     /**
@@ -254,21 +263,7 @@ class StateType extends AbstractType implements DataTransformerInterface
      */
     public function reverseTransform($value)
     {
-        $new_value = $value['state'];
-
-        // if transition is given, set value only if transition is posssible
-        if (isset($value['transition'])
-            && $value['transition'])
-        {
-            $transition_to = $this->settings['transitions'][$value['transition']]['to'];
-
-            if ($this->canTransist($value['state'], $value['transition']))
-            {
-                $new_value = $transition_to;
-            }
-        }
-
-        return $new_value;
+        return $value['state'];
     }
 
     /**

@@ -223,17 +223,14 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $content = new Content();
         $content->setContentType($ctField->getContentType());
 
-        // test a invalid place and transition choice
-        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
-            $ctField->getContentType(),
-            $content
+        // test a transition choice
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+                'csrf_protection' => false,
+            ]
         );
-
-        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
 
         $form->submit(
             [
-                '_token' => $csrf_token->getValue(),
                 $ctField->getIdentifier() => [
                     'transition' => 'tox_published'
                 ],
@@ -247,21 +244,17 @@ class StateFieldTypeTest extends FieldTypeTestCase
             $error_check[] = $error->getMessageTemplate();
         }
 
-        $this->assertCount(2, $error_check);
-        $this->assertEquals('workflow_invalid_place', $error_check[0]);
-        $this->assertEquals('This value is not valid.', $error_check[1]);
+        $this->assertCount(1, $error_check);
+        $this->assertEquals('This value is not valid.', $error_check[0]);
 
-        // test a valid transition
-        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
-            $ctField->getContentType(),
-            $content
+        // test a invalid transition
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+                'csrf_protection' => false,
+            ]
         );
-
-        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
 
         $form->submit(
             [
-                '_token' => $csrf_token->getValue(),
                 $ctField->getIdentifier() => [
                        'state' => 'review',
                        'transition' => 'to_published'
@@ -280,16 +273,13 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('workflow_transition_not_allowed', $error_check[0]);
 
         // test a valid transition
-        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
-            $ctField->getContentType(),
-            $content
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+                'csrf_protection' => false,
+            ]
         );
-
-        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
 
         $form->submit(
             [
-                '_token' => $csrf_token->getValue(),
                 $ctField->getIdentifier() => [
                     'state' => 'draft',
                     'transition' => 'to_review'
@@ -299,6 +289,28 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $this->assertTrue($form->isSubmitted());
         $this->assertTrue($form->isValid());
+        $this->assertEquals('review', $form->get($ctField->getIdentifier())->getData());
+
+        $content->setData(
+            []
+        );
+
+        // test empty values
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+                'csrf_protection' => false,
+            ]
+        );
+
+        $form->submit(
+            [
+                $ctField->getIdentifier() => [
+                    'state' => '',
+                    'transition' => ''
+                ]
+            ]
+        );
+
+        $this->assertEquals('draft', $form->get($ctField->getIdentifier())->getData());
 
     }
 

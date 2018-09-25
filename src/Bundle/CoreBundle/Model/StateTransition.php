@@ -18,28 +18,28 @@ class StateTransition
     /**
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_transition")
-     * @Assert\NotBlank(message="workflow_invalid_transition")
+     * @Assert\NotBlank(message="not_blank")
      */
     private $identifier;
 
     /**
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_transition")
-     * @Assert\NotBlank(message="workflow_invalid_transition")
+     * @Assert\NotBlank(message="not_blank")
      */
     private $label;
 
     /**
      * @var array
      * @Assert\Type(type="array", message="workflow_invalid_transition_from")
-     * @Assert\NotBlank(message="workflow_invalid_transition_from")
+     * @Assert\NotBlank(message="not_blank")
      */
     private $froms;
 
     /**
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_transition_to")
-     * @Assert\NotBlank(message="workflow_invalid_transition_to")
+     * @Assert\NotBlank(message="not_blank")
      */
     private $to;
 

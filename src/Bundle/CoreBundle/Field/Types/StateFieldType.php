@@ -73,16 +73,8 @@ class StateFieldType extends FieldType
 
         $state_settings = StateSettings::createFromArray((array) $settings);
 
-        $errors = $context->getValidator()->validate($state_settings);
+        $context->getViolations()->addAll($context->getValidator()->validate($state_settings));
 
-        if (count($errors) > 0) {
-
-           foreach ($errors as $error) 
-           {
-                $context->buildViolation($error->getMessageTemplate())->atPath($error->getPropertyPath())->addViolation();
-           }
-    
-        }
     }
 
 }
