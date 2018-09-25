@@ -88,8 +88,7 @@ class StateType extends AbstractType implements DataTransformerInterface
                 $formOptions['choice_attr'] = function($key, $val, $index) use ($state) {
 
                     $ret = [
-                        'class' => $this->getPlaceCategory($key),
-                        'disabled' => 'disabled'
+                        'class' => $this->getPlaceCategory($key)
                     ];
 
                     if ($this->canTransist($state, $key))
