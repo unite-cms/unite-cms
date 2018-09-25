@@ -56,3 +56,8 @@ services:
     arguments: ['@service_container', '@logger']
     public: false
 
+  # Provide LinkType as a service, pass translator as an argument, auto wire not working in forms
+  unite.cms.link_type:
+    class: UniteCMS\CoreBundle\Form\LinkType
+    arguments: ['@translator']
+    tags: [form.type]

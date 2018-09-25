@@ -41,4 +41,6 @@ invalid_expression: 'Invalid Expression definition. Please correct that and try 
 invalid_organization: 'Missing Organization'
 invalid_domain: 'Invalid Domain given. The Domain does not exist or Access is prohibited'
 invalid_content_type: 'Invalid Content Type given. The Content Type does not exist or Access is prohibited'
+noboolean_value: 'The given value is no boolean value.'
 translation_content_not_found: 'This content cannot be selected as translation. This can happen, if the selected content is a translation source for another translation set or if the selected content is already a translation of this content. Please select another content or create a new one.'
+

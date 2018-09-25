@@ -314,3 +314,9 @@ exception.http.404.message: 'The requested page was not found. Please check the 
 exception.http.403.title: 'Not allowed'
 exception.http.403.message: 'You have not been granted access to this page. Please check the URL you entered and try again. If this problem persists, contact your system administrator.'
 exception.dashboard.button: 'Go to dashboard / login'
+
+link_type.url.label: 'Url'
+link_type.title.label: 'Title'
+link_type.target.label: 'Target'
+link_type.choice.blank.label: 'Open link in a new window'
+link_type.choice.self.label: 'Open link in the same window'
