@@ -3,11 +3,6 @@
   "email.js": "/bundles/unitecmscore/email.e19e642f07aaa15691b3.js",
   "fonts/WorkSans-Bold.woff2": "/bundles/unitecmscore/fonts/WorkSans-Bold.910bcc47.woff2",
   "fonts/WorkSans-Medium.woff2": "/bundles/unitecmscore/fonts/WorkSans-Medium.62229411.woff2",
-<<<<<<< HEAD
-  "main.css": "/bundles/unitecmscore/main.91dbc7e270972d26d6c788c8a65dca98.css",
-  "main.js": "/bundles/unitecmscore/main.ba7fc828b27e575fa83d.js"
-=======
-  "main.css": "/bundles/unitecmscore/main.2c34eee57a034caba915e9856cff8c75.css",
-  "main.js": "/bundles/unitecmscore/main.354810c111cabf951243.js"
->>>>>>> master
+  "main.css": "/bundles/unitecmscore/main.ddf46b875e7dacd89f827bba3647b960.css",
+  "main.js": "/bundles/unitecmscore/main.48fdf424814da91c813a.js"
 }
