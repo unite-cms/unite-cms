@@ -18,24 +18,24 @@ class StatePlace
     /**
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_place")
-     * @Assert\NotBlank(message="workflow_no_place")
+     * @Assert\NotBlank(message="not_blank")
      */
     private $identifier;
 
     /**
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_place")
-     * @Assert\NotBlank(message="workflow_invalid_place")
+     * @Assert\NotBlank(message="not_blank")
      */
     private $label;
 
     /**
      * @var string
-     * @Assert\Choice(choices={"", "primary", "notice", "info", "success", "warning", "error", "danger"}, message="workflow_invalid_category")
+     * @Assert\Choice(choices={"primary", "notice", "info", "success", "warning", "error", "danger"}, message="workflow_invalid_category")
      */
     private $category;
     
-    public function __construct($identifier, $label, $category = "")
+    public function __construct($identifier, $label, $category = null)
     {
         $this->identifier = $identifier;
         $this->label = $label;
