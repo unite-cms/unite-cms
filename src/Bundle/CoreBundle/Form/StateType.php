@@ -56,20 +56,17 @@ class StateType extends AbstractType implements DataTransformerInterface
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
 
+            // Set default value to initial_place
+            if(empty($event->getData())) {
+                $event->setData($this->settings['initial_place']);
+            }
+
             $state = $event->getData();
             $form = $event->getForm();
 
-            // new content, no state data
-            if (!$state) {
-                $state = $this->settings['initial_place'];
-            }
-
-            $formOptions = array(
-                'label' => $options['label_prefix'].'.field.label',
-                'attr' => array('class' => 'state-transition'),
-                'choices' => $this->getChoices(
-                    $this->settings['transitions']
-                ),
+            // add transition form type with reachable states (based on current state).
+            $form->add('transition', ChoiceType::class, [
+                'choices' => $this->getChoices($this->settings['transitions']),
                 'placeholder' => $options['label_prefix'].'.field.placeholder',
                 'constraints' => [
                     new Callback(
@@ -77,23 +74,15 @@ class StateType extends AbstractType implements DataTransformerInterface
                     ),
                 ],
                 'choice_attr' => function($key, $val, $index) use ($state) {
-
-                    $ret = [
-                        'data-category' => $this->getPlaceCategory($key)
-                    ];
-
-                    if (!$this->canTransist($state, $key))
-                    {
-                        $ret['disabled'] = 'disabled';
-                    }
-
-                    return $ret;
-
+                    return array_merge(
+                        [
+                            'data-category' => $this->getPlaceCategory($key),
+                            'data-state-label' => $this->getPlaceLabel($key),
+                        ],
+                    $this->canTransist($state, $key) ? [] : ['disabled' => 'disabled']
+                    );
                 }
-            );
-
-            $form->add('transition', ChoiceType::class, $formOptions);
-
+            ]);
         });
 
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
@@ -158,14 +147,8 @@ class StateType extends AbstractType implements DataTransformerInterface
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-
-        $view->vars['current_state'] = "";
-        $view->vars['current_state_label'] = "";
-
-        if ($view->vars['value']['state']) {
-            $view->vars['current_state_label'] = $this->settings['places'][$view->vars['value']['state']]['label'];
-        }
-
+        $view->vars['current_state_label'] = $this->settings['places'][$view->vars['value']['state']]['label'];
+        $view->vars['current_state_category'] = $this->settings['places'][$view->vars['value']['state']]['category'] ?? '';
         parent::buildView($view, $form, $options);
     }
 
@@ -197,17 +180,17 @@ class StateType extends AbstractType implements DataTransformerInterface
         // transitions not set
         if (!isset($this->settings['transitions'][$transition_to]))
         {
-            return FALSE;
+            return false;
         }
 
         $transition = $this->settings['transitions'][$transition_to];
 
         if (in_array($current_state, $transition['from']))
         {
-            return TRUE;
+            return true;
         }
 
-        return FALSE;
+        return false;
     }
 
      /**
@@ -237,6 +220,22 @@ class StateType extends AbstractType implements DataTransformerInterface
 
         if (isset($this->settings['places'][$place]['category'])) {
             return $this->settings['places'][$place]['category'];
+        }
+
+        return "";
+    }
+
+    /**
+     * @param string $transition_key
+     *
+     * @return string
+     */
+    private function getPlaceLabel(string $transition_key) : string
+    {
+        $place = $this->settings['transitions'][$transition_key]['to'];
+
+        if (isset($this->settings['places'][$place]['label'])) {
+            return $this->settings['places'][$place]['label'];
         }
 
         return "";

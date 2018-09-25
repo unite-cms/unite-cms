@@ -2,23 +2,30 @@
     <div>
         <button class="current-state uk-button uk-button-default" type="button">
             <span class="text">
+                <span class="meta">{{ currentLabel }}:</span>
                 <span class="uk-label" :class='"uk-label-" + state_category'>{{ state_label }}</span>
                 <span class="to-state" v-if="transition_value">
                     <span v-html="feather.icons['arrow-right'].toSvg({ width: 18, height: 18 })"></span>
+                    <span class="meta">{{ toLabel }}:</span>
                     <span class="uk-label" :class='"uk-label-" + current_transition_category'>{{ current_transition_label }}</span>
                 </span>
             </span>
             <span class="chevron" v-html="feather.icons['chevron-down'].toSvg()"></span>
         </button>
-        <div uk-dropdown="mode: click">
+        <div class="transitions-dropdown">
             <ul class="uk-nav uk-dropdown-nav">
                 <li>
-                    <a v-on:click.prevent="transition_value = ''">{{ transition_placeholder }}</a>
+                    <a :class='{active: transition_value == ""}' v-on:click.prevent="setTransition('')">
+                        <span>{{ transition_placeholder }}</span>
+                    </a>
                 </li>
+                <li class="uk-nav-divider"></li>
                 <li v-for="transition in transitions">
-                    <span class="disabled" v-if="transition.disabled">{{ transition.name }}</span>
-                    <a v-else v-on:click.prevent="transition_value = transition.value">
-                        {{ transition.name }} <span class="uk-label" :class='"uk-label-" + transition.category'>{{ transition.name }}</span>
+                    <span class="disabled" v-if="transition.disabled">
+                        <span>{{ transition.name }}</span> <span class="uk-label uk-label-disabled">{{ transition.stateLabel }}</span>
+                    </span>
+                    <a v-else :class='{active: transition_value == transition.value}' v-on:click.prevent="setTransition(transition.value)">
+                        <span>{{ transition.name }}</span> <span class="uk-label" :class='"uk-label-" + transition.category'>{{ transition.stateLabel }}</span>
                     </a>
                 </li>
             </ul>
@@ -30,6 +37,7 @@
 
 <script>
 
+    import UIkit from 'uikit';
     import feather from 'feather-icons';
 
     export default {
@@ -37,9 +45,6 @@
 
             let state_config = JSON.parse(this.state);
             let transition_config = JSON.parse(this.transition);
-
-            console.log(state_config);
-            console.log(transition_config);
 
             return {
                 feather: feather,
@@ -50,26 +55,15 @@
                 transition_name: transition_config.name,
                 transition_value: transition_config.value,
                 transition_placeholder: transition_config.placeholder,
-                transitions: [
-                    {
-                        name: "Back to draft",
-                        value: 'to_draft',
-                        category: 'primary',
-                        disabled: true,
-                    },
-                    {
-                        name: "To review",
-                        value: 'to_review',
-                        category: 'warning',
-                        disabled: false,
-                    },
-                    {
-                        name: "Publish",
-                        value: 'publish',
-                        category: 'success',
-                        disabled: false,
-                    }
-                ]
+                transitions: transition_config.transitions.map((t) => {
+                    return {
+                        name: t.label,
+                        value: t.value,
+                        stateLabel: typeof t.attr['data-state-label'] !== 'undefined' ? t.attr['data-state-label'] : 'Undefined',
+                        category: typeof t.attr['data-category'] !== 'undefined' ? t.attr['data-category'] : null,
+                        disabled: typeof t.attr['disabled'] !== 'undefined' ? t.attr['disabled'] === 'disabled' : false,
+                    };
+                }),
             };
         },
         computed: {
@@ -80,7 +74,7 @@
 
                 return this.transitions
                     .filter((t) => { return t.value === this.transition_value })
-                    .map((t) => { return t.name })[0];
+                    .map((t) => { return t.stateLabel })[0];
             },
             current_transition_category() {
                 if(!this.transition_value) {
@@ -95,7 +89,21 @@
         props: [
             'state',
             'transition',
-        ]
+            'currentLabel',
+            'toLabel',
+        ],
+        mounted() {
+            this.dropdown = UIkit.dropdown(this.$el.querySelector('.transitions-dropdown'), {
+                mode: 'click',
+                delayHide: 0
+            });
+        },
+        methods: {
+            setTransition(transition) {
+                this.transition_value = transition;
+                this.dropdown.hide();
+            }
+        }
     };
 </script>
 
@@ -118,10 +126,11 @@
                 line-height: 0;
                 color: #666;
 
-                .uk-label {
-                    text-align: center;
-                    min-width: 70px;
-                    line-height: 1.3;
+                .meta {
+                    font-size: 0.6rem;
+                    line-height: normal;
+                    color: #bfbfbf;
+                    text-transform: uppercase;
                 }
 
                 .to-state {
@@ -154,6 +163,52 @@
                         transform: rotate(180deg);
                     }
                 }
+            }
+        }
+
+        .transitions-dropdown {
+            li {
+                > a, > span.disabled {
+                    display: flex;
+                    align-items: center;
+                    padding: 15px 25px;
+                    color: #666;
+                    opacity: 0.75;
+                    margin: 0 -25px;
+
+                    > span:first-child {
+                        flex: 1;
+                        padding-right: 20px;
+                    }
+                }
+
+                > a {
+                    &.active,
+                    &:hover {
+                        opacity: 1;
+                        > span:first-child {
+                            color: #242424;
+                        }
+                    }
+
+                    &.active {
+                        > span:first-child {
+                            font-weight: bold;
+                        }
+                    }
+
+                    &:hover {
+                        background: #ffd;
+                    }
+                }
+
+                > span.disabled {
+                    color: #bfbfbf;
+                    font-style: italic;
+                }
+
+                &:first-child { > a, > span.disabled { margin-top: -15px; } }
+                &:last-child { > a, > span.disabled { margin-bottom: -15px; } }
             }
         }
     }

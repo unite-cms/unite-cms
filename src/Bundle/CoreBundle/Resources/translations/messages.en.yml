@@ -322,5 +322,6 @@ link_type.choice.blank.label: 'Open link in a new window'
 link_type.choice.self.label: 'Open link in the same window'
 
 state.field.label: 'State'
-state.field.current_state: 'Current State: '
-state.field.placeholder: 'Choose an Transition'
+state.field.current_label: 'Current'
+state.field.to_label: 'To'
+state.field.placeholder: 'Remain in current state'
