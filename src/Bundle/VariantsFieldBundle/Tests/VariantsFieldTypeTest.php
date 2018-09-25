@@ -164,6 +164,58 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('settings.variants[0].fields[0].identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('identifier_already_taken', $errors->get(0)->getMessageTemplate());
 
+        // test more nested variant
+        $field->setSettings(
+            new FieldableFieldSettings([
+                'variants' => [
+                    [
+                        "title" => "V1",
+                        "identifier" => "variant_1",
+                        "fields"=> [
+                            ["title" => "Text", "identifier" => "field_text", "type" => "text" ]
+                        ]
+                    ],
+                    [
+                        'title' => 'V2',
+                        'identifier' => 'variant_2',
+                        'fields' => [
+                            [
+                                "title" => "Collection",
+                                "identifier" => "collection",
+                                "type" => "collection",
+                                "settings" => [
+                                    "fields" => [
+                                        [
+                                            "title" => "image",
+                                            "identifier" => "image",
+                                            "type" => "image",
+                                            "settings" => [
+                                                "bucket" => [
+                                                    "path" => "image",
+                                                    "key" =>  "XDSS",
+                                                    "secret" => "FGHTEDDD"
+                                                ]
+                                            ]
+                                        ],
+                                        [
+                                            'title' => 'Foo',
+                                            'identifier' => 'field-text',
+                                            'type' => 'text'
+                                        ],
+                                    ]
+                                ]
+                            ]
+                        ],
+                    ]
+                ]
+            ])
+        );
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(3, $errors);
+        $this->assertEquals('settings.variants[1].fields[1].settings.fields[image].settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('settings.variants[1].fields[1].settings.fields[image].settings.bucket.bucket', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('settings.variants[1].fields[1].settings.fields[field-text].identifier', $errors->get(2)->getPropertyPath());
+
         // Reserved identifier in different variants.
         $field->setSettings(new FieldableFieldSettings([
                     'variants' => [
