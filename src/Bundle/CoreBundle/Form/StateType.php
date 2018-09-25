@@ -141,11 +141,6 @@ class StateType extends AbstractType implements DataTransformerInterface
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        if (isset($view->vars['label']))
-        {
-            $view->vars['widget_label'] = $view->vars['label'];
-            $view->vars['label'] = false;
-        }
 
         if ($view->vars['value']['state']) {
             $view->vars['current_state'] = $this->translator->trans('state.field.current_state');
@@ -288,6 +283,6 @@ class StateType extends AbstractType implements DataTransformerInterface
      */
     public function getBlockPrefix()
     {
-        return 'state';
+        return 'unite_cms_core_state';
     }
 }

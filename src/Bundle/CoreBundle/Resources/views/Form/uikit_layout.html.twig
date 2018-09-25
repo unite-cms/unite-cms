@@ -136,6 +136,23 @@
     </div>
 {%- endblock unite_cms_choice_cards_widget -%}
 
+{%- block unite_cms_core_state_widget -%}
+    <unite-cms-core-state-field
+        state='{
+          "label": "{{ form.vars.current_state }}",
+          "name": "{{ form.state.vars.name }}",
+          "value": "{{ form.state.vars.value }}",
+          "category": "primary"
+        }'
+        transition='{
+          "name": "{{ form.transition.vars.name }}",
+          "value": "{{ form.transition.vars.value }}",
+          "placeholder": "{{ form.transition.vars.placeholder|trans }}",
+          "transitions": {{ form.transition.vars.choices|json_encode }}
+        }'
+    ></unite-cms-core-state-field>
+{%- endblock unite_cms_core_state_widget -%}
+
 {%- block form_errors -%}
     {%- if errors|length > 0 -%}
         {%- for error in errors -%}
