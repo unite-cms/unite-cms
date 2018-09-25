@@ -139,7 +139,7 @@
     <unite-cms-core-link-field
             label="{{ form.vars.widget_label }}"
             name="{{ form.vars.full_name }}"
-            value="{{ value }}"
+            value="{{ form.url.vars.value }}"
             {% if form.title is defined %}
                 title-widget='{ "label": "{% trans %}form.title.vars.label{% endtrans %}", "value": "{{ form.title.vars.value }}" }'
             {% endif %}
