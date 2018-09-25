@@ -174,7 +174,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                                 'fields' => [
                                     [
                                         'title' => 'Nested Field 2',
-                                        'identifier' => 'n2',
+                                        'identifier' => 'nested_2',
                                         'type' => 'collection',
                                         'settings' => [
                                             'fields' => [
@@ -219,13 +219,13 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertArrayHasKey('f1', $type->getField('f1')->getType()->getWrappedType()->getFields());
         $this->assertArrayHasKey('n1', $type->getField('f1')->getType()->getWrappedType()->getFields());
         $this->assertArrayHasKey(
-            'n2',
+            'nested_2',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getFields()
         );
         $this->assertArrayHasKey(
             'f2',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getField(
-                'n2'
+                'nested_2'
             )->getType()->getWrappedType()->getFields()
         );
 
@@ -240,21 +240,21 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->name
         );
         $this->assertEquals(
-            'Ct1F1N1N2CollectionFieldLevel3',
+            'Ct1F1N1Nested_2CollectionFieldLevel3',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getField(
-                'n2'
+                'nested_2'
             )->getType()->name
         );
         $this->assertEquals(
-            'Ct1F1N1N2CollectionFieldRowLevel3',
+            'Ct1F1N1Nested_2CollectionFieldRowLevel3',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getField(
-                'n2'
+                'nested_2'
             )->getType()->getWrappedType()->name
         );
         $this->assertEquals(
             'String',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getField(
-                'n2'
+                'nested_2'
             )->getType()->getWrappedType()->getField('f2')->getType()->name
         );
     }
@@ -282,7 +282,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                                 'fields' => [
                                     [
                                         'title' => 'Nested Field 2',
-                                        'identifier' => 'n2',
+                                        'identifier' => 'nested_2',
                                         'type' => 'collection',
                                         'settings' => [
                                             'fields' => [
@@ -360,7 +360,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
               f1: "Foo",
               n1: [
                 {
-                  n2: [
+                nested_2: [
                     { f2: "Baa" }
                   ]
                 }
@@ -373,7 +373,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         f1 {
           f1,
           n1 {
-            n2 {
+            nested_2 {
               f2
             }
           }
@@ -390,7 +390,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('Foo', $result->data->createCt1->f1[1]->f1);
         $this->assertEquals(
             'Baa',
-            $result->data->createCt1->f1[1]->n1[0]->n2[0]->f2
+            $result->data->createCt1->f1[1]->n1[0]->nested_2[0]->f2
         );
         $this->assertEquals('Foo', $content->getData()['f1'][1]['f1']);
     }
