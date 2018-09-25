@@ -43,7 +43,7 @@ class StateType extends AbstractType implements DataTransformerInterface
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $this->setSettings($options['settings']);
+        $this->settings = $options['settings'];
 
         $builder->add('state', HiddenType::class,
             [
@@ -256,18 +256,6 @@ class StateType extends AbstractType implements DataTransformerInterface
     public function reverseTransform($value)
     {
         return $value['state'];
-    }
-
-    /**
-     * @param array $settings
-     *
-     * @return StateType
-     */
-    public function setSettings(array $settings)
-    {
-        $this->settings = $settings;
-
-        return $this;
     }
 
     /**

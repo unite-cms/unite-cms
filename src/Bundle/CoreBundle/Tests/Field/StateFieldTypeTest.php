@@ -10,7 +10,6 @@ namespace UniteCMS\CoreBundle\Tests\Field;
 
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Form\StateType;
 
 class StateFieldTypeTest extends FieldTypeTestCase
 {
@@ -111,6 +110,9 @@ class StateFieldTypeTest extends FieldTypeTestCase
                     'fofofof' => '',
                     'category' => true
                 ],
+                'dra&%%ft2' => [
+                    'label' => $this->generateRandomMachineName(500),
+                ],
                 'review'=> [
                     'label' =>  ['red']
                 ],
@@ -121,12 +123,22 @@ class StateFieldTypeTest extends FieldTypeTestCase
                     'from' => ['draft'],
                     'to' => 'review',
                 ],
+                'to_review2'=> [
+                    'label' => $this->generateRandomMachineName(500),
+                    'from' => ['draft'],
+                    'to' => 'review',
+                ],
+                'to_r&%%eview3' => [
+                    'label' => 'Put into review mode',
+                    'from' => ['draft'],
+                    'to' => 'review',
+                ],
             ]
         ];
 
         $ctField->setSettings(new FieldableFieldSettings($settings));
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(8, $errors);
+        $this->assertCount(12, $errors);
 
         $this->assertEquals('workflow_invalid_places', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_place', $errors->get(1)->getMessageTemplate());
@@ -135,7 +147,11 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('workflow_invalid_place', $errors->get(4)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_category', $errors->get(5)->getMessageTemplate());
         $this->assertEquals('workflow_invalid_category', $errors->get(6)->getMessageTemplate());
-        $this->assertEquals('workflow_invalid_place', $errors->get(7)->getMessageTemplate());
+        $this->assertEquals('invalid_characters', $errors->get(7)->getMessageTemplate());
+        $this->assertEquals('too_long', $errors->get(8)->getMessageTemplate());
+        $this->assertEquals('workflow_invalid_place', $errors->get(9)->getMessageTemplate());
+        $this->assertEquals('too_long', $errors->get(10)->getMessageTemplate());
+        $this->assertEquals('invalid_characters', $errors->get(11)->getMessageTemplate());
 
          // check for invalid transitions
         $settings = [
@@ -203,18 +219,6 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
     }
 
-    public function testStateFieldTypeState()
-    {
-        $state_type = new StateType(static::$container->get('translator'));
-        $state_type->setSettings($this->settings);
-
-        $this->assertTrue($state_type->canTransist('draft', 'to_review'));
-        $this->assertFalse($state_type->canTransist('review', 'to_published'));
-        $this->assertFalse($state_type->canTransist('review2', 'to_draft'));
-        $this->assertTrue($state_type->canTransist('review2', 'to_published'));
-        $this->assertTrue($state_type->canTransist('published', 'to_draft'));
-    }
-
     public function testStateFieldTypeTestFormSubmit()
     {
         $ctField = $this->createContentTypeField('state');
@@ -271,6 +275,49 @@ class StateFieldTypeTest extends FieldTypeTestCase
 
         $this->assertCount(1, $error_check);
         $this->assertEquals('workflow_transition_not_allowed', $error_check[0]);
+
+        // test a second invalid transition
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+            'csrf_protection' => false,
+        ]
+        );
+
+        $form->submit(
+            [
+                $ctField->getIdentifier() => [
+                    'state' => 'review2',
+                    'transition' => 'to_draft'
+                ],
+            ]
+        );
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertFalse($form->isValid());
+        $error_check = [];
+        foreach ($form->getErrors(true, true) as $error) {
+            $error_check[] = $error->getMessageTemplate();
+        }
+
+        $this->assertCount(1, $error_check);
+        $this->assertEquals('workflow_transition_not_allowed', $error_check[0]);
+
+        // test a initial valid transition
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+            'csrf_protection' => false,
+        ]
+        );
+
+        $form->submit(
+        [
+            $ctField->getIdentifier() => [
+                'transition' => 'to_review'
+            ],
+        ]
+        );
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+        $this->assertEquals('review', $form->get($ctField->getIdentifier())->getData());
 
         // test a valid transition
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [

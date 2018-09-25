@@ -10,8 +10,12 @@ namespace UniteCMS\CoreBundle\Model;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
+use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
+
 /**
  * We use this model only for validation!
+ * 
+ * @Assert\GroupSequence({"StateTransition", "Strict"})
  */
 class StateTransition
 {
@@ -19,6 +23,8 @@ class StateTransition
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_transition")
      * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="30", maxMessage="too_long", groups={"Strict"})
+     * @ValidIdentifier(message="invalid_characters", groups={"Strict"})
      */
     private $identifier;
 
@@ -26,6 +32,7 @@ class StateTransition
      * @var string
      * @Assert\Type(type="string", message="workflow_invalid_transition")
      * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long", groups={"Strict"})
      */
     private $label;
 
