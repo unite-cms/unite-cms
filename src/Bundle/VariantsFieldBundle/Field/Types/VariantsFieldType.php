@@ -140,18 +140,25 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
         // Validate virtual sub fields for all variants.
         $field = $context->getObject();
+
         if($field instanceof FieldableField) {
+
             /**
              * @var Variants $variants
              */
             $variants = self::getNestableFieldable($field);
+
             foreach($variants->getVariantsMetadata() as $delta => $meta) {
-                $context->getValidator()->inContext($context)->atPath('variants['.$delta.']')->validate(new Variant(
+
+                $variant = new Variant(
                     $variants->getFieldsForVariant($meta['identifier']),
                     $meta['identifier'],
                     $meta['title'],
                     $field
-                ));
+                );
+
+                $context->getValidator()->inContext($context)->atPath('variants['.$delta.']')->validate($variant);
+
             }
         }
     }
