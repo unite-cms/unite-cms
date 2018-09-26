@@ -14,7 +14,7 @@ class ChoiceFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['choices'];
+    const SETTINGS = ['choices', 'multiple'];
 
     /**
      * All required settings for this field type.
@@ -26,8 +26,17 @@ class ChoiceFieldType extends FieldType
         return array_merge(
             parent::getFormOptions($field),
             [
+                'multiple' => $field->getSettings()->multiple ?? FALSE,
                 'choices' => $field->getSettings()->choices,
             ]
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function resolveGraphQLData(FieldableField $field, $value)
+    {
+        return is_array($value) ? implode(',', $value) : (string) $value;
     }
 }
