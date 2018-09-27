@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.6.3 (2018-09-27)
+- Added #220: Provide Generic State field
+- Added #222: Implement a Link Field
+- Added #249: API: Access translations from content and setting
+- Added #288/#295: Extend Checkbox for multiple Checkboxes
+- Improved #197: Abstract route generation for common entities
+- Improved #297: Improve form rendering for checkbox and choices fields
+- Fixed #192: GraphQL: Map validation path of custom validations
+- Fixed #257: GraphQL File Data can not access
+- Fixed #264: add File Field Type Bucket JSON validation
+- Fixed #267: There cannot be more than 1 rows. wrong propertyPath and error, when having multiple collection fields
+- Fixed #268: Selecting existing content as translation: API response results in js error
+- Fixed #269: GraphQL API: Missing language, when getting more translations of the same content
+- Fixed #273: Search in Editor does not work and throws an error in console
+- Fixed #274: Variation Type returns always null in Graphql
+- Fixed #277: Remove js page exit message on sign up / sign in
+- Fixed #278: Writing Id instead of ID in query results in 500 error (should be catched)
+- Fixed #285: Field identifier inside collections allows hyphens
+- Fixed #286: Update Domain Config causes Crash of Editor
+- Fixed #287: Fields inside Variant and Collection don't get validated at all
+
 ## 0.6.2 (2018-09-07)
 - Added #227: Added an experimental variable feature for domain JSON
 - Added #177: Send an internal event and an email to org admins after a user accepts / rejects an invitation.
