@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\StateType;
 use UniteCMS\CoreBundle\Model\StateSettings;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class StateFieldType extends FieldType
 {
@@ -38,6 +39,26 @@ class StateFieldType extends FieldType
                     'settings' => (array) $field->getSettings()
                 ]
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
+        return $schemaTypeManager->getSchemaType('StateFieldInput');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function resolveGraphQLData(FieldableField $field, $value)
+    {
+        // return NULL on empty value
+        if (empty($value))
+        {
+            return NULL;
+        }
+        return (string) $value;
     }
 
     /**

@@ -78,3 +78,6 @@ services:
 
     UniteCMS\CoreBundle\SchemaType\Types\Input\LinkFieldInputType:
         tags: [unite_cms.graphql.schema_type]
+
+    UniteCMS\CoreBundle\SchemaType\Types\Input\StateFieldInputType:
+        tags: [unite_cms.graphql.schema_type]

@@ -251,6 +251,30 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $error_check);
         $this->assertEquals('This value is not valid.', $error_check[0]);
 
+        // test wrong formats
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+                'csrf_protection' => false,
+            ]
+        );
+
+        $form->submit(
+            [
+                $ctField->getIdentifier() => [
+                    'state' => [],
+                    'transition' => null
+                ],
+            ]
+        );
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertFalse($form->isValid());
+        $error_check = [];
+        foreach ($form->getErrors(true, true) as $error) {
+            $error_check[] = $error->getMessageTemplate();
+        }
+        $this->assertCount(1, $error_check);
+        $this->assertEquals('workflow_invalid_place', $error_check[0]);
+
         // test a invalid transition
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
                 'csrf_protection' => false,
