@@ -140,7 +140,7 @@ class StateFieldTypeApiTest extends APITestCase
 
         $response = $this->api($query, $this->domains['ct']);
         $this->assertFalse(empty($response->errors));
-        $this->assertEquals('The given Transition is not allowed for this object.', $response->errors[0]->message);
+        $this->assertEquals('The given transition is not allowed for the current state.', $response->errors[0]->message);
 
         // test valid transitions
         $query = 'mutation {
@@ -209,7 +209,7 @@ class StateFieldTypeApiTest extends APITestCase
         }';
         $response = $this->api($query, $this->domains['ct']);
         $this->assertFalse(empty($response->errors));
-        $this->assertEquals('The given Transition is not allowed for this object.', $response->errors[0]->message);
+        $this->assertEquals('The given transition is not allowed for the current state.', $response->errors[0]->message);
 
         // test allowed transition
         $query = 'mutation {
