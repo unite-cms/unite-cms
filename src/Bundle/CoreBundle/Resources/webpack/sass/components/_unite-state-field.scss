@@ -1,0 +1,34 @@
+
+.state-transition {
+
+  option {
+    &.primary {
+      color: grey !important;
+    }
+
+    &.notice {
+      color: yellow !important;
+    }
+
+    &.info {
+      color: yellow !important;
+    }
+
+    &.success {
+      color: green !important;
+    }
+
+    &.warning {
+      color: orange !important;
+    }
+
+    &.error {
+      color: red !important;
+    }
+
+    &.danger {
+      color: red !important;
+    }
+  }
+
+}

@@ -172,3 +172,22 @@
     >
     </unite-cms-core-link-field>
 {%- endblock -%}
+
+{%- block unite_cms_core_state_widget -%}
+    <unite-cms-core-state-field
+        state='{
+          "label": "{{ form.vars.current_state_label }}",
+          "name": "{{ form.state.vars.full_name }}",
+          "value": "{{ form.state.vars.value }}",
+          "category": "{{ form.vars.current_state_category }}"
+        }'
+        transition='{
+          "name": "{{ form.transition.vars.full_name }}",
+          "value": "{{ form.transition.vars.value }}",
+          "placeholder": "{{ form.transition.vars.placeholder|trans }}",
+          "transitions": {{ form.transition.vars.choices|json_encode }}
+        }'
+        current-label="{% trans %}state.field.current_label{% endtrans %}"
+        to-label="{% trans %}state.field.to_label{% endtrans %}"
+    ></unite-cms-core-state-field>
+{%- endblock unite_cms_core_state_widget -%}

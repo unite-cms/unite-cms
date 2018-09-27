@@ -50,6 +50,12 @@ services:
     arguments: ['@security.token_storage']
     tags: [form.type]
 
+  # Provide Stete Type as a service, pass translator as an argument
+  unite.cms.state_type:
+      class: UniteCMS\CoreBundle\Form\StateType
+      arguments: ['@translator']
+      tags: [form.type]
+
   # Service Class to fire webhooks
   unite.cms.webhook_manager:
     class: UniteCMS\CoreBundle\Service\WebHookManager
