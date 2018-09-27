@@ -91,19 +91,6 @@
     {{- parent() -}}
 {%- endblock choice_widget_collapsed -%}
 
-{%- block state_widget -%}
-
-    {% if form.transition is defined %}
-        {{ form_row(form.transition) }}
-    {% endif %}
-
-    {{ current_state }}
-
-    <span class="state-info">{{ current_state_label }}</span>
-    {{ form_row(form.state) }}
-
-{%- endblock state_widget -%}
-
 {%- block choice_widget_expanded -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-form-controls-checkboxes')|trim}) %}
     <div {{ block('widget_container_attributes') }}>
