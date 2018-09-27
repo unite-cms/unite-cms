@@ -15,7 +15,14 @@
 {%- endblock form_end -%}
 
 {%- block form_row -%}
-    {% if label is not same as(false) -%}
+    {% if name is defined and name == "checkbox" %}
+        <div class="uk-margin">
+            <div class="uk-form-controls uk-form-controls-text uk-form-controls-checkbox">
+                {{- form_widget(form) -}}
+                {{- form_errors(form) -}}
+            </div>
+        </div>
+    {% elseif label is not same as(false) -%}
         <div class="uk-margin">
             {{- form_label(form) -}}
             <div class="uk-form-controls">
@@ -67,8 +74,11 @@
 
 {%- block checkbox_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-checkbox')|trim}) %}
-
-    {{- parent() -}}
+    {% if label is not same as(false) -%}
+        <label for="{{ form.vars.id }}">{{- parent() -}}&nbsp;{{ form.vars.label }}</label>
+    {% else %}
+        {{- parent() -}}
+    {% endif %}
 {%- endblock checkbox_widget -%}
 
 {%- block radio_widget -%}
@@ -93,6 +103,15 @@
     {{ form_row(form.state) }}
 
 {%- endblock state_widget -%}
+
+{%- block choice_widget_expanded -%}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-form-controls-checkboxes')|trim}) %}
+    <div {{ block('widget_container_attributes') }}>
+        {%- for child in form %}
+            {{- form_widget(child) -}}
+        {% endfor -%}
+    </div>
+{%- endblock choice_widget_expanded -%}
 
 {%- block range_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-range')|trim}) %}

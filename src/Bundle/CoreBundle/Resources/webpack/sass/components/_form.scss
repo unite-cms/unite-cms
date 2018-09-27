@@ -2,3 +2,18 @@
 .uk-textarea {
    resize: horizontal;
 }
+
+.uk-form-controls-checkbox,
+.uk-form-controls-checkboxes {
+   background: map-get($colors, white);
+   border: 1px solid map-get($colors, grey-medium);
+   box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
+   padding: 7px 0;
+   border-radius: 2px;
+   margin: 5px 0;
+
+   label {
+      display: block;
+      padding: 3px 10px;
+   }
+}

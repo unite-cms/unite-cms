@@ -21,6 +21,11 @@ services:
     public: false
     tags: [unite_cms.field_type]
 
+  # A simple choices input field that allows to select multiple values
+  UniteCMS\CoreBundle\Field\Types\ChoicesFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
   # A simple range input field
   UniteCMS\CoreBundle\Field\Types\RangeFieldType:
     public: false

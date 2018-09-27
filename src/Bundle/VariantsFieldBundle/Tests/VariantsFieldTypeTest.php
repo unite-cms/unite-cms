@@ -246,7 +246,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'title' => 'Foo',
                             'identifier' => 'baa',
                             'fields' => [
-                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'choices'],
+                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'anyunknown'],
                                 ['title' => 'Baa', 'identifier' => 'baa', 'type' => 'choice'],
                             ],
                         ]
