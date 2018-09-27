@@ -156,7 +156,7 @@ class StateFieldTypeApiTest extends APITestCase
 
     }
 
-    public function testStateFieldTypeGraphQLWrite()
+    public function testStateFieldTypeGraphQLCreate()
     {
 
         // test empty state
