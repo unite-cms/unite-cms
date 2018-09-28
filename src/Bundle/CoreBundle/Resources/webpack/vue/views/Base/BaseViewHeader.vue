@@ -3,7 +3,6 @@
         <h2 class="uk-flex-1">{{ title }}</h2>
         <a :href="createUrl" class="uk-button uk-button-primary">
             <span class="uk-margin-small-right-small" v-html="feather.icons['plus'].toSvg()"></span>
-            <i data-feather="plus" class=""></i>
             {{ createLabel }}
         </a>
     </header>

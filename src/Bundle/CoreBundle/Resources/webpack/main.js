@@ -5,7 +5,8 @@ import vueCustomElement from 'vue-custom-element';
 
 import feather from 'feather-icons';
 
-import Table from "./vue/views/Table.vue";
+import BaseView from './vue/views/Base/BaseView.vue';
+import TableContent from './vue/views/TableContent.vue';
 import Sortable from "./vue/views/Sortable.vue";
 import DomainEditor from "./vue/components/DomainEditor.vue";
 import ApiTokenField from "./vue/components/ApiTokenField";
@@ -25,8 +26,6 @@ Vue.use(vueCustomElement);
 
 window.UniteCMSEventBus = new Vue();
 
-// Register View: Table
-Vue.customElement('unite-cms-core-view-table', Table);
 Vue.customElement('unite-cms-core-view-sortable', Sortable);
 Vue.customElement('unite-cms-core-domaineditor', DomainEditor);
 Vue.customElement('unite-cms-core-variants-select', VariantsSelect);
@@ -37,8 +36,13 @@ Vue.customElement('unite-cms-core-reference-field', Reference);
 Vue.customElement('unite-cms-core-link-field', Link);
 Vue.customElement('unite-cms-core-state-field', State);
 
+// Register views
+Vue.customElement('unite-cms-core-view-table', {
+    extends: BaseView,
+    contentComponent: TableContent,
+});
 
-window.onload = function(e) {
+window.onload = function() {
 
     // Use feather icon set.
     feather.replace();

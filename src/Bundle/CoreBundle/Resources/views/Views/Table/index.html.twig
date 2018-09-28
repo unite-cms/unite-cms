@@ -1,5 +1,5 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
-    <header class="uk-card-header uk-flex">
+    <!--header class="uk-card-header uk-flex">
         <h2 class="uk-flex-1">
             {{ view.contentType }}
             {% if view.identifier != 'all' %} » {{ view }}{% endif %}
@@ -10,7 +10,7 @@
                 {% trans %}content.create.button{% endtrans %}
             </a>
         {% endif %}
-    </header>
+    </header-->
 
     <unite-cms-core-view-table parameters='{{ parameters|json_encode|raw }}'></unite-cms-core-view-table>
 </article>
