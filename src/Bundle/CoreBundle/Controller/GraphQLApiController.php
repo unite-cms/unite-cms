@@ -5,7 +5,6 @@ namespace UniteCMS\CoreBundle\Controller;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
 use GraphQL\Server\Helper;
-use GraphQL\Server\RequestError;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
 use GraphQL\Type\Schema;
