@@ -1,7 +1,8 @@
 
 const Encore = require('@symfony/webpack-encore');
 const webpack = require('webpack');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const { VueLoaderPlugin } = require('vue-loader');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 Encore
     // the project directory where all compiled assets will be stored
@@ -20,8 +21,10 @@ Encore
         sassConfigOptions.includePaths = ['./node_modules'];
     })
 
-    // https://vue-loader.vuejs.org/en/configurations/advanced.html
-    .enableVueLoader()
+    // https://github.com/symfony/webpack-encore/issues/311#issuecomment-411787830
+    .addLoader({ test: /\.vue$/, loader: 'vue-loader' })
+    .addPlugin(new VueLoaderPlugin())
+    .addAliases({ vue: 'vue/dist/vue.js' })
 
     // allow legacy applications to use $/jQuery as a global variable
     //.autoProvidejQuery()

@@ -1,8 +1,8 @@
 {
-  "email.css": "/bundles/unitecmscore/email.766d9ed63f8f8f590733911907d9811a.css",
-  "email.js": "/bundles/unitecmscore/email.e19e642f07aaa15691b3.js",
-  "fonts/WorkSans-Bold.woff2": "/bundles/unitecmscore/fonts/WorkSans-Bold.910bcc47.woff2",
+  "main.js": "/bundles/unitecmscore/main.aabcbaa6.js",
+  "main.css": "/bundles/unitecmscore/main.b2f5c27c.css",
+  "email.js": "/bundles/unitecmscore/email.e19e642f.js",
+  "email.css": "/bundles/unitecmscore/email.766d9ed6.css",
   "fonts/WorkSans-Medium.woff2": "/bundles/unitecmscore/fonts/WorkSans-Medium.62229411.woff2",
-  "main.css": "/bundles/unitecmscore/main.fd0759da6312752bda3cd900a707360d.css",
-  "main.js": "/bundles/unitecmscore/main.f25362f4247a2a4ca625.js"
+  "fonts/WorkSans-Bold.woff2": "/bundles/unitecmscore/fonts/WorkSans-Bold.910bcc47.woff2"
 }
