@@ -4,8 +4,8 @@
     "description": "Provides fields and views for managing files and images in a S3 storage.",
     "require": {
         "unite-cms/core-bundle": "0@dev",
-        "aws/aws-sdk-php": "^3.63",
-        "ramsey/uuid": "^3.7"
+        "aws/aws-sdk-php": "^3.67",
+        "ramsey/uuid": "^3.8"
     },
     "autoload": {
         "psr-4": { "UniteCMS\\StorageBundle\\": "" },

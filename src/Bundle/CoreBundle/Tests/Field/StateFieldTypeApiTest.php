@@ -198,7 +198,7 @@ class StateFieldTypeApiTest extends APITestCase
         }';
         $response = $this->api($query, $this->domains['ct']);
         $this->assertFalse(empty($response->errors));
-        $this->assertContains('Unknown field', $response->errors[0]->message);
+        $this->assertContains('Field "xxx" is not defined by type StateFieldInput.', $response->errors[0]->message);
 
 
         // test not allowed transition
