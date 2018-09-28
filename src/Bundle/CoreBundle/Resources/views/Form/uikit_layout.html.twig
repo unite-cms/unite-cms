@@ -15,7 +15,7 @@
 {%- endblock form_end -%}
 
 {%- block form_row -%}
-    {% if name is defined and name == "checkbox" %}
+    {% if block_prefixes[1] is defined and block_prefixes[1] == 'checkbox' %}
         <div class="uk-margin">
             <div class="uk-form-controls uk-form-controls-text uk-form-controls-checkbox">
                 {{- form_widget(form) -}}
