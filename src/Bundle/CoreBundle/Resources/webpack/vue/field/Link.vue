@@ -5,8 +5,7 @@
             <div class="uk-form-controls">
                 <div class="url-control uk-inline">
                     <input :id="input_id" type="url" class="uk-input" :name="name + '[url]'" v-model="url" />
-                    <a v-if="showTargetWidget" class="uk-form-icon uk-form-icon-flip" :class="{ external : (target == '_blank')}" :uk-tooltip="targetTooltip" v-on:click.prevent="toggleTarget">
-                        <i data-feather="external-link" width="16" height="16"></i>
+                    <a v-if="showTargetWidget" class="uk-form-icon uk-form-icon-flip" :class="{ external : (target == '_blank')}" :uk-tooltip="targetTooltip" v-on:click.prevent="toggleTarget" v-html="feather.icons['external-link'].toSvg({ width: 16, height: 16 })">
                     </a>
                 </div>
             </div>
@@ -22,6 +21,9 @@
 </template>
 
 <script>
+
+    import feather from 'feather-icons';
+
     export default {
         data(){
           let targetWidget = (typeof this.targetWidget !== 'undefined') ? JSON.parse(this.targetWidget) : false;
@@ -34,6 +36,7 @@
               title: titleWidget ? titleWidget.value : '',
               showTargetWidget: targetWidget,
               showTitleWidget: titleWidget,
+              feather: feather
           };
         },
         props: [

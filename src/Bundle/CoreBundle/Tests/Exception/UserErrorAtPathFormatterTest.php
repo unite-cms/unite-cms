@@ -18,13 +18,13 @@ class UserErrorAtPathFormatterTest extends TestCase
 {
     public function testFormatUserErrorAtPath() {
 
-        $error = new Error('This is my message', ['foo', 'baa']);
+        $error = new Error('This is my message', null, null, null, ['foo', 'baa']);
 
         // If no previous error is set, user error at formatter should to the same as default formatter.
         $this->assertEquals(FormattedError::createFromException($error), UserErrorAtPath::createFormattedErrorFromException($error));
 
         // If previous error is not a UserErrorAtPath, user error at formatter should to the same as default formatter.
-        $error = new Error('This is my message', ['foo', 'baa'], null, null, null, new UserError('Prev'));
+        $error = new Error('This is my message',null, null, null,  ['foo', 'baa'], new UserError('Prev'));
         $this->assertEquals(FormattedError::createFromException($error), UserErrorAtPath::createFormattedErrorFromException($error));
 
         // If previous error is a UserErrorAtPath, path and node should get overridden.
