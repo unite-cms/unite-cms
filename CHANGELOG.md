@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.4 (2018-09-28)
+- Fixed #305: New checkbox styling was not applied to all checkboxes
+- Fixed #302: Link target icon in nested collection was not shown
+
 ## 0.6.3 (2018-09-27)
 - Added #220: Provide Generic State field
 - Added #222: Implement a Link Field
