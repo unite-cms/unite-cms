@@ -10,6 +10,7 @@ namespace UniteCMS\VariantsFieldBundle\SchemaType\Factories;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use UniteCMS\CoreBundle\Entity\ContentType;
@@ -54,6 +55,41 @@ class VariantFactory
         }
 
         return $identifierName;
+    }
+
+
+    public function createVariantTypes(SchemaTypeManager $schemaTypeManager, $nestingLevel = 0, Variants $variants) {
+
+        $schemaTypeName = self::schemaTypeNameForVariant($variants);
+
+        if(!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
+
+            $variantsSchemaTypes = [];
+
+            foreach($variants->getVariantsMetadata() as $meta) {
+
+                $variant = new Variant(
+                    $variants->getFieldsForVariant($meta['identifier']),
+                    $meta['identifier'],
+                    $meta['title'],
+                    $variants
+                );
+
+                $variantsSchemaTypes[] = $this->createVariantType($schemaTypeManager, $nestingLevel = 0, $variant);
+
+            }
+
+            $schemaTypeManager->registerSchemaType(new ObjectType([
+                'name' => $schemaTypeName,
+                'variants' => $variantsSchemaTypes
+            ]));
+
+        }
+
+        #dump($schemaTypeManager->getSchemaType($schemaTypeName)); exit;
+
+
+        return $schemaTypeManager->getSchemaType($schemaTypeName);
     }
 
     public function createVariantType(SchemaTypeManager $schemaTypeManager, $nestingLevel = 0, Variant $variant) : Type {

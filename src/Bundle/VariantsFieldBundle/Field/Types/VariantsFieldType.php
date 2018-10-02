@@ -62,6 +62,9 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
+
+        #return $this->variantFactory->createVariantTypes($schemaTypeManager, $nestingLevel, self::getNestableFieldable($field));
+
         $variants = self::getNestableFieldable($field);
         foreach($variants->getVariantsMetadata() as $meta) {
 
@@ -90,11 +93,25 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
      */
     function resolveGraphQLData(FieldableField $field, $value)
     {
+
+
+
+
         if(empty($value['type'])) {
             return new Variant([], null, null);
         }
 
+
+
         $variants = self::getNestableFieldable($field);
+
+        dump(new Variant(
+            $variants->getFieldsForVariant($value['type']),
+            $value['type'],
+            $value['type'],
+            $variants,
+            $value[$value['type']] ?? []
+        )); exit;
 
         return new Variant(
             $variants->getFieldsForVariant($value['type']),

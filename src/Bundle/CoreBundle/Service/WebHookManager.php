@@ -67,7 +67,14 @@ class WebHookManager
            return;
         }
 
+        #dump( $this->container->get('unite.cms.graphql.schema_type_manager'));
+
+
         $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($entity->getIdentifier()) . $type, $entity->getDomain());
+
+        #dump($type); exit;
+
+
 
         foreach ($entity->getWebHooks() as $webhook) {
 
@@ -76,7 +83,11 @@ class WebHookManager
                 continue;
             }
 
-            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $content);
+            $query = 'query { variants { type } }';
+            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $query, $content);
+            #$result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $content);
+
+            dump($result); exit;
             
             if (empty($result->errors)) {
                 $this->fire($webhook, $result->data);
