@@ -3,12 +3,12 @@
 </template>
 
 <script>
-    import Field from './Field.vue';
-
     export default {
-        props: ['rows'],
-        components: {
-            'view-field': Field
-        }
+        props: [
+            'fields',
+            'rows',
+            'selectable',
+            'columns'
+        ]
     }
 </script>

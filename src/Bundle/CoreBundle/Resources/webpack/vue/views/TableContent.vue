@@ -1,7 +1,13 @@
 <template>
     <div>
-        <div v-for="row in rows">
-            <view-field v-for="field in Object.keys(row)" :name="field" :value="row[field]"></view-field>
+        <div :key="row.id" v-for="row in rows">
+            <component v-for="(field,identifier) in fields"
+                :key="identifier"
+                :is="$uniteCMSViewFields.resolve(field.type)"
+                :identifier="identifier"
+                :label="field.label"
+                :settings="field.settings"
+                :row="row"></component>
         </div>
     </div>
 </template>
@@ -11,7 +17,10 @@
     import BaseViewContent from './Base/BaseViewContent.vue';
 
     export default {
-        extends: BaseViewContent
+        extends: BaseViewContent,
+        data() {
+            return {};
+        }
     }
 </script>
 

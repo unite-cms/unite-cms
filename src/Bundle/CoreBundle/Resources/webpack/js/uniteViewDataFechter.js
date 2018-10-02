@@ -1,14 +1,13 @@
 
 import { GraphQLClient } from 'graphql-request'
 
-class uniteViewDataFechter {
-
-};
-
 export default {
 
     client: null,
     queryMethod: '',
+    updateMethod: '',
+    updateDataObjectName: '',
+    fieldQuery: [],
 
     page: 1,
     limit: 10,
@@ -16,7 +15,8 @@ export default {
     filterArgument: {},
     deletedArgument: false,
 
-    create(bag) {
+    create(bag, fieldQuery = []) {
+        this.fieldQuery = fieldQuery;
         this.client = new GraphQLClient(bag.endpoint, {
             credentials: "same-origin",
             headers: {
@@ -25,7 +25,13 @@ export default {
         });
 
         this.queryMethod = 'find' + bag.settings.contentType.charAt(0).toUpperCase() + bag.settings.contentType.slice(1);
-        this.sort(bag.settings.sort.field, bag.settings.sort.asc);
+
+        if(typeof bag.settings.sortable !== 'undefined') {
+            this.sort(bag.settings.sortable);
+        } else {
+            this.sort(bag.settings.sort.field, bag.settings.sort.asc);
+        }
+
         return this;
     },
 
@@ -65,8 +71,7 @@ export default {
                     page,
                     total,
                     result {
-                        id,
-                        deleted
+                        ` + this.fieldQuery.join(',') + `
                     }
                 }
               }`, {
@@ -79,6 +84,35 @@ export default {
                 (data) => {
                     this.page = data[this.queryMethod].page;
                     resolve(data[this.queryMethod]);
+                }
+            ).catch((err) => {
+                reject(err.response.errors[0].message);
+            });
+
+        });
+    },
+
+    update(id, data) {
+        return new Promise((resolve, reject) => {
+            this.client.request(`
+              mutation(
+                $id: Id!,
+                $data: ` + this.updateDataObjectName + `,
+                $sort: [SortInput],
+                $filter: FilterInput,
+                $deleted: Boolean
+              ) {
+                ` + this.updateMethod + `(id: $id, data: $data, persist: $persist) {
+                    result {
+                        ` + this.fieldQuery.join(',') + `
+                    }
+                }
+              }`, {
+                id: id,
+                data: data
+            }).then(
+                (data) => {
+                    resolve(data[this.updateMethod]);
                 }
             ).catch((err) => {
                 reject(err.response.errors[0].message);
