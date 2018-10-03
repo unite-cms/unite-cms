@@ -1,11 +1,60 @@
 
-.unite-card-table {
+.unite-div-table {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  margin: -31px -30px 0 -30px;
-  border-top: 30px solid map-get($colors, white);
+  border-top: 30px solid $form-background;
 
-  .unite-card-table-tabs {
+  .unite-div-table-row {
+    @extend .uk-grid;
+    @extend .uk-grid-collapse;
+    @extend .uk-child-width-expand\@s;
+    @extend .uk-flex-middle;
+    border-bottom: $table-divider-border-width solid $table-divider-border;
+
+    > * {
+      text-align: left;
+      padding: $table-cell-padding-vertical $table-cell-padding-horizontal;
+
+      p {
+        margin: 0;
+      }
+    }
+  }
+
+  .unite-div-table-thead {
+    display: none;
+    background: $form-background;
+
+    .unite-div-table-row {
+      > * {
+        vertical-align: bottom;
+        font-size: $table-header-cell-font-size;
+        font-weight: $table-header-cell-font-weight;
+        color: $table-header-cell-color;
+        @if (mixin-exists(hook-table-header-cell)) {
+          @include hook-table-header-cell();
+        }
+      }
+    }
+  }
+
+  .unite-div-table-tbody {
+    .unite-div-table-row {
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:nth-child(2n) {
+        background: $form-background;
+      }
+
+      &:hover {
+        background: $table-hover-row-background;
+      }
+    }
+  }
+
+  /*.unite-card-table-tabs {
     background: map-get($colors, white);
     margin-bottom: 0;
     padding: 0 0 30px 30px;
@@ -136,10 +185,53 @@
         }
       }
     }
+  }*/
+}
+
+.uk-card-body {
+  .unite-div-table {
+    margin: 0 -30px 0 -30px;
+  }
+
+  .uk-card-header + .unite-div-table {
+    margin-top: -31px;
   }
 }
 
-.unite-card-div-table {
+@media (min-width: $breakpoint-small) {
+  .unite-div-table {
+    .unite-div-table-row {
+      > * {
+        &:first-child {
+          padding-left: 30px;
+        }
+
+        &:last-child {
+          padding-right: 30px;
+        }
+      }
+    }
+
+    .unite-div-table-thead {
+      display: block;
+    }
+  }
+}
+
+@media (min-width: $breakpoint-large) {
+  .uk-card-body {
+    .unite-div-table {
+      margin-left: -40px;
+      margin-right: -40px;
+    }
+
+    .uk-card-header + .unite-div-table {
+      margin-top: -41px;
+    }
+  }
+}
+
+/*.unite-card-div-table {
   display: table;
 }
 
@@ -190,11 +282,4 @@
       }
     }
   }
-}
-
-@media (min-width: $breakpoint-large) {
-  .unite-card-table {
-    margin: -41px -40px 0 -40px;
-    border-top-width: 40px;
-  }
-}
+}*/
