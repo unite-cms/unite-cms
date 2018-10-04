@@ -32,25 +32,7 @@ class GraphQLApiController extends Controller
      */
     public function indexAction(Organization $organization, Domain $domain, Request $request)
     {
-        $schemaTypeManager = $this->get('unite.cms.graphql.schema_type_manager');
-        $schema = new Schema(
-            [
-                'query' => $schemaTypeManager->getSchemaType('Query'),
-
-                // At the moment only content (and not setting) can be mutated.
-                'mutation' => ($domain->getContentTypes()->count() > 0) ? $schemaTypeManager->getSchemaType(
-                    'Mutation'
-                ) : null,
-                'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
-                    return $schemaTypeManager->getSchemaType($name, $domain);
-                },
-
-                'types' => function() use ($schemaTypeManager)  {
-                    return $schemaTypeManager->getNonDetectableSchemaTypes();
-                }
-            ]
-        );
-
+        $schema = $this->get('unite.cms.graphql.schema_type_manager')->createSchema($domain, 'Query', 'Mutation');
         $server = new StandardServer(ServerConfig::create()
             ->setSchema($schema)
             ->setQueryBatching(true)
