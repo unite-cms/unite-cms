@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\View;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class ViewTypeManager
 {
@@ -18,9 +19,15 @@ class ViewTypeManager
      */
     private $urlGenerator;
 
-    public function __construct(UrlGeneratorInterface $urlGenerator)
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
+
+    public function __construct(UrlGeneratorInterface $urlGenerator, FieldTypeManager $fieldTypeManager)
     {
         $this->urlGenerator = $urlGenerator;
+        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -55,7 +62,7 @@ class ViewTypeManager
     public function getTemplateRenderParameters(View $view, $select_mode = ViewTypeInterface::SELECT_MODE_NONE): ViewParameterBag {
         $viewType = $this->getViewType($view->getType());
         $settings = $viewType->getTemplateRenderParameters($view, $select_mode);
-        return ViewParameterBag::createFromView($view, $this->urlGenerator, $select_mode, $settings ?? []);
+        return ViewParameterBag::createFromView($view, $this->urlGenerator, $this->fieldTypeManager, $select_mode, $settings ?? []);
     }
 
     /**

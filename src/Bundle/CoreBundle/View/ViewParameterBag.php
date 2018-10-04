@@ -5,14 +5,30 @@ namespace UniteCMS\CoreBundle\View;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class ViewParameterBag implements \JsonSerializable
 {
     /**
+     * @var string
+     */
+    private $title = '';
+
+    /**
+     * @var string
+     */
+    private $subTitle = '';
+
+    /**
      * @var array
      */
     private $settings = array();
+
+    /**
+     * @var array $fields
+     */
+    private $fields = array();
 
     /**
      * @var string
@@ -64,18 +80,59 @@ class ViewParameterBag implements \JsonSerializable
      */
     private $deleteDefinitelyUrlPattern = '';
 
-    public function __construct($settings = [])
+    public function __construct($title = '', $fields = [], $settings = [])
     {
+        $this->title = $title;
+        $this->fields = $fields;
         $this->settings = $settings;
     }
 
     public static function createFromView(
         View $view,
         UrlGeneratorInterface $generator,
+        FieldTypeManager $fieldTypeManager,
         string $select_mode = ViewTypeInterface::SELECT_MODE_NONE,
         $settings = []
     ) {
-        $bag = new ViewParameterBag($settings);
+
+        $fields = [];
+
+        if(!empty($settings['columns'])) {
+            foreach($settings['columns'] as $field => $label) {
+
+                switch ($field) {
+                    case 'id': $fields[$field] = [ 'label' => $label, 'type' => 'id' ];
+                        break;
+                    case 'locale': $fields[$field] = [ 'label' => $label, 'type' => 'text' ];
+                        break;
+                    case 'type': $fields[$field] = [ 'label' => $label, 'type' => 'text' ];
+                        break;
+                    case 'created': $fields[$field] = [ 'label' => $label, 'type' => 'date' ];
+                        break;
+                    case 'updated': $fields[$field] = [ 'label' => $label, 'type' => 'date' ];
+                        break;
+                    case 'deleted': $fields[$field] = [ 'label' => $label, 'type' => 'date' ];
+                        break;
+                    default:
+                        if($view->getContentType()->getFields()->containsKey($field)) {
+                            $fieldType = $view->getContentType()->getFields()->get($field);
+                            $fields[$field] = [
+                                'label' => $label,
+                                'type' => $fieldType->getType(),
+                                'settings' => $fieldTypeManager->getFieldType($fieldType->getType())->getViewFieldConfig($fieldType),
+                            ];
+                        }
+                        break;
+                }
+            }
+            unset($settings['columns']);
+        }
+
+        $bag = new ViewParameterBag($view->getContentType()->getTitle(), $fields, $settings);
+
+        if($view->getContentType()->getViews()->first() !== $view) {
+            $bag->setSubTitle($view->getTitle());
+        }
 
         $urlParameter = [
             'domain' => $view->getContentType()->getDomain()->getIdentifier(),
@@ -104,6 +161,54 @@ class ViewParameterBag implements \JsonSerializable
         $bag->setSelectMode($select_mode);
 
         return $bag;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param string $title
+     */
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSubTitle(): string
+    {
+        return $this->subTitle;
+    }
+
+    /**
+     * @param string $subTitle
+     */
+    public function setSubTitle(string $subTitle): void
+    {
+        $this->subTitle = $subTitle;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFields(): array
+    {
+        return $this->fields;
+    }
+
+    /**
+     * @param array $fields
+     */
+    public function setFields(array $fields): void
+    {
+        $this->fields = $fields;
     }
 
     /**
@@ -396,6 +501,9 @@ class ViewParameterBag implements \JsonSerializable
     function jsonSerialize()
     {
         return [
+            'title' => $this->getTitle(),
+            'subTitle' => $this->getSubTitle(),
+            'fields' => $this->getFields(),
             'urls' => [
                 'api' => $this->getApiEndpointPattern(),
                 'create' => $this->getCreateUrlPattern(),

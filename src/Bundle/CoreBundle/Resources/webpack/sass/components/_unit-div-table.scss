@@ -16,7 +16,7 @@
       padding: 0;
 
       > * {
-        padding: $table-cell-padding-vertical $table-cell-padding-horizontal;
+        padding: $table-cell-padding-vertical 3vw $table-cell-padding-vertical $table-cell-padding-horizontal;
       }
 
       p {
@@ -49,6 +49,7 @@
         }
 
         a {
+          display: inline-block;
           text-decoration: none;
           color: $table-header-cell-color;
           white-space: nowrap;
@@ -59,10 +60,6 @@
 
   .unite-div-table-tbody {
     .unite-div-table-row {
-      &:last-child {
-        border-bottom: none;
-      }
-
       &:nth-child(2n) {
         background: $form-background;
       }
@@ -71,6 +68,8 @@
         background: $table-hover-row-background;
       }
     }
+
+    margin-bottom: 20px;
   }
 
   /*.unite-card-table-tabs {
@@ -221,7 +220,7 @@
   .unite-div-table {
     .unite-div-table-row {
       display: grid;
-      flex: 1;
+      flex: 1 0 100%;
 
       > * {
         width: auto;

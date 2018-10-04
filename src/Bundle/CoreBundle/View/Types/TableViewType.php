@@ -51,6 +51,10 @@ class TableViewType extends ViewType
             $columns['updated'] = 'Updated';
         }
 
+        if($sort_field === 'updated' && !isset($columns['updated']) && isset($columns['created'])) {
+            $sort_field = 'created';
+        }
+
         return [
             'sort' => [
                 'field' => $sort_field,

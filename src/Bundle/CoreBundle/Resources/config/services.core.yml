@@ -27,7 +27,7 @@ services:
   # You can get all registered view types from this service.
   unite.cms.view_type_manager:
     class: UniteCMS\CoreBundle\View\ViewTypeManager
-    arguments: ['@router.default']
+    arguments: ['@router.default', '@unite.cms.field_type_manager']
     public: true
 
 

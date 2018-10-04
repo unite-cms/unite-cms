@@ -1,14 +1,12 @@
 <template>
-    <div v-on:click="recalcColumnWidth" class="unite-div-table">
+    <div class="unite-div-table">
         <div class="unite-div-table-thead">
             <div :style="rowStyle" uk-grid class="unite-div-table-row">
                 <div :key="identifier" v-for="(field,identifier) in fields">
-                    <p>
-                        <a href="#" v-on:click.prevent="setSort(identifier)">
-                            {{ field.label }}
-                            <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
-                        </a>
-                    </p>
+                    <a href="#" v-on:click.prevent="setSort(identifier)">
+                        {{ field.label }}
+                        <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -36,23 +34,30 @@
         extends: BaseViewContent,
         data() {
             return {
-                columnWidth: null,
+                columnWidth: Object.keys(this.fields).map(() => { return { min: 100, max: 0 } }),
+                rowStyle: {},
                 feather: feather,
             };
         },
         mounted() {
-            addListener(this.$el, this.recalcColumnWidth);
+            this.$nextTick(() => {
+                addListener(this.$el, this.recalcColumnWidth);
+                this.recalcColumnWidth();
+            });
         },
         destroyed() {
           removeListener(this.$el, this.recalcColumnWidth);
         },
-        computed: {
-            rowStyle() {
-                return !this.columnWidth ? {} : {
-                    'grid-template-columns': this.columnWidth.map((column) => {
-                        return column === 0 ? 'minmax(100px, 1fr)' : column + 'px';
-                    }).join(' ')
-                }
+        watch: {
+            columnWidth: {
+                handler(value) {
+                    this.rowStyle = {
+                        'grid-template-columns': value.map((column) => {
+                            return 'minmax(' + column.min + 'px,' + (column.max === 0 ? '1fr' : (column.max + 'px')) + ')';
+                        }).join(' ')
+                    };
+                },
+                deep: true
             }
         },
         methods: {
@@ -66,14 +71,19 @@
             },
             recalcColumnWidth() {
                 this.columnWidth = this.columnWidth || [];
-
                 this.$el.querySelectorAll('.unite-div-table-row').forEach((row) => {
                     row.childNodes.forEach((column, delta) => {
-                        let style = window.getComputedStyle(column);
-                        let columnWidth = parseInt(style.getPropertyValue('width'));
-                        let innerWidth = column.firstChild.clientWidth || columnWidth;
-                        let fixedWith = Math.abs(columnWidth - innerWidth) > 2 ? innerWidth : 0;
-                        this.columnWidth[delta] = this.columnWidth[delta] == null || this.columnWidth[delta] < fixedWith ? fixedWith : this.columnWidth[delta];
+                        if(column.firstChild.offsetWidth < column.offsetWidth) {
+                            if(column.firstChild.offsetWidth > this.columnWidth[delta].min) {
+                                this.columnWidth[delta].min = column.firstChild.offsetWidth;
+                            }
+
+                            if(row.parentElement.classList.contains('unite-div-table-tbody')) {
+                                if(column.firstChild.offsetWidth > this.columnWidth[delta].max) {
+                                    this.columnWidth[delta].max = column.firstChild.offsetWidth;
+                                }
+                            }
+                        }
                     });
                 });
             }

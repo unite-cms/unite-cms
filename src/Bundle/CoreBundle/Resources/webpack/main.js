@@ -69,9 +69,11 @@ Vue.use({
 
         Vue.prototype.$uniteCMSViewFields.register('text', require('./vue/views/Fields/Text').default);
         Vue.prototype.$uniteCMSViewFields.register('textarea', require('./vue/views/Fields/Textarea').default);
+        Vue.prototype.$uniteCMSViewFields.register('wysiwyg', require('./vue/views/Fields/Textarea').default);
         Vue.prototype.$uniteCMSViewFields.register('image', require('./vue/views/Fields/Image').default);
         Vue.prototype.$uniteCMSViewFields.register('date', require('./vue/views/Fields/Date').default);
         Vue.prototype.$uniteCMSViewFields.register('id', require('./vue/views/Fields/Id').default);
+        Vue.prototype.$uniteCMSViewFields.register('state', require('./vue/views/Fields/State').default);
     }
 });
 

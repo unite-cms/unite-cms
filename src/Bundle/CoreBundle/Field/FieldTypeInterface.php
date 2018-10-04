@@ -105,4 +105,12 @@ interface FieldTypeInterface
      * @param ExecutionContextInterface $context
      */
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context);
+
+    /**
+     * Return optional configuration that gets passed to the javascript field component when a content type view gets rendered.
+     *
+     * @param FieldableField $field
+     * @return array
+     */
+    function getViewFieldConfig(FieldableField $field) : array;
 }

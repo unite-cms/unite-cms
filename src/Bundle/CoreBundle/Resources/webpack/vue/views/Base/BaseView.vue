@@ -1,6 +1,6 @@
 <template>
     <div>
-        <component :is="headerComponent" :title="labels.title" :createLabel="labels.create" :createUrl="urls.create"></component>
+        <component :is="headerComponent" :title="labels.title" :subTitle="labels.subTitle" :createLabel="labels.create" :createUrl="urls.create"></component>
 
         <component :is="contentComponent"
                    :rows="rows"
@@ -14,7 +14,7 @@
             {{ error }}<br/><br/>
             <button class="uk-button" v-on:click.prevent="load">{{ labels.retry }}</button>
         </p>
-        <div v-if="loading" class="uk-text-center" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255,255,255,0.75);"><div style="position: absolute; top: 50%; margin-top: -15px;" uk-spinner></div></div>
+        <div v-if="loading" class="loading uk-text-center"><div uk-spinner></div></div>
         <component :is="footerComponent" ref="footer" @change="load" :total="total" :limit="limit"></component>
     </div>
 </template>
@@ -32,33 +32,7 @@
     export default {
         data() {
             let bag = JSON.parse(this.parameters);
-            let fields = {
-                id: {
-                    label: "Id",
-                    type: "id"
-                },
-                headline: {
-                    label: "Headline",
-                    type: "text"
-                },
-                image: {
-                    label: 'Image',
-                    type: 'image'
-                },
-                content: {
-                    label: 'Content',
-                    type: 'textarea'
-                },
-                created: {
-                    label: 'Created at',
-                    type: 'date'
-                },
-                updated: {
-                    label: 'Updated',
-                    type: 'date'
-                }
-            };
-
+            console.log(bag);
             return {
                 headerComponent: typeof this.$options.headerComponent !== 'undefined' ? this.$options.headerComponent : BaseViewHeader,
                 footerComponent: typeof this.$options.footerComponent !== 'undefined' ? this.$options.footerComponent : BaseViewFooter,
@@ -66,8 +40,8 @@
                 dataFetcher: uniteViewDataFetcher.create({
                     endpoint: bag.urls.api,
                     settings: bag.settings
-                }, Object.keys(fields).map((identifier) => {
-                    return this.$uniteCMSViewFields.resolveFieldQueryFunction(fields[identifier].type)(identifier, fields[identifier]);
+                }, Object.keys(bag.fields).map((identifier) => {
+                    return this.$uniteCMSViewFields.resolveFieldQueryFunction(bag.fields[identifier].type)(identifier, bag.fields[identifier]);
                 })),
                 loading: false,
                 error: null,
@@ -76,15 +50,15 @@
                 page: 1,
                 total: 0,
                 autoUpdateFields: [],
-                columns: bag.columns,
+                fields: bag.fields,
                 selectable: bag.select.is_mode_none ? null : (bag.select.is_mode_single ? 'SINGLE' : 'MULTIPLE'),
                 urls: bag.urls,
                 labels: {
-                    title: "Tags",
+                    title: bag.title,
+                    subTitle: bag.subTitle,
                     retry: "Retry",
                     create: "Create"
                 },
-                fields: fields,
                 sort: bag.settings.sort,
                 feather: feather,
             }
@@ -149,6 +123,20 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+    .loading {
+        z-index: 100;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(255,255,255,0.5);
 
+        > div {
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+        }
+    }
 </style>
