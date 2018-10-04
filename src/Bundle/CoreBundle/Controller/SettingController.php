@@ -128,8 +128,9 @@ class SettingController extends Controller
 
             $setting->setData($data);
 
-            $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($settingType->getIdentifier()) . 'Setting', $settingType->getDomain());
-            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $settingType->getPreview()->getQuery(), $setting);
+            // Create GraphQL Schema
+            $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($settingType->getDomain(), ucfirst($settingType->getIdentifier()) . 'Setting');
+            $result = GraphQL::executeQuery($schema, $settingType->getPreview()->getQuery(), $setting);
             $data_uri = urlencode($this->container->get('jms_serializer')->serialize($result->data, 'json'));
         }
 

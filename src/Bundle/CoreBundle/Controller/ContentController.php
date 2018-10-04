@@ -239,8 +239,10 @@ class ContentController extends Controller
 
             $content->setData($data);
 
-            $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($view->getContentType()->getIdentifier()) . 'Content', $view->getContentType()->getDomain());
-            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $view->getContentType()->getPreview()->getQuery(), $content);
+            // Create GraphQL Schema
+            $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($view->getContentType()->getDomain(), ucfirst($view->getContentType()->getIdentifier()) . 'Content');
+            $result = GraphQL::executeQuery($schema, $view->getContentType()->getPreview()->getQuery(), $content);
+
             $data_uri = urlencode($this->container->get('jms_serializer')->serialize($result->data, 'json'));
         }
 

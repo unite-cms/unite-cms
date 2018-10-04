@@ -3,11 +3,13 @@
 namespace UniteCMS\CoreBundle\SchemaType;
 
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\UnionType;
+use GraphQL\Type\Schema;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
 
@@ -57,6 +59,33 @@ class SchemaTypeManager
     public function hasSchemaType($key): bool
     {
         return array_key_exists($key, $this->schemaTypes);
+    }
+
+    /**
+     * Creates a new GraphQL schema with all registered types.
+     *
+     * @param Domain $domain, The Domain to create the schema for.
+     * @param string|ObjectType|UnionType $query, The root query object. If string, $this>>getSchemaType() will be called.
+     * @param string|InputType|UnionType $mutation, The root mutation object. If string, $this>>getSchemaType() will be called.
+     * @return Schema
+     */
+    public function createSchema(Domain $domain, $query, $mutation = null) : Schema {
+
+        $manager = $this;
+        $query = is_string($query) ? $this->getSchemaType($query, $domain) : $query;
+        $mutation = $mutation ? (is_string($mutation) ? $this->getSchemaType($mutation, $domain) : $mutation) : null;
+
+        return new Schema([
+            'query' => $query,
+            // At the moment only content (and not setting) can be mutated.
+            'mutation' => ($domain->getContentTypes()->count() > 0) ? $mutation : null,
+            'typeLoader' => function ($name) use ($manager, $domain) {
+                return $manager->getSchemaType($name, $domain);
+            },
+            'types' => function() use ($manager)  {
+                return $manager->getNonDetectableSchemaTypes();
+            }
+        ]);
     }
 
     /**
