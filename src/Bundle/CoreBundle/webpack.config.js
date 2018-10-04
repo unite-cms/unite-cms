@@ -1,6 +1,8 @@
 
-var Encore = require('@symfony/webpack-encore');
+const Encore = require('@symfony/webpack-encore');
+const webpack = require('webpack');
 const { VueLoaderPlugin } = require('vue-loader');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 Encore
     // the project directory where all compiled assets will be stored
@@ -39,5 +41,15 @@ Encore
     // show OS notifications when builds finish/fail
     //.enableBuildNotifications();
 
+const webpackConfig = Encore.getWebpackConfig();
+
+// Remove the old version first
+webpackConfig.plugins = webpackConfig.plugins.filter(
+    plugin => !(plugin instanceof webpack.optimize.UglifyJsPlugin)
+);
+
+// Add the new one
+webpackConfig.plugins.push(new UglifyJsPlugin());
+
 // export the final configuration
-module.exports = Encore.getWebpackConfig();
+module.exports = webpackConfig;

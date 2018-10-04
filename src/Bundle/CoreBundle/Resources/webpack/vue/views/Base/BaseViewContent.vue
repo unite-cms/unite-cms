@@ -6,9 +6,9 @@
     export default {
         props: [
             'fields',
+            'sort',
             'rows',
             'selectable',
-            'columns'
         ]
     }
 </script>

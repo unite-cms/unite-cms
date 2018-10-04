@@ -3,6 +3,7 @@ import Vue from "vue";
 import 'document-register-element';
 import vueCustomElement from 'vue-custom-element';
 
+import moment from 'moment';
 import feather from 'feather-icons';
 import UnloadManager from "./js/pageUnload";
 
@@ -69,8 +70,20 @@ Vue.use({
         Vue.prototype.$uniteCMSViewFields.register('text', require('./vue/views/Fields/Text').default);
         Vue.prototype.$uniteCMSViewFields.register('textarea', require('./vue/views/Fields/Textarea').default);
         Vue.prototype.$uniteCMSViewFields.register('image', require('./vue/views/Fields/Image').default);
+        Vue.prototype.$uniteCMSViewFields.register('date', require('./vue/views/Fields/Date').default);
+        Vue.prototype.$uniteCMSViewFields.register('id', require('./vue/views/Fields/Id').default);
     }
 });
+
+// Create vue moment filter.
+Vue.filter('dateFromNow', function(value) {
+    return value ? moment.unix(value).fromNow() : '';
+});
+
+Vue.filter('dateFull', function(value) {
+    return value ? moment.unix(value).format('LLL') : '';
+});
+
 
 window.onload = function() {
 

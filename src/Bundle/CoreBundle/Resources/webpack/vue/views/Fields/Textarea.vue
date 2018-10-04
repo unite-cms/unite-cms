@@ -1,6 +1,7 @@
 <template>
     <div class="view-field view-field-textarea">
-        <p v-if="teaser.length > 0" class="uk-text-truncate" :title="full" uk-tooltip="pos: bottom">{{ teaser }}</p>
+        <p v-if="teaser.length > 0 && full.length > 300" class="uk-text-truncate uk-text-meta" :title="full" uk-tooltip="pos: bottom">{{ teaser }}</p>
+        <p v-if="teaser.length > 0 && full.length <= 300" class="uk-text-truncate uk-text-meta">{{ teaser }}</p>
     </div>
 </template>
 
@@ -25,5 +26,7 @@
 </script>
 
 <style scoped>
-
+    p[title] {
+        cursor: pointer;
+    }
 </style>

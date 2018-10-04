@@ -5,6 +5,7 @@
         <component :is="contentComponent"
                    :rows="rows"
                    :fields="fields"
+                   :sort="sort"
                    :selectable="selectable"
         ></component>
 
@@ -34,7 +35,7 @@
             let fields = {
                 id: {
                     label: "Id",
-                    type: "text"
+                    type: "id"
                 },
                 headline: {
                     label: "Headline",
@@ -50,7 +51,7 @@
                 },
                 created: {
                     label: 'Created at',
-                    type: 'datetime'
+                    type: 'date'
                 },
                 updated: {
                     label: 'Updated',
@@ -84,6 +85,7 @@
                     create: "Create"
                 },
                 fields: fields,
+                sort: bag.settings.sort,
                 feather: feather,
             }
         },
@@ -118,6 +120,12 @@
                     }
                 },
                 deep: true
+            },
+            sort: {
+                handler(sort, oldSort) {
+                    this.load();
+                },
+                deep: true
             }
         },
         methods: {
@@ -125,7 +133,7 @@
 
                 this.error = null;
                 this.loading = true;
-                this.dataFetcher.fetch(page)
+                this.dataFetcher.sort(this.sort.field, this.sort.asc).fetch(page)
                     .then(
                         (data) => {
                             this.page = data.page;

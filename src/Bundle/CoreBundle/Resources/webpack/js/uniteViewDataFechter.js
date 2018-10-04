@@ -25,13 +25,6 @@ export default {
         });
 
         this.queryMethod = 'find' + bag.settings.contentType.charAt(0).toUpperCase() + bag.settings.contentType.slice(1);
-
-        if(typeof bag.settings.sortable !== 'undefined') {
-            this.sort(bag.settings.sortable);
-        } else {
-            this.sort(bag.settings.sort.field, bag.settings.sort.asc);
-        }
-
         return this;
     },
 

@@ -2,7 +2,14 @@
     <div v-on:click="recalcColumnWidth" class="unite-div-table">
         <div class="unite-div-table-thead">
             <div :style="rowStyle" uk-grid class="unite-div-table-row">
-                <div :key="identifier" v-for="(field,identifier) in fields">{{ field.label }}</div>
+                <div :key="identifier" v-for="(field,identifier) in fields">
+                    <p>
+                        <a href="#" v-on:click.prevent="setSort(identifier)">
+                            {{ field.label }}
+                            <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
+                        </a>
+                    </p>
+                </div>
             </div>
         </div>
         <div class="unite-div-table-tbody">
@@ -22,40 +29,50 @@
 <script>
 
     import BaseViewContent from './Base/BaseViewContent.vue';
+    import { addListener, removeListener } from 'resize-detector';
+    import feather from 'feather-icons';
 
     export default {
         extends: BaseViewContent,
         data() {
             return {
-                columnWidth: [],
+                columnWidth: null,
+                feather: feather,
             };
         },
-        updated() {
-            this.recalcColumnWidth();
+        mounted() {
+            addListener(this.$el, this.recalcColumnWidth);
+        },
+        destroyed() {
+          removeListener(this.$el, this.recalcColumnWidth);
         },
         computed: {
             rowStyle() {
-                console.log("computed rowStyle");
-                let columns = this.columnWidth.map((column) => {
-                    return 'auto';
-                });
-
-                console.log(this.columnWidth.length);
-                console.log(columns);
-
-                return {
-                    'grid-template-columns': columns.join(' '),
+                return !this.columnWidth ? {} : {
+                    'grid-template-columns': this.columnWidth.map((column) => {
+                        return column === 0 ? 'minmax(100px, 1fr)' : column + 'px';
+                    }).join(' ')
                 }
             }
         },
         methods: {
+            setSort(identifier) {
+                if(this.sort.field === identifier) {
+                    this.sort.asc = !this.sort.asc;
+                } else {
+                    this.sort.field = identifier;
+                    this.sort.asc = true;
+                }
+            },
             recalcColumnWidth() {
-                console.log("recalcColumnWidth");
+                this.columnWidth = this.columnWidth || [];
+
                 this.$el.querySelectorAll('.unite-div-table-row').forEach((row) => {
                     row.childNodes.forEach((column, delta) => {
-                        let width = parseInt(window.getComputedStyle(column).getPropertyValue('width'));
-                        let innerWidth = parseInt(column.firstChild.clientWidth || width);
-                        let fixedWith = Math.abs(width - innerWidth) > 2 ? innerWidth : 0;
+                        let style = window.getComputedStyle(column);
+                        let columnWidth = parseInt(style.getPropertyValue('width'));
+                        let innerWidth = column.firstChild.clientWidth || columnWidth;
+                        let fixedWith = Math.abs(columnWidth - innerWidth) > 2 ? innerWidth : 0;
                         this.columnWidth[delta] = this.columnWidth[delta] == null || this.columnWidth[delta] < fixedWith ? fixedWith : this.columnWidth[delta];
                     });
                 });

@@ -1,5 +1,5 @@
 <template>
-    <div class="view-field view-field-text"><p class="uk-text-truncate">{{ row[identifier] }}</p></div>
+    <div class="view-field view-field-text"><p>{{ row[identifier] }}</p></div>
 </template>
 
 <script>

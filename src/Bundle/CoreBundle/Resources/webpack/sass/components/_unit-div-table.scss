@@ -7,13 +7,17 @@
   .unite-div-table-row {
     @extend .uk-grid;
     @extend .uk-grid-collapse;
-    @extend .uk-child-width-expand\@s;
     @extend .uk-flex-middle;
+    display: block;
     border-bottom: $table-divider-border-width solid $table-divider-border;
 
     > * {
       text-align: left;
-      padding: $table-cell-padding-vertical $table-cell-padding-horizontal;
+      padding: 0;
+
+      > * {
+        padding: $table-cell-padding-vertical $table-cell-padding-horizontal;
+      }
 
       p {
         margin: 0;
@@ -23,9 +27,10 @@
 
   .unite-div-table-thead {
     display: none;
-    background: $form-background;
 
     .unite-div-table-row {
+      background: $form-background;
+
       > * {
         vertical-align: bottom;
         font-size: $table-header-cell-font-size;
@@ -33,6 +38,20 @@
         color: $table-header-cell-color;
         @if (mixin-exists(hook-table-header-cell)) {
           @include hook-table-header-cell();
+        }
+
+        span {
+          line-height: 0;
+          font-size: 0;
+          vertical-align: middle;
+          display: inline-block;
+          margin-top: -4px;
+        }
+
+        a {
+          text-decoration: none;
+          color: $table-header-cell-color;
+          white-space: nowrap;
         }
       }
     }
@@ -201,19 +220,32 @@
 @media (min-width: $breakpoint-small) {
   .unite-div-table {
     .unite-div-table-row {
+      display: grid;
+      flex: 1;
+
       > * {
+        width: auto;
+        min-width: 0;
+
         &:first-child {
-          padding-left: 30px;
+          > * {
+            padding-left: 30px;
+          }
         }
 
         &:last-child {
-          padding-right: 30px;
+          > * {
+            padding-right: 30px;
+          }
         }
       }
     }
 
-    .unite-div-table-thead {
-      display: block;
+    .unite-div-table-thead,
+    .unite-div-table-tbody {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: stretch;
     }
   }
 }

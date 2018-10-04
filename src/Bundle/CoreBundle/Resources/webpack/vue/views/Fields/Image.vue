@@ -1,8 +1,14 @@
 <template>
     <div class="view-field view-field-image">
-        <span v-if="src" class="uk-inline-clip">
+        <a :href="'#' + modalId" uk-toggle v-if="src" class="uk-inline-clip uk-box-shadow-small uk-box-shadow-hover-medium">
             <img :src="src" />
-        </span>
+        </a>
+        <div class="uk-flex-top" :id="modalId" uk-modal>
+            <div class="uk-modal-dialog uk-margin-auto-vertical">
+                <button class="uk-modal-close-outside" type="button" uk-close></button>
+                <img :src="src" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -13,6 +19,7 @@
         extends: BaseField,
         data(){
             return {
+                modalId: 'modal-' + this._uid,
                 src: this.row[this.identifier] ? this.row[this.identifier].url : null
             }
         },
@@ -29,20 +36,21 @@
 </script>
 
 <style scoped lang="scss">
+    .uk-modal-dialog {
+        width: 900px;
+    }
+
     .view-field-image {
         height: 50px;
         width: 80px;
-        text-align: center;
+        text-align: left;
 
         .uk-inline-clip {
             width: auto;
             height: 100%;
             border-radius: 5px;
             border: 2px solid white;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            margin-top: -2px;
-            margin-left: -2px;
-            cursor: pointer;
+            margin: -2px 0 0 -2px;
 
             img {
                 height: 100%;
