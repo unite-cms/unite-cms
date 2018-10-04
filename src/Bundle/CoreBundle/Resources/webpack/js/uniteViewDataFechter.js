@@ -11,12 +11,20 @@ export default {
 
     page: 1,
     limit: 10,
-    sortArgument: {},
+    sortArgument: {
+        field: null,
+        order: 'ASC'
+    },
     filterArgument: {},
     deletedArgument: false,
 
     create(bag, fieldQuery = []) {
         this.fieldQuery = fieldQuery;
+
+        if(this.fieldQuery.indexOf('id') < 0) {
+            this.fieldQuery.push('id');
+        }
+
         this.client = new GraphQLClient(bag.endpoint, {
             credentials: "same-origin",
             headers: {
@@ -28,10 +36,10 @@ export default {
         return this;
     },
 
-    sort(field, asc = true) {
+    sort(sort) {
         this.sortArgument = {
-            field: field,
-            order: asc ? 'ASC' : 'DESC'
+            field: sort.field,
+            order: sort.asc ? 'ASC' : 'DESC'
         };
         return this;
     },
@@ -72,7 +80,7 @@ export default {
                 page: page,
                 filter: this.filterArgument,
                 deleted: this.deletedArgument,
-                sort: [this.sortArgument]
+                sort: this.sortArgument.field ? [this.sortArgument] : null
             }).then(
                 (data) => {
                     this.page = data[this.queryMethod].page;
@@ -90,12 +98,9 @@ export default {
             this.client.request(`
               mutation(
                 $id: Id!,
-                $data: ` + this.updateDataObjectName + `,
-                $sort: [SortInput],
-                $filter: FilterInput,
-                $deleted: Boolean
+                $data: ` + this.updateDataObjectName + `
               ) {
-                ` + this.updateMethod + `(id: $id, data: $data, persist: $persist) {
+                ` + this.updateMethod + `(id: $id, data: $data, persist: true) {
                     result {
                         ` + this.fieldQuery.join(',') + `
                     }

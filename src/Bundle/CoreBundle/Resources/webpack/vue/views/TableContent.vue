@@ -12,7 +12,7 @@
         </div>
         <div class="unite-div-table-tbody">
             <div :style="rowStyle" uk-grid class="unite-div-table-row" :key="row.id" v-for="row in rows">
-                <div :key="identifier" v-for="(field,identifier) in fields">
+                <div class="unite-div-table-cell" :key="identifier" v-for="(field,identifier) in fields">
                     <component :is="$uniteCMSViewFields.resolve(field.type)"
                                :identifier="identifier"
                                :label="field.label"
@@ -35,6 +35,7 @@
         data() {
             return {
                 columnWidth: Object.keys(this.fields).map(() => { return { min: 100, max: 0 } }),
+                rowControl: this.selectable,
                 rowStyle: {},
                 feather: feather,
             };
@@ -43,6 +44,7 @@
             this.$nextTick(() => {
                 addListener(this.$el, this.recalcColumnWidth);
                 this.recalcColumnWidth();
+                this.updateRowStyle(this.columnWidth);
             });
         },
         destroyed() {
@@ -50,13 +52,7 @@
         },
         watch: {
             columnWidth: {
-                handler(value) {
-                    this.rowStyle = {
-                        'grid-template-columns': value.map((column) => {
-                            return 'minmax(' + column.min + 'px,' + (column.max === 0 ? '1fr' : (column.max + 'px')) + ')';
-                        }).join(' ')
-                    };
-                },
+                handler(value) { this.updateRowStyle(value); },
                 deep: true
             }
         },
@@ -69,10 +65,18 @@
                     this.sort.asc = true;
                 }
             },
+            updateRowStyle(columnWidth) {
+                let columns = this.rowControl ? ['60px'] : [];
+                this.rowStyle = {
+                    'grid-template-columns': columns.concat(columnWidth.map((column) => {
+                        return 'minmax(' + column.min + 'px,' + (column.max === 0 ? '1fr' : (column.max + 'px')) + ')';
+                    })).join(' ')
+                }
+            },
             recalcColumnWidth() {
                 this.columnWidth = this.columnWidth || [];
                 this.$el.querySelectorAll('.unite-div-table-row').forEach((row) => {
-                    row.childNodes.forEach((column, delta) => {
+                    row.querySelectorAll('.unite-div-table-cell').forEach((column, delta) => {
                         if(column.firstChild.offsetWidth < column.offsetWidth) {
                             if(column.firstChild.offsetWidth > this.columnWidth[delta].min) {
                                 this.columnWidth[delta].min = column.firstChild.offsetWidth;

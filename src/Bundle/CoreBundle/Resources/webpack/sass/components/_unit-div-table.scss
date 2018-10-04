@@ -4,27 +4,6 @@
   -webkit-overflow-scrolling: touch;
   border-top: 30px solid $form-background;
 
-  .unite-div-table-row {
-    @extend .uk-grid;
-    @extend .uk-grid-collapse;
-    @extend .uk-flex-middle;
-    display: block;
-    border-bottom: $table-divider-border-width solid $table-divider-border;
-
-    > * {
-      text-align: left;
-      padding: 0;
-
-      > * {
-        padding: $table-cell-padding-vertical 3vw $table-cell-padding-vertical $table-cell-padding-horizontal;
-      }
-
-      p {
-        margin: 0;
-      }
-    }
-  }
-
   .unite-div-table-thead {
     display: none;
 
@@ -40,19 +19,19 @@
           @include hook-table-header-cell();
         }
 
-        span {
-          line-height: 0;
-          font-size: 0;
-          vertical-align: middle;
-          display: inline-block;
-          margin-top: -4px;
-        }
-
-        a {
+        a, span {
           display: inline-block;
           text-decoration: none;
           color: $table-header-cell-color;
           white-space: nowrap;
+
+          > span {
+            line-height: 0;
+            font-size: 0;
+            vertical-align: middle;
+            display: inline-block;
+            margin-top: -4px;
+          }
         }
       }
     }
@@ -60,6 +39,10 @@
 
   .unite-div-table-tbody {
     .unite-div-table-row {
+
+      margin-top: -1px;
+      border-top: $table-divider-border-width solid $table-divider-border;
+
       &:nth-child(2n) {
         background: $form-background;
       }
@@ -71,139 +54,33 @@
 
     margin-bottom: 20px;
   }
+}
 
-  /*.unite-card-table-tabs {
-    background: map-get($colors, white);
-    margin-bottom: 0;
-    padding: 0 0 30px 30px;
+.unite-div-table-row {
+  @extend .uk-grid;
+  @extend .uk-grid-collapse;
+  @extend .uk-flex-middle;
+  display: block;
+  border-bottom: $table-divider-border-width solid $table-divider-border;
 
-    li {
-      a {
-        font-size: 0.75rem;
-        border: 2px solid transparent;
-        color: map-get($colors, grey-dark);
-        border-radius: 3px;
+  > * {
+    text-align: left;
+    padding: 0;
 
-        &:hover {
-          color: map-get($colors, grey-very-dark);
-        }
-      }
-
-      &.uk-active {
-        a {
-          border-color: map-get($colors, grey-very-dark);
-          color: map-get($colors, grey-very-dark);
-        }
-      }
+    > * {
+      padding: $table-cell-padding-vertical 3vw $table-cell-padding-vertical $table-cell-padding-horizontal;
     }
 
-    &:before {
-      display: none;
-    }
-
-    + .uk-table {
-      margin-top: 0;
+    p {
+      margin: 0;
     }
   }
 
-  table, .unite-card-div-table {
-    thead, .unite-card-div-table-thead {
-      background: map-get($colors, white);
-      > * {
-        > * {
-          padding: 16px 12px;
-          font-size: 0.75rem;
-          color: map-get($colors, grey-dark);
-          text-transform: uppercase;
-
-          &:first-child {
-            padding-left: 30px;
-          }
-
-          &:last-child {
-            padding-right: 30px;
-          }
-
-          a {
-            color: map-get($colors, grey-dark);
-          }
-        }
-
-      }
-    }
-
-    tbody, .unite-card-div-table-tbody {
-      > * {
-
-        border-top: $table-divider-border-width solid $table-divider-border;
-
-        > * {
-          padding: 16px 12px;
-
-          &:first-child {
-            padding-left: 30px;
-          }
-
-          &:last-child {
-            padding-right: 30px;
-          }
-
-          &.actions {
-            padding: 0;
-            vertical-align: middle;
-          }
-
-          &.select {
-            width: 30px;
-
-            button {
-              background: none;
-              border: none;
-              color: map-get($colors, grey-dark);
-              padding: 0;
-              cursor: pointer;
-
-              &:hover {
-                color: map-get($colors, grey-very-dark);
-              }
-            }
-          }
-
-          .uk-button.actions-dropdown {
-            box-shadow: none;
-            border: 1px solid transparent;
-            padding: 0 20px;
-            color: map-get($colors, grey-dark);
-          }
-        }
-
-        &:last-child {
-          border-bottom: $table-divider-border-width solid $table-divider-border;
-        }
-
-        &:hover {
-          background: $table-hover-row-background;
-
-          > * {
-            .uk-button.actions-dropdown {
-              background: map-get($colors, white);
-              box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-              border-color: map-get($colors, grey-medium);
-              color: map-get($colors, grey-very-dark);
-            }
-          }
-        }
-
-        &:nth-child(2n) {
-          background: map-get($colors, white);
-
-          &:hover {
-            background: $table-hover-row-background;
-          }
-        }
-      }
-    }
-  }*/
+  &.uk-sortable-drag {
+    background: $form-background;
+    border: none;
+    @extend .uk-box-shadow-medium;
+  }
 }
 
 .uk-card-body {
@@ -218,33 +95,33 @@
 
 @media (min-width: $breakpoint-small) {
   .unite-div-table {
-    .unite-div-table-row {
-      display: grid;
-      flex: 1 0 100%;
-
-      > * {
-        width: auto;
-        min-width: 0;
-
-        &:first-child {
-          > * {
-            padding-left: 30px;
-          }
-        }
-
-        &:last-child {
-          > * {
-            padding-right: 30px;
-          }
-        }
-      }
-    }
-
     .unite-div-table-thead,
     .unite-div-table-tbody {
       display: flex;
       flex-wrap: wrap;
       justify-content: stretch;
+    }
+  }
+
+  .unite-div-table-row {
+    display: grid;
+    flex: 1 0 100%;
+
+    > * {
+      width: auto;
+      min-width: 0;
+
+      &:first-child {
+        > * {
+          padding-left: 30px;
+        }
+      }
+
+      &:last-child {
+        > * {
+          padding-right: 30px;
+        }
+      }
     }
   }
 }
@@ -261,56 +138,3 @@
     }
   }
 }
-
-/*.unite-card-div-table {
-  display: table;
-}
-
-.unite-card-div-table-thead {
-  display: table-header-group;
-}
-.unite-card-div-table-tbody {
-  display: table-row-group;
-}
-
-.unite-card-div-table-thead > *,
-.unite-card-div-table-tbody > *,
-.table-div-ghost-row {
-  display: table-row;
-
-  > * {
-    display: table-cell;
-  }
-}
-
-.table-div-ghost-row {
-  display: table;
-  position: absolute !important;
-  z-index: $sortable-dragged-z-index !important;
-  pointer-events: none;
-  background: map-get($colors, white);
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-  border-color: map-get($colors, grey-medium);
-  opacity: 0.8;
-
-  > * {
-    padding: 16px 12px;
-
-    &:first-child {
-      padding-left: 30px;
-    }
-
-    &:last-child {
-      padding-right: 30px;
-    }
-
-    &.actions {
-      padding: 0;
-      vertical-align: middle;
-
-      > * {
-        display: none;
-      }
-    }
-  }
-}*/

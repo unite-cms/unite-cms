@@ -7,6 +7,7 @@
                    :fields="fields"
                    :sort="sort"
                    :selectable="selectable"
+                   @updateRow="onRowUpdate"
         ></component>
 
         <p v-if="error" class="uk-text-center">
@@ -32,7 +33,6 @@
     export default {
         data() {
             let bag = JSON.parse(this.parameters);
-            console.log(bag);
             return {
                 headerComponent: typeof this.$options.headerComponent !== 'undefined' ? this.$options.headerComponent : BaseViewHeader,
                 footerComponent: typeof this.$options.footerComponent !== 'undefined' ? this.$options.footerComponent : BaseViewFooter,
@@ -46,6 +46,10 @@
                 loading: false,
                 error: null,
                 rows: [],
+                sort: {
+                    field: null,
+                    asc: true
+                },
                 limit: 10,
                 page: 1,
                 total: 0,
@@ -59,7 +63,6 @@
                     retry: "Retry",
                     create: "Create"
                 },
-                sort: bag.settings.sort,
                 feather: feather,
             }
         },
@@ -107,7 +110,7 @@
 
                 this.error = null;
                 this.loading = true;
-                this.dataFetcher.sort(this.sort.field, this.sort.asc).fetch(page)
+                this.dataFetcher.sort(this.sort).fetch(page)
                     .then(
                         (data) => {
                             this.page = data.page;
@@ -116,6 +119,13 @@
                             this.$refs.footer.$emit('goto', this.page);
                         },
                         (error) => { this.error = 'API Error: ' + error; })
+                    .catch(() => { this.error = "An error occurred, while trying to fetch data."; })
+                    .finally(() => { this.loading = false; });
+            },
+            onRowUpdate(update) {
+                this.dataFetcher.update(update.id, update.data).then(
+                    (data) => {},
+                    (error) => { this.error = 'API Error: ' + error; })
                     .catch(() => { this.error = "An error occurred, while trying to fetch data."; })
                     .finally(() => { this.loading = false; });
             }

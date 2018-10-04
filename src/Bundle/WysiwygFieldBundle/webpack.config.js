@@ -42,13 +42,13 @@ Encore
 
 const webpackConfig = Encore.getWebpackConfig();
 
-// Remove the old version first
-webpackConfig.plugins = webpackConfig.plugins.filter(
-    plugin => !(plugin instanceof webpack.optimize.UglifyJsPlugin)
-);
-
-// Add the new one
-webpackConfig.plugins.push(new UglifyJsPlugin());
+// Replace uglify version on production.
+if(Encore.isProduction()) {
+    webpackConfig.plugins = webpackConfig.plugins.filter(
+        plugin => !(plugin instanceof webpack.optimize.UglifyJsPlugin)
+    );
+    webpackConfig.plugins.push(new UglifyJsPlugin());
+}
 
 // export the final configuration
 module.exports = webpackConfig;
