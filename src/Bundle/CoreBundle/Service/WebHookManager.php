@@ -9,11 +9,12 @@
 namespace UniteCMS\CoreBundle\Service;
 
 use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\TransferException;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
 use UniteCMS\CoreBundle\Entity\Webhook;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -61,13 +62,16 @@ class WebHookManager
      */
     public function process(FieldableContent $content, string $event_name, string $type) : void
     {
+        /**
+         * @var ContentType|SettingType $entity
+         */
         $entity = $content->getEntity();
 
         if (empty($entity->getWebHooks())) {
            return;
         }
 
-        $type = $this->container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(ucfirst($entity->getIdentifier()) . $type, $entity->getDomain());
+        $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($entity->getDomain(), ucfirst($entity->getIdentifier()) . $type);
 
         foreach ($entity->getWebHooks() as $webhook) {
 
@@ -76,8 +80,8 @@ class WebHookManager
                 continue;
             }
 
-            $result = GraphQL::executeQuery(new Schema(['query' => $type]), $webhook->getQuery(), $content);
-            
+            $result = GraphQL::executeQuery($schema, $webhook->getQuery(), $content);
+
             if (empty($result->errors)) {
                 $this->fire($webhook, $result->data);
             }
@@ -95,11 +99,9 @@ class WebHookManager
     /**
      * Executes the given webhooks
      *
-     * @param Webhook[]
+     * @param Webhook $webhook
      * @param array $data
      *
-     * @throws TransferException if the request fails
-     * 
      * @todo Log errors to a Log entity which will be presented to the user
      *
      * @return bool
@@ -122,13 +124,11 @@ class WebHookManager
                 $post_data['headers']['Authorization'] = $webhook->getAuthenticationHeader();
             }
 
-            $response = $this->client->request('POST', $webhook->getUrl(), $post_data);
-
+            $this->client->request('POST', $webhook->getUrl(), $post_data);
             return true;
 
-        } catch (TransferException $exception)
+        } catch (GuzzleException $exception)
         {
-
             // @todo Log errors to a Log entity which will be presented to the user
             $this->logger->error('A network error occurred. Webhook was not sent.', array('exception' => $exception));
             return false;
