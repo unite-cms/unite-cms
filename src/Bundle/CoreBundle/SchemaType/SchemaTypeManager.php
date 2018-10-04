@@ -78,7 +78,8 @@ class SchemaTypeManager
         return new Schema([
             'query' => $query,
             // At the moment only content (and not setting) can be mutated.
-            'mutation' => ($domain->getContentTypes()->count() > 0) ? $mutation : null,
+            'mutation' => $domain->getContentTypes()->count() > 0 ? $mutation : null,
+
             'typeLoader' => function ($name) use ($manager, $domain) {
                 return $manager->getSchemaType($name, $domain);
             },

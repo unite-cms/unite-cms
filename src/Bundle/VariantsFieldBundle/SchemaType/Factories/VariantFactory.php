@@ -57,41 +57,6 @@ class VariantFactory
         return $identifierName;
     }
 
-
-    public function createVariantTypes(SchemaTypeManager $schemaTypeManager, $nestingLevel = 0, Variants $variants) {
-
-        $schemaTypeName = self::schemaTypeNameForVariant($variants);
-
-        if(!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
-
-            $variantsSchemaTypes = [];
-
-            foreach($variants->getVariantsMetadata() as $meta) {
-
-                $variant = new Variant(
-                    $variants->getFieldsForVariant($meta['identifier']),
-                    $meta['identifier'],
-                    $meta['title'],
-                    $variants
-                );
-
-                $variantsSchemaTypes[] = $this->createVariantType($schemaTypeManager, $nestingLevel = 0, $variant);
-
-            }
-
-            $schemaTypeManager->registerSchemaType(new ObjectType([
-                'name' => $schemaTypeName,
-                'variants' => $variantsSchemaTypes
-            ]));
-
-        }
-
-        #dump($schemaTypeManager->getSchemaType($schemaTypeName)); exit;
-
-
-        return $schemaTypeManager->getSchemaType($schemaTypeName);
-    }
-
     public function createVariantType(SchemaTypeManager $schemaTypeManager, $nestingLevel = 0, Variant $variant) : Type {
 
         $schemaTypeName = self::schemaTypeNameForVariant($variant);

@@ -45,9 +45,6 @@ class VariantsFieldInterface extends InterfaceType
                         return $schemaTypeManager->getSchemaType('VariantsFieldBaseVariant');
                     }
 
-                    #dump($schemaTypeManager->getSchemaType(VariantFactory::schemaTypeNameForVariant($value), $value->getRootEntity()->getDomain())); exit;
-
-
                     // For real types, we can return the schema object that was generated before by VariantsFieldType.
                     return $schemaTypeManager->getSchemaType(VariantFactory::schemaTypeNameForVariant($value), $value->getRootEntity()->getDomain());
                 },
