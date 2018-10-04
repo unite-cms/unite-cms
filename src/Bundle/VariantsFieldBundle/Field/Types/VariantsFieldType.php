@@ -94,8 +94,6 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             return new Variant([], null, null);
         }
 
-
-
         $variants = self::getNestableFieldable($field);
 
         return new Variant(

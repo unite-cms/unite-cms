@@ -10,7 +10,6 @@ namespace UniteCMS\VariantsFieldBundle\SchemaType\Factories;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use UniteCMS\CoreBundle\Entity\ContentType;
