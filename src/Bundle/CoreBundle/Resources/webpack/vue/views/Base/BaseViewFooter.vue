@@ -78,11 +78,7 @@
             change(page) {
                 if(page !== this.current) {
                     this.current = page;
-                    this.$emit('change', {
-                        page: this.current,
-                        offset: this.limit * (this.current - 1),
-                        limit: this.limit
-                    });
+                    this.$emit('change', this.current);
                 }
             }
         }

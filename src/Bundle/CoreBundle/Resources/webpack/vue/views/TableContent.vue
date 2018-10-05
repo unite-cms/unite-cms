@@ -3,13 +3,13 @@
         <div class="unite-div-table-thead">
             <div :style="rowStyle" uk-grid class="unite-div-table-row">
                 <div :key="identifier" v-for="(field,identifier) in fields">
-                    <a v-if="!isSortable" href="#" v-on:click.prevent="setSort(identifier)">
+                    <a v-if="!isSortable && updateable" href="#" v-on:click.prevent="setSort(identifier)">
                         {{ field.label }}
                         <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
                     </a>
                     <span v-else >
                         {{ field.label }}
-                        <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
+                        <span v-if="updateable && sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
                     </span>
                 </div>
                 <div v-if="showActions">
@@ -17,17 +17,18 @@
                 </div>
             </div>
         </div>
-        <div class="unite-div-table-tbody" :uk-sortable="isSortable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
+        <div class="unite-div-table-tbody" :uk-sortable="isSortable && updateable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
             <div :style="rowStyle" uk-grid class="unite-div-table-row" :data-id="row.id" :key="row.id" v-for="row in rows">
                 <div class="unite-div-table-cell" :key="identifier" v-for="(field,identifier) in fields">
-                    <component :is="$uniteCMSViewFields.resolve(field.type)"
+                    <component :is="$uniteCMSViewFields.resolve(field.type)" v-if="!(isSortable && !updateable && sort.field === identifier)"
                                :identifier="identifier"
                                :label="field.label"
                                :settings="field.settings"
+                               :sortable="isSortable"
                                :row="row"></component>
                 </div>
                 <div v-if="showActions" class="unite-div-table-cell">
-                    <base-view-row-actions></base-view-row-actions>
+                    <base-view-row-actions :row="row" :urls="urls" ></base-view-row-actions>
                 </div>
             </div>
         </div>
@@ -60,7 +61,7 @@
         },
         computed: {
             showActions() {
-                return true;
+                return !this.selectable;
             },
             isSortable() {
                 return !!this.sort.sortable;

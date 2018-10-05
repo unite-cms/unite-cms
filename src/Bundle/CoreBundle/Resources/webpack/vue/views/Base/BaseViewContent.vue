@@ -9,6 +9,8 @@
             'sort',
             'rows',
             'selectable',
+            'updateable',
+            'urls',
         ]
     }
 </script>

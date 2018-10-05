@@ -1,6 +1,11 @@
 <template>
     <div>
-        <component :is="headerComponent" :title="labels.title" :subTitle="labels.subTitle" :createLabel="labels.create" :createUrl="urls.create"></component>
+        <component :deleted="deleted"
+                   :is="headerComponent"
+                   :title="labels.title"
+                   :subTitle="labels.subTitle"
+                   :createLabel="labels.create"
+                   :createUrl="urls.create"></component>
 
         <div v-if="error" class="unite-div-table-error uk-alert-danger uk-flex uk-flex-middle">
             <div v-html="feather.icons['alert-triangle'].toSvg({width: 24, height: 24})"></div>
@@ -13,10 +18,18 @@
                    :fields="fields"
                    :sort="sort"
                    :selectable="selectable"
-                   @updateRow="onRowUpdate"
-        ></component>
+                   :updateable="!deleted.showDeleted"
+                   :urls="urls"
+                   @updateRow="onRowUpdate"></component>
+
         <div v-if="loading" class="loading uk-text-center"><div uk-spinner></div></div>
-        <component :is="footerComponent" ref="footer" @change="load" :total="total" :limit="limit"></component>
+
+        <component
+                :is="footerComponent"
+                ref="footer"
+                @change="load"
+                :total="total"
+                :limit="limit"></component>
     </div>
 </template>
 
@@ -59,6 +72,11 @@
                 fields: bag.fields,
                 selectable: bag.select.is_mode_none ? null : (bag.select.is_mode_single ? 'SINGLE' : 'MULTIPLE'),
                 urls: bag.urls,
+                hasTranslations: bag.settings.hasTranslations,
+                deleted: {
+                    hasDeleted: false,
+                    showDeleted: false
+                },
                 labels: {
                     title: bag.title,
                     subTitle: bag.subTitle,
@@ -71,6 +89,12 @@
         props: ['parameters'],
         created: function() {
             this.load();
+
+            this.dataFetcher.countDeleted()
+                .then((total) => { this.deleted.hasDeleted = total > 0; }
+
+                // If something goes wrong, just show the deleted button.
+                ).catch(() => { this.deleted.hasDeleted = true; });
         },
         watch: {
             rows: {
@@ -105,6 +129,13 @@
                     this.load();
                 },
                 deep: true
+            },
+            deleted: {
+                handler(deleted) {
+                    this.dataFetcher.withDeleted(deleted.showDeleted);
+                    this.load();
+                },
+                deep: true
             }
         },
         methods: {
@@ -112,15 +143,30 @@
               this.load();
             },
             load(page = null) {
-
                 this.error = null;
                 this.loading = true;
+
                 this.dataFetcher.sort(this.sort).fetch(page)
                     .then(
                         (data) => {
+
+                            // In the future, allowed actions will be returned by the api, allowing to display action
+                            // buttons based on content and not only content type. At the moment, we fake this here.
+                            this.rows = data.result.map((row) => {
+                                let deleted = !(row.deleted == null);
+                                row._actions = {
+                                    delete: !deleted,
+                                    delete_definitely: deleted,
+                                    recover: deleted,
+                                    translations: !deleted && this.hasTranslations,
+                                    revisions: !deleted,
+                                    update: !deleted
+                                };
+                                return row;
+                            });
+
                             this.page = data.page;
                             this.total = data.total;
-                            this.rows = data.result;
                             this.$refs.footer.$emit('goto', this.page);
                         },
                         (error) => { this.error = 'API Error: ' + error; })
@@ -129,7 +175,14 @@
             },
             onRowUpdate(update) {
                 this.dataFetcher.update(update.id, update.data).then(
-                    (data) => {},
+                    (data) => {
+                        let rowToUpdate = this.rows.filter((row) => { return row.id === update.id });
+                        if(rowToUpdate) {
+                            ['updated'].concat(Object.keys(update.data)).forEach((field) => {
+                                rowToUpdate[0][field] = data[field];
+                            });
+                        }
+                    },
                     (error) => { this.error = 'API Error: ' + error; })
                     .catch(() => { this.error = "An error occurred, while trying to fetch data."; })
                     .finally(() => { this.loading = false; });

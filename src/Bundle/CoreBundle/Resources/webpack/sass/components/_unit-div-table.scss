@@ -88,6 +88,36 @@
     border: none;
     @extend .uk-box-shadow-medium;
   }
+
+  .actions {
+    .uk-button:not(.uk-button-text):not(.uk-button-link) {
+
+      opacity: 0.25;
+      transition: all 0.2s ease-out;
+
+      &:hover, &.uk-open {
+        background: $form-background;
+        opacity: 1;
+        @extend .uk-box-shadow-medium;
+        border-color: map-get($colors, grey-dark);
+      }
+    }
+  }
+
+  &:hover {
+    .actions {
+      .uk-button:not(.uk-button-text):not(.uk-button-link) {
+        background: $form-background;
+        border-color: map-get($colors, grey-medium);
+        opacity: 1;
+
+        &:hover, &.uk-open {
+          @extend .uk-box-shadow-medium;
+          border-color: map-get($colors, grey-dark);
+        }
+      }
+    }
+  }
 }
 
 .uk-card-body {

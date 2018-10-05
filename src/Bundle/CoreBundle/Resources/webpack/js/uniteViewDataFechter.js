@@ -25,6 +25,10 @@ export default {
             this.fieldQuery.push('id');
         }
 
+        if(this.fieldQuery.indexOf('deleted') < 0) {
+            this.fieldQuery.push('deleted');
+        }
+
         let clientConfig = {
             credentials: "same-origin",
             headers: {
@@ -68,6 +72,13 @@ export default {
         page = page ? page : this.page;
         limit = limit ? limit : this.limit;
 
+        let filter = this.filterArgument;
+
+        if(this.deletedArgument) {
+            let deletedFilter = { field: "deleted", operator: "IS NOT NULL" };
+            filter = filter ? { AND: [filter, deletedFilter] } : deletedFilter;
+        }
+
         return new Promise((resolve, reject) => {
             this.client.request(`
               query(
@@ -87,7 +98,7 @@ export default {
               }`, {
                 limit: limit,
                 page: page,
-                filter: this.filterArgument,
+                filter: filter,
                 deleted: this.deletedArgument,
                 sort: this.sortArgument.field ? [this.sortArgument] : null
             }).then(
@@ -98,6 +109,18 @@ export default {
             ).catch((err) => {
                 reject(err.response.errors[0].message);
             });
+
+        });
+    },
+
+    countDeleted() {
+        return new Promise((resolve, reject) => {
+            this.client.request(`
+                query($filter: FilterInput) { ` + this.queryMethod + `(limit: 1, filter: $filter, deleted: true) {
+                    total
+                } }`, { filter: { field: "deleted", operator: "IS NOT NULL" } })
+                .then((data) => { resolve(data[this.queryMethod].total); })
+                .catch((err) => {reject(err.response.errors[0].message);});
 
         });
     },
