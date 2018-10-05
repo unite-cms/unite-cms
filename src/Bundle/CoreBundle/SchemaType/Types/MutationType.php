@@ -281,9 +281,6 @@ class MutationType extends AbstractType
 
         $form = $this->fieldableFormBuilder->createForm($content->getContentType(), $content);
 
-        // Update only changed fields on this entity. Note: nested values will get replaced, no recursively replacement possible here.
-        $args['data'] = array_replace($content->getData(), $args['data']);
-
         // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
         if(is_array($args['data']) && !empty($context['csrf_token'])) {
             $args['data']['_token'] = $context['csrf_token'];
@@ -294,7 +291,7 @@ class MutationType extends AbstractType
             $args['data']['locale'] = $args['locale'] ?? $content->getLocale();
         }
 
-        $form->submit($args['data']);
+        $form->submit($args['data'], false);
 
         if ($form->isSubmitted() && $form->isValid()) {
 

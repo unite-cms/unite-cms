@@ -189,9 +189,9 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             case 'locale':
                                 return $value->getLocale();
                             case 'created':
-                                return $value->getCreated()->getTimestamp();
+                                return $value->getCreated() ? $value->getCreated()->getTimestamp() : null;
                             case 'updated':
-                                return $value->getUpdated()->getTimestamp();
+                                return $value->getCreated() ? $value->getUpdated()->getTimestamp() : null;
                             case 'deleted':
                                 return $value->getDeleted() ? $value->getDeleted()->getTimestamp() : null;
                             case 'translations':
