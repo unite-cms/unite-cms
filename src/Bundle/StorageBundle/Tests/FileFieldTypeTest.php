@@ -217,17 +217,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         );
 
         // Create GraphQL Schema
-        $schemaTypeManager = static::$container->get('unite.cms.graphql.schema_type_manager');
-
-        $schema = new Schema(
-            [
-                'query' => $schemaTypeManager->getSchemaType('Query'),
-                'mutation' => $schemaTypeManager->getSchemaType('Mutation'),
-                'typeLoader' => function ($name) use ($schemaTypeManager, $domain) {
-                    return $schemaTypeManager->getSchemaType($name, $domain);
-                },
-            ]
-        );
+        $schema = static::$container->get('unite.cms.graphql.schema_type_manager')->createSchema($domain, 'Query', 'Mutation');
 
         $result = GraphQL::executeQuery(
             $schema,
