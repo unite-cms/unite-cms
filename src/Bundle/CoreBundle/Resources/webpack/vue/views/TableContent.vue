@@ -3,21 +3,31 @@
         <div class="unite-div-table-thead">
             <div :style="rowStyle" uk-grid class="unite-div-table-row">
                 <div :key="identifier" v-for="(field,identifier) in fields">
-                    <a href="#" v-on:click.prevent="setSort(identifier)">
+                    <a v-if="!isSortable" href="#" v-on:click.prevent="setSort(identifier)">
                         {{ field.label }}
                         <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
                     </a>
+                    <span v-else >
+                        {{ field.label }}
+                        <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
+                    </span>
+                </div>
+                <div v-if="showActions">
+                    <span></span>
                 </div>
             </div>
         </div>
-        <div class="unite-div-table-tbody">
-            <div :style="rowStyle" uk-grid class="unite-div-table-row" :key="row.id" v-for="row in rows">
+        <div class="unite-div-table-tbody" :uk-sortable="isSortable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
+            <div :style="rowStyle" uk-grid class="unite-div-table-row" :data-id="row.id" :key="row.id" v-for="row in rows">
                 <div class="unite-div-table-cell" :key="identifier" v-for="(field,identifier) in fields">
                     <component :is="$uniteCMSViewFields.resolve(field.type)"
                                :identifier="identifier"
                                :label="field.label"
                                :settings="field.settings"
                                :row="row"></component>
+                </div>
+                <div v-if="showActions" class="unite-div-table-cell">
+                    <base-view-row-actions></base-view-row-actions>
                 </div>
             </div>
         </div>
@@ -26,71 +36,98 @@
 
 <script>
 
-    import BaseViewContent from './Base/BaseViewContent.vue';
-    import { addListener, removeListener } from 'resize-detector';
     import feather from 'feather-icons';
+    import UIkit from 'uikit';
+
+    import BaseViewContent from './Base/BaseViewContent.vue';
+    import BaseViewRowActions from './Base/BaseViewRowActions.vue';
 
     export default {
         extends: BaseViewContent,
         data() {
             return {
-                columnWidth: Object.keys(this.fields).map(() => { return { min: 100, max: 0 } }),
-                rowControl: this.selectable,
-                rowStyle: {},
+                columnWidth: [],
+                columnWidthChanged: 0,
                 feather: feather,
             };
         },
-        mounted() {
+        updated() {
             this.$nextTick(() => {
-                addListener(this.$el, this.recalcColumnWidth);
-                this.recalcColumnWidth();
-                this.updateRowStyle(this.columnWidth);
+                setTimeout(() => {
+                    this.recalcColumnWidth();
+                }, 1);
             });
         },
-        destroyed() {
-          removeListener(this.$el, this.recalcColumnWidth);
-        },
-        watch: {
-            columnWidth: {
-                handler(value) { this.updateRowStyle(value); },
-                deep: true
+        computed: {
+            showActions() {
+                return true;
+            },
+            isSortable() {
+                return !!this.sort.sortable;
+            },
+            rowStyle() {
+                this.columnWidthChanged; // We listen to changes on columnWidthChanged
+                return {
+                    'grid-template-columns': this.columnWidth.map((column) => {
+                        return 'minmax(' + column.min + 'px,' + (column.max === 0 ? '1fr' : (column.max + 'px')) + ')';
+                    }).join(' ')
+                };
             }
         },
         methods: {
             setSort(identifier) {
-                if(this.sort.field === identifier) {
-                    this.sort.asc = !this.sort.asc;
-                } else {
-                    this.sort.field = identifier;
-                    this.sort.asc = true;
-                }
-            },
-            updateRowStyle(columnWidth) {
-                let columns = this.rowControl ? ['60px'] : [];
-                this.rowStyle = {
-                    'grid-template-columns': columns.concat(columnWidth.map((column) => {
-                        return 'minmax(' + column.min + 'px,' + (column.max === 0 ? '1fr' : (column.max + 'px')) + ')';
-                    })).join(' ')
+                if(!this.isSortable) {
+                    if (this.sort.field === identifier) {
+                        this.sort.asc = !this.sort.asc;
+                    } else {
+                        this.sort.field = identifier;
+                        this.sort.asc = true;
+                    }
                 }
             },
             recalcColumnWidth() {
-                this.columnWidth = this.columnWidth || [];
+                let changed = false;
+
                 this.$el.querySelectorAll('.unite-div-table-row').forEach((row) => {
                     row.querySelectorAll('.unite-div-table-cell').forEach((column, delta) => {
+                        if(!this.columnWidth[delta]) {
+                            this.columnWidth[delta] = { min: 50, max: 0 };
+                            changed = true;
+                        }
+
                         if(column.firstChild.offsetWidth < column.offsetWidth) {
                             if(column.firstChild.offsetWidth > this.columnWidth[delta].min) {
                                 this.columnWidth[delta].min = column.firstChild.offsetWidth;
+                                changed = true;
                             }
 
                             if(row.parentElement.classList.contains('unite-div-table-tbody')) {
                                 if(column.firstChild.offsetWidth > this.columnWidth[delta].max) {
                                     this.columnWidth[delta].max = column.firstChild.offsetWidth;
+                                    changed = true;
                                 }
                             }
                         }
                     });
                 });
+
+                if(changed) {
+                    this.columnWidthChanged++;
+                }
+            },
+            moved(event) {
+                if(this.isSortable) {
+                    this.$emit('updateRow', {
+                        id: event.detail[1].dataset.id,
+                        data: {
+                            position: UIkit.util.index(event.detail[1])
+                        }
+                    });
+                }
             }
+        },
+        components: {
+            'base-view-row-actions': BaseViewRowActions
         }
     }
 </script>

@@ -56,6 +56,13 @@
   }
 }
 
+.unite-div-table-error {
+  border-bottom: $table-divider-border-width solid $table-divider-border;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
 .unite-div-table-row {
   @extend .uk-grid;
   @extend .uk-grid-collapse;
@@ -91,6 +98,37 @@
   .uk-card-header + .unite-div-table {
     margin-top: -31px;
   }
+
+  .unite-div-table-error {
+    margin: -30px -30px -30px;
+  }
+}
+
+@media (max-width: $breakpoint-small) {
+
+  .unite-div-table-error {
+    border-bottom: none;
+    display: block;
+  }
+
+  .unite-div-table-tbody {
+    border-top: $table-divider-border-width solid $table-divider-border;
+  }
+
+  .unite-div-table-row {
+    position: relative;
+    padding: 10px;
+
+    > * > * {
+      padding: 2px;
+    }
+  }
+
+  .uk-card-body {
+    .uk-card-header + .unite-div-table {
+      margin-top: -61px;
+    }
+  }
 }
 
 @media (min-width: $breakpoint-small) {
@@ -105,6 +143,8 @@
 
   .unite-div-table-row {
     display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
     flex: 1 0 100%;
 
     > * {
@@ -124,6 +164,16 @@
       }
     }
   }
+
+  .unite-div-table-error {
+    text-align: left;
+  }
+
+  .uk-card-body {
+    .unite-div-table-error {
+      margin-bottom: -15px;
+    }
+  }
 }
 
 @media (min-width: $breakpoint-large) {
@@ -135,6 +185,11 @@
 
     .uk-card-header + .unite-div-table {
       margin-top: -41px;
+    }
+
+    .unite-div-table-error {
+      margin: -40px -40px -20px;
+      padding: 15px 30px;
     }
   }
 }

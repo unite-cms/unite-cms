@@ -10,7 +10,6 @@ import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
 
 import BaseView from './vue/views/Base/BaseView.vue';
 import TableContent from './vue/views/TableContent.vue';
-import SortableContent from './vue/views/SortableContent.vue';
 import DomainEditor from "./vue/components/DomainEditor.vue";
 import ApiTokenField from "./vue/components/ApiTokenField";
 import iFramePreview from "./vue/components/iFramePreview.vue";
@@ -42,8 +41,10 @@ Vue.customElement('unite-cms-core-link-field', Link);
 Vue.customElement('unite-cms-core-state-field', State);
 
 // Register views.
-Vue.customElement('unite-cms-core-view-table', { extends: BaseView, contentComponent: TableContent });
-Vue.customElement('unite-cms-core-view-sortable', { extends: BaseView, contentComponent: SortableContent });
+Vue.customElement('unite-cms-core-view-table', {
+    extends: BaseView,
+    contentComponent: TableContent
+});
 
 // Register core fields.
 Vue.use({ install: Vue => {
@@ -54,6 +55,7 @@ Vue.use({ install: Vue => {
     Vue.prototype.$uniteCMSViewFields.register('date', require('./vue/views/Fields/Date').default);
     Vue.prototype.$uniteCMSViewFields.register('id', require('./vue/views/Fields/Id').default);
     Vue.prototype.$uniteCMSViewFields.register('state', require('./vue/views/Fields/State').default);
+    Vue.prototype.$uniteCMSViewFields.register('sortindex', require('./vue/views/Fields/Sortindex').default);
 }});
 
 // Create vue moment filter.

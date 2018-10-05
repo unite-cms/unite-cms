@@ -2,6 +2,12 @@
     <div>
         <component :is="headerComponent" :title="labels.title" :subTitle="labels.subTitle" :createLabel="labels.create" :createUrl="urls.create"></component>
 
+        <div v-if="error" class="unite-div-table-error uk-alert-danger uk-flex uk-flex-middle">
+            <div v-html="feather.icons['alert-triangle'].toSvg({width: 24, height: 24})"></div>
+            <div class="uk-flex-1 uk-padding-small">{{ error }}</div>
+            <button class="uk-button uk-button-danger" v-on:click.prevent="reload">{{ labels.retry }}</button>
+        </div>
+
         <component :is="contentComponent"
                    :rows="rows"
                    :fields="fields"
@@ -9,12 +15,6 @@
                    :selectable="selectable"
                    @updateRow="onRowUpdate"
         ></component>
-
-        <p v-if="error" class="uk-text-center">
-            <span v-html="feather.icons['alert-triangle'].toSvg({width: 80, height: 80})"></span><br /><br />
-            {{ error }}<br/><br/>
-            <button class="uk-button" v-on:click.prevent="load">{{ labels.retry }}</button>
-        </p>
         <div v-if="loading" class="loading uk-text-center"><div uk-spinner></div></div>
         <component :is="footerComponent" ref="footer" @change="load" :total="total" :limit="limit"></component>
     </div>
@@ -33,12 +33,14 @@
     export default {
         data() {
             let bag = JSON.parse(this.parameters);
+            console.log(bag);
             return {
                 headerComponent: typeof this.$options.headerComponent !== 'undefined' ? this.$options.headerComponent : BaseViewHeader,
                 footerComponent: typeof this.$options.footerComponent !== 'undefined' ? this.$options.footerComponent : BaseViewFooter,
                 contentComponent: typeof this.$options.contentComponent !== 'undefined' ? this.$options.contentComponent : BaseViewContent,
                 dataFetcher: uniteViewDataFetcher.create({
                     endpoint: bag.urls.api,
+                    csrf_token: bag.csrf_token,
                     settings: bag.settings
                 }, Object.keys(bag.fields).map((identifier) => {
                     return this.$uniteCMSViewFields.resolveFieldQueryFunction(bag.fields[identifier].type)(identifier, bag.fields[identifier]);
@@ -46,7 +48,7 @@
                 loading: false,
                 error: null,
                 rows: [],
-                sort: {
+                sort: bag.settings.sort || {
                     field: null,
                     asc: true
                 },
@@ -60,7 +62,7 @@
                 labels: {
                     title: bag.title,
                     subTitle: bag.subTitle,
-                    retry: "Retry",
+                    retry: "Reload",
                     create: "Create"
                 },
                 feather: feather,
@@ -106,6 +108,9 @@
             }
         },
         methods: {
+            reload() {
+              this.load();
+            },
             load(page = null) {
 
                 this.error = null;

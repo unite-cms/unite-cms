@@ -31,7 +31,7 @@
   background: map-get($colors, white);
   border-bottom: 1px solid map-get($colors, grey-medium);
   margin: -30px -30px 30px;
-  padding: 15px 30px;
+  padding: 15px;
 
   .back-button {
     margin-right: 10px;
@@ -79,6 +79,12 @@
     &.iframe-preview-parent {
       margin-right: 0 !important;
     }
+  }
+}
+
+@media (min-width: $breakpoint-small) {
+  .uk-card-header {
+    padding: 15px 30px;
   }
 }
 

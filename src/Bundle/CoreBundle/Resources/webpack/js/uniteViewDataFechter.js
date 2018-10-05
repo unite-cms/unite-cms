@@ -25,14 +25,23 @@ export default {
             this.fieldQuery.push('id');
         }
 
-        this.client = new GraphQLClient(bag.endpoint, {
+        let clientConfig = {
             credentials: "same-origin",
             headers: {
-                "Authentication-Fallback": true
+                "Authentication-Fallback": true,
             },
-        });
+        };
 
-        this.queryMethod = 'find' + bag.settings.contentType.charAt(0).toUpperCase() + bag.settings.contentType.slice(1);
+        if(bag.csrf_token) {
+            clientConfig.headers["X-CSRF-TOKEN"] = bag.csrf_token;
+        }
+
+        this.client = new GraphQLClient(bag.endpoint, clientConfig);
+
+        let contentTypeName = bag.settings.contentType.charAt(0).toUpperCase() + bag.settings.contentType.slice(1);
+        this.queryMethod = 'find' + contentTypeName;
+        this.updateMethod = 'update' + contentTypeName;
+        this.updateDataObjectName = contentTypeName + 'ContentInput';
         return this;
     },
 
@@ -96,14 +105,9 @@ export default {
     update(id, data) {
         return new Promise((resolve, reject) => {
             this.client.request(`
-              mutation(
-                $id: Id!,
-                $data: ` + this.updateDataObjectName + `
-              ) {
+              mutation($id: ID!, $data: ` + this.updateDataObjectName + `!) {
                 ` + this.updateMethod + `(id: $id, data: $data, persist: true) {
-                    result {
-                        ` + this.fieldQuery.join(',') + `
-                    }
+                    ` + this.fieldQuery.join(',') + `
                 }
               }`, {
                 id: id,
