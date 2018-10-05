@@ -120,6 +120,9 @@ class StateFieldTypeApiTest extends APITestCase
         $content->setContentType($this->domains['ct']->getContentTypes()->get('ct'));
         $this->repositoryFactory->add($content);
 
+        // When creating content, form will save the initial_state to the content.
+        $content->setData(['state' => 'draft']);
+
         // test empty update
         $query = 'mutation {
             updateCt(id: '.$content->getId().', data: {}, persist: false) {

@@ -26,6 +26,14 @@ class SortIndexFieldType extends FieldType
         return Type::int();
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    function resolveGraphQLData(FieldableField $field, $value)
+    {
+        return (int)$value;
+    }
+
     public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data)
     {
         $data[$field->getIdentifier()] = $repository->count(['contentType' => $content->getContentType()]);
