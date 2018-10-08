@@ -112,13 +112,29 @@ class WebHookManager
 
         try
         {
-            $post_data = [
-                'verify' => $ssl_verify,
-                'json' => $data,
-                'headers' => [
-                     'Content-type' => 'application/json; charset=utf-8'
-                 ]
-            ];
+            if ($webhook->getContentType() == 'json')
+            {
+
+                $post_data = [
+                    'verify' => $ssl_verify,
+                    'json' => $data,
+                    'headers' => [
+                        'Content-type' => 'application/json; charset=utf-8'
+                    ]
+                ];
+
+            }
+            else {
+
+                $post_data = [
+                    'verify' => $ssl_verify,
+                    'form_params' => $data,
+                    'headers' => [
+                        'Content-type' => 'application/x-www-form-urlencoded; charset=utf-8'
+                    ]
+                ];
+
+            }
 
             if ($webhook->getAuthenticationHeader()) {
                 $post_data['headers']['Authorization'] = $webhook->getAuthenticationHeader();

@@ -81,6 +81,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
                   {
                     "query": "query { type, text, longtext }",
                     "url": "http://www.example1.com",
+                    "content_type": "form_data",
                     "condition": "event == \"create\""
                   },
                   {
@@ -145,9 +146,9 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         parent::setUp();
 
         $this->mockHandler = new MockHandler([
-           new Response(200, []),
-           new Response(200, []),
-           new Response(200, [])
+            new Response(200, []),
+            new Response(200, []),
+            new Response(200, [])
         ]);
 
         $handler = HandlerStack::create($this->mockHandler);
@@ -175,7 +176,6 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
      */
     public function testContentTypeWebhooks()
     {
-
         $ct = $this->domain->getContentTypes()->first();
 
         $content = new Content();
@@ -192,7 +192,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
         $this->assertEquals([], $this->mockHandler->getLastRequest()->getHeader('Authorization'));
-        $this->assertEquals('{"type":"website","text":"my text","longtext":"my longtext"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
+        $this->assertEquals('type=website&text=my+text&longtext=my+longtext', $this->mockHandler->getLastRequest()->getBody()->getContents());
 
         $content_data = [
           'text' => "my text 1",

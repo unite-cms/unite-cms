@@ -152,9 +152,10 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
             new Webhook('', '', ''),
             new Webhook('XXX', 'XXX', 'csd <= ', 'csd <= ', -1),
             new Webhook('query { foo { baa } }', 'https://www.orf.at' . str_replace('_', 'a', $this->generateRandomMachineName(255)), 'event == "'.$this->generateRandomUTF8String(255).'"', true, $this->generateRandomUTF8String(255)),
+            new Webhook('query { type }', 'https://www.orf.at', 'event == "update"', true, 'test121212', 'chuck norris'),
         ]);
         $errors = static::$container->get('validator')->validate($contentType);
-        $this->assertCount(10, $errors);
+        $this->assertCount(11, $errors);
         $this->assertEquals('webhooks[0].query', $errors->get(0)->getPropertyPath());
         $this->assertEquals('not_blank', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('webhooks[0].url', $errors->get(1)->getPropertyPath());
@@ -175,10 +176,13 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('too_long', $errors->get(8)->getMessageTemplate());
         $this->assertEquals('webhooks[2].condition', $errors->get(9)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(9)->getMessageTemplate());
+        $this->assertEquals('webhooks[3].content_type', $errors->get(10)->getPropertyPath());
+        $this->assertEquals('invalid_webhook_content_type', $errors->get(10)->getMessageTemplate());
 
         $contentType->setWebhooks([
             new Webhook('{ type }', 'http://www.orf.at', 'event == "update"', false, 'abc12234234basdf'),
             new Webhook('query { foo { baa } }', 'https://www.orf.at', 'event == "delete"', true, ''),
+            new Webhook('query { foo { baa } }', 'https://www.orf.at', 'event == "delete"', true, '', 'form_data')
         ]);
         $this->assertCount(0, static::$container->get('validator')->validate($contentType));
         
