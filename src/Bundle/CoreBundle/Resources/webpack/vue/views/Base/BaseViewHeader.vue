@@ -10,10 +10,12 @@
                 {{ createLabel }}
             </a>
         </div>
-        <ul class="unite-card-table-tabs uk-tab" v-if="deleted.hasDeleted">
-            <li :class="{ 'uk-active': !deleted.showDeleted }"><a href="#" v-on:click.prevent="deleted.showDeleted = false">Active Content</a></li>
-            <li :class="{ 'uk-active': deleted.showDeleted }"><a href="#" v-on:click.prevent="deleted.showDeleted = true">Deleted Content</a></li>
-        </ul>
+        <div class="uk-flex">
+            <ul class="uk-flex-1 unite-div-table-tabs uk-tab" v-if="deleted.hasDeleted">
+                <li :class="{ 'uk-active': !deleted.showDeleted }"><a href="#" v-on:click.prevent="deleted.showDeleted = false">Active</a></li>
+                <li :class="{ 'uk-active': deleted.showDeleted }"><a href="#" v-on:click.prevent="deleted.showDeleted = true">Deleted</a></li>
+            </ul>
+        </div>
     </header>
 </template>
 
