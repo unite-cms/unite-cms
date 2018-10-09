@@ -13,7 +13,7 @@
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/BaseField.vue';
 
     export default {
         extends: BaseField,

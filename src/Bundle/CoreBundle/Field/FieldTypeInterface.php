@@ -113,4 +113,17 @@ interface FieldTypeInterface
      * @return array
      */
     function getViewFieldConfig(FieldableField $field) : array;
+
+    /**
+     * Return optional assets css and js assets, that get included when rendering the view. Assets can de defined as:
+     *
+     * [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ]
+     * [ 'js' => 'main.js', 'package' => 'UniteCMSStorageBundle' ]
+     * [ 'css' => 'https://example.com/main.css' ]
+     * [ 'js' => 'https://example.com/main.js' ]
+     *
+     * @param FieldableField $field
+     * @return array
+     */
+    function getViewFieldAssets(FieldableField $field) : array;
 }

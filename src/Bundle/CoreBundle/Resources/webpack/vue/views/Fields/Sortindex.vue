@@ -30,8 +30,7 @@
         line-height: 50px;
         padding: 0;
         position: absolute;
-        top: 50%;
-        margin-top: -25px;
+        top: 50px;
         right: 0;
         text-align: center;
     }

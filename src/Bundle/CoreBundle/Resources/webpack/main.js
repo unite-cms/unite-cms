@@ -27,8 +27,17 @@ Vue.use(vueCustomElement);
 // Create unite cms event bus.
 window.UniteCMSEventBus = new Vue();
 
-// Register view fields plugins.
-Vue.use(uniteViewFieldsPlugin);
+// Register core fields.
+Vue.use(uniteViewFieldsPlugin, {
+    register: {
+        'id': require('./vue/views/Fields/Id').default,
+        'text': require('./vue/views/Fields/Text').default,
+        'textarea': require('./vue/views/Fields/Textarea').default,
+        'date': require('./vue/views/Fields/Date').default,
+        'state': require('./vue/views/Fields/State').default,
+        'sortindex': require('./vue/views/Fields/Sortindex').default,
+    }
+});
 
 // Register global unite cms core components.
 Vue.customElement('unite-cms-core-domaineditor', DomainEditor);
@@ -45,18 +54,6 @@ Vue.customElement('unite-cms-core-view-table', {
     extends: BaseView,
     contentComponent: TableContent
 });
-
-// Register core fields.
-Vue.use({ install: Vue => {
-    Vue.prototype.$uniteCMSViewFields.register('text', require('./vue/views/Fields/Text').default);
-    Vue.prototype.$uniteCMSViewFields.register('textarea', require('./vue/views/Fields/Textarea').default);
-    Vue.prototype.$uniteCMSViewFields.register('wysiwyg', require('./vue/views/Fields/Textarea').default);
-    Vue.prototype.$uniteCMSViewFields.register('image', require('./vue/views/Fields/Image').default);
-    Vue.prototype.$uniteCMSViewFields.register('date', require('./vue/views/Fields/Date').default);
-    Vue.prototype.$uniteCMSViewFields.register('id', require('./vue/views/Fields/Id').default);
-    Vue.prototype.$uniteCMSViewFields.register('state', require('./vue/views/Fields/State').default);
-    Vue.prototype.$uniteCMSViewFields.register('sortindex', require('./vue/views/Fields/Sortindex').default);
-}});
 
 // Create vue moment filter.
 Vue.filter('dateFromNow', function(value) {

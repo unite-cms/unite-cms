@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
@@ -115,11 +116,17 @@ class ViewParameterBag implements \JsonSerializable
                         break;
                     default:
                         if($view->getContentType()->getFields()->containsKey($field)) {
+
+                            /**
+                             * @var FieldableField $fieldType
+                             */
                             $fieldType = $view->getContentType()->getFields()->get($field);
+
                             $fields[$field] = [
                                 'label' => $label,
                                 'type' => $fieldType->getType(),
                                 'settings' => $fieldTypeManager->getFieldType($fieldType->getType())->getViewFieldConfig($fieldType),
+                                'assets' => $fieldTypeManager->getFieldType($fieldType->getType())->getViewFieldAssets($fieldType),
                             ];
                         }
                         break;

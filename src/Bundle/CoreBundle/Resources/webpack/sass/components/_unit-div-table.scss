@@ -1,7 +1,5 @@
 
 .unite-div-table {
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
   border-top: 30px solid $form-background;
 
   .unite-div-table-thead {
@@ -126,7 +124,7 @@
   }
 
   .uk-card-header + .unite-div-table {
-    margin-top: -31px;
+    margin-top: -61px;
   }
 
   .unite-div-table-error {
@@ -178,21 +176,41 @@
   .unite-div-table-row {
     position: relative;
     padding: 10px;
+    min-height: 80px;
 
     > * > * {
       padding: 2px;
     }
-  }
 
-  .uk-card-body {
-    .uk-card-header + .unite-div-table {
-      margin-top: -61px;
+    .unite-div-table-cell {
+      > .actions {
+        padding: 0;
+        position: absolute;
+        text-align: center;
+        right: 5px;
+        top: 5px;
+        left: auto;
+        bottom: auto;
+
+        .uk-button {
+          padding: 0;
+          width: 40px;
+        }
+
+        .uk-dropdown {
+          text-align: right;
+        }
+      }
     }
   }
 }
 
 @media (min-width: $breakpoint-small) {
   .unite-div-table {
+
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+
     .unite-div-table-thead,
     .unite-div-table-tbody {
       display: flex;
@@ -227,16 +245,7 @@
 
   .unite-div-table-error {
     text-align: left;
-  }
-
-  .uk-card-body {
-    .unite-div-table-error {
-      margin-bottom: -15px;
-    }
-  }
-
-  .unite-div-table-tabs {
-    margin-bottom: -30px;
+    margin-bottom: -15px;
   }
 }
 
@@ -245,10 +254,6 @@
     .unite-div-table {
       margin-left: -40px;
       margin-right: -40px;
-    }
-
-    .uk-card-header + .unite-div-table {
-      margin-top: -41px;
     }
 
     .unite-div-table-error {
