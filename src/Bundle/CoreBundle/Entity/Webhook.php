@@ -39,6 +39,13 @@ class Webhook
 
     /**
      * @var string
+     * @Assert\Choice(choices={"json", "form_data"}, message="invalid_webhook_content_type")
+     * @Type("string")
+     */
+    private $content_type;
+
+    /**
+     * @var string
      * @Assert\Length(min="8", max="32", minMessage="too_short", maxMessage="too_long")
      * @Type("string")
      */
@@ -53,13 +60,14 @@ class Webhook
      */
     private $condition;
 
-    public function __construct(string $query, string $url, string $condition, bool $check_ssl = true, string $authentication_header = null)
+    public function __construct(string $query, string $url, string $condition, bool $check_ssl = true, string $authentication_header = null, string $content_type = 'json')
     {
         $this->query = $query;
         $this->url = $url;
         $this->check_ssl = $check_ssl;
         $this->authentication_header = $authentication_header;
         $this->condition = $condition;
+        $this->content_type = $content_type;
     }
 
     /**
@@ -108,6 +116,22 @@ class Webhook
     public function setCheckSSL(bool $check_ssl): void
     {
         $this->check_ssl = $check_ssl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentType(): string
+    {
+        return $this->content_type;
+    }
+
+    /**
+     * @param string $content_type
+     */
+    public function setContentType(string $content_type): void
+    {
+        $this->content_type = $content_type;
     }
 
     /**

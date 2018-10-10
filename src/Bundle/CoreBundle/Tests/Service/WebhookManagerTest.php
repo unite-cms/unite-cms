@@ -72,23 +72,67 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
               ],
               "webhooks": [
                   {
-                    "query": "query { type, text, longtext  }",
-                    "url": "http://www.example.com",
-                    "check_ssl": true,
-                    "authentication_header": "key1212494949494",
-                    "condition": "event == \"update\""
-                  },
-                  {
                     "query": "query { type, text, longtext }",
                     "url": "http://www.example1.com",
                     "condition": "event == \"create\""
                   },
                   {
-                    "query": "query { type, text }",
+                    "query": "query { type, text, longtext  }",
                     "url": "http://www.example2.com",
                     "check_ssl": true,
                     "authentication_header": "key1212494949494",
+                    "condition": "event == \"update\""
+                  },
+                  {
+                    "query": "query { type, text }",
+                    "url": "http://www.example3.com",
+                    "check_ssl": true,
+                    "authentication_header": "key1212494949494",
                     "condition": "event == \"delete\""
+                  }
+              ],
+              "locales": [
+                  "en",
+                  "de"
+              ]
+            },
+            {
+              "title": "Website2",
+              "identifier": "website2",
+              "fields": [
+                  {
+                    "title": "Choice",
+                    "identifier": "choice",
+                    "type": "choice",
+                    "settings": {
+                        "choices": {
+                            "Red color": "red",
+                            "Green color": "green",
+                            "Blue color": "blue"
+                        }
+                    }
+                  },
+                  {
+                    "title": "LongText",
+                    "identifier": "longtext",
+                    "type": "textarea",
+                    "settings": {}
+                  }
+              ],
+              "webhooks": [
+                  {
+                    "query": "query { type, choice, longtext }",
+                    "url": "http://www.example4.com",
+                    "content_type": "form_data",
+                    "condition": "event == \"create\""
+                  },
+                  {
+                    "query": "query { type, choice, longtext  }",
+                    "url": "http://www.example5.com",
+                    "check_ssl": true,
+                    "content_type": "form_data",
+                    "authentication_header": "key1212",
+                    "condition": "event == \"update\""
                   }
               ],
               "locales": [
@@ -112,7 +156,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
               "webhooks": [
                   {
                     "query": "query { type, text }",
-                    "url": "http://www.example3.com",
+                    "url": "http://www.example6.com",
                     "check_ssl": true,
                     "authentication_header": "key121277543",
                     "condition": "event == \"update\""
@@ -145,9 +189,9 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         parent::setUp();
 
         $this->mockHandler = new MockHandler([
-           new Response(200, []),
-           new Response(200, []),
-           new Response(200, [])
+            new Response(200, []),
+            new Response(200, []),
+            new Response(200, [])
         ]);
 
         $handler = HandlerStack::create($this->mockHandler);
@@ -171,11 +215,10 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
     }
 
     /**
-     * Test webhooks on ContentType
+     * Test webhooks on ContentType with Json content type
      */
-    public function testContentTypeWebhooks()
+    public function testContentTypeWebhooksJson()
     {
-
         $ct = $this->domain->getContentTypes()->first();
 
         $content = new Content();
@@ -215,6 +258,43 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals('key1212494949494', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
         $this->assertEquals('', $this->mockHandler->getLastRequest()->getBody()->getContents());
        
+    }
+
+    /**
+     * Test webhooks on ContentType with form data content type
+     */
+    public function testContentTypeWebhooksFormData()
+    {
+        $ct = $this->domain->getContentTypes()->last();
+
+        $content = new Content();
+        $content->setContentType($ct);
+
+        $content_data = [
+            'choice' => "red",
+            'longtext' => "my longtext 123"
+        ];
+
+        $content->setData($content_data);
+        $this->em->persist($content);
+        $this->em->flush($content);
+
+        $this->assertNotNull($this->mockHandler->getLastRequest());
+        $this->assertEquals([], $this->mockHandler->getLastRequest()->getHeader('Authorization'));
+        $this->assertEquals('type=website2&choice=red&longtext=my+longtext+123', $this->mockHandler->getLastRequest()->getBody()->getContents());
+
+        $content_data = [
+            'choice' => "green",
+            'longtext' => "my longtext 123"
+        ];
+
+        $content->setData($content_data);
+        $this->em->flush($content);
+
+        $this->assertNotNull($this->mockHandler->getLastRequest());
+        $this->assertEquals('key1212', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
+        $this->assertEquals('type=website2&choice=green&longtext=my+longtext+123', $this->mockHandler->getLastRequest()->getBody()->getContents());
+
     }
 
     /**
