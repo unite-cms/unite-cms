@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Tests\View;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RequestContext;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\View\ViewParameterBag;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\Entity\View;
@@ -72,6 +73,9 @@ class ViewParameterBagTest extends TestCase
         $this->assertEquals(
             json_encode(
                 [
+                    'title' => '',
+                    'subTitle' => '',
+                    'fields' => [],
                     'urls' => [
                         'api' => 'any_endpoint_pattern',
                         'create' => 'any_create_pattern',
@@ -114,8 +118,8 @@ class ViewParameterBagTest extends TestCase
     {
 
         $view = new View();
-        $view->setIdentifier('co1')->setContentType(new ContentType())->getContentType()
-            ->setIdentifier('ct1')->setLocales(['de', 'en'])->setDomain(new Domain())->getDomain()
+        $view->setIdentifier('co1')->setTitle('Baa')->setContentType(new ContentType())->getContentType()
+            ->setIdentifier('ct1')->setTitle('Foo')->setLocales(['de', 'en'])->setDomain(new Domain())->getDomain()
             ->setIdentifier('d1')->setOrganization(new Organization())->getOrganization()
             ->setIdentifier('o1');
         $generator = new Class implements UrlGeneratorInterface
@@ -136,6 +140,9 @@ class ViewParameterBagTest extends TestCase
         $this->assertEquals(
             json_encode(
                 [
+                    'title' => 'Foo',
+                    'subTitle' => 'Baa',
+                    'fields' => [],
                     'urls' => [
                         'api' => 'unitecms_core_api_d1,o1',
                         'create' => 'unitecms_core_content_create_d1,o1,co1,ct1',
@@ -161,6 +168,7 @@ class ViewParameterBagTest extends TestCase
                 ViewParameterBag::createFromView(
                     $view,
                     $generator,
+                    $this->createMock(FieldTypeManager::class),
                     ViewTypeInterface::SELECT_MODE_SINGLE,
                     ['foo' => 'baa']
                 )
