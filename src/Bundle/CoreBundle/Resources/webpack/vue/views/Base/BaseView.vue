@@ -7,7 +7,7 @@
                    :createLabel="labels.create"
                    :createUrl="urls.create"></component>
 
-        <div v-if="error" class="unite-div-table-error uk-alert-danger uk-flex uk-flex-middle">
+        <div v-if="error" class="unite-table-error uk-alert-danger uk-flex uk-flex-middle">
             <div v-html="feather.icons['alert-triangle'].toSvg({width: 24, height: 24})"></div>
             <div class="uk-flex-1 uk-padding-small">{{ error }}</div>
             <button class="uk-button uk-button-danger" v-on:click.prevent="reload">{{ labels.retry }}</button>
@@ -89,12 +89,6 @@
         props: ['parameters'],
         created: function() {
             this.load();
-
-            this.dataFetcher.countDeleted()
-                .then((total) => { this.deleted.hasDeleted = total > 0; }
-
-                // If something goes wrong, just show the deleted button.
-                ).catch(() => { this.deleted.hasDeleted = true; });
         },
         watch: {
             rows: {
@@ -152,7 +146,7 @@
 
                             // In the future, allowed actions will be returned by the api, allowing to display action
                             // buttons based on content and not only content type. At the moment, we fake this here.
-                            this.rows = data.result.map((row) => {
+                            this.rows = data.result.result.map((row) => {
                                 let deleted = !(row.deleted == null);
                                 row._actions = {
                                     delete: !deleted,
@@ -165,8 +159,9 @@
                                 return row;
                             });
 
-                            this.page = data.page;
-                            this.total = data.total;
+                            this.page = data.result.page;
+                            this.total = data.result.total;
+                            this.deleted.hasDeleted = data.deleted.total > 0;
                             this.$refs.footer.$emit('goto', this.page);
                         },
                         (error) => { this.error = 'API Error: ' + error; })

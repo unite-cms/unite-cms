@@ -88,12 +88,15 @@ export default {
                 $filter: FilterInput,
                 $deleted: Boolean
               ) {
-                ` + this.queryMethod + `(limit: $limit, page: $page, sort: $sort, filter: $filter, deleted: $deleted) {
+                result: ` + this.queryMethod + `(limit: $limit, page: $page, sort: $sort, filter: $filter, deleted: $deleted) {
                     page,
                     total,
                     result {
                         ` + this.fieldQuery.join(',') + `
                     }
+                },
+                deleted: ` + this.queryMethod + `(limit: 1, filter: { field: "deleted", operator: "IS NOT NULL" }, deleted: true) {
+                    total
                 }
               }`, {
                 limit: limit,
@@ -103,24 +106,12 @@ export default {
                 sort: this.sortArgument.field ? [this.sortArgument] : null
             }).then(
                 (data) => {
-                    this.page = data[this.queryMethod].page;
-                    resolve(data[this.queryMethod]);
+                    this.page = data.result.page;
+                    resolve(data);
                 }
             ).catch((err) => {
                 reject(err.response.errors[0].message);
             });
-
-        });
-    },
-
-    countDeleted() {
-        return new Promise((resolve, reject) => {
-            this.client.request(`
-                query($filter: FilterInput) { ` + this.queryMethod + `(limit: 1, filter: $filter, deleted: true) {
-                    total
-                } }`, { filter: { field: "deleted", operator: "IS NOT NULL" } })
-                .then((data) => { resolve(data[this.queryMethod].total); })
-                .catch((err) => {reject(err.response.errors[0].message);});
 
         });
     },

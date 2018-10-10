@@ -1,0 +1,152 @@
+.unite-div-table,
+.unite-card-table {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: -31px -30px 0 -30px;
+  border-top: 10px solid map-get($colors, white);
+
+  table > thead,
+  .unite-div-table-thead {
+    background: map-get($colors, white);
+
+    > * > * {
+      vertical-align: bottom;
+      font-size: $table-header-cell-font-size;
+      font-weight: $table-header-cell-font-weight;
+      color: $table-header-cell-color;
+      @if (mixin-exists(hook-table-header-cell)) {
+        @include hook-table-header-cell();
+      }
+
+      a, span {
+        display: inline-block;
+        text-decoration: none;
+        color: $table-header-cell-color;
+        white-space: nowrap;
+
+        > span {
+          line-height: 0;
+          font-size: 0;
+          vertical-align: middle;
+          display: inline-block;
+          margin-top: -4px;
+        }
+      }
+    }
+
+    tr:hover {
+      background: none;
+    }
+  }
+
+  table > tbody,
+  .unite-div-table-tbody {
+    margin-bottom: 20px;
+
+    > * {
+      &:hover {
+        background: $table-hover-row-background;
+
+        .uk-button:not(.uk-button-text):not(.uk-button-link) {
+          background: map-get($colors, white);
+          border-color: map-get($colors, grey-medium);
+          box-shadow: none;
+          opacity: 1;
+
+          &:hover, &.uk-open {
+            @extend .uk-box-shadow-medium;
+            border-color: map-get($colors, grey-dark);
+          }
+        }
+      }
+
+      &:nth-child(2n) {
+        background: $global-muted-background;
+
+        &:hover {
+          background: $table-hover-row-background;
+        }
+      }
+    }
+  }
+}
+
+// unite-div-table-row can also be used outside of .unite-div-table (e.g. ghost object while sorting)
+.unite-card-table tr,
+.unite-div-table-row {
+  border-bottom: $table-divider-border-width solid $table-divider-border;
+  background: $form-background;
+
+  > td,
+  > th,
+  > div > * {
+    padding: 16px 12px;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  > td:first-child,
+  > th:first-child,
+  > div:first-child > * {
+    padding-left: 30px;
+  }
+
+  > td:last-child,
+  > th:last-child,
+  > div:last-child > * {
+    padding-right: 30px;
+  }
+
+  &.uk-sortable-drag {
+    background: $form-background;
+    border: none;
+    @extend .uk-box-shadow-medium;
+  }
+
+  .uk-button:not(.uk-button-text):not(.uk-button-link) {
+
+    opacity: 0.25;
+    transition: all 0.2s ease-out;
+    box-shadow: none;
+    border-color: transparent;
+    color: map-get($colors, grey-very-dark);
+
+    &:hover, &.uk-open {
+      background: $form-background;
+      opacity: 1;
+      @extend .uk-box-shadow-medium;
+      border-color: map-get($colors, grey-dark);
+    }
+  }
+}
+
+.unite-table-error {
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  display: block;
+  margin: -30px;
+}
+
+@media (min-width: $breakpoint-small) {
+  .unite-table-error {
+    display: flex;
+    margin-bottom: -15px;
+    text-align: left;
+    border-bottom: $table-divider-border-width solid $table-divider-border;
+  }
+}
+
+@media (min-width: $breakpoint-large) {
+  .unite-div-table,
+  .unite-card-table {
+    margin: -41px -40px 0 -40px;
+  }
+
+  .unite-table-error {
+    margin: -40px -40px 40px;
+    padding: 15px 30px;
+  }
+}

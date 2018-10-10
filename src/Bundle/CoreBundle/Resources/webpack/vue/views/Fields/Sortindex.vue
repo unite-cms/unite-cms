@@ -24,7 +24,7 @@
 
     @import "../../../../../node_modules/uikit/src/scss/variables";
 
-    .view-field-sortindex {
+    .view-field.view-field-sortindex {
         width: 50px;
         height: 50px;
         line-height: 50px;
@@ -36,7 +36,7 @@
     }
 
     @media (min-width: $breakpoint-small) {
-        .view-field-sortindex {
+        .view-field.view-field-sortindex {
             position: relative;
             margin: 0;
             height: auto;
