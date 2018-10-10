@@ -57,8 +57,8 @@ services:
 
     #- ./.docker/unite-cms/root/etc/nginx/conf.d/app.conf:/etc/nginx/conf.d/app.conf
     #- ./.docker/unite-cms/root/etc/php-fpm.d/www.conf:/etc/php-fpm.d/www.conf
-    - ./var/log/php:/var/log/php
-    - ./var/log/nginx:/var/log/nginx
+    #- ./var/log/php:/var/log/php
+    #- ./var/log/nginx:/var/log/nginx
     ports:
     - "8080:8080"
 
