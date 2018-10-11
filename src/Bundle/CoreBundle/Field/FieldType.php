@@ -146,10 +146,10 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function getViewFieldConfig(FieldableField $field = null) : array { return []; }
-
-    /**
-     * {@inheritdoc}
-     */
-    function getViewFieldAssets(FieldableField $field = null) : array { return []; }
+    function getViewFieldDefinition(FieldableField $field = null) : array {
+        return [
+            'type' => self::getType(),
+            'label' => $field ? $field->getTitle() : null,
+        ];
+    }
 }

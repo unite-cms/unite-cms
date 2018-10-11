@@ -12,11 +12,11 @@
         computed: {
             stateCategory() {
                 let value = this.row[this.identifier];
-                return 'uk-label-' + (this.fieldConfig.places[value] ? this.fieldConfig.places[value].category : 'notice');
+                return 'uk-label-' + (this.settings.places[value] ? this.settings.places[value].category : 'notice');
             },
             stateLabel() {
                 let value = this.row[this.identifier];
-                return this.fieldConfig.places[value] ? this.fieldConfig.places[value].label : value;
+                return this.settings.places[value] ? this.settings.places[value].label : value;
             }
         }
     }

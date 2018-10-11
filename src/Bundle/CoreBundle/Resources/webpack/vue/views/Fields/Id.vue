@@ -1,5 +1,5 @@
 <template>
-    <div class="view-field view-field-text"><span class="uk-text-meta" :title="row[identifier]" uk-tooltip>{{ row[identifier] ? '#' + row[identifier].split('-')[0] : '' }}</span></div>
+    <div class="view-field view-field-id"><span class="uk-text-meta" :title="row[identifier]" uk-tooltip>{{ row[identifier] ? '#' + row[identifier].split('-')[0] : '' }}</span></div>
 </template>
 
 <script>
@@ -11,7 +11,7 @@
 </script>
 
 <style scoped lang="scss">
-    .view-field-text {
+    .view-field-id {
         display: inline-block;
 
         .uk-text-meta {

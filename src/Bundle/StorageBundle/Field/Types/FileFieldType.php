@@ -233,10 +233,12 @@ class FileFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getViewFieldAssets(FieldableField $field = null) : array {
-        return [
-            [ 'js' => 'main.js', 'package' => 'UniteCMSStorageBundle' ],
-            [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ],
+    function getViewFieldDefinition(FieldableField $field = null) : array {
+        return parent::getViewFieldDefinition($field) + [
+            'assets' => [
+                [ 'js' => 'main.js', 'package' => 'UniteCMSStorageBundle' ],
+                [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ],
+            ]
         ];
     }
 }

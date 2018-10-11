@@ -14,8 +14,9 @@ use Symfony\Component\Config\Definition\Processor;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\Types\TextFieldType;
 use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
-use UniteCMS\CoreBundle\View\Types\TableViewType;
 
 class TableViewConfigurationTest extends TestCase
 {
@@ -30,6 +31,11 @@ class TableViewConfigurationTest extends TestCase
     private $configuration;
 
     /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
+
+    /**
      * @var Processor $processor
      */
     private $processor;
@@ -40,7 +46,12 @@ class TableViewConfigurationTest extends TestCase
         $title = new ContentTypeField();
         $title->setIdentifier('title')->setTitle('Title')->setType('text');
         $this->view->setContentType(new ContentType())->getContentType()->addField($title);
-        $this->configuration = new TableViewConfiguration($this->view, TableViewType::PROPERTY_IDENTIFIERS);
+        $this->fieldTypeManager = $this->createMock(FieldTypeManager::class);
+        $this->fieldTypeManager->expects($this->any())->method('getFieldType')->will($this->returnValueMap([
+            ['text', new TextFieldType()],
+        ]));
+
+        $this->configuration = new TableViewConfiguration($this->view, $this->fieldTypeManager);
         $this->processor = new Processor();
     }
 

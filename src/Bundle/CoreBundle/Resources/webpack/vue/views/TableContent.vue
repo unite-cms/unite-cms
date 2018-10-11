@@ -23,7 +23,6 @@
                     <component :is="$uniteCMSViewFields.resolve(field.type)" v-if="!(isSortable && !updateable && sortConfig.field === identifier)"
                                :identifier="identifier"
                                :label="field.label"
-                               :config="field.config"
                                :settings="field.settings"
                                :sortable="isSortable"
                                :row="row"></component>
@@ -90,6 +89,7 @@
 
                 this.$el.querySelectorAll('.unite-div-table-row').forEach((row) => {
                     row.querySelectorAll('.unite-div-table-cell').forEach((column, delta) => {
+
                         if(!this.columnWidth[delta]) {
                             this.columnWidth[delta] = { min: 50, max: 0 };
                             changed = true;

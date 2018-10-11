@@ -112,13 +112,12 @@ class TableViewTypeTest extends ContainerAwareTestCase
         $this->viewSettings->fields = ['test'];
 
         // View should be valid.
-        echo static::$container->get('validator')->validate($this->view);
         $this->assertCount(0, static::$container->get('validator')->validate($this->view));
 
         // Parameters should include state field config and assets
         $parameters = static::$container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($this->view);
 
-        $this->assertEquals(['places' => $field->getSettings()->places], $parameters->getSettings()['fields']['test']['config']);
+        $this->assertEquals(['places' => $field->getSettings()->places], $parameters->getSettings()['fields']['test']['settings']);
     }
 
 }

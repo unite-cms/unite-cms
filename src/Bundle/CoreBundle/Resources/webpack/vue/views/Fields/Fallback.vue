@@ -23,5 +23,7 @@
 </script>
 
 <style scoped>
-
+    .view-field-fallback {
+        white-space: nowrap;
+    }
 </style>

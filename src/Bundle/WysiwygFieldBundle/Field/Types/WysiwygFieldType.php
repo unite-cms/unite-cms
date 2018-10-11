@@ -178,10 +178,14 @@ class WysiwygFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getViewFieldAssets(FieldableField $field = null) : array {
+    function getViewFieldDefinition(FieldableField $field = null) : array {
         return [
-            [ 'js' => 'main.js', 'package' => 'UniteCMSWysiwygFieldBundle' ],
-            [ 'css' => 'main.css', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+            'label' => $field ? $field->getTitle() : null,
+            'type' => 'textarea',
+            'assets' => [
+                [ 'js' => 'main.js', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+                [ 'css' => 'main.css', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+            ]
         ];
     }
 }

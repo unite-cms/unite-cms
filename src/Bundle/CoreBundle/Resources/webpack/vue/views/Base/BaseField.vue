@@ -4,11 +4,6 @@
 
 <script>
     export default {
-        data() {
-            return {
-                fieldConfig: Object.assign({}, this.settings, this.config)
-            };
-        },
         methods: {
 
             /**
@@ -22,7 +17,7 @@
                 return identifier
             },
         },
-        props: ['identifier', 'label', 'config', 'settings', 'row'],
+        props: ['identifier', 'label', 'settings', 'row'],
     }
 </script>
 

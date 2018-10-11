@@ -107,16 +107,13 @@ interface FieldTypeInterface
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context);
 
     /**
-     * Return optional configuration that gets passed to the javascript field component when a content type view gets rendered.
+     * Return the definition array that gets passed to the view field javascript component.
      *
-     * @param FieldableField $field
-     * @return array
-     */
-    function getViewFieldConfig(FieldableField $field = null) : array;
-
-    /**
-     * Return optional assets css and js assets, that get included when rendering the view. Assets can de defined as:
+     * Allowed keys are: label, type, settings, assets.
      *
+     * If $field is empty you should return definitions that can be set without $field and leave the rest empty.
+     *
+     * Assets can be defined as:
      * [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ]
      * [ 'js' => 'main.js', 'package' => 'UniteCMSStorageBundle' ]
      * [ 'css' => 'https://example.com/main.css' ]
@@ -125,5 +122,5 @@ interface FieldTypeInterface
      * @param FieldableField $field
      * @return array
      */
-    function getViewFieldAssets(FieldableField $field = null) : array;
+    function getViewFieldDefinition(FieldableField $field = null) : array;
 }

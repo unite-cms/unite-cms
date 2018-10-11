@@ -13,6 +13,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 
 /**
@@ -20,20 +21,22 @@ use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
  */
 class TableViewConfiguration implements ConfigurationInterface
 {
+    const PROPERTY_IDENTIFIERS = ['id', 'locale', 'created', 'updated', 'deleted'];
+
     /**
      * @var View $view
      */
     private $view;
 
     /**
-     * @var array $property_identifiers
+     * @var FieldTypeManager $fieldTypeManager
      */
-    private $property_identifiers;
+    private $fieldTypeManager;
 
-    public function __construct(View $view, $property_identifiers = [])
+    public function __construct(View $view, FieldTypeManager $fieldTypeManager)
     {
         $this->view = $view;
-        $this->property_identifiers = $property_identifiers;
+        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -133,7 +136,7 @@ class TableViewConfiguration implements ConfigurationInterface
 
                         // Make sure, that key is defined.
                         $root_key = explode('.', $key)[0];
-                        if (!in_array($key, $this->property_identifiers) && !$this->view->getContentType()->getFields(
+                        if (!in_array($key, self::PROPERTY_IDENTIFIERS) && !$this->view->getContentType()->getFields(
                             )->containsKey($root_key)) {
                             $exception = new InvalidConfigurationException(
                                 sprintf('Unknown field %s', json_encode($key))
@@ -142,7 +145,7 @@ class TableViewConfiguration implements ConfigurationInterface
                             throw $exception;
                         }
 
-                        $transformed[$key] = (array)$value + $this->defaultFieldConfig($key, $this->view);
+                        $transformed[$key] = (array)$value + $this->defaultFieldConfig($key, $value['type'] ?? null);
                     }
 
                     return $transformed;
@@ -155,6 +158,7 @@ class TableViewConfiguration implements ConfigurationInterface
             ->scalarNode('type')->isRequired()->end()
             ->scalarNode('label')->isRequired()->end()
             ->variableNode('settings')->end()
+            ->variableNode('assets')->end()
             ->end()
             ->end()
             ->end()
@@ -202,7 +206,7 @@ class TableViewConfiguration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    private function defaultFieldConfig(string $field, View $view)
+    private function defaultFieldConfig(string $field, string $type = null)
     {
 
         // If this is a nested key, we cannot resolve it.
@@ -210,7 +214,7 @@ class TableViewConfiguration implements ConfigurationInterface
             return [];
         }
 
-        if (in_array($field, $this->property_identifiers)) {
+        if (in_array($field, self::PROPERTY_IDENTIFIERS)) {
             return [
                 'type' => ($field == 'id' ? 'id' : ($field == 'locale' ? 'locale' : 'date')),
                 'label' => ucfirst($field),
@@ -220,13 +224,14 @@ class TableViewConfiguration implements ConfigurationInterface
         /**
          * @var ContentTypeField $field
          */
-        $field = $view->getContentType()->getFields()->get($field);
+        $field = $this->view->getContentType()->getFields()->get($field);
 
         if ($field) {
-            return [
-                'label' => $field->getTitle(),
-                'type' => $field->getType(),
-            ];
+            return $this->fieldTypeManager->getFieldType($field->getType())->getViewFieldDefinition($field);
+        }
+
+        elseif(!empty($type)) {
+            return $this->fieldTypeManager->getFieldType($type);
         }
 
         return [];

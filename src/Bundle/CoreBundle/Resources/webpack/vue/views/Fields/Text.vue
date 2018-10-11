@@ -11,5 +11,7 @@
 </script>
 
 <style scoped>
-
+    .view-field-text {
+        white-space: nowrap;
+    }
 </style>

@@ -59,11 +59,18 @@ Vue.customElement('unite-cms-core-view-table', {
 moment.locale(window.navigator.language);
 
 Vue.filter('dateFromNow', function(value) {
-    return value ? moment.unix(value).fromNow() : '';
+    let date = (typeof value === 'string') ? moment(value) : moment.unix(value);
+    return value ? date.fromNow() : '';
+});
+
+Vue.filter('date', function(value) {
+    let date = (typeof value === 'string') ? moment(value) : moment.unix(value);
+    return value ? date.format('LL') : '';
 });
 
 Vue.filter('dateFull', function(value) {
-    return value ? moment.unix(value).format('LLL') : '';
+    let date = (typeof value === 'string') ? moment(value) : moment.unix(value);
+    return value ? date.format('LLL') : '';
 });
 
 
