@@ -42,7 +42,7 @@ class OldSortableTableViewTypeTest extends DatabaseAwareTestCase
             ->setIdentifier('o1');
 
         $field = new ContentTypeField();
-        $field->setType('text')->setIdentifier('position')->setTitle('Position');
+        $field->setType('sortindex')->setIdentifier('position')->setTitle('Position');
         $view->getContentType()->addField($field);
 
         return $view;
@@ -60,13 +60,28 @@ class OldSortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals(
             [
-                'created' => 'Created',
-                'updated' => 'Updated',
-                'id' => 'ID',
+                'position' => [
+                    'label' => 'Position',
+                    'type' => 'sortindex',
+                ],
+                'id' => [
+                    'label' => 'Id',
+                    'type' => 'id',
+                ],
+                'created' => [
+                    'label' => 'Created',
+                    'type' => 'date',
+                ],
+                'updated' => [
+                    'label' => 'Updated',
+                    'type' => 'date',
+                ],
             ],
-            $parameters->get('columns')
+            $parameters->get('fields')
         );
-        $this->assertEquals('position', $parameters->get('sort_field'));
+        $this->assertEquals('position', $parameters->get('sort')['field']);
+        $this->assertEquals(true, $parameters->get('sort')['sortable']);
+        $this->assertEquals(true, $parameters->get('sort')['asc']);
     }
 
     public function testSortableViewWithInvalidSettings()
@@ -74,10 +89,9 @@ class OldSortableTableViewTypeTest extends DatabaseAwareTestCase
         $view = $this->createInstance();
         $view->setSettings(new ViewSettings());
 
-        // View should not be valid.
-        $errors = static::$container->get('validator')->validate($view);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+        // View settings all optional
+        echo static::$container->get('validator')->validate($view);
+        $this->assertCount(0, static::$container->get('validator')->validate($view));
 
         $view->setSettings(
             new ViewSettings(
@@ -91,37 +105,35 @@ class OldSortableTableViewTypeTest extends DatabaseAwareTestCase
         // View should not be valid.
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('Unrecognized option "foo" under "settings"', $errors->get(0)->getMessageTemplate());
 
         // Test validating invalid columns.
         $view->setSettings(new ViewSettings(['columns' => 'string', 'sort_field' => 'position']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.columns', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid type for path "settings.fields". Expected array, but got string', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(
-            new ViewSettings(['columns' => ['foo' => 'Foo', 'baa' => 'Baa'], 'sort_field' => 'position'])
+            new ViewSettings(['columns' => ['foo' => 'Foo'], 'sort_field' => 'position'])
         );
         $errors = static::$container->get('validator')->validate($view);
-        $this->assertCount(2, $errors);
-        $this->assertEquals('unknown_column', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.columns.foo', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('unknown_column', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('settings.columns.baa', $errors->get(1)->getPropertyPath());
+        $this->assertCount(1, $errors);
+        $this->assertEquals('Unknown field "foo"', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         // Test validating invalid sort_field.
         $view->setSettings(new ViewSettings(['sort_field' => ['foo']]));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid type for path "settings.sort.field". Expected scalar, but got array.', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_field' => 'foo']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('unknown_column', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Unknown field "foo"', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
     }
 
     public function testSortableViewWithValidSettings()
@@ -133,7 +145,10 @@ class OldSortableTableViewTypeTest extends DatabaseAwareTestCase
                     'columns' => [
                         'id' => 'ID',
                         'position' => 'Position',
-                        'position.any_sub' => 'baa',
+                        'position.any_sub' => [
+                            'label' => 'Baa',
+                            'type' => 'text',
+                        ],
                     ],
                     'sort_field' => 'position',
                 ]
@@ -152,12 +167,21 @@ class OldSortableTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals(
             [
-                'id' => 'ID',
-                'position' => 'Position',
-                'position.any_sub' => 'baa',
+                'id' => [
+                    'label' => 'ID',
+                    'type' => 'id',
+                ],
+                'position' => [
+                    'label' => 'Position',
+                    'type' => 'sortindex',
+                ],
+                'position.any_sub' => [
+                    'label' => 'Baa',
+                    'type' => 'text',
+                ],
             ],
-            $parameters->get('columns')
+            $parameters->get('fields')
         );
-        $this->assertEquals('position', $parameters->get('sort_field'));
+        $this->assertEquals('position', $parameters->get('sort')['field']);
     }
 }

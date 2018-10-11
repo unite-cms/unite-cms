@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\View\Types;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\NodeInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -10,6 +11,7 @@ use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 use UniteCMS\CoreBundle\View\ViewSettings;
 use UniteCMS\CoreBundle\View\ViewType;
 
@@ -17,6 +19,8 @@ class TableViewType extends ViewType
 {
     const TYPE = "table";
     const TEMPLATE = "UniteCMSCoreBundle:Views:Table/index.html.twig";
+
+    const PROPERTY_IDENTIFIERS = ['id', 'locale', 'created', 'updated', 'deleted'];
 
     /**
      * @var FieldTypeManager $fieldTypeManager
@@ -50,24 +54,37 @@ class TableViewType extends ViewType
             ->beforeNormalization()
                 ->always(function($v) use($defaultTextField) {
 
-                    if(isset($v['sort_field'])) {
+                    if(isset($v['sort_field']) || isset($v['sort_asc'])) {
                         $v['sort'] = [
-                            'field' => $v['sort_field'],
+                            'field' => $v['sort_field'] ?? null,
                             'asc' => $v['sort_asc'] ?? null,
                         ];
+
                         unset($v['sort_field']);
+                        unset($v['sort_asc']);
                     }
 
                     if(isset($v['columns'])) {
-                        $v['fields'] = array_map(function($v){
-                            return ['label' => $v];
-                        }, $v['columns']);
+                        if(is_array($v['columns'])) {
+                            $v['fields'] = array_map(
+                                function ($v) {
+                                    return is_string($v) ? ['label' => $v] : $v;
+                                },
+                                $v['columns']
+                            );
+                        } else {
+                            $v['fields'] = $v['columns'];
+                        }
                         unset($v['columns']);
                     }
 
                     // Add default fields.
                     if(empty($v['fields'])) {
-                        $v['fields'] = array_unique(array_filter([$v['sort']['field'] ?? null, 'id', $defaultTextField, 'created', 'updated']));
+                        $v['fields'] = ['id', $defaultTextField, 'created', 'updated'];
+                        if(!empty($v['sort']['field'])) {
+                            array_unshift($v['fields'], $v['sort']['field']);
+                        }
+                        $v['fields'] = array_filter(array_unique($v['fields'], SORT_REGULAR));
                     }
 
                     // Add default sort field.
@@ -91,14 +108,21 @@ class TableViewType extends ViewType
 
                                 // Allow to set fields as array of identifiers (["id", "title"])
                                 if(is_numeric($key) && is_string($value)) {
-                                    $transformed[$value] = $this->defaultFieldConfig($value, $view);
+                                    $key = $value;
+                                    $value = [];
                                 }
 
-                                // Default: Pass value.
-                                else {
-                                    $transformed[$key] = array_merge((array)$value, $this->defaultFieldConfig($key, $view));
+                                // Make sure, that key is defined.
+                                $root_key = explode('.', $key)[0];
+                                if(!in_array($key, static::PROPERTY_IDENTIFIERS) && !$view->getContentType()->getFields()->containsKey($root_key)) {
+                                    $exception = new InvalidConfigurationException(sprintf('Unknown field %s', json_encode($key)));
+                                    $exception->setPath($key);
+                                    throw $exception;
                                 }
+
+                                $transformed[$key] = (array)$value + $this->defaultFieldConfig($key, $view);
                             }
+
                             return $transformed;
                         })
                     ->end()
@@ -111,9 +135,35 @@ class TableViewType extends ViewType
                         ->end()
                     ->end()
                 ->end()
-                ->arrayNode('filter')->canBeEnabled()
+                ->variableNode('filter')
+                    ->validate()
+                        ->always(function($v){
+
+                            $exception = new InvalidConfigurationException('Invalid filter configuration');
+                            $exception->setPath('filter');
+
+                            if(!is_array($v)) {
+                                throw $exception;
+                            }
+
+                            if (!empty(array_diff(array_keys($v), ['AND', 'OR', 'field', 'value', 'operator']))) {
+                                throw $exception;
+                            }
+
+                            try {
+                                $filter_structure = new GraphQLDoctrineFilterQueryBuilder($v, [], 'c');
+                            } catch (\Exception $e) {
+                                throw $exception;
+                            }
+
+                            if (!$filter_structure->getFilter()) {
+                                throw $exception;
+                            }
+                            return $v;
+                        })
+                    ->end()
                 ->end()
-                ->arrayNode('sort')->canBeEnabled()
+                ->arrayNode('sort')
                     ->children()
                         ->scalarNode('field')->end()
                         ->booleanNode('asc')->treatNullLike(false)->end()
@@ -130,7 +180,12 @@ class TableViewType extends ViewType
 
     private function defaultFieldConfig(string $field, View $view) {
 
-        if(in_array($field, ['id', 'locale', 'created', 'updated', 'deleted'])) {
+        // If this is a nested key, we cannot resolve it.
+        if(count(explode('.', $field)) > 1) {
+            return [];
+        }
+
+        if(in_array($field, static::PROPERTY_IDENTIFIERS)) {
             return [
                 'type' => ($field == 'id' ? 'id' : ($field == 'locale' ? 'locale' : 'date')),
                 'label' => ucfirst($field),
@@ -161,7 +216,8 @@ class TableViewType extends ViewType
         $settings = $processor->process($this->settingTree($view), $view->getSettings()->processableConfig());
 
         foreach($settings['fields'] as $identifier => $definition) {
-            if(!in_array($identifier, ['id', 'locale', 'created', 'updated', 'deleted'])) {
+            if(!in_array($identifier, static::PROPERTY_IDENTIFIERS)) {
+
                 $field = $view->getContentType()->getFields()->get($identifier);
                 $fieldType = $this->fieldTypeManager->getFieldType($definition['type']);
 
@@ -191,9 +247,8 @@ class TableViewType extends ViewType
         try {
             $processor->process($this->settingTree($context->getObject()), $settings->processableConfig());
         }
-        catch (\Exception $e) {
-            dump($e->getMessage());
-            $context->buildViolation($e->getMessage())->atPath('settings')->addViolation();
+        catch (\Symfony\Component\Config\Definition\Exception\Exception $e) {
+            $context->buildViolation($e->getMessage())->addViolation();
         }
     }
 }

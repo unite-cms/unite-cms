@@ -3,11 +3,9 @@
 namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Symfony\Component\Routing\Generator\UrlGenerator;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
 use UniteCMS\CoreBundle\Entity\View;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\View\ViewSettings;
 use UniteCMS\CoreBundle\View\ViewType;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
@@ -46,7 +44,7 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
     public function testInvalidValue() {
 
         // Create validator with mocked ViewTypeManager.
-        $viewTypeManagerMock = new ViewTypeManager($this->createMock(UrlGenerator::class), $this->createMock(FieldTypeManager::class));
+        $viewTypeManagerMock = new ViewTypeManager($this->createMock(UrlGenerator::class));
         $viewTypeManagerMock->registerViewType(new class extends ViewType {
             const TYPE = "type";
             public function validateSettings(ViewSettings $settings, ExecutionContextInterface $context)
@@ -69,7 +67,7 @@ class ValidViewSettingsValidatorTest extends ConstraintValidatorTestCase
     public function testValidValue() {
 
         // Create validator with mocked ViewTypeManager.
-        $viewTypeManagerMock = new ViewTypeManager($this->createMock(UrlGenerator::class), $this->createMock(FieldTypeManager::class));
+        $viewTypeManagerMock = new ViewTypeManager($this->createMock(UrlGenerator::class));
         $viewTypeManagerMock->registerViewType(new class extends ViewType {
             const TYPE = "type";
             public function validateSettings(ViewSettings $settings, ExecutionContextInterface $context) {}

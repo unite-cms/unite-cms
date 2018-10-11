@@ -4,7 +4,6 @@ namespace UniteCMS\CoreBundle\Tests\View;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\View\ViewType;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
@@ -36,7 +35,7 @@ class ViewTypeManagerTest extends TestCase
             ->method('generate')
             ->willReturn('mocked_url');
 
-        $manager = new ViewTypeManager($urlGenerator, $this->createMock(FieldTypeManager::class));
+        $manager = new ViewTypeManager($urlGenerator);
         $manager->registerViewType($view);
 
 

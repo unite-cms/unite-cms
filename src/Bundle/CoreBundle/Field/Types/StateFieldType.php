@@ -101,9 +101,9 @@ class StateFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getViewFieldConfig(FieldableField $field) : array {
+    function getViewFieldConfig(FieldableField $field = null) : array {
         return [
-            'places' => $field->getSettings()->places
+            'places' => $field ? $field->getSettings()->places : []
         ];
     }
 }

@@ -112,7 +112,7 @@ interface FieldTypeInterface
      * @param FieldableField $field
      * @return array
      */
-    function getViewFieldConfig(FieldableField $field) : array;
+    function getViewFieldConfig(FieldableField $field = null) : array;
 
     /**
      * Return optional assets css and js assets, that get included when rendering the view. Assets can de defined as:
@@ -125,5 +125,5 @@ interface FieldTypeInterface
      * @param FieldableField $field
      * @return array
      */
-    function getViewFieldAssets(FieldableField $field) : array;
+    function getViewFieldAssets(FieldableField $field = null) : array;
 }

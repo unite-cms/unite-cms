@@ -47,11 +47,20 @@ class OldTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals(
             [
-                'created' => 'Created',
-                'updated' => 'Updated',
-                'id' => 'ID',
+                'created' => [
+                    'label' => 'Created',
+                    'type' => 'date',
+                ],
+                'updated' => [
+                    'label' => 'Updated',
+                    'type' => 'date',
+                ],
+                'id' => [
+                    'label' => 'Id',
+                    'type' => 'id',
+                ],
             ],
-            $parameters->get('columns')
+            $parameters->get('fields')
         );
         $this->assertEquals(
             [
@@ -99,7 +108,7 @@ class OldTableViewTypeTest extends DatabaseAwareTestCase
         // View should not be valid.
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('Unrecognized option "foo" under "settings"', $errors->get(0)->getMessageTemplate());
 
         $view->setSettings(new ViewSettings([]));
 
@@ -107,81 +116,79 @@ class OldTableViewTypeTest extends DatabaseAwareTestCase
         $view->setSettings(new ViewSettings(['columns' => 'string']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.columns', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid type for path "settings.fields". Expected array, but got string', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['columns' => ['foo' => 'Foo', 'baa' => 'Baa']]));
         $errors = static::$container->get('validator')->validate($view);
-        $this->assertCount(2, $errors);
-        $this->assertEquals('unknown_column', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.columns.foo', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('unknown_column', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('settings.columns.baa', $errors->get(1)->getPropertyPath());
+        $this->assertCount(1, $errors);
+        $this->assertEquals('Unknown field "foo"', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         // Test validating invalid sort_field.
         $view->setSettings(new ViewSettings(['sort_field' => ['foo']]));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid type for path "settings.sort.field". Expected scalar, but got array.', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_field' => 'foo']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('unknown_column', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.sort_field', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Unknown field "foo"', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         // Test validating invalid sort_asc.
         $view->setSettings(new ViewSettings(['sort_asc' => 'yes']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.sort_asc', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid type for path "settings.sort.asc". Expected boolean, but got string.', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_asc' => 'foo']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.sort_asc', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid type for path "settings.sort.asc". Expected boolean, but got string.', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['sort_asc' => ['foo']]));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.sort_asc', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid type for path "settings.sort.asc". Expected boolean, but got array.', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         // Test validating invalid filter.
         $view->setSettings(new ViewSettings(['filter' => ['foo']]));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid filter configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['filter' => 'string']));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid filter configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['filter' => ['AND' => ['foo']]]));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid filter configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(new ViewSettings(['filter' => ['operator' => 'foo', 'field' => 'foo', 'value' => 'baa']]));
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid filter configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
 
         $view->setSettings(
             new ViewSettings(['filter' => ['operator' => '=', 'field' => 'f1', 'value' => 'baa', 'foo' => 'baa']])
         );
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('wrong_setting_definition', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.filter', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('Invalid filter configuration', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('settings', $errors->get(0)->getPropertyPath());
     }
 
     public function testTableViewWithValidSettings()
@@ -228,7 +235,10 @@ class OldTableViewTypeTest extends DatabaseAwareTestCase
                     'columns' => [
                         'f1' => 'Title',
                         'id' => 'baa',
-                        'f1.any_sub' => 'baa',
+                        'f1.any_sub' => [
+                            'label' => 'Baa',
+                            'type' => 'email',
+                        ],
                     ],
                     'filter' => $filter,
                     'sort_field' => 'f1',
@@ -238,6 +248,7 @@ class OldTableViewTypeTest extends DatabaseAwareTestCase
         );
 
         // View should be valid.
+        echo static::$container->get('validator')->validate($view);
         $this->assertCount(0, static::$container->get('validator')->validate($view));
 
         // Test templateRenderParameters.
@@ -245,11 +256,20 @@ class OldTableViewTypeTest extends DatabaseAwareTestCase
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals(
             [
-                'f1' => 'Title',
-                'id' => 'baa',
-                'f1.any_sub' => 'baa',
+                'f1' => [
+                    'label' => 'Title',
+                    'type' => 'text',
+                ],
+                'id' => [
+                    'label' => 'baa',
+                    'type' => 'id'
+                ],
+                'f1.any_sub' => [
+                    'label' => 'Baa',
+                    'type' => 'email',
+                ],
             ],
-            $parameters->get('columns')
+            $parameters->get('fields')
         );
         $this->assertEquals(
             [

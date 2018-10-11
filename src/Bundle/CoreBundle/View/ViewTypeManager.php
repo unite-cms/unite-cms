@@ -5,7 +5,6 @@ namespace UniteCMS\CoreBundle\View;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\View;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class ViewTypeManager
 {
@@ -19,7 +18,7 @@ class ViewTypeManager
      */
     private $urlGenerator;
 
-    public function __construct(UrlGeneratorInterface $urlGenerator, FieldTypeManager $fieldTypeMana)
+    public function __construct(UrlGeneratorInterface $urlGenerator)
     {
         $this->urlGenerator = $urlGenerator;
     }

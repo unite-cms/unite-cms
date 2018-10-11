@@ -5,7 +5,6 @@ namespace UniteCMS\CoreBundle\Tests\View;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RequestContext;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\View\ViewParameterBag;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\Entity\View;
@@ -75,7 +74,6 @@ class ViewParameterBagTest extends TestCase
                 [
                     'title' => '',
                     'subTitle' => '',
-                    'fields' => [],
                     'urls' => [
                         'api' => 'any_endpoint_pattern',
                         'create' => 'any_create_pattern',
@@ -142,7 +140,6 @@ class ViewParameterBagTest extends TestCase
                 [
                     'title' => 'Foo',
                     'subTitle' => 'Baa',
-                    'fields' => [],
                     'urls' => [
                         'api' => 'unitecms_core_api_d1,o1',
                         'create' => 'unitecms_core_content_create_d1,o1,co1,ct1',
