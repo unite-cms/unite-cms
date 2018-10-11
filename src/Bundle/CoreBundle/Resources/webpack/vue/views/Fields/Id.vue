@@ -1,5 +1,5 @@
 <template>
-    <div class="view-field view-field-id"><span class="uk-text-meta" :title="row[identifier]" uk-tooltip>{{ row[identifier] ? '#' + row[identifier].split('-')[0] : '' }}</span></div>
+    <div class="view-field view-field-id"><span class="uk-text-meta" :title="value" uk-tooltip>{{ row[identifier] ? '#' + value.split('-')[0] : '' }}</span></div>
 </template>
 
 <script>

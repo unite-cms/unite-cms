@@ -11,12 +11,10 @@
         extends: BaseField,
         computed: {
             stateCategory() {
-                let value = this.row[this.identifier];
-                return 'uk-label-' + (this.settings.places[value] ? this.settings.places[value].category : 'notice');
+                return 'uk-label-' + (this.settings.places[this.value] ? this.settings.places[this.value].category : 'notice');
             },
             stateLabel() {
-                let value = this.row[this.identifier];
-                return this.settings.places[value] ? this.settings.places[value].label : value;
+                return this.settings.places[this.value] ? this.settings.places[this.value].label : value;
             }
         }
     }

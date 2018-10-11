@@ -20,7 +20,7 @@
         data(){
             return {
                 modalId: 'modal-' + this._uid,
-                src: this.row[this.identifier] ? this.row[this.identifier].url : null
+                src: value ? value.url : null
             }
         },
         methods: {
@@ -29,7 +29,7 @@
              * @inheritdoc
              */
             fieldQuery(identifier, field) {
-                return identifier + ' { url }'
+                return BaseField.methods.fieldQuery(identifier) + ' { url }';
             },
         }
     }

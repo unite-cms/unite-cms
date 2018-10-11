@@ -1,8 +1,8 @@
 <template>
     <div class="view-field view-field-date">
-        <time v-if="mode === 'date'" class="uk-text-meta">{{ date|date }}</time>
-        <time v-else-if="mode === 'datetime'" class="uk-text-meta">{{ date|dateFull }}</time>
-        <time v-else class="uk-text-meta" :title="date|dateFull" uk-tooltip>{{ date|dateFromNow }}</time>
+        <time v-if="mode === 'date'" class="uk-text-meta">{{ value|date }}</time>
+        <time v-else-if="mode === 'datetime'" class="uk-text-meta">{{ value|dateFull }}</time>
+        <time v-else class="uk-text-meta" :title="date|dateFull" uk-tooltip>{{ value|dateFromNow }}</time>
     </div>
 </template>
 
@@ -12,7 +12,6 @@
     export default {
         data() {
           let mode = 'fromnow';
-          let date = this.row[this.identifier];
 
           if(typeof date === 'string' && date.indexOf('-') > 0) {
               mode = 'date';
@@ -23,7 +22,6 @@
           }
 
           return {
-              date: date,
               mode: mode,
           }
         },

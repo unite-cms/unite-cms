@@ -9,19 +9,23 @@
     import BaseField from '../Base/BaseField.vue';
 
     export default {
-        data(){
-
-            let content = this.row[this.identifier] ? this.row[this.identifier] : '';
-            let virtualDiv = document.createElement("div");
-            virtualDiv.innerHTML = content;
-            content = (virtualDiv.textContent || virtualDiv.innerText);
-
-            return {
-                teaser: content.substr(0, 300),
-                full: content.substr(0, 500) + (content.length > 500 ? '...' : '')
+        extends: BaseField,
+        computed: {
+            teaser() {
+                let teaser = this.value;
+                let virtualDiv = document.createElement("div");
+                virtualDiv.innerHTML = teaser;
+                teaser = (virtualDiv.textContent || virtualDiv.innerText);
+                return teaser.substr(0, 300);
+            },
+            full() {
+                let full = this.value;
+                let virtualDiv = document.createElement("div");
+                virtualDiv.innerHTML = full;
+                full = (virtualDiv.textContent || virtualDiv.innerText);
+                return full.substr(0, 500) + (full.length > 500 ? '...' : '')
             }
-        },
-        extends: BaseField
+        }
     }
 </script>
 
