@@ -19,7 +19,6 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
  *
  * @ORM\Table(name="content")
  * @ORM\Entity
- * @ORM\InheritanceType("SINGLE_TABLE")
  * @Gedmo\Loggable
  * @Gedmo\SoftDeleteable(fieldName="deleted", timeAware=false)
  */
