@@ -102,6 +102,12 @@ class TableViewConfiguration implements ConfigurationInterface
                         ];
                     }
 
+                    else {
+                        if(!empty($v['sort']['sortable'])) {
+                            $v['sort']['asc'] = true;
+                        }
+                    }
+
                     return $v;
                 }
             )
@@ -118,6 +124,11 @@ class TableViewConfiguration implements ConfigurationInterface
                         if (is_numeric($key) && is_string($value)) {
                             $key = $value;
                             $value = [];
+                        }
+
+                        // Allow to set fields as array of identifiers and labels (["id" => "ID", "title" => "Title"])
+                        if (is_string($key) && is_string($value)) {
+                            $value = ['label' => $value];
                         }
 
                         // Make sure, that key is defined.
