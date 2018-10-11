@@ -10,7 +10,11 @@ use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class SortableTableViewTypeTest extends DatabaseAwareTestCase
+/**
+ * @deprecated 1.0 this tests are written for the old sortable view implementation. As we are backward compatible, they
+ * must pass, however we will remove them before 1.0 release. Please use table view with sortable option instead!
+ */
+class OldSortableTableViewTypeTest extends DatabaseAwareTestCase
 {
 
     /**

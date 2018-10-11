@@ -4,6 +4,9 @@ namespace UniteCMS\CoreBundle\View\Types;
 
 use UniteCMS\CoreBundle\Entity\View;
 
+/**
+ * @deprecated 1.0, Please use the sortable option on the table view.
+ */
 class SortableViewType extends TableViewType
 {
     const TYPE = "sortable";
@@ -16,15 +19,6 @@ class SortableViewType extends TableViewType
         $params = parent::getTemplateRenderParameters($view, $selectMode);
         $params['sort']['sortable'] = true;
         $params['sort']['asc'] = true;
-
-        foreach($params['columns'] as $field => $column) {
-            if($field === $params['sort']['field']) {
-                unset($params['columns'][$field]);
-            }
-        }
-
-        $params['columns'] = [$params['sort']['field'] => ''] + $params['columns'];
-
         return $params;
     }
 }

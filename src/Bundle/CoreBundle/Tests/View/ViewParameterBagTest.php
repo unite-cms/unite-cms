@@ -168,7 +168,6 @@ class ViewParameterBagTest extends TestCase
                 ViewParameterBag::createFromView(
                     $view,
                     $generator,
-                    $this->createMock(FieldTypeManager::class),
                     ViewTypeInterface::SELECT_MODE_SINGLE,
                     ['foo' => 'baa']
                 )

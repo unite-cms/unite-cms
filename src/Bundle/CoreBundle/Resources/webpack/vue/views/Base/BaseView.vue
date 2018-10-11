@@ -10,7 +10,7 @@
         <div v-if="error" class="unite-table-error uk-alert-danger uk-flex uk-flex-middle">
             <div v-html="feather.icons['alert-triangle'].toSvg({width: 24, height: 24})"></div>
             <div class="uk-flex-1 uk-padding-small">{{ error }}</div>
-            <button class="uk-button uk-button-danger" v-on:click.prevent="reload">{{ labels.retry }}</button>
+            <button class="uk-button uk-button-danger" v-on:click.prevent="load">{{ labels.retry }}</button>
         </div>
 
         <component :is="contentComponent"
@@ -20,7 +20,8 @@
                    :selectable="selectable"
                    :updateable="!deleted.showDeleted"
                    :urls="urls"
-                   @updateRow="onRowUpdate"></component>
+                   @updateRow="onRowUpdate"
+                   @updateSort="onUpdateSort"></component>
 
         <div v-if="loading" class="loading uk-text-center"><div uk-spinner></div></div>
 
@@ -55,8 +56,8 @@
                     endpoint: bag.urls.api,
                     csrf_token: bag.csrf_token,
                     settings: bag.settings
-                }, Object.keys(bag.fields).map((identifier) => {
-                    return this.$uniteCMSViewFields.resolveFieldQueryFunction(bag.fields[identifier].type)(identifier, bag.fields[identifier]);
+                }, Object.keys(bag.settings.fields).map((identifier) => {
+                    return this.$uniteCMSViewFields.resolveFieldQueryFunction(bag.settings.fields[identifier].type)(identifier, bag.settings.fields[identifier]);
                 })),
                 loading: false,
                 error: null,
@@ -69,7 +70,7 @@
                 page: 1,
                 total: 0,
                 autoUpdateFields: [],
-                fields: bag.fields,
+                fields: bag.settings.fields,
                 selectable: bag.select.is_mode_none ? null : (bag.select.is_mode_single ? 'SINGLE' : 'MULTIPLE'),
                 urls: bag.urls,
                 hasTranslations: bag.settings.hasTranslations,
@@ -118,12 +119,6 @@
                 },
                 deep: true
             },
-            sort: {
-                handler(sort, oldSort) {
-                    this.load();
-                },
-                deep: true
-            },
             deleted: {
                 handler(deleted) {
                     this.dataFetcher.withDeleted(deleted.showDeleted);
@@ -133,14 +128,11 @@
             }
         },
         methods: {
-            reload() {
-              this.load();
-            },
-            load(page = null) {
+            load() {
                 this.error = null;
                 this.loading = true;
 
-                this.dataFetcher.sort(this.sort).fetch(page)
+                this.dataFetcher.sort(this.sort).fetch()
                     .then(
                         (data) => {
 
@@ -167,6 +159,10 @@
                         (error) => { this.error = 'API Error: ' + error; })
                     .catch(() => { this.error = "An error occurred, while trying to fetch data."; })
                     .finally(() => { this.loading = false; });
+            },
+            onUpdateSort(sort) {
+                this.sort = sort;
+                this.load();
             },
             onRowUpdate(update) {
                 this.dataFetcher.update(update.id, update.data).then(

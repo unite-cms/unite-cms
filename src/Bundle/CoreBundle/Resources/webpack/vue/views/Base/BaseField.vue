@@ -17,7 +17,7 @@
                 return identifier
             },
         },
-        props: ['identifier', 'label', 'settings', 'row'],
+        props: ['identifier', 'label', 'config', 'settings', 'row'],
     }
 </script>
 

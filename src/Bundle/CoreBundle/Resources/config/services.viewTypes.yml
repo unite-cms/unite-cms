@@ -5,8 +5,12 @@ services:
   UniteCMS\CoreBundle\View\Types\TableViewType:
     tags: [unite_cms.view_type]
     public: false
+    arguments:
+      ['@unite.cms.field_type_manager']
 
   # A table view type that allows the user to sort rows via drag and drop.
   UniteCMS\CoreBundle\View\Types\SortableViewType:
     tags: [unite_cms.view_type]
     public: false
+    arguments:
+      ['@unite.cms.field_type_manager']

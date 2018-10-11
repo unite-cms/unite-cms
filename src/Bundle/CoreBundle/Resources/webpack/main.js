@@ -56,6 +56,8 @@ Vue.customElement('unite-cms-core-view-table', {
 });
 
 // Create vue moment filter.
+moment.locale(window.navigator.language);
+
 Vue.filter('dateFromNow', function(value) {
     return value ? moment.unix(value).fromNow() : '';
 });

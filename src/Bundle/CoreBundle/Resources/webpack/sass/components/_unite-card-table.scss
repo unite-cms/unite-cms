@@ -60,7 +60,7 @@
         }
       }
 
-      &:nth-child(2n) {
+      &:nth-child(2n - 1) {
         background: $global-muted-background;
 
         &:hover {

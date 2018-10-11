@@ -5,11 +5,11 @@
                 <div :key="identifier" v-for="(field,identifier) in fields">
                     <a v-if="!isSortable && updateable" href="#" v-on:click.prevent="setSort(identifier)">
                         {{ field.label }}
-                        <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
+                        <span v-if="sortConfig.field === identifier" v-html="feather.icons[sortConfig.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
                     </a>
                     <span v-else >
-                        {{ field.label }}
-                        <span v-if="updateable && sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
+                        <template v-if="identifier !== sortConfig.field">{{ field.label }}</template>
+                        <span v-if="updateable && sortConfig.field === identifier" v-html="feather.icons[sortConfig.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
                     </span>
                 </div>
                 <div v-if="showActions">
@@ -20,9 +20,10 @@
         <div class="unite-div-table-tbody" :uk-sortable="isSortable && updateable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
             <div :style="rowStyle" uk-grid class="unite-div-table-row" :data-id="row.id" :key="row.id" v-for="row in rows">
                 <div class="unite-div-table-cell" :key="identifier" v-for="(field,identifier) in fields">
-                    <component :is="$uniteCMSViewFields.resolve(field.type)" v-if="!(isSortable && !updateable && sort.field === identifier)"
+                    <component :is="$uniteCMSViewFields.resolve(field.type)" v-if="!(isSortable && !updateable && sortConfig.field === identifier)"
                                :identifier="identifier"
                                :label="field.label"
+                               :config="field.config"
                                :settings="field.settings"
                                :sortable="isSortable"
                                :row="row"></component>
@@ -50,6 +51,7 @@
                 columnWidth: [],
                 columnWidthChanged: 0,
                 feather: feather,
+                sortConfig: this.sort,
             };
         },
         updated() {
@@ -78,12 +80,9 @@
         methods: {
             setSort(identifier) {
                 if(!this.isSortable) {
-                    if (this.sort.field === identifier) {
-                        this.sort.asc = !this.sort.asc;
-                    } else {
-                        this.sort.field = identifier;
-                        this.sort.asc = true;
-                    }
+                    this.sortConfig.field = identifier;
+                    this.sortConfig.asc = this.sortConfig.field === identifier ? !this.sortConfig.asc : true;
+                    this.$emit('updateSort', this.sortConfig);
                 }
             },
             recalcColumnWidth() {

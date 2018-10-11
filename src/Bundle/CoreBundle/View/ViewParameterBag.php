@@ -4,9 +4,7 @@ namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\View;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class ViewParameterBag implements \JsonSerializable
@@ -25,11 +23,6 @@ class ViewParameterBag implements \JsonSerializable
      * @var array
      */
     private $settings = array();
-
-    /**
-     * @var array $fields
-     */
-    private $fields = array();
 
     /**
      * @var string
@@ -81,61 +74,19 @@ class ViewParameterBag implements \JsonSerializable
      */
     private $deleteDefinitelyUrlPattern = '';
 
-    public function __construct($title = '', $fields = [], $settings = [])
+    public function __construct($title = '', $settings = [])
     {
         $this->title = $title;
-        $this->fields = $fields;
         $this->settings = $settings;
     }
 
     public static function createFromView(
         View $view,
         UrlGeneratorInterface $generator,
-        FieldTypeManager $fieldTypeManager,
         string $select_mode = ViewTypeInterface::SELECT_MODE_NONE,
         $settings = []
     ) {
-
-        $fields = [];
-
-        if(!empty($settings['columns'])) {
-            foreach($settings['columns'] as $field => $label) {
-
-                switch ($field) {
-                    case 'id': $fields[$field] = [ 'label' => $label, 'type' => 'id' ];
-                        break;
-                    case 'locale': $fields[$field] = [ 'label' => $label, 'type' => 'text' ];
-                        break;
-                    case 'type': $fields[$field] = [ 'label' => $label, 'type' => 'text' ];
-                        break;
-                    case 'created': $fields[$field] = [ 'label' => $label, 'type' => 'date' ];
-                        break;
-                    case 'updated': $fields[$field] = [ 'label' => $label, 'type' => 'date' ];
-                        break;
-                    case 'deleted': $fields[$field] = [ 'label' => $label, 'type' => 'date' ];
-                        break;
-                    default:
-                        if($view->getContentType()->getFields()->containsKey($field)) {
-
-                            /**
-                             * @var FieldableField $fieldType
-                             */
-                            $fieldType = $view->getContentType()->getFields()->get($field);
-
-                            $fields[$field] = [
-                                'label' => $label,
-                                'type' => $fieldType->getType(),
-                                'settings' => $fieldTypeManager->getFieldType($fieldType->getType())->getViewFieldConfig($fieldType),
-                                'assets' => $fieldTypeManager->getFieldType($fieldType->getType())->getViewFieldAssets($fieldType),
-                            ];
-                        }
-                        break;
-                }
-            }
-            unset($settings['columns']);
-        }
-
-        $bag = new ViewParameterBag($view->getContentType()->getTitle(), $fields, $settings);
+        $bag = new ViewParameterBag($view->getContentType()->getTitle(), $settings);
 
         if($view->getContentType()->getViews()->first() !== $view) {
             $bag->setSubTitle($view->getTitle());
@@ -200,22 +151,6 @@ class ViewParameterBag implements \JsonSerializable
     public function setSubTitle(string $subTitle): void
     {
         $this->subTitle = $subTitle;
-    }
-
-    /**
-     * @return array
-     */
-    public function getFields(): array
-    {
-        return $this->fields;
-    }
-
-    /**
-     * @param array $fields
-     */
-    public function setFields(array $fields): void
-    {
-        $this->fields = $fields;
     }
 
     /**
@@ -510,7 +445,6 @@ class ViewParameterBag implements \JsonSerializable
         return [
             'title' => $this->getTitle(),
             'subTitle' => $this->getSubTitle(),
-            'fields' => $this->getFields(),
             'urls' => [
                 'api' => $this->getApiEndpointPattern(),
                 'create' => $this->getCreateUrlPattern(),

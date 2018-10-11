@@ -19,15 +19,9 @@ class ViewTypeManager
      */
     private $urlGenerator;
 
-    /**
-     * @var FieldTypeManager $fieldTypeManager
-     */
-    private $fieldTypeManager;
-
-    public function __construct(UrlGeneratorInterface $urlGenerator, FieldTypeManager $fieldTypeManager)
+    public function __construct(UrlGeneratorInterface $urlGenerator, FieldTypeManager $fieldTypeMana)
     {
         $this->urlGenerator = $urlGenerator;
-        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -62,7 +56,7 @@ class ViewTypeManager
     public function getTemplateRenderParameters(View $view, $select_mode = ViewTypeInterface::SELECT_MODE_NONE): ViewParameterBag {
         $viewType = $this->getViewType($view->getType());
         $settings = $viewType->getTemplateRenderParameters($view, $select_mode);
-        return ViewParameterBag::createFromView($view, $this->urlGenerator, $this->fieldTypeManager, $select_mode, $settings ?? []);
+        return ViewParameterBag::createFromView($view, $this->urlGenerator, $select_mode, $settings ?? []);
     }
 
     /**

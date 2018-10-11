@@ -10,7 +10,11 @@ use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
-class TableViewTypeTest extends DatabaseAwareTestCase
+/**
+ * @deprecated 1.0 this tests are written for the old table view implementation. As we are backward compatible, they
+ * must pass, however we will remove them before 1.0 release.
+ */
+class OldTableViewTypeTest extends DatabaseAwareTestCase
 {
 
     public function testTableViewWithoutSettings()

@@ -2,10 +2,14 @@
 
 namespace UniteCMS\CoreBundle\View\Types;
 
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\NodeInterface;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
-use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 use UniteCMS\CoreBundle\View\ViewSettings;
 use UniteCMS\CoreBundle\View\ViewType;
 
@@ -14,58 +18,168 @@ class TableViewType extends ViewType
     const TYPE = "table";
     const TEMPLATE = "UniteCMSCoreBundle:Views:Table/index.html.twig";
 
-    const SETTINGS = [
-        'columns',
-        'sort_field',
-        'sort_asc',
-        "filter",
-    ];
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
+
+    public function __construct(FieldTypeManager $fieldTypeManager)
+    {
+        $this->fieldTypeManager = $fieldTypeManager;
+    }
+
+    /**
+     * Returns the setting tree for this view. This is used to validate and process the view settings.
+     *
+     * @param View $view
+     * @return NodeInterface
+     */
+    private function settingTree(View $view) : NodeInterface {
+
+        $defaultTextField = $view->getContentType()->getFields()
+        ->filter(function(ContentTypeField $field){
+            return in_array($field->getType(), ['text', 'email']);
+        })->map(function(ContentTypeField $field){
+            return $field->getIdentifier();
+        })->first();
+
+        $tree = new TreeBuilder();
+        $tree->root('settings')
+
+            // Handle deprecated options
+            ->beforeNormalization()
+                ->always(function($v) use($defaultTextField) {
+
+                    if(isset($v['sort_field'])) {
+                        $v['sort'] = [
+                            'field' => $v['sort_field'],
+                            'asc' => $v['sort_asc'] ?? null,
+                        ];
+                        unset($v['sort_field']);
+                    }
+
+                    if(isset($v['columns'])) {
+                        $v['fields'] = array_map(function($v){
+                            return ['label' => $v];
+                        }, $v['columns']);
+                        unset($v['columns']);
+                    }
+
+                    // Add default fields.
+                    if(empty($v['fields'])) {
+                        $v['fields'] = array_unique(array_filter([$v['sort']['field'] ?? null, 'id', $defaultTextField, 'created', 'updated']));
+                    }
+
+                    // Add default sort field.
+                    if(empty($v['sort'])) {
+                        $v['sort'] = [
+                            'field' => 'updated',
+                            'asc' => false,
+                        ];
+                    }
+
+                    return $v;
+                })
+
+            ->end()
+            ->children()
+                ->arrayNode('fields')
+                    ->beforeNormalization()
+                        ->ifArray()->then(function($v) use ($view) {
+                            $transformed = [];
+                            foreach ($v as $key => $value) {
+
+                                // Allow to set fields as array of identifiers (["id", "title"])
+                                if(is_numeric($key) && is_string($value)) {
+                                    $transformed[$value] = $this->defaultFieldConfig($value, $view);
+                                }
+
+                                // Default: Pass value.
+                                else {
+                                    $transformed[$key] = array_merge((array)$value, $this->defaultFieldConfig($key, $view));
+                                }
+                            }
+                            return $transformed;
+                        })
+                    ->end()
+                    ->useAttributeAsKey('field')
+                    ->arrayPrototype()
+                        ->children()
+                            ->scalarNode('type')->isRequired()->end()
+                            ->scalarNode('label')->isRequired()->end()
+                            ->variableNode('settings')->end()
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('filter')->canBeEnabled()
+                ->end()
+                ->arrayNode('sort')->canBeEnabled()
+                    ->children()
+                        ->scalarNode('field')->end()
+                        ->booleanNode('asc')->treatNullLike(false)->end()
+                        ->booleanNode('sortable')->end()
+                    ->end()
+                ->end()
+
+                ->scalarNode('sort_field')->setDeprecated()->end()
+            ->end()
+        ;
+
+        return $tree->buildTree();
+    }
+
+    private function defaultFieldConfig(string $field, View $view) {
+
+        if(in_array($field, ['id', 'locale', 'created', 'updated', 'deleted'])) {
+            return [
+                'type' => ($field == 'id' ? 'id' : ($field == 'locale' ? 'locale' : 'date')),
+                'label' => ucfirst($field),
+            ];
+        }
+
+        /**
+         * @var ContentTypeField $field
+         */
+        $field = $view->getContentType()->getFields()->get($field);
+
+        if($field) {
+            return [
+                'label' => $field->getTitle(),
+                'type' => $field->getType(),
+            ];
+        }
+
+        return [];
+    }
 
     /**
      * {@inheritdoc}
      */
     function getTemplateRenderParameters(View $view, string $selectMode = self::SELECT_MODE_NONE): array
     {
-        $columns = $view->getSettings()->columns ?? [];
-        $sort_field = $view->getSettings()->sort_field ?? 'updated';
-        $sort_asc = $view->getSettings()->sort_asc ?? false;
-        $filter = $view->getSettings()->filter ?? null;
+        $processor = new Processor();
+        $settings = $processor->process($this->settingTree($view), $view->getSettings()->processableConfig());
 
-        // If no columns are defined, try to find any human readable key identifier and also add common fields.
-        $fields = $view->getContentType()->getFields();
-        $possible_field_types = ['text'];
+        foreach($settings['fields'] as $identifier => $definition) {
+            if(!in_array($identifier, ['id', 'locale', 'created', 'updated', 'deleted'])) {
+                $field = $view->getContentType()->getFields()->get($identifier);
+                $fieldType = $this->fieldTypeManager->getFieldType($definition['type']);
 
-        if (empty($columns)) {
-            if ($fields->containsKey('title') && in_array($fields->get('title')->getType(), $possible_field_types)) {
-                $columns['title'] = 'Title';
-            } elseif ($fields->containsKey('name') && in_array(
-                    $fields->get('name')->getType(),
-                    $possible_field_types
-                )) {
-                $columns['name'] = 'Name';
-            } else {
-                $columns['id'] = 'ID';
+                if ($fieldType->getViewFieldConfig($field)) {
+                    $settings['fields'][$identifier]['config'] = $fieldType->getViewFieldConfig($field);
+                }
+
+                if ($fieldType->getViewFieldAssets($field)) {
+                    $settings['fields'][$identifier]['assets'] = $fieldType->getViewFieldAssets($field);
+                }
             }
-
-            $columns['created'] = 'Created';
-            $columns['updated'] = 'Updated';
         }
 
-        if($sort_field === 'updated' && !isset($columns['updated']) && isset($columns['created'])) {
-            $sort_field = 'created';
-        }
-
-        return [
-            'sort' => [
-                'field' => $sort_field,
-                'asc' => $sort_asc,
-            ],
-            'filter' => $filter,
-            'columns' => $columns,
+        return array_merge($settings, [
             'View' => $view->getIdentifier(),
             'contentType' => IdentifierNormalizer::graphQLIdentifier($view->getContentType()),
             'hasTranslations' => count($view->getContentType()->getLocales()) > 1,
-        ];
+        ]);
     }
 
     /**
@@ -73,90 +187,13 @@ class TableViewType extends ViewType
      */
     function validateSettings(ViewSettings $settings, ExecutionContextInterface $context)
     {
-        parent::validateSettings($settings, $context);
-
-        // Only continue, if all required settings are available and there are no additional settings.
-        if ($context->getViolations()->count() > 0) {
-            return;
+        $processor = new Processor();
+        try {
+            $processor->process($this->settingTree($context->getObject()), $settings->processableConfig());
         }
-
-        /**
-         * @var View $view
-         */
-        $view = $context->getObject();
-
-        // validate setting structure.
-        if (!empty($settings->columns) && !is_array($settings->columns)) {
-            $context->buildViolation('wrong_setting_definition')->atPath('columns')->addViolation();
+        catch (\Exception $e) {
+            dump($e->getMessage());
+            $context->buildViolation($e->getMessage())->atPath('settings')->addViolation();
         }
-        if (!empty($settings->sort_field) && !is_string($settings->sort_field)) {
-            $context->buildViolation('wrong_setting_definition')->atPath('sort_field')->addViolation();
-        }
-
-        if (!empty($settings->sort_asc) && !is_bool($settings->sort_asc)) {
-            $context->buildViolation('wrong_setting_definition')->atPath('sort_asc')->addViolation();
-        }
-        if (!empty($settings->filter)) {
-            if (!is_array($settings->filter)) {
-                $context->buildViolation('wrong_setting_definition')->atPath('filter')->addViolation();
-            } else {
-
-                // Make sure, that there arr only allowed filter fields.
-                if (!empty(array_diff(array_keys($settings->filter), ['AND', 'OR', 'field', 'value', 'operator']))) {
-                    $context->buildViolation('wrong_setting_definition')->atPath('filter')->addViolation();
-                } else {
-
-                    $filter_structure = null;
-
-                    try {
-                        $filter_structure = new GraphQLDoctrineFilterQueryBuilder($settings->filter, [], 'c');
-                    } catch (\Exception $e) {
-                        $context->buildViolation('wrong_setting_definition')->atPath('filter')->addViolation();
-                    }
-
-                    // Validate filter structure.
-                    if ($filter_structure) {
-
-                        if (!$filter_structure->getFilter()) {
-                            $context->buildViolation('wrong_setting_definition')->atPath('filter')->addViolation();
-                        }
-                    }
-                }
-            }
-        }
-
-        // Only continue, if all setting properties have correct type.
-        if ($context->getViolations()->count() > 0) {
-            return;
-        }
-
-        // Validate column fields.
-        if (!empty($settings->columns)) {
-            foreach ($settings->columns as $field => $label) {
-                if (!$this->content_type_contains_field($view, $field)) {
-                    $context->buildViolation('unknown_column')->atPath('columns.'.$field)->addViolation();
-                }
-            }
-        }
-
-        // Validate sort_field.
-        if (!empty($settings->sort_field)) {
-            if (!$this->content_type_contains_field($view, $settings->sort_field)) {
-                $context->buildViolation('unknown_column')->atPath('sort_field')->addViolation();
-            }
-        }
-    }
-
-    private function content_type_contains_field(View $view, $field)
-    {
-        if (in_array($field, ['id', 'locale', 'created', 'updated', 'deleted'])) {
-            return true;
-        }
-
-        // At the moment we just check the root field. In the future we could also check nested field properties here.
-        $fieldParts = explode('.', $field);
-        $field = array_shift($fieldParts);
-
-        return $view->getContentType()->getFields()->containsKey($field);
     }
 }
