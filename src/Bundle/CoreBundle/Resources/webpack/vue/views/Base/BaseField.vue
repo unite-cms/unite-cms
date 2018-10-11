@@ -4,6 +4,11 @@
 
 <script>
     export default {
+        data() {
+            return {
+                fieldConfig: Object.assign({}, this.settings, this.config)
+            };
+        },
         methods: {
 
             /**

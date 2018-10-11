@@ -3,18 +3,18 @@
 namespace UniteCMS\CoreBundle\Tests\View;
 
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 use UniteCMS\CoreBundle\View\ViewSettings;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
  * @deprecated 1.0 this tests are written for the old table view implementation. As we are backward compatible, they
  * must pass, however we will remove them before 1.0 release.
  */
-class OldTableViewTypeTest extends DatabaseAwareTestCase
+class OldTableViewTypeTest extends ContainerAwareTestCase
 {
 
     public function testTableViewWithoutSettings()
