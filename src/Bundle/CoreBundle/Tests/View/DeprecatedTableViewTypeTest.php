@@ -14,7 +14,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
  * @deprecated 1.0 this tests are written for the old table view implementation. As we are backward compatible, they
  * must pass, however we will remove them before 1.0 release.
  */
-class OldTableViewTypeTest extends ContainerAwareTestCase
+class DeprecatedTableViewTypeTest extends ContainerAwareTestCase
 {
 
     public function testTableViewWithoutSettings()
@@ -247,9 +247,10 @@ class OldTableViewTypeTest extends ContainerAwareTestCase
             )
         );
 
-        // View should be valid.
-        echo static::$container->get('validator')->validate($view);
-        $this->assertCount(0, static::$container->get('validator')->validate($view));
+        // View should be valid. Only deprecation warnings allowed.
+        foreach(static::$container->get('validator')->validate($view) as $error) {
+            $this->assertTrue(!isset($error->getConstraint()->payload['severity']) || $error->getConstraint()->payload['severity'] === 'warning');
+        }
 
         // Test templateRenderParameters.
         $parameters = static::$container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);

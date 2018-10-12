@@ -52,8 +52,11 @@ class OldSortableTableViewTypeTest extends ContainerAwareTestCase
     {
         $view = $this->createInstance();
 
-        // View should be valid.
-        $this->assertCount(0, static::$container->get('validator')->validate($view));
+        // View should be valid. Only deprecation warnings allowed.
+        foreach(static::$container->get('validator')->validate($view) as $error) {
+            $this->assertTrue(!isset($error->getConstraint()->payload['severity']) || $error->getConstraint()->payload['severity'] === 'warning');
+        }
+
 
         // Test templateRenderParameters.
         $parameters = static::$container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
@@ -159,8 +162,10 @@ class OldSortableTableViewTypeTest extends ContainerAwareTestCase
         $field->setType('text')->setIdentifier('position')->setTitle('Position');
         $view->getContentType()->addField($field);
 
-        // View should be valid.
-        $this->assertCount(0, static::$container->get('validator')->validate($view));
+        // View should be valid. Only deprecation warnings allowed.
+        foreach(static::$container->get('validator')->validate($view) as $error) {
+            $this->assertTrue(!isset($error->getConstraint()->payload['severity']) || $error->getConstraint()->payload['severity'] === 'warning');
+        }
 
         // Test templateRenderParameters.
         $parameters = static::$container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);

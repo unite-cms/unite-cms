@@ -57,15 +57,13 @@ class TableViewType extends ViewType
      */
     function validateSettings(ViewSettings $settings, ExecutionContextInterface $context)
     {
+        set_error_handler(function($severity, $message, $filename, $lineno){
+            throw new DeprecationException($message);
+        }, E_USER_DEPRECATED);
+
         $processor = new Processor();
         try {
-            set_error_handler(function($severity, $message, $filename, $lineno){
-                if($severity === E_USER_DEPRECATED) {
-                    throw new DeprecationException($message);
-                }
-            });
             $processor->processConfiguration(new TableViewConfiguration($context->getObject(), $this->fieldTypeManager), $settings->processableConfig());
-            restore_error_handler();
         }
         catch (\Symfony\Component\Config\Definition\Exception\Exception $e) {
             $context->buildViolation($e->getMessage())->addViolation();
@@ -74,5 +72,6 @@ class TableViewType extends ViewType
             $context->setConstraint(new Warning());
             $context->buildViolation($e->getMessage())->addViolation();
         }
+        restore_error_handler();
     }
 }
