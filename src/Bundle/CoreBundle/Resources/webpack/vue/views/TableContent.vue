@@ -15,6 +15,7 @@
                                            @resized="onFieldResize"
                                            :ref="'field_' + identifier"></base-content-header-field>
                 <base-content-header-field v-if="showActions" v-for="i in [1]"
+                                           :key="i"
                                            identifier="_actions"
                                            type="_actions"
                                            :sort="sortConfig"
