@@ -37,5 +37,9 @@
         }
     }
 
+    .uk-sortable-handle {
+        display: inline-block;
+    }
+
 
 </style>

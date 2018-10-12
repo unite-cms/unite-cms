@@ -98,7 +98,6 @@
                     return
                 }
 
-                console.log("autoc");
                 let fields = [
                     {name: "title", value: "title", score: 300, meta: "rhyme"},
                     {name: "identifier", value: "identifier", score: 300, meta: "rhyme"},

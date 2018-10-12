@@ -26,7 +26,7 @@
             }
         },
         mounted() {
-            this.width = this.$el.childElementCount > 0 ? this.$el.children[0].offsetWidth : this.$el.offsetWidth;
+            this.calcWidth();
             this.$on('minWidthChanged', (minWidth) => {
                 this.minWidth = minWidth;
             });
@@ -49,6 +49,9 @@
         methods: {
             setSort(identifier) {
                 this.$emit('sortChanged', identifier);
+            },
+            calcWidth() {
+                this.width = this.$el.childElementCount > 0 ? this.$el.children[0].offsetWidth : this.$el.offsetWidth;
             }
         },
         props: ['identifier', 'label', 'isSortable', 'type', 'sort', 'initialMinWidth', 'fixedWidth'],

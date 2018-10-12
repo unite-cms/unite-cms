@@ -35,9 +35,10 @@ Vue.use(uniteViewFieldsPlugin, {
         'textarea': require('./vue/views/Fields/Textarea').default,
         'date': require('./vue/views/Fields/Date').default,
         'state': require('./vue/views/Fields/State').default,
-        'sortindex': require('./vue/views/Fields/Sortindex').default,
         'checkbox': require('./vue/views/Fields/Checkbox').default,
         'choice': require('./vue/views/Fields/Choice').default,
+        'sortindex': require('./vue/views/Fields/Sortindex').default,
+        'selectrow': require('./vue/views/Fields/Selectrow').default,
     }
 });
 

@@ -31,16 +31,25 @@
                 };
                 return createNestedQuery(identifier);
             },
+            calcWidth() {
+                this.width = this.$el.childElementCount > 0 ? this.$el.children[0].offsetWidth : this.$el.offsetWidth;
+            }
         },
         mounted() {
+            this.calcWidth();
             this.$on('minWidthChanged', (minWidth) => {
                 this.minWidth = minWidth;
             });
         },
-        updated() {
-            this.width = this.$el.childElementCount > 0 ? this.$el.children[0].offsetWidth : this.$el.offsetWidth;
-        },
         watch: {
+            row: {
+                handler() {
+                    this.$nextTick(() => {
+                        this.calcWidth();
+                    });
+                },
+                deep: true,
+            },
             width(width, oldWidth) {
                 this.$emit('resized', {
                     identifier: this.identifier,

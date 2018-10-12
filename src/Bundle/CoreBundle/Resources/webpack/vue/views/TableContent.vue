@@ -2,7 +2,7 @@
     <div class="unite-div-table">
         <div class="unite-div-table-thead">
             <div :style="rowStyle" class="unite-div-table-row">
-                <base-content-header-field v-for="(field,identifier) in fields" v-if="!(isSortable && !updateable && sortConfig.field === identifier)"
+                <base-content-header-field v-for="(field,identifier) in fields" v-if="renderField(field, identifier)"
                                            :key="identifier"
                                            :identifier="identifier"
                                            :label="field.label"
@@ -29,7 +29,7 @@
         </div>
         <div class="unite-div-table-tbody" :uk-sortable="isSortable && updateable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
             <div uk-grid :style="rowStyle" class="unite-div-table-row" :data-id="row.id" :key="row.id" v-for="row in rows">
-                <component v-for="(field,identifier) in fields" v-if="!(isSortable && !updateable && sortConfig.field === identifier)"
+                <component v-for="(field,identifier) in fields" v-if="renderField(field, identifier)"
                            :key="identifier"
                            :is="$uniteCMSViewFields.resolve(field.type)"
                            :type="field.type"
@@ -66,7 +66,6 @@
     export default {
         extends: BaseViewContent,
         data() {
-            console.log(this.$refs);
             return {
                 minWidthMap: {},
                 rowMinWidth: 0,
@@ -82,6 +81,29 @@
             },
             rowStyle() {
                 return this.rowMinWidth > 0 ? { 'min-width': this.rowMinWidth + 'px' } : {};
+            }
+        },
+        mounted: function(){
+            let findModal = (element) => {
+                if(element.hasAttribute('uk-modal')) {
+                    return element;
+                }
+                if(!element.parentElement) {
+                    return null;
+                }
+                return findModal(element.parentElement);
+            };
+            let modal = findModal(this.$el);
+            if(modal) {
+                UIkit.util.on(modal, 'show', () => {
+                    this.$nextTick(() => {
+                        Object.keys(this.fields).forEach((identifier) => {
+                            this.$refs['field_' + identifier].forEach((ref) => {
+                                ref.calcWidth();
+                            });
+                        });
+                    });
+                });
             }
         },
         methods: {
@@ -131,6 +153,18 @@
                     return this.$refs['field_' + identifier][1].$el.classList.contains('fixed-width');
                 }
                 return false;
+            },
+            renderField(field, identifier) {
+
+                if(!this.isSortable && !this.updateable && this.sortConfig.field === field.identifier) {
+                    return false;
+                }
+
+                if(!this.updateable && field.type === 'selectrow') {
+                    return false;
+                }
+
+                return true;
             }
         },
         components: {

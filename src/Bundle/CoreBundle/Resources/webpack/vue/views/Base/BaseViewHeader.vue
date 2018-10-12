@@ -5,7 +5,7 @@
                 <span class="uk-margin-small-right">{{ title }}</span>
                 <span v-if="subTitle" class="uk-text-meta"> / {{ subTitle }}</span>
             </h2>
-            <a :href="createUrl" class="uk-button uk-button-primary">
+            <a v-if="!selectable" :href="createUrl" class="uk-button uk-button-primary">
                 <span v-html="feather.icons['plus'].toSvg()"></span>
                 {{ createLabel }}
             </a>
@@ -34,7 +34,8 @@
             'title',
             'subTitle',
             'createLabel',
-            'createUrl'
+            'createUrl',
+            'selectable',
         ],
     }
 </script>

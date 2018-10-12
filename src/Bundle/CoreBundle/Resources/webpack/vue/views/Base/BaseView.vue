@@ -2,6 +2,7 @@
     <div>
         <component :deleted="deleted"
                    :is="headerComponent"
+                   :selectable="selectable"
                    :title="labels.title"
                    :subTitle="labels.subTitle"
                    :createLabel="labels.create"
@@ -10,7 +11,7 @@
         <div v-if="error" class="unite-table-error uk-alert-danger uk-flex uk-flex-middle">
             <div v-html="feather.icons['alert-triangle'].toSvg({width: 24, height: 24})"></div>
             <div class="uk-flex-1 uk-padding-small">{{ error }}</div>
-            <button class="uk-button uk-button-danger" v-on:click.prevent="load">{{ labels.retry }}</button>
+            <button class="uk-button uk-button-danger" v-on:click.prevent="reload">{{ labels.retry }}</button>
         </div>
 
         <component :is="contentComponent"
@@ -47,6 +48,24 @@
     export default {
         data() {
             let bag = JSON.parse(this.parameters);
+            let fields = bag.settings.fields;
+            let fieldQuery = Object.keys(fields).map((identifier) => {
+                return this.$uniteCMSViewFields.resolveFieldQueryFunction(fields[identifier].type)(identifier, fields[identifier]);
+            });
+
+            let selectable = bag.select.is_mode_none ? null : (bag.select.is_mode_single ? 'SINGLE' : 'MULTIPLE');
+            if(selectable) {
+                fields = Object.assign({}, {
+                    _selectable: {
+                        type: "selectrow",
+                        settings: {
+                            contentType: bag.settings.contentType,
+                            view: bag.settings.view
+                        }
+                    }
+                }, fields);
+            }
+
             return {
                 headerComponent: typeof this.$options.headerComponent !== 'undefined' ? this.$options.headerComponent : BaseViewHeader,
                 footerComponent: typeof this.$options.footerComponent !== 'undefined' ? this.$options.footerComponent : BaseViewFooter,
@@ -55,9 +74,7 @@
                     endpoint: bag.urls.api,
                     csrf_token: bag.csrf_token,
                     settings: bag.settings
-                }, Object.keys(bag.settings.fields).map((identifier) => {
-                    return this.$uniteCMSViewFields.resolveFieldQueryFunction(bag.settings.fields[identifier].type)(identifier, bag.settings.fields[identifier]);
-                })),
+                }, fieldQuery),
                 loading: false,
                 error: null,
                 rows: [],
@@ -69,8 +86,8 @@
                 page: 1,
                 total: 0,
                 autoUpdateFields: [],
-                fields: bag.settings.fields,
-                selectable: bag.select.is_mode_none ? null : (bag.select.is_mode_single ? 'SINGLE' : 'MULTIPLE'),
+                fields: fields,
+                selectable: selectable,
                 urls: bag.urls,
                 hasTranslations: bag.settings.hasTranslations,
                 deleted: {
@@ -127,11 +144,12 @@
             }
         },
         methods: {
-            load() {
+            reload() { this.load(); },
+            load(page) {
                 this.error = null;
                 this.loading = true;
 
-                this.dataFetcher.sort(this.sort).fetch()
+                this.dataFetcher.sort(this.sort).fetch(page)
                     .then(
                         (data) => {
 
