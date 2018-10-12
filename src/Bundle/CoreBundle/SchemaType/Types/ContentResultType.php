@@ -115,7 +115,17 @@ class ContentResultType extends AbstractType
 
                 return $items;
             case 'total':
-                return $value->getTotalItemCount();
+                $total = $value->getTotalItemCount();
+
+                // Reduce the total number of items by the number of items we don't have access to. This will only be
+                // correct, if we have not more than $limit items, but it is better than nothing.
+                foreach ($value->getItems() as $item) {
+                    if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $item)) {
+                        $total--;
+                    }
+                }
+
+                return $total;
             case 'page':
                 return $value->getCurrentPageNumber();
             default:
