@@ -1,5 +1,5 @@
 <template>
-    <div class="view-field view-field-fallback">{{ typeof value === 'undefined' ? 'Unknown' : value }}</div>
+    <div :style="style" :data-type="type" class="view-field view-field-fallback">{{ typeof value === 'undefined' ? 'Unknown' : value }}</div>
 </template>
 
 <script>

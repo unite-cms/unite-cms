@@ -47,7 +47,6 @@
     export default {
         data() {
             let bag = JSON.parse(this.parameters);
-            console.log(bag);
             return {
                 headerComponent: typeof this.$options.headerComponent !== 'undefined' ? this.$options.headerComponent : BaseViewHeader,
                 footerComponent: typeof this.$options.footerComponent !== 'undefined' ? this.$options.footerComponent : BaseViewFooter,

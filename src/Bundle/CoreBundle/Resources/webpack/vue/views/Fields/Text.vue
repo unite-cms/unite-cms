@@ -1,5 +1,5 @@
 <template>
-    <div class="view-field view-field-text"><p>{{ value }}</p></div>
+    <div :style="style" class="view-field view-field-text"><p>{{ value }}</p></div>
 </template>
 
 <script>
@@ -10,8 +10,12 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
     .view-field-text {
         white-space: nowrap;
+
+        p {
+            display: inline-block;
+        }
     }
 </style>

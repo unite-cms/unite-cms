@@ -1,5 +1,5 @@
 <template>
-    <div class="view-field view-field-state">
+    <div :style="style" class="view-field view-field-state fixed-width">
         <span class="uk-label" :class="stateCategory">{{ stateLabel }}</span>
     </div>
 </template>
@@ -22,8 +22,6 @@
 
 <style scoped lang="scss">
     .view-field-state {
-        display: inline-block;
-
         .uk-label {
             white-space: nowrap;
         }

@@ -79,7 +79,7 @@
 
   > td,
   > th,
-  > div > * {
+  > div {
     padding: 16px 12px;
 
     p {
@@ -89,13 +89,13 @@
 
   > td:first-child,
   > th:first-child,
-  > div:first-child > * {
+  > div:first-child {
     padding-left: 30px;
   }
 
   > td:last-child,
   > th:last-child,
-  > div:last-child > * {
+  > div:last-child {
     padding-right: 30px;
   }
 

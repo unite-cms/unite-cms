@@ -1,8 +1,8 @@
 <template>
-    <div class="view-field view-field-date">
+    <div :style="style" class="view-field view-field-date fixed-width">
         <time v-if="mode === 'date'" class="uk-text-meta">{{ value|date }}</time>
         <time v-else-if="mode === 'datetime'" class="uk-text-meta">{{ value|dateFull }}</time>
-        <time v-else class="uk-text-meta" :title="date|dateFull" uk-tooltip>{{ value|dateFromNow }}</time>
+        <time v-else class="uk-text-meta" :title="value|dateFull" uk-tooltip>{{ value|dateFromNow }}</time>
     </div>
 </template>
 
@@ -31,8 +31,6 @@
 
 <style scoped lang="scss">
     .view-field-date {
-        display: inline-block;
-
         time {
             cursor: pointer;
             white-space: nowrap;

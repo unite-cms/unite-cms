@@ -1,7 +1,7 @@
 <template>
-    <div class="view-field view-field-textarea">
-        <p v-if="teaser.length > 0 && full.length > 300" class="uk-text-truncate uk-text-meta" :title="full" uk-tooltip="pos: bottom">{{ teaser }}</p>
-        <p v-if="teaser.length > 0 && full.length <= 300" class="uk-text-truncate uk-text-meta">{{ teaser }}</p>
+    <div :style="style" class="view-field view-field-textarea">
+        <p v-if="teaser.length > 0 && full.length > 100" class="uk-text-truncate uk-text-meta" :title="full" uk-tooltip="pos: bottom">{{ teaser }}</p>
+        <p v-if="teaser.length > 0 && full.length <= 100" class="uk-text-truncate uk-text-meta">{{ teaser }}</p>
     </div>
 </template>
 
@@ -16,7 +16,7 @@
                 let virtualDiv = document.createElement("div");
                 virtualDiv.innerHTML = teaser;
                 teaser = (virtualDiv.textContent || virtualDiv.innerText);
-                return teaser.substr(0, 300);
+                return teaser.substr(0, 100);
             },
             full() {
                 let full = this.value;
@@ -32,5 +32,8 @@
 <style scoped>
     p[title] {
         cursor: pointer;
+        max-width: 300px;
+        min-width: 100px;
+        display: inline-block;
     }
 </style>

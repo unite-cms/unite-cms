@@ -1,35 +1,54 @@
 <template>
     <div class="unite-div-table">
         <div class="unite-div-table-thead">
-            <div :style="rowStyle" uk-grid class="unite-div-table-row">
-                <div :key="identifier" v-for="(field,identifier) in fields">
-                    <a v-if="!isSortable && updateable" href="#" v-on:click.prevent="setSort(identifier)">
-                        {{ field.label }}
-                        <span v-if="sortConfig.field === identifier" v-html="feather.icons[sortConfig.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
-                    </a>
-                    <span v-else >
-                        <template v-if="identifier !== sortConfig.field">{{ field.label }}</template>
-                        <span v-if="updateable && sortConfig.field === identifier" v-html="feather.icons[sortConfig.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
-                    </span>
-                </div>
-                <div v-if="showActions">
-                    <span></span>
-                </div>
+            <div :style="rowStyle" class="unite-div-table-row">
+                <base-content-header-field v-for="(field,identifier) in fields" v-if="!(isSortable && !updateable && sortConfig.field === identifier)"
+                                           :key="identifier"
+                                           :identifier="identifier"
+                                           :label="field.label"
+                                           :type="field.type"
+                                           :isSortable="isSortable"
+                                           :initialMinWidth="minWidthMap[identifier]"
+                                           :sort="sortConfig"
+                                           :fixedWidth="hasColumnFixedWidth(identifier)"
+                                           @sortChanged="setSort"
+                                           @resized="onFieldResize"
+                                           :ref="'field_' + identifier"></base-content-header-field>
+                <base-content-header-field v-if="showActions" v-for="i in [1]"
+                                           identifier="_actions"
+                                           type="_actions"
+                                           :sort="sortConfig"
+                                           :initialMinWidth="minWidthMap['_actions']"
+                                           label=""
+                                           :fixedWidth="true"
+                                           @resized="onFieldResize"
+                                           ref="field__actions"
+                ></base-content-header-field>
             </div>
         </div>
         <div class="unite-div-table-tbody" :uk-sortable="isSortable && updateable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
-            <div :style="rowStyle" uk-grid class="unite-div-table-row" :data-id="row.id" :key="row.id" v-for="row in rows">
-                <div class="unite-div-table-cell" :key="identifier" v-for="(field,identifier) in fields">
-                    <component :is="$uniteCMSViewFields.resolve(field.type)" v-if="!(isSortable && !updateable && sortConfig.field === identifier)"
-                               :identifier="identifier"
-                               :label="field.label"
-                               :settings="field.settings"
-                               :sortable="isSortable"
-                               :row="row"></component>
-                </div>
-                <div v-if="showActions" class="unite-div-table-cell">
-                    <base-view-row-actions :row="row" :urls="urls" ></base-view-row-actions>
-                </div>
+            <div uk-grid :style="rowStyle" class="unite-div-table-row" :data-id="row.id" :key="row.id" v-for="row in rows">
+                <component v-for="(field,identifier) in fields" v-if="!(isSortable && !updateable && sortConfig.field === identifier)"
+                           :key="identifier"
+                           :is="$uniteCMSViewFields.resolve(field.type)"
+                           :type="field.type"
+                           :identifier="identifier"
+                           :label="field.label"
+                           :settings="field.settings"
+                           :initialMinWidth="minWidthMap[identifier]"
+                           :sortable="isSortable"
+                           :row="row"
+                           @resized="onFieldResize"
+                           :ref="'field_' + identifier"></component>
+                <base-view-row-actions v-if="showActions"
+                                       :row="row"
+                                       :urls="urls"
+                                       identifier="_actions"
+                                       :initialMinWidth="minWidthMap['_actions']"
+                                       @resized="onFieldResize"
+                                       ref="field__actions"
+                                       :refInFor="true"
+                ></base-view-row-actions>
             </div>
         </div>
     </div>
@@ -37,28 +56,21 @@
 
 <script>
 
-    import feather from 'feather-icons';
     import UIkit from 'uikit';
 
     import BaseViewContent from './Base/BaseViewContent.vue';
+    import BaseViewContentHeaderField from './Base/BaseViewContentHeaderField.vue';
     import BaseViewRowActions from './Base/BaseViewRowActions.vue';
 
     export default {
         extends: BaseViewContent,
         data() {
+            console.log(this.$refs);
             return {
-                columnWidth: [],
-                columnWidthChanged: 0,
-                feather: feather,
+                minWidthMap: {},
+                rowMinWidth: 0,
                 sortConfig: this.sort,
             };
-        },
-        updated() {
-            this.$nextTick(() => {
-                setTimeout(() => {
-                    this.recalcColumnWidth();
-                }, 1);
-            });
         },
         computed: {
             showActions() {
@@ -68,12 +80,7 @@
                 return !!this.sort.sortable;
             },
             rowStyle() {
-                this.columnWidthChanged; // We listen to changes on columnWidthChanged
-                return {
-                    'grid-template-columns': this.columnWidth.map((column) => {
-                        return 'minmax(' + column.min + 'px,' + (column.max === 0 ? '1fr' : (column.max + 'px')) + ')';
-                    }).join(' ')
-                };
+                return this.rowMinWidth > 0 ? { 'min-width': this.rowMinWidth + 'px' } : {};
             }
         },
         methods: {
@@ -84,35 +91,28 @@
                     this.$emit('updateSort', this.sortConfig);
                 }
             },
-            recalcColumnWidth() {
-                let changed = false;
 
-                this.$el.querySelectorAll('.unite-div-table-row').forEach((row) => {
-                    row.querySelectorAll('.unite-div-table-cell').forEach((column, delta) => {
+            // When a child now its size or the size changes, onFieldResize will be called.
+            onFieldResize(event) {
+                if(!this.minWidthMap[event.identifier] || this.minWidthMap[event.identifier] < event.width) {
+                    this.minWidthMap[event.identifier] = event.width;
 
-                        if(!this.columnWidth[delta]) {
-                            this.columnWidth[delta] = { min: 50, max: 0 };
-                            changed = true;
+                    // Dispatch the new min width to all fields.
+                    if(typeof this.$refs['field_' + event.identifier] !== 'undefined') {
+                        if (typeof this.$refs['field_' + event.identifier].forEach === 'undefined') {
+                            this.$refs['field_' + event.identifier].$emit('minWidthChanged', event.width);
                         }
-
-                        if(column.firstChild.offsetWidth < column.offsetWidth) {
-                            if(column.firstChild.offsetWidth > this.columnWidth[delta].min) {
-                                this.columnWidth[delta].min = column.firstChild.offsetWidth;
-                                changed = true;
-                            }
-
-                            if(row.parentElement.classList.contains('unite-div-table-tbody')) {
-                                if(column.firstChild.offsetWidth > this.columnWidth[delta].max) {
-                                    this.columnWidth[delta].max = column.firstChild.offsetWidth;
-                                    changed = true;
-                                }
-                            }
+                        else {
+                            this.$refs['field_' + event.identifier].forEach((ref) => {
+                                ref.$emit('minWidthChanged', event.width);
+                            });
                         }
+                    }
+
+                    // Recalc row min width.
+                    this.$nextTick(() => {
+                        this.rowMinWidth = this.$el.querySelector('.unite-div-table-row').scrollWidth;
                     });
-                });
-
-                if(changed) {
-                    this.columnWidthChanged++;
                 }
             },
             moved(event) {
@@ -124,10 +124,17 @@
                         }
                     });
                 }
+            },
+            hasColumnFixedWidth(identifier) {
+                if(this.$refs['field_' + identifier] && this.$refs['field_' + identifier].length > 1) {
+                    return this.$refs['field_' + identifier][1].$el.classList.contains('fixed-width');
+                }
+                return false;
             }
         },
         components: {
-            'base-view-row-actions': BaseViewRowActions
+            'base-view-row-actions': BaseViewRowActions,
+            'base-content-header-field': BaseViewContentHeaderField
         }
     }
 </script>

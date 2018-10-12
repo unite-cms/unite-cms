@@ -1,12 +1,12 @@
 <template>
-    <div class="view-field view-field-image">
-        <a :href="'#' + modalId" uk-toggle v-if="src" class="uk-inline-clip uk-box-shadow-small uk-box-shadow-hover-medium">
-            <img :src="src" />
+    <div :style="style" class="view-field view-field-image fixed-width">
+        <a :href="'#' + modalId" uk-toggle v-if="value" class="uk-inline-clip uk-box-shadow-small uk-box-shadow-hover-medium">
+            <img :src="value" />
         </a>
         <div class="uk-flex-top" :id="modalId" uk-modal>
             <div class="uk-modal-dialog uk-margin-auto-vertical">
                 <button class="uk-modal-close-outside" type="button" uk-close></button>
-                <img :src="src" />
+                <img :src="value" />
             </div>
         </div>
     </div>
@@ -19,8 +19,7 @@
         extends: BaseField,
         data(){
             return {
-                modalId: 'modal-' + this._uid,
-                src: value ? value.url : null
+                modalId: 'modal-' + this._uid
             }
         },
         methods: {

@@ -1,5 +1,5 @@
 <template>
-    <div class="actions">
+    <div :style="style" class="view-field view-field-actions fixed-width">
         <button v-if="actions.length > 0" class="uk-button uk-button-default actions-dropdown" type="button" v-html="feather.icons['more-horizontal'].toSvg()"></button>
         <div v-if="actions.length > 0" uk-dropdown="mode: click; pos: bottom-right; offset: 5;">
             <ul class="uk-nav uk-dropdown-nav">
@@ -18,6 +18,8 @@
     export default {
         data() {
             return {
+                width: 0,
+                minWidth: this.initialMinWidth || 50,
                 feather: feather,
                 allActions: [
                     { key: 'update', icon: feather.icons['edit-2'].toSvg({ width: 24, height: 16 }), name: 'Update' },
@@ -29,8 +31,27 @@
                 ],
             }
         },
-        props: ['row', 'urls'],
+        props: ['row', 'urls', 'identifier', 'initialMinWidth'],
+        mounted() {
+            this.width = this.$el.childElementCount > 0 ? this.$el.children[0].offsetWidth : this.$el.offsetWidth;
+            this.$on('minWidthChanged', (minWidth) => {
+                this.minWidth = minWidth;
+            });
+        },
+        watch: {
+            width(width) {
+                this.$emit('resized', {
+                    identifier: this.identifier,
+                    width: width
+                });
+            }
+        },
         computed: {
+            style() {
+                return {
+                    'min-width': this.minWidth + 'px'
+                }
+            },
             actions() {
                 return this.allActions.filter(this.actionIsAllowed).map((action) => {
                     action.url = this.urlForAction(action, this.row);
