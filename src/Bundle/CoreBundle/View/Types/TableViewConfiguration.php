@@ -69,9 +69,6 @@ class TableViewConfiguration implements ConfigurationInterface
                             'field' => $v['sort_field'] ?? null,
                             'asc' => $v['sort_asc'] ?? null,
                         ];
-
-                        unset($v['sort_field']);
-                        unset($v['sort_asc']);
                     }
 
                     if (isset($v['columns'])) {
@@ -85,7 +82,6 @@ class TableViewConfiguration implements ConfigurationInterface
                         } else {
                             $v['fields'] = $v['columns'];
                         }
-                        unset($v['columns']);
                     }
 
                     // Add default fields.
@@ -200,7 +196,9 @@ class TableViewConfiguration implements ConfigurationInterface
                     ->booleanNode('sortable')->end()
             ->end()
             ->end()
-            ->scalarNode('sort_field')->setDeprecated()->end()
+            ->variableNode('sort_field')->setDeprecated()->end()
+            ->variableNode('sort_asc')->setDeprecated()->end()
+            ->variableNode('columns')->setDeprecated()->end()
             ->end();
 
         return $treeBuilder;
