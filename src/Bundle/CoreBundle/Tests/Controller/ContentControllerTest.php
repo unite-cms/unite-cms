@@ -146,12 +146,13 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         $crawler = $this->client->request('GET', $url_list);
 
-        // Assert add button.
-        $addButton = $crawler->filter('header .uk-button-primary');
-        $this->assertCount(1, $addButton);
+        // Assert view rendering.
+        $view = $crawler->filter('unite-cms-core-view-table');
+        $this->assertCount(1, $view);
+        $viewData = json_decode($view->attr('parameters'));
 
         // Click on add button.
-        $crawler = $this->client->click($addButton->first()->link());
+        $crawler = $this->client->request('GET', $viewData->urls->create);
 
         // Assert add form
         $form = $crawler->filter('form');

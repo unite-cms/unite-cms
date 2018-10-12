@@ -98,4 +98,14 @@ class StateFieldType extends FieldType
 
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    function getViewFieldDefinition(FieldableField $field = null) : array {
+        return parent::getViewFieldDefinition($field) + [
+            'settings' => [
+                'places' => $field ? $field->getSettings()->places : []
+            ]
+        ];
+    }
 }

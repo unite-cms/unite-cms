@@ -93,7 +93,7 @@
                                             {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}
                                                 class="uk-active"
                                             {% endif %}
-                                            {% endspaceless %}href="{{ url('unitecms_core_content_index', [type]) }}">
+                                            {% endspaceless %}href="{{ url('unitecms_core_content_index', [v]) }}">
                                         <i class="uk-margin-small-right" data-feather="{{ v.icon ? v.icon : 'layers' }}"></i>
                                         {{ v }}
                                     </a>

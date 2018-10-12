@@ -105,4 +105,22 @@ interface FieldTypeInterface
      * @param ExecutionContextInterface $context
      */
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context);
+
+    /**
+     * Return the definition array that gets passed to the view field javascript component.
+     *
+     * Allowed keys are: label, type, settings, assets.
+     *
+     * If $field is empty you should return definitions that can be set without $field and leave the rest empty.
+     *
+     * Assets can be defined as:
+     * [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ]
+     * [ 'js' => 'main.js', 'package' => 'UniteCMSStorageBundle' ]
+     * [ 'css' => 'https://example.com/main.css' ]
+     * [ 'js' => 'https://example.com/main.js' ]
+     *
+     * @param FieldableField $field
+     * @return array
+     */
+    function getViewFieldDefinition(FieldableField $field = null) : array;
 }

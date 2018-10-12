@@ -174,4 +174,18 @@ class WysiwygFieldType extends FieldType
             }
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getViewFieldDefinition(FieldableField $field = null) : array {
+        return [
+            'label' => $field ? $field->getTitle() : null,
+            'type' => 'textarea',
+            'assets' => [
+                [ 'js' => 'main.js', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+                [ 'css' => 'main.css', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+            ]
+        ];
+    }
 }

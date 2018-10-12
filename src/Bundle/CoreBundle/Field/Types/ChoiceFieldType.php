@@ -30,4 +30,17 @@ class ChoiceFieldType extends FieldType
             ]
         );
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getViewFieldDefinition(FieldableField $field = null) : array {
+        return [
+            'label' => $field ? $field->getTitle() : null,
+            'type' => 'choice',
+            'settings' => [
+                'choices' => $field ? array_flip($field->getSettings()->choices) : []
+            ]
+        ];
+    }
 }

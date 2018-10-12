@@ -1,16 +1,25 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
-    <header class="uk-card-header uk-flex">
-        <h2 class="uk-flex-1">
-            {{ view.contentType }}
-            {% if view.identifier != 'all' %} » {{ view }}{% endif %}
-        </h2>
-        {% if parameters.selectModeNone and is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), view.contentType) %}
-            <a href="{{ parameters.url('create') }}" class="uk-button uk-button-primary">
-                <i data-feather="plus" class="icon-left"></i>
-                {% trans %}content.create.button{% endtrans %}
-            </a>
+    {% for field in parameters.settings.fields %}
+        {% if field.assets is defined %}
+            {% for asset in field.assets %}
+                {% if asset.css is defined %}
+                    {% if not alreadyRendered(asset.css ~ (asset.package is defined ? asset.package : '')) %}
+                        <link type="text/css" rel="stylesheet" href="{{ asset(asset.css, asset.package is defined ? asset.package : null) }}">
+                    {% endif %}
+                {% endif %}
+                {% if asset.js is defined %}
+                    {% if not alreadyRendered(asset.js ~ (asset.package is defined ? asset.package : '')) %}
+                        <script type="text/javascript" src="{{ asset(asset.js, asset.package is defined ? asset.package : null) }}"></script>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
         {% endif %}
-    </header>
-
+        {% set field = {
+            label: field.label,
+            type: field.type,
+            settings: field.settings is defined ? field.settings : {},
+            config: field.config is defined ? field.config : {},
+        } %}
+    {% endfor %}
     <unite-cms-core-view-table parameters='{{ parameters|json_encode|raw }}'></unite-cms-core-view-table>
 </article>

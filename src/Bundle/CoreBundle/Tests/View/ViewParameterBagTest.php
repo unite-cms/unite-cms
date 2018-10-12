@@ -72,6 +72,8 @@ class ViewParameterBagTest extends TestCase
         $this->assertEquals(
             json_encode(
                 [
+                    'title' => '',
+                    'subTitle' => '',
                     'urls' => [
                         'api' => 'any_endpoint_pattern',
                         'create' => 'any_create_pattern',
@@ -114,8 +116,8 @@ class ViewParameterBagTest extends TestCase
     {
 
         $view = new View();
-        $view->setIdentifier('co1')->setContentType(new ContentType())->getContentType()
-            ->setIdentifier('ct1')->setLocales(['de', 'en'])->setDomain(new Domain())->getDomain()
+        $view->setIdentifier('co1')->setTitle('Baa')->setContentType(new ContentType())->getContentType()
+            ->setIdentifier('ct1')->setTitle('Foo')->setLocales(['de', 'en'])->setDomain(new Domain())->getDomain()
             ->setIdentifier('d1')->setOrganization(new Organization())->getOrganization()
             ->setIdentifier('o1');
         $generator = new Class implements UrlGeneratorInterface
@@ -136,6 +138,8 @@ class ViewParameterBagTest extends TestCase
         $this->assertEquals(
             json_encode(
                 [
+                    'title' => 'Foo',
+                    'subTitle' => 'Baa',
                     'urls' => [
                         'api' => 'unitecms_core_api_d1,o1',
                         'create' => 'unitecms_core_content_create_d1,o1,co1,ct1',

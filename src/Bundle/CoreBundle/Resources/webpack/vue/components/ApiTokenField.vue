@@ -25,7 +25,6 @@
             copyKey: function() {
 
                 let input = this.$el.getElementsByTagName('input')[0];
-                console.log(input);
                 input.select();
                 document.execCommand('Copy');
                 window.getSelection().removeAllRanges();

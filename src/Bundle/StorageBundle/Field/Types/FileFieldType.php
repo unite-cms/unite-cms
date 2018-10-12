@@ -229,4 +229,16 @@ class FileFieldType extends FieldType
             $this->storageService->deleteObject($file['id'], $file['name'], $field->getSettings()->bucket);
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getViewFieldDefinition(FieldableField $field = null) : array {
+        return parent::getViewFieldDefinition($field) + [
+            'assets' => [
+                [ 'js' => 'main.js', 'package' => 'UniteCMSStorageBundle' ],
+                [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ],
+            ]
+        ];
+    }
 }
