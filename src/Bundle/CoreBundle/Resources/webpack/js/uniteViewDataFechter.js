@@ -40,6 +40,10 @@ export default {
             clientConfig.headers["X-CSRF-TOKEN"] = bag.csrf_token;
         }
 
+        if(bag.settings.filter) {
+            this.filter(bag.settings.filter);
+        }
+
         this.client = new GraphQLClient(bag.endpoint, clientConfig);
 
         let contentTypeName = bag.settings.contentType.charAt(0).toUpperCase() + bag.settings.contentType.slice(1);

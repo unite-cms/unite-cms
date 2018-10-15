@@ -120,4 +120,22 @@ class TableViewTypeTest extends ContainerAwareTestCase
         $this->assertEquals(['places' => $field->getSettings()->places], $parameters->getSettings()['fields']['test']['settings']);
     }
 
+    public function testFilterAndSortableCannotBeCombined() {
+
+        $field = new ContentTypeField();
+        $field
+            ->setIdentifier('position')
+            ->setTitle('Position')
+            ->setType('sortindex');
+        $this->view->getContentType()->addField($field);
+        $this->viewSettings->filter = ['field' => 'deleted', 'operator' => 'IS NOT NULL'];
+        $this->viewSettings->sort = ['field' => 'position', 'sortable' => true];
+
+        // View should be valid.
+        $errors = static::$container->get('validator')->validate($this->view);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('A sortable view cannot have filters set', $errors->get(0)->getMessageTemplate());
+        echo $errors;
+    }
+
 }

@@ -61,7 +61,7 @@ class TableViewConfiguration implements ConfigurationInterface
         $treeBuilder->root('settings')
             // Handle deprecated options
             ->beforeNormalization()
-            ->always(
+                ->always(
                 function ($v) use ($defaultTextField) {
 
                     if (isset($v['sort_field']) || isset($v['sort_asc'])) {
@@ -107,14 +107,20 @@ class TableViewConfiguration implements ConfigurationInterface
                         }
                     }
 
+                    // Make sure that filter and sortable are not set both
+                    if(!empty($v['filter']) && !empty($v['sort']['sortable'])) {
+                        throw new InvalidConfigurationException('A sortable view cannot have filters set');
+                    }
+
                     return $v;
                 }
             )
             ->end()
             ->children()
-            ->arrayNode('fields')
-            ->beforeNormalization()
-            ->ifArray()->then(
+                ->arrayNode('fields')
+
+                ->beforeNormalization()
+                    ->ifArray()->then(
                 function ($v) {
                     $transformed = [];
                     foreach ($v as $key => $value) {
@@ -147,59 +153,62 @@ class TableViewConfiguration implements ConfigurationInterface
                     return $transformed;
                 }
             )
+                ->end()
+
+                ->useAttributeAsKey('field')
+                ->arrayPrototype()
+                    ->children()
+                        ->scalarNode('type')->isRequired()->end()
+                        ->scalarNode('label')->isRequired()->end()
+                        ->variableNode('settings')->end()
+                        ->variableNode('assets')->end()
+                    ->end()
+                ->end()
             ->end()
-            ->useAttributeAsKey('field')
-            ->arrayPrototype()
-            ->children()
-            ->scalarNode('type')->isRequired()->end()
-            ->scalarNode('label')->isRequired()->end()
-            ->variableNode('settings')->end()
-            ->variableNode('assets')->end()
-            ->end()
-            ->end()
-            ->end()
+
             ->variableNode('filter')
-            ->validate()
-            ->always(
-                function ($v) {
+                ->validate()
+                    ->always(
+                        function ($v) {
 
-                    $exception = new InvalidConfigurationException('Invalid filter configuration');
-                    $exception->setPath('filter');
+                            $exception = new InvalidConfigurationException('Invalid filter configuration');
+                            $exception->setPath('filter');
 
-                    if (!is_array($v)) {
-                        throw $exception;
-                    }
+                            if (!is_array($v)) {
+                                throw $exception;
+                            }
 
-                    if (!empty(array_diff(array_keys($v), ['AND', 'OR', 'field', 'value', 'operator']))) {
-                        throw $exception;
-                    }
+                            if (!empty(array_diff(array_keys($v), ['AND', 'OR', 'field', 'value', 'operator']))) {
+                                throw $exception;
+                            }
 
-                    try {
-                        $filter_structure = new GraphQLDoctrineFilterQueryBuilder($v, [], 'c');
-                    } catch (\Exception $e) {
-                        throw $exception;
-                    }
+                            try {
+                                $filter_structure = new GraphQLDoctrineFilterQueryBuilder($v, [], 'c');
+                            } catch (\Exception $e) {
+                                throw $exception;
+                            }
 
-                    if (!$filter_structure->getFilter()) {
-                        throw $exception;
-                    }
+                            if (!$filter_structure->getFilter()) {
+                                throw $exception;
+                            }
 
-                    return $v;
-                }
-            )
-            ->end()
+                            return $v;
+                        }
+                    )
+                ->end()
             ->end()
             ->arrayNode('sort')
                 ->children()
                     ->scalarNode('field')->isRequired()->end()
                     ->booleanNode('asc')->treatNullLike(false)->end()
                     ->booleanNode('sortable')->end()
+                ->end()
             ->end()
-            ->end()
+
             ->variableNode('sort_field')->setDeprecated()->end()
             ->variableNode('sort_asc')->setDeprecated()->end()
             ->variableNode('columns')->setDeprecated()->end()
-            ->end();
+        ->end();
 
         return $treeBuilder;
     }
