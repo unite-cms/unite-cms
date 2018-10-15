@@ -6,7 +6,9 @@
                    :title="labels.title"
                    :subTitle="labels.subTitle"
                    :createLabel="labels.create"
-                   :createUrl="urls.create"></component>
+                   :sortable="sort.sortable"
+                   :createUrl="urls.create"
+                   @search="onSearch"></component>
 
         <div v-if="error" class="unite-table-error uk-alert-danger uk-flex uk-flex-middle">
             <div v-html="feather.icons['alert-triangle'].toSvg({width: 24, height: 24})"></div>
@@ -176,6 +178,10 @@
                         (error) => { this.error = 'API Error: ' + error; })
                     .catch(() => { this.error = "An error occurred, while trying to fetch data."; })
                     .finally(() => { this.loading = false; });
+            },
+            onSearch(term) {
+                this.dataFetcher.search(term);
+                this.load();
             },
             onUpdateSort(sort) {
                 this.sort = sort;

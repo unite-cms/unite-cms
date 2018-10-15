@@ -16,6 +16,7 @@ export default {
         order: 'ASC'
     },
     filterArgument: {},
+    searchArgument: {},
     deletedArgument: false,
 
     create(bag, fieldQuery = []) {
@@ -66,6 +67,21 @@ export default {
         return this;
     },
 
+    search(term) {
+
+        if(!term) {
+            this.searchArgument = {};
+            return;
+        }
+
+        this.searchArgument = { OR: [] };
+        this.fieldQuery.forEach((field) => {
+            let identifier = field.replace('}', '').replace('{', '.').replace(' ', '');
+            this.searchArgument.OR.push({ field: identifier, operator: 'LIKE', value: '%' + term + '%' });
+        });
+        return this;
+    },
+
     withDeleted(deleted = true) {
         this.deletedArgument = deleted;
         return this;
@@ -77,10 +93,11 @@ export default {
         limit = limit ? limit : this.limit;
 
         let filter = this.filterArgument;
+        filter = Object.keys(filter).length > 0 ? { AND: [filter, this.searchArgument] } : this.searchArgument;
 
         if(this.deletedArgument) {
             let deletedFilter = { field: "deleted", operator: "IS NOT NULL" };
-            filter = filter ? { AND: [filter, deletedFilter] } : deletedFilter;
+            filter = Object.keys(filter).length > 0 ? { AND: [filter, deletedFilter] } : deletedFilter;
         }
 
         return new Promise((resolve, reject) => {
