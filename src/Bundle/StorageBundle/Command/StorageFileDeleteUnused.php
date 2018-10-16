@@ -8,7 +8,7 @@
 
 namespace UniteCMS\StorageBundle\Command;
 
-use Aws\S3\S3Client;
+use Aws\S3\S3MultiRegionClient;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -175,7 +175,7 @@ class StorageFileDeleteUnused extends Command
             $objects_to_delete = [];
 
             // Return pre-signed url
-            $s3Client = new S3Client(
+            $s3Client = new S3MultiRegionClient(
                 [
                     'version' => 'latest',
                     'region' => 'us-east-1',

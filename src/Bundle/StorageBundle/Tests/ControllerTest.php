@@ -8,7 +8,7 @@
 
 namespace UniteCMS\StorageBundle\Tests;
 
-use Aws\S3\S3Client;
+use Aws\S3\S3MultiRegionClient;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\HttpKernel\Client;
@@ -473,7 +473,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $this->assertNotNull($preSignedUrl->getChecksum());
         $this->assertTrue($preSignedUrl->check(static::$container->getParameter('kernel.secret')));
 
-        $s3Client = new S3Client(
+        $s3Client = new S3MultiRegionClient(
             [
                 'version' => 'latest',
                 'region' => 'us-east-1',
@@ -534,7 +534,7 @@ class ControllerTest extends DatabaseAwareTestCase
         $this->assertNotNull($preSignedUrl->getChecksum());
         $this->assertTrue($preSignedUrl->check(static::$container->getParameter('kernel.secret')));
 
-        $s3Client = new S3Client(
+        $s3Client = new S3MultiRegionClient(
             [
                 'version' => 'latest',
                 'region' => 'us-east-1',
@@ -576,7 +576,6 @@ class ControllerTest extends DatabaseAwareTestCase
 
         $service = static::$container->get('unite.cms.storage.service');
 
-
         // Test setting endpoint and bucket
         $fieldSettings->bucket = [
             'endpoint' => 'https://foo.com',
@@ -585,6 +584,7 @@ class ControllerTest extends DatabaseAwareTestCase
             'secret' => 'XXX',
         ];
         $response = $service->createPreSignedUploadUrlForFieldPath('test.txt', $contentType, 'file');
+
         $this->assertStringStartsWith('https://foo.com/baa/' . $response->getUuid() . '/' . $response->getFilename(), $response->getPreSignedUrl());
 
         // Test setting path

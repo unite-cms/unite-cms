@@ -8,7 +8,7 @@
 
 namespace UniteCMS\StorageBundle\Service;
 
-use Aws\S3\S3Client;
+use Aws\S3\S3MultiRegionClient;
 use Ramsey\Uuid\Uuid;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -111,7 +111,7 @@ class StorageService
         $uuid = (string)Uuid::uuid1();
 
         // Return pre-signed url
-        $s3Client = new S3Client(
+        $s3Client = new S3MultiRegionClient(
             [
                 'version' => 'latest',
                 'region' => $bucket_settings['region'] ?? 'us-east-1',
@@ -206,10 +206,10 @@ class StorageService
      */
     public function deleteObject(string $uuid, string $filename, array $bucket_settings)
     {
-        $s3Client = new S3Client(
+        $s3Client = new S3MultiRegionClient(
             [
                 'version' => 'latest',
-                'region' => 'us-east-1',
+                'region' => $bucket_settings['region'] ?? 'us-east-1',
                 'endpoint' => $bucket_settings['endpoint'],
                 'use_path_style_endpoint' => true,
                 'credentials' => [
