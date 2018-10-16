@@ -131,11 +131,10 @@ class TableViewTypeTest extends ContainerAwareTestCase
         $this->viewSettings->filter = ['field' => 'deleted', 'operator' => 'IS NOT NULL'];
         $this->viewSettings->sort = ['field' => 'position', 'sortable' => true];
 
-        // View should be valid.
+        // View should not be valid.
         $errors = static::$container->get('validator')->validate($this->view);
         $this->assertCount(1, $errors);
         $this->assertEquals('A sortable view cannot have filters set', $errors->get(0)->getMessageTemplate());
-        echo $errors;
     }
 
 }
