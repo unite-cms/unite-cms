@@ -93,7 +93,6 @@ class OldSortableTableViewTypeTest extends ContainerAwareTestCase
         $view->setSettings(new ViewSettings());
 
         // View settings all optional
-        echo static::$container->get('validator')->validate($view);
         $this->assertCount(0, static::$container->get('validator')->validate($view));
 
         $view->setSettings(
