@@ -53,10 +53,17 @@ abstract class FieldType implements FieldTypeInterface
      */
     function getFormOptions(FieldableField $field): array
     {
-        return [
+        $options = [
             'label' => $this->getTitle($field),
-            'required' => false,
+            'required' => $field->getSettings()->required ?? false
         ];
+
+        // add empty data option only if it's really explicitly allowed
+        if (isset($field->getSettings()->empty_data)) {
+            $options['empty_data'] = $field->getSettings()->empty_data;
+        }
+
+        return $options;
     }
 
     // OPTIONAL: public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {}
@@ -133,6 +140,16 @@ abstract class FieldType implements FieldTypeInterface
             if (!isset($settings[$setting])) {
                 $context->buildViolation('required')->atPath($setting)->addViolation();
             }
+        }
+
+        // validate required
+        if (isset($settings['required']) && !is_bool($settings['required'])) {
+            $context->buildViolation('noboolean_value')->atPath($setting)->addViolation();
+        }
+
+        // validate empty data
+        if (isset($settings['empty_data']) && !is_string($settings['empty_data'])) {
+            $context->buildViolation('nostring_value')->atPath($setting)->addViolation();
         }
 
         return $violations;
