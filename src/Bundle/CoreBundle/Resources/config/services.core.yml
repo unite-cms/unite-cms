@@ -31,6 +31,11 @@ services:
     public: true
 
 
+  # Parses domain configuration from and dumps domain objects to the filesystem.
+  unite.cms.domain_config_manager:
+    class: UniteCMS\CoreBundle\Service\DomainConfigManager
+    public: true
+
   # Parses and serializes a domain object. This service is used to create a domain object from the JSON definition.
   unite.cms.domain_definition_parser:
     class: UniteCMS\CoreBundle\Service\DomainDefinitionParser
