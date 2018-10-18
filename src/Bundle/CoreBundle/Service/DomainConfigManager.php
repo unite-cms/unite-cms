@@ -11,6 +11,7 @@ namespace UniteCMS\CoreBundle\Service;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
 use UniteCMS\CoreBundle\Exception\MissingDomainException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
@@ -74,24 +75,64 @@ class DomainConfigManager
     }
 
     /**
+     * Parses the config to an domain entity. This will change anything in the config dir.
+     *
+     * @param string $config
+     * @return Domain
+     */
+    public function parse(string $config) : Domain {
+        return $this->domainDefinitionParser->parse($config);
+    }
+
+    /**
+     * Serializes the domain entity to an json string. This will change anything in the config dir.
+     *
+     * @param Domain $domain
+     * @return string
+     */
+    public function serialize(Domain $domain) : string {
+        return $this->domainDefinitionParser->serialize($domain);
+    }
+
+    /**
      * Dumps the domain as a JSON file to the organization directory in the defined domain config location.
      *
      * @param Domain $domain
      * @param bool $forceOverride, If provided, an existing domain config file will be overridden.
+     * @param string $customConfig, Per default, the serialized domain will get dumped to the config file. However,
+     *   when customConfig is set, this config gets dumped instead. This allows to save config that includes variables
+     *   and miss default config. An error is thrown, if customConfig does not equals the domain, if it gets parsed.
+     *
+     *
      * @return bool, Returns true if domain was dumped successfully. False if file did exist and forceOverride was set to false.
      *
      * @throws MissingDomainException
      * @throws MissingOrganizationException
      * @throws IOException if the file cannot be written
+     * @throws InvalidDomainConfigurationException
      */
-    public function dumpDomainToConfig(Domain $domain, bool $forceOverride = false) : bool{
+    public function updateConfigFromDomain(Domain $domain, bool $forceOverride = false, string $customConfig = null) : bool{
         $path = $this->getDomainConfigPath($domain);
 
         if($this->filesystem->exists($path) && !$forceOverride) {
             return false;
         }
 
-        $this->filesystem->dumpFile($path, $this->domainDefinitionParser->serialize($domain));
+        $domainConfig = $this->serialize($domain);
+
+        if(!$customConfig) {
+            $this->filesystem->dumpFile($path, $domainConfig);
+        }
+
+        // If we want to save a custom domain config to the file.
+        else {
+            // Make sure, that customConfig equals domain, once parsed.
+            if($domainConfig != $this->serialize($this->parse($customConfig))) {
+                throw new InvalidDomainConfigurationException('CustomConfig must match the domain, once parsed. Use this parameter only to set variables or to exclude default config.');
+            }
+
+            $this->filesystem->dumpFile($path, $customConfig);
+        }
 
         return true;
     }
@@ -121,7 +162,7 @@ class DomainConfigManager
         }
 
         // Create domain object from config.
-        $loadedDomain = $this->domainDefinitionParser->parse($loadedConfig);
+        $loadedDomain = $this->parse($loadedConfig);
 
         // Make sure, that the loaded domain has the same identifier as the given domain.
         if($loadedDomain->getIdentifier() !== $domain->getIdentifier()) {
@@ -130,5 +171,25 @@ class DomainConfigManager
 
         // Override domain with content from loadedDomain.
         $domain->setFromEntity($loadedDomain);
+    }
+
+    /**
+     * Reads the domain configuration JSON file for the given organization and domain identifier and creates an domain
+     * entity from it. The domain won't get validated at this point!
+     *
+     * @param Organization $organization
+     * @param string $domainIdentifier
+     *
+     * @throws MissingOrganizationException
+     * @throws MissingDomainException
+     * @throws InvalidDomainConfigurationException
+     *
+     * @return Domain
+     */
+    public function createDomainFromConfig(Organization $organization, string $domainIdentifier) : Domain {
+        $domain = new Domain();
+        $domain->setIdentifier($domainIdentifier)->setOrganization($organization);
+        $this->updateDomainFromConfig($domain);
+        return $domain;
     }
 }

@@ -2,7 +2,7 @@
 services:
 
     UniteCMS\CoreBundle\Command\CreateDomainCommand:
-        arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@unite.cms.domain_definition_parser']
+        arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@unite.cms.domain_config_manager']
         tags:
             - { name: 'console.command', command: 'unite:domain:create' }
 

@@ -27,7 +27,7 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $application->add(new CreateDomainCommand(
             static::$container->get('doctrine.orm.default_entity_manager'),
             static::$container->get('validator'),
-            static::$container->get('unite.cms.domain_definition_parser')
+            static::$container->get('unite.cms.domain_config_manager')
         ));
 
         $command = $application->find('unite:domain:create');
@@ -42,7 +42,7 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
 
         $inputDomain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->validDomain);
-        $commandTester->setInputs(array('0', $this->validDomain, null, 'Y'));
+        $commandTester->setInputs(array('0', 'access_check', $this->validDomain, null, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
 
         // Verify output
@@ -57,60 +57,28 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
 
 
         // Now let's try to create another domain with the same identifier.
-        $commandTester->setInputs(array('0', $this->validDomain, null, 'Y'));
+        $commandTester->setInputs(array('0', 'access_check', $this->validDomain, null, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
         $this->assertContains('There was an error while creating the domain', $commandTester->getDisplay());
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
-    }
 
-    public function testCreateDomainWithVariablesCommand() {
+        // Now let's try to create another domain with empty config
+        $commandTester->setInputs(array('0', 'access_check', null, null, 'Y'));
+        $commandTester->execute(array('command' => $command->getName()));
+        $this->assertContains('There was an error while creating the domain', $commandTester->getDisplay());
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
 
-        $application = new Application(self::$kernel);
-        $application->add(new CreateDomainCommand(
-            static::$container->get('doctrine.orm.default_entity_manager'),
-            static::$container->get('validator'),
-            static::$container->get('unite.cms.domain_definition_parser')
-        ));
-
-        $command = $application->find('unite:domain:create');
-        $commandTester = new CommandTester($command);
-
-        $organization = new Organization();
-        $organization->setIdentifier('org')->setTitle('Org');
-
-        $this->em->persist($organization);
-        $this->em->flush();
-
-        $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
-
-        $commandTester->setInputs(array('0', $this->validDomainWithVariables, $this->configVariables, 'Y'));
+        $commandTester->setInputs(array('0', 'other_check', null, null, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
 
         // Verify output
         $this->assertContains('Domain was created successfully!', $commandTester->getDisplay());
 
-        // Verify creation & replacement.
+        // Verify creation
         $domains = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll();
-        $this->assertCount(1, $domains);
-        $this->assertEquals('replaced_title', $domains[0]->getTitle());
-        $this->assertEquals('with_variables', $domains[0]->getIdentifier());
-        $this->assertEquals($organization, $domains[0]->getOrganization());
-
-        $this->assertCount(3, $domains[0]->getContentTypes());
-        $this->assertCount(2, $domains[0]->getContentTypes()->get('t1')->getFields());
-        $this->assertCount(2, $domains[0]->getContentTypes()->get('t2')->getFields());
-        $this->assertCount(0, $domains[0]->getContentTypes()->get('t3')->getFields());
-        $this->assertEquals('F1', $domains[0]->getContentTypes()->get('t1')->getFields()->first()->getTitle());
-        $this->assertEquals('f1', $domains[0]->getContentTypes()->get('t1')->getFields()->first()->getIdentifier());
-        $this->assertEquals('F2', $domains[0]->getContentTypes()->get('t1')->getFields()->last()->getTitle());
-        $this->assertEquals('f2', $domains[0]->getContentTypes()->get('t1')->getFields()->last()->getIdentifier());
-        $this->assertEquals('F1', $domains[0]->getContentTypes()->get('t2')->getFields()->first()->getTitle());
-        $this->assertEquals('f1', $domains[0]->getContentTypes()->get('t2')->getFields()->first()->getIdentifier());
-        $this->assertEquals('F2', $domains[0]->getContentTypes()->get('t2')->getFields()->last()->getTitle());
-        $this->assertEquals('f2', $domains[0]->getContentTypes()->get('t2')->getFields()->last()->getIdentifier());
-
-        // Make sure, that the variables where saved to the domain as well.
-        $this->assertEquals(json_decode($this->configVariables, true), $domains[0]->getConfigVariables());
-
+        $this->assertCount(2, $domains);
+        $this->assertEquals('Other check', $domains[1]->getTitle());
+        $this->assertEquals('other_check', $domains[1]->getIdentifier());
+        $this->assertEquals($organization, $domains[1]->getOrganization());
     }
 }

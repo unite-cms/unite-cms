@@ -8,7 +8,6 @@
 
 namespace App\Bundle\CoreBundle\Tests\Service;
 
-
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use UniteCMS\CoreBundle\Entity\ContentType;
@@ -190,7 +189,7 @@ class DomainConfigManagerTest extends KernelTestCase
     public function testDumpingDomainWithMissingOrganization() {
         $domain = new Domain();
         $domain->setIdentifier('my_test_domain');
-        $this->manager->dumpDomainToConfig($domain, false);
+        $this->manager->updateConfigFromDomain($domain, false);
     }
 
     /**
@@ -204,7 +203,7 @@ class DomainConfigManagerTest extends KernelTestCase
         $domain
             ->setOrganization($organization)
             ->setIdentifier('my_test_domain');
-        $this->manager->dumpDomainToConfig($domain, false);
+        $this->manager->updateConfigFromDomain($domain, false);
     }
 
     /**
@@ -217,7 +216,7 @@ class DomainConfigManagerTest extends KernelTestCase
         $organization->setIdentifier('my_test_organization');
         $domain = new Domain();
         $domain->setOrganization($organization);
-        $this->manager->dumpDomainToConfig($domain, false);
+        $this->manager->updateConfigFromDomain($domain, false);
     }
 
     /**
@@ -303,9 +302,44 @@ class DomainConfigManagerTest extends KernelTestCase
 
         // First create a domain config .json file to test force ovrrride.
         $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json', 'foo');
-        $this->assertFalse($this->manager->dumpDomainToConfig($domain));
+        $this->assertFalse($this->manager->updateConfigFromDomain($domain));
         $this->assertEquals('foo', file_get_contents($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json'));
-        $this->assertTrue($this->manager->dumpDomainToConfig($domain, true));
+        $this->assertTrue($this->manager->updateConfigFromDomain($domain, true));
         $this->assertJsonStringEqualsJsonString(static::$container->get('unite.cms.domain_definition_parser')->serialize($domain), file_get_contents($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json'));
+    }
+
+    /**
+     * @expectedException \UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException
+     * @expectedExceptionMessage CustomConfig must match the domain, once parsed. Use this parameter only to set variables or to exclude default config.
+     */
+    public function testDumpingDomainConfigWithInvalidCustomConfig() {
+
+        $organization = new Organization();
+        $organization->setIdentifier('my_test_organization');
+        $domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->exampleConfig);
+        $domain
+            ->setOrganization($organization)
+            ->setId('XXX-YYY-ZZZ');
+
+        // Try to dump a custom config that is different from domain.
+        $this->manager->updateConfigFromDomain($domain, true, str_replace('First Content Type', 'Foo Content Type', $this->exampleConfig));
+    }
+
+    public function testDumpingDomainConfigWithValidCustomConfig() {
+
+        $organization = new Organization();
+        $organization->setIdentifier('my_test_organization');
+        $domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->exampleConfig);
+        $domain
+            ->setOrganization($organization)
+            ->setId('XXX-YYY-ZZZ');
+
+        $customConfig = json_decode($this->exampleConfig);
+        $customConfig->variables = ['@title' => 'First Content Type'];
+        $customConfig->content_types[0]->title = '@title';
+
+
+        // Try to dump a custom config that is the same as domain.
+        $this->assertTrue($this->manager->updateConfigFromDomain($domain, true, json_encode($customConfig)));
     }
 }
