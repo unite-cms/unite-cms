@@ -120,20 +120,17 @@ class DomainConfigManager
 
         $domainConfig = $this->serialize($domain);
 
-        if(!$customConfig) {
-            $this->filesystem->dumpFile($path, $domainConfig);
-        }
-
         // If we want to save a custom domain config to the file.
-        else {
+        if($customConfig) {
             // Make sure, that customConfig equals domain, once parsed.
             if($domainConfig != $this->serialize($this->parse($customConfig))) {
                 throw new InvalidDomainConfigurationException('CustomConfig must match the domain, once parsed. Use this parameter only to set variables or to exclude default config.');
             }
 
-            $this->filesystem->dumpFile($path, $customConfig);
+            $domainConfig = $customConfig;
         }
 
+        $this->filesystem->dumpFile($path, json_encode(json_decode($domainConfig), JSON_PRETTY_PRINT));
         return true;
     }
 

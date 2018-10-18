@@ -62,6 +62,28 @@ class CreateDomainCommand extends Command
     }
 
     /**
+     * Validates the domain and prints a message if not valid.
+     *
+     * @param OutputInterface $output
+     * @param Domain $domain
+     * @return bool
+     */
+    protected function validate(OutputInterface $output, Domain $domain) {
+        $errors = $this->validator->validate($domain);
+        if (count($errors) > 0) {
+
+            // A later flush would throw an exception, if the organization would include the invalid domain.
+            $domain->getOrganization()->getDomains()->removeElement($domain);
+            unset($domain);
+
+            $output->writeln("<error>\n\nThere was an error while creating the domain\n \n$errors\n</error>");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -86,11 +108,11 @@ class CreateDomainCommand extends Command
         }
 
         $helper = $this->getHelper('question');
-        $question = new Question('<info>Please an identifier for the domain. numbers, lowercase chars and underscore is allowed:</info>');
+        $question = new Question("\n<info>Domain identifier</info> (numbers, lowercase chars and underscore is allowed): ");
         $domainIdentifier = $helper->ask($input, $output, $question);
 
         $helper = $this->getHelper('question');
-        $question = new Question('<info>You can now insert a JSON domain configuration (If left blank, an empty domain will get created and you can update the file later.):</info>');
+        $question = new Question("\n<info>Domain configuration</info> (If left blank, an empty domain will get created and you can update it later.): </info>");
         $domainDefinition = $helper->ask($input, $output, $question);
 
         $domain = empty($domainDefinition) ? new Domain() : $this->domainConfigManager->parse($domainDefinition);
@@ -99,6 +121,8 @@ class CreateDomainCommand extends Command
         if(empty($domain->getTitle())) {
             $domain->setTitle(str_replace('_', ' ', ucfirst($domain->getIdentifier())));
         }
+
+        if(!$this->validate($output, $domain)) { return; }
 
         $output->writeln(['', '', '<info>*****Domain definition*****</info>', '']);
         $output->writeln('Title</>: <comment>'.$domain->getTitle().'</comment>');
@@ -128,7 +152,7 @@ class CreateDomainCommand extends Command
             $output->writeln('    }');
         }
 
-        $output->writeln(['', '']);
+        $output->writeln([']', '']);
 
         $question = new ConfirmationQuestion(
             '<info>Should the domain for the organization: "'.$organization.'" be created</info>? [<comment>Y/n</comment>] ',
@@ -140,16 +164,7 @@ class CreateDomainCommand extends Command
             return;
         }
 
-        $errors = $this->validator->validate($domain);
-        if (count($errors) > 0) {
-
-            // A later flush would throw an exception, if the organization would include the invalid domain.
-            $organization->getDomains()->removeElement($domain);
-            unset($domain);
-
-            $output->writeln("<error>\n\nThere was an error while creating the domain\n \n$errors\n</error>");
-        } else {
-
+        if ($this->validate($output, $domain)) {
             try {
                 $this->domainConfigManager->updateConfigFromDomain($domain);
             } catch (InvalidDomainConfigurationException $e) {
@@ -162,9 +177,7 @@ class CreateDomainCommand extends Command
 
             $this->em->persist($domain);
             $this->em->flush();
-            $output->writeln('<info>Domain was created successfully!</info>');
+            $output->writeln(['', '<info>Database entry was created successfully!</info>', '<info>Domain configuration file was created successfully at path: </info>"' . $this->domainConfigManager->getDomainConfigPath($domain) . '"', '']);
         }
-
-        $output->writeln('<info>Domain was created successfully!</info>');
     }
 }

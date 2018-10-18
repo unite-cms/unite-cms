@@ -18,9 +18,6 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
 {
     private $validDomain = '{ "title": "Test controller access check domain", "identifier": "access_check", "content_types": [{"title": "CT 1", "identifier": "ct1"}], "setting_types": [{"title": "ST 1", "identifier": "st1"}] }';
 
-    private $configVariables = '{ "@var_title": "replaced_title", "@var_fields": [ { "title": "F1", "identifier": "f1", "type": "text" }, { "title": "F2", "identifier": "f2", "type": "text" } ], "@ct3": { "title": "T3",  "identifier": "t3" } }';
-    private $validDomainWithVariables = '{ "title": "@var_title", "identifier": "with_variables", "content_types": [{ "title": "T1",  "identifier": "t1", "fields": "@var_fields" }, { "title": "T2",  "identifier": "t2", "fields": "@var_fields" }, "@ct3"] }';
-
     public function testCreateDomainCommand() {
 
         $application = new Application(self::$kernel);
@@ -46,7 +43,7 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $commandTester->execute(array('command' => $command->getName()));
 
         // Verify output
-        $this->assertContains('Domain was created successfully!', $commandTester->getDisplay());
+        $this->assertContains('Database entry was created successfully!', $commandTester->getDisplay());
 
         // Verify creation
         $domains = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll();
@@ -72,7 +69,7 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $commandTester->execute(array('command' => $command->getName()));
 
         // Verify output
-        $this->assertContains('Domain was created successfully!', $commandTester->getDisplay());
+        $this->assertContains('Database entry was created successfully!', $commandTester->getDisplay());
 
         // Verify creation
         $domains = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll();
