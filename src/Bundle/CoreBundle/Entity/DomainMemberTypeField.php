@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\SkipWhenEmpty;
 use JMS\Serializer\Annotation\Type;
 
 use Symfony\Component\Validator\Constraints as Assert;
@@ -74,6 +75,7 @@ class DomainMemberTypeField implements FieldableField
      * @Assert\NotNull(message="not_null")
      * @Type("UniteCMS\CoreBundle\Field\FieldableFieldSettings")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $settings;
 

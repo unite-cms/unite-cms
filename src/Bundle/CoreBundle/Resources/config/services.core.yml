@@ -30,20 +30,18 @@ services:
     arguments: ['@router.default']
     public: true
 
-
-  # Parses domain configuration from and dumps domain objects to the filesystem.
-  unite.cms.domain_config_manager:
-    class: UniteCMS\CoreBundle\Service\DomainConfigManager
-    public: true
-    arguments:
-      ['%kernel.project_dir%/config/unite/']
-
   # Parses and serializes a domain object. This service is used to create a domain object from the JSON definition.
   unite.cms.domain_definition_parser:
     class: UniteCMS\CoreBundle\Service\DomainDefinitionParser
     arguments: ['@jms_serializer', '@validator']
     public: true
 
+  # Parses domain configuration from and dumps domain objects to the filesystem.
+  unite.cms.domain_config_manager:
+    class: UniteCMS\CoreBundle\Service\DomainConfigManager
+    public: true
+    arguments:
+      ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem']
 
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
   unite.cms.fieldable_form_builder:

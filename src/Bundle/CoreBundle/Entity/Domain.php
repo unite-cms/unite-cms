@@ -108,12 +108,6 @@ class Domain
     private $permissions;
 
     /**
-     * @var array
-     * @ORM\Column(name="config_variables", type="array", nullable=true)
-     */
-    private $configVariables;
-
-    /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
@@ -261,8 +255,7 @@ class Domain
         $this
             ->setTitle($domain->getTitle())
             ->setIdentifier($domain->getIdentifier())
-            ->setPermissions($domain->getPermissions())
-            ->setConfigVariables($domain->getConfigVariables());
+            ->setPermissions($domain->getPermissions());
 
         // ContentTypes to delete
         foreach ($this->getContentTypesDiff($domain) as $ct) {
@@ -589,33 +582,6 @@ class Domain
     public function addPermission($attribute, string $expression)
     {
         $this->permissions[$attribute] = $expression;
-    }
-
-    /**
-     * Set configVariables
-     *
-     * @param array configVariables
-     *
-     * @return Domain
-     */
-    public function setConfigVariables(array $configVariables)
-    {
-        $this->configVariables = $configVariables;
-
-        return $this;
-    }
-
-    /**
-     * Get configVariables
-     *
-     * @return array
-     */
-    public function getConfigVariables(): array
-    {
-        if(empty($this->configVariables)) {
-            $this->configVariables = [];
-        }
-        return $this->configVariables;
     }
 
     /**
