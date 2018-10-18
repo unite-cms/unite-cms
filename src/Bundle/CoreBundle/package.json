@@ -10,6 +10,7 @@
     "@symfony/webpack-encore": "^0.20.1",
     "ace-builds": "^1.4.1",
     "brace": "^0.11.1",
+    "brace-diff": "^0.1.2",
     "feather-icons": "^4.7.3",
     "graphql-request": "^1.8.2",
     "install": "^0.12.1",

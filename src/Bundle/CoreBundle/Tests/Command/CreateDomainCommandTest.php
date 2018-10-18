@@ -38,7 +38,7 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
 
         $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
 
-        $inputDomain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->validDomain);
+        $inputDomain = static::$container->get('unite.cms.domain_config_manager')->parse($this->validDomain);
         $commandTester->setInputs(array('0', 'access_check', $this->validDomain, null, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
 
@@ -52,12 +52,27 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $this->assertEquals($inputDomain->getIdentifier(), $domains[0]->getIdentifier());
         $this->assertEquals($organization, $domains[0]->getOrganization());
 
+        $this->assertFileExists(static::$container->get('unite.cms.domain_config_manager')->getDomainConfigPath($domains[0]));
+        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domains[0]);
+        $originalConfig = $domains[0]->getConfig();
+        $this->assertNotEmpty($originalConfig);
+        $this->assertJsonStringEqualsJsonString($this->validDomain, $originalConfig);
 
         // Now let's try to create another domain with the same identifier.
         $commandTester->setInputs(array('0', 'access_check', $this->validDomain, null, 'Y'));
         $commandTester->execute(array('command' => $command->getName()));
         $this->assertContains('There was an error while creating the domain', $commandTester->getDisplay());
-        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
+
+        // Make sure, that the access_check domain was not saved because there was an error.
+        $domains = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll();
+        $this->assertCount(1, $domains);
+        $this->assertEquals($inputDomain->getTitle(), $domains[0]->getTitle());
+        $this->assertEquals($inputDomain->getIdentifier(), $domains[0]->getIdentifier());
+        $this->assertEquals($organization, $domains[0]->getOrganization());
+
+        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domains[0]);
+        $this->assertEquals($originalConfig, $domains[0]->getConfig());
+
 
         // Now let's try to create another domain with empty config
         $commandTester->setInputs(array('0', 'access_check', null, null, 'Y'));
@@ -77,5 +92,7 @@ class CreateDomainCommandTest extends DatabaseAwareTestCase
         $this->assertEquals('Other check', $domains[1]->getTitle());
         $this->assertEquals('other_check', $domains[1]->getIdentifier());
         $this->assertEquals($organization, $domains[1]->getOrganization());
+
+        $this->assertFileExists(static::$container->get('unite.cms.domain_config_manager')->getDomainConfigPath($domains[1]));
     }
 }

@@ -116,7 +116,10 @@ class CreateDomainCommand extends Command
         $domainDefinition = $helper->ask($input, $output, $question);
 
         $domain = empty($domainDefinition) ? new Domain() : $this->domainConfigManager->parse($domainDefinition);
-        $domain->setOrganization($organization)->setIdentifier($domainIdentifier);
+        $domain
+            ->setOrganization($organization)
+            ->setIdentifier($domainIdentifier)
+            ->setConfig($domainDefinition ?? '');
 
         if(empty($domain->getTitle())) {
             $domain->setTitle(str_replace('_', ' ', ucfirst($domain->getIdentifier())));
@@ -165,19 +168,9 @@ class CreateDomainCommand extends Command
         }
 
         if ($this->validate($output, $domain)) {
-            try {
-                $this->domainConfigManager->updateConfigFromDomain($domain);
-            } catch (InvalidDomainConfigurationException $e) {
-                $output->writeln("<error>\n\nThere was an error while creating the domain. Invalid domain configuration.\n</error>");
-            } catch (MissingDomainException $e) {
-                $output->writeln("<error>\n\nThere was an error while creating the domain. Domain identifier is missing.\n</error>");
-            } catch (MissingOrganizationException $e) {
-                $output->writeln("<error>\n\nThere was an error while creating the domain. Organization is missing.\n</error>");
-            }
-
             $this->em->persist($domain);
             $this->em->flush();
-            $output->writeln(['', '<info>Database entry was created successfully!</info>', '<info>Domain configuration file was created successfully at path: </info>"' . $this->domainConfigManager->getDomainConfigPath($domain) . '"', '']);
+            $output->writeln(['', '<info>Database entry was created successfully!</info>', '<info>Domain configuration file was created successfully at path: </info>"'.$this->domainConfigManager->getDomainConfigPath( $domain ).'"', '']);
         }
     }
 }

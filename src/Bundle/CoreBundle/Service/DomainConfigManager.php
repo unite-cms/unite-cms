@@ -10,6 +10,7 @@ namespace UniteCMS\CoreBundle\Service;
 
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
@@ -52,26 +53,37 @@ class DomainConfigManager
     /**
      * Returns the full path to the config file for a domain.
      *
+     * @param Organization $organization
+     * @return string
+     * @throws MissingOrganizationException
+     */
+    public function getOrganizationConfigPath(Organization $organization) : string {
+        if(empty($organization->getIdentifier())) {
+            throw new MissingOrganizationException('Organization identifier is empty.');
+        }
+
+        return $this->domainConfigDir . $organization->getIdentifier() . '/';
+    }
+
+    /**
+     * Returns the full path to the config file for a domain.
+     *
      * @param Domain $domain
      * @return string
      * @throws MissingDomainException
      * @throws MissingOrganizationException
      */
-    public function getDomainConfigPath(Domain $domain) {
+    public function getDomainConfigPath(Domain $domain) : string {
 
         if(empty($domain->getOrganization())) {
             throw new MissingOrganizationException('You can only process domains where the organization is not empty.');
-        }
-
-        if(empty($domain->getOrganization()->getIdentifier())) {
-            throw new MissingOrganizationException('You can only process domains where the organization identifier is not empty.');
         }
 
         if(empty($domain->getIdentifier())) {
             throw new MissingDomainException('You can only process domains where the identifier is not empty.');
         }
 
-        return $this->domainConfigDir . $domain->getOrganization()->getIdentifier() . '/' . $domain->getIdentifier() . '.json';
+        return $this->getOrganizationConfigPath($domain->getOrganization()) . $domain->getIdentifier() . '.json';
     }
 
     /**
@@ -98,11 +110,7 @@ class DomainConfigManager
      * Dumps the domain as a JSON file to the organization directory in the defined domain config location.
      *
      * @param Domain $domain
-     * @param bool $forceOverride, If provided, an existing domain config file will be overridden.
-     * @param string $customConfig, Per default, the serialized domain will get dumped to the config file. However,
-     *   when customConfig is set, this config gets dumped instead. This allows to save config that includes variables
-     *   and miss default config. An error is thrown, if customConfig does not equals the domain, if it gets parsed.
-     *
+     * @param bool $forceOverride , If provided, an existing domain config file will be overridden.
      *
      * @return bool, Returns true if domain was dumped successfully. False if file did exist and forceOverride was set to false.
      *
@@ -111,38 +119,57 @@ class DomainConfigManager
      * @throws IOException if the file cannot be written
      * @throws InvalidDomainConfigurationException
      */
-    public function updateConfigFromDomain(Domain $domain, bool $forceOverride = false, string $customConfig = null) : bool{
+    public function updateConfig(Domain $domain, bool $forceOverride = false) : bool{
         $path = $this->getDomainConfigPath($domain);
 
         if($this->filesystem->exists($path) && !$forceOverride) {
             return false;
         }
 
-        $domainConfig = $this->serialize($domain);
+        $serializedDomain = $this->serialize($domain);
 
-        // If we want to save a custom domain config to the file.
-        if($customConfig) {
-            // Make sure, that customConfig equals domain, once parsed.
-            if($domainConfig != $this->serialize($this->parse($customConfig))) {
-                throw new InvalidDomainConfigurationException('CustomConfig must match the domain, once parsed. Use this parameter only to set variables or to exclude default config.');
-            }
-
-            $domainConfig = $customConfig;
+        // If config is empty, just serialize the domain and save it.
+        if(empty($domain->getConfig())) {
+            $config = $serializedDomain;
         }
 
-        $this->filesystem->dumpFile($path, json_encode(json_decode($domainConfig), JSON_PRETTY_PRINT));
+        // If config is not empty, first check if it is the same as the domain.
+        else {
+            $config = $domain->getConfig();
+            $parsedConfig = $this->parse($config);
+
+            if($serializedDomain != $this->serialize($parsedConfig)) {
+                throw new InvalidDomainConfigurationException('Domain config does not match parsed domain.');
+            }
+        }
+
+        $this->filesystem->dumpFile($path, json_encode(json_decode($config), JSON_PRETTY_PRINT));
         return true;
     }
 
     /**
-     * Reads the domain configuration JSON file and updates the given domain to it.
+     * Returns true, if the config for the given domain exists.
      *
      * @param Domain $domain
-     * @throws MissingOrganizationException
      * @throws MissingDomainException
-     * @throws InvalidDomainConfigurationException
+     * @throws MissingOrganizationException
+     * @return bool
      */
-    public function updateDomainFromConfig(Domain $domain) : void {
+    public function configExists(Domain $domain) : bool {
+        $path = $this->getDomainConfigPath($domain);
+        return $this->filesystem->exists($path);
+    }
+
+    /**
+     * Loads the domain configuration JSON file and optional updates the given domain to it.
+     *
+     * @param Domain $domain
+     * @param bool $updateDomain
+     * @throws InvalidDomainConfigurationException
+     * @throws MissingDomainException
+     * @throws MissingOrganizationException
+     */
+    public function loadConfig(Domain $domain, $updateDomain = false) : void {
 
         $path = $this->getDomainConfigPath($domain);
 
@@ -158,35 +185,62 @@ class DomainConfigManager
             throw new IOException(sprintf('Failed to load content from file "%s".', $path), 0, null, $path);
         }
 
-        // Create domain object from config.
         $loadedDomain = $this->parse($loadedConfig);
 
         // Make sure, that the loaded domain has the same identifier as the given domain.
-        if($loadedDomain->getIdentifier() !== $domain->getIdentifier()) {
-            throw new InvalidDomainConfigurationException('The domain configuration identifier does not match with the filename.');
+        if ($loadedDomain->getIdentifier() !== $domain->getIdentifier()) {
+            throw new InvalidDomainConfigurationException(
+                'The domain configuration identifier does not match with the filename.'
+            );
         }
 
         // Override domain with content from loadedDomain.
-        $domain->setFromEntity($loadedDomain);
+        if($updateDomain) {
+            $domain->setFromEntity($loadedDomain);
+        }
+
+        $domain->setConfig($loadedConfig);
     }
 
     /**
-     * Reads the domain configuration JSON file for the given organization and domain identifier and creates an domain
-     * entity from it. The domain won't get validated at this point!
+     * Removes the domain configuration JSON file for the given domain.
      *
-     * @param Organization $organization
-     * @param string $domainIdentifier
-     *
+     * @param Domain $domain
      * @throws MissingOrganizationException
      * @throws MissingDomainException
-     * @throws InvalidDomainConfigurationException
-     *
-     * @return Domain
+     * @throws IOException if the file cannot be deleted
      */
-    public function createDomainFromConfig(Organization $organization, string $domainIdentifier) : Domain {
-        $domain = new Domain();
-        $domain->setIdentifier($domainIdentifier)->setOrganization($organization);
-        $this->updateDomainFromConfig($domain);
-        return $domain;
+    public function removeConfig(Domain $domain) : void {
+
+        $path = $this->getDomainConfigPath($domain);
+
+        // If file does not exists, return.
+        if(!$this->filesystem->exists($path)) {
+            return;
+        }
+
+        $this->filesystem->remove($path);
+    }
+
+    /**
+     * Get all config files without .json suffix (this is the domain identifier) for the given domain.
+     *
+     * @param Organization $organization
+     * @return array
+     * @throws MissingOrganizationException
+     */
+    public function listConfig(Organization $organization) : array {
+
+        $path = $this->getOrganizationConfigPath($organization);
+
+        $finder = new Finder();
+        $finder->files()->in($path);
+        $configs = [];
+
+        foreach($finder as $file) {
+            $configs[] = $file->getBasename();
+        }
+
+        return $configs;
     }
 }

@@ -1,17 +1,10 @@
 <template>
     <div>
-        <textarea v-if="!is_disabled" :name="field_name + '[definition]'" v-model="definition"></textarea>
-        <textarea v-if="!is_disabled" :name="field_name + '[variables]'" v-model="variables"></textarea>
-        <input type="hidden" v-if="is_disabled" :name="field_name + '[definition]'" v-model="definition" />
-        <input type="hidden" v-if="is_disabled" :name="field_name + '[variables]'" v-model="variables" />
+        <textarea v-if="!is_disabled" :name="field_name" v-model="config"></textarea>
+        <input type="hidden" v-if="is_disabled" :name="field_name" v-model="config" />
         <div class="uk-flex" v-if="!is_disabled">
-            <div class="uk-width-2-3">
-                <h4>{{ domain_title }}</h4>
-                <div uk-height-viewport offset-top="true" :id="editor_id + '_definition'"></div>
-            </div>
-            <div class="uk-width-1-3">
-                <h4>{{ variables_title }} <span :title="variables_title_help" uk-tooltip v-html="feather.icons['help-circle'].toSvg({ width: 16, height: 16 })"></span></h4>
-                <div uk-height-viewport offset-top="true" :id="editor_id + '_variables'"></div>
+            <div class="uk-width-1-1">
+                <div uk-height-viewport offset-top="true" :id="editor_id + '_config'"></div>
             </div>
         </div>
     </div>
@@ -19,6 +12,7 @@
 
 <script>
     import ace from 'brace';
+    import aceDiff from 'brace-diff';
     import 'brace/mode/json';
     import 'brace/theme/monokai';
     import 'brace/ext/language_tools';
@@ -29,17 +23,12 @@
 
     export default {
         data() {
-            let value = JSON.parse(this.value);
             return {
                 field_name: this.name,
                 editor_id: 'domain-editor' + this._uid,
-                definition: value.definition,
-                variables: value.variables,
+                config: this.value,
                 is_disabled: this.disabled,
-                feather: feather,
-                domain_title: 'Domain configuration',
-                variables_title: 'Variables',
-                variables_title_help: 'Define reusable configuration snippets that can be used in the domain configuration. Please see the docs for examples.'
+                feather: feather
             };
         },
         props: [
@@ -50,8 +39,7 @@
         mounted() {
             if(!this.is_disabled) {
                 this.editors = [];
-                this.createEditorInstance("definition");
-                this.createEditorInstance("variables");
+                this.createEditorInstance("config")
             }
         },
 

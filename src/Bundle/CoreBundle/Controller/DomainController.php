@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -52,14 +53,13 @@ class DomainController extends Controller
     {
         $domain = new Domain();
         $domain->setTitle('Untitled Domain')->setIdentifier('untitled');
+        $domain->setConfig($this->get('unite.cms.domain_config_manager')->serialize($domain));
+
         $form = $this->createFormBuilder([
-            'domain' => [
-                'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
-                'variables' => '{}',
-            ]
+            'domain' => $domain->getConfig(),
         ])
-        ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
-        ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
+            ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->getForm();
 
         $form->handleRequest($request);
@@ -69,7 +69,8 @@ class DomainController extends Controller
             $domain = null;
 
             try {
-                $domain = $this->get('unite.cms.domain_definition_parser')->parse($form->getData()['domain']['definition'], $form->getData()['domain']['variables'] ?? null);
+                $domain = $this->get('unite.cms.domain_config_manager')->parse($form->getData()['domain']);
+                $domain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
             }
@@ -137,14 +138,19 @@ class DomainController extends Controller
      */
     public function updateAction(Organization $organization, Domain $domain, Request $request)
     {
+        if($this->get('unite.cms.domain_config_manager')->configExists($domain)) {
+            $this->get('unite.cms.domain_config_manager')->loadConfig($domain);
+
+        // If the file does not exist, serialize the current domain instead.
+        } else {
+            $domain->setConfig((string)$this->get('unite.cms.domain_config_manager')->serialize($domain));
+        }
+
         $originalDomain = null;
         $updatedDomain = null;
 
         $form = $this->createFormBuilder([
-            'domain' => [
-                'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
-                'variables' => empty($domain->getConfigVariables()) ? '{}': json_encode($domain->getConfigVariables()),
-            ],
+            'domain' => $domain->getConfig(),
         ])
         ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'error_bubbling' => true])
         ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
@@ -158,10 +164,8 @@ class DomainController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             try {
-                $updatedDomain = $this->get('unite.cms.domain_definition_parser')->parse(
-                    $form->getData()['domain']['definition'],
-                    $form->getData()['domain']['variables'] ?? null
-                );
+                $updatedDomain = $this->get('unite.cms.domain_config_manager')->parse($form->getData()['domain']);
+                $updatedDomain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
                 $formView = $form->createView();
@@ -170,9 +174,7 @@ class DomainController extends Controller
             if (isset($updatedDomain)) {
 
                 // In order to avoid persistence conflicts, we create a new domain from serialized domain.
-                $originalDomain = $this->get('unite.cms.domain_definition_parser')->parse(
-                    $this->get('unite.cms.domain_definition_parser')->serialize($domain, false)
-                );
+                $originalDomain = $this->get('unite.cms.domain_config_manager')->parse($this->get('unite.cms.domain_config_manager')->serialize($domain));
                 $domain->setFromEntity($updatedDomain);
                 $violations = $this->get('validator')->validate($domain);
 

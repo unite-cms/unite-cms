@@ -114,6 +114,14 @@ class Domain
      */
     private $members;
 
+    /**
+     * This holds the json config for this domain. This config was not generated automatically from this domain, but is
+     * loaded from the filesystem. This allows us to define variables on the domain config, that get substituted when
+     * creating a domain entity from the config. This config also does not get saved to the database.
+     * @var string
+     */
+    private $config;
+
     public function __toString()
     {
         return ''.$this->title;
@@ -255,7 +263,8 @@ class Domain
         $this
             ->setTitle($domain->getTitle())
             ->setIdentifier($domain->getIdentifier())
-            ->setPermissions($domain->getPermissions());
+            ->setPermissions($domain->getPermissions())
+            ->setConfig($domain->getConfig());
 
         // ContentTypes to delete
         foreach ($this->getContentTypesDiff($domain) as $ct) {
@@ -620,6 +629,22 @@ class Domain
         }
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getConfig(): string
+    {
+        return $this->config ?? '';
+    }
+
+    /**
+     * @param string $config
+     */
+    public function setConfig(string $config): void
+    {
+        $this->config = $config;
     }
 }
 

@@ -152,12 +152,12 @@ class DomainConfigManagerTest extends KernelTestCase
     public function testParsingDomainWithMissingOrganization() {
         $domain = new Domain();
         $domain->setIdentifier('my_test_domain');
-        $this->manager->updateDomainFromConfig($domain);
+        $this->manager->loadConfig($domain);
     }
 
     /**
      * @expectedException \UniteCMS\CoreBundle\Exception\MissingOrganizationException
-     * @expectedExceptionMessage You can only process domains where the organization identifier is not empty.
+     * @expectedExceptionMessage Organization identifier is empty.
      */
     public function testParsingDomainWithMissingOrganizationIdentifier() {
 
@@ -166,7 +166,7 @@ class DomainConfigManagerTest extends KernelTestCase
         $domain
             ->setOrganization($organization)
             ->setIdentifier('my_test_domain');
-        $this->manager->updateDomainFromConfig($domain);
+        $this->manager->loadConfig($domain);
     }
 
     /**
@@ -179,7 +179,7 @@ class DomainConfigManagerTest extends KernelTestCase
         $organization->setIdentifier('my_test_organization');
         $domain = new Domain();
         $domain->setOrganization($organization);
-        $this->manager->updateDomainFromConfig($domain);
+        $this->manager->loadConfig($domain);
     }
 
     /**
@@ -189,12 +189,12 @@ class DomainConfigManagerTest extends KernelTestCase
     public function testDumpingDomainWithMissingOrganization() {
         $domain = new Domain();
         $domain->setIdentifier('my_test_domain');
-        $this->manager->updateConfigFromDomain($domain, false);
+        $this->manager->updateConfig($domain, false);
     }
 
     /**
      * @expectedException \UniteCMS\CoreBundle\Exception\MissingOrganizationException
-     * @expectedExceptionMessage You can only process domains where the organization identifier is not empty.
+     * @expectedExceptionMessage Organization identifier is empty.
      */
     public function testDumpingDomainWithMissingOrganizationIdentifier() {
 
@@ -203,7 +203,7 @@ class DomainConfigManagerTest extends KernelTestCase
         $domain
             ->setOrganization($organization)
             ->setIdentifier('my_test_domain');
-        $this->manager->updateConfigFromDomain($domain, false);
+        $this->manager->updateConfig($domain, false);
     }
 
     /**
@@ -216,7 +216,7 @@ class DomainConfigManagerTest extends KernelTestCase
         $organization->setIdentifier('my_test_organization');
         $domain = new Domain();
         $domain->setOrganization($organization);
-        $this->manager->updateConfigFromDomain($domain, false);
+        $this->manager->updateConfig($domain, false);
     }
 
     /**
@@ -232,7 +232,7 @@ class DomainConfigManagerTest extends KernelTestCase
             ->setOrganization($organization)
             ->setIdentifier('my_test_domain');
 
-        $this->manager->updateDomainFromConfig($domain);
+        $this->manager->loadConfig($domain);
     }
 
     /**
@@ -254,7 +254,7 @@ class DomainConfigManagerTest extends KernelTestCase
             "identifier": "foo"
         }');
 
-        $this->manager->updateDomainFromConfig($domain);
+        $this->manager->loadConfig($domain);
     }
 
     public function testParsingDomain() {
@@ -270,12 +270,13 @@ class DomainConfigManagerTest extends KernelTestCase
         $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json', $this->exampleConfig);
 
         // Then update domain from config.
-        $this->manager->updateDomainFromConfig($domain);
+        $this->manager->loadConfig($domain, true);
 
         // Make sure, that domain now reflects the config .json file
         $this->assertEquals('My test Domain', $domain->getTitle());
         $this->assertEquals('my_test_domain', $domain->getIdentifier());
         $this->assertEquals(["view domain" => "true", "update domain" => "true"], $domain->getPermissions());
+        $this->assertEquals($this->exampleConfig, $domain->getConfig());
 
         $this->assertCount(2, $domain->getContentTypes());
 
@@ -302,15 +303,15 @@ class DomainConfigManagerTest extends KernelTestCase
 
         // First create a domain config .json file to test force ovrrride.
         $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json', 'foo');
-        $this->assertFalse($this->manager->updateConfigFromDomain($domain));
+        $this->assertFalse($this->manager->updateConfig($domain));
         $this->assertEquals('foo', file_get_contents($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json'));
-        $this->assertTrue($this->manager->updateConfigFromDomain($domain, true));
+        $this->assertTrue($this->manager->updateConfig($domain, true));
         $this->assertJsonStringEqualsJsonString(static::$container->get('unite.cms.domain_definition_parser')->serialize($domain), file_get_contents($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json'));
     }
 
     /**
      * @expectedException \UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException
-     * @expectedExceptionMessage CustomConfig must match the domain, once parsed. Use this parameter only to set variables or to exclude default config.
+     * @expectedExceptionMessage Domain config does not match parsed domain.
      */
     public function testDumpingDomainConfigWithInvalidCustomConfig() {
 
@@ -321,8 +322,10 @@ class DomainConfigManagerTest extends KernelTestCase
             ->setOrganization($organization)
             ->setId('XXX-YYY-ZZZ');
 
+        $domain->setConfig(str_replace('First Content Type', 'Foo Content Type', $this->exampleConfig));
+
         // Try to dump a custom config that is different from domain.
-        $this->manager->updateConfigFromDomain($domain, true, str_replace('First Content Type', 'Foo Content Type', $this->exampleConfig));
+        $this->manager->updateConfig($domain, true);
     }
 
     public function testDumpingDomainConfigWithValidCustomConfig() {
@@ -338,8 +341,22 @@ class DomainConfigManagerTest extends KernelTestCase
         $customConfig->variables = ['@title' => 'First Content Type'];
         $customConfig->content_types[0]->title = '@title';
 
+        $domain->setConfig(json_encode($customConfig));
+
 
         // Try to dump a custom config that is the same as domain.
-        $this->assertTrue($this->manager->updateConfigFromDomain($domain, true, json_encode($customConfig)));
+        $this->assertTrue($this->manager->updateConfig($domain, true));
+    }
+
+    public function testRemoveDomainConfig() {
+        // TODO
+    }
+
+    public function testListConfig() {
+        // TODO
+    }
+
+    public function testConfigExists() {
+        // TODO
     }
 }
