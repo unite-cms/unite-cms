@@ -28,11 +28,6 @@ class DomainConfigManagerTest extends KernelTestCase
     private $manager;
 
     /**
-     * @var string $configDir
-     */
-    private $configDir;
-
-    /**
      * @var Filesystem $fileSystem
      */
     private $fileSystem;
@@ -46,7 +41,6 @@ class DomainConfigManagerTest extends KernelTestCase
         parent::setUp();
         static::bootKernel();
         $this->manager = static::$container->get('unite.cms.domain_config_manager');
-        $this->configDir = static::$container->getParameter('domain_config_dir');
         $this->fileSystem = static::$container->get('filesystem');
         $this->exampleConfig = '{
             "title": "My test Domain",
@@ -202,7 +196,7 @@ class DomainConfigManagerTest extends KernelTestCase
             ->setIdentifier('my_test_domain');
 
         // First create a domain config .json file in the correct location
-        $this->fileSystem->dumpFile($this->configDir . $organization->getIdentifier() . '/' . $domain->getIdentifier() . 'json', '{
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json', '{
             "title": "Foo",
             "identifier": "foo"
         }');
@@ -220,7 +214,7 @@ class DomainConfigManagerTest extends KernelTestCase
             ->setIdentifier('my_test_domain');
 
         // First create a domain config .json file in the correct location
-        $this->fileSystem->dumpFile($this->configDir . $organization->getIdentifier() . '/' . $domain->getIdentifier() . 'json', $this->exampleConfig);
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json', $this->exampleConfig);
 
         // Then update domain from config.
         $this->manager->updateDomainFromConfig($domain);

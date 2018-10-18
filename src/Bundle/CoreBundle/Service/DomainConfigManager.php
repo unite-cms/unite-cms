@@ -14,6 +14,25 @@ use UniteCMS\CoreBundle\Entity\Organization;
 class DomainConfigManager
 {
     /**
+     * @var string $domainConfigDir, The location to store domain configurations.
+     */
+    private $domainConfigDir;
+
+    public function __construct(string $domainConfigDir)
+    {
+        $this->domainConfigDir = $domainConfigDir;
+    }
+
+    /**
+     * Returns the location to store domain configurations.
+     *
+     * @return string
+     */
+    public function getDomainConfigDir() : string {
+        return $this->domainConfigDir;
+    }
+
+    /**
      * Dumps the domain as a JSON file to the organization directory in the defined domain config location.
      *
      * @param Domain $domain

@@ -35,6 +35,8 @@ services:
   unite.cms.domain_config_manager:
     class: UniteCMS\CoreBundle\Service\DomainConfigManager
     public: true
+    arguments:
+      ['%kernel.project_dir%/config/unite/']
 
   # Parses and serializes a domain object. This service is used to create a domain object from the JSON definition.
   unite.cms.domain_definition_parser:
