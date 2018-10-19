@@ -109,7 +109,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $form->form();
         $form->disableValidation();
         $values = $form->getPhpValues();
-        $values['form']['domain']['definition'] = 'foo baa';
+        $values['form']['domain'] = 'foo baa';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->assertFalse($this->client->getResponse()->isRedirect());
@@ -119,7 +119,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['domain']['definition'] = '{ "foo": "baa" }';
+        $values['form']['domain'] = '{ "foo": "baa" }';
 
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertFalse($this->client->getResponse()->isRedirect());
@@ -133,8 +133,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['domain']['definition'] = '{ "title": "Domain 1", "identifier": "d1" }';
-        $values['form']['domain']['variables'] = '{}';
+        $values['form']['domain'] = '{ "title": "Domain 1", "identifier": "d1" }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->client->enableReboot();
@@ -143,7 +142,20 @@ class DomainControllerTest extends DatabaseAwareTestCase
             'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => 'd1',
         ], Router::ABSOLUTE_URL)));
+
         $crawler = $this->client->followRedirect();
+
+        // Assert domain creation.
+        $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findOneBy([
+            'organization' => $this->organization,
+            'identifier' => 'd1',
+        ]);
+
+        // Assert domain config file.
+        $this->assertNotNull($domain);
+        $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
+        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
+        $this->assertJsonStringEqualsJsonString($values['form']['domain'], $domain->getConfig());
 
         $this->client->disableReboot();
 
@@ -159,7 +171,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $form->form();
         $form->disableValidation();
         $values = $form->getPhpValues();
-        $values['form']['domain']['definition'] = 'foo baa';
+        $values['form']['domain'] = 'foo baa';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->assertFalse($this->client->getResponse()->isRedirect());
@@ -169,7 +181,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['domain']['definition'] = '{ "foo": "baa" }';
+        $values['form']['domain'] = '{ "foo": "baa" }';
         $values['form']['submit'] = '';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
         $this->assertFalse($this->client->getResponse()->isRedirect());
@@ -180,11 +192,17 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['domain']['definition'] = '{ "title": "@replaced_by_variable", "identifier": "d1", "permissions": {
-            "view domain": "true",
-            "update domain": "member.type == \"user\""
-        }}';
-        $values['form']['domain']['variables'] = '{ "@replaced_by_variable": "Domain 1" }';
+        $values['form']['domain'] = '{
+            "title": "@replaced_by_variable",
+            "identifier": "d1",
+            "variables": {
+                "@replaced_by_variable": "Domain 1"
+            },
+            "permissions": {
+                "view domain": "true",
+                "update domain": "member.type == \"user\""
+            }
+        }';
         $values['form']['submit'] = '';
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
@@ -220,14 +238,18 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         $crawler = $this->client->followRedirect();
 
-        // make sure, that the domain was updated.
-        $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll()[0];
+        // Assert domain update.
+        $this->em->refresh($domain);
+        $this->assertNotNull($domain);
         $this->assertEquals([
             'view domain' => 'true',
             'update domain' => 'member.type == "user"',
         ], $domain->getPermissions());
 
-        // Make sure, that domain title was replaced correctly.
+        // Assert domain config file.
+        $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
+        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
+        $this->assertJsonStringEqualsJsonString($values['form']['domain'], $domain->getConfig());
         $this->assertEquals('Domain 1', $domain->getTitle());
 
         // Click on domain delete.
@@ -273,6 +295,9 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Assert domain was deleted.
         $this->assertCount(0, $this->em->getRepository('UniteCMSCoreBundle:Domain')->findAll());
+
+        // Assert domain config file was deleted.
+        $this->assertFalse(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
     }
 
     public function testCRUDActionsAsEditor() {
