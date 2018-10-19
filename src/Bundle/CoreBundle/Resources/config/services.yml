@@ -10,3 +10,10 @@ imports:
   - { resource: services.kernelListener.yml }
   - { resource: services.serialization.yml }
   - { resource: services.twig.yml }
+
+services:
+
+  # This allows controller actions to inject services in the method call instead of calling $this->get('').
+  UniteCMS\CoreBundle\Controller\:
+    resource: '../../Controller'
+    tags: ['controller.service_arguments']

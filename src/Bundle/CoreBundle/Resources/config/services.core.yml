@@ -33,9 +33,13 @@ services:
   # Parses domain configuration from and dumps domain objects to the filesystem.
   unite.cms.domain_config_manager:
     class: UniteCMS\CoreBundle\Service\DomainConfigManager
+    autowire: true
     public: true
     arguments:
       ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem']
+
+  # In order to autowire DomainConfigManager, we need to alis the full class path
+  UniteCMS\CoreBundle\Service\DomainConfigManager: "@unite.cms.domain_config_manager"
 
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
   unite.cms.fieldable_form_builder:

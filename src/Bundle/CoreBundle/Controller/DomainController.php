@@ -2,8 +2,9 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use Doctrine\ORM\EntityManager;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -12,12 +13,12 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Router;
 use Symfony\Component\Validator\ConstraintViolation;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Form\WebComponentType;
-use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
+use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
 class DomainController extends Controller
 {
@@ -28,16 +29,32 @@ class DomainController extends Controller
      *
      * @param Organization $organization
      * @param Request $request
+     * @param DomainConfigManager $domainConfigManager
+     * @param LoggerInterface $logger
      * @return Response
      */
-    public function indexAction(Organization $organization, Request $request)
+    public function indexAction(Organization $organization, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
         $domains = $organization->getDomains();
 
-        return $this->render(
-            '@UniteCMSCore/Domain/index.html.twig',
-            ['organization' => $organization, 'domains' => $domains]
-        );
+        // Load new domain configurations from the filesystem that are not already in the organization.
+        if($this->isGranted(OrganizationVoter::UPDATE, $organization)) {
+            try {
+                $missingIdentifiers = array_diff(
+                    $domainConfigManager->listConfig($organization),
+                    $organization->getDomains()->map(function(Domain $domain){ return $domain->getIdentifier(); })->toArray()
+                );
+                $organization->setMissingDomainConfigIdentifiers($missingIdentifiers);
+            } catch (\Exception $e) {
+                $logger->error($e->getMessage(), ['context' => $e]);
+                $this->addFlash('warning', 'Could not load (potential new) configurations from the filesystem.');
+            }
+        }
+
+        return $this->render('@UniteCMSCore/Domain/index.html.twig', [
+            'organization' => $organization,
+            'domains' => $domains,
+        ]);
     }
 
     /**
@@ -47,13 +64,29 @@ class DomainController extends Controller
      *
      * @param Organization $organization
      * @param Request $request
+     * @param DomainConfigManager $domainConfigManager
+     * @param LoggerInterface $logger
      * @return Response
      */
-    public function createAction(Organization $organization, Request $request)
+    public function createAction(Organization $organization, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
         $domain = new Domain();
-        $domain->setTitle('Untitled Domain')->setIdentifier('untitled');
-        $domain->setConfig($this->get('unite.cms.domain_config_manager')->serialize($domain));
+        $import_config = $request->query->has('import');
+
+        if($import_config) {
+            try {
+                $domain->setOrganization($organization)->setIdentifier($request->query->get('import'));
+                $domainConfigManager->loadConfig($domain, true);
+            } catch (\Exception $e) {
+                $organization->getDomains()->removeElement($domain);
+                $logger->error($e->getMessage(), ['context' => $e]);
+                $this->addFlash('danger', 'Could not load configuration from the filesystem.');
+                return $this->redirectToRoute('unitecms_core_domain_index', [$organization]);
+            }
+        } else {
+            $domain->setTitle('Untitled Domain')->setIdentifier('untitled');
+            $domain->setConfig($domainConfigManager->serialize($domain));
+        }
 
         $form = $this->createFormBuilder([
             'domain' => $domain->getConfig(),
@@ -66,10 +99,12 @@ class DomainController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            // First unset temporary domain
+            $organization->getDomains()->removeElement($domain);
             $domain = null;
 
             try {
-                $domain = $this->get('unite.cms.domain_config_manager')->parse($form->getData()['domain']);
+                $domain = $domainConfigManager->parse($form->getData()['domain']);
                 $domain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
@@ -93,10 +128,12 @@ class DomainController extends Controller
             }
         }
 
-        return $this->render(
-            '@UniteCMSCore/Domain/create.html.twig',
-            ['organization' => $organization, 'form' => $form->createView()]
-        );
+        return $this->render('@UniteCMSCore/Domain/create.html.twig', [
+            'organization' => $organization,
+            'domain' => $domain,
+            'form' => $form->createView(),
+            'import_config' => $import_config,
+        ]);
     }
 
     /**
@@ -136,14 +173,21 @@ class DomainController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function updateAction(Organization $organization, Domain $domain, Request $request)
+    public function updateAction(Organization $organization, Domain $domain, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
-        if($this->get('unite.cms.domain_config_manager')->configExists($domain)) {
-            $this->get('unite.cms.domain_config_manager')->loadConfig($domain);
+        try {
+            if ($domainConfigManager->configExists($domain)) {
+                $domainConfigManager->loadConfig($domain);
 
-        // If the file does not exist, serialize the current domain instead.
-        } else {
-            $domain->setConfig((string)$this->get('unite.cms.domain_config_manager')->serialize($domain));
+                // If the file does not exist, serialize the current domain instead and save the file.
+            } else {
+                $domain->setConfig((string)$domainConfigManager->serialize($domain));
+                $domainConfigManager->updateConfig($domain);
+            }
+        } catch (\Exception $e) {
+            $logger->error($e->getMessage(), ['context' => $e]);
+            $this->addFlash('danger', 'Cannot load config file.');
+            return $this->redirectToRoute('unitecms_core_domain_index', [$organization]);
         }
 
         $originalDomain = null;
@@ -164,7 +208,7 @@ class DomainController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             try {
-                $updatedDomain = $this->get('unite.cms.domain_config_manager')->parse($form->getData()['domain']);
+                $updatedDomain = $domainConfigManager->parse($form->getData()['domain']);
                 $updatedDomain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
@@ -174,7 +218,7 @@ class DomainController extends Controller
             if (isset($updatedDomain)) {
 
                 // In order to avoid persistence conflicts, we create a new domain from serialized domain.
-                $originalDomain = $this->get('unite.cms.domain_config_manager')->parse($this->get('unite.cms.domain_config_manager')->serialize($domain));
+                $originalDomain = $domainConfigManager->parse($domainConfigManager->serialize($domain));
                 $domain->setFromEntity($updatedDomain);
                 $violations = $this->get('validator')->validate($domain);
 

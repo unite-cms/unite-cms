@@ -32,6 +32,22 @@
 
 
     <ul class="uk-nav">
+
+        {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization) and organization.missingDomainConfigIdentifiers|length > 0 %}
+            <li class="uk-nav-header uk-text-warning" title="{% trans %}organization.menu.new_domains_from_config.description{% endtrans %}" uk-tooltip>
+                {% trans %}organization.menu.new_domains_from_config.header{% endtrans %}
+                <i data-feather="help-circle"></i>
+            </li>
+            {% for identifier in organization.missingDomainConfigIdentifiers %}
+                <li>
+                    <a class="uk-text-warning" href="{{ url('unitecms_core_domain_create', { organization: organization, import: identifier }) }}">
+                        <i data-feather="plus-circle" class="uk-margin-small-right"></i>
+                        {{ identifier }}
+                    </a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
         <li class="uk-nav-header">{% trans %}organization.menu.domains.header{% endtrans %}</li>
 
         {% for domain in unite.organization.domains %}

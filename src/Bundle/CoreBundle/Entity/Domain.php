@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ExclusionPolicy;
@@ -22,6 +23,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
  *
  * @ORM\Table(name="domain")
  * @ORM\Entity()
+ * @ORM\HasLifecycleCallbacks
  * @UniqueEntity(fields={"identifier", "organization"}, message="identifier_already_taken")
  * @ExclusionPolicy("all")
  */
@@ -122,6 +124,13 @@ class Domain
      */
     private $config;
 
+    /**
+     * If the config has changed, this variable is set to true to force an update.
+     *
+     * @var bool
+     */
+    private $configChanged = false;
+
     public function __toString()
     {
         return ''.$this->title;
@@ -136,6 +145,16 @@ class Domain
 
         $this->addDefaultMemberTypes();
         $this->addDefaultPermissions();
+    }
+
+    /**
+     * @ORM\PreFlush
+     * @param PreFlushEventArgs $args
+     */
+    public function forceUpdateIfConfigChanged(PreFlushEventArgs $args) {
+        if($this->configChanged) {
+            $args->getEntityManager()->getUnitOfWork()->scheduleForUpdate($this);
+        }
     }
 
     private function addDefaultMemberTypes()
@@ -641,10 +660,14 @@ class Domain
 
     /**
      * @param string $config
+     * @return Domain
      */
-    public function setConfig(string $config): void
-    {
+    public function setConfig(string $config) {
+        if(!empty($this->config) && $this->config !== $config) {
+            $this->configChanged = true;
+        }
         $this->config = $config;
+        return $this;
     }
 }
 

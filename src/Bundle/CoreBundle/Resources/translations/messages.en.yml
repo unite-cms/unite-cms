@@ -36,6 +36,8 @@ organization.menu.manage.user: 'User'
 organization.menu.manage.api_keys: 'API Keys'
 organization.menu.manage.delete: 'Delete organization'
 organization.menu.domains.header: 'Domains in this organization'
+organization.menu.new_domains_from_config.header: 'Domain config files to import'
+organization.menu.new_domains_from_config.description: 'This list of domain configuration files where found in the filesystem but are not saved to the database yet. In order to use them, you need to import them.'
 organization.menu.domains.add: 'Add a domain'
 
 organization.user.title: 'User'
@@ -105,6 +107,9 @@ domain.menu.empty_placehodler_user: 'There are no content or setting types, you 
 domain.create.title: 'Create domain'
 domain.create.headline: 'Create domain'
 domain.create.form.submit: 'Create'
+
+domain.import.headline: 'Import domain "%title%" from "%identifier%.json"'
+domain.import.title: 'Import domain'
 
 domain.delete.title: 'Delete domain "%domain%"'
 domain.delete.headline: 'Delete domain "%domain%"'

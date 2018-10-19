@@ -80,6 +80,12 @@ class Organization
      */
     private $invites;
 
+    /**
+     * If set, thisholds config identifiers, that are in the filesystem but not not in the database.
+     * @var array $newDomainsFromConfig
+     */
+    private $missingDomainConfigIdentifiers = [];
+
     public function __toString()
     {
         return ''.$this->title;
@@ -285,6 +291,24 @@ class Organization
     public function getInvites()
     {
         return $this->invites;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMissingDomainConfigIdentifiers() : array
+    {
+        return $this->missingDomainConfigIdentifiers;
+    }
+
+    /**
+     * @param array $missingDomainConfigIdentifiers
+     * @return Organization
+     */
+    public function setMissingDomainConfigIdentifiers(array $missingDomainConfigIdentifiers)
+    {
+        $this->missingDomainConfigIdentifiers = $missingDomainConfigIdentifiers;
+        return $this;
     }
 }
 
