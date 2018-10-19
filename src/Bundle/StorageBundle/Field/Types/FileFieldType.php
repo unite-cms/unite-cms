@@ -181,6 +181,15 @@ class FileFieldType extends FieldType
                 $context->buildViolation('storage.absolute_url')->atPath('bucket.endpoint')->addViolation();
             }
         }
+
+        // validate for trailing slash
+        if($context->getViolations()->count() == 0) {
+            // if this does not match, there is a trainling slash
+            if (rtrim($settings->bucket['endpoint'], '/\\') != $settings->bucket['endpoint'])
+            {
+                $context->buildViolation('storage.no_trailing_slash')->atPath('bucket.endpoint')->addViolation();
+            }
+        }
     }
 
     /**

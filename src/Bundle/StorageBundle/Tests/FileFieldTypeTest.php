@@ -95,6 +95,25 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(0, $errors);
 
+        // test an endpoint with a path an slashes
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com/foo/foo/baaa',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                        "region" => "east",
+                    ],
+                ]
+            )
+        );
+
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(0, $errors);
+
         // Try saving additional data
         $field->setSettings(
             new FieldableFieldSettings(
@@ -117,6 +136,27 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.bucket.foo', $errors->get(0)->getPropertyPath());
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+
+        // Try saving with trailing slash
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com/foo/',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                        "region" => "east",
+                    ],
+                ]
+            )
+        );
+
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
+
     }
 
     public function testGettingGraphQLData()
