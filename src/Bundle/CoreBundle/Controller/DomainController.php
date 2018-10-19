@@ -2,7 +2,6 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Routing\Annotation\Route;
@@ -28,12 +27,11 @@ class DomainController extends Controller
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::VIEW'), organization)")
      *
      * @param Organization $organization
-     * @param Request $request
      * @param DomainConfigManager $domainConfigManager
      * @param LoggerInterface $logger
      * @return Response
      */
-    public function indexAction(Organization $organization, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
+    public function indexAction(Organization $organization, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
         $domains = $organization->getDomains();
 
@@ -171,13 +169,23 @@ class DomainController extends Controller
      * @param Organization $organization
      * @param Domain $domain
      * @param Request $request
+     * @param DomainConfigManager $domainConfigManager
+     * @param LoggerInterface $logger
      * @return Response
      */
     public function updateAction(Organization $organization, Domain $domain, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
+        $outOfSyncPersistedConfig = null;
+
         try {
             if ($domainConfigManager->configExists($domain)) {
                 $domainConfigManager->loadConfig($domain);
+
+                // Check if config (once parsed) is different from domain entity.
+                $outOfSyncPersistedConfig = $domainConfigManager->serialize($domain);
+                if($outOfSyncPersistedConfig === $domainConfigManager->serialize($domainConfigManager->parse($domain->getConfig()))) {
+                    $outOfSyncPersistedConfig = null;
+                }
 
             // If the file does not exist, serialize the current domain instead and save the file.
             } else {
@@ -195,9 +203,13 @@ class DomainController extends Controller
         $updatedDomain = null;
 
         $form = $this->createFormBuilder([
-            'domain' => $domain->getConfig(),
+            'domain' => $outOfSyncPersistedConfig ? $outOfSyncPersistedConfig : $domain->getConfig(),
         ])
-        ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'error_bubbling' => true])
+        ->add('domain', WebComponentType::class, [
+            'tag' => 'unite-cms-core-domaineditor',
+            'error_bubbling' => true,
+            'attr' => $outOfSyncPersistedConfig ? ['diff-value' => json_encode(json_decode($domain->getConfig()))] : [],
+        ])
         ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
         ->add('confirm', SubmitType::class, ['label' => 'domain.update.form.confirm', 'attr' => ['class' => 'uk-button uk-button-primary']])
@@ -269,6 +281,11 @@ class DomainController extends Controller
                     $domain->setFromEntity($originalDomain);
                     $formView = $form->createView();
                 }
+            }
+        }
+        else {
+            if($outOfSyncPersistedConfig) {
+                $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. You can use the diff tool to update the config.');
             }
         }
 

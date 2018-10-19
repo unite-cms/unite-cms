@@ -2,7 +2,12 @@
     <div>
         <textarea v-if="!is_disabled" :name="field_name" v-model="config"></textarea>
         <input type="hidden" v-if="is_disabled" :name="field_name" v-model="config" />
-        <div class="uk-flex" v-if="!is_disabled">
+
+        <div v-if="diffValue && !is_disabled" class="uk-flex">
+            <h4 class="uk-width-1-2">Actual config</h4>
+            <h4 class="uk-width-1-2" style="padding-left: 30px;">Filesystem config</h4>
+        </div>
+        <div style="position: relative" v-if="!is_disabled" class="uk-flex">
             <div class="uk-width-1-1">
                 <div uk-height-viewport offset-top="true" :id="editor_id + '_config'"></div>
             </div>
@@ -12,7 +17,7 @@
 
 <script>
     import ace from 'brace';
-    import aceDiff from 'brace-diff';
+    import AceDiff from 'ace-diff';
     import 'brace/mode/json';
     import 'brace/theme/monokai';
     import 'brace/ext/language_tools';
@@ -20,6 +25,7 @@
     import 'brace/snippets/json';
 
     import feather from 'feather-icons';
+    import 'ace-diff/dist/ace-diff-dark.min.css';
 
     export default {
         data() {
@@ -34,52 +40,88 @@
         props: [
             'name',
             'value',
+            'diffValue',
             'disabled',
         ],
         mounted() {
             if(!this.is_disabled) {
                 this.editors = [];
-                this.createEditorInstance("config")
+
+                if(!this.diffValue) {
+                    let editor = ace.edit(this.editor_id + '_config');
+                    editor.getSession().setValue(this.normalizeValue(this.value));
+                    this.configureEditor(editor, true);
+                }
+                else {
+                    let aceDiff = new AceDiff({
+                        element: '#' + this.editor_id + '_config',
+                        left: {
+                            content: this.normalizeValue(this.value, true),
+                            copyLinkEnabled: false,
+                        },
+                        right: {
+                            content: this.normalizeValue(this.diffValue, true),
+                            editable: false,
+                            copyLinkEnabled: true,
+                        },
+                    });
+
+                    this.configureEditor(aceDiff.editors.left.ace, true);
+                    this.configureEditor(aceDiff.editors.right.ace);
+                }
             }
         },
 
         methods: {
-            createEditorInstance(name) {
-                this.editors[name] = ace.edit(this.editor_id + '_' + name);
-                this.editors[name].getSession().setMode('ace/mode/json');
-                this.editors[name].setTheme('ace/theme/monokai');
-                this.editors[name].setOptions({
+            normalizeValue(value, diffOptimized = false) {
+                value = JSON.stringify(JSON.parse(value), null, 2);
+
+                if(diffOptimized) {
+                    value = value.replace(/^( *)(.*\[)(\],*)$/gm, "$1$2\n$1$3");
+                    value = value.replace(/^( *)(.*\{)(\},*)$/gm, "$1$2\n$1$3");
+                }
+
+                return value;
+            },
+            configureEditor(editor, bindToConfig) {
+                console.log(editor);
+                editor.getSession().setMode('ace/mode/json');
+                editor.setTheme('ace/theme/monokai');
+                editor.setOptions({
                     enableBasicAutocompletion: true,
                     enableSnippets: true,
-                    enableLiveAutocompletion: true,
                     highlightActiveLine: false,
                     tabSize: 2,
-                    useSoftTabs: true
+                    useSoftTabs: true,
+                    //enableLiveAutocompletion: true,
                 });
 
-                this.editors[name].$blockScrolling = 'Infinity';
-                this.editors[name].getSession().setValue(JSON.stringify(JSON.parse(this[name]), null, 2));
-                this.editors[name].getSession().on('change', () => {
-                    this[name] = this.editors[name].getSession().getValue();
-                });
+                editor.$blockScrolling = 'Infinity';
 
-                // For the moment we use a simple selector to enable / disable form submit, this should be refactored!
-                let submitButtons = this.$el.closest('form').querySelector('*[type="submit"]');
-                this.editors[name].getSession().on('changeAnnotation', () => {
-                    if (this.editors[name].getSession().getAnnotations().filter((a) => {
-                        return a.type === 'error';
-                    }).length > 0) {
-                        submitButtons.setAttribute('disabled', 'disabled');
-                    } else {
-                        submitButtons.removeAttribute('disabled');
-                    }
-                });
+                if(bindToConfig) {
+                    editor.getSession().on('change', () => {
+                        this.config = editor.getSession().getValue();
+                    });
 
-                let langTools = ace.acequire("ace/ext/language_tools");
-                langTools.addCompleter({
-                    getCompletions: this.autoCompleter
-                });
-            },
+                    // For the moment we use a simple selector to enable / disable form submit, this should be refactored!
+                    let submitButtons = this.$el.closest('form').querySelector('*[type="submit"]');
+                    editor.getSession().on('changeAnnotation', () => {
+                        if (editor.getSession().getAnnotations().filter((a) => {
+                            return a.type === 'error';
+                        }).length > 0) {
+                            submitButtons.setAttribute('disabled', 'disabled');
+                        } else {
+                            submitButtons.removeAttribute('disabled');
+                        }
+                    });
+
+                    // This is not working at the moment.
+                    /*let langTools = ace.acequire("ace/ext/language_tools");
+                    langTools.addCompleter({
+                        getCompletions: this.autoCompleter
+                    });*/
+                }
+            }/*,
             autoCompleter: (editor, session, pos, prefix, callback) => {
                 if (prefix.length === 0) {
                     callback(null, []);
@@ -100,7 +142,7 @@
                 }
 
                 callback(null, selection);
-            }
+            }*/
         }
     };
 </script>

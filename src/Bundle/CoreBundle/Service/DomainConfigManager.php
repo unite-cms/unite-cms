@@ -138,7 +138,7 @@ class DomainConfigManager
             $config = $domain->getConfig();
             $parsedConfig = $this->parse($config);
 
-            if($serializedDomain != $this->serialize($parsedConfig)) {
+            if($serializedDomain !== $this->serialize($parsedConfig)) {
                 throw new InvalidDomainConfigurationException('Domain config does not match parsed domain.');
             }
         }
