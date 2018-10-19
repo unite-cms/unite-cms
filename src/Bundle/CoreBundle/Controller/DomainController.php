@@ -179,10 +179,11 @@ class DomainController extends Controller
             if ($domainConfigManager->configExists($domain)) {
                 $domainConfigManager->loadConfig($domain);
 
-                // If the file does not exist, serialize the current domain instead and save the file.
+            // If the file does not exist, serialize the current domain instead and save the file.
             } else {
                 $domain->setConfig((string)$domainConfigManager->serialize($domain));
                 $domainConfigManager->updateConfig($domain);
+                $this->addFlash('warning', 'This domain configuration comes from the database and not from the file system at the moment. Please save this domain to create a config file in the filesystem.');
             }
         } catch (\Exception $e) {
             $logger->error($e->getMessage(), ['context' => $e]);
