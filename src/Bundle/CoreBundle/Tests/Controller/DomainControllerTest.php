@@ -133,14 +133,14 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form = $crawler->filter('form');
         $form = $form->form();
         $form->disableValidation();
-        $values['form']['domain'] = '{ "title": "Domain 1", "identifier": "d1" }';
+        $values['form']['domain'] = '{ "title": "Domain 1", "identifier": "d1_domain_controller_test" }';
         $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
 
         $this->client->enableReboot();
 
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
-            'domain' => 'd1',
+            'domain' => IdentifierNormalizer::denormalize('d1_domain_controller_test'),
         ], Router::ABSOLUTE_URL)));
 
         $crawler = $this->client->followRedirect();
@@ -148,7 +148,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Assert domain creation.
         $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findOneBy([
             'organization' => $this->organization,
-            'identifier' => 'd1',
+            'identifier' => 'd1_domain_controller_test',
         ]);
 
         // Assert domain config file.
@@ -194,7 +194,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $form->disableValidation();
         $values['form']['domain'] = '{
             "title": "@replaced_by_variable",
-            "identifier": "d1",
+            "identifier": "d1_domain_controller_test",
             "variables": {
                 "@replaced_by_variable": "Domain 1"
             },
@@ -233,7 +233,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
             'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
-            'domain' => 'd1',
+            'domain' => IdentifierNormalizer::denormalize('d1_domain_controller_test'),
         ], Router::ABSOLUTE_URL)));
 
         $crawler = $this->client->followRedirect();
