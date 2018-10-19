@@ -233,12 +233,16 @@ class DomainConfigManager
 
         $path = $this->getOrganizationConfigPath($organization);
 
+        if(!$this->filesystem->exists($path)) {
+            return [];
+        }
+
         $finder = new Finder();
-        $finder->files()->in($path);
+        $finder->files()->in($path)->sortByName();
         $configs = [];
 
         foreach($finder as $file) {
-            $configs[] = $file->getBasename();
+            $configs[] = $file->getBasename('.json');
         }
 
         return $configs;

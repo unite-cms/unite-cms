@@ -28,7 +28,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('not_blank', $errors->get(1)->getMessageTemplate());
 
         // Try to validate organization with too long title and identifier.
-        $org1->setTitle($this->generateRandomUTF8String(256))->setIdentifier($this->generateRandomMachineName(256));
+        $org1->setTitle($this->generateRandomUTF8String(256))->setIdentifier($this->generateRandomMachineName(201));
         $errors = static::$container->get('validator')->validate($org1);
         $this->assertCount(2, $errors);
 
@@ -41,7 +41,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         // Try to test invalid identifier.
         $org1
             ->setTitle($this->generateRandomUTF8String(255))
-            ->setIdentifier($this->generateRandomMachineName(254).':');
+            ->setIdentifier($this->generateRandomMachineName(199).':');
         $errors = static::$container->get('validator')->validate($org1);
         $this->assertCount(1, $errors);
 
@@ -58,7 +58,7 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
         // Try to validate valid organization.
-        $org1->setIdentifier($this->generateRandomMachineName(255));
+        $org1->setIdentifier($this->generateRandomMachineName(200));
         $this->assertCount(0, static::$container->get('validator')->validate($org1));
 
         // Save the organization to the database.
@@ -146,8 +146,6 @@ class OrganizationEntityPersistentTest extends DatabaseAwareTestCase
         $this->em->persist($org1);
         $this->em->persist($domain1);
         $this->em->persist($domain2);
-        $this->em->flush($domain1);
-        $this->em->flush($domain2);
 
         // add the 2 domains to the organisation
         $org1->setDomains(

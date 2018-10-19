@@ -50,10 +50,10 @@ class Domain
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
-     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Length(max="200", maxMessage="too_long")
      * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Domain::RESERVED_IDENTIFIERS")
-     * @ORM\Column(name="identifier", type="string", length=255)
+     * @ORM\Column(name="identifier", type="string", length=200)
      * @Expose
      */
     private $identifier;

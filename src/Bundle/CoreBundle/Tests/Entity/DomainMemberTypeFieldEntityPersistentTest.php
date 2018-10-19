@@ -43,7 +43,7 @@ class DomainMemberTypeFieldEntityPersistentTest extends DatabaseAwareTestCase
         // Try to validate too long title, identifier, type
         $field
             ->setTitle($this->generateRandomUTF8String(256))
-            ->setIdentifier($this->generateRandomMachineName(256))
+            ->setIdentifier($this->generateRandomMachineName(201))
             ->setType($this->generateRandomMachineName(256))
             ->setEntity(new DomainMemberType())
             ->getEntity()

@@ -349,14 +349,38 @@ class DomainConfigManagerTest extends KernelTestCase
     }
 
     public function testRemoveDomainConfig() {
-        // TODO
+
+        $organization = new Organization();
+        $organization->setIdentifier('my_test_organization');
+        $domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->exampleConfig);
+        $domain
+            ->setOrganization($organization)
+            ->setId('XXX-YYY-ZZZ');
+
+        // First create a domain config .json file to test force ovrrride.
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json', 'foo');
+        $this->assertTrue($this->manager->configExists($domain));
+        $this->manager->removeConfig($domain);
+        $this->assertFalse($this->manager->configExists($domain));
+        $this->manager->removeConfig($domain);
+        $this->assertFalse($this->manager->configExists($domain));
     }
 
     public function testListConfig() {
-        // TODO
-    }
+        $organization = new Organization();
+        $organization->setIdentifier('my_test_organization');
+        $this->assertEquals([], $this->manager->listConfig($organization));
 
-    public function testConfigExists() {
-        // TODO
+        $domain1 = new Domain();
+        $domain1->setIdentifier('domain1')->setTitle('Domain1')->setOrganization($organization);
+        $this->manager->updateConfig($domain1);
+
+        $this->assertEquals(['domain1'], $this->manager->listConfig($organization));
+
+        $domain2 = new Domain();
+        $domain2->setIdentifier('domain2')->setTitle('Domain2')->setOrganization($organization);
+        $this->manager->updateConfig($domain2);
+
+        $this->assertEquals(['domain1', 'domain2'], $this->manager->listConfig($organization));
     }
 }

@@ -44,7 +44,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         // Try to validate organization with too long title and identifier.
         $domain1
             ->setTitle($this->generateRandomUTF8String(256))
-            ->setIdentifier($this->generateRandomMachineName(256));
+            ->setIdentifier($this->generateRandomMachineName(201));
         $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(2, $errors->count());
 
@@ -57,7 +57,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         // Try to test invalid identifier.
         $domain1
             ->setTitle($this->generateRandomUTF8String(255))
-            ->setIdentifier($this->generateRandomMachineName(254).':');
+            ->setIdentifier($this->generateRandomMachineName(199).':');
         $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
 
@@ -74,7 +74,7 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         );
         $domain1
             ->setTitle($this->generateRandomUTF8String(255))
-            ->setIdentifier($this->generateRandomMachineName(255))
+            ->setIdentifier($this->generateRandomMachineName(200))
             ->setOrganization($org)
             ->addContentType(new ContentType())
             ->addSettingType(new SettingType())
