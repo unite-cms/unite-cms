@@ -369,5 +369,113 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // but are not allowed to delete the domain.
         $this->assertCount(0, $crawler->filter('a:contains("' . static::$container->get('translator')->trans('domain.menu.manage.trash') .'")'));
+
+        // delete file for next next
+        static::$container->get('unite.cms.domain_config_manager')->removeConfig($domain);
+    }
+
+    public function testCreateFromConfigAndUpdateFromConfig() {
+
+        // Create a test config for the current domain.
+        $domain = new Domain();
+        $domain->setOrganization($this->organization)->setIdentifier('test_create_domain_from_config')->setTitle('Custom title');
+        static::$container->get('unite.cms.domain_config_manager')->updateConfig($domain, true);
+        $this->organization->getDomains()->removeElement($domain);
+        $this->assertFileExists(static::$container->get('unite.cms.domain_config_manager')->getDomainConfigPath($domain));
+        unset($domain);
+
+        $this->login($this->admin);
+
+        // List all domains.
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domain_index', [
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+        ], Router::ABSOLUTE_URL));
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        // Check that there is a import domain button
+        $importSection = $crawler->filter('li:contains("' . static::$container->get('translator')->trans('organization.menu.new_domains_from_config.header') . '")');
+        $this->assertCount(1, $importSection);
+        $crawler = $this->client->click($importSection->nextAll()->first()->children()->first()->link());
+
+        // Check, that config is pre-filled with the domain identifier.
+        $form = $crawler->filter('form');
+        $editorValue = json_decode($form->filter('unite-cms-core-domaineditor')->attr('value'));
+        $this->assertEquals('test_create_domain_from_config', $editorValue->identifier);
+        $this->assertEquals('Custom title', $editorValue->title);
+        $this->em->clear();
+
+        // Submit create from should create new domain.
+        $form = $form->form();
+        $form->disableValidation();
+        $values = $form->getPhpValues();
+        $values['form']['domain'] = json_encode($editorValue);
+        $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        $this->client->enableReboot();
+
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+            'domain' => IdentifierNormalizer::denormalize('test_create_domain_from_config'),
+        ], Router::ABSOLUTE_URL)));
+
+        $crawler = $this->client->followRedirect();
+
+        // Assert domain creation.
+        $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findOneBy([
+            'organization' => $this->organization,
+            'identifier' => 'test_create_domain_from_config',
+        ]);
+        $this->assertNotNull($domain);
+        $this->assertEquals('test_create_domain_from_config', $domain->getIdentifier());
+
+        // If the config file was updated, we should see a warning on the domain update page
+        file_put_contents(static::$container->get('unite.cms.domain_config_manager')->getDomainConfigPath($domain), '{
+            "title": "Updated",
+            "identifier": "test_create_domain_from_config",
+            "content_types": [{ "title": "Foo", "identifier": "foo" }]
+        }');
+
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domain_update', [$domain], Router::ABSOLUTE_URL));
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertNotNull($crawler->filter('.uk-alert-warning:contains("The filesystem config of this domain is different from the current config. You can use the diff tool to update the config.")'));
+
+        // Merge the diff value into the value and submit.
+        $form = $crawler->filter('form');
+        $editorValue = json_decode($form->filter('unite-cms-core-domaineditor')->attr('diff-value'));
+        $this->assertEquals('test_create_domain_from_config', $editorValue->identifier);
+        $this->assertEquals('Updated', $editorValue->title);
+        $this->em->clear();
+
+        // Submit create from should create new domain.
+        $form = $form->form();
+        $form->disableValidation();
+        $values = $form->getPhpValues();
+        $values['form']['domain'] = json_encode($editorValue);
+        $values['form']['submit'] = '';
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        // assert confirmation page.
+        $this->assertCount(1, $crawler->filter('.unite-domain-change-visualization'));
+
+        // click on confirmation button.
+        $values['form']['confirm'] = '';
+        unset($values['form']['submit']);
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        $this->assertTrue($this->client->getResponse()->isRedirect(static::$container->get('router')->generate('unitecms_core_domain_view', [
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+            'domain' => IdentifierNormalizer::denormalize('test_create_domain_from_config'),
+        ], Router::ABSOLUTE_URL)));
+
+        $crawler = $this->client->followRedirect();
+
+        // Assert domain creation.
+        $domain = $this->em->getRepository('UniteCMSCoreBundle:Domain')->findOneBy([
+            'organization' => $this->organization,
+            'identifier' => 'test_create_domain_from_config',
+        ]);
+        $this->assertNotNull($domain);
+        $this->assertEquals('Updated', $domain->getTitle());
+
     }
 }
