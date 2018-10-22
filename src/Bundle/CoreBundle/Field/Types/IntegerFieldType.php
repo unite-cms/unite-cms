@@ -9,4 +9,5 @@ class IntegerFieldType extends FieldType
 {
     const TYPE = "integer";
     const FORM_TYPE = IntegerType::class;
+    const SETTINGS = ['required', 'empty_data'];
 }

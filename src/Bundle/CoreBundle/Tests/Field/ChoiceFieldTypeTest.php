@@ -21,11 +21,34 @@ class ChoiceFieldTypeTest extends FieldTypeTestCase
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('choice');
-        $ctField->setSettings(new FieldableFieldSettings(['choices' => ['foo' => 'baa'], 'foo' => 'baa']));
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'choices' => ['foo' => 'baa'],
+                'foo' => 'baa',
+                'required' => 123,
+                'empty_data' => true
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(3, $errors);
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('nostring_value', $errors->get(2)->getMessageTemplate());
+
+        // check wrong empty data
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'choices' => ['foo1' => 'foo1', 'foo2' => 'foo2'],
+                'empty_data' => 'baa'
+            ]
+        ));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('emptydata_not_inside_values', $errors->get(0)->getMessageTemplate());
+
     }
 
     public function testContentTypeFieldTypeWithValidSettings()
@@ -33,7 +56,13 @@ class ChoiceFieldTypeTest extends FieldTypeTestCase
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('choice');
-        $ctField->setSettings(new FieldableFieldSettings(['choices' => ['foo' => 'baa']]));
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'choices' => ['foo' => 'baa'],
+                'empty_data' => 'baa'
+            ]
+        ));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);

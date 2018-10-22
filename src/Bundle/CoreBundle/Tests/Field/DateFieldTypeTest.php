@@ -23,6 +23,36 @@ class DateFieldTypeTest extends FieldTypeTestCase
 
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'foo' => 'baa',
+                'empty_data' => [],
+                'required' => 124
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(3, $errors);
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('nostring_value', $errors->get(2)->getMessageTemplate());
+
+    }
+
+    public function testDateTypeFieldTypeWithValidSettings()
+    {
+        $ctField = $this->createContentTypeField('date');
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'empty_data' => '2018-05-24',
+                'required' => true
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(0, $errors);
     }
 
     public function testFormDataTransformers() {
@@ -49,5 +79,25 @@ class DateFieldTypeTest extends FieldTypeTestCase
         ]);
 
         $this->assertEquals('2012-01-01', $form->get($ctField->getIdentifier())->getData());
+
+        // test with empty_data set
+        $ctField = $this->createContentTypeField('date');
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'empty_data' => '2018-06-24',
+                'required' => true
+            ]
+        ));
+
+        $content = new Content();
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+            'csrf_protection' => false,
+        ]);
+
+        $form->submit([]);
+
+        $this->assertEquals('2018-06-24', $form->getData()[$ctField->getIdentifier()]);
     }
 }

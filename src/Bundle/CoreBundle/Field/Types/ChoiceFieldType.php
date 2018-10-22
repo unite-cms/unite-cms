@@ -3,6 +3,8 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldType;
 
@@ -14,7 +16,7 @@ class ChoiceFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['choices'];
+    const SETTINGS = ['choices', 'required', 'empty_data'];
 
     /**
      * All required settings for this field type.
@@ -42,5 +44,25 @@ class ChoiceFieldType extends FieldType
                 'choices' => $field ? array_flip($field->getSettings()->choices) : []
             ]
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
+    {
+        // Validate allowed and required settings.
+        parent::validateSettings($settings, $context);
+
+        // Only continue, if there are no violations yet.
+        if ($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        // validate if empty data is inside choice values
+        if (isset($settings->empty_data) && !in_array($settings->empty_data, $settings->choices)) {
+            $context->buildViolation('emptydata_not_inside_values')->atPath('choices')->addViolation();
+        }
+
     }
 }

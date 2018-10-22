@@ -55,7 +55,7 @@ abstract class FieldType implements FieldTypeInterface
     {
         $options = [
             'label' => $this->getTitle($field),
-            'required' => $field->getSettings()->required ?? false
+            'required' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false
         ];
 
         // add empty data option only if it's really explicitly allowed

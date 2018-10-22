@@ -10,6 +10,7 @@ class DateFieldType extends FieldType
 {
     const TYPE = "date";
     const FORM_TYPE = DateType::class;
+    const SETTINGS = ['required', 'empty_data'];
 
     /**
      * {@inheritdoc}

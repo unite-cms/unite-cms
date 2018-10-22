@@ -9,6 +9,7 @@ class DateTimeFieldType extends DateFieldType
 {
     const TYPE = "datetime";
     const FORM_TYPE = DateTimeType::class;
+    const SETTINGS = ['required', 'empty_data'];
 
     /**
      * {@inheritdoc}

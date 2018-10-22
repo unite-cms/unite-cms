@@ -9,4 +9,5 @@ class PhoneFieldType extends FieldType
 {
     const TYPE = "phone";
     const FORM_TYPE = TelType::class;
+    const SETTINGS = ['required', 'empty_data'];
 }

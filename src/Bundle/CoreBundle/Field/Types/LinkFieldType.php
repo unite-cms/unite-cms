@@ -23,7 +23,7 @@ class LinkFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['title_widget', 'target_widget'];
+    const SETTINGS = ['title_widget', 'target_widget', 'required', 'empty_data'];
 
     function getFormOptions(FieldableField $field): array
     {

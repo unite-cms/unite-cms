@@ -9,4 +9,5 @@ class NumberFieldType extends FieldType
 {
     const TYPE = "number";
     const FORM_TYPE = NumberType::class;
+    const SETTINGS = ['required', 'empty_data'];
 }

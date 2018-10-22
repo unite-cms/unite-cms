@@ -9,6 +9,7 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 class ChoicesFieldType extends ChoiceFieldType
 {
     const TYPE = "choices";
+    const SETTINGS = ['required', 'empty_data'];
 
     function getFormOptions(FieldableField $field): array
     {
