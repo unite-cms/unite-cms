@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Tests\Field;
 
+use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class ChoiceFieldTypeTest extends FieldTypeTestCase
