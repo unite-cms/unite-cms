@@ -36,7 +36,7 @@ class TableViewType extends ViewType
     function getTemplateRenderParameters(View $view, string $selectMode = self::SELECT_MODE_NONE): array
     {
         $processor = new Processor();
-        $settings = $processor->processConfiguration(new TableViewConfiguration($view, $this->fieldTypeManager), $view->getSettings()->processableConfig());
+        $settings = $processor->processConfiguration(new TableViewConfiguration($view->getContentType(), $this->fieldTypeManager), $view->getSettings()->processableConfig());
 
         /**
          * @deprecated 1.0 Remove this, once we drop legacy support.
@@ -63,7 +63,7 @@ class TableViewType extends ViewType
 
         $processor = new Processor();
         try {
-            $processor->processConfiguration(new TableViewConfiguration($context->getObject(), $this->fieldTypeManager), $settings->processableConfig());
+            $processor->processConfiguration(new TableViewConfiguration($context->getObject()->getContentType(), $this->fieldTypeManager), $settings->processableConfig());
         }
         catch (\Symfony\Component\Config\Definition\Exception\Exception $e) {
             $context->buildViolation($e->getMessage())->addViolation();

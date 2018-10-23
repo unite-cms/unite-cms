@@ -3,6 +3,7 @@
 namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
@@ -17,6 +18,7 @@ use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
 
 class CollectionFieldType extends FieldType implements NestableFieldTypeInterface
 {
@@ -329,6 +331,39 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 if(!empty($data[$field->getIdentifier()])) {
                     foreach($data[$field->getIdentifier()] as $key => $subData) {
                         $fieldType->onHardDelete($subField, $content, $repository, $subData);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+
+        $settings['assets'] = [
+            [ 'js' => 'main.js', 'package' => 'UniteCMSCollectionFieldBundle' ],
+            [ 'css' => 'main.css', 'package' => 'UniteCMSCollectionFieldBundle' ],
+        ];
+
+        if($field) {
+            $settings['settings'] = $settings['settings'] ?? [];
+            $settings['settings']['content_type'] = $field->getEntity()->getIdentifier();
+            $settings['settings']['variant_titles'] = [];
+            $settings['settings']['fields'] = $settings['settings']['fields'] ?? [];
+
+            // normalize settings for nested fields.
+            if(!empty($settings['settings']['fields'])) {
+                $processor = new Processor();
+                $config = $processor->processConfiguration(new TableViewConfiguration(self::getNestableFieldable($field), $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
+                $settings['settings']['fields'] = $config['fields'];
+
+                // Template will only include assets from root fields, so we need to add any child templates to the root field.
+                foreach($config['fields'] as $nestedField) {
+                    if(!empty($nestedField['assets'])) {
+                        $settings['assets'] = array_merge($settings['assets'], $nestedField['assets']);
                     }
                 }
             }

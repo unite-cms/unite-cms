@@ -146,10 +146,8 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function getViewFieldDefinition(FieldableField $field = null) : array {
-        return [
-            'type' => self::getType(),
-            'label' => $field ? $field->getTitle() : null,
-        ];
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        $settings['type'] = self::getType();
+        $settings['label'] = $settings['label'] ?? ($field ? $field->getTitle() : null);
     }
 }

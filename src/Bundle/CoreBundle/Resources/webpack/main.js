@@ -39,6 +39,7 @@ Vue.use(uniteViewFieldsPlugin, {
         'choice': require('./vue/views/Fields/Choice').default,
         'sortindex': require('./vue/views/Fields/Sortindex').default,
         'selectrow': require('./vue/views/Fields/Selectrow').default,
+        'reference': require('./vue/views/Fields/Reference').default,
     }
 });
 
