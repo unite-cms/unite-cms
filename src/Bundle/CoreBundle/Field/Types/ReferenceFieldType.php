@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
@@ -19,9 +20,11 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\ReferenceType;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
+use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 use UniteCMS\CoreBundle\Entity\View;
@@ -386,6 +389,30 @@ class ReferenceFieldType extends FieldType
             }
 
             $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+        $settings['settings'] = $settings['settings'] ?? [];
+        $settings['settings']['fields'] = $settings['settings']['fields'] ?? [];
+
+        // normalize settings for nested fields.
+        if($field && !empty($settings['settings']['fields'])) {
+            $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
+            $processor = new Processor();
+            $config = $processor->processConfiguration(new TableViewConfiguration($contentType, $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
+            $settings['settings']['fields'] = $config['fields'];
+
+            // Template will only include assets from root fields, so we need to add any child templates to the root field.
+            foreach($config['fields'] as $nestedField) {
+                if(!empty($nestedField['assets'])) {
+                    $settings['assets'] = array_merge($settings['assets'], $nestedField['assets']);
+                }
+            }
         }
     }
 }

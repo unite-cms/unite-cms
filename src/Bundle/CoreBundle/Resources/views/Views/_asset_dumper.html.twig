@@ -1,0 +1,20 @@
+{% spaceless %}
+{% if fields is defined %}
+    {% for field in fields %}
+        {% if field.assets is defined %}
+            {% for asset in field.assets %}
+                {% if asset.css is defined %}
+                    {% if not alreadyRendered(asset.css ~ (asset.package is defined ? asset.package : '')) %}
+                        <link type="text/css" rel="stylesheet" href="{{ asset(asset.css, asset.package is defined ? asset.package : null) }}">
+                    {% endif %}
+                {% endif %}
+                {% if asset.js is defined %}
+                    {% if not alreadyRendered(asset.js ~ (asset.package is defined ? asset.package : '')) %}
+                        <script type="text/javascript" src="{{ asset(asset.js, asset.package is defined ? asset.package : null) }}"></script>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% endspaceless %}

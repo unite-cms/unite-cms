@@ -9,6 +9,7 @@
 namespace UniteCMS\VariantsFieldBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -18,6 +19,7 @@ use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
 use UniteCMS\VariantsFieldBundle\Form\VariantsFormType;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
@@ -404,6 +406,44 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
                     $fieldType->onHardDelete($subField, $content, $repository, $variant->getData() );
                 }
             }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+
+        $settings['settings'] = $settings['settings'] ?? [];
+        $settings['assets'] = [
+            [ 'js' => 'main.js', 'package' => 'UniteCMSVariantsFieldBundle' ],
+            [ 'css' => 'main.css', 'package' => 'UniteCMSVariantsFieldBundle' ],
+        ];
+
+        if($field) {
+            $settings['settings']['content_type'] = $field->getEntity()->getIdentifier();
+            $settings['settings']['variant_titles'] = [];
+            $settings['settings']['on'] = $settings['settings']['on'] ?? [];
+
+            // normalize settings for nested fields.
+            $variants = self::getNestableFieldable($field);
+            foreach($settings['settings']['on'] as $v => $fields) {
+                $processor = new Processor();
+                $config = $processor->processConfiguration(new TableViewConfiguration(new Variant($variants->getFieldsForVariant($v), $v, $v), $fieldTypeManager), ['settings' => ['fields' => $fields]]);
+                $settings['settings']['on'][$v] = $config['fields'];
+
+                // Template will only include assets from root fields, so we need to add any child templates to the root field.
+                foreach($config['fields'] as $nestedField) {
+                    if(!empty($nestedField['assets'])) {
+                        $settings['assets'] = array_merge($settings['assets'], $nestedField['assets']);
+                    }
+                }
+            }
+        }
+
+        foreach($field->getSettings()->variants as $variant) {
+            $settings['settings']['variant_titles'][$variant['identifier']] = $variant['title'];
         }
     }
 }

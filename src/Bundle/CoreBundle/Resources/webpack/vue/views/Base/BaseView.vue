@@ -51,9 +51,16 @@
         data() {
             let bag = JSON.parse(this.parameters);
             let fields = bag.settings.fields;
-            let fieldQuery = Object.keys(fields).map((identifier) => {
-                return this.$uniteCMSViewFields.resolveFieldQueryFunction(fields[identifier].type)(identifier, fields[identifier]);
-            });
+            let error = null;
+            let fieldQuery = [];
+
+            try {
+                fieldQuery = Object.keys(fields).map((identifier) => {
+                    return this.$uniteCMSViewFields.resolveFieldQueryFunction(fields[identifier].type)(identifier, fields[identifier], this.$uniteCMSViewFields);
+                });
+            } catch (e) {
+                error = e;
+            }
 
             let selectable = bag.select.is_mode_none ? null : (bag.select.is_mode_single ? 'SINGLE' : 'MULTIPLE');
             if(selectable) {
@@ -78,7 +85,7 @@
                     settings: bag.settings
                 }, fieldQuery),
                 loading: false,
-                error: null,
+                error: error,
                 rows: [],
                 sort: bag.settings.sort || {
                     field: null,
@@ -107,7 +114,11 @@
         },
         props: ['parameters'],
         created: function() {
-            this.load();
+
+            // only load, if there is no initial error.
+            if(!this.error) {
+                this.load();
+            }
         },
         watch: {
             rows: {

@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\StateType;
 use UniteCMS\CoreBundle\Model\StateSettings;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -101,11 +102,10 @@ class StateFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getViewFieldDefinition(FieldableField $field = null) : array {
-        return parent::getViewFieldDefinition($field) + [
-            'settings' => [
-                'places' => $field ? $field->getSettings()->places : []
-            ]
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+        $settings['settings'] = [
+            'places' => $field ? $field->getSettings()->places : []
         ];
     }
 }
