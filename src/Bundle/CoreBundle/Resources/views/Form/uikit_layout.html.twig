@@ -120,12 +120,15 @@
     {{- parent() -}}
 {%- endblock reset_widget -%}
 
-
-
 {%- block collection_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' collection-form')|trim}) %}
     {{- parent() -}}
 {%- endblock collection_widget -%}
+
+{%- block unite_cms_core_reference_widget -%}
+    {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: form }) }}
+    {{ block('unite_cms_web_component_widget') }}
+{%- endblock unite_cms_core_reference_widget -%}
 
 {%- block unite_cms_web_component_widget -%}
     <{{ tag }} {{ block('widget_attributes') }} value="{{ value }}"></{{ tag }}>

@@ -179,6 +179,23 @@ class ReferenceFieldType extends FieldType
             ]
         );
 
+        $viewParameters = $this->viewTypeManager
+            ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
+            ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form'));
+
+        // Add all view field assets to the form, so they get included only once and at form rendering time.
+        $viewFieldSettings = $viewParameters->getSettings();
+        $viewFieldAssets = [];
+        if(!empty($viewFieldSettings['fields'])) {
+            foreach ($viewFieldSettings['fields'] as $viewFieldKey => $viewField) {
+                if(!empty($viewField['assets'])) {
+                    $viewFieldAssets = array_merge($viewFieldAssets, $viewField['assets']);
+                    $viewFieldSettings['fields'][$viewFieldKey]['assets'] = [];
+                }
+            }
+        }
+        $viewParameters->setSettings($viewFieldSettings);
+
         // Pass the rendered view HTML and other parameters as a form option.
         return array_merge(
             parent::getFormOptions($field),
@@ -187,6 +204,7 @@ class ReferenceFieldType extends FieldType
                     'domain' => $contentType->getDomain()->getIdentifier(),
                     'content_type' => $contentType->getIdentifier(),
                 ],
+                'assets' => $viewFieldAssets,
                 'attr' => [
                     'api-url' => $this->router->generate('unitecms_core_api', [$contentType]),
                     'content-label' => $settings->content_label ?? (empty(
@@ -196,9 +214,7 @@ class ReferenceFieldType extends FieldType
                         $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
                         [
                             'view' => $view,
-                            'parameters' => $this->viewTypeManager
-                                ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
-                                ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form')),
+                            'parameters' => $viewParameters,
                         ]
                     ),
                 ],
