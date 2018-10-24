@@ -249,6 +249,22 @@ class DomainConfigManager
     }
 
     /**
+     * Removes all domain configuration Files from Folder
+     *
+     * @throws IOException if the folder cannot be deleted or created
+     */
+    public function removeAllConfig() : void {
+
+        $path = $this->getDomainConfigDir();
+
+        // remove whole folder
+        $this->filesystem->remove($path);
+
+        // recreate empty folder
+        $this->checkConfigFolder();
+    }
+
+    /**
      * Get all config files without .json suffix (this is the domain identifier) for the given domain.
      *
      * @param Organization $organization

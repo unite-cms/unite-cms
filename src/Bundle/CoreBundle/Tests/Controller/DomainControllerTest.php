@@ -20,6 +20,7 @@ use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
+use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
 class DomainControllerTest extends DatabaseAwareTestCase
 {
@@ -44,9 +45,15 @@ class DomainControllerTest extends DatabaseAwareTestCase
      */
     private $organization;
 
+    /**
+     * @var DomainConfigManager $manager
+     */
+    private $manager;
+
     public function setUp()
     {
         parent::setUp();
+        $this->manager = static::$container->get('unite.cms.domain_config_manager');
         $this->client = static::$container->get('test.client');
         $this->client->followRedirects(false);
         $this->client->disableReboot();
@@ -75,6 +82,10 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->flush();
         $this->em->refresh($this->admin);
         $this->em->refresh($this->editor);
+
+        // remove and config folder before each test
+        $this->manager->removeAllConfig();
+
     }
 
     private function login(User $user) {
