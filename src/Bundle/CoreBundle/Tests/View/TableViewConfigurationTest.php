@@ -15,6 +15,7 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\Types\TextAreaFieldType;
 use UniteCMS\CoreBundle\Field\Types\TextFieldType;
 use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
 
@@ -49,9 +50,10 @@ class TableViewConfigurationTest extends TestCase
         $this->fieldTypeManager = $this->createMock(FieldTypeManager::class);
         $this->fieldTypeManager->expects($this->any())->method('getFieldType')->will($this->returnValueMap([
             ['text', new TextFieldType()],
+            ['textarea', new TextAreaFieldType()],
         ]));
 
-        $this->configuration = new TableViewConfiguration($this->view, $this->fieldTypeManager);
+        $this->configuration = new TableViewConfiguration($this->view->getContentType(), $this->fieldTypeManager);
         $this->processor = new Processor();
     }
 

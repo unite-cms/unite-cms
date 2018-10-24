@@ -76,7 +76,10 @@ export default {
 
         this.searchArgument = { OR: [] };
         this.fieldQuery.forEach((field) => {
-            let identifier = field.replace('}', '').replace('{', '.').replace(' ', '');
+
+            // At the moment, we can only use the root element to do filtering. In the future, we may let the field type
+            // set the correct field identifier, to allow more specific nested searches.
+            let identifier = field.split('{')[0].replace(' ', '');
             this.searchArgument.OR.push({ field: identifier, operator: 'LIKE', value: '%' + term + '%' });
         });
         return this;

@@ -146,7 +146,6 @@ class OldSortableTableViewTypeTest extends ContainerAwareTestCase
                 [
                     'columns' => [
                         'id' => 'ID',
-                        'position' => 'Position',
                         'position.any_sub' => [
                             'label' => 'Baa',
                             'type' => 'text',
@@ -176,12 +175,15 @@ class OldSortableTableViewTypeTest extends ContainerAwareTestCase
                     'type' => 'id',
                 ],
                 'position' => [
-                    'label' => 'Position',
-                    'type' => 'sortindex',
-                ],
-                'position.any_sub' => [
                     'label' => 'Baa',
-                    'type' => 'text',
+                    'type' => 'sortindex',
+                    'settings' => [
+                        'fields' => [
+                            'any_sub' => [
+                                'type' => 'text',
+                            ]
+                        ],
+                    ]
                 ],
             ],
             $parameters->get('fields')

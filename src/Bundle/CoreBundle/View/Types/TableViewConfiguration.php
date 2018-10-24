@@ -11,8 +11,9 @@ namespace UniteCMS\CoreBundle\View\Types;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
-use UniteCMS\CoreBundle\Entity\ContentTypeField;
-use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 
@@ -24,18 +25,18 @@ class TableViewConfiguration implements ConfigurationInterface
     const PROPERTY_IDENTIFIERS = ['id', 'locale', 'created', 'updated', 'deleted'];
 
     /**
-     * @var View $view
+     * @var Fieldable $fieldable
      */
-    private $view;
+    private $fieldable;
 
     /**
      * @var FieldTypeManager $fieldTypeManager
      */
     private $fieldTypeManager;
 
-    public function __construct(View $view, FieldTypeManager $fieldTypeManager)
+    public function __construct(Fieldable $fieldable, FieldTypeManager $fieldTypeManager)
     {
-        $this->view = $view;
+        $this->fieldable = $fieldable;
         $this->fieldTypeManager = $fieldTypeManager;
     }
 
@@ -46,13 +47,13 @@ class TableViewConfiguration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $defaultTextField = $this->view->getContentType()->getFields()
+        $defaultTextField = $this->fieldable->getFields()
             ->filter(
-                function (ContentTypeField $field) {
+                function (FieldableField $field) {
                     return in_array($field->getType(), ['text', 'email']);
                 }
             )->map(
-                function (ContentTypeField $field) {
+                function (FieldableField $field) {
                     return $field->getIdentifier();
                 }
             )->first();
@@ -120,39 +121,7 @@ class TableViewConfiguration implements ConfigurationInterface
                 ->arrayNode('fields')
 
                 ->beforeNormalization()
-                    ->ifArray()->then(
-                function ($v) {
-                    $transformed = [];
-                    foreach ($v as $key => $value) {
-
-                        // Allow to set fields as array of identifiers (["id", "title"])
-                        if (is_numeric($key) && is_string($value)) {
-                            $key = $value;
-                            $value = [];
-                        }
-
-                        // Allow to set fields as array of identifiers and labels (["id" => "ID", "title" => "Title"])
-                        if (is_string($key) && is_string($value)) {
-                            $value = ['label' => $value];
-                        }
-
-                        // Make sure, that key is defined.
-                        $root_key = explode('.', $key)[0];
-                        if (!in_array($key, self::PROPERTY_IDENTIFIERS) && !$this->view->getContentType()->getFields(
-                            )->containsKey($root_key)) {
-                            $exception = new InvalidConfigurationException(
-                                sprintf('Unknown field %s', json_encode($key))
-                            );
-                            $exception->setPath($key);
-                            throw $exception;
-                        }
-
-                        $transformed[$key] = (array)$value + $this->defaultFieldConfig($key, $value['type'] ?? null);
-                    }
-
-                    return $transformed;
-                }
-            )
+                    ->ifArray()->then(function($v){ return $this->normalizeFields($v); })
                 ->end()
 
                 ->useAttributeAsKey('field')
@@ -213,34 +182,70 @@ class TableViewConfiguration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    private function defaultFieldConfig(string $field, string $type = null)
-    {
+    protected function normalizeFields(array $fields) : array {
+        $transformed = [];
+        foreach ($fields as $key => $value) {
 
-        // If this is a nested key, we cannot resolve it.
-        if (count(explode('.', $field)) > 1) {
-            return [];
+            // Allow to set fields as array of identifiers (["id", "title"])
+            if (is_numeric($key) && is_string($value)) {
+                $key = $value;
+                $value = [];
+            }
+
+            // Allow to set fields as array of identifiers and labels (["id" => "ID", "title" => "Title"])
+            if (is_string($key) && is_string($value)) {
+                $value = ['label' => $value];
+            }
+
+            // Handle deprecated nested field selectors.
+            $parts = explode('.', $key);
+            if(count($parts) > 1) {
+                $key = $parts[0];
+                $value['settings'] = $value['settings'] ?? [];
+                $value['settings']['fields'] = [$parts[1] => [
+                    'type' => $value['type'],
+                ]];
+                unset($value['type']);
+            }
+
+
+            // Make sure, that key is defined.
+            if (!in_array($key, self::PROPERTY_IDENTIFIERS) && !$this->fieldable->getFields()->exists(function($fkey, FieldableField $field) use($key) {
+                return $field->getIdentifier() === $key;
+            })) {
+                $exception = new InvalidConfigurationException(sprintf('Unknown field %s', json_encode($key)));
+                $exception->setPath($key);
+                throw $exception;
+            }
+
+            // Allow to override all default fields from config
+            $transformed[$key] = $this->defaultFieldConfig((array)$value, $key);
         }
+        return $transformed;
+    }
 
-        if (in_array($field, self::PROPERTY_IDENTIFIERS)) {
-            return [
-                'type' => ($field == 'id' ? 'id' : ($field == 'locale' ? 'locale' : 'date')),
-                'label' => ucfirst($field),
-            ];
+    private function defaultFieldConfig(array $config, string $field) : array
+    {
+        // Handle content type properties.
+        if($this->fieldable instanceof ContentType && in_array($field, self::PROPERTY_IDENTIFIERS)) {
+            $config['type'] = $config['type'] ?? ($field == 'id' ? 'id' : ($field == 'locale' ? 'locale' : 'date'));
+            $config['label'] = $config['label'] ?? ucfirst($field);
+            return $config;
         }
 
         /**
-         * @var ContentTypeField $field
+         * @var FieldableField $field
          */
-        $field = $this->view->getContentType()->getFields()->get($field);
+        $fieldEntity = $this->fieldable->getFields()->filter(function(FieldableField $fieldEntity) use ($field) { return $fieldEntity->getIdentifier() === $field; })->first();
 
-        if ($field) {
-            return $this->fieldTypeManager->getFieldType($field->getType())->getViewFieldDefinition($field);
+        if(!$fieldEntity) {
+            $exception = new InvalidConfigurationException(sprintf('Unknown field %s', json_encode($field)));
+            $exception->setPath($field);
+            throw $exception;
         }
 
-        elseif(!empty($type)) {
-            return $this->fieldTypeManager->getFieldType($type);
-        }
-
-        return [];
+        $type = $config['type'] ?? $fieldEntity->getType();
+        $this->fieldTypeManager->getFieldType($type)->alterViewFieldSettings($config, $this->fieldTypeManager, $fieldEntity);
+        return $config;
     }
 }

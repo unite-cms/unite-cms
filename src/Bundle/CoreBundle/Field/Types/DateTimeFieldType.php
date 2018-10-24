@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class DateTimeFieldType extends DateFieldType
 {
@@ -14,10 +15,8 @@ class DateTimeFieldType extends DateFieldType
     /**
      * {@inheritdoc}
      */
-    function getViewFieldDefinition(FieldableField $field = null) : array {
-        return [
-            'label' => $field ? $field->getTitle() : null,
-            'type' => 'date',
-        ];
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+        $settings['type'] = 'date';
     }
 }

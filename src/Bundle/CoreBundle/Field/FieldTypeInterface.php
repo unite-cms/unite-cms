@@ -107,11 +107,8 @@ interface FieldTypeInterface
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context);
 
     /**
-     * Return the definition array that gets passed to the view field javascript component.
-     *
+     * Allows the field to alter defined settings. The field can always overrule configured settings.
      * Allowed keys are: label, type, settings, assets.
-     *
-     * If $field is empty you should return definitions that can be set without $field and leave the rest empty.
      *
      * Assets can be defined as:
      * [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ]
@@ -119,8 +116,9 @@ interface FieldTypeInterface
      * [ 'css' => 'https://example.com/main.css' ]
      * [ 'js' => 'https://example.com/main.js' ]
      *
+     * @param array $settings
      * @param FieldableField $field
-     * @return array
+     * @param FieldTypeManager $fieldTypeManager
      */
-    function getViewFieldDefinition(FieldableField $field = null) : array;
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null);
 }

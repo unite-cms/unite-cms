@@ -7,6 +7,7 @@ use GraphQL\Error\FormattedError;
 use GraphQL\Server\Helper;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -23,13 +24,14 @@ class GraphQLApiController extends Controller
      * @param Organization $organization
      * @param Domain $domain
      * @param Request $request
+     * @param LoggerInterface $logger
      *
+     * @return \Symfony\Component\HttpFoundation\Response
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), domain)")
-     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function indexAction(Organization $organization, Domain $domain, Request $request)
+    public function indexAction(Organization $organization, Domain $domain, Request $request, LoggerInterface $logger)
     {
         $schema = $this->get('unite.cms.graphql.schema_type_manager')->createSchema($domain, 'Query', 'Mutation');
         $server = new StandardServer(ServerConfig::create()
@@ -62,6 +64,7 @@ class GraphQLApiController extends Controller
             );
         } catch (\Exception $e) {
             $status = 500;
+            $logger->error($e->getMessage(), ['exception' => $e]);
 
             try {
                 $result = ['errors' => [FormattedError::createFromException($e)]];
