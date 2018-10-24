@@ -120,6 +120,9 @@ class DomainConfigManager
      * @throws InvalidDomainConfigurationException
      */
     public function updateConfig(Domain $domain, bool $forceOverride = false) : bool{
+
+        $this->checkConfigFolder();
+
         $path = $this->getDomainConfigPath($domain);
 
         if($this->filesystem->exists($path) && !$forceOverride) {
@@ -148,29 +151,25 @@ class DomainConfigManager
     }
 
     /**
-     * Returns true, if the domain config folder exists, also is trying to create the folder
-     *
+     * Tries to create the config folder
+     * @throws IOException
      * @return bool
      */
-    public function configFolderExists() : bool {
+    public function checkConfigFolder() : void {
 
         $config_path = $this->getDomainConfigDir();
 
         // if domain config folder was never created
         if (!$this->filesystem->exists($config_path)) {
-
             // try to create the domain config folder, will work only systems with the appropriate on the parent folder
-            try
-            {
+            try {
                 $this->filesystem->mkdir($config_path);
             }
-            catch (IOException $exception)
-            {
-                return FALSE;
+            catch (IOException $exception) {
+                throw new IOException(sprintf('Failed to create config directory "%s".', $config_path), 0, null, $config_path);
             }
         }
 
-        return TRUE;
     }
 
     /**
@@ -182,6 +181,7 @@ class DomainConfigManager
      * @return bool
      */
     public function configExists(Domain $domain) : bool {
+        $this->checkConfigFolder();
         $path = $this->getDomainConfigPath($domain);
         return $this->filesystem->exists($path);
     }
@@ -196,6 +196,8 @@ class DomainConfigManager
      * @throws MissingOrganizationException
      */
     public function loadConfig(Domain $domain, $updateDomain = false) : void {
+
+        $this->checkConfigFolder();
 
         $path = $this->getDomainConfigPath($domain);
 
@@ -238,6 +240,8 @@ class DomainConfigManager
      */
     public function removeConfig(Domain $domain) : void {
 
+        $this->checkConfigFolder();
+
         $path = $this->getDomainConfigPath($domain);
 
         // If file does not exists, return.
@@ -256,6 +260,8 @@ class DomainConfigManager
      * @throws MissingOrganizationException
      */
     public function listConfig(Organization $organization) : array {
+
+        $this->checkConfigFolder();
 
         $path = $this->getOrganizationConfigPath($organization);
 
