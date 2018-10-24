@@ -9,7 +9,7 @@ volumes:
     driver_opts:
       type: nfs
       o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
-      device: ":${SOURCE_DIR}"
+      device: ":${PWD}/"
 
 services:
 
@@ -26,7 +26,7 @@ services:
     - "3307:3306"
     volumes:
     - mysql_data:/var/lib/mysql
-  
+
   unitecms-web:
     image: unitecms/docker-unite
     build: ./.docker/unite-cms

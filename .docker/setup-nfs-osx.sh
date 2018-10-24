@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export CONTAINER_DIR="/app/unite-cms"
-export SOURCE_DIR=${SOURCE_DIR:="/private/var/www/unite-cms"}
+export SOURCE_DIR=${SOURCE_DIR:=$PWD/}
 
 echo "CONTAINER_DIR: $CONTAINER_DIR"
 echo "SOURCE_DIR: $SOURCE_DIR"
