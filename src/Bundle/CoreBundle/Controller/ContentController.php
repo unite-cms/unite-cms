@@ -37,18 +37,26 @@ class ContentController extends Controller
      */
     public function indexAction(View $view)
     {
+        $template = null;
+        $parameters = null;
+
+        try {
+            $template = $this->get('unite.cms.view_type_manager')->getViewType($view->getType())::getTemplate();
+            $parameters = $this->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
+            $parameters->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form'));
+        }
+        catch (\Symfony\Component\Config\Definition\Exception\Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+        }
+
         return $this->render(
             '@UniteCMSCore/Content/index.html.twig',
             [
                 'organization' => $view->getContentType()->getDomain()->getOrganization(),
                 'domain' => $view->getContentType()->getDomain(),
                 'view' => $view,
-                'template' => $this->get('unite.cms.view_type_manager')->getViewType(
-                    $view->getType()
-                )::getTemplate(),
-                'templateParameters' => $this->get('unite.cms.view_type_manager')->getTemplateRenderParameters(
-                    $view
-                )->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form')),
+                'template' => $template,
+                'templateParameters' => $parameters,
             ]
         );
     }

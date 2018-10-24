@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class ChoiceFieldType extends FieldType
 {
@@ -34,13 +35,15 @@ class ChoiceFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getViewFieldDefinition(FieldableField $field = null) : array {
-        return [
-            'label' => $field ? $field->getTitle() : null,
-            'type' => 'choice',
-            'settings' => [
-                'choices' => $field ? array_flip($field->getSettings()->choices) : []
-            ]
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+        $settings['type'] = 'choice';
+        $settings['settings'] = [
+            'choices' => $field ? array_flip($field->getSettings()->choices) : []
+        ];
+        $settings['assets'] = [
+            ['js' => 'main.js', 'package' => 'UniteCMSWysiwygFieldBundle'],
+            ['css' => 'main.css', 'package' => 'UniteCMSWysiwygFieldBundle'],
         ];
     }
 }

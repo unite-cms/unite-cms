@@ -233,7 +233,6 @@ class DeprecatedTableViewTypeTest extends ContainerAwareTestCase
             new ViewSettings(
                 [
                     'columns' => [
-                        'f1' => 'Title',
                         'id' => 'baa',
                         'f1.any_sub' => [
                             'label' => 'Baa',
@@ -257,17 +256,20 @@ class DeprecatedTableViewTypeTest extends ContainerAwareTestCase
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals(
             [
-                'f1' => [
-                    'label' => 'Title',
-                    'type' => 'text',
-                ],
                 'id' => [
                     'label' => 'baa',
                     'type' => 'id'
                 ],
-                'f1.any_sub' => [
+                'f1' => [
                     'label' => 'Baa',
-                    'type' => 'email',
+                    'type' => 'text',
+                    'settings' => [
+                        'fields' => [
+                            'any_sub' => [
+                                'type' => 'email',
+                            ]
+                        ]
+                    ],
                 ],
             ],
             $parameters->get('fields')

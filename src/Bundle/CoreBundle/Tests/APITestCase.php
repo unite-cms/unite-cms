@@ -401,7 +401,7 @@ abstract class APITestCase extends ContainerAwareTestCase
             []
         ));
 
-        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
+        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request, static::$container->get('logger'));
         return json_decode($response->getContent());
     }
 
