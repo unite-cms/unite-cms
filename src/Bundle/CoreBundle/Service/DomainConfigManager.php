@@ -152,8 +152,6 @@ class DomainConfigManager
 
     /**
      * Tries to create the config folder
-     * @throws IOException
-     * @return bool
      */
     public function checkConfigFolder() : void {
 
@@ -166,7 +164,6 @@ class DomainConfigManager
                 $this->filesystem->mkdir($config_path);
             }
             catch (IOException $exception) {
-                throw new IOException(sprintf('Failed to create config directory "%s".', $config_path), 0, null, $config_path);
             }
         }
 
