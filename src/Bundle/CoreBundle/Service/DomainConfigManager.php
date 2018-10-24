@@ -148,6 +148,32 @@ class DomainConfigManager
     }
 
     /**
+     * Returns true, if the domain config folder exists, also is trying to create the folder
+     *
+     * @return bool
+     */
+    public function configFolderExists() : bool {
+
+        $config_path = $this->getDomainConfigDir();
+
+        // if domain config folder was never created
+        if (!$this->filesystem->exists($config_path)) {
+
+            // try to create the domain config folder, will work only systems with the appropriate on the parent folder
+            try
+            {
+                $this->filesystem->mkdir($config_path);
+            }
+            catch (IOException $exception)
+            {
+                return FALSE;
+            }
+        }
+
+        return TRUE;
+    }
+
+    /**
      * Returns true, if the config for the given domain exists.
      *
      * @param Domain $domain

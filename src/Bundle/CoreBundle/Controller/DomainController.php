@@ -177,6 +177,13 @@ class DomainController extends Controller
     {
         $outOfSyncPersistedConfig = null;
 
+        // check if the main config folder was created, raise an error if the folder could not be created
+        if (!$domainConfigManager->configFolderExists())
+        {
+            $this->addFlash('danger', 'Domain Config Folder ('.$domainConfigManager->getDomainConfigDir().') is missing or could not be created due to directory permission issues.');
+            return $this->redirectToRoute('unitecms_core_domain_index', [$organization]);
+        }
+
         try {
             if ($domainConfigManager->configExists($domain)) {
                 $domainConfigManager->loadConfig($domain);
