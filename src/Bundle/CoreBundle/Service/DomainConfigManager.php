@@ -159,12 +159,11 @@ class DomainConfigManager
 
         // if domain config folder was never created
         if (!$this->filesystem->exists($config_path)) {
+
             // try to create the domain config folder, will work only systems with the appropriate on the parent folder
-            try {
-                $this->filesystem->mkdir($config_path);
-            }
-            catch (IOException $exception) {
-            }
+            // throws an IOException on fail
+            $this->filesystem->mkdir($config_path);
+
         }
 
     }

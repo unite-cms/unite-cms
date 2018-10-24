@@ -383,4 +383,33 @@ class DomainConfigManagerTest extends KernelTestCase
 
         $this->assertEquals(['domain1', 'domain2'], $this->manager->listConfig($organization));
     }
+
+    public function testIvalidDomainAndOrganizationIdentifiers() {
+
+        // this test should only be a reverse check and reminder if regexes are changed some day,
+        // such chars should never ever be allowed in domain or organization identifiers, otherwise things might get dangerous
+
+        $domain = new Domain();
+        $domain->setTitle('test');
+
+        $organization = new Organization();
+        $organization->setTitle('test');
+
+        $invalid_chars = [".", " ", "?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%", "+", chr(0)];
+
+        foreach ($invalid_chars as $char) {
+            $domain->setIdentifier($char.'test');
+            $errors = static::$container->get('validator')->validate($domain);
+            $this->assertGreaterThanOrEqual(1, $errors->count());
+            $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
+        }
+
+        foreach ($invalid_chars as $char) {
+            $organization->setIdentifier($char.'test');
+            $errors = static::$container->get('validator')->validate($organization);
+            $this->assertGreaterThanOrEqual(1, $errors->count());
+            $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
+        }
+
+    }
 }
