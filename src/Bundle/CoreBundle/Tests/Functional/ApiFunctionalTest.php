@@ -492,7 +492,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         static::$container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, $firewall, []));
 
-        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
+        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request, static::$container->get('logger'));
         return json_decode($response->getContent());
     }
 
