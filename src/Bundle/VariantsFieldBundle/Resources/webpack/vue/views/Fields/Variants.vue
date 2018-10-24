@@ -22,7 +22,6 @@
              * @inheritdoc
              */
             fieldQuery(identifier, field, $uniteCMSViewFields) {
-
                 let ucfirst = function(str) { return str.charAt(0).toUpperCase() + str.slice(1); };
                 let query = identifier + ' { type ';
 
@@ -35,7 +34,7 @@
                 }
 
                 Object.keys(field.settings.on).forEach((variant) => {
-                    query += '... on ' + ucfirst(field.settings.content_type) + 'Content' + ucfirst(identifier) + ucfirst(variant) + 'Variant {';
+                    query += '... on ' + field.settings.variant_schema_types[variant] + '{';
                     query += Object.keys(field.settings.on[variant]).map((videntifier) => {
                         return $uniteCMSViewFields.resolveFieldQueryFunction(field.settings.on[variant][videntifier].type)(
                             videntifier,

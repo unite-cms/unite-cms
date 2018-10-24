@@ -422,7 +422,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
         ];
 
         if($field) {
-            $settings['settings']['content_type'] = $field->getEntity()->getIdentifier();
+            $settings['settings']['variant_schema_types'] = [];
             $settings['settings']['variant_titles'] = [];
             $settings['settings']['on'] = $settings['settings']['on'] ?? [];
 
@@ -430,8 +430,10 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             $variants = self::getNestableFieldable($field);
             foreach($settings['settings']['on'] as $v => $fields) {
                 $processor = new Processor();
-                $config = $processor->processConfiguration(new TableViewConfiguration(new Variant($variants->getFieldsForVariant($v), $v, $v), $fieldTypeManager), ['settings' => ['fields' => $fields]]);
+                $variant = new Variant($variants->getFieldsForVariant($v), $v, $v, $variants);
+                $config = $processor->processConfiguration(new TableViewConfiguration($variant, $fieldTypeManager), ['settings' => ['fields' => $fields]]);
                 $settings['settings']['on'][$v] = $config['fields'];
+                $settings['settings']['variant_schema_types'][$v] = VariantFactory::schemaTypeNameForVariant($variant);
 
                 // Template will only include assets from root fields, so we need to add any child templates to the root field.
                 foreach($config['fields'] as $nestedField) {
