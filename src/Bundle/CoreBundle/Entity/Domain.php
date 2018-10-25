@@ -110,6 +110,13 @@ class Domain
     private $permissions;
 
     /**
+     * @var array
+     * @ORM\Column(name="config_variables", type="array", nullable=true)
+     * @deprecated 0.8. Config variables are now stored as "variables" property inside domain config. Please update your domain to autosave values from this field to the filesystem.
+     */
+    private $configVariables;
+
+    /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
@@ -613,6 +620,20 @@ class Domain
     }
 
     /**
+     * Get configVariables
+     * @deprecated 0.8. Config variables are now stored as "variables" property inside domain config. Please update your domain to autosave values from this field to the filesystem.
+     *
+     * @return array
+     */
+    public function getConfigVariables(): array
+    {
+        if(empty($this->configVariables)) {
+            $this->configVariables = [];
+        }
+        return $this->configVariables;
+    }
+
+    /**
      * @return DomainMember[]|ArrayCollection
      */
     public function getMembers()
@@ -664,10 +685,19 @@ class Domain
      */
     public function setConfig(string $config) {
         if(!empty($this->config) && $this->config !== $config) {
-            $this->configChanged = true;
+            $this->setConfigChanged();
         }
         $this->config = $config;
         return $this;
+    }
+
+    /**
+     * Set the config of ths domain to changed. This is calculated automatically on setConfig. However, you can override
+     * it with this method if you want to force or prevent a change event.
+     * @param bool $changed
+     */
+    public function setConfigChanged($changed = true) {
+        $this->configChanged = $changed;
     }
 }
 

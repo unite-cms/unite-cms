@@ -176,6 +176,7 @@ class DomainController extends Controller
     public function updateAction(Organization $organization, Domain $domain, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
         $outOfSyncPersistedConfig = null;
+        $configNotInFilesystem = false;
 
         try {
             if ($domainConfigManager->configExists($domain)) {
@@ -189,9 +190,36 @@ class DomainController extends Controller
 
             // If the file does not exist, serialize the current domain instead and save the file.
             } else {
-                $domain->setConfig((string)$domainConfigManager->serialize($domain));
-                $domainConfigManager->updateConfig($domain);
-                $this->addFlash('warning', 'This domain configuration comes from the database and not from the file system at the moment. Please save this domain to create a config file in the filesystem.');
+                $domain->setConfig($domainConfigManager->serialize($domain));
+
+                /**
+                 * @deprecated 0.8 Before Version 0.7, variables could be saved to $domain->configVariables. They where
+                 * auto-replaced by the domain config parser. To be backward compatible we need to to this here. This block can
+                 * be deleted, once we reach version 0.8.
+                 */
+                if(!empty($domain->getConfigVariables())) {
+
+                    $JSON = $domain->getConfig();
+                    foreach($domain->getConfigVariables() as $variable => $value) {
+                        $value = json_encode($value);
+                        $JSON = str_replace($value, '"'.$variable.'"', $JSON);
+                    }
+
+                    $JSON_ARRAY = json_decode($JSON, true);
+                    $JSON_ARRAY['variables'] = $domain->getConfigVariables();
+                    uksort($JSON_ARRAY, function($a, $b){
+                        if(in_array($a, ['title', 'identifier', 'variables'])) {
+                            return -1;
+                        }
+                        return +1;
+                    });
+                    $JSON = json_encode($JSON_ARRAY);
+                    $domain->setConfig($JSON);
+                }
+
+                // Force update of the domain config.
+                $domain->setConfigChanged();
+                $configNotInFilesystem = true;
             }
         } catch (\Exception $e) {
             $logger->error($e->getMessage(), ['context' => $e]);
@@ -286,6 +314,10 @@ class DomainController extends Controller
         else {
             if($outOfSyncPersistedConfig) {
                 $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. You can use the diff tool to update the config.');
+            }
+
+            if($configNotInFilesystem) {
+                $this->addFlash('warning', 'This domain configuration comes from the database and not from the file system at the moment. Please save this domain to create a config file in the filesystem.');
             }
         }
 
