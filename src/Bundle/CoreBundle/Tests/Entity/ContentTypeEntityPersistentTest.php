@@ -60,7 +60,7 @@ class ContentTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
-        $contentType->setIdentifier($this->generateRandomMachineName(256));
+        $contentType->setIdentifier($this->generateRandomMachineName(201));
         $errors = static::$container->get('validator')->validate($contentType);
         $this->assertCount(1, $errors);
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());

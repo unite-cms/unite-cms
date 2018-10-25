@@ -44,10 +44,10 @@ class Organization
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
-     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Length(max="200", maxMessage="too_long")
      * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Organization::RESERVED_IDENTIFIERS")
-     * @ORM\Column(name="identifier", type="string", length=255, unique=true)
+     * @ORM\Column(name="identifier", type="string", length=200, unique=true)
      */
     private $identifier;
 
@@ -79,6 +79,12 @@ class Organization
      * @ORM\OneToMany(targetEntity="Invitation", mappedBy="organization", fetch="EXTRA_LAZY")
      */
     private $invites;
+
+    /**
+     * If set, thisholds config identifiers, that are in the filesystem but not not in the database.
+     * @var array $newDomainsFromConfig
+     */
+    private $missingDomainConfigIdentifiers = [];
 
     public function __toString()
     {
@@ -285,6 +291,24 @@ class Organization
     public function getInvites()
     {
         return $this->invites;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMissingDomainConfigIdentifiers() : array
+    {
+        return $this->missingDomainConfigIdentifiers;
+    }
+
+    /**
+     * @param array $missingDomainConfigIdentifiers
+     * @return Organization
+     */
+    public function setMissingDomainConfigIdentifiers(array $missingDomainConfigIdentifiers)
+    {
+        $this->missingDomainConfigIdentifiers = $missingDomainConfigIdentifiers;
+        return $this;
     }
 }
 
