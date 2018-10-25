@@ -63,7 +63,7 @@
                 return this.row[this.identifier];
             },
         },
-        props: ['identifier', 'label', 'settings', 'row', 'type', 'initialMinWidth'],
+        props: ['identifier', 'label', 'settings', 'row', 'type', 'initialMinWidth', 'sortable'],
     }
 </script>
 
