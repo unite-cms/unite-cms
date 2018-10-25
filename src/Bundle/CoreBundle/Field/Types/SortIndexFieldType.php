@@ -65,9 +65,9 @@ class SortIndexFieldType extends FieldType
 
                 $repository->createQueryBuilder('c')
                     ->update('UniteCMSCoreBundle:Content', 'c')
-                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) +1 AS int))")
+                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) +1 AS int))")
                     ->where('c.contentType = :contentType')
-                    ->andWhere("JSON_EXTRACT(c.data, :identifier) BETWEEN :first AND :last")
+                    ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) BETWEEN :first AND :last")
                     ->setParameters(
                         [
                             'identifier' => $field->getJsonExtractIdentifier(),
@@ -85,9 +85,9 @@ class SortIndexFieldType extends FieldType
 
                 $repository->createQueryBuilder('c')
                     ->update('UniteCMSCoreBundle:Content', 'c')
-                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) -1 AS int))")
+                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) -1 AS int))")
                     ->where('c.contentType = :contentType')
-                    ->andWhere("JSON_EXTRACT(c.data, :identifier) BETWEEN :first AND :last")
+                    ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) BETWEEN :first AND :last")
                     ->setParameters(
                         [
                             'identifier' => $field->getJsonExtractIdentifier(),
@@ -104,9 +104,9 @@ class SortIndexFieldType extends FieldType
 
                 $repository->createQueryBuilder('c')
                     ->update('UniteCMSCoreBundle:Content', 'c')
-                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) +1 AS int))")
+                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) +1 AS int))")
                     ->where('c.contentType = :contentType')
-                    ->andWhere("JSON_EXTRACT(c.data, :identifier) >= :first")
+                    ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) >= :first")
                     ->setParameters(
                         [
                             'identifier' => $field->getJsonExtractIdentifier(),
@@ -126,9 +126,9 @@ class SortIndexFieldType extends FieldType
         // all content after the deleted one should get --.
         $repository->createQueryBuilder('c')
             ->update('UniteCMSCoreBundle:Content', 'c')
-            ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_EXTRACT(c.data, :identifier) -1 AS int))")
+            ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) -1 AS int))")
             ->where('c.contentType = :contentType')
-            ->andWhere("JSON_EXTRACT(c.data, :identifier) > :last")
+            ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) > :last")
             ->setParameters(
                 [
                     'identifier' => $field->getJsonExtractIdentifier(),
