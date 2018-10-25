@@ -30,6 +30,15 @@
             fieldQuery(identifier, field) {
                 return BaseField.methods.fieldQuery(identifier) + ' { url }';
             },
+        },
+        computed: {
+            /**
+             * Each field must implement a value method that gets called to get the data from the API result set.
+             * The default implementation just uses the identifier to look for the data in the (possible nested) result.
+             */
+            value() {
+                return this.row[this.identifier] ? this.row[this.identifier]['url'] : null;
+            },
         }
     }
 </script>

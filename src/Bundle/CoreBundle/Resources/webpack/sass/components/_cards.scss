@@ -137,6 +137,12 @@
       }
     }
   }
+
+  .uk-modal-dialog {
+    .uk-card.full-content-card:not(.always-full) {
+      margin: 0;
+    }
+  }
 }
 
 @media (min-width: 2100px) {
@@ -144,6 +150,12 @@
     &:not(.always-full) {
       width: 1600px;
       align-self: center;
+    }
+  }
+
+  .uk-modal-dialog {
+    .uk-card.full-content-card:not(.always-full) {
+      margin: 0;
     }
   }
 }
