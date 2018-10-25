@@ -11,26 +11,30 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
+use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Service\DomainDefinitionParser;
+use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
+use UniteCMS\CoreBundle\Exception\MissingDomainException;
+use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
+use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
 class CreateDomainCommand extends Command
 {
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     private $em;
 
     /**
-     * @var \Symfony\Component\Validator\Validator\ValidatorInterface
+     * @var ValidatorInterface
      */
     private $validator;
 
     /**
-     * @var \UniteCMS\CoreBundle\Service\DomainDefinitionParser
+     * @var DomainConfigManager $domainConfigManager
      */
-    private $definiton_parser;
+    private $domainConfigManager;
 
     /**
      * {@inheritdoc}
@@ -38,11 +42,11 @@ class CreateDomainCommand extends Command
     public function __construct(
         EntityManager $em,
         ValidatorInterface $validator,
-        DomainDefinitionParser $definiton_parser
+        DomainConfigManager $domainConfigManager
     ) {
         $this->em = $em;
         $this->validator = $validator;
-        $this->definiton_parser = $definiton_parser;
+        $this->domainConfigManager = $domainConfigManager;
 
         parent::__construct();
     }
@@ -54,7 +58,29 @@ class CreateDomainCommand extends Command
     {
         $this
             ->setName('unite:domain:create')
-            ->setDescription('Creates a new domain for an organization and saves it to the database.');
+            ->setDescription('Creates a new domain for an organization and saves it to the database and to the filesystem.');
+    }
+
+    /**
+     * Validates the domain and prints a message if not valid.
+     *
+     * @param OutputInterface $output
+     * @param Domain $domain
+     * @return bool
+     */
+    protected function validate(OutputInterface $output, Domain $domain) {
+        $errors = $this->validator->validate($domain);
+        if (count($errors) > 0) {
+
+            // A later flush would throw an exception, if the organization would include the invalid domain.
+            $domain->getOrganization()->getDomains()->removeElement($domain);
+            unset($domain);
+
+            $output->writeln("<error>\n\nThere was an error while creating the domain\n \n$errors\n</error>");
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -70,6 +96,7 @@ class CreateDomainCommand extends Command
             $organizations
         );
         $organization_title = $helper->ask($input, $output, $question);
+
         /**
          * @var Organization $organization
          */
@@ -81,14 +108,24 @@ class CreateDomainCommand extends Command
         }
 
         $helper = $this->getHelper('question');
-        $question = new Question('<info>Please insert the domain definition JSON string:</info> ');
+        $question = new Question("\n<info>Domain identifier</info> (numbers, lowercase chars and underscore is allowed): ");
+        $domainIdentifier = $helper->ask($input, $output, $question);
+
+        $helper = $this->getHelper('question');
+        $question = new Question("\n<info>Domain configuration</info> (If left blank, an empty domain will get created and you can update it later.): </info>");
         $domainDefinition = $helper->ask($input, $output, $question);
 
-        $question = new Question('<info>If you have used any variables in the domain definition, please pass dem as JSON string here. Otherwise, just hit enter:</info> ');
-        $variablesDefinition = $helper->ask($input, $output, $question);
+        $domain = empty($domainDefinition) ? new Domain() : $this->domainConfigManager->parse($domainDefinition);
+        $domain
+            ->setOrganization($organization)
+            ->setIdentifier($domainIdentifier)
+            ->setConfig($domainDefinition ?? '');
 
-        $domain = $this->definiton_parser->parse($domainDefinition, $variablesDefinition);
-        $domain->setOrganization($organization);
+        if(empty($domain->getTitle())) {
+            $domain->setTitle(str_replace('_', ' ', ucfirst($domain->getIdentifier())));
+        }
+
+        if(!$this->validate($output, $domain)) { return; }
 
         $output->writeln(['', '', '<info>*****Domain definition*****</info>', '']);
         $output->writeln('Title</>: <comment>'.$domain->getTitle().'</comment>');
@@ -118,7 +155,7 @@ class CreateDomainCommand extends Command
             $output->writeln('    }');
         }
 
-        $output->writeln(['', '']);
+        $output->writeln([']', '']);
 
         $question = new ConfirmationQuestion(
             '<info>Should the domain for the organization: "'.$organization.'" be created</info>? [<comment>Y/n</comment>] ',
@@ -130,15 +167,10 @@ class CreateDomainCommand extends Command
             return;
         }
 
-        $errors = $this->validator->validate($domain);
-        if (count($errors) > 0) {
-            $output->writeln("<error>\n\nThere was an error while creating the domain\n \n$errors\n</error>");
-        } else {
+        if ($this->validate($output, $domain)) {
             $this->em->persist($domain);
             $this->em->flush();
-            $output->writeln('<info>Domain was created successfully!</info>');
+            $output->writeln(['', '<info>Database entry was created successfully!</info>', '<info>Domain configuration file was created successfully at path: </info>"'.$this->domainConfigManager->getDomainConfigPath( $domain ).'"', '']);
         }
-
-        $output->writeln('<info>Domain was created successfully!</info>');
     }
 }

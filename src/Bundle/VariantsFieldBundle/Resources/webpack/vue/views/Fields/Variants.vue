@@ -1,7 +1,7 @@
 <template>
     <div :style="style" class="view-field view-field-variants">
         <div class="uk-label" v-if="settings.title">{{ settings.variant_titles[value.type] }}</div>
-        <component :key="identifier" v-for="(v,identifier) in settings.on[value.type]"
+        <component v-if="value" :key="identifier" v-for="(v,identifier) in settings.on[value.type]"
                    :is="$uniteCMSViewFields.resolve(v.type)"
                    :type="v.type"
                    :identifier="identifier"
