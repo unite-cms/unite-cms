@@ -14,6 +14,8 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\FieldablePreview;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Exception\MissingDomainException;
+use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
 class DomainConfigManagerTest extends KernelTestCase
@@ -170,6 +172,21 @@ class DomainConfigManagerTest extends KernelTestCase
     }
 
     /**
+     * @expectedException \UniteCMS\CoreBundle\Exception\MissingOrganizationException
+     * @expectedExceptionMessage Organization identifier contains invalid characters.
+     */
+    public function testParsingDomainWithOrganizationIdentifierWithOnlyInvalidChars() {
+
+        $organization = new Organization();
+        $organization->setIdentifier('../');
+        $domain = new Domain();
+        $domain
+            ->setOrganization($organization)
+            ->setIdentifier('my_test_domain');
+        $this->manager->loadConfig($domain);
+    }
+
+    /**
      * @expectedException \UniteCMS\CoreBundle\Exception\MissingDomainException
      * @expectedExceptionMessage You can only process domains where the identifier is not empty.
      */
@@ -178,6 +195,20 @@ class DomainConfigManagerTest extends KernelTestCase
         $organization = new Organization();
         $organization->setIdentifier('my_test_organization');
         $domain = new Domain();
+        $domain->setOrganization($organization);
+        $this->manager->loadConfig($domain);
+    }
+
+    /**
+     * @expectedException \UniteCMS\CoreBundle\Exception\MissingDomainException
+     * @expectedExceptionMessage Domain identifier contains invalid characters.
+     */
+    public function testParsingDomainWithDomainIdentifierOnlyInvalidChars() {
+
+        $organization = new Organization();
+        $organization->setIdentifier('my_test_organization');
+        $domain = new Domain();
+        $domain->setIdentifier('../');
         $domain->setOrganization($organization);
         $this->manager->loadConfig($domain);
     }
@@ -384,10 +415,22 @@ class DomainConfigManagerTest extends KernelTestCase
         $this->assertEquals(['domain1', 'domain2'], $this->manager->listConfig($organization));
     }
 
-    public function testIvalidDomainAndOrganizationIdentifiers() {
+    public function invalidIdentifierChars() {
+        return array_map(
+            function($c){ return [$c]; },
+            ["D", "A", ".", " ", "?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%", "+", chr(0)]
+        );
+    }
 
-        // this test should only be a reverse check and reminder if regexes are changed some day,
-        // such chars should never ever be allowed in domain or organization identifiers, otherwise things might get dangerous
+    /**
+     * @expectedException \UniteCMS\CoreBundle\Exception\MissingOrganizationException
+     * @expectedExceptionMessage Organization identifier contains invalid characters.
+     * @dataProvider invalidIdentifierChars
+     */
+    public function testOrganizationContainsInvalidChars(string $invalid_char) {
+
+        // If the domain gets validated, only a-z0-9_ chard are allowed, however the config manager will not validate
+        // the domain. So we also need to remove them before doing anything on the filesystem.
 
         $domain = new Domain();
         $domain->setTitle('test');
@@ -395,21 +438,34 @@ class DomainConfigManagerTest extends KernelTestCase
         $organization = new Organization();
         $organization->setTitle('test');
 
-        $invalid_chars = [".", " ", "?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%", "+", chr(0)];
+        $organization->setIdentifier('oprefix_'.$invalid_char.'_osuffix');
+        $domain->setIdentifier('dprefix_'.$invalid_char.'_dsuffix');
 
-        foreach ($invalid_chars as $char) {
-            $domain->setIdentifier($char.'test');
-            $errors = static::$container->get('validator')->validate($domain);
-            $this->assertGreaterThanOrEqual(1, $errors->count());
-            $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
-        }
+        $this->expectException(MissingOrganizationException::class);
+        $this->expectExceptionMessage('Organization identifier contains invalid characters.');
+        $this->assertEquals($this->manager->getDomainConfigDir() . '/oprefix__osuffix/', $this->manager->getOrganizationConfigPath($organization));
+    }
 
-        foreach ($invalid_chars as $char) {
-            $organization->setIdentifier($char.'test');
-            $errors = static::$container->get('validator')->validate($organization);
-            $this->assertGreaterThanOrEqual(1, $errors->count());
-            $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
-        }
+    /**
+     * @expectedException \UniteCMS\CoreBundle\Exception\MissingDomainException
+     * @expectedExceptionMessage Domain identifier contains invalid characters.
+     * @dataProvider invalidIdentifierChars
+     */
+    public function testDomainContainsInvalidChars(string $invalid_char) {
 
+        // If the domain gets validated, only a-z0-9_ chard are allowed, however the config manager will not validate
+        // the domain. So we also need to remove them before doing anything on the filesystem.
+
+        $domain = new Domain();
+        $domain->setTitle('test');
+
+        $organization = new Organization();
+        $organization->setTitle('test');
+        $domain->setOrganization($organization);
+
+        $domain->setIdentifier('dprefix_'.$invalid_char.'_dsuffix');
+        $this->expectException(MissingDomainException::class);
+        $this->expectExceptionMessage('Domain identifier contains invalid characters.');
+        $this->assertEquals($this->manager->getDomainConfigDir() . '/oprefix__osuffix/dprefix__dsuffix.json', $this->manager->getDomainConfigPath($domain));
     }
 }

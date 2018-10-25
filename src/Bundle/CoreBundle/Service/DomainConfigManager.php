@@ -58,11 +58,18 @@ class DomainConfigManager
      * @throws MissingOrganizationException
      */
     public function getOrganizationConfigPath(Organization $organization) : string {
-        if(empty($organization->getIdentifier())) {
+
+        $identifier = $organization->getIdentifier() ?? '';
+        if(preg_match('/[^a-z0-9_]+/', $identifier)) {
+            throw new MissingOrganizationException('Organization identifier contains invalid characters.');
+        }
+
+
+        if(empty($identifier)) {
             throw new MissingOrganizationException('Organization identifier is empty.');
         }
 
-        return $this->domainConfigDir . $organization->getIdentifier() . '/';
+        return $this->domainConfigDir . $identifier . '/';
     }
 
     /**
@@ -79,11 +86,16 @@ class DomainConfigManager
             throw new MissingOrganizationException('You can only process domains where the organization is not empty.');
         }
 
-        if(empty($domain->getIdentifier())) {
+        $identifier = $domain->getIdentifier() ?? '';
+        if(preg_match('/[^a-z0-9_]+/', $identifier)) {
+            throw new MissingDomainException('Domain identifier contains invalid characters.');
+        }
+
+        if(empty($identifier)) {
             throw new MissingDomainException('You can only process domains where the identifier is not empty.');
         }
 
-        return $this->getOrganizationConfigPath($domain->getOrganization()) . $domain->getIdentifier() . '.json';
+        return $this->getOrganizationConfigPath($domain->getOrganization()) . $identifier . '.json';
     }
 
     /**
