@@ -6,7 +6,7 @@
                    :title="labels.title"
                    :subTitle="labels.subTitle"
                    :createLabel="labels.create"
-                   :sortable="sort.sortable"
+                   :sortable="sort.sortable && !selectable && !deleted.showDeleted"
                    :createUrl="urls.create"
                    @search="onSearch"></component>
 
@@ -53,6 +53,10 @@
             let fields = bag.settings.fields;
             let error = null;
             let fieldQuery = [];
+            let sort = bag.settings.sort || {
+                field: null,
+                asc: true
+            };
 
             try {
                 fieldQuery = Object.keys(fields).map((identifier) => {
@@ -87,10 +91,8 @@
                 loading: false,
                 error: error,
                 rows: [],
-                sort: bag.settings.sort || {
-                    field: null,
-                    asc: true
-                },
+                sort: sort,
+                initialSort: Object.assign({}, sort),
                 limit: 10,
                 page: 1,
                 total: 0,
@@ -150,6 +152,13 @@
             },
             deleted: {
                 handler(deleted) {
+
+                    // When coming back from deleted screen reset sortable.
+                    if(!deleted.showDeleted && this.sort.sortable) {
+                        this.sort.field = this.initialSort.field;
+                        this.sort.asc = this.initialSort.asc;
+                    }
+
                     this.dataFetcher.withDeleted(deleted.showDeleted);
                     this.load();
                 },

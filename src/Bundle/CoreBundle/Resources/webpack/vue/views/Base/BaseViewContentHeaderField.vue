@@ -1,13 +1,15 @@
 <template>
-    <div :style="style" :class="{ 'fixed-width': fixedWidth }">
+    <div :style="style" :class="{ 'fixed-width': fixedWidth }" v-if="type !== 'sortindex' || isSortable">
 
-        <a v-if="!isSortable" href="#" v-on:click.prevent="setSort(identifier)">
+        <span v-if="type === 'sortindex' && isSortable"><span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span></span>
+
+        <a v-else-if="!isSortable" href="#" v-on:click.prevent="setSort(identifier)">
             {{ label }}
             <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
         </a>
 
         <span v-else>
-            <template v-if="type !== 'sortindex'">{{ label }}</template>
+            {{ label }}
             <span v-if="sort.field === identifier" v-html="feather.icons[sort.asc ? 'arrow-down' : 'arrow-up'].toSvg({width: 16, height: 16})"></span>
         </span>
     </div>
