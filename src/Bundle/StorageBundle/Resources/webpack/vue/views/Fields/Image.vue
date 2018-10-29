@@ -71,3 +71,26 @@
         }
     }
 </style>
+
+<style lang="scss">
+    .unite-grid-view {
+        .view-field.view-field-image {
+            width: 100%;
+            max-width: none;
+            height: auto;
+
+            .uk-inline-clip {
+                width: auto;
+                height: auto;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                margin: 0;
+
+                img {
+                    height: 150px;
+                }
+            }
+        }
+    }
+</style>

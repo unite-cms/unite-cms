@@ -1,0 +1,20 @@
+
+.unite-grid-view {
+  > div > div.uk-card.uk-card-default {
+    background: map-get($colors, white);
+    border-radius: 3px;
+    text-align: center;
+    min-height: 150px;
+
+    .view-field-actions {
+      position: absolute;
+      right: 0;
+      top: 0;
+
+      .uk-button.uk-button-default {
+        box-shadow: none;
+        border: none;
+      }
+    }
+  }
+}
