@@ -30,13 +30,16 @@ services:
     arguments: ['@router.default']
     public: true
 
-
-  # Parses and serializes a domain object. This service is used to create a domain object from the JSON definition.
-  unite.cms.domain_definition_parser:
-    class: UniteCMS\CoreBundle\Service\DomainDefinitionParser
-    arguments: ['@jms_serializer', '@validator']
+  # Parses domain configuration from and dumps domain objects to the filesystem.
+  unite.cms.domain_config_manager:
+    class: UniteCMS\CoreBundle\Service\DomainConfigManager
+    autowire: true
     public: true
+    arguments:
+      ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem']
 
+  # In order to autowire DomainConfigManager, we need to alis the full class path
+  UniteCMS\CoreBundle\Service\DomainConfigManager: "@unite.cms.domain_config_manager"
 
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
   unite.cms.fieldable_form_builder:
@@ -60,6 +63,12 @@ services:
   unite.cms.webhook_manager:
     class: UniteCMS\CoreBundle\Service\WebHookManager
     arguments: ['@service_container', '@logger']
+    public: false
+
+  # Parses and serializes a domain object. If you want to dump or read domain config, please use unite.cms.domain_config_manager.
+  unite.cms.domain_definition_parser:
+    class: UniteCMS\CoreBundle\Service\DomainDefinitionParser
+    arguments: ['@jms_serializer', '@validator']
     public: false
 
   # Provide LinkType as a service, pass translator as an argument, auto wire not working in forms

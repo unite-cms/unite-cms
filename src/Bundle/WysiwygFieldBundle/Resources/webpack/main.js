@@ -6,4 +6,6 @@ import Wysiwyg from "./vue/field/Wysiwyg.vue";
 // Use VueCustomElement
 Vue.use(vueCustomElement);
 
-Vue.customElement('unite-cms-wysiwyg-field', Wysiwyg);
+if(!customElements.get('unite-cms-wysiwyg-field')) {
+    Vue.customElement('unite-cms-wysiwyg-field', Wysiwyg);
+}

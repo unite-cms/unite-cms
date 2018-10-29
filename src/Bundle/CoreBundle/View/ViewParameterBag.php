@@ -10,6 +10,16 @@ use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 class ViewParameterBag implements \JsonSerializable
 {
     /**
+     * @var string
+     */
+    private $title = '';
+
+    /**
+     * @var string
+     */
+    private $subTitle = '';
+
+    /**
      * @var array
      */
     private $settings = array();
@@ -64,8 +74,9 @@ class ViewParameterBag implements \JsonSerializable
      */
     private $deleteDefinitelyUrlPattern = '';
 
-    public function __construct($settings = [])
+    public function __construct($title = '', $settings = [])
     {
+        $this->title = $title;
         $this->settings = $settings;
     }
 
@@ -75,7 +86,11 @@ class ViewParameterBag implements \JsonSerializable
         string $select_mode = ViewTypeInterface::SELECT_MODE_NONE,
         $settings = []
     ) {
-        $bag = new ViewParameterBag($settings);
+        $bag = new ViewParameterBag($view->getContentType()->getTitle(), $settings);
+
+        if($view->getContentType()->getViews()->first() !== $view) {
+            $bag->setSubTitle($view->getTitle());
+        }
 
         $urlParameter = [
             'domain' => $view->getContentType()->getDomain()->getIdentifier(),
@@ -104,6 +119,38 @@ class ViewParameterBag implements \JsonSerializable
         $bag->setSelectMode($select_mode);
 
         return $bag;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param string $title
+     */
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSubTitle(): string
+    {
+        return $this->subTitle;
+    }
+
+    /**
+     * @param string $subTitle
+     */
+    public function setSubTitle(string $subTitle): void
+    {
+        $this->subTitle = $subTitle;
     }
 
     /**
@@ -396,6 +443,8 @@ class ViewParameterBag implements \JsonSerializable
     function jsonSerialize()
     {
         return [
+            'title' => $this->getTitle(),
+            'subTitle' => $this->getSubTitle(),
             'urls' => [
                 'api' => $this->getApiEndpointPattern(),
                 'create' => $this->getCreateUrlPattern(),

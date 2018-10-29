@@ -13,6 +13,7 @@ use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\StorageBundle\Form\StorageFileType;
@@ -181,6 +182,15 @@ class FileFieldType extends FieldType
                 $context->buildViolation('storage.absolute_url')->atPath('bucket.endpoint')->addViolation();
             }
         }
+
+        // validate for trailing slash
+        if($context->getViolations()->count() == 0) {
+            // if this does not match, there is a trainling slash
+            if (rtrim($settings->bucket['endpoint'], '/\\') != $settings->bucket['endpoint'])
+            {
+                $context->buildViolation('storage.no_trailing_slash')->atPath('bucket.endpoint')->addViolation();
+            }
+        }
     }
 
     /**
@@ -228,5 +238,16 @@ class FileFieldType extends FieldType
             $file = $data[$field->getIdentifier()];
             $this->storageService->deleteObject($file['id'], $file['name'], $field->getSettings()->bucket);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+        $settings['assets'] = [
+            ['js' => 'main.js', 'package' => 'UniteCMSStorageBundle'],
+            ['css' => 'main.css', 'package' => 'UniteCMSStorageBundle'],
+        ];
     }
 }

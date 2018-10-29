@@ -1,200 +1,152 @@
-
+.unite-div-table,
 .unite-card-table {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   margin: -31px -30px 0 -30px;
-  border-top: 30px solid map-get($colors, white);
+  border-top: 10px solid map-get($colors, white);
 
-  .unite-card-table-tabs {
+  table > thead,
+  .unite-div-table-thead {
     background: map-get($colors, white);
-    margin-bottom: 0;
-    padding: 0 0 30px 30px;
 
-    li {
-      a {
-        font-size: 0.75rem;
-        border: 2px solid transparent;
-        color: map-get($colors, grey-dark);
-        border-radius: 3px;
-
-        &:hover {
-          color: map-get($colors, grey-very-dark);
-        }
+    > * > * {
+      vertical-align: bottom;
+      font-size: $table-header-cell-font-size;
+      font-weight: $table-header-cell-font-weight;
+      color: $table-header-cell-color;
+      @if (mixin-exists(hook-table-header-cell)) {
+        @include hook-table-header-cell();
       }
 
-      &.uk-active {
-        a {
-          border-color: map-get($colors, grey-very-dark);
-          color: map-get($colors, grey-very-dark);
+      a, span {
+        display: inline-block;
+        text-decoration: none;
+        color: $table-header-cell-color;
+        white-space: nowrap;
+
+        > span {
+          line-height: 0;
+          font-size: 0;
+          vertical-align: middle;
+          display: inline-block;
+          margin-top: -4px;
         }
       }
     }
 
-    &:before {
-      display: none;
-    }
-
-    + .uk-table {
-      margin-top: 0;
+    tr:hover {
+      background: none;
     }
   }
 
-  table, .unite-card-div-table {
-    thead, .unite-card-div-table-thead {
-      background: map-get($colors, white);
-      > * {
-        > * {
-          padding: 16px 12px;
-          font-size: 0.75rem;
-          color: map-get($colors, grey-dark);
-          text-transform: uppercase;
+  table > tbody,
+  .unite-div-table-tbody {
+    margin-bottom: 20px;
 
-          &:first-child {
-            padding-left: 30px;
-          }
+    > * {
+      &:hover {
+        background: $table-hover-row-background;
 
-          &:last-child {
-            padding-right: 30px;
-          }
+        .uk-button:not(.uk-button-text):not(.uk-button-link) {
+          background: map-get($colors, white);
+          border-color: map-get($colors, grey-medium);
+          box-shadow: none;
+          opacity: 1;
 
-          a {
-            color: map-get($colors, grey-dark);
+          &:hover, &.uk-open {
+            @extend .uk-box-shadow-medium;
+            border-color: map-get($colors, grey-dark);
           }
         }
-
       }
-    }
 
-    tbody, .unite-card-div-table-tbody {
-      > * {
-
-        border-top: $table-divider-border-width solid $table-divider-border;
-
-        > * {
-          padding: 16px 12px;
-
-          &:first-child {
-            padding-left: 30px;
-          }
-
-          &:last-child {
-            padding-right: 30px;
-          }
-
-          &.actions {
-            padding: 0;
-            vertical-align: middle;
-          }
-
-          &.select {
-            width: 30px;
-
-            button {
-              background: none;
-              border: none;
-              color: map-get($colors, grey-dark);
-              padding: 0;
-              cursor: pointer;
-
-              &:hover {
-                color: map-get($colors, grey-very-dark);
-              }
-            }
-          }
-
-          .uk-button.actions-dropdown {
-            box-shadow: none;
-            border: 1px solid transparent;
-            padding: 0 20px;
-            color: map-get($colors, grey-dark);
-          }
-        }
-
-        &:last-child {
-          border-bottom: $table-divider-border-width solid $table-divider-border;
-        }
+      &:nth-child(2n - 1) {
+        background: $global-muted-background;
 
         &:hover {
           background: $table-hover-row-background;
-
-          > * {
-            .uk-button.actions-dropdown {
-              background: map-get($colors, white);
-              box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-              border-color: map-get($colors, grey-medium);
-              color: map-get($colors, grey-very-dark);
-            }
-          }
-        }
-
-        &:nth-child(2n) {
-          background: map-get($colors, white);
-
-          &:hover {
-            background: $table-hover-row-background;
-          }
         }
       }
     }
   }
 }
 
-.unite-card-div-table {
-  display: table;
-}
+// unite-div-table-row can also be used outside of .unite-div-table (e.g. ghost object while sorting)
+.unite-card-table tr,
+.unite-div-table-row {
+  border-bottom: $table-divider-border-width solid $table-divider-border;
+  background: $form-background;
 
-.unite-card-div-table-thead {
-  display: table-header-group;
-}
-.unite-card-div-table-tbody {
-  display: table-row-group;
-}
-
-.unite-card-div-table-thead > *,
-.unite-card-div-table-tbody > *,
-.table-div-ghost-row {
-  display: table-row;
-
-  > * {
-    display: table-cell;
-  }
-}
-
-.table-div-ghost-row {
-  display: table;
-  position: absolute !important;
-  z-index: $sortable-dragged-z-index !important;
-  pointer-events: none;
-  background: map-get($colors, white);
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-  border-color: map-get($colors, grey-medium);
-  opacity: 0.8;
-
-  > * {
+  > td,
+  > th,
+  > div {
     padding: 16px 12px;
 
-    &:first-child {
-      padding-left: 30px;
+    p {
+      margin: 0;
     }
+  }
 
-    &:last-child {
-      padding-right: 30px;
+  > td:first-child,
+  > th:first-child,
+  > div:first-child {
+    padding-left: 30px;
+  }
+
+  > td:last-child,
+  > th:last-child,
+  > div:last-child {
+    padding-right: 30px;
+  }
+
+  &.uk-sortable-drag {
+    background: $form-background;
+    border: none;
+    @extend .uk-box-shadow-medium;
+  }
+
+  .uk-button:not(.uk-button-text):not(.uk-button-link) {
+
+    opacity: 0.25;
+    transition: all 0.2s ease-out;
+    box-shadow: none;
+    border-color: transparent;
+    color: map-get($colors, grey-very-dark);
+
+    &:hover, &.uk-open {
+      background: $form-background;
+      opacity: 1;
+      @extend .uk-box-shadow-medium;
+      border-color: map-get($colors, grey-dark);
     }
+  }
+}
 
-    &.actions {
-      padding: 0;
-      vertical-align: middle;
+.unite-table-error {
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  display: block;
+  margin: -30px;
+}
 
-      > * {
-        display: none;
-      }
-    }
+@media (min-width: $breakpoint-small) {
+  .unite-table-error {
+    display: flex;
+    margin-bottom: -15px;
+    text-align: left;
+    border-bottom: $table-divider-border-width solid $table-divider-border;
   }
 }
 
 @media (min-width: $breakpoint-large) {
+  .unite-div-table,
   .unite-card-table {
     margin: -41px -40px 0 -40px;
-    border-top-width: 40px;
+  }
+
+  .unite-table-error {
+    margin: -40px -40px 40px;
+    padding: 15px 30px;
   }
 }

@@ -3,7 +3,6 @@
 namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use Symfony\Component\Routing\Generator\UrlGenerator;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
 use UniteCMS\CoreBundle\Entity\View;

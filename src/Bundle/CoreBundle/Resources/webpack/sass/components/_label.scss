@@ -5,6 +5,7 @@
   font-size: 0.8rem;
   line-height: 1.3;
   text-align: center;
+  background-color: map-get($colors, grey-dark);
 
   &.uk-label-disabled {
     background-color: #bfbfbf;

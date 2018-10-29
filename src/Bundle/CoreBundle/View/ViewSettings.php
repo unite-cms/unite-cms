@@ -16,4 +16,10 @@ class ViewSettings
             $this->$key = $value;
         }
     }
+
+    public function processableConfig($root = 'settings') {
+        return [
+            $root => (array)$this,
+        ];
+    }
 }

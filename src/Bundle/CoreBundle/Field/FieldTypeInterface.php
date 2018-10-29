@@ -105,4 +105,20 @@ interface FieldTypeInterface
      * @param ExecutionContextInterface $context
      */
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context);
+
+    /**
+     * Allows the field to alter defined settings. The field can always overrule configured settings.
+     * Allowed keys are: label, type, settings, assets.
+     *
+     * Assets can be defined as:
+     * [ 'css' => 'main.css', 'package' => 'UniteCMSStorageBundle' ]
+     * [ 'js' => 'main.js', 'package' => 'UniteCMSStorageBundle' ]
+     * [ 'css' => 'https://example.com/main.css' ]
+     * [ 'js' => 'https://example.com/main.js' ]
+     *
+     * @param array $settings
+     * @param FieldableField $field
+     * @param FieldTypeManager $fieldTypeManager
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null);
 }

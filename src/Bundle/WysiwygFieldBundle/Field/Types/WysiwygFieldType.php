@@ -6,6 +6,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\WysiwygFieldBundle\Form\WysiwygType;
 
 class WysiwygFieldType extends FieldType
@@ -173,5 +174,17 @@ class WysiwygFieldType extends FieldType
                 }
             }
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+        $settings['type'] = 'textarea';
+        $settings['assets'] = [
+            [ 'js' => 'main.js', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+            [ 'css' => 'main.css', 'package' => 'UniteCMSWysiwygFieldBundle' ],
+        ];
     }
 }

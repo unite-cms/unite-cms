@@ -492,7 +492,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         static::$container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, $firewall, []));
 
-        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request);
+        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request, static::$container->get('logger'));
         return json_decode($response->getContent());
     }
 
@@ -1577,7 +1577,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertCount(1, $response->data->findLang->result);
 
         // Total gets the total number of all items.
-        $this->assertEquals(2, $response->data->findLang->total);
+        $this->assertEquals(1, $response->data->findLang->total);
 
         // Find content should only return one content (de)
         $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
@@ -1589,6 +1589,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }
         }', [], false, 'main');
         $this->assertCount(1, $response->data->findLang->result);
-        $this->assertEquals(2, $response->data->findLang->total);
+        $this->assertEquals(1, $response->data->findLang->total);
     }
 }

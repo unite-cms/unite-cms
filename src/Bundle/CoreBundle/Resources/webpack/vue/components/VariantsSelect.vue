@@ -36,7 +36,6 @@
         mounted() {
             this.$el.querySelectorAll('*[name="'+this.input+'"]').forEach((input) => {
                 input.addEventListener('change', (event) => {
-                    console.log(event.srcElement);
                     if(event.srcElement.checked) {
                         this.variant = event.srcElement.value;
                     }

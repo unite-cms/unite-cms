@@ -5,11 +5,11 @@
   "devDependencies": {
     "@symfony/webpack-encore": "^0.20.1",
     "feather-icons": "^4.7.3",
-    "node-sass": "^4.9.3",
+    "node-sass": "^4.9.4",
     "npm": "^6.4.1",
     "sass-loader": "^7.1.0",
     "vue": "^2.5.17",
-    "vue-custom-element": "^3.2.5",
+    "vue-custom-element": "^3.2.6",
     "vue-loader": "^15.4.2",
     "vue-template-compiler": "^2.5.17"
   },

@@ -227,10 +227,26 @@
     }
 
     header {
-      > button:not(uk-toggle).uk-button svg.feather {
-        position: relative;
-        margin-top: auto;
-        margin-right: -24px !important;
+
+      > button.uk-toggle {
+
+      }
+
+      > button:not(uk-toggle).uk-button:not(.uk-button-link) {
+        box-shadow: none;
+        opacity: 0.5;
+
+        svg.feather {
+          position: relative;
+          margin-top: auto;
+          margin-right: -24px !important;
+          width: 16px;
+          height: 16px;
+        }
+
+        &.uk-open {
+          opacity: 1;
+        }
       }
     }
 

@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\SkipWhenEmpty;
 use JMS\Serializer\Annotation\Type;
 
 use Symfony\Component\Validator\Constraints as Assert;
@@ -48,10 +49,10 @@ class DomainMemberTypeField implements FieldableField
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
-     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Length(max="200", maxMessage="too_long")
      * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\DomainMemberTypeField::RESERVED_IDENTIFIERS")
-     * @ORM\Column(name="identifier", type="string", length=255)
+     * @ORM\Column(name="identifier", type="string", length=200)
      * @Expose
      */
     private $identifier;
@@ -74,6 +75,7 @@ class DomainMemberTypeField implements FieldableField
      * @Assert\NotNull(message="not_null")
      * @Type("UniteCMS\CoreBundle\Field\FieldableFieldSettings")
      * @Expose
+     * @SkipWhenEmpty
      */
     private $settings;
 

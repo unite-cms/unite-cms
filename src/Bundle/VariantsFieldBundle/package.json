@@ -1,0 +1,17 @@
+{
+  "name": "UniteCMSVariantsFieldBundle",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@symfony/webpack-encore": "^0.20.1",
+    "node-sass": "^4.9.3",
+    "npm": "^6.4.1",
+    "sass-loader": "^7.1.0",
+    "vue": "^2.5.17",
+    "vue-loader": "^15.4.2",
+    "vue-template-compiler": "^2.5.17"
+  },
+  "scripts": {
+    "dev": "./node_modules/.bin/encore dev --watch",
+    "build": "./node_modules/.bin/encore production"
+  }
+}

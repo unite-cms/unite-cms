@@ -142,4 +142,12 @@ abstract class FieldType implements FieldTypeInterface
      * {@inheritdoc}
      */
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        $settings['type'] = self::getType();
+        $settings['label'] = $settings['label'] ?? ($field ? $field->getTitle() : null);
+    }
 }

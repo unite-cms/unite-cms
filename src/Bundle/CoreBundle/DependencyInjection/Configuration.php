@@ -19,11 +19,13 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('unite_cms_core');
-
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
-
+        $rootNode
+            ->children()
+                ->scalarNode('domain_config_dir')
+                    ->defaultValue('%kernel.project_dir%/config/unite/')
+                    ->info('The location to store domain configurations. Content in this directory can get deleted, when you create or update an organization or domain!')
+                ->end()
+            ->end();
         return $treeBuilder;
     }
 }
