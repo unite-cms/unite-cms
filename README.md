@@ -8,6 +8,8 @@ unite cms is a decoupled content management system that allows you to manage all
 
 ![unite CMS admin UI](https://minio.apps.unitecms.io/github/poster.png)
 
+### ROADMAP 1.0
+https://github.com/unite-cms/unite-cms/issues/351
 
 ### Demo
 
