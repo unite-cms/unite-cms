@@ -160,7 +160,10 @@ class SettingTypeTranslationsFactory implements SchemaTypeFactoryInterface
                     ],
                     $fields
                 ),
-                'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use ($settingType) {
+                'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use (
+                    $settingType,
+                    $fieldTypes
+                ) {
                     if (!empty($value) && $value instanceof Setting) {
                         switch ($info->fieldName) {
                             case 'type':
