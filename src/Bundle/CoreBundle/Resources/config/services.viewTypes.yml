@@ -1,13 +1,21 @@
 # Contains all core view types
 services:
 
-  # A simple table view type that renders all content documents as table rows.
+  # A table view type that renders all content documents as table rows.
   UniteCMS\CoreBundle\View\Types\TableViewType:
     tags: [unite_cms.view_type]
     public: false
     arguments:
       ['@unite.cms.field_type_manager']
 
+  # A grid view type that renders all content documents in a 2d grid.
+  UniteCMS\CoreBundle\View\Types\GridViewType:
+    tags: [unite_cms.view_type]
+    public: false
+    arguments:
+      ['@unite.cms.field_type_manager']
+
+  # @deprecated
   # A table view type that allows the user to sort rows via drag and drop.
   UniteCMS\CoreBundle\View\Types\SortableViewType:
     tags: [unite_cms.view_type]

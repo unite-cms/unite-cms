@@ -8,7 +8,9 @@
 
 namespace UniteCMS\CoreBundle\View\Types;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Builder\VariableNodeDefinition;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use UniteCMS\CoreBundle\Entity\ContentType;
@@ -27,12 +29,12 @@ class TableViewConfiguration implements ConfigurationInterface
     /**
      * @var Fieldable $fieldable
      */
-    private $fieldable;
+    protected $fieldable;
 
     /**
      * @var FieldTypeManager $fieldTypeManager
      */
-    private $fieldTypeManager;
+    protected $fieldTypeManager;
 
     public function __construct(Fieldable $fieldable, FieldTypeManager $fieldTypeManager)
     {
@@ -47,6 +49,132 @@ class TableViewConfiguration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
+        $treeBuilder = new TreeBuilder();
+        $treeBuilder->root('settings')
+
+            // Handle deprecated options
+            ->beforeNormalization()->always(\Closure::fromCallable([$this, 'normalizeConfig']))->end()
+            ->children()
+                ->append($this->appendFieldsNode())
+                ->append($this->appendFilterNode())
+                ->append($this->appendSortNode())
+                ->variableNode('sort_field')->setDeprecated()->end()
+                ->variableNode('sort_asc')->setDeprecated()->end()
+                ->variableNode('columns')->setDeprecated()->end()
+            ->end();
+
+        return $treeBuilder;
+    }
+
+    protected function appendFieldsNode() : ArrayNodeDefinition {
+        $treeBuilder = new TreeBuilder();
+        return $treeBuilder->root('fields')
+            ->beforeNormalization()
+                ->ifArray()->then(\Closure::fromCallable([$this, 'normalizeFields']))
+            ->end()
+            ->useAttributeAsKey('field')
+            ->arrayPrototype()
+                ->children()
+                    ->scalarNode('type')->isRequired()->end()
+                    ->scalarNode('label')->isRequired()->end()
+                    ->variableNode('settings')->end()
+                    ->variableNode('assets')->end()
+                ->end()
+            ->end();
+    }
+    protected function appendFilterNode() : VariableNodeDefinition {
+        $treeBuilder = new TreeBuilder();
+        return $treeBuilder->root('filter', 'variable')
+            ->validate()
+                ->always(
+                    function ($v) {
+
+                        $exception = new InvalidConfigurationException('Invalid filter configuration');
+                        $exception->setPath('filter');
+
+                        if (!is_array($v)) {
+                            throw $exception;
+                        }
+
+                        if (!empty(array_diff(array_keys($v), ['AND', 'OR', 'field', 'value', 'operator']))) {
+                            throw $exception;
+                        }
+
+                        try {
+                            $filter_structure = new GraphQLDoctrineFilterQueryBuilder($v, [], 'c');
+                        } catch (\Exception $e) {
+                            throw $exception;
+                        }
+
+                        if (!$filter_structure->getFilter()) {
+                            throw $exception;
+                        }
+
+                        return $v;
+                    }
+                )
+            ->end();
+    }
+    protected function appendSortNode() : ArrayNodeDefinition {
+        $treeBuilder = new TreeBuilder();
+        return $treeBuilder->root('sort')
+            ->children()
+                ->scalarNode('field')->isRequired()->end()
+                ->booleanNode('asc')->treatNullLike(false)->end()
+                ->booleanNode('sortable')->end()
+            ->end();
+    }
+
+    protected function normalizeConfig(array $v) : array {
+        if (isset($v['sort_field']) || isset($v['sort_asc'])) {
+            $v['sort'] = [
+                'field' => $v['sort_field'] ?? null,
+                'asc' => $v['sort_asc'] ?? null,
+            ];
+        }
+
+        if (isset($v['columns'])) {
+            if (is_array($v['columns'])) {
+                $v['fields'] = array_map(
+                    function ($v) {
+                        return is_string($v) ? ['label' => $v] : $v;
+                    },
+                    $v['columns']
+                );
+            } else {
+                $v['fields'] = $v['columns'];
+            }
+        }
+
+        // Add default fields.
+        if (empty($v['fields'])) {
+            $v['fields'] = $this->addDefaultFields($v);
+        }
+
+        // Add default sort field.
+        if (empty($v['sort'])) {
+            $v['sort'] = [
+                'field' => 'updated',
+                'asc' => false,
+            ];
+        }
+
+        else {
+            if(!empty($v['sort']['sortable'])) {
+                $v['sort']['asc'] = true;
+            }
+        }
+
+        // Make sure that filter and sortable are not set both
+        if(!empty($v['filter']) && !empty($v['sort']['sortable'])) {
+            throw new InvalidConfigurationException('A sortable view cannot have filters set');
+        }
+
+        return $v;
+    }
+
+    protected function addDefaultFields($v) : array {
+
         $defaultTextField = $this->fieldable->getFields()
             ->filter(
                 function (FieldableField $field) {
@@ -58,128 +186,11 @@ class TableViewConfiguration implements ConfigurationInterface
                 }
             )->first();
 
-        $treeBuilder = new TreeBuilder();
-        $treeBuilder->root('settings')
-            // Handle deprecated options
-            ->beforeNormalization()
-                ->always(
-                function ($v) use ($defaultTextField) {
-
-                    if (isset($v['sort_field']) || isset($v['sort_asc'])) {
-                        $v['sort'] = [
-                            'field' => $v['sort_field'] ?? null,
-                            'asc' => $v['sort_asc'] ?? null,
-                        ];
-                    }
-
-                    if (isset($v['columns'])) {
-                        if (is_array($v['columns'])) {
-                            $v['fields'] = array_map(
-                                function ($v) {
-                                    return is_string($v) ? ['label' => $v] : $v;
-                                },
-                                $v['columns']
-                            );
-                        } else {
-                            $v['fields'] = $v['columns'];
-                        }
-                    }
-
-                    // Add default fields.
-                    if (empty($v['fields'])) {
-                        $v['fields'] = ['id', $defaultTextField, 'created', 'updated'];
-                        if (!empty($v['sort']['field'])) {
-                            array_unshift($v['fields'], $v['sort']['field']);
-                        }
-                        $v['fields'] = array_filter(array_unique($v['fields'], SORT_REGULAR));
-                    }
-
-                    // Add default sort field.
-                    if (empty($v['sort'])) {
-                        $v['sort'] = [
-                            'field' => 'updated',
-                            'asc' => false,
-                        ];
-                    }
-
-                    else {
-                        if(!empty($v['sort']['sortable'])) {
-                            $v['sort']['asc'] = true;
-                        }
-                    }
-
-                    // Make sure that filter and sortable are not set both
-                    if(!empty($v['filter']) && !empty($v['sort']['sortable'])) {
-                        throw new InvalidConfigurationException('A sortable view cannot have filters set');
-                    }
-
-                    return $v;
-                }
-            )
-            ->end()
-            ->children()
-                ->arrayNode('fields')
-
-                ->beforeNormalization()
-                    ->ifArray()->then(function($v){ return $this->normalizeFields($v); })
-                ->end()
-
-                ->useAttributeAsKey('field')
-                ->arrayPrototype()
-                    ->children()
-                        ->scalarNode('type')->isRequired()->end()
-                        ->scalarNode('label')->isRequired()->end()
-                        ->variableNode('settings')->end()
-                        ->variableNode('assets')->end()
-                    ->end()
-                ->end()
-            ->end()
-
-            ->variableNode('filter')
-                ->validate()
-                    ->always(
-                        function ($v) {
-
-                            $exception = new InvalidConfigurationException('Invalid filter configuration');
-                            $exception->setPath('filter');
-
-                            if (!is_array($v)) {
-                                throw $exception;
-                            }
-
-                            if (!empty(array_diff(array_keys($v), ['AND', 'OR', 'field', 'value', 'operator']))) {
-                                throw $exception;
-                            }
-
-                            try {
-                                $filter_structure = new GraphQLDoctrineFilterQueryBuilder($v, [], 'c');
-                            } catch (\Exception $e) {
-                                throw $exception;
-                            }
-
-                            if (!$filter_structure->getFilter()) {
-                                throw $exception;
-                            }
-
-                            return $v;
-                        }
-                    )
-                ->end()
-            ->end()
-            ->arrayNode('sort')
-                ->children()
-                    ->scalarNode('field')->isRequired()->end()
-                    ->booleanNode('asc')->treatNullLike(false)->end()
-                    ->booleanNode('sortable')->end()
-                ->end()
-            ->end()
-
-            ->variableNode('sort_field')->setDeprecated()->end()
-            ->variableNode('sort_asc')->setDeprecated()->end()
-            ->variableNode('columns')->setDeprecated()->end()
-        ->end();
-
-        return $treeBuilder;
+        $v['fields'] = ['id', $defaultTextField, 'created', 'updated'];
+        if (!empty($v['sort']['field'])) {
+            array_unshift($v['fields'], $v['sort']['field']);
+        }
+        return array_filter(array_unique($v['fields'], SORT_REGULAR));
     }
 
     protected function normalizeFields(array $fields) : array {
