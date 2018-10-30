@@ -13,26 +13,15 @@ services:
         tags: [unite_cms.graphql.schema_type_factory]
         arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.entity_manager']
 
-    unite.cms.graphql.content_type_translations_factory:
-        class: UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeTranslationsFactory
-        tags: [unite_cms.graphql.schema_type_factory]
-        arguments: ['@doctrine.orm.entity_manager', '@security.authorization_checker', '@unite.cms.field_type_manager']
-
     unite.cms.graphql.setting_type_factory:
         class: UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory
         tags: [unite_cms.graphql.schema_type_factory]
         arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.default_entity_manager']
 
-    unite.cms.graphql.setting_type_translations_factory:
-        class: UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeTranslationsFactory
-        tags: [unite_cms.graphql.schema_type_factory]
-        arguments: ['@doctrine.orm.entity_manager', '@security.authorization_checker', '@unite.cms.field_type_manager']
-
     unite.cms.graphql.content_result_type_factory:
         class: UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory
         tags: [unite_cms.graphql.schema_type_factory]
         arguments: [ '@security.authorization_checker']
-
 
     # Query Type implementations, that get registered in the schema_type_manager.
     UniteCMS\CoreBundle\SchemaType\Types\QueryType:

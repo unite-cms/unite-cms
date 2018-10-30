@@ -6,7 +6,6 @@ use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -177,15 +176,20 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                         case 'locale':
                             return $value->getLocale();
                         case 'translations':
+
                             $translations = [];
-                            $languagesToUse = !empty($args['locales']) ? $args['locales'] : [];
+                            $includeLocales = $args['locales'] ?? $value->getSettingType()->getLocales();
+                            $includeLocales = is_string($includeLocales) ? [$includeLocales] : $includeLocales;
+                            $includeLocales = array_diff($includeLocales, [$value->getLocale()]);
+
                             foreach ($value->getSettingType()->getLocales() as $locale) {
-                                if ($locale !== $value->getLocale() && in_array($locale, $languagesToUse)) {
+                                if(in_array($locale, $includeLocales)) {
                                     $translations[] = $value->getSettingType()->getSetting($locale);
                                 }
                             }
 
                             return $translations;
+
                         default:
 
                             if (!array_key_exists($info->fieldName, $fieldTypes)) {

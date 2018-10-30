@@ -176,12 +176,9 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             'translations' => [
                                 'type' => Type::listOf(
                                     $schemaTypeManager->getSchemaType(
-                                        IdentifierNormalizer::graphQLType(
-                                            $identifier,
-                                            'ContentTranslations'
-                                        ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
+                                        IdentifierNormalizer::graphQLType($identifier, 'Content') .'Level' .  ($nestingLevel + 1),
                                         $domain,
-                                        $nestingLevel
+                                        $nestingLevel + 1
                                     )
                                 ),
                                 'args' => [
@@ -227,25 +224,26 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             case 'translations':
 
                                 $translations = [];
-
-                                $languagesToUse = !empty($args['locales']) ? $args['locales'] : [];
+                                $includeLocales = $args['locales'] ?? $value->getContentType()->getLocales();
+                                $includeLocales = is_string($includeLocales) ? [$includeLocales] : $includeLocales;
+                                $includeLocales = array_diff($includeLocales, [$value->getLocale()]);
 
                                 // Case 1: This is the base translation
-                                if (empty($value->getTranslationOf())) {
-                                    foreach ($value->getTranslations() as $translation) {
-                                        if (in_array($translation->getLocale(), $languagesToUse)) {
-                                            $translations[] = $translation;
+                                if(empty($value->getTranslationOf())) {
+                                    foreach($value->getTranslations() as $translation) {
+                                        if(in_array($translation->getLocale(), $includeLocales)) {
+                                            $translations[$translation->getLocale()] = $translation;
                                         }
                                     }
-                                } // Case 2: This is a translation of a base translation
+                                }
+                                // Case 2: This is a translation of a base translation
                                 else {
-                                    if (in_array($value->getTranslationOf()->getLocale(), $languagesToUse)) {
-                                        $translations[] = $value->getTranslationOf();
+                                    if(in_array($value->getTranslationOf()->getLocale(), $includeLocales)) {
+                                        $translations[$value->getTranslationOf()->getLocale()] = $value->getTranslationOf();
                                     }
-
-                                    foreach ($value->getTranslationOf()->getTranslations() as $translation) {
-                                        if (in_array($translation->getLocale(), $languagesToUse)) {
-                                            $translations[] = $translation;
+                                    foreach($value->getTranslationOf()->getTranslations() as $translation) {
+                                        if(in_array($translation->getLocale(), $includeLocales)) {
+                                            $translations[$translation->getLocale()] = $translation;
                                         }
                                     }
                                 }
