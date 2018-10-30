@@ -1,8 +1,31 @@
 <template>
     <div class="unite-grid-view uk-grid-medium uk-grid-match uk-flex-center" uk-grid :uk-sortable="isSortable && updateable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
-        <div class="uk-width-1-5@m" :data-id="row.id" :key="row.id" v-for="row in rows">
-            <div class="uk-card uk-card-default uk-flex uk-flex-column uk-flex-center">
-                <component v-for="(field,identifier) in fields" v-if="renderField(field, identifier)"
+        <div class="unite-grid-view-item uk-width-1-3@s uk-width-1-5@l uk-flex uk-flex-column" :data-id="row.id" :key="row.id" v-for="row in rows">
+            <div class="uk-card uk-card-hover uk-card-default">
+                <div class="unite-grid-view-fields uk-flex uk-flex-column uk-flex-center">
+                    <component v-for="(field,identifier) in fields" v-if="renderField(field, identifier, false)"
+                               :key="identifier"
+                               :is="$uniteCMSViewFields.resolve(field.type)"
+                               :type="field.type"
+                               :identifier="identifier"
+                               :label="field.label"
+                               :settings="field.settings"
+                               :sortable="isSortable"
+                               initialMinWidth="0"
+                               :row="row"
+                               :ref="'field_' + identifier"></component>
+                </div>
+                <base-view-row-actions v-if="showActions"
+                                       :row="row"
+                                       :urls="urls"
+                                       identifier="_actions"
+                                       ref="field__actions"
+                                       initialMinWidth="0"
+                                       :refInFor="true"
+                ></base-view-row-actions>
+            </div>
+            <div class="unite-grid-view-meta-fields">
+                <component v-for="(field,identifier) in fields" v-if="renderField(field, identifier, true)"
                            :key="identifier"
                            :is="$uniteCMSViewFields.resolve(field.type)"
                            :type="field.type"
@@ -13,14 +36,6 @@
                            initialMinWidth="0"
                            :row="row"
                            :ref="'field_' + identifier"></component>
-                <base-view-row-actions v-if="showActions"
-                                       :row="row"
-                                       :urls="urls"
-                                       identifier="_actions"
-                                       ref="field__actions"
-                                       initialMinWidth="0"
-                                       :refInFor="true"
-                ></base-view-row-actions>
             </div>
         </div>
     </div>
@@ -91,7 +106,7 @@
                     });
                 }
             },
-            renderField(field, identifier) {
+            renderField(field, identifier, meta = false) {
 
                 if(!this.isSortable && !this.updateable && this.sortConfig.field === field.identifier) {
                     return false;
@@ -101,7 +116,7 @@
                     return false;
                 }
 
-                return true;
+                return !!field.meta === meta;
             }
         },
         components: {

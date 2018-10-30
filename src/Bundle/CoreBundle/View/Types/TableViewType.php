@@ -2,11 +2,10 @@
 
 namespace UniteCMS\CoreBundle\View\Types;
 
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
-use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Exception\DeprecationException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
@@ -23,11 +22,15 @@ class TableViewType extends ViewType
     /**
      * @var FieldTypeManager $fieldTypeManager
      */
-    private $fieldTypeManager;
+    protected $fieldTypeManager;
 
     public function __construct(FieldTypeManager $fieldTypeManager)
     {
         $this->fieldTypeManager = $fieldTypeManager;
+    }
+
+    protected function createConfig(ContentType $contentType) : ConfigurationInterface {
+        return new TableViewConfiguration($contentType, $this->fieldTypeManager);
     }
 
     /**
@@ -36,7 +39,7 @@ class TableViewType extends ViewType
     function getTemplateRenderParameters(View $view, string $selectMode = self::SELECT_MODE_NONE): array
     {
         $processor = new Processor();
-        $settings = $processor->processConfiguration(new TableViewConfiguration($view->getContentType(), $this->fieldTypeManager), $view->getSettings()->processableConfig());
+        $settings = $processor->processConfiguration($this->createConfig($view->getContentType()), $view->getSettings()->processableConfig());
 
         /**
          * @deprecated 1.0 Remove this, once we drop legacy support.
@@ -63,7 +66,7 @@ class TableViewType extends ViewType
 
         $processor = new Processor();
         try {
-            $processor->processConfiguration(new TableViewConfiguration($context->getObject()->getContentType(), $this->fieldTypeManager), $settings->processableConfig());
+            $processor->processConfiguration($this->createConfig($context->getObject()->getContentType()), $settings->processableConfig());
         }
         catch (\Symfony\Component\Config\Definition\Exception\Exception $e) {
             $context->buildViolation($e->getMessage())->addViolation();
