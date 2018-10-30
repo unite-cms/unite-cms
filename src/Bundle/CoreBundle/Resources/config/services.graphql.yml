@@ -11,12 +11,12 @@ services:
     unite.cms.graphql.content_type_factory:
         class: UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory
         tags: [unite_cms.graphql.schema_type_factory]
-        arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.entity_manager']
+        arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.entity_manager', '@security.authorization_checker']
 
     unite.cms.graphql.setting_type_factory:
         class: UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory
         tags: [unite_cms.graphql.schema_type_factory]
-        arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.default_entity_manager']
+        arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.default_entity_manager', '@security.authorization_checker']
 
     unite.cms.graphql.content_result_type_factory:
         class: UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory

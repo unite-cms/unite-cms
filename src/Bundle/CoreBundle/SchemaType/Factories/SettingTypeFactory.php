@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -15,6 +16,7 @@ use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 
 class SettingTypeFactory implements SchemaTypeFactoryInterface
 {
@@ -29,10 +31,16 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
      */
     private $entityManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager, EntityManager $entityManager)
+    /**
+     * @var AuthorizationChecker $authorizationChecker
+     */
+    private $authorizationChecker;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
     {
         $this->fieldTypeManager = $fieldTypeManager;
         $this->entityManager = $entityManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -143,12 +151,9 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                         'translations' => [
                             'type' => Type::listOf(
                                 $schemaTypeManager->getSchemaType(
-                                    IdentifierNormalizer::graphQLType(
-                                        $identifier,
-                                        'SettingTranslations'
-                                    ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
+                                    IdentifierNormalizer::graphQLType($identifier,'Setting').'Level'.($nestingLevel + 1),
                                     $domain,
-                                    $nestingLevel
+                                    $nestingLevel + 1
                                 )
                             ),
                             'args' => [
@@ -185,6 +190,13 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                             foreach ($value->getSettingType()->getLocales() as $locale) {
                                 if(in_array($locale, $includeLocales)) {
                                     $translations[] = $value->getSettingType()->getSetting($locale);
+                                }
+                            }
+
+                            // Remove all translations, we don't have access to.
+                            foreach($translations as $locale => $translation) {
+                                if(!$this->authorizationChecker->isGranted(SettingVoter::VIEW, $translation)) {
+                                    unset($translations[$locale]);
                                 }
                             }
 

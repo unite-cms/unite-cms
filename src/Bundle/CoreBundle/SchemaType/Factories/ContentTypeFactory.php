@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
@@ -16,6 +17,7 @@ use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentTypeFactory implements SchemaTypeFactoryInterface
 {
@@ -30,10 +32,16 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
      */
     private $entityManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager, EntityManager $entityManager)
+    /**
+     * @var AuthorizationChecker $authorizationChecker
+     */
+    private $authorizationChecker;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
     {
         $this->fieldTypeManager = $fieldTypeManager;
         $this->entityManager = $entityManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -176,7 +184,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             'translations' => [
                                 'type' => Type::listOf(
                                     $schemaTypeManager->getSchemaType(
-                                        IdentifierNormalizer::graphQLType($identifier, 'Content') .'Level' .  ($nestingLevel + 1),
+                                        IdentifierNormalizer::graphQLType($identifier, 'Content').'Level'.($nestingLevel + 1),
                                         $domain,
                                         $nestingLevel + 1
                                     )
@@ -245,6 +253,13 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                         if(in_array($translation->getLocale(), $includeLocales)) {
                                             $translations[$translation->getLocale()] = $translation;
                                         }
+                                    }
+                                }
+
+                                // Remove all translations, we don't have access to.
+                                foreach($translations as $locale => $translation) {
+                                    if(!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $translation)) {
+                                        unset($translations[$locale]);
                                     }
                                 }
 
