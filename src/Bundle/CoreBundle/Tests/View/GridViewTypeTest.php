@@ -64,13 +64,10 @@ class GridViewTypeTest extends ContainerAwareTestCase
         $this->assertTrue($parameters->isSelectModeNone());
         $this->assertEquals(
             [
-                'created' => [
-                    'label' => 'Created',
-                    'type' => 'date',
-                ],
                 'updated' => [
                     'label' => 'Updated',
                     'type' => 'date',
+                    'meta' => true,
                 ],
                 'id' => [
                     'label' => 'Id',
