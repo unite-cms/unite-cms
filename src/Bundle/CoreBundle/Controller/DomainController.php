@@ -211,7 +211,10 @@ class DomainController extends Controller
                         if(in_array($a, ['title', 'identifier', 'variables'])) {
                             return -1;
                         }
-                        return +1;
+                        if(in_array($b, ['title', 'identifier', 'variables'])) {
+                            return +1;
+                        }
+                        return 0;
                     });
                     $JSON = json_encode($JSON_ARRAY);
                     $domain->setConfig($JSON);
