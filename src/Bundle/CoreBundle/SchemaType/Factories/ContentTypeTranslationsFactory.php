@@ -10,10 +10,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
 {
@@ -27,10 +26,19 @@ class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
      */
     private $authorizationChecker;
 
-    public function __construct(EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
-    {
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
+
+    public function __construct(
+        EntityManager $entityManager,
+        AuthorizationChecker $authorizationChecker,
+        FieldTypeManager $fieldTypeManager
+    ) {
         $this->entityManager = $entityManager;
         $this->authorizationChecker = $authorizationChecker;
+        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -44,8 +52,8 @@ class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
         $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
 
         // Support for content type.
-        if(count($nameParts) == 3) {
-            if($nameParts[1] == 'Content' && $nameParts[2] == 'Translations') {
+        if (count($nameParts) == 3) {
+            if ($nameParts[1] == 'Content' && $nameParts[2] == 'Translations') {
                 return true;
             }
         }
@@ -61,10 +69,16 @@ class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-    {
-        if(!$domain) {
-            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeTranslationsFactory::createSchemaType needs an domain as second argument');
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        int $nestingLevel,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
+        if (!$domain) {
+            throw new \InvalidArgumentException(
+                'UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeTranslationsFactory::createSchemaType needs an domain as second argument'
+            );
         }
 
         $identifier = IdentifierNormalizer::fromGraphQLSchema($schemaTypeName);
@@ -79,7 +93,7 @@ class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
         }
 
         // Load the full contentType if it is not already loaded.
-        if(!$this->entityManager->contains($contentType)) {
+        if (!$this->entityManager->contains($contentType)) {
             $contentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find(
                 $contentType->getId()
             );
@@ -90,32 +104,102 @@ class ContentTypeTranslationsFactory implements SchemaTypeFactoryInterface
          */
         $fields = [];
 
-        foreach ($contentType->getLocales() as $locale) {
+        /**
+         * @var FieldType[] $fieldTypes
+         */
+        $fieldTypes = [];
 
-            $fields[$locale] = $schemaTypeManager->getSchemaType(
-                IdentifierNormalizer::graphQLType($identifier, 'Content') .'Level' .  ($nestingLevel + 1),
-                $domain,
-                ($nestingLevel + 1)
-            );
+        /**
+         * @var \UniteCMS\CoreBundle\Entity\ContentTypeField $field
+         */
+        foreach ($contentType->getFields() as $field) {
+
+            $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
+
+            try {
+                $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
+
+                $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType(
+                    $field,
+                    $schemaTypeManager,
+                    $nestingLevel + 1
+                );
+
+                // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
+            } catch (AccessDeniedException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+
+                // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
+            } catch (InvalidFieldConfigurationException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+            }
         }
 
         return new ObjectType(
             [
-                'name' => IdentifierNormalizer::graphQLType($identifier, 'ContentTranslations') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
-                'fields' => $fields,
-                'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use ($contentType) {
+                'name' => IdentifierNormalizer::graphQLType(
+                        $identifier,
+                        'ContentTranslations'
+                    ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
+                'args' => [
+                    'locales' => [
+                        'type' => Type::listOf(Type::string()),
+                        'description' => 'List of Locales for Example: all translations ($locales = null), one locale ($locales = ["de"]), or multiple ($locales = ["de", "en"]',
+                        'defaultValue' => null,
+                    ],
+                ],
+                'fields' => array_merge(
+                    [
+                        'id' => Type::id(),
+                        'type' => Type::string(),
+                    ],
+                    empty($contentType->getLocales()) ? [] : [
+                        'locale' => Type::string(),
+                    ],
+                    [
+                        'created' => Type::int(),
+                        'updated' => Type::int(),
+                        'deleted' => Type::int(),
+                    ],
+                    $fields
+                ),
+                'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use (
+                    $contentType,
+                    $fieldTypes
+                ) {
+                    if (!empty($value) && $value instanceof Content) {
 
-                    if(!empty($value[$info->fieldName]) && $value[$info->fieldName] instanceof Content) {
+                        switch ($info->fieldName) {
+                            case 'id':
+                                return $value->getId();
+                            case 'type':
+                                return $value->getContentType()->getIdentifier();
+                            case 'locale':
+                                return $value->getLocale();
+                            case 'created':
+                                return $value->getCreated() ? $value->getCreated()->getTimestamp() : null;
+                            case 'updated':
+                                return $value->getUpdated() ? $value->getUpdated()->getTimestamp() : null;
+                            case 'deleted':
+                                return $value->getDeleted() ? $value->getDeleted()->getTimestamp() : null;
+                            default:
+                                if (!array_key_exists($info->fieldName, $fieldTypes)) {
+                                    return null;
+                                }
 
-                        if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $value[$info->fieldName])) {
-                            throw new ContentTypeAccessDeniedException("You are not allowed to access \"{$info->fieldName}\" translation of \"{$value[$info->fieldName]->getContentType()->getTitle()}\" content.");
+                                $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData(
+                                )[$info->fieldName] : null;
+
+                                return $fieldTypes[$info->fieldName]->resolveGraphQLData(
+                                    $contentType->getFields()->get($info->fieldName),
+                                    $fieldData
+                                );
                         }
-
-                        return $value[$info->fieldName];
                     }
 
                     return null;
                 },
+                'interfaces' => [$schemaTypeManager->getSchemaType('ContentInterface')],
             ]
         );
     }

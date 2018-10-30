@@ -10,10 +10,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 
 class SettingTypeTranslationsFactory implements SchemaTypeFactoryInterface
 {
@@ -27,10 +26,19 @@ class SettingTypeTranslationsFactory implements SchemaTypeFactoryInterface
      */
     private $authorizationChecker;
 
-    public function __construct(EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
-    {
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
+
+    public function __construct(
+        EntityManager $entityManager,
+        AuthorizationChecker $authorizationChecker,
+        FieldTypeManager $fieldTypeManager
+    ) {
         $this->entityManager = $entityManager;
         $this->authorizationChecker = $authorizationChecker;
+        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -44,8 +52,8 @@ class SettingTypeTranslationsFactory implements SchemaTypeFactoryInterface
         $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
 
         // Support for setting type.
-        if(count($nameParts) == 3) {
-            if($nameParts[1] == 'Setting' && $nameParts[2] == 'Translations') {
+        if (count($nameParts) == 3) {
+            if ($nameParts[1] == 'Setting' && $nameParts[2] == 'Translations') {
                 return true;
             }
         }
@@ -61,10 +69,16 @@ class SettingTypeTranslationsFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-    {
-        if(!$domain) {
-            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeTranslationsFactory::createSchemaType needs an domain as second argument');
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        int $nestingLevel,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
+        if (!$domain) {
+            throw new \InvalidArgumentException(
+                'UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeTranslationsFactory::createSchemaType needs an domain as second argument'
+            );
         }
 
         $identifier = IdentifierNormalizer::fromGraphQLSchema($schemaTypeName);
@@ -79,7 +93,7 @@ class SettingTypeTranslationsFactory implements SchemaTypeFactoryInterface
         }
 
         // Load the full settingType if it is not already loaded.
-        if(!$this->entityManager->contains($settingType)) {
+        if (!$this->entityManager->contains($settingType)) {
             $settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->find(
                 $settingType->getId()
             );
@@ -90,32 +104,86 @@ class SettingTypeTranslationsFactory implements SchemaTypeFactoryInterface
          */
         $fields = [];
 
-        foreach ($settingType->getLocales() as $locale) {
+        /**
+         * @var FieldType[] $fieldTypes
+         */
+        $fieldTypes = [];
 
-            $fields[$locale] = $schemaTypeManager->getSchemaType(
-                IdentifierNormalizer::graphQLType($identifier, 'Setting') .'Level' .  ($nestingLevel + 1),
-                $domain,
-                ($nestingLevel + 1)
-            );
+//        foreach ($settingType->getLocales() as $locale) {
+//
+//            $fields[$locale] = $schemaTypeManager->getSchemaType(
+//                IdentifierNormalizer::graphQLType($identifier, 'Setting').'Level'.($nestingLevel + 1),
+//                $domain,
+//                ($nestingLevel + 1)
+//            );
+//        }
+
+
+        /**
+         * @var \UniteCMS\CoreBundle\Entity\SettingTypeField $field
+         */
+        foreach ($settingType->getFields() as $field) {
+
+            $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
+
+            try {
+                $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
+
+                $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType(
+                    $field,
+                    $schemaTypeManager,
+                    $nestingLevel + 1
+                );
+
+                // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
+            } catch (AccessDeniedException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+
+                // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
+            } catch (InvalidFieldConfigurationException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+            }
         }
 
         return new ObjectType(
             [
-                'name' => IdentifierNormalizer::graphQLType($identifier, 'SettingTranslations') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
-                'fields' => $fields,
+                'name' => IdentifierNormalizer::graphQLType(
+                        $identifier,
+                        'SettingTranslations'
+                    ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
+                'fields' => array_merge(
+                    [
+                        'type' => Type::string(),
+                    ],
+                    empty($settingType->getLocales()) ? [] : [
+                        'locale' => Type::string(),
+                    ],
+                    $fields
+                ),
                 'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use ($settingType) {
+                    if (!empty($value) && $value instanceof Setting) {
+                        switch ($info->fieldName) {
+                            case 'type':
+                                return IdentifierNormalizer::graphQLIdentifier($value->getSettingType());
+                            case 'locale':
+                                return $value->getLocale();
+                            default:
+                                if (!array_key_exists($info->fieldName, $fieldTypes)) {
+                                    return null;
+                                }
 
-                    if(!empty($value[$info->fieldName]) && $value[$info->fieldName] instanceof Setting) {
+                                $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData()[$info->fieldName] : null;
 
-                        if (!$this->authorizationChecker->isGranted(SettingVoter::VIEW, $value[$info->fieldName])) {
-                            throw new ContentTypeAccessDeniedException("You are not allowed to access \"{$info->fieldName}\" translation of \"{$value[$info->fieldName]->getSettingType()->getTitle()}\" setting.");
+                                return $fieldTypes[$info->fieldName]->resolveGraphQLData(
+                                    $settingType->getFields()->get($info->fieldName),
+                                    $fieldData
+                                );
                         }
-
-                        return $value[$info->fieldName];
                     }
 
                     return null;
                 },
+                'interfaces' => [$schemaTypeManager->getSchemaType('SettingInterface')],
             ]
         );
     }

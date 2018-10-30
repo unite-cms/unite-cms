@@ -2,8 +2,6 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
-use UniteCMS\CoreBundle\Exception\AccessDeniedException;
-use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
@@ -12,6 +10,8 @@ use GraphQL\Type\Definition\Type;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Exception\AccessDeniedException;
+use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
@@ -47,15 +47,15 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
         $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
 
         // Support for content type.
-        if(count($nameParts) == 2) {
-            if($nameParts[1] == 'Content') {
+        if (count($nameParts) == 2) {
+            if ($nameParts[1] == 'Content') {
                 return true;
             }
         }
 
         // Support for content input type.
-        if(count($nameParts) == 3) {
-            if($nameParts[1] == 'Content' && $nameParts[2] == 'Input') {
+        if (count($nameParts) == 3) {
+            if ($nameParts[1] == 'Content' && $nameParts[2] == 'Input') {
                 return true;
             }
         }
@@ -71,10 +71,16 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-    {
-        if(!$domain) {
-            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument');
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        int $nestingLevel,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
+        if (!$domain) {
+            throw new \InvalidArgumentException(
+                'UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument'
+            );
         }
 
         $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
@@ -91,7 +97,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
         }
 
         // Load the full contentType if it is not already loaded.
-        if(!$this->entityManager->contains($contentType)) {
+        if (!$this->entityManager->contains($contentType)) {
             $contentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find(
                 $contentType->getId()
             );
@@ -132,20 +138,23 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                     );
                 }
 
-            // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
+                // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
             } catch (AccessDeniedException $accessDeniedException) {
                 // TODO: We should log this here and show it to the user somewhere.
 
-            // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
+                // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
             } catch (InvalidFieldConfigurationException $accessDeniedException) {
                 // TODO: We should log this here and show it to the user somewhere.
             }
         }
 
-        if($isInputType) {
+        if ($isInputType) {
             return new InputObjectType(
                 [
-                    'name' => IdentifierNormalizer::graphQLType($identifier, 'ContentInput') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                    'name' => IdentifierNormalizer::graphQLType(
+                            $identifier,
+                            'ContentInput'
+                        ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                     'fields' => $fields,
                 ]
             );
@@ -153,7 +162,10 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
             return new ObjectType(
                 [
-                    'name' => IdentifierNormalizer::graphQLType($identifier, 'Content') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                    'name' => IdentifierNormalizer::graphQLType(
+                            $identifier,
+                            'Content'
+                        ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                     'fields' => array_merge(
                         [
                             'id' => Type::id(),
@@ -161,7 +173,25 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                         ],
                         empty($contentType->getLocales()) ? [] : [
                             'locale' => Type::string(),
-                            'translations' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($identifier, 'ContentTranslations') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''), $domain, $nestingLevel)
+                            'translations' => [
+                                'type' => Type::listOf(
+                                    $schemaTypeManager->getSchemaType(
+                                        IdentifierNormalizer::graphQLType(
+                                            $identifier,
+                                            'ContentTranslations'
+                                        ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
+                                        $domain,
+                                        $nestingLevel
+                                    )
+                                ),
+                                'args' => [
+                                    'locales' => [
+                                        'type' => Type::listOf(Type::string()),
+                                        'description' => 'List of Locales for Example: all translations ($locales = null), one locale ($locales = ["de"]), or multiple ($locales = ["de", "en"]',
+                                        'defaultValue' => null,
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'created' => Type::int(),
@@ -177,7 +207,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
                         if (!$value instanceof Content) {
                             throw new \InvalidArgumentException(
-                                'Value must be instance of ' . Content::class . '.'
+                                'Value must be instance of '.Content::class.'.'
                             );
                         }
 
@@ -198,19 +228,25 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
                                 $translations = [];
 
+                                $languagesToUse = !empty($args['locales']) ? $args['locales'] : [];
+
                                 // Case 1: This is the base translation
-                                if(empty($value->getTranslationOf())) {
-                                    foreach($value->getTranslations() as $translation) {
-                                        $translations[$translation->getLocale()] = $translation;
+                                if (empty($value->getTranslationOf())) {
+                                    foreach ($value->getTranslations() as $translation) {
+                                        if (in_array($translation->getLocale(), $languagesToUse)) {
+                                            $translations[] = $translation;
+                                        }
                                     }
-                                }
-
-                                // Case 2: This is a translation of a base translation
+                                } // Case 2: This is a translation of a base translation
                                 else {
-                                    $translations[$value->getTranslationOf()->getLocale()] = $value->getTranslationOf();
+                                    if (in_array($value->getTranslationOf()->getLocale(), $languagesToUse)) {
+                                        $translations[] = $value->getTranslationOf();
+                                    }
 
-                                    foreach($value->getTranslationOf()->getTranslations() as $translation) {
-                                        $translations[$translation->getLocale()] = $translation;
+                                    foreach ($value->getTranslationOf()->getTranslations() as $translation) {
+                                        if (in_array($translation->getLocale(), $languagesToUse)) {
+                                            $translations[] = $translation;
+                                        }
                                     }
                                 }
 
@@ -218,12 +254,17 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
                             default:
 
-                                if(!array_key_exists($info->fieldName, $fieldTypes)) {
+                                if (!array_key_exists($info->fieldName, $fieldTypes)) {
                                     return null;
                                 }
 
-                                $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData()[$info->fieldName] : null;
-                                return $fieldTypes[$info->fieldName]->resolveGraphQLData($contentType->getFields()->get($info->fieldName), $fieldData);
+                                $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData(
+                                )[$info->fieldName] : null;
+
+                                return $fieldTypes[$info->fieldName]->resolveGraphQLData(
+                                    $contentType->getFields()->get($info->fieldName),
+                                    $fieldData
+                                );
                         }
                     },
                     'interfaces' => [$schemaTypeManager->getSchemaType('ContentInterface')],
