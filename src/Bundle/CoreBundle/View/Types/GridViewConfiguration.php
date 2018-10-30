@@ -42,7 +42,6 @@ class GridViewConfiguration extends TableViewConfiguration
         if (!empty($v['sort']['field']) && isset($v['fields'][$v['sort']['field']])) {
             unset($v['fields'][$v['sort']['field']]);
         }
-        dump($v['fields']);
         return $v['fields'];
     }
 
