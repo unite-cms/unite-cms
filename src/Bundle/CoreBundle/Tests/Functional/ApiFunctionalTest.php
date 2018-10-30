@@ -1320,24 +1320,15 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 id,
                 locale,
                 title,
-                translations {
-                  en {
-                    id, 
-                    locale,
-                    title
-                  },
-                  de {
+                translations(locales: ["de", "en"]) {
                     id, 
                     locale,
                     title,
-                    translations {
-                      en {
+                    translations(locales: "en") {
                         id,
                         locale,
-                        title,
-                      }
+                        title
                     }
-                  }
                 }
             }
         }', ['id' => $id]);
@@ -1346,14 +1337,15 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         // Make sure, that only de translation is filled out.
         $this->assertEquals('en', $response->data->getLang->locale);
-        $this->assertNull($response->data->getLang->translations->en);
-        $this->assertEquals('DE content', $response->data->getLang->translations->de->title);
-        $this->assertEquals('de', $response->data->getLang->translations->de->locale);
+        $this->assertCount(1, $response->data->getLang->translations);
+        $this->assertEquals('DE content', $response->data->getLang->translations[0]->title);
+        $this->assertEquals('de', $response->data->getLang->translations[0]->locale);
 
         // Make sure, that also translations can access their translationOf
-        $this->assertEquals($id, $response->data->getLang->translations->de->translations->en->id);
-        $this->assertEquals('en', $response->data->getLang->translations->de->translations->en->locale);
-        $this->assertEquals('Updated title', $response->data->getLang->translations->de->translations->en->title);
+        $this->assertCount(1, $response->data->getLang->translations[0]->translations);
+        $this->assertEquals($id, $response->data->getLang->translations[0]->translations[0]->id);
+        $this->assertEquals('en', $response->data->getLang->translations[0]->translations[0]->locale);
+        $this->assertEquals('Updated title', $response->data->getLang->translations[0]->translations[0]->title);
 
         $fr_trans = new Content();
         $fr_trans->setContentType($content->getContentType());
@@ -1364,20 +1356,17 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->em->flush();
 
         // Try to access translation, the user do not have access to.
-        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query($id: ID!) {
             getLang(id: $id) {
-                translations {
-                  fr {
+                translations(locales: "fr") {
                     id, 
                     locale,
                     title
-                  }
                 }
             }
-        }');
+        }', ['id' => $content->getId()]);
 
-        $this->assertNotEmpty($response->errors);
-        $this->assertTrue(empty($response->data->getLang->translations->fr));
+        $this->assertTrue(empty($response->data->getLang->translations));
     }
 
     public function testAPICRUDForSTWithLang() {
@@ -1399,7 +1388,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $fr_trans->setLocale('fr');
         $fr_trans->setData(['title' => 'FR title, no access']);
         $this->em->persist($fr_trans);
-
         $this->em->flush();
 
         $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
@@ -1407,52 +1395,20 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 locale,
                 title,
                 translations {
-                  en {
                     locale,
                     title
-                  }
-                  de {
-                    locale,
-                    title
-                  }
                 }
             }
         }');
 
         $this->assertTrue(empty($response->errors));
 
-        // Make sure, that only de translation is filled out.
+        // Make sure, that only de translation is filled out and not fr translation, we do not have access to.
         $this->assertEquals('en', $response->data->LangSetting->locale);
         $this->assertEquals('Updated title', $response->data->LangSetting->title);
-        $this->assertNull($response->data->LangSetting->translations->en);
-        $this->assertEquals('en', $response->data->LangSetting->locale);
-        $this->assertEquals('DE title', $response->data->LangSetting->translations->de->title);
-        $this->assertEquals('de', $response->data->LangSetting->translations->de->locale);
-
-        // Try to access translation, the user do not have access to.
-        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
-            LangSetting {
-                locale,
-                title,
-                translations {
-                  en {
-                    locale,
-                    title
-                  }
-                  de {
-                    locale,
-                    title
-                  },
-                  fr {
-                    locale,
-                    title
-                  }
-                }
-            }
-        }');
-
-        $this->assertNotEmpty($response->errors);
-        $this->assertTrue(empty($response->data->LangSetting->translations->fr));
+        $this->assertCount(1, $response->data->LangSetting->translations);
+        $this->assertEquals('DE title', $response->data->LangSetting->translations[0]->title);
+        $this->assertEquals('de', $response->data->LangSetting->translations[0]->locale);
     }
 
     public function testAPICRUDActionsWithCookieAuthentication() {
