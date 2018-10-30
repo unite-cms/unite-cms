@@ -77,43 +77,44 @@
     @import "../../../../../node_modules/uikit/src/scss/variables";
 
     .unite-grid-view-item {
-        .view-field.view-field-image {
-            width: 100%;
-            max-width: none;
-            height: auto;
-            text-align: center;
-
-            .uk-inline-clip {
-                width: auto;
-                border-radius: 0;
-                border: none;
-                box-shadow: none;
-                margin: 0;
-                height: 150px;
-                background: $global-secondary-background;
-
-                img {
-                    height: 170px;
-                    transform: translateX(-50%) translateY(-50%);
-                    top: 50%;
-                }
-            }
-
-
-
-            @media (max-width: $breakpoint-small) {
-                min-height: 120px;
+        > div.uk-card.uk-card-default {
+            .view-field.view-field-image {
+                width: 100%;
+                max-width: none;
+                height: auto;
+                text-align: center;
+                padding: 0;
 
                 .uk-inline-clip {
-                    height: auto;
-                    min-height: 120px;
+                    width: auto;
+                    border-radius: 0;
+                    border: none;
+                    box-shadow: none;
+                    margin: 0;
+                    height: 150px;
+                    background: $global-secondary-background;
 
                     img {
-                        position: static;
-                        transform: none;
-                        left: auto;
-                        width: 100%;
+                        height: 170px;
+                        transform: translateX(-50%) translateY(-50%);
+                        top: 50%;
+                    }
+                }
+
+                @media (max-width: $breakpoint-small) {
+                    min-height: 120px;
+
+                    .uk-inline-clip {
                         height: auto;
+                        min-height: 120px;
+
+                        img {
+                            position: static;
+                            transform: none;
+                            left: auto;
+                            width: 100%;
+                            height: auto;
+                        }
                     }
                 }
             }

@@ -15,11 +15,17 @@
       min-height: 120px;
     }
 
+    .view-field {
+      padding: 10px 10px 0;
+      &:last-child { padding-bottom: 10px; }
+    }
+
     .view-field-actions {
       position: absolute;
       right: 5px;
       top: 5px;
       opacity: 0;
+      padding: 0;
 
       .uk-button.uk-button-default {
         background: white;
@@ -35,6 +41,7 @@
       top: 5px;
       opacity: 0;
       z-index: 5;
+      padding: 0;
 
       .uk-sortable-handle {
         box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
@@ -48,9 +55,40 @@
       }
     }
 
+    .view-field-selectrow {
+      flex-basis: 10px;
+      position: absolute;
+      z-index: 5;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.2;
+      padding: 0;
+
+      > div {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        svg {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+
+          &.feather-check-circle {
+            color: $unite-color;
+          }
+        }
+      }
+    }
+
     &:hover {
       .view-field-actions,
-      .view-field-sortindex {
+      .view-field-sortindex,
+      .view-field-selectrow {
         opacity: 1;
       }
     }
