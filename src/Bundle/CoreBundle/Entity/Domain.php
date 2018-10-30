@@ -70,7 +70,7 @@ class Domain
     /**
      * @var ContentType[]
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\ContentType>")
-     * @Accessor(getter="getContentTypes",setter="setContentTypes")
+     * @Accessor(getter="getOrderedContentTypes",setter="setContentTypes")
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
@@ -81,7 +81,7 @@ class Domain
     /**
      * @var SettingType[]
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\SettingType>")
-     * @Accessor(getter="getSettingTypes",setter="setSettingTypes")
+     * @Accessor(getter="getOrderedSettingTypes",setter="setSettingTypes")
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
@@ -92,7 +92,7 @@ class Domain
     /**
      * @var DomainMemberType[]
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMemberType>")
-     * @Accessor(getter="getDomainMemberTypes",setter="setDomainMemberTypes")
+     * @Accessor(getter="getOrderedDomainMemberTypes",setter="setDomainMemberTypes")
      * @Assert\Count(min="1", minMessage="member_type_required")
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
@@ -307,6 +307,12 @@ class Domain
             $this->getContentTypes()->get($ct)->setFromEntity($domain->getContentTypes()->get($ct));
         }
 
+        // Update weight of all content types.
+        foreach($domain->getContentTypes()->getKeys() as $weight => $key) {
+            $this->getContentTypes()->get($key)->setWeight($weight);
+        }
+
+
         // SettingTypes to delete
         foreach ($this->getSettingTypesDiff($domain) as $st) {
             $this->getSettingTypes()->remove($st);
@@ -323,6 +329,12 @@ class Domain
             $this->getSettingTypes()->get($st)->setFromEntity($domain->getSettingTypes()->get($st));
         }
 
+        // Update weight of all setting types.
+        foreach($domain->getSettingTypes()->getKeys() as $weight => $key) {
+            $this->getSettingTypes()->get($key)->setWeight($weight);
+        }
+
+
         // DomainMemberTypes to delete
         foreach ($this->getDomainMemberTypesDiff($domain) as $dmt) {
             $this->getDomainMemberTypes()->remove($dmt);
@@ -336,6 +348,11 @@ class Domain
         // DomainMemberTypes to update
         foreach (array_intersect($domain->getDomainMemberTypes()->getKeys(), $this->getDomainMemberTypes()->getKeys()) as $dmt) {
             $this->getDomainMemberTypes()->get($dmt)->setFromEntity($domain->getDomainMemberTypes()->get($dmt));
+        }
+
+        // Update weight of all domain member types.
+        foreach($domain->getDomainMemberTypes()->getKeys() as $weight => $key) {
+            $this->getDomainMemberTypes()->get($key)->setWeight($weight);
         }
 
         return $this;
@@ -472,6 +489,18 @@ class Domain
     }
 
     /**
+     * @return ContentType[]|ArrayCollection
+     */
+    public function getOrderedContentTypes()
+    {
+        $iterator = $this->contentTypes->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+        });
+        return new ArrayCollection(iterator_to_array($iterator));
+    }
+
+    /**
      * @param ContentType[] $contentTypes
      *
      * @return Domain
@@ -514,6 +543,18 @@ class Domain
     }
 
     /**
+     * @return SettingType[]|ArrayCollection
+     */
+    public function getOrderedSettingTypes()
+    {
+        $iterator = $this->settingTypes->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+        });
+        return new ArrayCollection(iterator_to_array($iterator));
+    }
+
+    /**
      * @param SettingType[] $settingTypes
      *
      * @return Domain
@@ -553,6 +594,18 @@ class Domain
     public function getDomainMemberTypes()
     {
         return $this->domainMemberTypes;
+    }
+
+    /**
+     * @return DomainMemberType[]|ArrayCollection
+     */
+    public function getOrderedDomainMemberTypes()
+    {
+        $iterator = $this->domainMemberTypes->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+        });
+        return new ArrayCollection(iterator_to_array($iterator));
     }
 
     /**
