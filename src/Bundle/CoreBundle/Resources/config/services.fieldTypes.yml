@@ -37,6 +37,12 @@ services:
     tags: [unite_cms.field_type]
     arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@unite.cms.view_type_manager', '@templating.engine.twig', '@router', '@security.csrf.token_manager']
 
+  # A reference input field that allows to add a reference to a content item in any domain in the same organization.
+  UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+    arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager']
+
   # An integer input field that automatically handles position indexing (on INSERT, UPDATE, DELETE).
   UniteCMS\CoreBundle\Field\Types\SortIndexFieldType:
     public: false
