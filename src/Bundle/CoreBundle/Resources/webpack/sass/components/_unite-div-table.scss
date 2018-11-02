@@ -54,7 +54,8 @@
 .unite-div-table-search {
   margin-top: 20px;
   margin-bottom: 0;
-  width: 240px;
+  width: 100%;
+  max-width: 360px;
 
   input.uk-search-input {
     height: 29px;
@@ -169,5 +170,9 @@
 
   .unite-div-table-tabs {
     justify-content: flex-start;
+  }
+
+  .unite-div-table-search {
+    width: 240px;
   }
 }

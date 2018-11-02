@@ -1,0 +1,120 @@
+
+.unite-grid-view {
+  margin-bottom: 30px;
+}
+
+.unite-grid-view-item {
+  > div.uk-card.uk-card-default {
+    background: map-get($colors, white);
+    border-radius: 3px;
+    text-align: center;
+
+    .unite-grid-view-fields {
+      border-radius: 3px;
+      overflow: hidden;
+      min-height: 120px;
+    }
+
+    .view-field {
+      padding: 10px 10px 0;
+      &:last-child { padding-bottom: 10px; }
+    }
+
+    .view-field-actions {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      opacity: 0;
+      padding: 0;
+
+      .uk-button.uk-button-default {
+        background: white;
+        line-height: 30px;
+        padding: 0 12px;
+        border: 1px solid rgba(0,0,0,0.15);
+      }
+    }
+
+    .view-field-sortindex {
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      opacity: 0;
+      z-index: 5;
+      padding: 0;
+
+      .uk-sortable-handle {
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        border-radius: 2px;
+        text-transform: none;
+        font-size: 1rem;
+        background: white;
+        line-height: 30px;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 0 16px;
+      }
+    }
+
+    .view-field-selectrow {
+      flex-basis: 10px;
+      position: absolute;
+      z-index: 5;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.2;
+      padding: 0;
+
+      > div {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        svg {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+
+          &.feather-check-circle {
+            color: $unite-color;
+          }
+        }
+      }
+    }
+
+    &:hover {
+      .view-field-actions,
+      .view-field-sortindex,
+      .view-field-selectrow {
+        opacity: 1;
+      }
+    }
+
+    .view-field-text {
+      white-space: normal;
+      line-height: normal;
+    }
+  }
+
+  &.uk-sortable-drag {
+    > div.uk-card.uk-card-default {
+      .view-field-sortindex {
+        opacity: 1;
+      }
+    }
+  }
+
+  .unite-grid-view-meta-fields {
+    padding: 5px;
+    flex: 0;
+  }
+
+  .view-field-text {
+    p {
+      margin-bottom: 0;
+    }
+  }
+}

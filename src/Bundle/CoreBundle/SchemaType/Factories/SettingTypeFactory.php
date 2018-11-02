@@ -2,20 +2,21 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
-use UniteCMS\CoreBundle\Exception\AccessDeniedException;
-use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Exception\AccessDeniedException;
+use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 
 class SettingTypeFactory implements SchemaTypeFactoryInterface
 {
@@ -30,10 +31,16 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
      */
     private $entityManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager, EntityManager $entityManager)
+    /**
+     * @var AuthorizationChecker $authorizationChecker
+     */
+    private $authorizationChecker;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
     {
         $this->fieldTypeManager = $fieldTypeManager;
         $this->entityManager = $entityManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -46,11 +53,11 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
     {
         $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
 
-        if(count($nameParts) !== 2) {
+        if (count($nameParts) !== 2) {
             return false;
         }
 
-        if($nameParts[1] !== 'Setting') {
+        if ($nameParts[1] !== 'Setting') {
             return false;
         }
 
@@ -65,10 +72,16 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
-    {
-        if(!$domain) {
-            throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory::createSchemaType needs an domain as second argument');
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        int $nestingLevel,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
+        if (!$domain) {
+            throw new \InvalidArgumentException(
+                'UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory::createSchemaType needs an domain as second argument'
+            );
         }
 
         $identifier = IdentifierNormalizer::fromGraphQLSchema($schemaTypeName);
@@ -83,7 +96,7 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
         }
 
         // Load the full settingType if it is not already loaded.
-        if(!$this->entityManager->contains($settingType)) {
+        if (!$this->entityManager->contains($settingType)) {
             $settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->find(
                 $settingType->getId()
             );
@@ -113,11 +126,11 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                     $nestingLevel + 1
                 );
 
-            // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
+                // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
             } catch (AccessDeniedException $accessDeniedException) {
                 // TODO: We should log this here and show it to the user somewhere.
 
-            // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
+                // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
             } catch (InvalidFieldConfigurationException $accessDeniedException) {
                 // TODO: We should log this here and show it to the user somewhere.
             }
@@ -125,14 +138,32 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
 
         return new ObjectType(
             [
-                'name' => IdentifierNormalizer::graphQLType($identifier, 'Setting')  . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''),
+                'name' => IdentifierNormalizer::graphQLType(
+                        $identifier,
+                        'Setting'
+                    ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                 'fields' => array_merge(
                     [
                         'type' => Type::string(),
                     ],
                     empty($settingType->getLocales()) ? [] : [
                         'locale' => Type::string(),
-                        'translations' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($identifier, 'SettingTranslations') . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''), $domain, $nestingLevel)
+                        'translations' => [
+                            'type' => Type::listOf(
+                                $schemaTypeManager->getSchemaType(
+                                    IdentifierNormalizer::graphQLType($identifier,'Setting').'Level'.($nestingLevel + 1),
+                                    $domain,
+                                    $nestingLevel + 1
+                                )
+                            ),
+                            'args' => [
+                                'locales' => [
+                                    'type' => Type::listOf(Type::string()),
+                                    'description' => 'List of Locales for Example: all translations ($locales = null), one locale ($locales = ["de"]), or multiple ($locales = ["de", "en"]',
+                                    'defaultValue' => null,
+                                ],
+                            ],
+                        ],
                     ],
                     $fields
                 ),
@@ -150,21 +181,40 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                         case 'locale':
                             return $value->getLocale();
                         case 'translations':
+
                             $translations = [];
-                            foreach($value->getSettingType()->getLocales() as $locale) {
-                                if($locale !== $value->getLocale()) {
-                                    $translations[$locale] = $value->getSettingType()->getSetting($locale);
+                            $includeLocales = $args['locales'] ?? $value->getSettingType()->getLocales();
+                            $includeLocales = is_string($includeLocales) ? [$includeLocales] : $includeLocales;
+                            $includeLocales = array_diff($includeLocales, [$value->getLocale()]);
+
+                            foreach ($value->getSettingType()->getLocales() as $locale) {
+                                if(in_array($locale, $includeLocales)) {
+                                    $translations[] = $value->getSettingType()->getSetting($locale);
                                 }
                             }
+
+                            // Remove all translations, we don't have access to.
+                            foreach($translations as $locale => $translation) {
+                                if(!$this->authorizationChecker->isGranted(SettingVoter::VIEW, $translation)) {
+                                    unset($translations[$locale]);
+                                }
+                            }
+
                             return $translations;
+
                         default:
 
                             if (!array_key_exists($info->fieldName, $fieldTypes)) {
                                 return null;
                             }
 
-                            $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData()[$info->fieldName] : null;
-                            return $fieldTypes[$info->fieldName]->resolveGraphQLData($settingType->getFields()->get($info->fieldName), $fieldData);
+                            $fieldData = array_key_exists($info->fieldName, $value->getData()) ? $value->getData(
+                            )[$info->fieldName] : null;
+
+                            return $fieldTypes[$info->fieldName]->resolveGraphQLData(
+                                $settingType->getFields()->get($info->fieldName),
+                                $fieldData
+                            );
                     }
                 },
                 'interfaces' => [$schemaTypeManager->getSchemaType('SettingInterface')],
