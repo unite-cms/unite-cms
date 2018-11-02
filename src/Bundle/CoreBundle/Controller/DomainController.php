@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolation;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
 use UniteCMS\CoreBundle\Form\WebComponentType;
 use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
@@ -184,11 +185,13 @@ class DomainController extends Controller
 
                 // Check if config (once parsed) is different from domain entity.
                 $outOfSyncPersistedConfig = $domainConfigManager->serialize($domain);
-                if($outOfSyncPersistedConfig === $domainConfigManager->serialize($domainConfigManager->parse($domain->getConfig()))) {
+                if ($outOfSyncPersistedConfig === $domainConfigManager->serialize(
+                        $domainConfigManager->parse($domain->getConfig())
+                    )) {
                     $outOfSyncPersistedConfig = null;
                 }
 
-            // If the file does not exist, serialize the current domain instead and save the file.
+                // If the file does not exist, serialize the current domain instead and save the file.
             } else {
                 $domain->setConfig($domainConfigManager->serialize($domain));
 
@@ -197,25 +200,29 @@ class DomainController extends Controller
                  * auto-replaced by the domain config parser. To be backward compatible we need to to this here. This block can
                  * be deleted, once we reach version 0.8.
                  */
-                if(!empty($domain->getConfigVariables())) {
+                if (!empty($domain->getConfigVariables())) {
 
                     $JSON = $domain->getConfig();
-                    foreach($domain->getConfigVariables() as $variable => $value) {
+                    foreach ($domain->getConfigVariables() as $variable => $value) {
                         $value = json_encode($value);
                         $JSON = str_replace($value, '"'.$variable.'"', $JSON);
                     }
 
                     $JSON_ARRAY = json_decode($JSON, true);
                     $JSON_ARRAY['variables'] = $domain->getConfigVariables();
-                    uksort($JSON_ARRAY, function($a, $b){
-                        if(in_array($a, ['title', 'identifier', 'variables'])) {
-                            return -1;
+                    uksort(
+                        $JSON_ARRAY,
+                        function ($a, $b) {
+                            if (in_array($a, ['title', 'identifier', 'variables'])) {
+                                return -1;
+                            }
+                            if (in_array($b, ['title', 'identifier', 'variables'])) {
+                                return +1;
+                            }
+
+                            return 0;
                         }
-                        if(in_array($b, ['title', 'identifier', 'variables'])) {
-                            return +1;
-                        }
-                        return 0;
-                    });
+                    );
                     $JSON = json_encode($JSON_ARRAY);
                     $domain->setConfig($JSON);
                 }
@@ -224,6 +231,11 @@ class DomainController extends Controller
                 $domain->setConfigChanged();
                 $configNotInFilesystem = true;
             }
+        } catch (InvalidDomainConfigurationException $e) {
+            $logger->error($e->getMessage(), ['context' => $e]);
+            $this->addFlash('danger', $e->getMessage());
+            return $this->redirectToRoute('unitecms_core_domain_index', [$organization]);
+
         } catch (\Exception $e) {
             $logger->error($e->getMessage(), ['context' => $e]);
             $this->addFlash('danger', 'Cannot load config file.');

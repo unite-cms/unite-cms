@@ -226,7 +226,7 @@ class DomainConfigManager
         // Make sure, that the loaded domain has the same identifier as the given domain.
         if ($loadedDomain->getIdentifier() !== $domain->getIdentifier()) {
             throw new InvalidDomainConfigurationException(
-                'The domain configuration identifier does not match with the filename.'
+                sprintf('The domain configuration identifier "%s" does not match with the filename "%s".', $loadedDomain->getIdentifier(), $domain->getIdentifier().'.json')
             );
         }
 
