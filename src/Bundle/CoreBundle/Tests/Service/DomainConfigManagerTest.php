@@ -268,7 +268,7 @@ class DomainConfigManagerTest extends KernelTestCase
 
     /**
      * @expectedException \UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException
-     * @expectedExceptionMessage The domain configuration identifier does not match with the filename.
+     * @expectedExceptionMessage The domain configuration identifier "foo" does not match with the filename "my_test_domain.json".
      */
     public function testParsingDomainWithWrongDomainIdentifier() {
 

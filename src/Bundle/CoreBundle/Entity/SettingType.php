@@ -97,7 +97,7 @@ class SettingType implements Fieldable
      * @var SettingTypeField[]
      * @Assert\Valid()
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\SettingTypeField>")
-     * @Accessor(getter="getFields",setter="setFields")
+     * @Accessor(getter="getOrderedFields",setter="setFields")
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingTypeField", mappedBy="settingType", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
      * @Expose
@@ -247,6 +247,12 @@ class SettingType implements Fieldable
         foreach (array_intersect($settingType->getFields()->getKeys(), $this->getFields()->getKeys()) as $field) {
             $this->getFields()->get($field)->setFromEntity($settingType->getFields()->get($field));
         }
+
+        // Update weight of all fields.
+        foreach($settingType->getFields()->getKeys() as $weight => $key) {
+            $this->getFields()->get($key)->setWeight($weight);
+        }
+
 
         return $this;
     }
@@ -436,6 +442,18 @@ class SettingType implements Fieldable
     public function getFields()
     {
         return $this->fields;
+    }
+
+    /**
+     * @return SettingTypeField[]|ArrayCollection
+     */
+    public function getOrderedFields()
+    {
+        $iterator = $this->fields->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+        });
+        return new ArrayCollection(iterator_to_array($iterator));
     }
 
     /**
