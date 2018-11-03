@@ -17,12 +17,12 @@ RUN mkdir ${APP_ROOT}
 
 WORKDIR ${APP_ROOT}
 
-RUN rpm-file-permissions && \
+RUN rpm-file-permissions; \
     useradd -u 1001 -r -g 0 -d ${APP_ROOT} -s /sbin/nologin \
-      -c "Default Application User" default && \
-    chown -R 1001:0 ${APP_ROOT} && \
-    chown -R 1001:0 /etc/php-fpm.d && \
-    chown -R 1001:0 /etc/nginx && \
+      -c "Default Application User" default; \
+    chown -R 1001:0 ${APP_ROOT}; \
+    chown -R 1001:0 /etc/php-fpm.d; \
+    chown -R 1001:0 /etc/nginx; \
     fix-permissions /app
 
 USER 1001

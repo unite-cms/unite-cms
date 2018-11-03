@@ -2,6 +2,7 @@
 .idea/
 .env
 composer.lock
+composer.phar
 package-lock.json
 /node_modules/
 /vendor/
