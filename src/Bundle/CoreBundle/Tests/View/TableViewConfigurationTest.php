@@ -8,7 +8,6 @@
 
 namespace UniteCMS\CoreBundle\Tests\View;
 
-
 use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
 use Symfony\Component\Config\Definition\Processor;
 use UniteCMS\CoreBundle\Entity\ContentType;

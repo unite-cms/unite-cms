@@ -1,0 +1,4 @@
+<article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    {{ include('@UniteCMSCore/Views/_asset_dumper.html.twig', { fields: parameters.settings.fields }) }}
+    <unite-cms-core-view-grid parameters='{{ parameters|json_encode|raw }}'></unite-cms-core-view-grid>
+</article>

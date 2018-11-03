@@ -10,6 +10,7 @@ import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
 
 import BaseView from './vue/views/Base/BaseView.vue';
 import TableContent from './vue/views/TableContent.vue';
+import GridContent from './vue/views/GridContent.vue';
 import DomainEditor from "./vue/components/DomainEditor.vue";
 import ApiTokenField from "./vue/components/ApiTokenField";
 import iFramePreview from "./vue/components/iFramePreview.vue";
@@ -57,6 +58,11 @@ Vue.customElement('unite-cms-core-state-field', State);
 Vue.customElement('unite-cms-core-view-table', {
     extends: BaseView,
     contentComponent: TableContent
+});
+
+Vue.customElement('unite-cms-core-view-grid', {
+    extends: BaseView,
+    contentComponent: GridContent
 });
 
 // Create vue moment filter.

@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -11,12 +12,13 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Router;
 use Symfony\Component\Validator\ConstraintViolation;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
 use UniteCMS\CoreBundle\Form\WebComponentType;
-use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
+use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
 class DomainController extends Controller
 {
@@ -26,17 +28,32 @@ class DomainController extends Controller
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::VIEW'), organization)")
      *
      * @param Organization $organization
-     * @param Request $request
+     * @param DomainConfigManager $domainConfigManager
+     * @param LoggerInterface $logger
      * @return Response
      */
-    public function indexAction(Organization $organization, Request $request)
+    public function indexAction(Organization $organization, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
         $domains = $organization->getDomains();
 
-        return $this->render(
-            '@UniteCMSCore/Domain/index.html.twig',
-            ['organization' => $organization, 'domains' => $domains]
-        );
+        // Load new domain configurations from the filesystem that are not already in the organization.
+        if($this->isGranted(OrganizationVoter::UPDATE, $organization)) {
+            try {
+                $missingIdentifiers = array_diff(
+                    $domainConfigManager->listConfig($organization),
+                    $organization->getDomains()->map(function(Domain $domain){ return $domain->getIdentifier(); })->toArray()
+                );
+                $organization->setMissingDomainConfigIdentifiers($missingIdentifiers);
+            } catch (\Exception $e) {
+                $logger->error($e->getMessage(), ['context' => $e]);
+                $this->addFlash('warning', 'Could not load (potential new) configurations from the filesystem.');
+            }
+        }
+
+        return $this->render('@UniteCMSCore/Domain/index.html.twig', [
+            'organization' => $organization,
+            'domains' => $domains,
+        ]);
     }
 
     /**
@@ -46,30 +63,48 @@ class DomainController extends Controller
      *
      * @param Organization $organization
      * @param Request $request
+     * @param DomainConfigManager $domainConfigManager
+     * @param LoggerInterface $logger
      * @return Response
      */
-    public function createAction(Organization $organization, Request $request)
+    public function createAction(Organization $organization, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
         $domain = new Domain();
-        $domain->setTitle('Untitled Domain')->setIdentifier('untitled');
+        $import_config = $request->query->has('import');
+
+        if($import_config) {
+            try {
+                $domain->setOrganization($organization)->setIdentifier($request->query->get('import'));
+                $domainConfigManager->loadConfig($domain, true);
+            } catch (\Exception $e) {
+                $organization->getDomains()->removeElement($domain);
+                $logger->error($e->getMessage(), ['context' => $e]);
+                $this->addFlash('danger', 'Could not load configuration from the filesystem.');
+                return $this->redirectToRoute('unitecms_core_domain_index', [$organization]);
+            }
+        } else {
+            $domain->setTitle('Untitled Domain')->setIdentifier('untitled');
+            $domain->setConfig($domainConfigManager->serialize($domain));
+        }
+
         $form = $this->createFormBuilder([
-            'domain' => [
-                'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
-                'variables' => '{}',
-            ]
+            'domain' => $domain->getConfig(),
         ])
-        ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
-        ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
+            ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
+            ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            // First unset temporary domain
+            $organization->getDomains()->removeElement($domain);
             $domain = null;
 
             try {
-                $domain = $this->get('unite.cms.domain_definition_parser')->parse($form->getData()['domain']['definition'], $form->getData()['domain']['variables'] ?? null);
+                $domain = $domainConfigManager->parse($form->getData()['domain']);
+                $domain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
             }
@@ -92,10 +127,12 @@ class DomainController extends Controller
             }
         }
 
-        return $this->render(
-            '@UniteCMSCore/Domain/create.html.twig',
-            ['organization' => $organization, 'form' => $form->createView()]
-        );
+        return $this->render('@UniteCMSCore/Domain/create.html.twig', [
+            'organization' => $organization,
+            'domain' => $domain,
+            'form' => $form->createView(),
+            'import_config' => $import_config,
+        ]);
     }
 
     /**
@@ -133,20 +170,89 @@ class DomainController extends Controller
      * @param Organization $organization
      * @param Domain $domain
      * @param Request $request
+     * @param DomainConfigManager $domainConfigManager
+     * @param LoggerInterface $logger
      * @return Response
      */
-    public function updateAction(Organization $organization, Domain $domain, Request $request)
+    public function updateAction(Organization $organization, Domain $domain, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
     {
+        $outOfSyncPersistedConfig = null;
+        $configNotInFilesystem = false;
+
+        try {
+            if ($domainConfigManager->configExists($domain)) {
+                $domainConfigManager->loadConfig($domain);
+
+                // Check if config (once parsed) is different from domain entity.
+                $outOfSyncPersistedConfig = $domainConfigManager->serialize($domain);
+                if ($outOfSyncPersistedConfig === $domainConfigManager->serialize(
+                        $domainConfigManager->parse($domain->getConfig())
+                    )) {
+                    $outOfSyncPersistedConfig = null;
+                }
+
+                // If the file does not exist, serialize the current domain instead and save the file.
+            } else {
+                $domain->setConfig($domainConfigManager->serialize($domain));
+
+                /**
+                 * @deprecated 0.8 Before Version 0.7, variables could be saved to $domain->configVariables. They where
+                 * auto-replaced by the domain config parser. To be backward compatible we need to to this here. This block can
+                 * be deleted, once we reach version 0.8.
+                 */
+                if (!empty($domain->getConfigVariables())) {
+
+                    $JSON = $domain->getConfig();
+                    foreach ($domain->getConfigVariables() as $variable => $value) {
+                        $value = json_encode($value);
+                        $JSON = str_replace($value, '"'.$variable.'"', $JSON);
+                    }
+
+                    $JSON_ARRAY = json_decode($JSON, true);
+                    $JSON_ARRAY['variables'] = $domain->getConfigVariables();
+                    uksort(
+                        $JSON_ARRAY,
+                        function ($a, $b) {
+                            if (in_array($a, ['title', 'identifier', 'variables'])) {
+                                return -1;
+                            }
+                            if (in_array($b, ['title', 'identifier', 'variables'])) {
+                                return +1;
+                            }
+
+                            return 0;
+                        }
+                    );
+                    $JSON = json_encode($JSON_ARRAY);
+                    $domain->setConfig($JSON);
+                }
+
+                // Force update of the domain config.
+                $domain->setConfigChanged();
+                $configNotInFilesystem = true;
+            }
+        } catch (InvalidDomainConfigurationException $e) {
+            $logger->error($e->getMessage(), ['context' => $e]);
+            $this->addFlash('danger', $e->getMessage());
+            return $this->redirectToRoute('unitecms_core_domain_index', [$organization]);
+
+        } catch (\Exception $e) {
+            $logger->error($e->getMessage(), ['context' => $e]);
+            $this->addFlash('danger', 'Cannot load config file.');
+            return $this->redirectToRoute('unitecms_core_domain_index', [$organization]);
+        }
+
         $originalDomain = null;
         $updatedDomain = null;
 
         $form = $this->createFormBuilder([
-            'domain' => [
-                'definition' => $this->get('unite.cms.domain_definition_parser')->serialize($domain),
-                'variables' => empty($domain->getConfigVariables()) ? '{}': json_encode($domain->getConfigVariables()),
-            ],
+            'domain' => $outOfSyncPersistedConfig ? $outOfSyncPersistedConfig : $domain->getConfig(),
         ])
-        ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'error_bubbling' => true])
+        ->add('domain', WebComponentType::class, [
+            'tag' => 'unite-cms-core-domaineditor',
+            'error_bubbling' => true,
+            'attr' => $outOfSyncPersistedConfig ? ['diff-value' => json_encode(json_decode($domain->getConfig()))] : [],
+        ])
         ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
         ->add('confirm', SubmitType::class, ['label' => 'domain.update.form.confirm', 'attr' => ['class' => 'uk-button uk-button-primary']])
@@ -158,10 +264,8 @@ class DomainController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             try {
-                $updatedDomain = $this->get('unite.cms.domain_definition_parser')->parse(
-                    $form->getData()['domain']['definition'],
-                    $form->getData()['domain']['variables'] ?? null
-                );
+                $updatedDomain = $domainConfigManager->parse($form->getData()['domain']);
+                $updatedDomain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
                 $formView = $form->createView();
@@ -170,9 +274,7 @@ class DomainController extends Controller
             if (isset($updatedDomain)) {
 
                 // In order to avoid persistence conflicts, we create a new domain from serialized domain.
-                $originalDomain = $this->get('unite.cms.domain_definition_parser')->parse(
-                    $this->get('unite.cms.domain_definition_parser')->serialize($domain, false)
-                );
+                $originalDomain = $domainConfigManager->parse($domainConfigManager->serialize($domain));
                 $domain->setFromEntity($updatedDomain);
                 $violations = $this->get('validator')->validate($domain);
 
@@ -222,6 +324,15 @@ class DomainController extends Controller
                     $domain->setFromEntity($originalDomain);
                     $formView = $form->createView();
                 }
+            }
+        }
+        else {
+            if($outOfSyncPersistedConfig) {
+                $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. You can use the diff tool to update the config.');
+            }
+
+            if($configNotInFilesystem) {
+                $this->addFlash('warning', 'This domain configuration comes from the database and not from the file system at the moment. Please save this domain to create a config file in the filesystem.');
             }
         }
 

@@ -19,10 +19,13 @@ class UniteCMSCoreExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('services.yml');
+
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
+        // Set domain config dir as first argument to domain config manager.
+        $container->getDefinition('unite.cms.domain_config_manager')->setArgument(0, $config['domain_config_dir']);
     }
 }

@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ExclusionPolicy;
@@ -22,6 +23,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
  *
  * @ORM\Table(name="domain")
  * @ORM\Entity()
+ * @ORM\HasLifecycleCallbacks
  * @UniqueEntity(fields={"identifier", "organization"}, message="identifier_already_taken")
  * @ExclusionPolicy("all")
  */
@@ -50,10 +52,10 @@ class Domain
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
-     * @Assert\Length(max="255", maxMessage="too_long")
+     * @Assert\Length(max="200", maxMessage="too_long")
      * @ValidIdentifier(message="invalid_characters")
      * @ReservedWords(message="reserved_identifier", reserved="UniteCMS\CoreBundle\Entity\Domain::RESERVED_IDENTIFIERS")
-     * @ORM\Column(name="identifier", type="string", length=255)
+     * @ORM\Column(name="identifier", type="string", length=200)
      * @Expose
      */
     private $identifier;
@@ -68,7 +70,7 @@ class Domain
     /**
      * @var ContentType[]
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\ContentType>")
-     * @Accessor(getter="getContentTypes",setter="setContentTypes")
+     * @Accessor(getter="getOrderedContentTypes",setter="setContentTypes")
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\ContentType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
@@ -79,7 +81,7 @@ class Domain
     /**
      * @var SettingType[]
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\SettingType>")
-     * @Accessor(getter="getSettingTypes",setter="setSettingTypes")
+     * @Accessor(getter="getOrderedSettingTypes",setter="setSettingTypes")
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\SettingType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
      * @ORM\OrderBy({"weight": "ASC"})
@@ -90,7 +92,7 @@ class Domain
     /**
      * @var DomainMemberType[]
      * @Type("ArrayCollection<UniteCMS\CoreBundle\Entity\DomainMemberType>")
-     * @Accessor(getter="getDomainMemberTypes",setter="setDomainMemberTypes")
+     * @Accessor(getter="getOrderedDomainMemberTypes",setter="setDomainMemberTypes")
      * @Assert\Count(min="1", minMessage="member_type_required")
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMemberType", mappedBy="domain", cascade={"persist", "remove", "merge"}, indexBy="identifier", orphanRemoval=true)
@@ -110,6 +112,7 @@ class Domain
     /**
      * @var array
      * @ORM\Column(name="config_variables", type="array", nullable=true)
+     * @deprecated 0.8. Config variables are now stored as "variables" property inside domain config. Please update your domain to autosave values from this field to the filesystem.
      */
     private $configVariables;
 
@@ -119,6 +122,21 @@ class Domain
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $members;
+
+    /**
+     * This holds the json config for this domain. This config was not generated automatically from this domain, but is
+     * loaded from the filesystem. This allows us to define variables on the domain config, that get substituted when
+     * creating a domain entity from the config. This config also does not get saved to the database.
+     * @var string
+     */
+    private $config;
+
+    /**
+     * If the config has changed, this variable is set to true to force an update.
+     *
+     * @var bool
+     */
+    private $configChanged = false;
 
     public function __toString()
     {
@@ -134,6 +152,16 @@ class Domain
 
         $this->addDefaultMemberTypes();
         $this->addDefaultPermissions();
+    }
+
+    /**
+     * @ORM\PreFlush
+     * @param PreFlushEventArgs $args
+     */
+    public function forceUpdateIfConfigChanged(PreFlushEventArgs $args) {
+        if($this->configChanged) {
+            $args->getEntityManager()->getUnitOfWork()->scheduleForUpdate($this);
+        }
     }
 
     private function addDefaultMemberTypes()
@@ -262,7 +290,7 @@ class Domain
             ->setTitle($domain->getTitle())
             ->setIdentifier($domain->getIdentifier())
             ->setPermissions($domain->getPermissions())
-            ->setConfigVariables($domain->getConfigVariables());
+            ->setConfig($domain->getConfig());
 
         // ContentTypes to delete
         foreach ($this->getContentTypesDiff($domain) as $ct) {
@@ -278,6 +306,12 @@ class Domain
         foreach (array_intersect($domain->getContentTypes()->getKeys(), $this->getContentTypes()->getKeys()) as $ct) {
             $this->getContentTypes()->get($ct)->setFromEntity($domain->getContentTypes()->get($ct));
         }
+
+        // Update weight of all content types.
+        foreach($domain->getContentTypes()->getKeys() as $weight => $key) {
+            $this->getContentTypes()->get($key)->setWeight($weight);
+        }
+
 
         // SettingTypes to delete
         foreach ($this->getSettingTypesDiff($domain) as $st) {
@@ -295,6 +329,12 @@ class Domain
             $this->getSettingTypes()->get($st)->setFromEntity($domain->getSettingTypes()->get($st));
         }
 
+        // Update weight of all setting types.
+        foreach($domain->getSettingTypes()->getKeys() as $weight => $key) {
+            $this->getSettingTypes()->get($key)->setWeight($weight);
+        }
+
+
         // DomainMemberTypes to delete
         foreach ($this->getDomainMemberTypesDiff($domain) as $dmt) {
             $this->getDomainMemberTypes()->remove($dmt);
@@ -308,6 +348,11 @@ class Domain
         // DomainMemberTypes to update
         foreach (array_intersect($domain->getDomainMemberTypes()->getKeys(), $this->getDomainMemberTypes()->getKeys()) as $dmt) {
             $this->getDomainMemberTypes()->get($dmt)->setFromEntity($domain->getDomainMemberTypes()->get($dmt));
+        }
+
+        // Update weight of all domain member types.
+        foreach($domain->getDomainMemberTypes()->getKeys() as $weight => $key) {
+            $this->getDomainMemberTypes()->get($key)->setWeight($weight);
         }
 
         return $this;
@@ -444,6 +489,18 @@ class Domain
     }
 
     /**
+     * @return ContentType[]|ArrayCollection
+     */
+    public function getOrderedContentTypes()
+    {
+        $iterator = $this->contentTypes->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+        });
+        return new ArrayCollection(iterator_to_array($iterator));
+    }
+
+    /**
      * @param ContentType[] $contentTypes
      *
      * @return Domain
@@ -486,6 +543,18 @@ class Domain
     }
 
     /**
+     * @return SettingType[]|ArrayCollection
+     */
+    public function getOrderedSettingTypes()
+    {
+        $iterator = $this->settingTypes->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+        });
+        return new ArrayCollection(iterator_to_array($iterator));
+    }
+
+    /**
      * @param SettingType[] $settingTypes
      *
      * @return Domain
@@ -525,6 +594,18 @@ class Domain
     public function getDomainMemberTypes()
     {
         return $this->domainMemberTypes;
+    }
+
+    /**
+     * @return DomainMemberType[]|ArrayCollection
+     */
+    public function getOrderedDomainMemberTypes()
+    {
+        $iterator = $this->domainMemberTypes->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+        });
+        return new ArrayCollection(iterator_to_array($iterator));
     }
 
     /**
@@ -592,21 +673,8 @@ class Domain
     }
 
     /**
-     * Set configVariables
-     *
-     * @param array configVariables
-     *
-     * @return Domain
-     */
-    public function setConfigVariables(array $configVariables)
-    {
-        $this->configVariables = $configVariables;
-
-        return $this;
-    }
-
-    /**
      * Get configVariables
+     * @deprecated 0.8. Config variables are now stored as "variables" property inside domain config. Please update your domain to autosave values from this field to the filesystem.
      *
      * @return array
      */
@@ -654,6 +722,35 @@ class Domain
         }
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getConfig(): string
+    {
+        return $this->config ?? '';
+    }
+
+    /**
+     * @param string $config
+     * @return Domain
+     */
+    public function setConfig(string $config) {
+        if(!empty($this->config) && $this->config !== $config) {
+            $this->setConfigChanged();
+        }
+        $this->config = $config;
+        return $this;
+    }
+
+    /**
+     * Set the config of ths domain to changed. This is calculated automatically on setConfig. However, you can override
+     * it with this method if you want to force or prevent a change event.
+     * @param bool $changed
+     */
+    public function setConfigChanged($changed = true) {
+        $this->configChanged = $changed;
     }
 }
 

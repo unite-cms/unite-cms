@@ -31,6 +31,7 @@ doctrine:
                 JSON_EXTRACT:   Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
                 JSON_SET:       Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
                 JSON_REMOVE:    Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
+                JSON_UNQUOTE:   Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
                 CAST:           Oro\ORM\Query\AST\Functions\Cast
 
 stof_doctrine_extensions:

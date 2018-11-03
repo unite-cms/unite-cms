@@ -1,5 +1,5 @@
 {% extends '@UniteCMSCore/layout.html.twig' %}
-{% block title %}{% trans %}domain.create.title{% endtrans %}{% endblock title %}
+{% block title %}{{ ('domain.' ~ (import_config ? 'import' : 'create') ~ '.title')|trans }}{% endblock title %}
 {% block navigation %}{{ include('@UniteCMSCore/Organization/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card always-full uk-flex-1">
@@ -8,7 +8,7 @@
         <a class="back-button" href="{{ url('unitecms_core_domain_index', [unite.organization]) }}">
             <i data-feather="arrow-left"></i>
         </a>
-        <h2 class="uk-flex-1">{% trans %}domain.create.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-1">{{ ('domain.' ~ (import_config ? 'import' : 'create') ~ '.headline')|trans({ '%title%': domain.title, '%identifier%': domain.identifier }) }}</h2>
         {{ form_widget(form.submit) }}
     </header>
     {{ form_end(form) }}

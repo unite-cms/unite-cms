@@ -2,9 +2,10 @@
 .idea/
 .env
 composer.lock
+composer.phar
 package-lock.json
 /node_modules/
 /vendor/
 /var/
 /public/bundles/
-composer.phar
+/config/unite/

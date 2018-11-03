@@ -39,7 +39,7 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         // Try to validate too long title, identifier, type
         $view
             ->setTitle($this->generateRandomUTF8String(256))
-            ->setIdentifier($this->generateRandomMachineName(256))
+            ->setIdentifier($this->generateRandomMachineName(201))
             ->setType($this->generateRandomMachineName(256))
             ->setContentType(new ContentType())
             ->getContentType()

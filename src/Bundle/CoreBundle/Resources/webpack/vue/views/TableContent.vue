@@ -77,7 +77,7 @@
                 return !this.selectable;
             },
             isSortable() {
-                return !!this.sort.sortable;
+                return !!this.sort.sortable && !this.selectable && this.updateable;
             },
             rowStyle() {
                 return this.rowMinWidth > 0 ? { 'min-width': this.rowMinWidth + 'px' } : {};
@@ -149,7 +149,7 @@
                 }
             },
             hasColumnFixedWidth(identifier) {
-                if(this.$refs['field_' + identifier] && this.$refs['field_' + identifier].length > 1) {
+                if(this.$refs['field_' + identifier] && this.$refs['field_' + identifier].length > 1 && this.$refs['field_' + identifier][1].$el.nodeType === Node.ELEMENT_NODE) {
                     return this.$refs['field_' + identifier][1].$el.classList.contains('fixed-width');
                 }
                 return false;
