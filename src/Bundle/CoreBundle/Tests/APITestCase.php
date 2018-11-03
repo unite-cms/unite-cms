@@ -271,6 +271,13 @@ abstract class APITestCase extends ContainerAwareTestCase
         $reflector->setAccessible(true);
         $reflector->setValue(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference'), $em);
 
+        $o01 = new \ReflectionProperty(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference'), 'referenceResolver');
+        $o01->setAccessible(true);
+        $referenceResolver = $o01->getValue(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference'));
+
+        $reflector = new \ReflectionProperty($referenceResolver, 'entityManager');
+        $reflector->setAccessible(true);
+        $reflector->setValue($referenceResolver, $em);
 
 
         $this->organization = new Organization();
