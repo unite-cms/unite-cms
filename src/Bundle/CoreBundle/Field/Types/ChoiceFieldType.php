@@ -17,7 +17,7 @@ class ChoiceFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['choices', 'required', 'empty_data'];
+    const SETTINGS = ['choices', 'required', 'initial_data', 'description'];
 
     /**
      * All required settings for this field type.
@@ -49,23 +49,4 @@ class ChoiceFieldType extends FieldType
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
-    {
-        // Validate allowed and required settings.
-        parent::validateSettings($settings, $context);
-
-        // Only continue, if there are no violations yet.
-        if ($context->getViolations()->count() > 0) {
-            return;
-        }
-
-        // validate if empty data is inside choice values
-        if (isset($settings->empty_data) && !in_array($settings->empty_data, $settings->choices)) {
-            $context->buildViolation('emptydata_not_inside_values')->atPath('choices')->addViolation();
-        }
-
-    }
 }

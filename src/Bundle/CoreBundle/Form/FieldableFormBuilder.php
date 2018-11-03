@@ -33,8 +33,6 @@ class FieldableFormBuilder
 
         foreach ($fieldable->getFields() as $fieldDefinition) {
 
-            $settings = $fieldDefinition->getSettings();
-
             // Add the definition of the current field to the options.
             $options['fields'][] = new FieldableFormField(
                 $this->fieldTypeManager->getFieldType($fieldDefinition->getType()),
@@ -47,14 +45,6 @@ class FieldableFormBuilder
              */
             if ($content && array_key_exists($fieldDefinition->getIdentifier(), $content->getData())) {
                 $data[$fieldDefinition->getIdentifier()] = $content->getData()[$fieldDefinition->getIdentifier()];
-            }
-
-            /**
-             *  check if empty_data isset and pre-populate fields only on new created content,
-             *  data option would always override the value and empty_data does not pre-populate the field
-             */
-            if (isset($settings->empty_data) && empty($data[$fieldDefinition->getIdentifier()])) {
-                $data[$fieldDefinition->getIdentifier()] = $settings->empty_data;
             }
 
         }

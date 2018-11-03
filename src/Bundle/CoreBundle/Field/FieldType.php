@@ -58,9 +58,9 @@ abstract class FieldType implements FieldTypeInterface
             'required' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false
         ];
 
-        // add empty data option only if it's really explicitly allowed
-        if (isset($field->getSettings()->empty_data)) {
-            $options['empty_data'] = $field->getSettings()->empty_data;
+        // add initial_data option only if it's really explicitly allowed
+        if (isset($field->getSettings()->initial_data)) {
+            $options['initial_data'] = $field->getSettings()->initial_data;
         }
 
         return $options;
@@ -145,11 +145,6 @@ abstract class FieldType implements FieldTypeInterface
         // validate required
         if (isset($settings['required']) && !is_bool($settings['required'])) {
             $context->buildViolation('noboolean_value')->atPath($setting)->addViolation();
-        }
-
-        // validate empty data
-        if (isset($settings['empty_data']) && !is_string($settings['empty_data'])) {
-            $context->buildViolation('nostring_value')->atPath($setting)->addViolation();
         }
 
         return $violations;

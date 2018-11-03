@@ -9,5 +9,5 @@ class EmailFieldType extends FieldType
 {
     const TYPE = "email";
     const FORM_TYPE = EmailType::class;
-    const SETTINGS = ['required', 'empty_data'];
+    const SETTINGS = ['required', 'initial_data', 'description'];
 }

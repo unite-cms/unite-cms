@@ -27,16 +27,16 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
-                'empty_data' => [],
+                'initial_data' => [],
                 'required' => 124
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(3, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('nostring_value', $errors->get(2)->getMessageTemplate());
+        #$this->assertEquals('nostring_value', $errors->get(2)->getMessageTemplate());
 
     }
 
@@ -46,7 +46,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'empty_data' => '2018-05-24',
+                'initial_data' => '2018-05-24',
                 'required' => true
             ]
         ));
@@ -80,12 +80,12 @@ class DateFieldTypeTest extends FieldTypeTestCase
 
         $this->assertEquals('2012-01-01', $form->get($ctField->getIdentifier())->getData());
 
-        // test with empty_data set
+        // test with initial_data set
         $ctField = $this->createContentTypeField('date');
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'empty_data' => '2018-06-24',
+                'initial_data' => '2018-06-24',
                 'required' => true
             ]
         ));

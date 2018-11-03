@@ -29,14 +29,14 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'required' => 123,
-                'empty_data' => true
+                'initial_data' => true
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(2, $errors);
+        $this->assertCount(1, $errors);
         $this->assertEquals('noboolean_value', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('nostring_value', $errors->get(1)->getMessageTemplate());
+        #$this->assertEquals('nostring_value', $errors->get(1)->getMessageTemplate());
     }
 
     public function testFormFormSubmit() {
@@ -45,7 +45,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'empty_data' => true
+                'initial_data' => true
             ]
         ));
 

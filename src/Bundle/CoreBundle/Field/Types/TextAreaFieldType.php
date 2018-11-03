@@ -18,7 +18,7 @@ class TextAreaFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['rows', 'required', 'empty_data'];
+    const SETTINGS = ['rows', 'required', 'initial_data', 'description'];
 
     function getFormOptions(FieldableField $field): array
     {

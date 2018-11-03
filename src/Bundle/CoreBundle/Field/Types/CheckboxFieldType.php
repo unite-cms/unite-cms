@@ -9,5 +9,5 @@ class CheckboxFieldType extends FieldType
 {
     const TYPE = "checkbox";
     const FORM_TYPE = CheckboxType::class;
-    const SETTINGS = ['required', 'empty_data'];
+    const SETTINGS = ['required', 'initial_data', 'description'];
 }
