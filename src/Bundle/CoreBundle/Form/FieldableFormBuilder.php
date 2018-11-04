@@ -31,6 +31,9 @@ class FieldableFormBuilder
 
         $options['fields'] = [];
 
+        // pass full FieldableContent object as option
+        $options['content'] = $content;
+
         foreach ($fieldable->getFields() as $fieldDefinition) {
 
             // Add the definition of the current field to the options.

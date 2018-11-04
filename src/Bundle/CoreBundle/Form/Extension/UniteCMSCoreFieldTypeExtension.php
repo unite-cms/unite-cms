@@ -25,12 +25,13 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
+        dump($options);
+
+
         // add required constraint
         if (isset($options['required']) && $options['required']) {
 
-            $options['constraints'][] = new NotBlank();
-
-            dump($options); exit;
+            #$options['constraints'][] = new NotBlank();
 
         }
 
@@ -63,6 +64,7 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
         parent::configureOptions($resolver);
         $resolver->setDefault('description', '');
         $resolver->setDefault('initial_data', '');
+        $resolver->setDefined('content');
         $resolver->setDefault('required', false);
     }
 
