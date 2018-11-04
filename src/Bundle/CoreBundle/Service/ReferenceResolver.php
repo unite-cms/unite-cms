@@ -191,13 +191,9 @@ class ReferenceResolver
         )->first();
 
         if(!$field) {
-            throw new MissingFieldException("A reference field was configured with reference field \"{$field_identifier}\" on content type \"{$contentType->getIdentifier()}\". However \"{$field_identifier}\" does not exist or isn't a reference field.");
+            throw new MissingFieldException("A reference field was configured with reference field \"{$field_identifier}\" on content type \"{$contentType->getIdentifier()}\". However \"{$field_identifier}\" does not exist or is of wrong type.");
         }
 
-        if($field->getSettings()->domain !== $contentType->getDomain()->getIdentifier() || $field->getSettings()->content_type !== $contentType->getIdentifier()) {
-            throw new MissingFieldException("A reference field was configured with reference field \"{$field_identifier}\". However dies field holds a reference to a different content type.");
-        }
-
-        return $contentType->getFields()->get($field_identifier);
+        return $field;
     }
 }

@@ -12,6 +12,8 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\MissingContentTypeException;
 use UniteCMS\CoreBundle\Exception\MissingDomainException;
@@ -19,14 +21,14 @@ use UniteCMS\CoreBundle\Exception\MissingFieldException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
-use UniteCMS\CoreBundle\Form\WebComponentType;
+use UniteCMS\CoreBundle\Form\ReferenceOfType;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
 class ReferenceOfFieldType extends FieldType
 {
     const TYPE = "reference_of";
-    const FORM_TYPE = WebComponentType::class;
+    const FORM_TYPE = ReferenceOfType::class;
 
     const SETTINGS = ['domain', 'content_type', 'reference_field'];
     const REQUIRED_SETTINGS = ['domain', 'content_type', 'reference_field'];
@@ -56,6 +58,10 @@ class ReferenceOfFieldType extends FieldType
      */
     function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
+        if(!$context->getObject() instanceof ContentTypeField) {
+            $context->buildViolation('invalid_entity_type')->addViolation();
+        }
+
         // Validate allowed and required settings.
         parent::validateSettings($settings, $context);
 
@@ -72,7 +78,17 @@ class ReferenceOfFieldType extends FieldType
         try {
             $domain = $this->referenceResolver->resolveDomain($settings->domain);
             $contentType = $this->referenceResolver->resolveContentType($domain, $settings->content_type);
-            $this->referenceResolver->resolveField($contentType, $settings->reference_field, ReferenceFieldType::getType());
+            $field = $this->referenceResolver->resolveField($contentType, $settings->reference_field, ReferenceFieldType::getType());
+
+            /**
+             * @var ContentType $thisContentType
+             */
+            $thisContentType = $context->getObject()->getContentType();
+
+            // Check if field references the current content type.
+            if($field->getSettings()->domain !== $thisContentType->getDomain()->getIdentifier() || $field->getSettings()->content_type !== $thisContentType->getIdentifier()) {
+                $context->buildViolation('invalid_field_reference')->atPath('reference_field')->addViolation();
+            }
 
         } catch (DomainAccessDeniedException $e) {
             $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();

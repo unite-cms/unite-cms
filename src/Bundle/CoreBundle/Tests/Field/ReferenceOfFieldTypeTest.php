@@ -174,6 +174,11 @@ class ReferenceOfFieldTypeTest extends FieldTypeTestCase
         $ctField->getContentType()->setIdentifier('baa');
         $domain = $ctField->getContentType()->getDomain();
 
+        // Create 2nd content type
+        $ct2 = new ContentType();
+        $ct2->setTitle('CT2')->setIdentifier('ct2');
+        $domain->addContentType($ct2);
+
         // wrong domain name and wrong content_type
         $ctField->getSettings()->domain = 'wrong';
         $ctField->getSettings()->content_type = 'wrong';
@@ -188,7 +193,7 @@ class ReferenceOfFieldTypeTest extends FieldTypeTestCase
 
         // wrong domain
         $ctField->getSettings()->domain = 'wrong';
-        $ctField->getSettings()->content_type = 'baa';
+        $ctField->getSettings()->content_type = 'ct2';
         $errors = static::$container->get('validator')->validate($domain);
         $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
 
@@ -201,7 +206,7 @@ class ReferenceOfFieldTypeTest extends FieldTypeTestCase
         // Reference field exists but is of wrong type
         $ref_field = new ContentTypeField();
         $ref_field->setType('text')->setIdentifier('ref')->setTitle('Ref');
-        $ctField->getContentType()->addField($ref_field);
+        $ct2->addField($ref_field);
         $ctField->getSettings()->reference_field = 'ref';
 
         $errors = static::$container->get('validator')->validate($domain);
@@ -210,12 +215,12 @@ class ReferenceOfFieldTypeTest extends FieldTypeTestCase
 
         // Reference field exists and is of correct type but not for this content type and domain.
         $ref_field->setType('reference');
-        $ref_field->getSettings()->domain = 'other';
-        $ref_field->getSettings()->content_type = 'other';
+        $ref_field->getSettings()->domain = 'new';
+        $ref_field->getSettings()->content_type = 'ct2';
 
         $errors = static::$container->get('validator')->validate($domain);
         $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_field', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_field_reference', $errors->get(0)->getMessageTemplate());
 
         // Reference field exists and is of correct type and for this domain and ct
         $ref_field->getSettings()->domain = 'new';
