@@ -13,6 +13,9 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -24,23 +27,39 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
-        dump($options);
-
-
-        // add required constraint
-        if (isset($options['required']) && $options['required']) {
-
-            #$options['constraints'][] = new NotBlank();
-
-        }
-
-        // set default values for field
+        // set default value for field
         if (isset($options['initial_data']) && $options['initial_data']) {
 
-            //dump("required");
+            $default = $options['initial_data'];
+
+            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($default) {
+
+                $data = $event->getData();
+                $form = $event->getForm();
+
+                if (is_null($data)) {
+                    $event->setData($default);
+                }
+
+            });
+
         }
 
+        // add required validation dynamically
+        if (isset($options['not_empty']) && $options['not_empty']) {
+
+            $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+
+                $data = $event->getData();
+                $form = $event->getForm();
+
+                if (empty($data)) {
+                    $form->addError(new FormError('', 'not_blank'));
+                }
+
+            });
+
+        }
 
     }
 
@@ -49,7 +68,7 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        // pass description
+        // pass description to template
         if (isset($options['description'])) {
             $view->vars['description'] = $options['description'];
         }
@@ -61,11 +80,9 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        parent::configureOptions($resolver);
-        $resolver->setDefault('description', '');
-        $resolver->setDefault('initial_data', '');
-        $resolver->setDefined('content');
-        $resolver->setDefault('required', false);
+        $resolver->setDefined('description');
+        $resolver->setDefined('initial_data');
+        $resolver->setDefined('not_empty');
     }
 
     /**
@@ -75,4 +92,5 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
     {
         return FormType::class;
     }
+
 }

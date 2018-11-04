@@ -55,7 +55,9 @@ abstract class FieldType implements FieldTypeInterface
     {
         $options = [
             'label' => $this->getTitle($field),
-            'required' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false
+            'required' => false,
+            'not_empty' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
+            'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : ""
         ];
 
         // add initial_data option only if it's really explicitly allowed
@@ -145,6 +147,11 @@ abstract class FieldType implements FieldTypeInterface
         // validate required
         if (isset($settings['required']) && !is_bool($settings['required'])) {
             $context->buildViolation('noboolean_value')->atPath($setting)->addViolation();
+        }
+
+        // validate description
+        if (isset($settings['description']) && !is_string($settings['description'])) {
+            $context->buildViolation('nostring_value')->atPath($setting)->addViolation();
         }
 
         return $violations;

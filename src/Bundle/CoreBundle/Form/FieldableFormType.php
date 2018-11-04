@@ -49,7 +49,7 @@ class FieldableFormType extends AbstractType
             $builder->add(
                 $field->getFieldType()->getIdentifier($field->getFieldDefinition()),
                 $field->getFieldType()->getFormType($field->getFieldDefinition()),
-                $field->getFieldType()->getFormOptions($field->getFieldDefinition())+['content' => $options['content']]
+                $field->getFieldType()->getFormOptions($field->getFieldDefinition())
             );
         }
     }

@@ -21,6 +21,7 @@
                 {{- form_widget(form) -}}
                 {{- form_errors(form) -}}
             </div>
+            <p class="uk-form-help-inline">{{ form.vars.description }}</p>
         </div>
     {% elseif label is not same as(false) -%}
         <div class="uk-margin">
@@ -29,11 +30,13 @@
                 {{- form_widget(form) -}}
                 {{- form_errors(form) -}}
             </div>
+            <p class="uk-form-help-inline">{{ form.vars.description }}</p>
         </div>
     {% else %}
         {{- form_widget(form) -}}
         {{- form_errors(form) -}}
     {% endif %}
+
 {%- endblock form_row -%}
 
 {%- block button_row -%}

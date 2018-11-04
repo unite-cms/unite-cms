@@ -32,7 +32,6 @@ class TextFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(2, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
-        #$this->assertEquals('nostring_value', $errors->get(2)->getMessageTemplate());
     }
 
     public function testFormFormSubmit() {
@@ -56,6 +55,7 @@ class TextFieldTypeTest extends FieldTypeTestCase
 
         $this->assertTrue($form->isSubmitted());
         $this->assertTrue($form->isValid());
+
         $this->assertEquals('test', $form->get($ctField->getIdentifier())->getData());
 
     }

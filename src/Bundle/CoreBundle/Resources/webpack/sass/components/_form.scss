@@ -1,4 +1,17 @@
 
+
+.uk-form-label {
+   &.required:after {
+      content:" *";
+      color: red;
+   }
+}
+
+.uk-form-help-inline {
+   margin-top: 0.5em;
+   font-size: small;
+}
+
 .uk-textarea {
    resize: horizontal;
 }

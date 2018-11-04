@@ -29,23 +29,46 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'required' => 123,
-                'initial_data' => true
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('noboolean_value', $errors->get(0)->getMessageTemplate());
-        #$this->assertEquals('nostring_value', $errors->get(1)->getMessageTemplate());
     }
 
     public function testFormFormSubmit() {
 
         $ctField = $this->createContentTypeField('checkbox');
 
+        // check required
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => true
+                'required' => true
+            ]
+        ));
+
+        $content = new Content();
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+            'csrf_protection' => false,
+        ]);
+
+        $form->submit([]);
+        $this->assertFalse($form->isValid());
+        $this->assertTrue($form->isSubmitted());
+        $error_check = [];
+        foreach ($form->getErrors(true, true) as $error) {
+            $error_check[] = $error->getMessageTemplate();
+        }
+        $this->assertCount(1, $error_check);
+        $this->assertEquals('not_blank', $error_check[0]);
+
+        // check initial data
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'initial_data' => true,
+                'required' => true
             ]
         ));
 
