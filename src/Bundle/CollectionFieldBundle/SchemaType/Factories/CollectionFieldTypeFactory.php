@@ -80,6 +80,11 @@ class CollectionFieldTypeFactory
                     } else {
                       $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
                     }
+
+                    // field type can also return null, if no input / output is defined for this field.
+                    if(!$fieldsSchemaTypes[$fieldIdentifier]) {
+                        unset($fieldsSchemaTypes[$fieldIdentifier]);
+                    }
                 }
 
                 if($isInputType) {

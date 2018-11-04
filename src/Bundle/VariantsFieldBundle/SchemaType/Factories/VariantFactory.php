@@ -142,6 +142,11 @@ class VariantFactory
 
                 foreach($variant->getFields() as $field) {
                     $variantFieldsSchemaTypes[IdentifierNormalizer::graphQLIdentifier($field)] = $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel);
+
+                    // field type can also return null, if no input / output is defined for this field.
+                    if(!$variantFieldsSchemaTypes[IdentifierNormalizer::graphQLIdentifier($field)]) {
+                        unset($variantFieldsSchemaTypes[IdentifierNormalizer::graphQLIdentifier($field)]);
+                    }
                 }
 
                 if($variantFieldsSchemaTypes) {

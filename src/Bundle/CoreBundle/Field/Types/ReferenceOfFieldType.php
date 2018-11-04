@@ -9,11 +9,15 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\ORM\EntityManager;
+use GraphQL\Type\Definition\Type;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\MissingContentTypeException;
 use UniteCMS\CoreBundle\Exception\MissingDomainException;
@@ -22,6 +26,9 @@ use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Form\ReferenceOfType;
+use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
@@ -43,14 +50,27 @@ class ReferenceOfFieldType extends FieldType
      */
     private $referenceResolver;
 
+    /**
+     * @var EntityManager $entityManager
+     */
+    private $entityManager;
+
+    /**
+     * @var PaginatorInterface $paginator
+     */
+    private $paginator;
+
     function __construct(
         ValidatorInterface $validator,
         AuthorizationChecker $authorizationChecker,
         UniteCMSManager $uniteCMSManager,
-        EntityManager $entityManager
+        EntityManager $entityManager,
+        PaginatorInterface $paginator
     ) {
         $this->validator = $validator;
         $this->referenceResolver = new ReferenceResolver($uniteCMSManager, $entityManager, $authorizationChecker);
+        $this->entityManager = $entityManager;
+        $this->paginator = $paginator;
     }
 
     /**
@@ -101,5 +121,106 @@ class ReferenceOfFieldType extends FieldType
         } catch (MissingFieldException $e) {
             $context->buildViolation('invalid_field')->atPath('reference_field')->addViolation();
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
+        return [
+            'type' => $schemaTypeManager->getSchemaType('ContentResultInterface'),
+            'args' => [
+                'limit' => [
+                    'type' => Type::int(),
+                    'description' => 'Set maximal number of content items to return.',
+                    'defaultValue' => 20,
+                ],
+                'page' => [
+                    'type' => Type::int(),
+                    'description' => 'Set the pagination page to get the content from.',
+                    'defaultValue' => 1,
+                ],
+                'sort' => [
+                    'type' => Type::listOf($schemaTypeManager->getSchemaType('SortInput')),
+                    'description' => 'Set one or many fields to sort by.',
+                ],
+                'filter' => [
+                    'type' => $schemaTypeManager->getSchemaType('FilterInput'),
+                    'description' => 'Set one optional filter condition.',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function resolveGraphQLData(FieldableField $field, $value)
+    {
+        // TODO: args are missing.
+        $args = ['limit' => 10, 'page' => 1];
+
+        $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
+        $args['limit'] = $args['limit'] > 100 ? 100 : $args['limit'];
+        $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
+
+        // Resolve content type and field.
+        $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
+        $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
+        $field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
+
+
+        // Get content for the resolved content type.
+        $contentEntityFields = $this->entityManager->getClassMetadata(Content::class)->getFieldNames();
+        $contentQuery = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
+            ->select('c')
+            ->where('c.contentType = :contentType')
+            ->setParameter(':contentType', $contentType);
+
+        // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
+        if (!empty($args['sort'])) {
+            foreach ($args['sort'] as $sort) {
+
+                $key = $sort['field'];
+                $order = $sort['order'];
+
+                // if we sort by a content field.
+                if (in_array($key, $contentEntityFields)) {
+                    $contentQuery->addOrderBy('c.'.$key, $order);
+
+                    // if we sort by a nested content data field.
+                } else {
+                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                }
+            }
+        }
+
+        // Adding where filter to the query.
+        if (!empty($args['filter'])) {
+
+            // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
+            // TODO: Replace field names with nested field selectors.
+            $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
+            $contentQuery->andWhere($a->getFilter());
+            foreach($a->getParameters() as $parameter => $value) {
+                $contentQuery->setParameter($parameter, $value);
+            }
+        }
+
+        // Get all content in one request for all contentTypes.
+        return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], [
+            'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResult')
+        ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
+        // This field does not save any data it only is an accessor to fields that are referencing this content.
+        // Therefore there is no input for this field.
+        return null;
     }
 }

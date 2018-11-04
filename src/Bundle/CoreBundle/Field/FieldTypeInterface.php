@@ -25,7 +25,7 @@ interface FieldTypeInterface
      * @param FieldableField $field
      * @param SchemaTypeManager $schemaTypeManager
      * @param int $nestingLevel
-     * @return Type
+     * @return Type|null|array
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0);
 
@@ -42,7 +42,7 @@ interface FieldTypeInterface
      * @param FieldableField $field
      * @param SchemaTypeManager $schemaTypeManager
      * @param int $nestingLevel
-     * @return Type
+     * @return Type|null
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0);
 
