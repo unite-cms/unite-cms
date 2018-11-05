@@ -77,13 +77,14 @@ class DateFieldTypeTest extends FieldTypeTestCase
         ]);
 
         $this->assertEquals('2012-01-01', $form->get($ctField->getIdentifier())->getData());
+    }
 
-        // test with initial_data set
+    public function testFormSubmit() {
+
         $ctField = $this->createContentTypeField('date');
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => '2018-06-24',
                 'required' => true
             ]
         ));
@@ -95,7 +96,46 @@ class DateFieldTypeTest extends FieldTypeTestCase
         ]);
 
         $form->submit([]);
+        $this->assertFalse($form->isValid());
+        $this->assertTrue($form->isSubmitted());
+        $error_check = [];
+        foreach ($form->getErrors(true, true) as $error) {
+            $error_check[] = $error->getMessageTemplate();
+        }
+        $this->assertCount(1, $error_check);
+        $this->assertEquals('not_blank', $error_check[0]);
+    }
 
-        $this->assertEquals('2018-06-24', $form->getData()[$ctField->getIdentifier()]);
+    public function testContentFormBuild() {
+
+        $ctField = $this->createContentTypeField('date');
+
+        $ctField->setIdentifier('f1');
+
+        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('baa');
+        $ctField->getContentType()->getDomain()->setIdentifier('foo');
+        $ctField->getContentType()->setIdentifier('ct1');
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'initial_data' => '2012-01-01',
+                'description' => 'blabla'
+            ]
+        ));
+
+        $content = new Content();
+        $content->setContentType($ctField->getContentType());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content
+        );
+
+        $formView = $form->createView();
+        $root = $formView->getIterator()->current();
+
+        $this->assertEquals('2012-01-01', $root->vars['value']);
+        $this->assertEquals('blabla', $root->vars['description']);
+
     }
 }

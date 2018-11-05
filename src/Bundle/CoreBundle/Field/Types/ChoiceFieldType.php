@@ -49,4 +49,27 @@ class ChoiceFieldType extends FieldType
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
+    {
+        // Validate allowed and required settings.
+        parent::validateSettings($settings, $context);
+
+        // Only continue, if there are no violations yet.
+        if ($context->getViolations()->count() > 0) {
+            return;
+        }
+        // validate if initial data exists inside choice values
+        if (isset($settings->initial_data)) {
+            $values = (array) $settings->initial_data;
+            foreach ($values as $value) {
+                if (!in_array($value, $settings->choices)) {
+                    $context->buildViolation('initial_data_not_inside_values')->atPath('choices')->addViolation();
+                }
+            }
+        }
+    }
+
 }

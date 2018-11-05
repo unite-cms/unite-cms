@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Field;
 
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -55,9 +56,8 @@ abstract class FieldType implements FieldTypeInterface
     {
         $options = [
             'label' => $this->getTitle($field),
-            'required' => false,
-            'not_empty' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
-            'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : ""
+            'required' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
+            'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
         ];
 
         // add initial_data option only if it's really explicitly allowed
@@ -152,6 +152,21 @@ abstract class FieldType implements FieldTypeInterface
         // validate description
         if (isset($settings['description']) && !is_string($settings['description'])) {
             $context->buildViolation('nostring_value')->atPath($setting)->addViolation();
+        }
+
+        // validate description length
+        if (isset($settings['description'])) {
+
+            $lengthConstraint = new Assert\Length(['max' => 255]);
+
+            $errors = $context->getValidator()->validate(
+                $settings['description'],
+                $lengthConstraint
+            );
+
+            if (count($errors) > 0) {
+                $context->buildViolation('too_long', ['limit' => 255])->atPath($setting)->addViolation();
+            }
         }
 
         return $violations;

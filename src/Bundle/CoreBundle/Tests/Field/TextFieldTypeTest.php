@@ -17,26 +17,33 @@ class TextFieldTypeTest extends FieldTypeTestCase
 
     public function testContentTypeFieldTypeWithInvalidSettings()
     {
-
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('text');
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
                 'required' => 'foo',
-                'initial_data' => true
+                'initial_data' => true,
+                'description' => $this->generateRandomMachineName(500)
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(2, $errors);
+        $this->assertCount(3, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('too_long', $errors->get(2)->getMessageTemplate());
     }
 
-    public function testFormFormSubmit() {
+    public function testContentFormBuild() {
 
         $ctField = $this->createContentTypeField('text');
+
+        $ctField->setIdentifier('f1');
+
+        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('baa');
+        $ctField->getContentType()->getDomain()->setIdentifier('foo');
+        $ctField->getContentType()->setIdentifier('ct1');
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
@@ -47,16 +54,16 @@ class TextFieldTypeTest extends FieldTypeTestCase
         $content = new Content();
         $content->setContentType($ctField->getContentType());
 
-        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
-            'csrf_protection' => false,
-        ]);
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content
+        );
 
-        $form->submit([]);
+        $formView = $form->createView();
+        $root = $formView->getIterator()->current();
 
-        $this->assertTrue($form->isSubmitted());
-        $this->assertTrue($form->isValid());
-
-        $this->assertEquals('test', $form->get($ctField->getIdentifier())->getData());
+        $this->assertEquals('test', $root->vars['value']);
 
     }
+
 }

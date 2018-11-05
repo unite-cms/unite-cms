@@ -37,7 +37,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('noboolean_value', $errors->get(0)->getMessageTemplate());
     }
 
-    public function testFormFormSubmit() {
+    public function testFormSubmit() {
 
         $ctField = $this->createContentTypeField('checkbox');
 
@@ -63,23 +63,38 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         }
         $this->assertCount(1, $error_check);
         $this->assertEquals('not_blank', $error_check[0]);
+    }
 
-        // check initial data
+    public function testContentFormBuild() {
+
+        $ctField = $this->createContentTypeField('checkbox');
+
+        $ctField->setIdentifier('f1');
+
+        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('baa');
+        $ctField->getContentType()->getDomain()->setIdentifier('foo');
+        $ctField->getContentType()->setIdentifier('ct1');
+
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'initial_data' => true,
-                'required' => true
+                'description' => 'blabla'
             ]
         ));
 
         $content = new Content();
+        $content->setContentType($ctField->getContentType());
 
-        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
-            'csrf_protection' => false,
-        ]);
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content
+        );
 
-        $form->submit([]);
+        $formView = $form->createView();
+        $root = $formView->getIterator()->current();
 
-        $this->assertTrue($form->getData()[$ctField->getIdentifier()]);
+        $this->assertEquals(1, $root->vars['value']);
+        $this->assertEquals('blabla', $root->vars['description']);
+
     }
 }

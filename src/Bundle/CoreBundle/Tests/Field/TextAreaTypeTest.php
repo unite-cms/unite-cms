@@ -64,13 +64,15 @@ class TextAreaTypeTest extends FieldTypeTestCase
           [
               'foo' => 'baa',
               'required' => 'foo',
-              'initial_data' => true
+              'initial_data' => true,
+              'description' => true
           ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(2, $errors);
+        $this->assertCount(3, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('nostring_value', $errors->get(2)->getMessageTemplate());
     }
 }
