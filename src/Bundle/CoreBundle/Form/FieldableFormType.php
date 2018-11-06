@@ -46,22 +46,10 @@ class FieldableFormType extends AbstractType
          * @var FieldableFormField $field
          */
         foreach ($options['fields'] as $field) {
-
-            $foptions = $field->getFieldType()->getFormOptions($field->getFieldDefinition());
-
-            // unfortunately found no other way:
-            // Problem 1: cant access / distinguish form types with getForm()->getRoot()
-            // Problem 2: required option is used for some other Types, breaks stuff
-            // see UniteCMSCoreFieldTypeExtension extension
-            if (isset($options['content'])) {
-                $foptions['content'] = $options['content'];
-                $foptions['is_field'] = true;
-            }
-
             $builder->add(
                 $field->getFieldType()->getIdentifier($field->getFieldDefinition()),
                 $field->getFieldType()->getFormType($field->getFieldDefinition()),
-                $foptions
+                $field->getFieldType()->getFormOptions($field->getFieldDefinition())
             );
         }
     }

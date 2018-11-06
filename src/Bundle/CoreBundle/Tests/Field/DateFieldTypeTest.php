@@ -79,33 +79,6 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('2012-01-01', $form->get($ctField->getIdentifier())->getData());
     }
 
-    public function testFormSubmit() {
-
-        $ctField = $this->createContentTypeField('date');
-
-        $ctField->setSettings(new FieldableFieldSettings(
-            [
-                'required' => true
-            ]
-        ));
-
-        $content = new Content();
-
-        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
-            'csrf_protection' => false,
-        ]);
-
-        $form->submit([]);
-        $this->assertFalse($form->isValid());
-        $this->assertTrue($form->isSubmitted());
-        $error_check = [];
-        foreach ($form->getErrors(true, true) as $error) {
-            $error_check[] = $error->getMessageTemplate();
-        }
-        $this->assertCount(1, $error_check);
-        $this->assertEquals('not_blank', $error_check[0]);
-    }
-
     public function testContentFormBuild() {
 
         $ctField = $this->createContentTypeField('date');

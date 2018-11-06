@@ -14,7 +14,7 @@ class RangeFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['min', 'max', 'step', 'required', 'initial_data', 'description'];
+    const SETTINGS = ['min', 'max', 'step', 'required', 'description'];
 
     function getFormOptions(FieldableField $field): array
     {

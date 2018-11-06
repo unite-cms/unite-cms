@@ -51,5 +51,10 @@ class TextAreaFieldType extends FieldType
                 $context->buildViolation('nointeger_value')->atPath('rows')->addViolation();
             }
         }
+
+        // validate if initial data is a string
+        if (isset($settings->initial_data) && !is_string($settings->initial_data)) {
+            $context->buildViolation('invalid_initial_data')->atPath('initial_data')->addViolation();
+        }
     }
 }

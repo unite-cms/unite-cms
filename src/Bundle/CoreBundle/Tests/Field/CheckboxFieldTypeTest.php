@@ -61,6 +61,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         foreach ($form->getErrors(true, true) as $error) {
             $error_check[] = $error->getMessageTemplate();
         }
+
         $this->assertCount(1, $error_check);
         $this->assertEquals('not_blank', $error_check[0]);
     }

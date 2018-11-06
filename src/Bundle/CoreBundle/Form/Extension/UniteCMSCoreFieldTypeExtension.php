@@ -26,19 +26,18 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
         // set default value for field
         if (isset($options['initial_data']) && $options['initial_data']) {
 
-            $content = $options['content'];
             $default = $options['initial_data'];
 
-            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($default, $content) {
+            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($default) {
 
                 $data = $event->getData();
+                $content = $event->getForm()->getRoot()->getConfig()->getOption('content');
 
                 // if new object and data is empty
-                if (is_null($content->getId()) && empty($data)) {
+                if ($content && is_null($content->getId()) && empty($data)) {
                     $event->setData($default);
                 }
 
@@ -47,10 +46,7 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
         }
 
         // add required validation dynamically
-        if (isset($options['required'])
-            && $options['required']
-            && isset($options['is_field'])
-        ) {
+        if (isset($options['not_empty']) && $options['not_empty']) {
 
             $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
 
@@ -86,22 +82,13 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
     {
         $resolver->setDefined('description');
         $resolver->setDefined('initial_data');
-        $resolver->setDefined('content');
-        $resolver->setDefined('is_field');
+        $resolver->setDefined('not_empty');
     }
 
     /**
      * {@inheritdoc}
      */
     public function getExtendedType()
-    {
-        return FormType::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent()
     {
         return FormType::class;
     }

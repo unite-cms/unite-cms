@@ -57,6 +57,7 @@ abstract class FieldType implements FieldTypeInterface
         $options = [
             'label' => $this->getTitle($field),
             'required' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
+            'not_empty' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
             'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
         ];
 
@@ -157,11 +158,9 @@ abstract class FieldType implements FieldTypeInterface
         // validate description length
         if (isset($settings['description'])) {
 
-            $lengthConstraint = new Assert\Length(['max' => 255]);
-
             $errors = $context->getValidator()->validate(
                 $settings['description'],
-                $lengthConstraint
+                new Assert\Length(['max' => 255])
             );
 
             if (count($errors) > 0) {

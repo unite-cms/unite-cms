@@ -25,6 +25,7 @@ invalid_characters: 'This field contains invalid characters. Please check https:
 invalid_url: 'Only full URLs are allowed (e.g.: https://example.com).'
 content_not_found: 'The selected content object was not found. Please reload and try again.'
 invalid_email: 'This email address is not valid.'
+invalid_initial_data: 'The given initial data is not valid for this type.'
 too_short: 'This field must be at least {{ limit }} characters long.'
 too_long: 'This field cannot be longer than {{ limit }} characters.'
 not_blank: 'Please fill out this field.'

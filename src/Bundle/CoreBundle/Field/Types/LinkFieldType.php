@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\LinkType;
@@ -78,6 +79,19 @@ class LinkFieldType extends FieldType
 
         if (!empty($settings->target_widget) && !is_bool($settings->target_widget)) {
             $context->buildViolation('noboolean_value')->atPath('target_widget')->addViolation();
+        }
+
+        // validate if initial data is a external link
+        if (isset($settings->initial_data)) {
+
+            $errors = $context->getValidator()->validate(
+                $settings->initial_data,
+                new Assert\Url()
+            );
+
+            if (count($errors) > 0) {
+                $context->buildViolation('invalid_initial_data')->atPath('initial_data')->addViolation();
+            }
         }
 
     }
