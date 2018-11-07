@@ -22,5 +22,28 @@ class PhoneFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+
+        // test wrong intial data
+        $ctField->setSettings(new FieldableFieldSettings(['initial_data' => ['test']]));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
+    }
+
+    public function testPhoneTypeFieldTypeWithValidSettings()
+    {
+        // Phone Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('phone');
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'required' => true,
+                'description' => 'my description',
+                'initial_data' => '+436605277131'
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(0, $errors);
     }
 }

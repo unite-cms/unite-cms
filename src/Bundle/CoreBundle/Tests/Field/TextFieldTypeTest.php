@@ -23,7 +23,6 @@ class TextFieldTypeTest extends FieldTypeTestCase
             [
                 'foo' => 'baa',
                 'required' => 'foo',
-                'initial_data' => true,
                 'description' => $this->generateRandomMachineName(500)
             ]
         ));
@@ -33,6 +32,17 @@ class TextFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
         $this->assertEquals('too_long', $errors->get(2)->getMessageTemplate());
+
+         // test wrong initial data
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'initial_data' => true,
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testContentFormBuild() {

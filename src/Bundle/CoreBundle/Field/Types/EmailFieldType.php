@@ -27,7 +27,7 @@ class EmailFieldType extends FieldType
         }
 
         // validate if initial data is a valid email
-        if (isset($settings->initial_data) && !filter_var($settings->initial_data, FILTER_VALIDATE_IP)) {
+        if (isset($settings->initial_data) && !filter_var($settings->initial_data, FILTER_VALIDATE_EMAIL)) {
             $context->buildViolation('invalid_initial_data')->atPath('initial_data')->addViolation();
         }
     }

@@ -24,10 +24,10 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
+        // test invalid settings
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
-                'initial_data' => [],
                 'required' => 124
             ]
         ));
@@ -36,6 +36,17 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(2, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+
+        // test wrong initial data
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'initial_data' => true,
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testDateTypeFieldTypeWithValidSettings()

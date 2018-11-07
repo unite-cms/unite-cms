@@ -23,6 +23,27 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
 
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'foo' => 'baa',
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+
+        // test wrong initial data
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'initial_data' => '15.67.98877'
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testFormDataTransformers() {
