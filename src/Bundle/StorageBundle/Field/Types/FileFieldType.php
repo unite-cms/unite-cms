@@ -114,7 +114,7 @@ class FileFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         if(empty($value['id']) || empty($value['name'])) {
             return null;

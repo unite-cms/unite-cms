@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -83,9 +84,10 @@ interface FieldTypeInterface
      *
      * @param FieldableField $field
      * @param $value
+     * @param FieldableContent $content
      * @return mixed
      */
-    function resolveGraphQLData(FieldableField $field, $value);
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content);
 
     /**
      * A callback to allow the field type to validate the field settings.

@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use GraphQL\Type\Definition\Type;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -40,7 +41,7 @@ class ChoicesFieldType extends ChoiceFieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         return (array)$value;
     }
