@@ -128,8 +128,10 @@ class ReferenceOfFieldType extends FieldType
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
+        $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
+        $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
         return [
-            'type' => $schemaTypeManager->getSchemaType('ContentResultInterface'),
+            'type' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResult'), $domain),
             'args' => [
                 'limit' => [
                     'type' => Type::int(),
