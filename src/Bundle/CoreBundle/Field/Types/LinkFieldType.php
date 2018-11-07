@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Form\LinkType;
@@ -53,7 +54,7 @@ class LinkFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         return (array) $value;
     }
