@@ -21,7 +21,9 @@
                 {{- form_widget(form) -}}
                 {{- form_errors(form) -}}
             </div>
-            <p class="uk-form-help-inline">{{ form.vars.description }}</p>
+            {% if (form.vars.description is defined)  %}
+                 <p class="uk-form-help-inline">{{ form.vars.description }}</p>
+            {% endif %}
         </div>
     {% elseif label is not same as(false) -%}
         <div class="uk-margin">
@@ -30,7 +32,9 @@
                 {{- form_widget(form) -}}
                 {{- form_errors(form) -}}
             </div>
-            <p class="uk-form-help-inline">{{ form.vars.description }}</p>
+            {% if (form.vars.description is defined)  %}
+                <p class="uk-form-help-inline">{{ form.vars.description }}</p>
+            {% endif %}
         </div>
     {% else %}
         {{- form_widget(form) -}}
