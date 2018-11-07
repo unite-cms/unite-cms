@@ -37,7 +37,7 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
                 $content = $event->getForm()->getRoot()->getConfig()->getOption('content');
 
                 // if new object and data is empty
-                if ($content && is_null($content->getId()) && empty($data)) {
+                if ($content && $content->isNew() && empty($data)) {
                     $event->setData($default);
                 }
 
