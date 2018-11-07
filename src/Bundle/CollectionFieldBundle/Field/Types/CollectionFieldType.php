@@ -7,6 +7,7 @@ use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
+use UniteCMS\CollectionFieldBundle\Model\CollectionRow;
 use UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -106,7 +107,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         return (array)$value;
     }
@@ -163,15 +164,14 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     private function validateNestedFields(FieldableField $field, $data, ExecutionContextInterface $context) {
 
         $collection = self::getNestableFieldable($field);
-
         $path = $context->getPropertyPath() . '[' . $collection->getIdentifier() . ']';
-
         $current_property_path = $context->getPropertyPath();
+        $current_object = $context->getObject();
 
         // Make sure, that there is no additional data in content that is not in settings.
         foreach($data as $delta => $row) {
 
-            $context->setNode($context->getValue(), null, $context->getMetadata(), $path . '['.$delta.']');
+            $context->setNode($context->getValue(), new CollectionRow($collection, $data), $context->getMetadata(), $path . '['.$delta.']');
 
             foreach (array_keys($row) as $data_key) {
 
@@ -187,7 +187,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         }
 
         // Reset propertypath to the original value.
-        $context->setNode($context->getValue(), null, $context->getMetadata(), $current_property_path);
+        $context->setNode($context->getValue(), $current_object, $context->getMetadata(), $current_property_path);
     }
 
     /**

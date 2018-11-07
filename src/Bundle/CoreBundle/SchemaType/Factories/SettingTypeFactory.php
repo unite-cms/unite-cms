@@ -213,7 +213,8 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
 
                             return $fieldTypes[$info->fieldName]->resolveGraphQLData(
                                 $settingType->getFields()->get($info->fieldName),
-                                $fieldData
+                                $fieldData,
+                                $value
                             );
                     }
                 },

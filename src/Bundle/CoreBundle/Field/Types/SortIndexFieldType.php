@@ -29,7 +29,7 @@ class SortIndexFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         return (int)$value;
     }

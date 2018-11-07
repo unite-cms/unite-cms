@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -93,7 +94,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         return (string)$value;
     }

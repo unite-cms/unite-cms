@@ -20,6 +20,7 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
+use UniteCMS\VariantsFieldBundle\Model\VariantContent;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
 
 class VariantFactory
@@ -110,7 +111,7 @@ class VariantFactory
 
                     $return_value = null;
                     $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$info->fieldName]);
+                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$info->fieldName], new VariantContent($value, $value->getData()));
                     return $return_value;
                 }
             ]), false);

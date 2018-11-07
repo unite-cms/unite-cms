@@ -90,7 +90,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         if(empty($value['type'])) {
             return new Variant([], null, null);
