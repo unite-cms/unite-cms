@@ -92,6 +92,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             public function getEntity() { return $this->entity; }
             public function setEntity(Fieldable $entity) { $this->entity = $entity; }
             public function getLocale() { return null; }
+            public function isNew() : bool { return false; }
         };
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($fieldable, $content);

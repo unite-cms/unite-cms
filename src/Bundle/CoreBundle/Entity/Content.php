@@ -196,6 +196,18 @@ class Content implements FieldableContent
     }
 
     /**
+     * @param int $id
+     *
+     * @return Content
+     */
+    public function setId(int $id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
      * @param Fieldable $entity
      *
      * @return Content
@@ -397,6 +409,18 @@ class Content implements FieldableContent
         $this->deleted = null;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isNew(): bool {
+
+        if (is_null($this->getId())) {
+            return true;
+        }
+
+        return false;
     }
 }
 

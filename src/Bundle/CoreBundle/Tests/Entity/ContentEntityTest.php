@@ -7,6 +7,19 @@ use UniteCMS\CoreBundle\Entity\Content;
 
 class ContentEntityTest extends TestCase
 {
+
+    public function testBasicOperations()
+    {
+        $content = new Content();
+
+        $this->assertTrue($content->isNew());
+
+        $content->setId(1);
+
+        $this->assertEquals(1, $content->getId());
+        $this->assertFalse($content->isNew());
+    }
+
     public function testExistingTranslation()
     {
         $content = new Content();
