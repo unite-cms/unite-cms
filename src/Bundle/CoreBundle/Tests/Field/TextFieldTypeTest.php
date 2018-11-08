@@ -76,4 +76,56 @@ class TextFieldTypeTest extends FieldTypeTestCase
 
     }
 
+    public function testStateFieldTypeTestFormSubmit()
+    {
+        $ctField = $this->createContentTypeField('text');
+        $ctField->setSettings(new FieldableFieldSettings(['not_empty' => true]));
+        $content = new Content();
+        $content->setContentType($ctField->getContentType());
+
+        // test a transition choice
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content,
+            [
+                'csrf_protection' => false,
+            ]
+        );
+
+        $form->submit([]);
+        $this->assertTrue($form->isSubmitted());
+        $this->assertFalse($form->isValid());
+        $this->assertEquals('This value should not be blank.', $form->getErrors(true, true)->offsetGet(0)->getMessage());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content,
+            [
+                'csrf_protection' => false,
+            ]
+        );
+        $form->submit(
+            [
+                $ctField->getIdentifier() => '',
+            ]
+        );
+        $this->assertTrue($form->isSubmitted());
+        $this->assertFalse($form->isValid());
+        $this->assertEquals('This value should not be blank.', $form->getErrors(true, true)->offsetGet(0)->getMessage());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $ctField->getContentType(),
+            $content,
+            [
+                'csrf_protection' => false,
+            ]
+        );
+        $form->submit(
+            [
+                $ctField->getIdentifier() => 'Foo',
+            ]
+        );
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+    }
 }
