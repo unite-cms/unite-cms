@@ -77,7 +77,7 @@ class TextAreaTypeTest extends FieldTypeTestCase
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
           [
-              'initial_data' => true,
+              'default' => true,
           ]
         ));
 

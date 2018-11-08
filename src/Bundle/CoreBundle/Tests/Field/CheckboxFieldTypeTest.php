@@ -40,7 +40,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         // validate wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => 123
+                'default' => 123
             ]
         ));
 
@@ -90,7 +90,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => true,
+                'default' => true,
                 'description' => 'blabla'
             ]
         ));

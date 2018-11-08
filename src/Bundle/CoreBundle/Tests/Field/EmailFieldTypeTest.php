@@ -23,7 +23,7 @@ class EmailFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
-        $ctField->setSettings(new FieldableFieldSettings(['initial_data' => 'baa.asdfasdf.at']));
+        $ctField->setSettings(new FieldableFieldSettings(['default' => 'baa.asdfasdf.at']));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
@@ -37,7 +37,7 @@ class EmailFieldTypeTest extends FieldTypeTestCase
             [
                 'required' => true,
                 'description' => 'my description',
-                'initial_data' => 'admin@unite.co.at'
+                'default' => 'admin@unite.co.at'
             ]
         ));
 

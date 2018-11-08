@@ -9,5 +9,4 @@ class TextFieldType extends FieldType
 {
     const TYPE = "text";
     const FORM_TYPE = TextType::class;
-    const SETTINGS = ['not_empty', 'description', 'default'];
 }

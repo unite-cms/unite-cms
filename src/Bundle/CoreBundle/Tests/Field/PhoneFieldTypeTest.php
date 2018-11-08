@@ -24,7 +24,7 @@ class PhoneFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // test wrong intial data
-        $ctField->setSettings(new FieldableFieldSettings(['initial_data' => ['test']]));
+        $ctField->setSettings(new FieldableFieldSettings(['default' => ['test']]));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
@@ -39,7 +39,7 @@ class PhoneFieldTypeTest extends FieldTypeTestCase
             [
                 'required' => true,
                 'description' => 'my description',
-                'initial_data' => '+436605277131'
+                'default' => '+436605277131'
             ]
         ));
 

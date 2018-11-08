@@ -25,7 +25,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 {
     const TYPE                      = "collection";
     const FORM_TYPE                 = CollectionFormType::class;
-    const SETTINGS                  = ['fields', 'min_rows', 'max_rows'];
+    const SETTINGS                  = ['description', 'fields', 'min_rows', 'max_rows'];
     const REQUIRED_SETTINGS         = ['fields'];
 
     private $collectionFieldTypeFactory;

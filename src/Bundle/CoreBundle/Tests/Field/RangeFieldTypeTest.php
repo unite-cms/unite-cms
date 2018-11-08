@@ -27,7 +27,7 @@ class RangeFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // validate initial data
-        $ctField->setSettings(new FieldableFieldSettings(['min' => 0, 'max' => 100, 'step' => 1, 'initial_data' => 'baa']));
+        $ctField->setSettings(new FieldableFieldSettings(['min' => 0, 'max' => 100, 'step' => 1, 'default' => 'baa']));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
@@ -39,7 +39,7 @@ class RangeFieldTypeTest extends FieldTypeTestCase
 
         // Content Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('range');
-        $ctField->setSettings(new FieldableFieldSettings(['min' => 0, 'max' => 100, 'step' => 1, 'initial_data' => 50]));
+        $ctField->setSettings(new FieldableFieldSettings(['min' => 0, 'max' => 100, 'step' => 1, 'default' => 50]));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);

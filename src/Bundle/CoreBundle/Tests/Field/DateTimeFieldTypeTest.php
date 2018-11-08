@@ -37,7 +37,7 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => '15.67.98877'
+                'default' => '15.67.98877'
             ]
         ));
 

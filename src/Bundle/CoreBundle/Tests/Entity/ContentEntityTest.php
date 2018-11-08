@@ -14,7 +14,9 @@ class ContentEntityTest extends TestCase
 
         $this->assertTrue($content->isNew());
 
-        $content->setId(1);
+        $rct1_id = new \ReflectionProperty($content, 'id');
+        $rct1_id->setAccessible(true);
+        $rct1_id->setValue($content, 1);
 
         $this->assertEquals(1, $content->getId());
         $this->assertFalse($content->isNew());

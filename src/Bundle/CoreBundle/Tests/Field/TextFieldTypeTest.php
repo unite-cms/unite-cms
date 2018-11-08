@@ -36,7 +36,7 @@ class TextFieldTypeTest extends FieldTypeTestCase
          // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => true,
+                'default' => true,
             ]
         ));
 
@@ -57,7 +57,7 @@ class TextFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => 'test'
+                'default' => 'test'
             ]
         ));
 

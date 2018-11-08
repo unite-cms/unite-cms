@@ -24,7 +24,7 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
         // test wrong initial data
-        $ctField->setSettings(new FieldableFieldSettings(['initial_data' => 'baa']));
+        $ctField->setSettings(new FieldableFieldSettings(['default' => 'baa']));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
@@ -38,7 +38,7 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
             [
                 'required' => true,
                 'description' => 'my description',
-                'initial_data' => 123
+                'default' => 123
             ]
         ));
 

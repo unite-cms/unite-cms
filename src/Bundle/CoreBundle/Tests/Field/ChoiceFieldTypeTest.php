@@ -28,7 +28,7 @@ class ChoiceFieldTypeTest extends FieldTypeTestCase
                 'choices' => ['foo' => 'baa'],
                 'foo' => 'baa',
                 'required' => 123,
-                'initial_data' => true
+                'default' => true
             ]
         ));
 
@@ -41,7 +41,7 @@ class ChoiceFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'choices' => ['foo1' => 'foo1', 'foo2' => 'foo2'],
-                'initial_data' => 'baa'
+                'default' => 'baa'
             ]
         ));
 
@@ -59,7 +59,7 @@ class ChoiceFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'choices' => ['foo' => 'baa'],
-                'initial_data' => 'baa'
+                'default' => 'baa'
             ]
         ));
 

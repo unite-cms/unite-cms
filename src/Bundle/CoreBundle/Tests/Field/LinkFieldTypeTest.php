@@ -41,7 +41,7 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         // test wrong intial data
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => 123,
+                'default' => 123,
             ]
         ));
 
@@ -62,7 +62,7 @@ class LinkFieldTypeTest extends FieldTypeTestCase
                 'target_widget' => false,
                 'description' => 'my description',
                 'required' => false,
-                'initial_data' => 'https://www.unitecms.io'
+                'default' => 'https://www.unitecms.io'
             ]
         ));
 

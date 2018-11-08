@@ -14,7 +14,9 @@ class SettingEntityTest extends TestCase
 
         $this->assertTrue($setting->isNew());
 
-        $setting->setId(1);
+        $rct1_id = new \ReflectionProperty($setting, 'id');
+        $rct1_id->setAccessible(true);
+        $rct1_id->setValue($setting, 1);
 
         $this->assertEquals(1, $setting->getId());
         $this->assertFalse($setting->isNew());

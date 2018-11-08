@@ -40,7 +40,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => true,
+                'default' => true,
             ]
         ));
 
@@ -55,7 +55,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => '2018-05-24',
+                'default' => '2018-05-24',
                 'required' => true
             ]
         ));
@@ -102,7 +102,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'initial_data' => '2012-01-01',
+                'default' => '2012-01-01',
                 'description' => 'blabla'
             ]
         ));
