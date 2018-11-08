@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -24,7 +25,7 @@ class LinkFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['title_widget', 'target_widget'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'title_widget', 'target_widget'];
 
     function getFormOptions(FieldableField $field): array
     {
@@ -80,7 +81,38 @@ class LinkFieldType extends FieldType
         if (!empty($settings->target_widget) && !is_bool($settings->target_widget)) {
             $context->buildViolation('noboolean_value')->atPath('target_widget')->addViolation();
         }
-
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
+
+        // Check that only allowed keys are set
+        if(!is_array($value)) {
+            $context->buildViolation('invalid_initial_data')->addViolation();
+            return;
+        }
+
+        foreach (array_keys($value) as $setting) {
+            if (!in_array($setting, ['url', 'title', 'target'])) {
+                $context->buildViolation('invalid_initial_data')->atPath($setting)->addViolation();
+            }
+        }
+        if($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        if (!empty($value['url'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($value['url'], new Assert\Url(['message' => 'invalid_initial_data']))
+            );
+        }
+
+        if (!empty($value['target'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($value['target'], new Assert\Choice(['choices' => ['_self', '_blank'], 'message' => 'invalid_initial_data']))
+            );
+        }
+    }
 }

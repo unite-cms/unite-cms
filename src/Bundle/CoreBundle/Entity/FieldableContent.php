@@ -40,4 +40,9 @@ interface FieldableContent
      * @return FieldableContent
      */
     public function setEntity(Fieldable $entity);
+
+    /**
+     * @return boolean
+     */
+    public function isNew(): bool;
 }

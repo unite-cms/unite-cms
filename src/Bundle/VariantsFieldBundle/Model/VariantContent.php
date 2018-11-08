@@ -81,4 +81,11 @@ class VariantContent implements FieldableContent
 
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isNew(): bool {
+        return false;
+    }
 }

@@ -398,5 +398,12 @@ class Content implements FieldableContent
 
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isNew(): bool {
+        return empty($this->getId());
+    }
 }
 

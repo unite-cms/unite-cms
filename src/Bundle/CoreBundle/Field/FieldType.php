@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Field;
 
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -26,7 +27,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = [];
+    const SETTINGS = ['not_empty', 'description', 'default'];
 
     /**
      * All required settings for this field type.
@@ -57,7 +58,17 @@ abstract class FieldType implements FieldTypeInterface
         return [
             'label' => $this->getTitle($field),
             'required' => false,
+            'not_empty' => (isset($field->getSettings()->not_empty)) ? (boolean) $field->getSettings()->not_empty : false,
+            'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getDefaultValue(FieldableField $field)
+    {
+        return $field->getSettings()->default ?? null;
     }
 
     // OPTIONAL: public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {}
@@ -117,13 +128,10 @@ abstract class FieldType implements FieldTypeInterface
     function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         $violations = [];
-
-        if (is_object($settings)) {
-            $settings = get_object_vars($settings);
-        }
+        $settingsArray = $settings ? get_object_vars($settings) : [];
 
         // Check that only allowed settings are present.
-        foreach (array_keys($settings) as $setting) {
+        foreach (array_keys($settingsArray) as $setting) {
             if (!in_array($setting, static::SETTINGS)) {
                 $context->buildViolation('additional_data')->atPath($setting)->addViolation();
             }
@@ -131,12 +139,45 @@ abstract class FieldType implements FieldTypeInterface
 
         // Check that all required settings are present.
         foreach (static::REQUIRED_SETTINGS as $setting) {
-            if (!isset($settings[$setting])) {
+            if (!isset($settingsArray[$setting])) {
                 $context->buildViolation('required')->atPath($setting)->addViolation();
             }
         }
 
+        // validate empty data is boolean
+        if (!empty($settingsArray['not_empty'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($settingsArray['not_empty'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
+            );
+        }
+
+        // validate description length
+        if (!empty($settingsArray['description'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($settingsArray['description'], [
+                    new Assert\Type(['type' => 'string', 'message' => 'nostring_value']),
+                    new Assert\Length(['max' => 255, 'maxMessage' => 'too_long'])
+                ])
+            );
+        }
+
+        if (!empty($settingsArray['default'])) {
+            $this->validateDefaultValue($settingsArray['default'], $settings, $context);
+        }
+
         return $violations;
+    }
+
+    /**
+     * Validates the default value if it is set.
+     * @param $value
+     * @param FieldableFieldSettings $settings
+     * @param ExecutionContextInterface $context
+     */
+    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
+        $context->getViolations()->addAll(
+            $context->getValidator()->validate($value, new Assert\Type(['type' => 'string', 'message' => 'invalid_initial_data']))
+        );
     }
 
     /**

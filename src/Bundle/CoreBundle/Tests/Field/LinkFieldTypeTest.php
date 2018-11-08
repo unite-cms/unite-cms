@@ -37,6 +37,17 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(2, $errors);
         $this->assertEquals('noboolean_value', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+
+        // test wrong intial data
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'default' => 123,
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testLinkFieldTypeWithValidSettings()
@@ -49,6 +60,9 @@ class LinkFieldTypeTest extends FieldTypeTestCase
             [
                 'title_widget' => true,
                 'target_widget' => false,
+                'description' => 'my description',
+                'not_empty' => false,
+                'default' => ['url' => 'https://www.unitecms.io'],
             ]
         ));
 
@@ -122,6 +136,9 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         ));
 
         $content = new Content();
+        $id = new \ReflectionProperty($content, 'id');
+        $id->setAccessible(true);
+        $id->setValue($content, 1);
         $content->setData(
             [
                 'f1' => [
