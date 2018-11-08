@@ -12,7 +12,7 @@ class CheckboxFieldType extends FieldType
 {
     const TYPE = "checkbox";
     const FORM_TYPE = CheckboxType::class;
-    const SETTINGS = ['not_empty', 'description'];
+    const SETTINGS = ['default', 'description'];
 
     /**
      * {@inheritdoc}
