@@ -44,13 +44,14 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     {
         $settings = $field->getSettings();
 
-        $options = [
-            'label' => false,
-        ];
-        $options['fields'] = [];
-
         // Create a new collection model that implements Fieldable.
         $collection = self::getNestableFieldable($field);
+
+        $options = [
+            'label' => false,
+            'content' => new CollectionRow($collection, []),
+        ];
+        $options['fields'] = [];
 
         // Add the definition of the all collection fields to the options.
         foreach ($collection->getFields() as $fieldDefinition) {
@@ -61,20 +62,23 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         }
 
         // Configure the collection from type.
-        return array_merge(parent::getFormOptions($field), [
-            'allow_add' => true,
-            'allow_delete' => true,
-            'delete_empty' => true,
-            'error_bubbling' => false,
-            'prototype_name' => '__' . str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')) . 'Name__',
-            'attr' => [
-                'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
-                'min-rows' => $settings->min_rows ?? 0,
-                'max-rows' => $settings->max_rows ?? null,
-            ],
-            'entry_type' => FieldableFormType::class,
-            'entry_options' => $options,
-        ]);
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'allow_add' => true,
+                'allow_delete' => true,
+                'delete_empty' => true,
+                'error_bubbling' => false,
+                'prototype_name' => '__'.str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')).'Name__',
+                'attr' => [
+                    'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
+                    'min-rows' => $settings->min_rows ?? 0,
+                    'max-rows' => $settings->max_rows ?? null,
+                ],
+                'entry_type' => FieldableFormType::class,
+                'entry_options' => $options,
+            ]
+        );
     }
 
     /**
@@ -127,6 +131,18 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             $context->getValidator()->inContext($context)->validate(self::getNestableFieldable($field));
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getDefaultValue(FieldableField $field) { return []; }
+
+    /**
+     * Validates the default value if it is set.
+     * @param ExecutionContextInterface $context
+     * @param $value
+     */
+    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {}
 
     /**
      * {@inheritdoc}

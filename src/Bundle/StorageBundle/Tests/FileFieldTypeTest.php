@@ -411,6 +411,9 @@ class FileFieldTypeTest extends FieldTypeTestCase
             )
         );
         $content = new Content();
+        $id = new \ReflectionProperty($content, 'id');
+        $id->setAccessible(true);
+        $id->setValue($content, 1);
         $content->setData(
             [
                 'f1' => [
@@ -467,6 +470,9 @@ class FileFieldTypeTest extends FieldTypeTestCase
             )
         );
         $setting = new Setting();
+        $id = new \ReflectionProperty($setting, 'id');
+        $id->setAccessible(true);
+        $id->setValue($setting, 1);
         $setting->setData(
             [
                 'f1' => [
