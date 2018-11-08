@@ -26,17 +26,6 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
-        // validate not_empty
-        $ctField->setSettings(new FieldableFieldSettings(
-            [
-                'not_empty' => 123,
-            ]
-        ));
-
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('noboolean_value', $errors->get(0)->getMessageTemplate());
-
         // validate wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
             [
@@ -54,11 +43,7 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('checkbox');
 
         // check not_empty
-        $ctField->setSettings(new FieldableFieldSettings(
-            [
-                'not_empty' => true
-            ]
-        ));
+        $ctField->setSettings(new FieldableFieldSettings());
 
         $content = new Content();
 
@@ -67,15 +52,8 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         ]);
 
         $form->submit([]);
-        $this->assertFalse($form->isValid());
+        $this->assertTrue($form->isValid());
         $this->assertTrue($form->isSubmitted());
-        $error_check = [];
-        foreach ($form->getErrors(true, true) as $error) {
-            $error_check[] = $error->getMessageTemplate();
-        }
-
-        $this->assertCount(1, $error_check);
-        $this->assertEquals('not_blank', $error_check[0]);
     }
 
     public function testContentFormBuild() {

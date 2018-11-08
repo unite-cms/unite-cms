@@ -16,7 +16,10 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class UniteCMSCoreTypeExtension extends AbstractTypeExtension
 {
@@ -26,52 +29,14 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
-        // set default value for field
-        /*if (isset($options['initial_data']) && $options['initial_data']) {
-
-            $default = $options['initial_data'];
-
-            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($default) {
-
-                $data = $event->getData();
-                $content = $event->getForm()->getRoot()->getConfig()->getOption('content');
-
-                // if new object and data is empty
-                if ($content && $content->isNew() && empty($data)) {
-                    $event->setData($default);
-                }
-
-            });
-
-        }*/
-
-
         // add required validation dynamically
-        /*if (isset($options['not_empty']) && $options['not_empty']) {
-
-            $options['required'] = true;
-
-            #dump($options['label']);
-            #dump($options['required']);
-
-            $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
-
-                $data = $event->getData();
-                $form = $event->getForm();
-
-                $event->getForm()->isEmpty()
-
-                dump($event->getForm()->getName());
-                dump($event->getForm()->getConfig()->getOption('required'));
-
-                #if (empty($data)) {
-                    $form->addError(new FormError('', 'not_blank'));
-                #}
-
+        if (isset($options['not_empty']) && $options['not_empty']) {
+            $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
+                if($event->getForm()->isEmpty()) {
+                    $event->getForm()->addError(new FormError('This value should not be blank.'));
+                }
             });
-
-        }*/
+        }
 
     }
 
@@ -92,10 +57,14 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        #$resolver->setNormalizer('')
         $resolver->setDefined('description');
         $resolver->setDefined('default');
         $resolver->setDefined('not_empty');
+
+        // If not_empty is set, also set the required option to true
+        $resolver->setNormalizer('required', function(Options $options, $value){
+            return $options->offsetExists('not_empty') && $options->offsetGet('not_empty') ? true : $value;
+        });
     }
 
     /**
