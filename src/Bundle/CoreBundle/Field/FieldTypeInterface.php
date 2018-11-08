@@ -64,6 +64,15 @@ interface FieldTypeInterface
     function getFormOptions(FieldableField $field): array;
 
     /**
+     * Returns the default value for this field. This method will be called when a new fieldablecontent is passed to
+     * the fieldableform builder.
+     *
+     * @param FieldableField $field
+     * @return null|mixed
+     */
+    function getDefaultValue(FieldableField $field);
+
+    /**
      * Get the title for this field.
      *
      * @param FieldableField $field

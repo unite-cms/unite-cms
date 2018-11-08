@@ -55,19 +55,20 @@ abstract class FieldType implements FieldTypeInterface
      */
     function getFormOptions(FieldableField $field): array
     {
-        $options = [
+        return [
             'label' => $this->getTitle($field),
             'required' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
             'not_empty' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
             'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
         ];
+    }
 
-        // add initial_data option only if it's really explicitly allowed
-        if (isset($field->getSettings()->initial_data)) {
-            $options['initial_data'] = $field->getSettings()->initial_data;
-        }
-
-        return $options;
+    /**
+     * {@inheritdoc}
+     */
+    function getDefaultValue(FieldableField $field)
+    {
+        return $field->getSettings()->default ?? null;
     }
 
     // OPTIONAL: public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {}
