@@ -15,6 +15,7 @@ class SortIndexFieldType extends FieldType
 {
     const TYPE = "sortindex";
     const FORM_TYPE = IntegerType::class;
+    const SETTINGS = ['description'];
 
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
@@ -32,6 +33,14 @@ class SortIndexFieldType extends FieldType
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         return (int)$value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getDefaultValue(FieldableField $field)
+    {
+        return 0;
     }
 
     public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data)

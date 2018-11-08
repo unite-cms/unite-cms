@@ -13,7 +13,6 @@ class DateFieldType extends FieldType
 {
     const TYPE = "date";
     const FORM_TYPE = DateType::class;
-    const SETTINGS = ['required', 'initial_data', 'description'];
 
     /**
      * {@inheritdoc}
@@ -32,27 +31,9 @@ class DateFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
-    {
-        // Validate allowed and required settings.
-        parent::validateSettings($settings, $context);
-
-        // Only continue, if there are no violations yet.
-        if ($context->getViolations()->count() > 0) {
-            return;
-        }
-
-        // validate if initial data is a valid date
-        if (isset($settings->initial_data)) {
-
-            $errors = $context->getValidator()->validate(
-                $settings->initial_data,
-                new Assert\Date()
-            );
-
-            if (count($errors) > 0) {
-                $context->buildViolation('invalid_initial_data')->atPath('initial_data')->addViolation();
-            }
-        }
+    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+        $context->getViolations()->addAll(
+            $context->getValidator()->validate($value, new Assert\Date(['message' => 'invalid_initial_data']))
+        );
     }
 }

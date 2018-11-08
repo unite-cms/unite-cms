@@ -42,8 +42,6 @@ interface FieldableContent
     public function setEntity(Fieldable $entity);
 
     /**
-     * check if new content
-     *
      * @return boolean
      */
     public function isNew(): bool;

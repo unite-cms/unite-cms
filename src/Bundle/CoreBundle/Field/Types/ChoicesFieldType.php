@@ -3,6 +3,8 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -10,7 +12,7 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 class ChoicesFieldType extends ChoiceFieldType
 {
     const TYPE = "choices";
-    const SETTINGS = ['choices', 'required', 'initial_data', 'description'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'choices'];
 
     function getFormOptions(FieldableField $field): array
     {
@@ -20,6 +22,18 @@ class ChoicesFieldType extends ChoiceFieldType
                 'multiple' => true,
                 'expanded' => true,
             ]
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+        $context->getViolations()->addAll(
+            $context->getValidator()->validate($value, [
+                new Assert\Type(['type' => 'array', 'message' => 'invalid_initial_data']),
+                new Assert\All(['constraints' => [new Assert\Type(['type' => 'string', 'message' => 'invalid_initial_data'])]])
+            ])
         );
     }
 

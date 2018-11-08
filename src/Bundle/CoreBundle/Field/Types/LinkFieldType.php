@@ -25,7 +25,7 @@ class LinkFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['title_widget', 'target_widget', 'required', 'initial_data', 'description'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'title_widget', 'target_widget'];
 
     function getFormOptions(FieldableField $field): array
     {
@@ -81,20 +81,33 @@ class LinkFieldType extends FieldType
         if (!empty($settings->target_widget) && !is_bool($settings->target_widget)) {
             $context->buildViolation('noboolean_value')->atPath('target_widget')->addViolation();
         }
-
-        // validate if initial data is a external link
-        if (isset($settings->initial_data)) {
-
-            $errors = $context->getValidator()->validate(
-                $settings->initial_data,
-                new Assert\Url()
-            );
-
-            if (count($errors) > 0) {
-                $context->buildViolation('invalid_initial_data')->atPath('initial_data')->addViolation();
-            }
-        }
-
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+
+        // Check that only allowed keys are set
+        foreach (array_keys($value) as $setting) {
+            if (!in_array($setting, ['url', 'title', 'target'])) {
+                $context->buildViolation('invalid_initial_data')->atPath($setting)->addViolation();
+            }
+        }
+        if($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        if (!empty($value['url'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($value['url'], new Assert\Url(['message' => 'invalid_initial_data']))
+            );
+        }
+
+        if (!empty($value['target'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($value['target'], new Assert\Choice(['choices' => ['_self', '_blank'], 'message' => 'invalid_initial_data']))
+            );
+        }
+    }
 }

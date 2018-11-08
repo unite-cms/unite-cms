@@ -196,18 +196,6 @@ class Content implements FieldableContent
     }
 
     /**
-     * @param int $id
-     *
-     * @return Content
-     */
-    public function setId(int $id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
      * @param Fieldable $entity
      *
      * @return Content
@@ -415,12 +403,7 @@ class Content implements FieldableContent
      * {@inheritdoc}
      */
     public function isNew(): bool {
-
-        if (is_null($this->getId())) {
-            return true;
-        }
-
-        return false;
+        return empty($this->getId());
     }
 }
 

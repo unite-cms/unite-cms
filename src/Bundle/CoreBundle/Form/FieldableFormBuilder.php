@@ -36,17 +36,21 @@ class FieldableFormBuilder
 
         foreach ($fieldable->getFields() as $fieldDefinition) {
 
+            $fieldType = $this->fieldTypeManager->getFieldType($fieldDefinition->getType());
+
             // Add the definition of the current field to the options.
-            $options['fields'][] = new FieldableFormField(
-                $this->fieldTypeManager->getFieldType($fieldDefinition->getType()),
-                $fieldDefinition
-            );
+            $options['fields'][] = new FieldableFormField($fieldType, $fieldDefinition);
+
+            // If this fieldable content is new, allow field types to set default values.
+            if(!$content || $content->isNew()) {
+                $data[$fieldDefinition->getIdentifier()] = $fieldType->getDefaultValue($fieldDefinition);
+            }
 
             /**
              * Add any value found for the current field to the data array. If we just pass the data array to the
              * form, we could have problems with old data for deleted fields.
              */
-            if ($content && array_key_exists($fieldDefinition->getIdentifier(), $content->getData())) {
+            else if ($content && array_key_exists($fieldDefinition->getIdentifier(), $content->getData())) {
                 $data[$fieldDefinition->getIdentifier()] = $content->getData()[$fieldDefinition->getIdentifier()];
             }
 

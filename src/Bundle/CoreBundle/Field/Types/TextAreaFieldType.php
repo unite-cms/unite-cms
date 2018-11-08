@@ -18,7 +18,7 @@ class TextAreaFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['rows', 'required', 'initial_data', 'description'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'rows'];
 
     function getFormOptions(FieldableField $field): array
     {
@@ -50,11 +50,6 @@ class TextAreaFieldType extends FieldType
             if(!is_int($settings->rows)) {
                 $context->buildViolation('nointeger_value')->atPath('rows')->addViolation();
             }
-        }
-
-        // validate if initial data is a string
-        if (isset($settings->initial_data) && !is_string($settings->initial_data)) {
-            $context->buildViolation('invalid_initial_data')->atPath('initial_data')->addViolation();
         }
     }
 }

@@ -27,7 +27,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = [];
+    const SETTINGS = ['not_empty', 'description', 'default'];
 
     /**
      * All required settings for this field type.
@@ -57,8 +57,7 @@ abstract class FieldType implements FieldTypeInterface
     {
         return [
             'label' => $this->getTitle($field),
-            'required' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
-            'not_empty' => (isset($field->getSettings()->required)) ? (boolean) $field->getSettings()->required : false,
+            'not_empty' => (isset($field->getSettings()->not_empty)) ? (boolean) $field->getSettings()->not_empty : false,
             'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
         ];
     }
@@ -147,30 +146,27 @@ abstract class FieldType implements FieldTypeInterface
             }
         }
 
-        // validate required
-        if (isset($settings['required']) && !is_bool($settings['required'])) {
-            $context->buildViolation('noboolean_value')->atPath($setting)->addViolation();
-        }
-
-        // validate description
-        if (isset($settings['description']) && !is_string($settings['description'])) {
-            $context->buildViolation('nostring_value')->atPath($setting)->addViolation();
-        }
-
         // validate description length
-        if (isset($settings['description'])) {
+        if (!empty($settings['description'])) {
+            $context->getValidator()->validate($settings['description'], new Assert\Length(['max' => 255, 'maxMessage' => 'too_long']));
+        }
 
-            $errors = $context->getValidator()->validate(
-                $settings['description'],
-                new Assert\Length(['max' => 255])
-            );
-
-            if (count($errors) > 0) {
-                $context->buildViolation('too_long', ['limit' => 255])->atPath($setting)->addViolation();
-            }
+        if (!empty($settings['default'])) {
+            $this->validateDefaultValue($context, $settings['default']);
         }
 
         return $violations;
+    }
+
+    /**
+     * Validates the default value if it is set.
+     * @param ExecutionContextInterface $context
+     * @param $value
+     */
+    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+        $context->getViolations()->addAll(
+            $context->getValidator()->validate($value, new Assert\Type(['type' => 'string', 'message' => 'invalid_initial_data']))
+        );
     }
 
     /**

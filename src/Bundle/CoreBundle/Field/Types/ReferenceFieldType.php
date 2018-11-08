@@ -41,7 +41,7 @@ class ReferenceFieldType extends FieldType
 {
     const TYPE = "reference";
     const FORM_TYPE = ReferenceType::class;
-    const SETTINGS = ['domain', 'content_type', 'view', 'content_label'];
+    const SETTINGS = ['not_empty', 'description', 'domain', 'content_type', 'view', 'content_label'];
     const REQUIRED_SETTINGS = ['domain', 'content_type'];
 
     private $validator;

@@ -324,11 +324,6 @@ class DomainMember implements FieldableContent
      * {@inheritdoc}
      */
     public function isNew(): bool {
-
-        if (is_null($this->getId())) {
-            return true;
-        }
-
-        return false;
+        return empty($this->getId());
     }
 }

@@ -5,7 +5,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
-use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Field\FieldType;
 
 class RangeFieldType extends FieldType
@@ -16,7 +16,7 @@ class RangeFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['min', 'max', 'step', 'required', 'initial_data', 'description'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'min', 'max', 'step'];
 
     function getFormOptions(FieldableField $field): array
     {
@@ -35,19 +35,9 @@ class RangeFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
-    {
-        // Validate allowed and required settings.
-        parent::validateSettings($settings, $context);
-
-        // Only continue, if there are no violations yet.
-        if ($context->getViolations()->count() > 0) {
-            return;
-        }
-
-        // validate if initial data is a integer
-        if (isset($settings->initial_data) && !is_int($settings->initial_data)) {
-            $context->buildViolation('invalid_initial_data')->atPath('initial_data')->addViolation();
-        }
+    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+        $context->getViolations()->addAll(
+            $context->getValidator()->validate($value, new Assert\Type(['type' => 'integer', 'message' => 'invalid_initial_data']))
+        );
     }
 }
