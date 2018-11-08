@@ -57,6 +57,7 @@ abstract class FieldType implements FieldTypeInterface
     {
         return [
             'label' => $this->getTitle($field),
+            'required' => false,
             'not_empty' => (isset($field->getSettings()->not_empty)) ? (boolean) $field->getSettings()->not_empty : false,
             'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
         ];
