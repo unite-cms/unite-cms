@@ -18,7 +18,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
+class UniteCMSCoreTypeExtension extends AbstractTypeExtension
 {
 
     /**
@@ -26,8 +26,9 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+
         // set default value for field
-        if (isset($options['initial_data']) && $options['initial_data']) {
+        /*if (isset($options['initial_data']) && $options['initial_data']) {
 
             $default = $options['initial_data'];
 
@@ -43,23 +44,34 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
 
             });
 
-        }
+        }*/
+
 
         // add required validation dynamically
-        if (isset($options['not_empty']) && $options['not_empty']) {
+        /*if (isset($options['not_empty']) && $options['not_empty']) {
+
+            $options['required'] = true;
+
+            #dump($options['label']);
+            #dump($options['required']);
 
             $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
 
                 $data = $event->getData();
                 $form = $event->getForm();
 
-                if (empty($data)) {
+                $event->getForm()->isEmpty()
+
+                dump($event->getForm()->getName());
+                dump($event->getForm()->getConfig()->getOption('required'));
+
+                #if (empty($data)) {
                     $form->addError(new FormError('', 'not_blank'));
-                }
+                #}
 
             });
 
-        }
+        }*/
 
     }
 
@@ -80,8 +92,9 @@ class UniteCMSCoreFieldTypeExtension extends AbstractTypeExtension
      */
     public function configureOptions(OptionsResolver $resolver)
     {
+        #$resolver->setNormalizer('')
         $resolver->setDefined('description');
-        $resolver->setDefined('initial_data');
+        $resolver->setDefined('default');
         $resolver->setDefined('not_empty');
     }
 
