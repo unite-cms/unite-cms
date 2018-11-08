@@ -36,7 +36,7 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('integer');
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'required' => true,
+                'not_empty' => true,
                 'description' => 'my description',
                 'default' => 123
             ]

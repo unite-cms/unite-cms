@@ -51,6 +51,10 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('datetime');
 
         $content = new Content();
+        $id = new \ReflectionProperty($content, 'id');
+        $id->setAccessible(true);
+        $id->setValue($content, 1);
+
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);

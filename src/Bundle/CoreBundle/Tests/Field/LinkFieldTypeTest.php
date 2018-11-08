@@ -61,8 +61,8 @@ class LinkFieldTypeTest extends FieldTypeTestCase
                 'title_widget' => true,
                 'target_widget' => false,
                 'description' => 'my description',
-                'required' => false,
-                'default' => 'https://www.unitecms.io'
+                'not_empty' => false,
+                'default' => ['url' => 'https://www.unitecms.io'],
             ]
         ));
 
@@ -136,6 +136,9 @@ class LinkFieldTypeTest extends FieldTypeTestCase
         ));
 
         $content = new Content();
+        $id = new \ReflectionProperty($content, 'id');
+        $id->setAccessible(true);
+        $id->setValue($content, 1);
         $content->setData(
             [
                 'f1' => [

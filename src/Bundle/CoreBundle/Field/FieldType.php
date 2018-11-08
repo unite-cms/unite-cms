@@ -146,9 +146,21 @@ abstract class FieldType implements FieldTypeInterface
             }
         }
 
+        // validate empty data is boolean
+        if (!empty($settings['not_empty'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($settings['not_empty'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
+            );
+        }
+
         // validate description length
         if (!empty($settings['description'])) {
-            $context->getValidator()->validate($settings['description'], new Assert\Length(['max' => 255, 'maxMessage' => 'too_long']));
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($settings['description'], [
+                    new Assert\Type(['type' => 'string', 'message' => 'nostring_value']),
+                    new Assert\Length(['max' => 255, 'maxMessage' => 'too_long'])
+                ])
+            );
         }
 
         if (!empty($settings['default'])) {

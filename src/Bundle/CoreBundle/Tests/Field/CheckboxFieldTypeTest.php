@@ -26,10 +26,10 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
 
-        // validate required
+        // validate not_empty
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'required' => 123,
+                'not_empty' => 123,
             ]
         ));
 
@@ -53,10 +53,10 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
 
         $ctField = $this->createContentTypeField('checkbox');
 
-        // check required
+        // check not_empty
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'required' => true
+                'not_empty' => true
             ]
         ));
 

@@ -21,17 +21,18 @@ class ChoicesFieldTypeTest extends FieldTypeTestCase
             [
                 'choices' => ['foo' => 'baa'],
                 'foo' => 'baa',
-                'required' => 123,
+                'not_empty' => 123,
                 'default' => true,
                 'description' => 123
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(3, $errors);
+        $this->assertCount(4, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
         $this->assertEquals('nostring_value', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('invalid_initial_data', $errors->get(3)->getMessageTemplate());
 
         // check wrong empty data
         $ctField->setSettings(new FieldableFieldSettings(

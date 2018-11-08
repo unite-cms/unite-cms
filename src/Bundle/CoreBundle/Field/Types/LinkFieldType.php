@@ -89,6 +89,11 @@ class LinkFieldType extends FieldType
     protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
 
         // Check that only allowed keys are set
+        if(!is_array($value)) {
+            $context->buildViolation('invalid_initial_data')->addViolation();
+            return;
+        }
+
         foreach (array_keys($value) as $setting) {
             if (!in_array($setting, ['url', 'title', 'target'])) {
                 $context->buildViolation('invalid_initial_data')->atPath($setting)->addViolation();

@@ -35,7 +35,7 @@ class EmailFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('email');
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'required' => true,
+                'not_empty' => true,
                 'description' => 'my description',
                 'default' => 'admin@unite.co.at'
             ]

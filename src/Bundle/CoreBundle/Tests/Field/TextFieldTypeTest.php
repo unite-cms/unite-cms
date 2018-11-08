@@ -22,7 +22,7 @@ class TextFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
-                'required' => 'foo',
+                'not_empty' => 'foo',
                 'description' => $this->generateRandomMachineName(500)
             ]
         ));

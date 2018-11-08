@@ -37,7 +37,7 @@ class PhoneFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('phone');
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'required' => true,
+                'not_empty' => true,
                 'description' => 'my description',
                 'default' => '+436605277131'
             ]

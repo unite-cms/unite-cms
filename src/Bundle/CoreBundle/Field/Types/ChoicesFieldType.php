@@ -30,11 +30,13 @@ class ChoicesFieldType extends ChoiceFieldType
      */
     protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
         $context->getViolations()->addAll(
-            $context->getValidator()->validate($value, [
-                new Assert\Type(['type' => 'array', 'message' => 'invalid_initial_data']),
-                new Assert\All(['constraints' => [new Assert\Type(['type' => 'string', 'message' => 'invalid_initial_data'])]])
-            ])
+            $context->getValidator()->validate($value, new Assert\Type(['type' => 'array', 'message' => 'invalid_initial_data']))
         );
+        if($context->getViolations()->count() == 0) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($value, new Assert\All(['constraints' => [new Assert\Type(['type' => 'string', 'message' => 'invalid_initial_data'])]]))
+            );
+        }
     }
 
     /**

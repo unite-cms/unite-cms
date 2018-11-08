@@ -28,7 +28,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
-                'required' => 124
+                'not_empty' => 124
             ]
         ));
 
@@ -56,7 +56,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'default' => '2018-05-24',
-                'required' => true
+                'not_empty' => true
             ]
         ));
 
@@ -69,6 +69,10 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('date');
 
         $content = new Content();
+        $id = new \ReflectionProperty($content, 'id');
+        $id->setAccessible(true);
+        $id->setValue($content, 1);
+        
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);
