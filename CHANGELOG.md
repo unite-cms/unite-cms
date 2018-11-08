@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.0 (2018-11-08)
+- Added #246: Domain config is now saved to the filesystem. Changes in the filesystem can be imported into unite cms
+- Added #350: Most of the fields now have a "description" setting which will be shown in the form
+- Added #239: Most of the fields now have a "default" option for default values and a "not_empty" option for setting the field as required
+- Added #311: Refactored view component to allow to display complex fields (like collections or references)
+- Added #307: Add a (media) grid view type 
+- Added #324: Allow to search table and grid views
+- Improved #347: Improve getting translations of content/settings via GraphQL API
+- Improved #246: Improve variable definition by saving the whole domain config including the variables to the filesystem
+- Improved #310: Allow to define a content-type for webhooks
+- Fixed #334: Fixed drag and drop sorting for element at position 0
+- Fixed #309: Fixed a bug where you cannot access collection or variant field data inside the webhook query
+
 ## 0.6.4 (2018-09-28)
 - Fixed #305: New checkbox styling was not applied to all checkboxes
 - Fixed #302: Link target icon in nested collection was not shown
