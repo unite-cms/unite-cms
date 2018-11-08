@@ -6,7 +6,7 @@
  * Time: 10:33
  */
 
-namespace App\Bundle\CoreBundle\Tests\Functional;
+namespace UniteCMS\CoreBundle\Tests\Functional;
 
 
 use Symfony\Bundle\FrameworkBundle\Client;

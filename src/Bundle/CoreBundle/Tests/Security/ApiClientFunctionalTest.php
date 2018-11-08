@@ -1,6 +1,6 @@
 <?php
 
-namespace src\UniteCMS\CoreBundle\Tests\Security;
+namespace UniteCMS\CoreBundle\Tests\Security;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\BrowserKit\Cookie;

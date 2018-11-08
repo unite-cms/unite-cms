@@ -6,7 +6,7 @@
  * Time: 11:45
  */
 
-namespace App\Bundle\CoreBundle\Tests\Service;
+namespace UniteCMS\CoreBundle\Tests\Service;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Filesystem\Filesystem;

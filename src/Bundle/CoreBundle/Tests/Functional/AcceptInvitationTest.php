@@ -1,6 +1,6 @@
 <?php
 
-namespace src\UniteCMS\CoreBundle\Tests\Functional;
+namespace UniteCMS\CoreBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
