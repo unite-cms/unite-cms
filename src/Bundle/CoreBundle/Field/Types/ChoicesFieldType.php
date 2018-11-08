@@ -7,6 +7,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class ChoicesFieldType extends ChoiceFieldType
@@ -28,13 +29,16 @@ class ChoicesFieldType extends ChoiceFieldType
     /**
      * {@inheritdoc}
      */
-    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
         $context->getViolations()->addAll(
             $context->getValidator()->validate($value, new Assert\Type(['type' => 'array', 'message' => 'invalid_initial_data']))
         );
         if($context->getViolations()->count() == 0) {
             $context->getViolations()->addAll(
-                $context->getValidator()->validate($value, new Assert\All(['constraints' => [new Assert\Type(['type' => 'string', 'message' => 'invalid_initial_data'])]]))
+                $context->getValidator()->validate($value, new Assert\All(['constraints' => [
+                    new Assert\Type(['type' => 'string', 'message' => 'invalid_initial_data']),
+                    new Assert\Choice(['choices' => $settings->choices])
+                ]]))
             );
         }
     }

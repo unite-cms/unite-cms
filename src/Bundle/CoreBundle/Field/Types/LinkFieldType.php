@@ -86,7 +86,7 @@ class LinkFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
 
         // Check that only allowed keys are set
         if(!is_array($value)) {

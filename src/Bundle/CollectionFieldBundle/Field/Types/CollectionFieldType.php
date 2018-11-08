@@ -138,11 +138,9 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     function getDefaultValue(FieldableField $field) { return []; }
 
     /**
-     * Validates the default value if it is set.
-     * @param ExecutionContextInterface $context
-     * @param $value
+     * {@inheritdoc}
      */
-    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {}
+    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {}
 
     /**
      * {@inheritdoc}

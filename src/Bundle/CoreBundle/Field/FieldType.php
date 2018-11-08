@@ -127,13 +127,10 @@ abstract class FieldType implements FieldTypeInterface
     function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         $violations = [];
-
-        if (is_object($settings)) {
-            $settings = get_object_vars($settings);
-        }
+        $settingsArray = $settings ? get_object_vars($settings) : [];
 
         // Check that only allowed settings are present.
-        foreach (array_keys($settings) as $setting) {
+        foreach (array_keys($settingsArray) as $setting) {
             if (!in_array($setting, static::SETTINGS)) {
                 $context->buildViolation('additional_data')->atPath($setting)->addViolation();
             }
@@ -141,30 +138,30 @@ abstract class FieldType implements FieldTypeInterface
 
         // Check that all required settings are present.
         foreach (static::REQUIRED_SETTINGS as $setting) {
-            if (!isset($settings[$setting])) {
+            if (!isset($settingsArray[$setting])) {
                 $context->buildViolation('required')->atPath($setting)->addViolation();
             }
         }
 
         // validate empty data is boolean
-        if (!empty($settings['not_empty'])) {
+        if (!empty($settingsArray['not_empty'])) {
             $context->getViolations()->addAll(
-                $context->getValidator()->validate($settings['not_empty'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
+                $context->getValidator()->validate($settingsArray['not_empty'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
             );
         }
 
         // validate description length
-        if (!empty($settings['description'])) {
+        if (!empty($settingsArray['description'])) {
             $context->getViolations()->addAll(
-                $context->getValidator()->validate($settings['description'], [
+                $context->getValidator()->validate($settingsArray['description'], [
                     new Assert\Type(['type' => 'string', 'message' => 'nostring_value']),
                     new Assert\Length(['max' => 255, 'maxMessage' => 'too_long'])
                 ])
             );
         }
 
-        if (!empty($settings['default'])) {
-            $this->validateDefaultValue($context, $settings['default']);
+        if (!empty($settingsArray['default'])) {
+            $this->validateDefaultValue($settingsArray['default'], $settings, $context);
         }
 
         return $violations;
@@ -172,10 +169,11 @@ abstract class FieldType implements FieldTypeInterface
 
     /**
      * Validates the default value if it is set.
-     * @param ExecutionContextInterface $context
      * @param $value
+     * @param FieldableFieldSettings $settings
+     * @param ExecutionContextInterface $context
      */
-    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
         $context->getViolations()->addAll(
             $context->getValidator()->validate($value, new Assert\Type(['type' => 'string', 'message' => 'invalid_initial_data']))
         );

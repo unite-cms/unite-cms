@@ -6,6 +6,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 
 class DateFieldType extends FieldType
@@ -30,7 +31,7 @@ class DateFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
         $context->getViolations()->addAll(
             $context->getValidator()->validate($value, new Assert\Date(['message' => 'invalid_initial_data']))
         );

@@ -6,6 +6,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class DateTimeFieldType extends DateFieldType
@@ -24,7 +25,7 @@ class DateTimeFieldType extends DateFieldType
     /**
      * {@inheritdoc}
      */
-    protected function validateDefaultValue(ExecutionContextInterface $context, $value) {
+    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
         $context->getViolations()->addAll(
             $context->getValidator()->validate($value, new Assert\DateTime(['message' => 'invalid_initial_data']))
         );

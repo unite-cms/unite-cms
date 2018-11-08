@@ -44,7 +44,7 @@ class ChoicesFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('initial_data_not_inside_values', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('The value you selected is not a valid choice.', $errors->get(0)->getMessageTemplate());
 
     }
 
