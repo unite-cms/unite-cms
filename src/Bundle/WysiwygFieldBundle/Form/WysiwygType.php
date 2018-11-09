@@ -72,7 +72,14 @@ class WysiwygType extends WebComponentType
             return null;
         }
 
-        return $this->antiXss->xss_clean($data);
+        $data = $this->antiXss->xss_clean($data);
+
+        // This is the default value of ckeditor5 when you delete all content and styles.
+        if($data === '<p>&nbsp;</p>') {
+            return null;
+        }
+
+        return $data;
     }
 
     /**

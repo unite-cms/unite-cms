@@ -29,7 +29,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 {
     const TYPE                      = "variants";
     const FORM_TYPE                 = VariantsFormType::class;
-    const SETTINGS                  = ['variants'];
+    const SETTINGS                  = ["description", 'variants'];
     const REQUIRED_SETTINGS         = ['variants'];
 
     /**
