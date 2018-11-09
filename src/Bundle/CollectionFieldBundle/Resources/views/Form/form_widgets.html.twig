@@ -1,4 +1,5 @@
 {%- block unite_cms_collection_widget -%}
+    {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: form }) }}
     {% if prototype is defined %}
         {%- set attr = attr|merge({'data-prototype': form_row(prototype) }) -%}
     {% endif %}
