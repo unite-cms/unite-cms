@@ -77,6 +77,12 @@ services:
     arguments: ['@translator']
     tags: [form.type]
 
+  # Provide ReferenceOfType as a service, pass view type manager as an argument
+  unite.cms.reference_of_type:
+    class: UniteCMS\CoreBundle\Form\ReferenceOfType
+    arguments: ['@unite.cms.view_type_manager']
+    tags: [form.type]
+
   # register unite core field type extension
   unite.cms.core_type_extension:
     class: UniteCMS\CoreBundle\Form\Extension\UniteCMSCoreTypeExtension

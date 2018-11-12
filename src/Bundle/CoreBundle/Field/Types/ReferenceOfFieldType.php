@@ -78,6 +78,21 @@ class ReferenceOfFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
+    function getFormOptions(FieldableField $field): array
+    {
+        $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
+        $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
+        $reference_field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
+
+        return array_merge(parent::getFormOptions($field), [
+           'view' => $contentType->getView('all'),
+            'reference_field' => $reference_field,
+        ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
         if(!$context->getObject() instanceof ContentTypeField) {

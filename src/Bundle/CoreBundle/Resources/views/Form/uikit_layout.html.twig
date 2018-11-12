@@ -139,7 +139,11 @@
 {%- endblock unite_cms_core_reference_widget -%}
 
 {%- block unite_cms_core_reference_of_widget -%}
-    <div class="unite-reference-of-view-wrapper">TODO</div>
+    <div class="unite-reference-of-view-wrapper">
+        {% if template is not null and templateParameters is not null %}
+            {{ include(template, {parameters: templateParameters}) }}
+        {% endif %}
+    </div>
 {%- endblock unite_cms_core_reference_of_widget -%}
 
 
