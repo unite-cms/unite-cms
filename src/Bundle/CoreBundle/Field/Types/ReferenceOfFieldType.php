@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\ORM\EntityManager;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
@@ -17,6 +18,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\MissingContentTypeException;
@@ -131,7 +133,7 @@ class ReferenceOfFieldType extends FieldType
         $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
         $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
         return [
-            'type' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResult'), $domain),
+            'type' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel), $domain, $nestingLevel),
             'args' => [
                 'limit' => [
                     'type' => Type::int(),
@@ -152,68 +154,75 @@ class ReferenceOfFieldType extends FieldType
                     'description' => 'Set one optional filter condition.',
                 ],
             ],
+            'resolve' => function ($value, array $args, $context, ResolveInfo $info) use ($field, $nestingLevel) {
+
+                // Reference of fields does only work for content entities.
+                if(!$value instanceof Content) {
+                    return null;
+                }
+
+                $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
+                $args['limit'] = $args['limit'] > 100 ? 100 : $args['limit'];
+                $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
+
+                // Resolve content type and field.
+                $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
+                $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
+                $field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
+
+                // Create filter by reference field + optional filter args
+                $referenceFilter = ['field' => $field->getIdentifier().'.content', 'operator' => '=', 'value' => $value->getId()];
+                $args['filter'] = empty($args['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $args['filter']]];
+
+                // Get content for the resolved content type.
+                $contentEntityFields = $this->entityManager->getClassMetadata(Content::class)->getFieldNames();
+                $contentQuery = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
+                    ->select('c')
+                    ->where('c.contentType = :contentType')
+                    ->setParameter(':contentType', $contentType);
+
+                // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
+                if (!empty($args['sort'])) {
+                    foreach ($args['sort'] as $sort) {
+
+                        $key = $sort['field'];
+                        $order = $sort['order'];
+
+                        // if we sort by a content field.
+                        if (in_array($key, $contentEntityFields)) {
+                            $contentQuery->addOrderBy('c.'.$key, $order);
+
+                            // if we sort by a nested content data field.
+                        } else {
+                            $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                        }
+                    }
+                }
+
+                // Adding where filter to the query.
+                // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
+                // TODO: Replace field names with nested field selectors.
+                $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
+                $contentQuery->andWhere($a->getFilter());
+                foreach($a->getParameters() as $parameter => $value) {
+                    $contentQuery->setParameter($parameter, $value);
+                }
+
+                // Get all content in one request for all contentTypes.
+                return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], [
+                    'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel)
+                ]);
+            },
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
-        // TODO: args are missing.
-        $args = ['limit' => 10, 'page' => 1];
-
-        $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
-        $args['limit'] = $args['limit'] > 100 ? 100 : $args['limit'];
-        $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
-
-        // Resolve content type and field.
-        $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
-        $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
-        $field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
-
-
-        // Get content for the resolved content type.
-        $contentEntityFields = $this->entityManager->getClassMetadata(Content::class)->getFieldNames();
-        $contentQuery = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
-            ->select('c')
-            ->where('c.contentType = :contentType')
-            ->setParameter(':contentType', $contentType);
-
-        // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
-        if (!empty($args['sort'])) {
-            foreach ($args['sort'] as $sort) {
-
-                $key = $sort['field'];
-                $order = $sort['order'];
-
-                // if we sort by a content field.
-                if (in_array($key, $contentEntityFields)) {
-                    $contentQuery->addOrderBy('c.'.$key, $order);
-
-                    // if we sort by a nested content data field.
-                } else {
-                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
-                }
-            }
-        }
-
-        // Adding where filter to the query.
-        if (!empty($args['filter'])) {
-
-            // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
-            // TODO: Replace field names with nested field selectors.
-            $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
-            $contentQuery->andWhere($a->getFilter());
-            foreach($a->getParameters() as $parameter => $value) {
-                $contentQuery->setParameter($parameter, $value);
-            }
-        }
-
-        // Get all content in one request for all contentTypes.
-        return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], [
-            'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResult')
-        ]);
+        // We resolve content for this field directly in the returned type of getGraphQLType.
+        return null;
     }
 
     /**
