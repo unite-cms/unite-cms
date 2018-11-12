@@ -329,6 +329,9 @@ class ImageFieldTypeTest extends FieldTypeTestCase
             )
         );
         $content = new Content();
+        $id = new \ReflectionProperty($content, 'id');
+        $id->setAccessible(true);
+        $id->setValue($content, 1);
         $content->setData(
             [
                 'f1' => [

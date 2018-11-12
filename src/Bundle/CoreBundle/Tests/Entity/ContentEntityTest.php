@@ -7,6 +7,21 @@ use UniteCMS\CoreBundle\Entity\Content;
 
 class ContentEntityTest extends TestCase
 {
+
+    public function testBasicOperations()
+    {
+        $content = new Content();
+
+        $this->assertTrue($content->isNew());
+
+        $rct1_id = new \ReflectionProperty($content, 'id');
+        $rct1_id->setAccessible(true);
+        $rct1_id->setValue($content, 1);
+
+        $this->assertEquals(1, $content->getId());
+        $this->assertFalse($content->isNew());
+    }
+
     public function testExistingTranslation()
     {
         $content = new Content();

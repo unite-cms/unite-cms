@@ -281,7 +281,8 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
 
                                 return $fieldTypes[$info->fieldName]->resolveGraphQLData(
                                     $contentType->getFields()->get($info->fieldName),
-                                    $fieldData
+                                    $fieldData,
+                                    $value
                                 );
                         }
                     },

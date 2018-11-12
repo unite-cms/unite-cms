@@ -1,104 +1,67 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: stefankamsker
+ * Date: 05.11.18
+ * Time: 18:23
+ */
 
 namespace UniteCMS\CoreBundle\Tests\Field;
 
-use UniteCMS\CoreBundle\Tests\APITestCase;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
-class ChoicesFieldTypeTest extends APITestCase
+class ChoicesFieldTypeTest extends FieldTypeTestCase
 {
-    protected $domainConfig = ['ct' => '{
-        "content_types": [
-            {
-                "title": "CT", 
-                "identifier": "ct",
-                "fields": [
-                    {
-                      "title": "Choices",
-                      "identifier": "choices",
-                      "type": "choices",
-                      "settings": {
-                        "choices": {
-                          "Foo": "foo",
-                          "Baa": "baa"
-                        }
-                      }
-                    }
-                ]
-            }
-        ]
-    }'];
-
-    public function testGraphQLReadAndWrite()
+    public function testContentTypeFieldTypeWithInvalidSettings()
     {
-        $query = 'mutation {
-            createCt(data: {}, persist: false) {
-                choices
-            }
-        }';
 
-        $response = $this->api($query, $this->domains['ct']);
-        $this->assertTrue(empty($response->errors));
-        $this->assertEquals([], $response->data->createCt->choices);
+        $ctField = $this->createContentTypeField('choices');
 
-        $query = 'mutation {
-            createCt(data: { choices: "foo" }, persist: false) {
-                choices
-            }
-        }';
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'choices' => ['foo' => 'baa'],
+                'foo' => 'baa',
+                'not_empty' => 123,
+                'default' => true,
+                'description' => 123
+            ]
+        ));
 
-        $response = $this->api($query, $this->domains['ct']);
-        $this->assertTrue(empty($response->errors));
-        $this->assertEquals(['foo'], $response->data->createCt->choices);
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(4, $errors);
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('nostring_value', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('invalid_initial_data', $errors->get(3)->getMessageTemplate());
 
-        $query = 'mutation {
-            createCt(data: { choices: [] }, persist: false) {
-                choices
-            }
-        }';
+        // check wrong empty data
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'choices' => ['foo1' => 'foo1', 'foo2' => 'foo2', 'foo3' => 'foo3'],
+                'default' => ['baaa']
+            ]
+        ));
 
-        $response = $this->api($query, $this->domains['ct']);
-        $this->assertTrue(empty($response->errors));
-        $this->assertEquals([], $response->data->createCt->choices);
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('The value you selected is not a valid choice.', $errors->get(0)->getMessageTemplate());
 
-        $query = 'mutation {
-            createCt(data: { choices: ["foo"] }, persist: false) {
-                choices
-            }
-        }';
-
-        $response = $this->api($query, $this->domains['ct']);
-        $this->assertTrue(empty($response->errors));
-        $this->assertEquals(["foo"], $response->data->createCt->choices);
-
-        $query = 'mutation {
-            createCt(data: { choices: ["foo", "baa"] }, persist: false) {
-                choices
-            }
-        }';
-
-        $response = $this->api($query, $this->domains['ct']);
-        $this->assertTrue(empty($response->errors));
-        $this->assertEquals(["foo", "baa"], $response->data->createCt->choices);
-
-        $query = 'mutation {
-            createCt(data: { choices: ["baa", "foo"] }, persist: false) {
-                choices
-            }
-        }';
-
-        $response = $this->api($query, $this->domains['ct']);
-        $this->assertTrue(empty($response->errors));
-        $this->assertEquals(["foo", "baa"], $response->data->createCt->choices);
-
-        $query = 'mutation {
-            createCt(data: { choices: ["any", "foo"] }, persist: false) {
-                choices
-            }
-        }';
-
-        $response = $this->api($query, $this->domains['ct']);
-        $this->assertFalse(empty($response->errors));
-        $this->assertEquals('This value is not valid.', $response->errors[0]->message);
-        $this->assertEmpty($response->data->createCt);
     }
+
+    public function testContentTypeFieldTypeWithValidSettings()
+    {
+        // Content Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('choices');
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'choices' => ['foo1' => 'foo1', 'foo2' => 'foo2', 'foo3' => 'foo3'],
+                'default' => ['foo1', 'foo2']
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(0, $errors);
+    }
+
 }

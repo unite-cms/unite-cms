@@ -24,6 +24,7 @@ class FieldableFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+
         // Handle content locales
         if (!empty($options['locales'])) {
 
@@ -57,6 +58,7 @@ class FieldableFormType extends AbstractType
     {
         $resolver->setRequired('fields');
         $resolver->setDefined('locales');
+        $resolver->setDefined('content');
         if ($this->tokenStorage->getToken() && $this->tokenStorage->getToken()->getProviderKey() == "api") {
             $resolver->setDefault('csrf_protection', false);
         }

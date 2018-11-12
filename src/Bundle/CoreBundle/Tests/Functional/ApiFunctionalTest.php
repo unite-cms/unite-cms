@@ -627,8 +627,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }');
 
         // Get title_title and content partial strings from any random content.
-        $content1 = $news->data->findNews->result[rand(1, $news->data->findNews->total - 1)];
-        $content2 = $news->data->findNews->result[rand(1, $news->data->findNews->total - 1)];
+        $content1 = $news->data->findNews->result[rand(1, ($news->data->findNews->total / 2) - 1)];
+        $content2 = $news->data->findNews->result[rand(($news->data->findNews->total / 2), $news->data->findNews->total - 1)];
         $content1_title_title_part = substr($content1->title_title, rand(1, 50), rand(1, 20));
         $content2_content_part = substr($content2->content, rand(1, 50), rand(1, 20));
 
@@ -706,14 +706,6 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 'content' => '%' . $content2_content_part . '%',
             ]
         );
-
-        // This happens only sometimes, so for getting a chance to debug this we inject some debugging output here.
-        if($result->data->findNews->total < 2) {
-            print_r($content1_title_title_part);
-            print_r($content1->title_title);
-            print_r($content2_content_part);
-            print_r($content2->content);
-        }
 
         $this->assertGreaterThan(1, $result->data->findNews->total);
     }

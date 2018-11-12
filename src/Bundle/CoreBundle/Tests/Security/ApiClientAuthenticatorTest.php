@@ -1,6 +1,6 @@
 <?php
 
-namespace src\UniteCMS\CoreBundle\Tests\Security;
+namespace UniteCMS\CoreBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;

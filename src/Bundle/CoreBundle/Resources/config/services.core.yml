@@ -76,3 +76,9 @@ services:
     class: UniteCMS\CoreBundle\Form\LinkType
     arguments: ['@translator']
     tags: [form.type]
+
+  # register unite core field type extension
+  unite.cms.core_type_extension:
+    class: UniteCMS\CoreBundle\Form\Extension\UniteCMSCoreTypeExtension
+    tags:
+    - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }

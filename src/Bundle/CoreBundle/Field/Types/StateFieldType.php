@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -25,7 +26,7 @@ class StateFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['initial_place', 'places', 'transitions'];
+    const SETTINGS = ['description', 'initial_place', 'places', 'transitions'];
 
     /**
      * All required settings for this field type.
@@ -52,7 +53,7 @@ class StateFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         // return NULL on empty value
         if (empty($value))

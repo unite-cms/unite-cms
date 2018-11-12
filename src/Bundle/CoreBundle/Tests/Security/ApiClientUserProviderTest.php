@@ -1,6 +1,6 @@
 <?php
 
-namespace src\UniteCMS\CoreBundle\Tests\Security;
+namespace UniteCMS\CoreBundle\Tests\Security;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;

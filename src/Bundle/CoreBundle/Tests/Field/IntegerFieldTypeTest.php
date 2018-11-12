@@ -22,5 +22,27 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+
+        // test wrong initial data
+        $ctField->setSettings(new FieldableFieldSettings(['default' => 'baa']));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
+    }
+
+    public function testIntegerTypeFieldTypeWithValidSettings()
+    {
+        $ctField = $this->createContentTypeField('integer');
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'not_empty' => true,
+                'description' => 'my description',
+                'default' => 123
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(0, $errors);
     }
 }

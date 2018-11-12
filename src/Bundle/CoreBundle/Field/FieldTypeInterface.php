@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -63,6 +64,15 @@ interface FieldTypeInterface
     function getFormOptions(FieldableField $field): array;
 
     /**
+     * Returns the default value for this field. This method will be called when a new fieldablecontent is passed to
+     * the fieldableform builder.
+     *
+     * @param FieldableField $field
+     * @return null|mixed
+     */
+    function getDefaultValue(FieldableField $field);
+
+    /**
      * Get the title for this field.
      *
      * @param FieldableField $field
@@ -83,9 +93,10 @@ interface FieldTypeInterface
      *
      * @param FieldableField $field
      * @param $value
+     * @param FieldableContent $content
      * @return mixed
      */
-    function resolveGraphQLData(FieldableField $field, $value);
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content);
 
     /**
      * A callback to allow the field type to validate the field settings.

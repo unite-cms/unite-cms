@@ -23,6 +23,27 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
 
         $this->assertCount(1, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'foo' => 'baa',
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+
+        // test wrong initial data
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'default' => '15.67.98877'
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
     }
 
     public function testFormDataTransformers() {
@@ -30,6 +51,10 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('datetime');
 
         $content = new Content();
+        $id = new \ReflectionProperty($content, 'id');
+        $id->setAccessible(true);
+        $id->setValue($content, 1);
+
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);

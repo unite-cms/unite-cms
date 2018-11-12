@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
+use UniteCMS\CollectionFieldBundle\Model\CollectionRow;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
@@ -100,7 +101,7 @@ class CollectionFieldTypeFactory
                     'fields' => function() use($fieldsSchemaTypes){
                       return $fieldsSchemaTypes;
                     },
-                    'resolveField' => function($value, array $args, $context, ResolveInfo $info) use ($fields, $fieldTypes) {
+                    'resolveField' => function($value, array $args, $context, ResolveInfo $info) use ($collection, $fields, $fieldTypes) {
 
                       if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$info->fieldName])) {
                         return null;
@@ -108,7 +109,7 @@ class CollectionFieldTypeFactory
 
                       $return_value = null;
                       $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName]);
+                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName], new CollectionRow($collection, $value));
                       return $return_value;
                     }
                   ]));

@@ -146,5 +146,12 @@ class Setting implements FieldableContent
     {
         return $this->data;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isNew(): bool {
+        return empty($this->getId());
+    }
 }
 

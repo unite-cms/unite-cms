@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Routing\Router;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
@@ -38,7 +39,7 @@ class ReferenceFieldType extends FieldType
 {
     const TYPE = "reference";
     const FORM_TYPE = ReferenceType::class;
-    const SETTINGS = ['domain', 'content_type', 'view', 'content_label'];
+    const SETTINGS = ['not_empty', 'description', 'domain', 'content_type', 'view', 'content_label'];
     const REQUIRED_SETTINGS = ['domain', 'content_type'];
 
     /**
@@ -218,14 +219,16 @@ class ReferenceFieldType extends FieldType
      *
      * @param FieldableField $field
      * @param array $value
+     * @param FieldableContent $content
      * @return null|Content
      *
-     * @throws InvalidFieldConfigurationException
      * @throws ContentAccessDeniedException
      * @throws DomainAccessDeniedException
+     * @throws MissingContentTypeException
+     * @throws MissingDomainException
      * @throws MissingOrganizationException
      */
-    function resolveGraphQLData(FieldableField $field, $value)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         if (empty($value)) {
             return null;
@@ -275,7 +278,7 @@ class ReferenceFieldType extends FieldType
         } // Try to resolve the data to check if the current user is allowed to access it.
         else {
             try {
-                $this->resolveGraphQLData($field, $data);
+                $this->resolveGraphQLData($field, $data, $context->getObject());
             } catch (\Exception $e) {
                 $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
