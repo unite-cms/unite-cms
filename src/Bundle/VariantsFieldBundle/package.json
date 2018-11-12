@@ -2,7 +2,7 @@
   "name": "UniteCMSVariantsFieldBundle",
   "version": "1.0.0",
   "devDependencies": {
-    "@symfony/webpack-encore": "^0.20.1",
+    "@symfony/webpack-encore": "^0.21.0",
     "node-sass": "^4.9.3",
     "npm": "^6.4.1",
     "sass-loader": "^7.1.0",

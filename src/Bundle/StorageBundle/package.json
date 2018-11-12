@@ -5,7 +5,7 @@
     "uikit": "^3.0.0-rc.17"
   },
   "devDependencies": {
-    "@symfony/webpack-encore": "^0.20.1",
+    "@symfony/webpack-encore": "^0.21.0",
     "feather-icons": "^4.7.3",
     "node-sass": "^4.9.3",
     "npm": "^6.4.1",

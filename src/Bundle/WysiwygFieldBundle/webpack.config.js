@@ -1,8 +1,5 @@
 
 const Encore = require('@symfony/webpack-encore');
-const webpack = require('webpack');
-const { VueLoaderPlugin } = require('vue-loader');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 Encore
     // the project directory where all compiled assets will be stored
@@ -21,14 +18,10 @@ Encore
         sassConfigOptions.includePaths = ['./node_modules'];
     })
 
-    // https://github.com/symfony/webpack-encore/issues/311#issuecomment-411787830
-    .addLoader({ test: /\.vue$/, loader: 'vue-loader' })
-    .addPlugin(new VueLoaderPlugin())
-    .addAliases({ vue: 'vue/dist/vue.js' })
+    // load vue components
+    .enableVueLoader()
 
-    // allow legacy applications to use $/jQuery as a global variable
-    //.autoProvidejQuery()
-
+    // Enable sourcemaps in production mode
     .enableSourceMaps(!Encore.isProduction())
 
     // empty the outputPath dir before each build
@@ -37,18 +30,8 @@ Encore
     // versioning to avoid browser cache loading old assets
     .enableVersioning(Encore.isProduction())
 
-    // show OS notifications when builds finish/fail
-    //.enableBuildNotifications();
-
-const webpackConfig = Encore.getWebpackConfig();
-
-// Replace uglify version on production.
-if(Encore.isProduction()) {
-    webpackConfig.plugins = webpackConfig.plugins.filter(
-        plugin => !(plugin instanceof webpack.optimize.UglifyJsPlugin)
-    );
-    webpackConfig.plugins.push(new UglifyJsPlugin());
-}
+    // We don't need a runtime.js for unite cms at the moment
+    .disableSingleRuntimeChunk();
 
 // export the final configuration
-module.exports = webpackConfig;
+module.exports = Encore.getWebpackConfig();
