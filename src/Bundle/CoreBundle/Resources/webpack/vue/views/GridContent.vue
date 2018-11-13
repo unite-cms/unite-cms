@@ -22,6 +22,7 @@
                                        ref="field__actions"
                                        initialMinWidth="0"
                                        :refInFor="true"
+                                       :embedded="embedded"
                 ></base-view-row-actions>
             </div>
             <div class="unite-grid-view-meta-fields">
