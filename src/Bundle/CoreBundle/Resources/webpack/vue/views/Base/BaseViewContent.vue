@@ -10,6 +10,7 @@
             'rows',
             'selectable',
             'updateable',
+            'embedded',
             'urls',
         ]
     }

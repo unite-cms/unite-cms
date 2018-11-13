@@ -17,15 +17,13 @@
 
 .unite-div-table-filter {
   display: block;
-  margin-top: 20px;
   text-align: center;
 }
 
 .unite-div-table-tabs {
-  margin-top: 20px;
-  margin-bottom: 0;
-  margin-left: -10px;
+  margin: 0;
   justify-content: center;
+  flex-wrap: nowrap;
 
   &:before {
     display: none;
@@ -48,14 +46,18 @@
         border-color: inherit;
       }
     }
+
+    &:first-child {
+      padding-left: 0;
+    }
   }
 }
 
 .unite-div-table-search {
-  margin-top: 20px;
-  margin-bottom: 0;
+  margin: 0;
   width: 100%;
-  max-width: 360px;
+  min-width: 150px;
+  max-width: 300px;
 
   input.uk-search-input {
     height: 29px;
@@ -166,13 +168,5 @@
   .unite-div-table-filter {
     display: flex;
     text-align: left;
-  }
-
-  .unite-div-table-tabs {
-    justify-content: flex-start;
-  }
-
-  .unite-div-table-search {
-    width: 240px;
   }
 }

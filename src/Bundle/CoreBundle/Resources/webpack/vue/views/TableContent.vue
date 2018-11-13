@@ -49,6 +49,7 @@
                                        @resized="onFieldResize"
                                        ref="field__actions"
                                        :refInFor="true"
+                                       :embedded="embedded"
                 ></base-view-row-actions>
             </div>
         </div>
