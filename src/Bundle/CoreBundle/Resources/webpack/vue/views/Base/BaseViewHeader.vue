@@ -1,12 +1,12 @@
 <template>
     <header class="uk-card-header">
-        <div class="uk-flex uk-flex-middle">
-            <div class="uk-flex uk-flex-1 uk-flex-middle">
+        <div class="uk-flex uk-flex-middle unite-div-table-header">
+            <div class="unite-div-table-headline uk-flex uk-flex-1 uk-flex-middle">
                 <h2 v-if="showTitle" class="uk-flex-0 uk-flex uk-flex-middle">
                     <span>{{ title }}</span>
                     <span v-if="subTitle" class="uk-text-meta"> / {{ subTitle }}</span>
                 </h2>
-                <ul class="uk-flex-0 unite-div-table-tabs uk-tab uk-margin-right" v-if="deleted.hasDeleted">
+                <ul class="uk-flex-0 unite-div-table-tabs uk-tab" v-if="deleted.hasDeleted">
                     <li :class="{ 'uk-active': !deleted.showDeleted }"><a href="#" v-on:click.prevent="deleted.showDeleted = false">Active</a></li>
                     <li :class="{ 'uk-active': deleted.showDeleted }"><a href="#" v-on:click.prevent="deleted.showDeleted = true">Deleted</a></li>
                 </ul>
