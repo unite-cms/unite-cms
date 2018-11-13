@@ -5,6 +5,8 @@
                    :selectable="selectable"
                    :title="labels.title"
                    :subTitle="labels.subTitle"
+                   :showTitle="showTitle"
+                   :embedded="embedded"
                    :createLabel="labels.create"
                    :sortable="sort.sortable && !selectable && !deleted.showDeleted"
                    :createUrl="urls.create"
@@ -22,6 +24,7 @@
                    :sort="sort"
                    :selectable="selectable"
                    :updateable="!deleted.showDeleted"
+                   :embedded="embedded"
                    :urls="urls"
                    @updateRow="onRowUpdate"
                    @updateSort="onUpdateSort"></component>
@@ -111,6 +114,8 @@
                     retry: "Reload",
                     create: "Create"
                 },
+                showTitle: bag.settings.showTitle || true,
+                embedded: bag.settings.embedded || false,
                 feather: feather,
             }
         },

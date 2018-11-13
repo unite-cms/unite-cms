@@ -57,6 +57,13 @@
     line-height: 40px;
     margin: 0;
     padding-right: 10px;
+
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 10px;
+    }
   }
 }
 

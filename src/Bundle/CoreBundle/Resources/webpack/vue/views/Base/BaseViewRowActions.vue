@@ -3,7 +3,7 @@
         <button v-if="actions.length > 0" class="uk-button uk-button-default actions-dropdown" type="button" v-html="feather.icons['more-horizontal'].toSvg()"></button>
         <div v-if="actions.length > 0" uk-dropdown="mode: click; pos: bottom-right; offset: 5;">
             <ul class="uk-nav uk-dropdown-nav">
-                <li v-for="action in actions"><a :href="action.url" :class="action.class ? action.class : ''">
+                <li v-for="action in actions"><a :target="embedded ? '_blank' : '_self'" :href="action.url" :class="action.class ? action.class : ''">
                     <span class="uk-margin-small-right" v-html="action.icon"></span>{{ action.name }}</a>
                 </li>
             </ul>
@@ -31,7 +31,7 @@
                 ],
             }
         },
-        props: ['row', 'urls', 'identifier', 'initialMinWidth'],
+        props: ['row', 'urls', 'identifier', 'initialMinWidth', 'embedded'],
         mounted() {
             this.width = this.$el.childElementCount > 0 ? this.$el.children[0].offsetWidth : this.$el.offsetWidth;
             this.$on('minWidthChanged', (minWidth) => {
