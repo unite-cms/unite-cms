@@ -85,7 +85,7 @@ class ReferenceOfFieldType extends FieldType
         $reference_field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
 
         return array_merge(parent::getFormOptions($field), [
-           'view' => $contentType->getView('all'),
+            'view' => $contentType->getView('all'),
             'reference_field' => $reference_field,
         ]);
     }

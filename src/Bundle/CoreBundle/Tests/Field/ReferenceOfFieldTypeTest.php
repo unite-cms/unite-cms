@@ -2,6 +2,8 @@
 
 namespace UniteCMS\CoreBundle\Tests\Field;
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
@@ -226,5 +228,68 @@ class ReferenceOfFieldTypeTest extends FieldTypeTestCase
         $ref_field->getSettings()->domain = 'new';
         $ref_field->getSettings()->content_type = 'baa';
         $this->assertCount(0, static::$container->get('validator')->validate($domain));
+    }
+
+    public function testFormOptionGeneration() {
+
+        $ctField = $this->createContentTypeField('reference_of');
+        $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('org');
+        $ctField->getContentType()->getDomain()->setIdentifier('domain');
+        $ctField->getContentType()->setIdentifier('ct');
+        $ctField->setSettings(new FieldableFieldSettings([
+            'domain' => 'domain',
+            'content_type' => 'ct2',
+            'reference_field' => 'reference',
+        ]));
+
+        // Create other reference field
+        $ctRefField = $this->createContentTypeField('reference');
+        $ctRefField->getContentType()->setDomain($ctField->getContentType()->getDomain());
+        $ctRefField->getContentType()->setIdentifier('ct2');
+        $ctRefField->setIdentifier('reference');
+        $ctRefField->setSettings(new FieldableFieldSettings([
+            'domain' => 'domain',
+            'content_type' => 'ct',
+        ]));
+
+        // Fake organization and domain
+        $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
+
+        $o01 = new \ReflectionProperty($fieldType, 'referenceResolver');
+        $o01->setAccessible(true);
+        $referenceResolver = $o01->getValue($fieldType);
+
+        $o1 = new \ReflectionProperty($referenceResolver, 'authorizationChecker');
+        $o1->setAccessible(true);
+        $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
+        $authMock->expects($this->any())->method('isGranted')->willReturn(true);
+        $o1->setValue($referenceResolver, $authMock);
+
+        $o2 = new \ReflectionProperty($referenceResolver, 'uniteCMSManager');
+        $o2->setAccessible(true);
+        $cmsManager = $this->createMock(UniteCMSManager::class);
+        $cmsManager->expects($this->any())->method('getOrganization')->willReturn($ctField->getContentType()->getDomain()->getOrganization());
+        $cmsManager->expects($this->any())->method('getDomain')->willReturn($ctField->getContentType()->getDomain());
+        $o2->setValue($referenceResolver, $cmsManager);
+
+        $o31 = new \ReflectionProperty($referenceResolver, 'entityManager');
+        $o31->setAccessible(true);
+
+        $viewRepositoryMock = $this->createMock(EntityRepository::class);
+        $viewRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getView('all'));
+        $domainRepositoryMock = $this->createMock(EntityRepository::class);
+        $domainRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getDomain());
+
+        $cmsManager = $this->createMock(EntityManager::class);
+        $cmsManager->expects($this->any())->method('getRepository')->will($this->returnValueMap([
+            ['UniteCMSCoreBundle:View', $viewRepositoryMock],
+            ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
+        ]));
+        $o31->setValue($referenceResolver, $cmsManager);
+
+        $options = $fieldType->getFormOptions($ctField);
+        $this->assertEquals($options['label'], $ctField->getTitle());
+        $this->assertEquals($options['view'], $ctRefField->getContentType()->getView('all'));
+        $this->assertEquals($options['reference_field'], $ctRefField);
     }
 }

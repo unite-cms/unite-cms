@@ -43,23 +43,32 @@ class ReferenceOfType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        if(!$options['view'] instanceof View) {
+        $view->vars['template'] = null;
+        $view->vars['templateParameters'] = null;
+
+        if(empty($options['view']) || !$options['view'] instanceof View) {
             throw new InvalidArgumentException('Required "view" form option must be of type UniteCMS\CoreBundle\Entity\View.');
         }
 
-        if(!$options['reference_field'] instanceof ContentTypeField) {
+        if(empty($options['reference_field']) || !$options['reference_field'] instanceof ContentTypeField) {
             throw new InvalidArgumentException('Required "reference_field" form option must be of type UniteCMS\CoreBundle\Entity\ContentTypeField.');
         }
 
-        if(!$form->getRoot()->getConfig()->hasOption('content') || !$form->getRoot()->getConfig()->getOption('content') instanceof Content) {
-            throw new InvalidArgumentException('ReferenceOf form type needs a content option on the root form element');
+        if(!$form->getRoot() || !$form->getRoot()->getConfig()->hasOption('content') || !$form->getRoot()->getConfig()->getOption('content') instanceof Content) {
+            throw new InvalidArgumentException('ReferenceOf form type needs a content option on the root form element.');
+        }
+
+        $content = $form->getRoot()->getConfig()->getOption('content');
+
+        if(empty($content->getId())) {
+            return;
         }
 
         $view->vars['template'] = $this->viewTypeManager->getViewType($options['view']->getType())::getTemplate();
         $view->vars['templateParameters'] = $this->viewTypeManager->getTemplateRenderParameters($options['view']);
 
         $settings = $view->vars['templateParameters']->getSettings();
-        $referenceFilter = ['field' => $options['reference_field']->getIdentifier().'.content', 'operator' => '=', 'value' => $form->getRoot()->getConfig()->getOption('content')->getId()];
+        $referenceFilter = ['field' => $options['reference_field']->getIdentifier().'.content', 'operator' => '=', 'value' => $content->getId()];
         $settings['filter'] = empty($settings['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $settings['filter']]];
         $settings['embedded'] = true;
 
