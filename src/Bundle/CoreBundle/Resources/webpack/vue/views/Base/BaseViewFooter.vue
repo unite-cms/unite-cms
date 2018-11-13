@@ -1,5 +1,5 @@
 <template>
-    <footer>
+    <footer v-if="pages.length > 1">
         <ul class="uk-pagination uk-flex-center" uk-margin>
             <li class="first uk-visible@s" v-if="showArrows && current > 1">
                 <a v-on:click="change(1)" v-html="feather.icons['chevrons-left'].toSvg({ width: 16, height: 16 })"></a>
@@ -87,6 +87,6 @@
 
 <style scoped>
     footer {
-        margin: 0 -20px;
+        margin: 20px -20px 0;
     }
 </style>
