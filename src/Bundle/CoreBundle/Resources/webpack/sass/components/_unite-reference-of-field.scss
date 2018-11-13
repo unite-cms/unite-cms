@@ -12,5 +12,20 @@
     box-shadow: none;
     padding-bottom: 0;
     background: none;
+
+    .unite-div-table-headline {
+      opacity: 0.5;
+    }
+
+    .uk-button-primary {
+      color: map-get($colors, grey-dark);
+      border-color: map-get($colors, grey);
+      background: map-get($colors, white);
+
+      &:hover {
+        background-color: $button-primary-background;
+        color: $button-primary-color;
+      }
+    }
   }
 }

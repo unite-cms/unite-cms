@@ -61,6 +61,8 @@ class ReferenceOfType extends AbstractType
         $settings = $view->vars['templateParameters']->getSettings();
         $referenceFilter = ['field' => $options['reference_field']->getIdentifier().'.content', 'operator' => '=', 'value' => $form->getRoot()->getConfig()->getOption('content')->getId()];
         $settings['filter'] = empty($settings['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $settings['filter']]];
+        $settings['embedded'] = true;
+
         $view->vars['templateParameters']->setSettings($settings);
     }
 

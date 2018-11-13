@@ -2,7 +2,7 @@
     <header class="uk-card-header">
         <div class="uk-flex uk-flex-middle unite-div-table-header">
             <div class="unite-div-table-headline uk-flex uk-flex-1 uk-flex-middle">
-                <h2 v-if="showTitle" class="uk-flex-0 uk-flex uk-flex-middle">
+                <h2 class="uk-flex-0 uk-flex uk-flex-middle">
                     <span>{{ title }}</span>
                     <span v-if="subTitle" class="uk-text-meta"> / {{ subTitle }}</span>
                 </h2>
@@ -55,7 +55,6 @@
             'deleted',
             'title',
             'subTitle',
-            'showTitle',
             'createLabel',
             'createUrl',
             'selectable',
