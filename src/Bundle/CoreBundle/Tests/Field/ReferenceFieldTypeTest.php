@@ -83,11 +83,15 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         // Fake organization
         $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
 
-        $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o01 = new \ReflectionProperty($fieldType, 'referenceResolver');
+        $o01->setAccessible(true);
+        $referenceResolver = $o01->getValue($fieldType);
+
+        $o1 = new \ReflectionProperty($referenceResolver, 'authorizationChecker');
         $o1->setAccessible(true);
-        $o1->setValue($fieldType, new class implements AuthorizationCheckerInterface {
-            public function isGranted($attributes, $subject = null) { return true; }
-        });
+        $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
+        $authMock->expects($this->any())->method('isGranted')->willReturn(true);
+        $o1->setValue($referenceResolver, $authMock);
 
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'organization');
         $reflector->setAccessible(true);
@@ -116,7 +120,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $ctField->getSettings()->domain = 'foo';
         $ctField->getSettings()->content_type = 'baa';
 
-        $o1->setValue($fieldType, new class implements AuthorizationCheckerInterface {
+        $o1->setValue($referenceResolver, new class implements AuthorizationCheckerInterface {
             public function isGranted($attributes, $subject = null) { return false; }
         });
 
@@ -124,7 +128,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('invalid_domain', $errors->get(0)->getMessageTemplate());
 
-        $o1->setValue($fieldType, new class implements AuthorizationCheckerInterface {
+        $o1->setValue($referenceResolver, new class implements AuthorizationCheckerInterface {
             public function isGranted($attributes, $subject = null) { return true; }
         });
 
@@ -194,11 +198,19 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         // Fake organization
         $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
 
-        $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o01 = new \ReflectionProperty($fieldType, 'referenceResolver');
+        $o01->setAccessible(true);
+        $referenceResolver = $o01->getValue($fieldType);
+
+        $o01 = new \ReflectionProperty($fieldType, 'referenceResolver');
+        $o01->setAccessible(true);
+        $referenceResolver = $o01->getValue($fieldType);
+
+        $o1 = new \ReflectionProperty($referenceResolver, 'authorizationChecker');
         $o1->setAccessible(true);
         $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
         $authMock->expects($this->any())->method('isGranted')->willReturn(true);
-        $o1->setValue($fieldType, $authMock);
+        $o1->setValue($referenceResolver, $authMock);
 
         $domain = new Domain();
         $domain->setTitle('Domain')->setIdentifier("domain");
@@ -245,21 +257,34 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         // Fake organization and domain
         $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
 
-        $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o01 = new \ReflectionProperty($fieldType, 'referenceResolver');
+        $o01->setAccessible(true);
+        $referenceResolver = $o01->getValue($fieldType);
+
+        $o1 = new \ReflectionProperty($referenceResolver, 'authorizationChecker');
         $o1->setAccessible(true);
         $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
         $authMock->expects($this->any())->method('isGranted')->willReturn(true);
-        $o1->setValue($fieldType, $authMock);
+        $o1->setValue($referenceResolver, $authMock);
 
-        $o2 = new \ReflectionProperty($fieldType, 'uniteCMSManager');
+        $o10 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o10->setAccessible(true);
+        $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
+        $authMock->expects($this->any())->method('isGranted')->willReturn(true);
+        $o10->setValue($fieldType, $authMock);
+
+        $o2 = new \ReflectionProperty($referenceResolver, 'uniteCMSManager');
         $o2->setAccessible(true);
         $cmsManager = $this->createMock(UniteCMSManager::class);
         $cmsManager->expects($this->any())->method('getOrganization')->willReturn($ctField->getContentType()->getDomain()->getOrganization());
         $cmsManager->expects($this->any())->method('getDomain')->willReturn($ctField->getContentType()->getDomain());
-        $o2->setValue($fieldType, $cmsManager);
+        $o2->setValue($referenceResolver, $cmsManager);
 
         $o3 = new \ReflectionProperty($fieldType, 'entityManager');
         $o3->setAccessible(true);
+        $o31 = new \ReflectionProperty($referenceResolver, 'entityManager');
+        $o31->setAccessible(true);
+
         $viewRepositoryMock = $this->createMock(EntityRepository::class);
         $viewRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getView('all'));
         $domainRepositoryMock = $this->createMock(EntityRepository::class);
@@ -271,6 +296,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
             ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
         ]));
         $o3->setValue($fieldType, $cmsManager);
+        $o31->setValue($referenceResolver, $cmsManager);
 
         $options = $fieldType->getFormOptions($ctField);
         $this->assertEquals(false, $options['required']);
@@ -298,21 +324,33 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         // Fake organization and domain
         $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
 
-        $o1 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o01 = new \ReflectionProperty($fieldType, 'referenceResolver');
+        $o01->setAccessible(true);
+        $referenceResolver = $o01->getValue($fieldType);
+
+        $o1 = new \ReflectionProperty($referenceResolver, 'authorizationChecker');
         $o1->setAccessible(true);
         $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
         $authMock->expects($this->any())->method('isGranted')->willReturn(true);
-        $o1->setValue($fieldType, $authMock);
+        $o1->setValue($referenceResolver, $authMock);
 
-        $o2 = new \ReflectionProperty($fieldType, 'uniteCMSManager');
+        $o10 = new \ReflectionProperty($fieldType, 'authorizationChecker');
+        $o10->setAccessible(true);
+        $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
+        $authMock->expects($this->any())->method('isGranted')->willReturn(true);
+        $o10->setValue($fieldType, $authMock);
+
+        $o2 = new \ReflectionProperty($referenceResolver, 'uniteCMSManager');
         $o2->setAccessible(true);
         $cmsManager = $this->createMock(UniteCMSManager::class);
         $cmsManager->expects($this->any())->method('getOrganization')->willReturn($ctField->getContentType()->getDomain()->getOrganization());
         $cmsManager->expects($this->any())->method('getDomain')->willReturn($ctField->getContentType()->getDomain());
-        $o2->setValue($fieldType, $cmsManager);
+        $o2->setValue($referenceResolver, $cmsManager);
 
         $o3 = new \ReflectionProperty($fieldType, 'entityManager');
         $o3->setAccessible(true);
+        $o31 = new \ReflectionProperty($referenceResolver, 'entityManager');
+        $o31->setAccessible(true);
         $viewRepositoryMock = $this->createMock(EntityRepository::class);
         $viewRepositoryMock->expects($this->any())->method('findOneBy')->willReturn($ctField->getContentType()->getView('all'));
         $domainRepositoryMock = $this->createMock(EntityRepository::class);
@@ -324,6 +362,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
             ['UniteCMSCoreBundle:Domain', $domainRepositoryMock],
         ]));
         $o3->setValue($fieldType, $cmsManager);
+        $o31->setValue($referenceResolver, $cmsManager);
 
         // No content_label fallback and no content_label set.
         $ctField->getContentType()->setContentLabel('');
@@ -419,7 +458,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
     /**
      * @expectedException \UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException
-     * @expectedExceptionMessage A reference field was configured to reference to domain "foo". However "foo" does not exist, or you don't have access to it.
+     * @expectedExceptionMessage A reference field was configured with domain "foo". However "foo" does not exist, or you don't have access to it.
      */
     public function testDomainNotFoundException()
     {
@@ -478,7 +517,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
     /**
      * @expectedException \UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException
-     * @expectedExceptionMessage A reference field was configured to reference to content type "baa" on domain "domain1". However "baa" does not exist.
+     * @expectedExceptionMessage A reference field was configured with content type "baa" on domain "domain1". However "baa" does not exist.
      */
     public function testContentTypeNotFoundException()
     {
@@ -538,7 +577,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
     /**
      * @expectedException \UniteCMS\CoreBundle\Exception\DomainAccessDeniedException
-     * @expectedExceptionMessage A reference field was configured to reference to domain "domain1". However you are not allowed to access it.
+     * @expectedExceptionMessage A reference field was configured with domain "domain1". However you are not allowed to access it.
      */
     public function testDomainNoAccess()
     {

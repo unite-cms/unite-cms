@@ -5,7 +5,6 @@
                    :selectable="selectable"
                    :title="labels.title"
                    :subTitle="labels.subTitle"
-                   :showTitle="showTitle"
                    :embedded="embedded"
                    :createLabel="labels.create"
                    :sortable="sort.sortable && !selectable && !deleted.showDeleted"
@@ -114,7 +113,6 @@
                     retry: "Reload",
                     create: "Create"
                 },
-                showTitle: bag.settings.showTitle || true,
                 embedded: bag.settings.embedded || false,
                 feather: feather,
             }

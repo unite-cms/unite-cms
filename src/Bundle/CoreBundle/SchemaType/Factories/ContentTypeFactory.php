@@ -146,6 +146,11 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                     );
                 }
 
+                // field type can also return null, if no input / output is defined for this field.
+                if(!$fields[$fieldIdentifier]) {
+                    unset($fields[$fieldIdentifier]);
+                }
+
                 // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
             } catch (AccessDeniedException $accessDeniedException) {
                 // TODO: We should log this here and show it to the user somewhere.

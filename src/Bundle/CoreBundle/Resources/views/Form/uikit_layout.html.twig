@@ -138,6 +138,17 @@
     {{ block('unite_cms_web_component_widget') }}
 {%- endblock unite_cms_core_reference_widget -%}
 
+{%- block unite_cms_core_reference_of_widget -%}
+    <div class="unite-reference-of-view-wrapper">
+        {% if template is not null and templateParameters is not null %}
+            {{ include(template, {parameters: templateParameters}) }}
+        {% else %}
+            <div class="uk-text-meta uk-padding-small">Content for this field will be available, once it is created and referenced by other content items.</div>
+        {% endif %}
+    </div>
+{%- endblock unite_cms_core_reference_of_widget -%}
+
+
 {%- block unite_cms_web_component_widget -%}
     <{{ tag }} {{ block('widget_attributes') }} value="{{ value }}"></{{ tag }}>
 {%- endblock unite_cms_web_component_widget -%}

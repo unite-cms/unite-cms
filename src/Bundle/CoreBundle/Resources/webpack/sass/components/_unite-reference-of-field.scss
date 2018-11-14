@@ -1,0 +1,31 @@
+.unite-reference-of-view-wrapper {
+  position: relative;
+  background: map-get($colors, white);
+  border: 1px solid map-get($colors, grey-medium);
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
+  border-radius: 2px;
+  padding: 0;
+
+  .uk-card.full-content-card {
+    border-radius: 2px;
+    margin-left: 0;
+    box-shadow: none;
+    padding-bottom: 0;
+    background: none;
+
+    .unite-div-table-headline {
+      opacity: 0.5;
+    }
+
+    .uk-button-primary {
+      color: map-get($colors, grey-dark);
+      border-color: map-get($colors, grey);
+      background: map-get($colors, white);
+
+      &:hover {
+        background-color: $button-primary-background;
+        color: $button-primary-color;
+      }
+    }
+  }
+}

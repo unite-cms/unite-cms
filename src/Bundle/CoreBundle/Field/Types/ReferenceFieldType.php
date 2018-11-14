@@ -24,13 +24,11 @@ use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\ReferenceType;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
-use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
+use UniteCMS\CoreBundle\Service\ReferenceResolver;
 use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 use UniteCMS\CoreBundle\Entity\View;
-use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
@@ -44,9 +42,17 @@ class ReferenceFieldType extends FieldType
     const SETTINGS = ['not_empty', 'description', 'domain', 'content_type', 'view', 'content_label'];
     const REQUIRED_SETTINGS = ['domain', 'content_type'];
 
+    /**
+     * @var ValidatorInterface $validator
+     */
     private $validator;
+
+    /**
+     * @var ReferenceResolver $referenceResolver
+     */
+    private $referenceResolver;
+
     private $authorizationChecker;
-    private $uniteCMSManager;
     private $viewTypeManager;
     private $entityManager;
     private $templating;
@@ -63,82 +69,14 @@ class ReferenceFieldType extends FieldType
         Router $router,
         CsrfTokenManager $csrfTokenManager
     ) {
+        $this->referenceResolver = new ReferenceResolver($uniteCMSManager, $entityManager, $authorizationChecker);
         $this->validator = $validator;
         $this->authorizationChecker = $authorizationChecker;
-        $this->uniteCMSManager = $uniteCMSManager;
         $this->viewTypeManager = $viewTypeManager;
         $this->entityManager = $entityManager;
         $this->templating = $templating;
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
-    }
-
-    /**
-     * Resolves an content type and checks permission for the domain.
-     *
-     * @param string $domain_identifier
-     * @param string $content_type_identifier
-     * @return ContentType
-     * @throws DomainAccessDeniedException
-     * @throws MissingContentTypeException
-     * @throws MissingDomainException
-     * @throws MissingOrganizationException
-     */
-    private function resolveContentType($domain_identifier, $content_type_identifier): ContentType
-    {
-
-        if (!$domain_identifier || !$content_type_identifier) {
-            throw new InvalidArgumentException("You must pass a domain and content_type identifier.");
-        }
-
-        // Only allow to resolve a content type from the same organization.
-        $organization = $this->uniteCMSManager->getOrganization();
-
-        if (!$organization) {
-            throw new MissingOrganizationException(
-              "Organization Missing."
-            );
-        }
-
-        $domain = $organization->getDomains()->filter(
-            function (Domain $domain) use ($domain_identifier) {
-                return $domain->getIdentifier() == $domain_identifier;
-            }
-        )->first();
-
-        if (!$domain) {
-            throw new MissingDomainException(
-                "A reference field was configured to reference to domain \"{$domain_identifier}\". However \"{$domain_identifier}\" does not exist, or you don't have access to it."
-            );
-        }
-
-        // We need to reload the full domain. uniteCMSManager only holds infos for the current domain.
-        $domain = $this->entityManager->getRepository('UniteCMSCoreBundle:Domain')->findOneBy(
-            [
-                'organization' => $organization,
-                'id' => $domain->getId(),
-            ]
-        );
-
-        if (!$this->authorizationChecker->isGranted(DomainVoter::VIEW, $domain)) {
-            throw new DomainAccessDeniedException(
-                "A reference field was configured to reference to domain \"{$domain_identifier}\". However you are not allowed to access it."
-            );
-        }
-
-        $contentType = $domain->getContentTypes()->filter(
-            function (ContentType $contentType) use ($content_type_identifier) {
-                return $contentType->getIdentifier() == $content_type_identifier;
-            }
-        )->first();
-
-        if (!$contentType) {
-            throw new MissingContentTypeException(
-                "A reference field was configured to reference to content type \"{$content_type_identifier}\" on domain \"{$domain_identifier}\". However \"{$content_type_identifier}\" does not exist."
-            );
-        }
-
-        return $contentType;
     }
 
     /**
@@ -155,7 +93,10 @@ class ReferenceFieldType extends FieldType
         $settings->view = $settings->view ?? 'all';
 
         // Get content type and check if we have access to it.
-        $contentType = $this->resolveContentType($settings->domain, $settings->content_type);
+        $contentType = $this->referenceResolver->resolveContentType(
+            $this->referenceResolver->resolveDomain($settings->domain),
+            $settings->content_type);
+
         if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
             throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$settings->content_type}\".");
         }
@@ -234,7 +175,9 @@ class ReferenceFieldType extends FieldType
     {
 
         // Get content type and check if we have access to it.
-        $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
+        $contentType = $this->referenceResolver->resolveContentType(
+            $this->referenceResolver->resolveDomain($field->getSettings()->domain),
+            $field->getSettings()->content_type);
 
         if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
             throw new ContentTypeAccessDeniedException("You are not allowed to list content of content type \"{$contentType->getIdentifier()}\" on domain \"{$contentType->getDomain()->getIdentifier()}\".");
@@ -259,9 +202,11 @@ class ReferenceFieldType extends FieldType
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
-
         // Get content type and check if we have access to it.
-        $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
+        $contentType = $this->referenceResolver->resolveContentType(
+            $this->referenceResolver->resolveDomain($field->getSettings()->domain),
+            $field->getSettings()->content_type);
+
         if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
             throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$contentType}\".");
         }
@@ -289,7 +234,10 @@ class ReferenceFieldType extends FieldType
             return null;
         }
 
-        $contentType = $this->resolveContentType($value['domain'], $value['content_type']);
+        // Get content type and check if we have access to it.
+        $contentType = $this->referenceResolver->resolveContentType(
+            $this->referenceResolver->resolveDomain($value['domain']),
+            $value['content_type']);
 
         // Find content for this content type.
         $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
@@ -350,63 +298,22 @@ class ReferenceFieldType extends FieldType
             return;
         }
 
+        // At the moment of validating settings, the referenced domain / content type might not be persisted if we are
+        // referencing to domain we are about to create. In this case, we provide a fallback domain / content type.
+        $this->referenceResolver->setFallbackFromContext($context, $settings);
+
         // Try to resolve content type. If it don't throw an exception, the domain and content_type exist and the user can access it.
         try {
-            $this->resolveContentType($settings->domain, $settings->content_type);
+            $domain = $this->referenceResolver->resolveDomain($settings->domain);
+            $this->referenceResolver->resolveContentType($domain, $settings->content_type);
         }
         catch (DomainAccessDeniedException $e) {
             $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
         } catch (MissingOrganizationException $e) {
             $context->buildViolation('invalid_organization')->atPath('domain')->addViolation();
-        }
-
-
-        // Special case 1: We are validating a new domain, that is not already persisted.
-        catch (MissingDomainException $e) {
-
-            if($context->getRoot() instanceof Domain && empty($context->getRoot()->getId())) {
-
-                // If we don't reference the new domain, but the domain also does not exist, we can't reference it.
-                if($context->getRoot()->getIdentifier() != $settings->domain) {
-                    $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
-                    return;
-                }
-
-                $contentType = $context->getRoot()->getContentTypes()->filter(
-                    function (ContentType $contentType) use ($settings) {
-                        return $contentType->getIdentifier() == $settings->content_type;
-                    }
-                )->first();
-
-                // If we referenced content_type was not found in our new domain, we can't reference it.
-                if(!$contentType) {
-                    $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
-                    return;
-                }
-
-                return;
-            }
-
+        } catch (MissingDomainException $e) {
             $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
-
-
-
-        // Special case 2: Domain does exist, but we are updating the domain at the moment, adding a new content_type.
         } catch (MissingContentTypeException $e) {
-
-            if($context->getRoot() instanceof Domain && !empty($this->uniteCMSManager->getDomain())  && $context->getRoot()->getId() === $this->uniteCMSManager->getDomain()->getId()) {
-                if(!$context->getRoot()->getContentTypes()->filter(
-                    function (ContentType $contentType) use ($settings) {
-                        return $contentType->getIdentifier() == $settings->content_type;
-                    }
-                )->first()) {
-                    $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
-                    return;
-                }
-
-                return;
-            }
-
             $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
         }
     }
@@ -421,7 +328,9 @@ class ReferenceFieldType extends FieldType
 
         // normalize settings for nested fields.
         if($field && !empty($settings['settings']['fields'])) {
-            $contentType = $this->resolveContentType($field->getSettings()->domain, $field->getSettings()->content_type);
+            $contentType = $this->referenceResolver->resolveContentType(
+                $this->referenceResolver->resolveDomain($field->getSettings()->domain),
+                $field->getSettings()->content_type);
             $processor = new Processor();
             $config = $processor->processConfiguration(new TableViewConfiguration($contentType, $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
             $settings['settings']['fields'] = $config['fields'];

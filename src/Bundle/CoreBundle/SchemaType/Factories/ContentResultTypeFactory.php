@@ -73,9 +73,10 @@ class ContentResultTypeFactory implements SchemaTypeFactoryInterface
             $this->authorizationChecker,
             null,
             $domain,
-            IdentifierNormalizer::graphQLType($contentType)
+            IdentifierNormalizer::graphQLType($contentType, 'Content' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : '')),
+            $nestingLevel
         );
-        $type->name = IdentifierNormalizer::graphQLType($contentType, 'ContentResult');
+        $type->name = IdentifierNormalizer::graphQLType($contentType, 'ContentResult' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''));
         return $type;
     }
 }

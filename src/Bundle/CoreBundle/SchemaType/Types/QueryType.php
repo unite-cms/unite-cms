@@ -229,6 +229,7 @@ class QueryType extends AbstractType
      *
      * @return mixed
      * @throws \Doctrine\Common\Persistence\Mapping\MappingException
+     * @throws \Doctrine\ORM\Query\QueryException
      */
     private function resolveFindContent($resultType, $value, array $args, $context, ResolveInfo $info) : AbstractPagination
     {
