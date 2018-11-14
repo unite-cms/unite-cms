@@ -22,12 +22,14 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\Types\ReferenceFieldType;
+use UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
 // Mocked database repository.
 class MockedObjectRepository implements ObjectRepository {
 
+    public $queryManipulator = null;
     public $objects = [];
     public $className;
 
@@ -105,13 +107,17 @@ class MockedObjectRepository implements ObjectRepository {
         $objects = $this->objects;
 
         $mockedQueryBuilder = new class extends QueryBuilder {
+            public $queryManipulator;
             public $objects;
             public $contentTypeIdentifiers = [];
+            protected $parameters = [];
 
             public function __construct() {}
             public function setParameter($key, $value, $type = null) {
 
-                if($key === ':contentTypes') {
+                $this->parameters[$key] = $value;
+
+                if($key === ':contentType' || $key === ':contentTypes') {
 
                     if(!is_array($value)) {
                         $value = [$value];
@@ -142,11 +148,20 @@ class MockedObjectRepository implements ObjectRepository {
                     }
                 }
 
+                // Allow the test to manipulate the query result.
+                if(!empty($this->queryManipulator) && is_callable($this->queryManipulator)) {
+                    $func = $this->queryManipulator;
+                    $func->bindTo($this);
+                    $objects = call_user_func($func, $objects, $this->getDQLParts(), $this->parameters, $this->getFirstResult(), $this->getMaxResults());
+                }
+
                 // For the moment, just return all objects here.
                 return new ArrayCollection($objects);
             }
         };
+
         $mockedQueryBuilder->objects = $objects;
+        $mockedQueryBuilder->queryManipulator = $this->queryManipulator;
 
         return $mockedQueryBuilder;
     }
@@ -199,7 +214,9 @@ class MockedRepositoryFactory implements RepositoryFactory {
     }
 
     /**
-     * {@inheritdoc}
+     * @param EntityManagerInterface $entityManager
+     * @param $entityName
+     * @return MockedObjectRepository
      */
     public function getRepository(EntityManagerInterface $entityManager, $entityName)
     {
@@ -274,6 +291,19 @@ abstract class APITestCase extends ContainerAwareTestCase
         $o01 = new \ReflectionProperty(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference'), 'referenceResolver');
         $o01->setAccessible(true);
         $referenceResolver = $o01->getValue(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference'));
+
+        $reflector = new \ReflectionProperty($referenceResolver, 'entityManager');
+        $reflector->setAccessible(true);
+        $reflector->setValue($referenceResolver, $em);
+
+        // We also need to set this to the reference_of field type. Not 100% sure, why the field type is not getting our overridden doctrine.orm.entity_manager instance.
+        $reflector = new \ReflectionProperty(ReferenceOfFieldType::class, 'entityManager');
+        $reflector->setAccessible(true);
+        $reflector->setValue(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference_of'), $em);
+
+        $o01 = new \ReflectionProperty(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference_of'), 'referenceResolver');
+        $o01->setAccessible(true);
+        $referenceResolver = $o01->getValue(static::$container->get('unite.cms.field_type_manager')->getFieldType('reference_of'));
 
         $reflector = new \ReflectionProperty($referenceResolver, 'entityManager');
         $reflector->setAccessible(true);

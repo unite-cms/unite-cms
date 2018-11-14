@@ -41,17 +41,24 @@ class ContentResultType extends AbstractType
      */
     private $contentSchemaType;
 
+    /**
+     * @var int $nestingLevel
+     */
+    private $nestingLevel;
+
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
         AuthorizationChecker $authorizationChecker,
         UniteCMSManager $uniteCMSManager = null,
         Domain $domain = null,
-        $contentSchemaType = 'ContentInterface'
+        $contentSchemaType = 'ContentInterface',
+        $nestingLevel = 0
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->domain = $domain ? $domain : $uniteCMSManager->getDomain();
         $this->contentSchemaType = $contentSchemaType;
+        $this->nestingLevel = $nestingLevel;
         parent::__construct();
     }
 
@@ -72,7 +79,7 @@ class ContentResultType extends AbstractType
     protected function fields()
     {
         return [
-            'result' => Type::listOf($this->schemaTypeManager->getSchemaType($this->contentSchemaType, $this->domain)),
+            'result' => Type::listOf($this->schemaTypeManager->getSchemaType($this->contentSchemaType, $this->domain, $this->nestingLevel)),
             'total' => Type::int(),
             'page' => Type::int(),
         ];
