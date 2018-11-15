@@ -23,11 +23,6 @@ matrix:
           env:
             - ROUTING_APPROACH=parameter
             - DEFAULT_HOSTNAME=unite.test
-        - php: 7.3
-          if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
-          env:
-            - ROUTING_APPROACH=parameter
-            - DEFAULT_HOSTNAME=localhost
         - php: 7.2
           if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
           env:
