@@ -6,7 +6,6 @@ parameters:
     jms_serializer.unserialize_object_constructor.class: UniteCMS\CoreBundle\Serializer\ObjectConstructor
     site_name: unite cms
     default_hostname: '%env(DEFAULT_HOSTNAME)%'
-    env(ROUTING_APPROACH): subdomain
     routing_approach: '%env(ROUTING_APPROACH)%'
 
     # This pattern will be used for organization and domain identifier url matching (allows "-").
