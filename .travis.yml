@@ -30,7 +30,10 @@ matrix:
             - DEFAULT_HOSTNAME=unite.test
         - php: 7.2
           if: type == push AND branch = master AND fork = false
-          env: coverage=true
+          env:
+            - coverage=true
+            - ROUTING_APPROACH=parameter
+            - DEFAULT_HOSTNAME=
 
     fast_finish: true
 
