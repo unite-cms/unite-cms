@@ -21,7 +21,6 @@
                             :urls="urls"
                             :embedded="embedded"
                             @moved="moved"
-                            @onFieldResize="onFieldResize"
         ></tree-view-children>
     </div>
 </template>
@@ -35,15 +34,7 @@
         extends: TableContent,
         methods: {
             renderField(field, identifier) {
-                if(!TableContent.methods.renderField.call(this)) {
-                    return false;
-                }
-
-                if(identifier === this.settings.children_field) {
-                    return false;
-                }
-
-                return true;
+                return TableContent.methods.renderField.call(this) && (!identifier === this.settings.children_field);
             },
         },
         components: {

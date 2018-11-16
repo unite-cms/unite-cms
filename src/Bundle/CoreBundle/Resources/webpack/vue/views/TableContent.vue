@@ -12,7 +12,7 @@
                                           :embedded="embedded"
                 ></table-content-header-row>
             </div>
-            <div class="unite-div-table-tbody" :uk-sortable="isSortable && updateable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
+            <div class="unite-div-table-tbody">
                 <table-content-row v-for="row in rows"
                                    :row="row"
                                    :fields="fields"
@@ -42,66 +42,31 @@
                 sortConfig: this.sort,
             };
         },
+        mounted() {
+            if(this.isSortable && this.updateable) {
+                UIkit.sortable(this.$el.querySelector('.unite-div-table-tbody'), {
+                    handle: '.uk-sortable-handle',
+                    nestable: true
+                });
+                UIkit.util.on(this.$el, 'moved', this.moved);
+            }
+        },
+        updated() {
+            [].forEach.call(this.$el.querySelectorAll('.unite-div-table-row > *'), (cell) => {
+                cell.style.width = cell.clientWidth + 'px';
+            });
+        },
         computed: {
             showActions() {
                 return !this.selectable;
             },
             isSortable() {
                 return !!this.sort.sortable && !this.selectable && this.updateable;
-            },
-            rowStyle() {
-                return this.rowMinWidth > 0 ? { 'min-width': this.rowMinWidth + 'px' } : {};
-            }
-        },
-        mounted: function(){
-            let findModal = (element) => {
-                if(element.hasAttribute('uk-modal')) {
-                    return element;
-                }
-                if(!element.parentElement) {
-                    return null;
-                }
-                return findModal(element.parentElement);
-            };
-            let modal = findModal(this.$el);
-            if(modal) {
-                UIkit.util.on(modal, 'show', () => {
-                    this.$nextTick(() => {
-                        Object.keys(this.fields).forEach((identifier) => {
-                            this.$refs['field_' + identifier].forEach((ref) => {
-                                ref.calcWidth();
-                            });
-                        });
-                    });
-                });
             }
         },
         methods: {
-
-            updateSort(event) { this.emit('updateSort', event); },
-
-            // When a child now its size or the size changes, onFieldResize will be called.
-            onFieldResize(event) {
-                if(!this.minWidthMap[event.identifier] || this.minWidthMap[event.identifier] < event.width) {
-                    this.minWidthMap[event.identifier] = event.width;
-
-                    // Dispatch the new min width to all fields.
-                    if(typeof this.$refs['field_' + event.identifier] !== 'undefined') {
-                        if (typeof this.$refs['field_' + event.identifier].forEach === 'undefined') {
-                            this.$refs['field_' + event.identifier].$emit('minWidthChanged', event.width);
-                        }
-                        else {
-                            this.$refs['field_' + event.identifier].forEach((ref) => {
-                                ref.$emit('minWidthChanged', event.width);
-                            });
-                        }
-                    }
-
-                    // Recalc row min width.
-                    this.$nextTick(() => {
-                        this.rowMinWidth = this.$el.querySelector('.unite-div-table-row').scrollWidth;
-                    });
-                }
+            updateSort(event) {
+                this.$emit('updateSort', event);
             },
             moved(event) {
                 if(this.isSortable) {
@@ -112,12 +77,6 @@
                         }
                     });
                 }
-            },
-            hasColumnFixedWidth(identifier) {
-                if(this.$refs['field_' + identifier] && this.$refs['field_' + identifier].length > 1 && this.$refs['field_' + identifier][1].$el.nodeType === Node.ELEMENT_NODE) {
-                    return this.$refs['field_' + identifier][1].$el.classList.contains('fixed-width');
-                }
-                return false;
             }
         },
         components: {
