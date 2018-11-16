@@ -15,6 +15,13 @@ services:
     arguments:
       ['@unite.cms.field_type_manager']
 
+  # A tree view type that renders content as a nested tree.
+  UniteCMS\CoreBundle\View\Types\TreeViewType:
+    tags: [unite_cms.view_type]
+    public: false
+    arguments:
+      ['@unite.cms.field_type_manager']
+
   # @deprecated
   # A table view type that allows the user to sort rows via drag and drop.
   UniteCMS\CoreBundle\View\Types\SortableViewType:

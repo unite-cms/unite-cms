@@ -52,8 +52,9 @@ class TableViewConfiguration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $treeBuilder->root('settings')
 
-            // Handle deprecated options
+            ->beforeNormalization()->always(\Closure::fromCallable([$this, 'handleDeprecatedConfig']))->end()
             ->beforeNormalization()->always(\Closure::fromCallable([$this, 'normalizeConfig']))->end()
+
             ->children()
                 ->append($this->appendFieldsNode())
                 ->append($this->appendFilterNode())
@@ -125,7 +126,11 @@ class TableViewConfiguration implements ConfigurationInterface
             ->end();
     }
 
-    protected function normalizeConfig(array $v) : array {
+    /**
+     * @deprecated 1.0
+     */
+    protected function handleDeprecatedConfig(array $v) : array {
+
         if (isset($v['sort_field']) || isset($v['sort_asc'])) {
             $v['sort'] = [
                 'field' => $v['sort_field'] ?? null,
@@ -146,6 +151,10 @@ class TableViewConfiguration implements ConfigurationInterface
             }
         }
 
+        return $v;
+    }
+
+    protected function normalizeConfig(array $v) : array {
         // Add default fields.
         if (empty($v['fields'])) {
             $v['fields'] = $this->addDefaultFields($v);
