@@ -25,6 +25,7 @@
                    :updateable="!deleted.showDeleted"
                    :embedded="embedded"
                    :urls="urls"
+                   :settings="settings"
                    @updateRow="onRowUpdate"
                    @updateSort="onUpdateSort"></component>
 
@@ -115,6 +116,7 @@
                 },
                 embedded: bag.settings.embedded || false,
                 feather: feather,
+                settings: bag.settings
             }
         },
         props: ['parameters'],

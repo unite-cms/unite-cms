@@ -8,6 +8,7 @@
             'fields',
             'sort',
             'rows',
+            'settings',
             'selectable',
             'updateable',
             'embedded',

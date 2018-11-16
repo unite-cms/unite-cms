@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-checkbox fixed-width">
+    <div class="view-field view-field-checkbox fixed-width">
         <div v-if="value" v-html="feather.icons['check-circle'].toSvg({ width: 16, height: 16 })"></div>
         <div v-else></div>
     </div>

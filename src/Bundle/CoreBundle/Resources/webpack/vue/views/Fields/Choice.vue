@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-choice fixed-width">
+    <div class="view-field view-field-choice fixed-width">
         <div>
             <span class="uk-label" v-for="v in values">{{ v }}</span>
         </div>

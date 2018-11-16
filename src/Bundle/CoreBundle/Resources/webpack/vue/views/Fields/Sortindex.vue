@@ -1,5 +1,5 @@
 <template>
-    <div v-if="sortable" :style="style" class="view-field view-field-sortindex fixed-width">
+    <div v-if="sortable" class="view-field view-field-sortindex fixed-width">
         <div class="uk-sortable-handle" v-html="feather.icons['move'].toSvg({ width: 16, height: 16 })"></div>
     </div>
 </template>
@@ -39,6 +39,7 @@
 
     .uk-sortable-handle {
         display: inline-block;
+        width: 30px;
     }
 
 

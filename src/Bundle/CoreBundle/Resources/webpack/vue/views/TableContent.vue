@@ -1,56 +1,28 @@
 <template>
-    <div class="unite-div-table">
-        <div class="unite-div-table-thead">
-            <div :style="rowStyle" class="unite-div-table-row">
-                <base-content-header-field v-for="(field,identifier) in fields" v-if="renderField(field, identifier)"
-                                           :key="identifier"
-                                           :identifier="identifier"
-                                           :label="field.label"
-                                           :type="field.type"
-                                           :isSortable="isSortable"
-                                           :initialMinWidth="minWidthMap[identifier]"
-                                           :sort="sortConfig"
-                                           :fixedWidth="hasColumnFixedWidth(identifier)"
-                                           @sortChanged="setSort"
-                                           @resized="onFieldResize"
-                                           :ref="'field_' + identifier"></base-content-header-field>
-                <base-content-header-field v-if="showActions" v-for="i in [1]"
-                                           :key="i"
-                                           identifier="_actions"
-                                           type="_actions"
-                                           :sort="sortConfig"
-                                           :initialMinWidth="minWidthMap['_actions']"
-                                           label=""
-                                           :fixedWidth="true"
-                                           @resized="onFieldResize"
-                                           ref="field__actions"
-                ></base-content-header-field>
+    <div class="unite-card-table">
+        <div class="unite-div-table">
+            <div class="unite-div-table-thead">
+                <table-content-header-row :fields="fields"
+                                          :is-sortable="isSortable"
+                                          :is-updateable="updateable"
+                                          :show-actions="showActions"
+                                          :sort-config="sortConfig"
+                                          @updateSort="updateSort"
+                                          :urls="urls"
+                                          :embedded="embedded"
+                ></table-content-header-row>
             </div>
-        </div>
-        <div class="unite-div-table-tbody" :uk-sortable="isSortable && updateable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
-            <div uk-grid :style="rowStyle" class="unite-div-table-row" :data-id="row.id" :key="row.id" v-for="row in rows">
-                <component v-for="(field,identifier) in fields" v-if="renderField(field, identifier)"
-                           :key="identifier"
-                           :is="$uniteCMSViewFields.resolve(field.type)"
-                           :type="field.type"
-                           :identifier="identifier"
-                           :label="field.label"
-                           :settings="field.settings"
-                           :initialMinWidth="minWidthMap[identifier]"
-                           :sortable="isSortable"
-                           :row="row"
-                           @resized="onFieldResize"
-                           :ref="'field_' + identifier"></component>
-                <base-view-row-actions v-if="showActions"
-                                       :row="row"
-                                       :urls="urls"
-                                       identifier="_actions"
-                                       :initialMinWidth="minWidthMap['_actions']"
-                                       @resized="onFieldResize"
-                                       ref="field__actions"
-                                       :refInFor="true"
-                                       :embedded="embedded"
-                ></base-view-row-actions>
+            <div class="unite-div-table-tbody" :uk-sortable="isSortable && updateable ? 'handle: .uk-sortable-handle' : null" v-on:moved="moved">
+                <table-content-row v-for="row in rows"
+                                   :row="row"
+                                   :fields="fields"
+                                   :is-sortable="isSortable"
+                                   :is-updateable="updateable"
+                                   :show-actions="showActions"
+                                   :sort-config="sortConfig"
+                                   :urls="urls"
+                                   :embedded="embedded"
+                ></table-content-row>
             </div>
         </div>
     </div>
@@ -59,17 +31,14 @@
 <script>
 
     import UIkit from 'uikit';
-
     import BaseViewContent from './Base/BaseViewContent.vue';
-    import BaseViewContentHeaderField from './Base/BaseViewContentHeaderField.vue';
-    import BaseViewRowActions from './Base/BaseViewRowActions.vue';
+    import TableContentRow from './TableContentRow.vue';
+    import TableContentHeaderRow from './TableContentHeaderRow.vue';
 
     export default {
         extends: BaseViewContent,
         data() {
             return {
-                minWidthMap: {},
-                rowMinWidth: 0,
                 sortConfig: this.sort,
             };
         },
@@ -108,13 +77,8 @@
             }
         },
         methods: {
-            setSort(identifier) {
-                if(!this.isSortable) {
-                    this.sortConfig.field = identifier;
-                    this.sortConfig.asc = this.sortConfig.field === identifier ? !this.sortConfig.asc : true;
-                    this.$emit('updateSort', this.sortConfig);
-                }
-            },
+
+            updateSort(event) { this.emit('updateSort', event); },
 
             // When a child now its size or the size changes, onFieldResize will be called.
             onFieldResize(event) {
@@ -154,23 +118,11 @@
                     return this.$refs['field_' + identifier][1].$el.classList.contains('fixed-width');
                 }
                 return false;
-            },
-            renderField(field, identifier) {
-
-                if(!this.isSortable && !this.updateable && this.sortConfig.field === field.identifier) {
-                    return false;
-                }
-
-                if(!this.updateable && field.type === 'selectrow') {
-                    return false;
-                }
-
-                return true;
             }
         },
         components: {
-            'base-view-row-actions': BaseViewRowActions,
-            'base-content-header-field': BaseViewContentHeaderField
+            'table-content-row': TableContentRow,
+            'table-content-header-row': TableContentHeaderRow,
         }
     }
 </script>

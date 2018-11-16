@@ -1,4 +1,3 @@
-.unite-div-table,
 .unite-card-table {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
@@ -6,7 +5,7 @@
   border-top: 10px solid map-get($colors, white);
 
   table > thead,
-  .unite-div-table-thead {
+  .unite-div-table > .unite-div-table-thead {
     background: map-get($colors, white);
 
     > * > * {
@@ -40,7 +39,7 @@
   }
 
   table > tbody,
-  .unite-div-table-tbody {
+  .unite-div-table > .unite-div-table-tbody {
 
     > * {
       &:hover {
@@ -139,7 +138,6 @@
 }
 
 @media (min-width: $breakpoint-large) {
-  .unite-div-table,
   .unite-card-table {
     margin: -41px -40px 0 -40px;
   }

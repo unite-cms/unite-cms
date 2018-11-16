@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-reference">
+    <div class="view-field view-field-reference">
         <component v-if="value" v-for="(v,identifier) in settings.fields"
                    :key="identifier"
                    :is="$uniteCMSViewFields.resolve(v.type)"

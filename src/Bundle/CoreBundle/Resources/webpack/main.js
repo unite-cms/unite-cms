@@ -42,7 +42,7 @@ Vue.use(uniteViewFieldsPlugin, {
         'sortindex': require('./vue/views/Fields/Sortindex').default,
         'selectrow': require('./vue/views/Fields/Selectrow').default,
         'reference': require('./vue/views/Fields/Reference').default,
-        'reference_of': require('./vue/views/Fields/ReferenceOf').default,
+        'tree_view_children': require('./vue/views/Fields/TreeViewChildren').default,
     }
 });
 

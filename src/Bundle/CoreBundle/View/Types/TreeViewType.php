@@ -18,7 +18,7 @@ class TreeViewType extends TableViewType
     protected function addRecursiveChildrenFields($fields, $children_field, $level = 6) {
         return array_merge($fields, [
             $children_field => [
-                'type' => 'reference_of',
+                'type' => 'tree_view_children',
                 'settings' => [
                     'fields' => $level > 0 ? $this->addRecursiveChildrenFields($fields, $children_field, $level -1) : $fields,
                 ],
