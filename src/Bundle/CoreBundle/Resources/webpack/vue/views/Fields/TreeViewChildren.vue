@@ -1,7 +1,8 @@
 <template>
     <div class="unite-div-table-tbody">
         <div class="unite-div-tree-view-element" :data-id="row.id" :key="row.id" v-for="row in rows">
-            <table-content-row :row="row"
+            <table-content-row class="unite-div-tree-view-row uk-box-shadow-small uk-box-shadow-hover-medium"
+                               :row="row"
                                :fields="fields"
                                :is-sortable="isSortable"
                                :is-updateable="updateable"
@@ -74,31 +75,15 @@
             },
 
             childRows(row) {
-
-                let result = row[this.childrenField].result;
-
-                if(result.length === 0) {
-                    return [];
-                }
-
-                return result.map((cRow) => {
+                return row[this.childrenField].result.map((cRow) => {
                     cRow['_actions'] = row['_actions'];
                     return cRow;
                 });
             },
 
-            moved(event) { this.$emit('moved', event); },
-
-            renderField(field, identifier) {
-                if(!TableContent.methods.renderField.call(this)) {
-                    return false;
-                }
-
-                if(identifier === this.childrenField) {
-                    return false;
-                }
-
-                return true;
+            moved(event) {
+                // TODO: CHECK IF Nesting and do other stuff on nesting.
+                this.$emit('moved', event);
             }
         },
         components: {
@@ -111,7 +96,6 @@
 <style scoped lang="scss">
     .unite-div-tree-view-element {
         margin-bottom: 10px;
-        display: table-row;
 
         .view-field-actions {
             padding-top: 0;
