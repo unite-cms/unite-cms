@@ -13,7 +13,7 @@
                 ></table-content-header-row>
             </div>
             <div class="unite-div-table-tbody">
-                <table-content-row v-for="row in rows"
+                <table-content-row v-for="row in rows" :key="row.id"
                                    :row="row"
                                    :fields="fields"
                                    :is-sortable="isSortable"

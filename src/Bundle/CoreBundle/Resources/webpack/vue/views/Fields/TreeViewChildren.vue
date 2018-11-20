@@ -58,7 +58,7 @@
                     nestable: true
                 });
                 UIkit.util.on(this.$el, 'moved', this.moved);
-                UIkit.util.on(this.$el, 'nest', this.nest);
+                UIkit.util.on(this.$el, 'added', this.nest);
             }
         },
 
@@ -95,9 +95,16 @@
             nest(event) {
                 if(this.isSortable) {
                     let data = {};
-                    //data[this.parent_field] = 'FOO';
-                    //this.updateRow(event.detail[1].dataset.id, data);
-                    console.log("nest", event.detail[1].dataset.id);
+                    if(event.detail[0].$el.parentElement.parentElement.classList.contains('unite-div-tree-view-element')) {
+                        data[this.parentField] = { content: event.detail[0].$el.parentElement.parentElement.dataset.id };
+                    } else {
+                        data[this.parentField] = null;
+                    }
+
+                    console.log(this);
+                    console.log(event.detail[1].dataset.id);
+                    console.log(data);
+                    this.updateRow(event.detail[1].dataset.id, data);
                 }
             },
 
