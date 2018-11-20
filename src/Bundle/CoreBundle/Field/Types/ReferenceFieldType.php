@@ -278,7 +278,7 @@ class ReferenceFieldType extends FieldType
         } // Try to resolve the data to check if the current user is allowed to access it.
         else {
             try {
-                $this->resolveGraphQLData($field, $data, $context->getObject());
+                $this->resolveGraphQLData($field, $data, new Content());
             } catch (\Exception $e) {
                 $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
