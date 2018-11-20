@@ -21,7 +21,8 @@
                                     :parent-field="parentField"
                                     :urls="urls"
                                     :embedded="embedded"
-                                    @moved="moved"
+                                    :dataFetcher="dataFetcher"
+                                    :sort="sort"
                 ></tree-view-children>
             </div>
         </div>
@@ -31,11 +32,11 @@
 <script>
 
     import UIkit from 'uikit';
-    import nestable from 'uikit3-nestable';
+    import nestable from 'uikit3-nestable/src/js/nestable';
+
     UIkit.mixin(nestable, 'sortable');
 
     import BaseField from '../Base/BaseField.vue';
-    import TableContent from '../TableContent.vue';
     import TableContentRow from '../TableContentRow.vue';
     import BaseViewRowActions from '../Base/BaseViewRowActions.vue';
 
@@ -47,15 +48,17 @@
                 sortConfig: this.sort,
             };
         },
-        props: ['isSortable', 'showActions', 'updateable', 'rows', 'fields', 'childrenField', 'parentField', 'urls', 'embedded'],
+        props: ['isSortable', 'showActions', 'updateable', 'rows', 'fields', 'childrenField', 'parentField', 'urls', 'embedded', 'dataFetcher', 'sort'],
 
         mounted() {
             if(this.isSortable && this.updateable) {
                 UIkit.sortable(this.$el, {
                     handle: '.uk-sortable-handle',
+                    nestableContainerClass: 'unite-div-table-tbody',
                     nestable: true
                 });
                 UIkit.util.on(this.$el, 'moved', this.moved);
+                UIkit.util.on(this.$el, 'nest', this.nest);
             }
         },
 
@@ -65,7 +68,7 @@
              * @inheritdoc
              */
             fieldQuery(identifier, field, $uniteCMSViewFields) {
-                return identifier + ' { result { ' + Object.keys(field.settings.fields).map((identifier) => {
+                return identifier + '(sort: {field: "' + field.settings.sort.field + '", order: "' + (field.settings.sort.asc ? 'ASC' : 'DESC') + '"}) { result { ' + Object.keys(field.settings.fields).map((identifier) => {
                     return $uniteCMSViewFields.resolveFieldQueryFunction(field.settings.fields[identifier].type)(
                         identifier,
                         field.settings.fields[identifier],
@@ -82,8 +85,35 @@
             },
 
             moved(event) {
-                // TODO: CHECK IF Nesting and do other stuff on nesting.
-                this.$emit('moved', event);
+                if(this.isSortable) {
+                    let data = {};
+                    data[this.sort.field] = UIkit.util.index(event.detail[1]);
+                    this.updateRow(event.detail[1].dataset.id, data);
+                }
+            },
+
+            nest(event) {
+                if(this.isSortable) {
+                    let data = {};
+                    //data[this.parent_field] = 'FOO';
+                    //this.updateRow(event.detail[1].dataset.id, data);
+                    console.log("nest", event.detail[1].dataset.id);
+                }
+            },
+
+            updateRow(id, data) {
+                this.dataFetcher.update(id, data).then(
+                    (data) => {
+                        let rowToUpdate = this.rows.filter((row) => { return row.id === id });
+                        if(rowToUpdate.length > 0) {
+                            ['updated'].concat(Object.keys(data)).forEach((field) => {
+                                rowToUpdate[0][field] = data[field];
+                            });
+                        }
+                    },
+                    (error) => { this.error = 'API Error: ' + error; })
+                    .catch(() => { this.error = "An error occurred, while trying to fetch data."; })
+                    .finally(() => { this.loading = false; });
             }
         },
         components: {

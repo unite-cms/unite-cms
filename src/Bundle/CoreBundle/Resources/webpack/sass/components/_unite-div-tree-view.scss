@@ -8,6 +8,10 @@
   }
 }
 
+.unite-div-tree-view-element .uk-sortable.uk-sortable-empty {
+  min-height: 0;
+}
+
 .unite-div-table-row.unite-div-tree-view-row {
   display: flex;
   align-items: center;

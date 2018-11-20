@@ -13,6 +13,7 @@
             'updateable',
             'embedded',
             'urls',
+            'dataFetcher'
         ]
     }
 </script>

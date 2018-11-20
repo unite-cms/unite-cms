@@ -70,11 +70,12 @@
             },
             moved(event) {
                 if(this.isSortable) {
+                    let data = {};
+                    data[this.sort.field] = UIkit.util.index(event.detail[1]);
+
                     this.$emit('updateRow', {
                         id: event.detail[1].dataset.id,
-                        data: {
-                            position: UIkit.util.index(event.detail[1])
-                        }
+                        data: data
                     });
                 }
             }

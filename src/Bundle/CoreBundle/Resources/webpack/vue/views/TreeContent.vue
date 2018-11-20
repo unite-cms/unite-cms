@@ -9,6 +9,8 @@
                             :parent-field="settings.parent_field"
                             :urls="urls"
                             :embedded="embedded"
+                            :dataFetcher="dataFetcher"
+                            :sort="sort"
                             @moved="moved"
         ></tree-view-children>
     </div>

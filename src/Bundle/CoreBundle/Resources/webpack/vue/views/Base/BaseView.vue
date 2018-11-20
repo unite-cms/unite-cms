@@ -26,6 +26,7 @@
                    :embedded="embedded"
                    :urls="urls"
                    :settings="settings"
+                   :dataFetcher="dataFetcher"
                    @updateRow="onRowUpdate"
                    @updateSort="onUpdateSort"></component>
 
@@ -216,7 +217,7 @@
                 this.dataFetcher.update(update.id, update.data).then(
                     (data) => {
                         let rowToUpdate = this.rows.filter((row) => { return row.id === update.id });
-                        if(rowToUpdate) {
+                        if(rowToUpdate.length > 0) {
                             ['updated'].concat(Object.keys(update.data)).forEach((field) => {
                                 rowToUpdate[0][field] = data[field];
                             });

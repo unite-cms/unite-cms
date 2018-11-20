@@ -15,12 +15,13 @@ class TreeViewType extends TableViewType
         return new TreeViewConfiguration($contentType, $this->fieldTypeManager);
     }
 
-    protected function addRecursiveChildrenFields($fields, $children_field, $level = 6) {
+    protected function addRecursiveChildrenFields($fields, $children_field, $sort, $level = 6) {
         return array_merge($fields, [
             $children_field => [
                 'type' => 'tree_view_children',
                 'settings' => [
-                    'fields' => $level > 0 ? $this->addRecursiveChildrenFields($fields, $children_field, $level -1) : $fields,
+                    'fields' => $level > 0 ? $this->addRecursiveChildrenFields($fields, $children_field, $sort, $level -1) : $fields,
+                    'sort' => $sort,
                 ],
             ]
         ]);
@@ -41,7 +42,7 @@ class TreeViewType extends TableViewType
         $settings['filter'] = empty($settings['filter']) ? $rootLevelFilter : ['AND' => [$rootLevelFilter, $settings['filter']]];
 
         // Add a custom reference_of field to the view
-        $settings['fields'] = $this->addRecursiveChildrenFields($settings['fields'], $settings['children_field']);
+        $settings['fields'] = $this->addRecursiveChildrenFields($settings['fields'], $settings['children_field'], $settings['sort']);
 
         return $settings;
     }
