@@ -53,6 +53,15 @@ class VariantsGraphQLTest extends APITestCase
                                             }
                                         ]
                                     }
+                                },
+                                {
+                                    "title": "Ref",
+                                    "identifier": "ref",
+                                    "type": "reference",
+                                    "settings": {
+                                        "domain": "variants",
+                                        "content_type": "other"
+                                    }
                                 }
                             ]
                         }
@@ -60,6 +69,17 @@ class VariantsGraphQLTest extends APITestCase
                   }
                 }
               ]
+            },
+            {
+                "title": "Other",
+                "identifier": "other",
+                "views": [
+                    {
+                        "title": "All",
+                        "identifier": "all",
+                        "type": "table"
+                    }
+                ]
             }
         ],
         "setting_types": [
@@ -154,7 +174,7 @@ class VariantsGraphQLTest extends APITestCase
                     ]
                 ],
             ]], json_decode(json_encode($this->api($query)), true));
-        
+
         // 2. Content with field data.
         $c->setData([
             'variants' => [
@@ -240,6 +260,29 @@ class VariantsGraphQLTest extends APITestCase
 
     public function testMutateVariants() {
 
+        $other_c1 = new Content();
+        $other_c1->setContentType($this->domains['variants']->getContentTypes()->last());
+        $this->repositoryFactory->add($other_c1);
+        $this->repositoryFactory->add($this->domains['variants']->getContentTypes()->last()->getViews()->first());
+
+        $response = json_decode(json_encode($this->api('mutation {
+                createVariants(data: { variants: {
+                    type: "variant_2",
+                    variant_1: { field_text: "Foo" },
+                    variant_2: { collection: [ { field_text: "Foo" }, { field_text: "Baa" } ], ref: { content_type: "other", domain: "variants", content: "'.$other_c1->getId().'" } }
+                } }, persist: false) {
+                    variants {
+                        type,
+                        
+                        ... on VariantsContentVariantsVariant_2Variant {
+                            collection {
+                                field_text
+                            }
+                        }
+                    }
+                }
+            }')), true);
+
         // Create nested content object.
         $this->assertEquals([
             'data' => [
@@ -252,22 +295,6 @@ class VariantsGraphQLTest extends APITestCase
                         ]
                     ]
                 ],
-            ]], json_decode(json_encode($this->api('mutation {
-                createVariants(data: { variants: {
-                    type: "variant_2",
-                    variant_1: { field_text: "Foo" },
-                    variant_2: { collection: [ { field_text: "Foo" }, { field_text: "Baa" } ] }
-                } }, persist: false) {
-                    variants {
-                        type,
-                        
-                        ... on VariantsContentVariantsVariant_2Variant {
-                            collection {
-                                field_text
-                            }
-                        }
-                    }
-                }
-            }')), true));
+            ]], $response);
     }
 }
