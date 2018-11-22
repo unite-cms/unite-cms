@@ -7,6 +7,8 @@
                             :fields="fieldWithoutChildren"
                             :children-field="settings.children_field"
                             :parent-field="settings.parent_field"
+                            :content-type="settings.content_type"
+                            :domain="settings.domain"
                             :urls="urls"
                             :embedded="embedded"
                             :dataFetcher="dataFetcher"

@@ -15,6 +15,14 @@
             return {
                 feather: feather
             }
+        },
+        methods: {
+            /**
+             * @inheritdoc
+             */
+            filterQuery(identifier, field) {
+                return null;
+            },
         }
 
     }

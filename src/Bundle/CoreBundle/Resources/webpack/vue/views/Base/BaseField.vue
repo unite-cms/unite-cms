@@ -15,6 +15,21 @@
              */
             fieldQuery(identifier, field) {
                 return identifier;
+            },
+
+            /**
+             * Each field must implement a filter Query method that gets called to alter the search command. The default
+             * implementation just adds a LIKE filter. If null is returned, this field is not searchable.
+             *
+             * @param identifier, the specified identifier
+             * @param field, the field object config
+             */
+            filterQuery(identifier, field) {
+                return {
+                    field: identifier,
+                    operator: 'LIKE',
+                    value: (value) => { return '%' + value + '%' }
+                };
             }
         },
         computed: {

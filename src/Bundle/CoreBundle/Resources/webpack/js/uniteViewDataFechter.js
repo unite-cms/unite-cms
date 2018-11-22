@@ -8,6 +8,7 @@ export default {
     updateMethod: '',
     updateDataObjectName: '',
     fieldQuery: [],
+    filterQuery: [],
 
     page: 1,
     limit: 10,
@@ -19,8 +20,9 @@ export default {
     searchArgument: {},
     deletedArgument: false,
 
-    create(bag, fieldQuery = []) {
+    create(bag, fieldQuery = [], filterQuery = []) {
         this.fieldQuery = fieldQuery;
+        this.filterQuery = filterQuery;
 
         if(this.fieldQuery.indexOf('id') < 0) {
             this.fieldQuery.push('id');
@@ -51,7 +53,9 @@ export default {
         this.queryMethod = 'find' + contentTypeName;
         this.updateMethod = 'update' + contentTypeName;
         this.updateDataObjectName = contentTypeName + 'ContentInput';
-        return this;
+
+        // Return a copy of this object on create.
+        return Object.assign({}, this);
     },
 
     sort(sort) {
@@ -75,12 +79,14 @@ export default {
         }
 
         this.searchArgument = { OR: [] };
-        this.fieldQuery.forEach((field) => {
-
-            // At the moment, we can only use the root element to do filtering. In the future, we may let the field type
-            // set the correct field identifier, to allow more specific nested searches.
-            let identifier = field.split('{')[0].replace(' ', '');
-            this.searchArgument.OR.push({ field: identifier, operator: 'LIKE', value: '%' + term + '%' });
+        this.filterQuery.forEach((filter) => {
+            if(filter) {
+                this.searchArgument.OR.push({
+                    field: filter.field,
+                    operator: filter.operator,
+                    value: filter.value(term)
+                });
+            }
         });
         return this;
     },

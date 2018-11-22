@@ -187,6 +187,12 @@ class ReferenceOfFieldType extends FieldType
 
                 // Create filter by reference field + optional filter args
                 $referenceFilter = ['field' => $field->getIdentifier().'.content', 'operator' => '=', 'value' => $value->getId()];
+
+                // If args have a content filter already set, remove it first.
+                if(!empty($args['filter']['field']) && $args['filter']['field'] === $field->getIdentifier().'.content') {
+                    $args['filter'] = [];
+                }
+
                 $args['filter'] = empty($args['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $args['filter']]];
 
                 // Get content for the resolved content type.

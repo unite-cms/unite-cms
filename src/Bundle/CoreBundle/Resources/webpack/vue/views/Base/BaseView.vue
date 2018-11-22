@@ -57,6 +57,7 @@
             let fields = bag.settings.fields;
             let error = null;
             let fieldQuery = [];
+            let filterQuery = [];
             let sort = bag.settings.sort || {
                 field: null,
                 asc: true
@@ -65,6 +66,9 @@
             try {
                 fieldQuery = Object.keys(fields).map((identifier) => {
                     return this.$uniteCMSViewFields.resolveFieldQueryFunction(fields[identifier].type)(identifier, fields[identifier], this.$uniteCMSViewFields);
+                });
+                filterQuery = Object.keys(fields).map((identifier) => {
+                    return this.$uniteCMSViewFields.resolveFilterQueryFunction(fields[identifier].type)(identifier, fields[identifier], this.$uniteCMSViewFields);
                 });
             } catch (e) {
                 error = e;
@@ -91,7 +95,7 @@
                     endpoint: bag.urls.api,
                     csrf_token: bag.csrf_token,
                     settings: bag.settings
-                }, fieldQuery),
+                }, fieldQuery, filterQuery),
                 loading: false,
                 error: error,
                 rows: [],

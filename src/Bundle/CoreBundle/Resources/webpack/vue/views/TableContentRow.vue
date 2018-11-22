@@ -27,11 +27,11 @@
         methods: {
             renderField(field, identifier) {
 
-                if(!this.isSortable && !this.updateable && this.sortConfig.field === field.identifier) {
+                if(!this.isSortable && !this.isUpdateable && this.sortConfig.field === field.identifier) {
                     return false;
                 }
 
-                if(!this.updateable && field.type === 'selectrow') {
+                if(!this.isUpdateable && field.type === 'selectrow') {
                     return false;
                 }
 

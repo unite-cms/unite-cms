@@ -25,7 +25,16 @@
               mode: mode,
           }
         },
-        extends: BaseField
+        extends: BaseField,
+
+        methods: {
+            /**
+             * @inheritdoc
+             */
+            filterQuery(identifier, field) {
+                return null;
+            },
+        }
     }
 </script>
 

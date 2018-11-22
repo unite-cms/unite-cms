@@ -11,20 +11,18 @@
                                :urls="urls"
                                :embedded="embedded"
             ></table-content-row>
-            <div class="unite-div-tree-view-group" v-if="childRows(row).length > 0">
-                <tree-view-children :isSortable="isSortable"
-                                    :showActions="showActions"
-                                    :updateable="updateable"
-                                    :rows="childRows(row)"
-                                    :fields="fields"
-                                    :children-field="childrenField"
-                                    :parent-field="parentField"
-                                    :urls="urls"
-                                    :embedded="embedded"
-                                    :dataFetcher="dataFetcher"
-                                    :sort="sort"
-                ></tree-view-children>
-            </div>
+            <tree-view-children :isSortable="isSortable" v-if="childRows(row).length > 0"
+                                :showActions="showActions"
+                                :updateable="updateable"
+                                :rows="childRows(row)"
+                                :fields="fields"
+                                :children-field="childrenField"
+                                :parent-field="parentField"
+                                :urls="urls"
+                                :embedded="embedded"
+                                :dataFetcher="dataFetcher"
+                                :sort="sort"
+            ></tree-view-children>
         </div>
     </div>
 </template>
@@ -48,17 +46,21 @@
                 sortConfig: this.sort,
             };
         },
-        props: ['isSortable', 'showActions', 'updateable', 'rows', 'fields', 'childrenField', 'parentField', 'urls', 'embedded', 'dataFetcher', 'sort'],
+        props: ['isSortable', 'showActions', 'updateable', 'rows', 'fields', 'childrenField', 'contentType', 'domain', 'parentField', 'urls', 'embedded', 'dataFetcher', 'sort'],
 
         mounted() {
             if(this.isSortable && this.updateable) {
-                UIkit.sortable(this.$el, {
-                    handle: '.uk-sortable-handle',
-                    nestableContainerClass: 'unite-div-table-tbody',
-                    nestable: true
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        UIkit.sortable(this.$el, {
+                            handle: '.uk-sortable-handle',
+                            nestableContainerClass: 'unite-div-table-tbody',
+                            nestable: true
+                        });
+                        UIkit.util.on(this.$el, 'moved', this.moved);
+                        UIkit.util.on(this.$el, 'added', this.nest);
+                    }, 100);
                 });
-                UIkit.util.on(this.$el, 'moved', this.moved);
-                UIkit.util.on(this.$el, 'added', this.nest);
             }
         },
 
@@ -75,6 +77,16 @@
                         $uniteCMSViewFields
                     );
                 }).join(', ') + ' } }';
+            },
+
+            /**
+             * @inheritdoc
+             */
+            filterQuery(identifier, field) {
+
+                // At the moment, we can't filter by referenced values. We can implement this, once
+                // https://github.com/unite-cms/unite-cms/issues/326 is resolved.
+               return null;
             },
 
             childRows(row) {
@@ -95,15 +107,18 @@
             nest(event) {
                 if(this.isSortable) {
                     let data = {};
-                    if(event.detail[0].$el.parentElement.parentElement.classList.contains('unite-div-tree-view-element')) {
-                        data[this.parentField] = { content: event.detail[0].$el.parentElement.parentElement.dataset.id };
+                    if(event.detail[0].$el.parentElement.classList.contains('unite-div-tree-view-element')) {
+                        data[this.parentField] = {
+                            content: event.detail[0].$el.parentElement.dataset.id,
+                            content_type: this.contentType,
+                            domain: this.domain
+                        };
                     } else {
                         data[this.parentField] = null;
                     }
 
-                    console.log(this);
-                    console.log(event.detail[1].dataset.id);
-                    console.log(data);
+                    data[this.sort.field] = UIkit.util.index(event.detail[1]);
+
                     this.updateRow(event.detail[1].dataset.id, data);
                 }
             },
@@ -138,10 +153,6 @@
             padding-top: 0;
             padding-bottom: 0;
             padding-right: 10px;
-        }
-
-        .unite-div-tree-view-group {
-            padding: 10px 0 0 60px;
         }
     }
 

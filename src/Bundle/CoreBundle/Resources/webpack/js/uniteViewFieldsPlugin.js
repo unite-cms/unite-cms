@@ -1,5 +1,15 @@
 import Fallback from '../vue/views/Fields/Fallback';
 
+let findComponentMethod = (component, name) => {
+    if (typeof component.methods === 'object' && typeof component.methods[name] === 'function') {
+        return component.methods[name];
+    }
+    if (typeof component.extends === 'object') {
+        return findComponentMethod(component.extends, name);
+    }
+    throw new TypeError('All fields, registered in $uniteCMSViewFields must implement method ' + name + '() or extend a component that implements this method.')
+};
+
 export default {
     install: (Vue, options) => {
 
@@ -14,16 +24,11 @@ export default {
                 return typeof this._types[type] !== 'undefined' ? this._types[type] : Fallback;
             },
             resolveFieldQueryFunction(type) {
-                let findFieldQuery = function (component) {
-                    if (typeof component.methods === 'object' && typeof component.methods.fieldQuery === 'function') {
-                        return component.methods.fieldQuery;
-                    }
-                    if (typeof component.extends === 'object') {
-                        return findFieldQuery(component.extends);
-                    }
-                    throw new TypeError('All fields, registered in $uniteCMSViewFields must implement method fieldQuery() or extend a compoenent that implements method fieldQuery().')
-                };
-                return findFieldQuery(this.resolve(type));
+                return findComponentMethod(this.resolve(type), 'fieldQuery');
+            },
+
+            resolveFilterQueryFunction(type) {
+                return findComponentMethod(this.resolve(type), 'filterQuery');
             }
         };
 

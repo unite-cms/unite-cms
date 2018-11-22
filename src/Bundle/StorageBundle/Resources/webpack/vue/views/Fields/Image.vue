@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-image fixed-width">
+    <div class="view-field view-field-image fixed-width">
         <a :href="'#' + modalId" uk-toggle v-if="value" class="uk-inline-clip uk-box-shadow-small uk-box-shadow-hover-medium">
             <img :src="value" />
         </a>
