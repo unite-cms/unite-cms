@@ -28,7 +28,7 @@ class CreateOrganizationSubscriberTest extends DatabaseAwareTestCase
      */
     public function testMembershipCreationOnOrgCreationWithoutUser() {
         $org = new Organization();
-        $org->setTitle('org')->setIdentifier('Org');
+        $org->setTitle('Org')->setIdentifier('org');
         $this->em->persist($org);
         $this->em->flush();
         $this->em->refresh($org);
@@ -39,7 +39,7 @@ class CreateOrganizationSubscriberTest extends DatabaseAwareTestCase
         static::$container->get('session')->set('_security_main', serialize($token));
 
         $org = new Organization();
-        $org->setTitle('org2')->setIdentifier('Org2');
+        $org->setTitle('Org2')->setIdentifier('org2');
         $this->em->persist($org);
         $this->em->flush();
         $this->em->refresh($org);
@@ -61,7 +61,7 @@ class CreateOrganizationSubscriberTest extends DatabaseAwareTestCase
         static::$container->get('session')->set('_security_main', serialize($token));
 
         $org = new Organization();
-        $org->setTitle('org')->setIdentifier('Org');
+        $org->setTitle('Org')->setIdentifier('org');
         $this->em->persist($org);
         $this->em->flush();
         $this->em->refresh($org);
@@ -83,7 +83,7 @@ class CreateOrganizationSubscriberTest extends DatabaseAwareTestCase
         static::$container->get('session')->set('_security_main', serialize($token));
 
         $org = new Organization();
-        $org->setTitle('org')->setIdentifier('Org');
+        $org->setTitle('Org')->setIdentifier('org');
         $this->em->persist($org);
         $this->em->flush();
         $this->em->refresh($org);

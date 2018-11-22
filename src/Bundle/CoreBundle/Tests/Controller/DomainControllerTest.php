@@ -82,10 +82,6 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->em->flush();
         $this->em->refresh($this->admin);
         $this->em->refresh($this->editor);
-
-        // remove and config folder before each test
-        $this->manager->removeAllConfig();
-
     }
 
     private function login(User $user) {
