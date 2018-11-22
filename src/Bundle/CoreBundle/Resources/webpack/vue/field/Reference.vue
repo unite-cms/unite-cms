@@ -91,6 +91,7 @@
                     // For the moment, we can only handle single selections
                     if(data.length > 0) {
                         this.content = data[0].row.id;
+                        this.contentType = data[0].contentType;
                         this.findHumanReadableName();
                         this.closeModal();
                     }
