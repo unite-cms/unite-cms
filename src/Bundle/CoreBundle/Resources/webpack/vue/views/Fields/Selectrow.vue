@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-selectrow fixed-width">
+    <div class="view-field view-field-selectrow fixed-width">
         <div v-on:click="select" v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></div>
     </div>
 </template>

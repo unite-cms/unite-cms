@@ -1,4 +1,5 @@
 
+const path = require('path');
 const Encore = require('@symfony/webpack-encore');
 
 Encore
@@ -35,4 +36,8 @@ Encore
     .disableSingleRuntimeChunk();
 
 // export the final configuration
-module.exports = Encore.getWebpackConfig();
+let config = Encore.getWebpackConfig();
+config.resolve.alias = {
+    'uikit-util': path.resolve(__dirname, 'node_modules/uikit/src/js/util')
+};
+module.exports = config;

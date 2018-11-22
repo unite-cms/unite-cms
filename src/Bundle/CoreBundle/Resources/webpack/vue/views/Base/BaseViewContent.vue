@@ -8,10 +8,12 @@
             'fields',
             'sort',
             'rows',
+            'settings',
             'selectable',
             'updateable',
             'embedded',
             'urls',
+            'dataFetcher'
         ]
     }
 </script>

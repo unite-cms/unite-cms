@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-state fixed-width">
+    <div class="view-field view-field-state fixed-width">
         <span class="uk-label" :class="stateCategory">{{ stateLabel }}</span>
     </div>
 </template>

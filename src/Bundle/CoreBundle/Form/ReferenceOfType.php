@@ -68,9 +68,19 @@ class ReferenceOfType extends AbstractType
         $view->vars['templateParameters'] = $this->viewTypeManager->getTemplateRenderParameters($options['view']);
 
         $settings = $view->vars['templateParameters']->getSettings();
+
+        // If settings have a content filter already set, remove it first.
+        if(!empty($settings['filter']['field']) && $settings['filter']['field'] === $options['reference_field']->getIdentifier().'.content') {
+            $settings['filter'] = [];
+        }
+
         $referenceFilter = ['field' => $options['reference_field']->getIdentifier().'.content', 'operator' => '=', 'value' => $content->getId()];
         $settings['filter'] = empty($settings['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $settings['filter']]];
         $settings['embedded'] = true;
+
+        if(!empty($settings['sort']['sortable'])) {
+            $settings['sort']['sortable'] = false;
+        }
 
         $view->vars['templateParameters']->setSettings($settings);
     }

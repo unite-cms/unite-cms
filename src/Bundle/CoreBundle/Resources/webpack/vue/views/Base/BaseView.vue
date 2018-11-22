@@ -25,6 +25,8 @@
                    :updateable="!deleted.showDeleted"
                    :embedded="embedded"
                    :urls="urls"
+                   :settings="settings"
+                   :dataFetcher="dataFetcher"
                    @updateRow="onRowUpdate"
                    @updateSort="onUpdateSort"></component>
 
@@ -55,6 +57,7 @@
             let fields = bag.settings.fields;
             let error = null;
             let fieldQuery = [];
+            let filterQuery = [];
             let sort = bag.settings.sort || {
                 field: null,
                 asc: true
@@ -63,6 +66,9 @@
             try {
                 fieldQuery = Object.keys(fields).map((identifier) => {
                     return this.$uniteCMSViewFields.resolveFieldQueryFunction(fields[identifier].type)(identifier, fields[identifier], this.$uniteCMSViewFields);
+                });
+                filterQuery = Object.keys(fields).map((identifier) => {
+                    return this.$uniteCMSViewFields.resolveFilterQueryFunction(fields[identifier].type)(identifier, fields[identifier], this.$uniteCMSViewFields);
                 });
             } catch (e) {
                 error = e;
@@ -89,7 +95,7 @@
                     endpoint: bag.urls.api,
                     csrf_token: bag.csrf_token,
                     settings: bag.settings
-                }, fieldQuery),
+                }, fieldQuery, filterQuery),
                 loading: false,
                 error: error,
                 rows: [],
@@ -115,6 +121,7 @@
                 },
                 embedded: bag.settings.embedded || false,
                 feather: feather,
+                settings: bag.settings
             }
         },
         props: ['parameters'],
@@ -214,7 +221,7 @@
                 this.dataFetcher.update(update.id, update.data).then(
                     (data) => {
                         let rowToUpdate = this.rows.filter((row) => { return row.id === update.id });
-                        if(rowToUpdate) {
+                        if(rowToUpdate.length > 0) {
                             ['updated'].concat(Object.keys(update.data)).forEach((field) => {
                                 rowToUpdate[0][field] = data[field];
                             });

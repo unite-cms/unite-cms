@@ -11,6 +11,7 @@ import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
 import BaseView from './vue/views/Base/BaseView.vue';
 import TableContent from './vue/views/TableContent.vue';
 import GridContent from './vue/views/GridContent.vue';
+import TreeContent from './vue/views/TreeContent.vue';
 import DomainEditor from "./vue/components/DomainEditor.vue";
 import ApiTokenField from "./vue/components/ApiTokenField";
 import iFramePreview from "./vue/components/iFramePreview.vue";
@@ -41,6 +42,7 @@ Vue.use(uniteViewFieldsPlugin, {
         'sortindex': require('./vue/views/Fields/Sortindex').default,
         'selectrow': require('./vue/views/Fields/Selectrow').default,
         'reference': require('./vue/views/Fields/Reference').default,
+        'tree_view_children': require('./vue/views/Fields/TreeViewChildren').default,
     }
 });
 
@@ -63,6 +65,11 @@ Vue.customElement('unite-cms-core-view-table', {
 Vue.customElement('unite-cms-core-view-grid', {
     extends: BaseView,
     contentComponent: GridContent
+});
+
+Vue.customElement('unite-cms-core-view-tree', {
+    extends: BaseView,
+    contentComponent: TreeContent
 });
 
 // Create vue moment filter.

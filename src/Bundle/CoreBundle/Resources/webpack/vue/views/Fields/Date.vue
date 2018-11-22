@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-date fixed-width">
+    <div class="view-field view-field-date fixed-width">
         <time v-if="mode === 'date'" class="uk-text-meta">{{ value|date }}</time>
         <time v-else-if="mode === 'datetime'" class="uk-text-meta">{{ value|dateFull }}</time>
         <time v-else class="uk-text-meta" :title="value|dateFull" uk-tooltip>{{ value|dateFromNow }}</time>
@@ -25,7 +25,16 @@
               mode: mode,
           }
         },
-        extends: BaseField
+        extends: BaseField,
+
+        methods: {
+            /**
+             * @inheritdoc
+             */
+            filterQuery(identifier, field) {
+                return null;
+            },
+        }
     }
 </script>
 

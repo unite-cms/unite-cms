@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-actions fixed-width">
+    <div class="view-field view-field-actions fixed-width">
         <button v-if="actions.length > 0" class="uk-button uk-button-default actions-dropdown" type="button" v-html="feather.icons['more-horizontal'].toSvg()"></button>
         <div v-if="actions.length > 0" uk-dropdown="mode: click; pos: bottom-right; offset: 5;">
             <ul class="uk-nav uk-dropdown-nav">
@@ -81,6 +81,11 @@
 </script>
 
 <style scoped lang="scss">
+
+    .actions-dropdown {
+        width: 65px;
+    }
+
     .actions {
         display: inline-block;
 

@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-textarea">
+    <div class="view-field view-field-textarea">
         <p v-if="teaser.length > 0 && full.length > 100" class="uk-text-truncate uk-text-meta" :title="full" uk-tooltip="pos: bottom">{{ teaser }}</p>
         <p v-if="teaser.length > 0 && full.length <= 100" class="uk-text-truncate uk-text-meta">{{ teaser }}</p>
     </div>

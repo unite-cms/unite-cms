@@ -1,5 +1,5 @@
 <template>
-    <div :style="style" class="view-field view-field-id fixed-width">
+    <div class="view-field view-field-id fixed-width">
         <span class="uk-text-meta" :title="value" uk-tooltip>{{ value ? '#' + value.split('-')[0] : '' }}</span>
     </div>
 </template>

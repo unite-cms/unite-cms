@@ -1,18 +1,32 @@
 
 .unite-div-table {
+  display: table;
+  border-collapse: collapse;
+  width: 100%;
+
   .unite-div-table-tbody {
-    .unite-div-table-row {
-      margin-top: -1px;
-      border-top: $table-divider-border-width solid $table-divider-border;
-    }
+    display: table-row-group;
+  }
+
+  .unite-div-table-thead {
+    display: table-header-group;
   }
 }
 
 .unite-div-table-row {
-  @extend .uk-grid;
-  @extend .uk-grid-collapse;
-  @extend .uk-flex-middle;
-  display: block;
+  display: table-row;
+  border-bottom: 1px solid #e5e5e5;
+
+  > * {
+    display: table-cell;
+    box-sizing: border-box;
+
+    &.fixed-width {
+      width: 1px;
+      white-space: nowrap;
+      padding-right: 20px;
+    }
+  }
 }
 
 .unite-div-table-tabs {
@@ -139,9 +153,11 @@
 
   .unite-div-table-tbody {
     border-top: $table-divider-border-width solid $table-divider-border;
+    display: block;
   }
 
   .unite-div-table-row {
+    display: block;
     position: relative;
     padding: 10px;
     min-height: 80px;
@@ -173,33 +189,3 @@
   }
 }
 
-@media (min-width: $breakpoint-small) {
-  .unite-div-table {
-    .unite-div-table-thead,
-    .unite-div-table-tbody {
-      display: inline-block;
-      min-width: 100%;
-    }
-  }
-
-  .unite-div-table-row {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: stretch;
-    align-items: center;
-    width: auto;
-    min-width: 100%;
-
-    > * {
-      flex: 1 0 auto;
-
-      &.fixed-width {
-        flex-grow: 0;
-      }
-    }
-  }
-
-  .unite-div-table-row.uk-sortable-drag {
-    min-width: 0;
-  }
-}
