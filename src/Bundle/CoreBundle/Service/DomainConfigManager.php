@@ -14,6 +14,7 @@ use Symfony\Component\Finder\Finder;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
+use UniteCMS\CoreBundle\Exception\InvalidOrganizationConfigurationException;
 use UniteCMS\CoreBundle\Exception\MissingDomainException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 
@@ -122,6 +123,7 @@ class DomainConfigManager
      * Dumps the domain as a JSON file to the organization directory in the defined domain config location.
      *
      * @param Domain $domain
+     * @param string $previous_identifier
      * @param bool $forceOverride , If provided, an existing domain config file will be overridden.
      *
      * @return bool, Returns true if domain was dumped successfully. False if file did exist and forceOverride was set to false.
@@ -131,7 +133,7 @@ class DomainConfigManager
      * @throws IOException if the file cannot be written
      * @throws InvalidDomainConfigurationException
      */
-    public function updateConfig(Domain $domain, bool $forceOverride = false) : bool{
+    public function updateConfig(Domain $domain, string $previous_identifier = null, bool $forceOverride = false) : bool{
 
         $this->checkConfigFolder();
 
@@ -158,8 +160,87 @@ class DomainConfigManager
             }
         }
 
+        // If old config file exists, remove it.
+        if($previous_identifier) {
+            $previous_organization = new Organization();
+            $previous_organization->setIdentifier($domain->getOrganization()->getIdentifier());
+            $previous_domain = new Domain();
+            $previous_domain->setIdentifier($previous_identifier)->setOrganization($previous_organization);
+            $this->removeConfig($previous_domain);
+            unset($previous_domain);
+            unset($previous_organization);
+        }
+
         $this->filesystem->dumpFile($path, json_encode(json_decode($config), JSON_PRETTY_PRINT));
         return true;
+    }
+
+    /**
+     * Creates a new folder for an organization. If the folder already exists, an exception will be thrown.
+     *
+     * @param Organization $organization
+     * @throws MissingOrganizationException
+     * @throws InvalidOrganizationConfigurationException
+     */
+    public function createOrganizationFolder(Organization $organization) {
+
+        $this->checkConfigFolder();
+        $path = $this->getOrganizationConfigPath($organization);
+
+        if($this->filesystem->exists($path)) {
+            throw new InvalidOrganizationConfigurationException('An organization folder with this identifier already exists! Please delete the folder first, to create an organization with this identifier.');
+        }
+
+        $this->filesystem->mkdir($path);
+    }
+
+    /**
+     * Renames an organization config folder or creates one, if old folder is missing.
+     *
+     * @param Organization $organization
+     * @param string $previous_identifier
+     * @throws InvalidOrganizationConfigurationException
+     * @throws MissingOrganizationException
+     */
+    public function renameOrganizationFolder(Organization $organization, string $previous_identifier) {
+
+        $this->checkConfigFolder();
+        $path = $this->getOrganizationConfigPath($organization);
+
+        $previous_organization = new Organization();
+        $previous_organization->setIdentifier($previous_identifier);
+        $previous_path = $this->getOrganizationConfigPath($previous_organization);
+        unset($previous_organization);
+
+        if($this->filesystem->exists($path)) {
+            throw new InvalidOrganizationConfigurationException('An organization folder with this identifier already exists!');
+        }
+
+        if($this->filesystem->exists($previous_path)) {
+            $this->filesystem->rename($previous_path, $path);
+        } else {
+            $this->filesystem->mkdir($path);
+        }
+
+    }
+
+    /**
+     * Removes an organization config folder.
+     *
+     * @param Organization $organization
+     * @throws MissingOrganizationException
+     */
+    public function removeOrganizationFolder(Organization $organization) {
+
+        $this->checkConfigFolder();
+        $path = $this->getOrganizationConfigPath($organization);
+
+        // If folder does not exists, return.
+        if(!$this->filesystem->exists($path)) {
+            return;
+        }
+
+        $this->filesystem->remove($path);
     }
 
     /**

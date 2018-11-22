@@ -37,5 +37,8 @@ abstract class ContainerAwareTestCase extends KernelTestCase
     public function setUp()
     {
         static::bootKernel(static::KERNEL_OPTIONS);
+
+        // Clear config folder an setUp
+        static::$container->get('unite.cms.domain_config_manager')->removeAllConfig();
     }
 }
