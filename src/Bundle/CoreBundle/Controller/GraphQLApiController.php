@@ -37,7 +37,7 @@ class GraphQLApiController extends Controller
         $server = new StandardServer(ServerConfig::create()
             ->setSchema($schema)
             ->setQueryBatching(true)
-            ->setDebug($this->getParameter('kernel.debug'))
+            ->setDebug(true)
             ->setContext(
                 function () use ($request) {
                     return [
