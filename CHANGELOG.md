@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.2 (2018-11-23)
+- Added #355: Reference_of field to access all content that references this content via GraphQL API
+- Added #231: A tree view to display and sort tree-nested data
+- Improved #371: The layout of the view header was refactored and views now have a embedded option for be embedded in a form
+- [Security] Fixed #386, #388: Filesystem config is now always in sync with org and domains on create, change and delete
+- Fixed #367: Vue is now deployed in production mode, this should improve performance
+- Fixed #373: Fixed a GraphQL mutation error if a content type only contains fields without an input object
+- Fixed #375: Show a validation warning if view type is missing instead of raising an exception
+- Fixed #376: Fixed cookie and session config to make both routing approaches more robust
+- Fixed #394: Fixed a bug, where reference content could not be saved if the reference content_type settings changed
+- Fixed #381: Fixed a bug, where reference content in variants (and collections) could not be saved
+
 ## 0.7.1 (2018-11-09)
 - Improved #362: Enable description, not_empty and default option for more field types
 - Fixed #360: Fix a bug, where field assets where not added for fields in collections 
