@@ -10,7 +10,9 @@ use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -51,13 +53,19 @@ class MutationType extends AbstractType
      */
     private $fieldableFormBuilder;
 
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    private $fieldTypeManager;
+
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
         EntityManager $entityManager,
         UniteCMSManager $uniteCMSManager,
         AuthorizationChecker $authorizationChecker,
         ValidatorInterface $validator,
-        FieldableFormBuilder $fieldableFormBuilder
+        FieldableFormBuilder $fieldableFormBuilder,
+        FieldTypeManager $fieldTypeManager
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->entityManager = $entityManager;
@@ -65,6 +73,7 @@ class MutationType extends AbstractType
         $this->authorizationChecker = $authorizationChecker;
         $this->validator = $validator;
         $this->fieldableFormBuilder = $fieldableFormBuilder;
+        $this->fieldTypeManager = $fieldTypeManager;
         parent::__construct();
     }
 
@@ -107,7 +116,11 @@ class MutationType extends AbstractType
 
             // If this content type has defined fields, we can create and update content with data.
             $fullContentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find($contentType->getId());
-            if($fullContentType->getFields()->count() > 0) {
+            $fieldsWithInput = $fullContentType->getFields()->filter(function(ContentTypeField $field){
+                return $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
+            });
+
+            if($fieldsWithInput->count() > 0) {
                 $fields['create' . $key]['args']['data'] = [
                     'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'ContentInput', $this->uniteCMSManager->getDomain())),
                     'description' => 'The content data to save.',
@@ -149,6 +162,8 @@ class MutationType extends AbstractType
      */
     protected function resolveField($value, array $args, $context, ResolveInfo $info)
     {
+        $args['data'] = $args['data'] ?? [];
+
         // Resolve create content type
         if(substr($info->fieldName, 0, 6) == 'create') {
             return $this->resolveCreateContent(
