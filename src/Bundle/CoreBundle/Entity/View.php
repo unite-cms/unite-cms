@@ -219,7 +219,7 @@ class View
      *
      * @return View
      */
-    public function setType(string $type)
+    public function setType($type)
     {
         $this->type = $type;
 
