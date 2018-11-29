@@ -70,12 +70,25 @@
              * @inheritdoc
              */
             fieldQuery(identifier, field, $uniteCMSViewFields) {
-                return identifier + '(sort: {field: "' + field.settings.sort.field + '", order: "' + (field.settings.sort.asc ? 'ASC' : 'DESC') + '"}) { result { ' + Object.keys(field.settings.fields).map((identifier) => {
-                    return $uniteCMSViewFields.resolveFieldQueryFunction(field.settings.fields[identifier].type)(
-                        identifier,
-                        field.settings.fields[identifier],
-                        $uniteCMSViewFields
-                    );
+
+                let fields = Object.keys(field.settings.fields);
+
+                // All rows must include an id field in the query. We need the id for drag / drop sorting, selecting etc.
+                if(fields.indexOf('id') < 0) {
+                    fields.push('_id');
+                }
+
+                return identifier + '(sort: {field: "' + field.settings.sort.field + '", order: "' + (field.settings.sort.asc ? 'ASC' : 'DESC') + '"}) { result { ' + fields.map((identifier) => {
+
+                    if(identifier === '_id') {
+                        return 'id';
+                    } else {
+                        return $uniteCMSViewFields.resolveFieldQueryFunction(field.settings.fields[identifier].type)(
+                            identifier,
+                            field.settings.fields[identifier],
+                            $uniteCMSViewFields
+                        );
+                    }
                 }).join(', ') + ' } }';
             },
 
