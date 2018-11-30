@@ -202,10 +202,6 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
         $o01->setAccessible(true);
         $referenceResolver = $o01->getValue($fieldType);
 
-        $o01 = new \ReflectionProperty($fieldType, 'referenceResolver');
-        $o01->setAccessible(true);
-        $referenceResolver = $o01->getValue($fieldType);
-
         $o1 = new \ReflectionProperty($referenceResolver, 'authorizationChecker');
         $o1->setAccessible(true);
         $authMock =  $this->createMock(AuthorizationCheckerInterface::class);
@@ -240,6 +236,12 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
+
+        // Now, when I change the domain identifier, the same settings should not be valid anymore.
+        $ctField->getContentType()->getDomain()->setIdentifier($ctField->getContentType()->getDomain()->getIdentifier() . '_updated');
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('Invalid Domain given. The Domain does not exist or Access is prohibited', $errors->get(0)->getMessage());
     }
 
     public function testFormOptionGeneration() {
