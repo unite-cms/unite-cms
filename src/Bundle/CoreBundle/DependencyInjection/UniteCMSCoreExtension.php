@@ -27,5 +27,9 @@ class UniteCMSCoreExtension extends Extension
 
         // Set domain config dir as first argument to domain config manager.
         $container->getDefinition('unite.cms.domain_config_manager')->setArgument(0, $config['domain_config_dir']);
+
+        // Set maximum nesting level as first argument to schema type manager and maximum nesting type object type.
+        $container->getDefinition('unite.cms.graphql.schema_type_manager')->setArgument(0, $config['maximum_nesting_level']);
+        $container->getDefinition('UniteCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType')->setArgument(0, $config['maximum_nesting_level']);
     }
 }

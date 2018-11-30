@@ -15,8 +15,6 @@ use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
 
 class SchemaTypeManager
 {
-    const MAXIMUM_NESTING_LEVEL = 8;
-
     /**
      * @var ObjectType|InputObjectType|InterfaceType|UnionType[]
      */
@@ -31,6 +29,20 @@ class SchemaTypeManager
      * @var SchemaTypeFactoryInterface[]
      */
     private $schemaTypeFactories = [];
+
+    /**
+     * @var int $maximumNestingLevel
+     */
+    private $maximumNestingLevel;
+
+    public function __construct(int $maximumNestingLevel = 8)
+    {
+        $this->maximumNestingLevel = $maximumNestingLevel;
+    }
+
+    public function getMaximumNestingLevel() : int {
+        return $this->maximumNestingLevel;
+    }
 
     /**
      * @return ObjectType|InputObjectType|InterfaceType|UnionType[]
@@ -102,7 +114,7 @@ class SchemaTypeManager
      */
     public function getSchemaType($key, Domain $domain = null, $nestingLevel = 0)
     {
-        if ($nestingLevel >= self::MAXIMUM_NESTING_LEVEL) {
+        if ($nestingLevel >= $this->getMaximumNestingLevel()) {
             $key = 'MaximumNestingLevel';
         }
 

@@ -1,3 +1,4 @@
 
 unite_cms_core:
     domain_config_dir: '%kernel.cache_dir%/unite/config/'
+    maximum_nesting_level: 6
