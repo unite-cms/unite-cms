@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.3 (2018-11-30)
+- Added #378: GraphQL API now allows to delete content
+- Added #380: GraphQL API Maximum nesting level is now configurable
+- Fixed #399: Fixed a bug where selection of nested tree items in reference overlay was not working
+- Fixed #387, #385: Don't show an 500 error if reference or content_label are not set correctly and try to validate them during domain create / update 
+
 ## 0.7.2 (2018-11-23)
 - Added #355: Reference_of field to access all content that references this content via GraphQL API
 - Added #231: A tree view to display and sort tree-nested data
