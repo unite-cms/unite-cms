@@ -127,6 +127,8 @@ class ApiMaximumNestingLevelTest extends APITestCase
 
     public function testReachingMaximumNestingLevel() {
 
+        $this->allowed_level = static::$container->get('unite.cms.graphql.schema_type_manager')->getMaximumNestingLevel();
+
         $news = new Content();
         $category = new Content();
         $news->setContentType($this->domains['marketing']->getContentTypes()->get('news'));
@@ -147,11 +149,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
                             news {
                               category {
                                 news {
-                                  category {
-                                    news {
-                                      message
-                                    }
-                                  }
+                                  message
                                 }
                               }
                             }
@@ -172,11 +170,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
                                     'news' => [
                                         'category' => [
                                             'news' => [
-                                                'category' => [
-                                                    'news' => [
-                                                        'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
-                                                    ]
-                                                ],
+                                                'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
                                             ]
                                         ],
                                     ]
@@ -190,6 +184,8 @@ class ApiMaximumNestingLevelTest extends APITestCase
     }
 
     public function testReachingMaximumNestingLevelForSelfReference() {
+
+        $this->allowed_level = static::$container->get('unite.cms.graphql.schema_type_manager')->getMaximumNestingLevel();
 
         $self = new Content();
         $sibling = new Content();
@@ -210,11 +206,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
                             sibling {
                               sibling {
                                 sibling {
-                                  sibling {
-                                    sibling {
-                                      message
-                                    }
-                                  }
+                                    message
                                 }
                               }
                             }
@@ -233,11 +225,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
                                 'sibling' => [
                                     'sibling' => [
                                         'sibling' => [
-                                            'sibling' => [
-                                                'sibling' => [
-                                                    'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
-                                                ]
-                                            ]
+                                            'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
                                         ],
                                     ],
                                 ]
@@ -250,6 +238,8 @@ class ApiMaximumNestingLevelTest extends APITestCase
     }
 
     public function testReachingMaximumNestingLevelForSelfReferenceInCollection() {
+
+        $this->allowed_level = static::$container->get('unite.cms.graphql.schema_type_manager')->getMaximumNestingLevel();
 
         $self = new Content();
         $sibling = new Content();
@@ -283,11 +273,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
                             sibling {
                                 collection {
                                     sibling {
-                                        collection {
-                                            sibling {
-                                                message
-                                            }
-                                        }
+                                        message
                                     }
                                 }
                             }
@@ -306,11 +292,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
                                 [ 'sibling' => [
                                     'collection' => [
                                         [ 'sibling' => [
-                                            'collection' => [
-                                                [ 'sibling' => [
-                                                    'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
-                                                ]],
-                                            ],
+                                            'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
                                         ]],
                                     ],
                                 ]],

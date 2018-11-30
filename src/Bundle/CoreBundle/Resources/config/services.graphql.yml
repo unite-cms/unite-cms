@@ -4,7 +4,7 @@ services:
     # Schema Type Manager, that holds all schema types during one request
     unite.cms.graphql.schema_type_manager:
         class: UniteCMS\CoreBundle\SchemaType\SchemaTypeManager
-        arguments: ['@unite.cms.graphql.content_type_factory', '@unite.cms.graphql.content_result_type_factory', '@unite.cms.graphql.setting_type_factory']
+        arguments: [8]
         public: true
 
     # SchemaTypeFactory implementations
@@ -50,6 +50,7 @@ services:
 
     UniteCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType:
         tags: [unite_cms.graphql.schema_type]
+        arguments: [8]
 
     UniteCMS\CoreBundle\SchemaType\Types\LinkFieldType:
         tags: [unite_cms.graphql.schema_type]

@@ -9,6 +9,17 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 class MaximumNestingLevelType extends AbstractType
 {
     /**
+     * @var int $maximumNestingLevel
+     */
+    private $maximumNestingLevel;
+
+    public function __construct(int $maximumNestingLevel = 8)
+    {
+        $this->maximumNestingLevel = $maximumNestingLevel;
+        parent::__construct();
+    }
+
+    /**
      * Define all fields of this type.
      *
      * @return array
@@ -33,6 +44,6 @@ class MaximumNestingLevelType extends AbstractType
      */
     protected function resolveField($value, array $args, $context, ResolveInfo $info)
     {
-        return 'Maximum nesting level of ' . SchemaTypeManager::MAXIMUM_NESTING_LEVEL . ' reached.';
+        return 'Maximum nesting level of ' . $this->maximumNestingLevel . ' reached.';
     }
 }
