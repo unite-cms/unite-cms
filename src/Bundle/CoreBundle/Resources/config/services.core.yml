@@ -53,6 +53,11 @@ services:
     arguments: ['@security.token_storage']
     tags: [form.type]
 
+  # Provide ContentDeleteFormType form as a service, pass tokenstorage as an argument, auto wire not working in forms
+  UniteCMS\CoreBundle\Form\ContentDeleteFormType:
+      arguments: ['@security.token_storage']
+      tags: [form.type]
+
   # Provide Stete Type as a service, pass translator as an argument
   unite.cms.state_type:
       class: UniteCMS\CoreBundle\Form\StateType

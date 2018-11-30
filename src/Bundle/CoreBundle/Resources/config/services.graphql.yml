@@ -30,7 +30,7 @@ services:
 
     UniteCMS\CoreBundle\SchemaType\Types\MutationType:
         tags: [unite_cms.graphql.schema_type]
-        arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@validator', '@unite.cms.fieldable_form_builder', '@unite.cms.field_type_manager']
+        arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@validator', '@unite.cms.fieldable_form_builder', '@form.factory', '@unite.cms.field_type_manager']
 
     UniteCMS\CoreBundle\SchemaType\Types\ContentResultInterface:
         tags: [unite_cms.graphql.schema_type]
@@ -51,6 +51,9 @@ services:
     UniteCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType:
         tags: [unite_cms.graphql.schema_type]
         arguments: [8]
+
+    UniteCMS\CoreBundle\SchemaType\Types\DeletedContentResultType:
+        tags: [unite_cms.graphql.schema_type]
 
     UniteCMS\CoreBundle\SchemaType\Types\LinkFieldType:
         tags: [unite_cms.graphql.schema_type]

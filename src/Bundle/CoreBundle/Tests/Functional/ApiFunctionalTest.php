@@ -22,6 +22,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\View;
+use UniteCMS\CoreBundle\Form\ContentDeleteFormType;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
@@ -459,7 +460,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->controller->setContainer(static::$container);
     }
 
-    private function api(Domain $domain, UserInterface $user, string $query, array $variables = [], $set_csrf_token = FALSE, $firewall = 'api') {
+    private function api(Domain $domain, UserInterface $user, string $query, array $variables = [], $set_csrf_token = FALSE, $firewall = 'api', $form_type = null) {
 
         // Fake a real HTTP request.
         $request = new Request([], [], [
@@ -487,7 +488,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         // If we fallback to the statefull main firewall, we need to add a csrf-token with the request.
         if($set_csrf_token) {
-            $request->headers->set('X-CSRF-TOKEN', static::$container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(FieldableFormType::class))->getValue());
+            $request->headers->set('X-CSRF-TOKEN', static::$container->get('security.csrf.token_manager')->getToken(StringUtil::fqcnToBlockPrefix(
+                $form_type ?? FieldableFormType::class
+            ))->getValue());
         }
 
         static::$container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, $firewall, []));
@@ -1020,7 +1023,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
     }
 
-    public function testAPICreateAndUpdateMethod() {
+    public function testAPICRUDMethod() {
 
         // Try to create content without permissions.
         $response = $this->api(
@@ -1225,6 +1228,60 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals("Updated News2", $response->data->updateNews->title_title);
         $this->assertEquals("<p>Hello new World</p>", $response->data->updateNews->content);
         $this->assertNull($response->data->updateNews->category);
+
+        // delete content without permission
+        $response = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: false) {
+                    id,
+                    deleted
+                }
+            }', [
+            'id' => $news->id,
+            'category' => null
+        ]);
+
+        $this->assertNotEmpty($response->errors);
+        $this->assertEquals("You are not allowed to delete content with id '" . $news->id . "'.", $response->errors[0]->message);
+
+        $originalCountNews = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query { findNews { total } }')->data->findNews->total;
+
+        // delete content with permission, but without persist = true
+        $response = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_editor'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: false) {
+                    id,
+                    deleted
+                }
+            }', [
+            'id' => $news->id,
+            'category' => null
+        ]);
+
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals($news->id, $response->data->deleteNews->id);
+        $this->assertEquals(false, $response->data->deleteNews->deleted);
+        $this->assertEquals($originalCountNews, $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query { findNews { total } }')->data->findNews->total);
+
+        // delete content with permission, with persist = true
+        $response = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_editor'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: true) {
+                    id,
+                    deleted
+                }
+            }', [
+            'id' => $news->id,
+            'category' => null
+        ]);
+
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals($news->id, $response->data->deleteNews->id);
+        $this->assertEquals(true, $response->data->deleteNews->deleted);
+        $this->assertEquals($originalCountNews -1, $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query { findNews { total } }')->data->findNews->total);
     }
 
     public function testAPICRUDForCTWithLang() {
@@ -1493,6 +1550,32 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         ], true, 'main');
 
         $this->assertEquals('Updated News', $responseUpdate->data->updateNews->title_title);
+
+        // Try Delete
+        $responseDelete = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_editor'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: true) { 
+                    id
+                }
+            }', [
+            'id' => $response->data->createNews->id,
+        ], false, 'main', ContentDeleteFormType::class);
+
+        $this->assertNotEmpty($responseDelete->errors);
+        $this->assertStringStartsWith("The CSRF token is invalid. Please try to resubmit the form.", $responseDelete->errors[0]->message);
+        $this->assertEquals(['deleteNews'], $responseDelete->errors[0]->path);
+
+        $responseDelete = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_editor'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: true) { 
+                    deleted
+                }
+            }', [
+            'id' => $response->data->createNews->id,
+        ], true, 'main', ContentDeleteFormType::class);
+        $this->assertEquals(true, $responseDelete->data->deleteNews->deleted);
 
     }
 
