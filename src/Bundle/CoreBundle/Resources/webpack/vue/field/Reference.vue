@@ -1,5 +1,6 @@
 <template>
     <div>
+        <div v-if="warning" class="uk-alert-warning" uk-alert>{{ warning }}</div>
         <input type="hidden" :name="name + '[domain]'" :value="domain" />
         <input type="hidden" :name="name + '[content_type]'" :value="contentType" />
         <input type="hidden" :name="name + '[content]'" :value="content" />
@@ -23,7 +24,6 @@
             </div>
             <button class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearSelection"></button>
         </div>
-
     </div>
 </template>
 
@@ -51,7 +51,8 @@
                 contentLabelFields: contentLabelFields,
                 loading: false,
                 title: '',
-                feather: feather
+                feather: feather,
+                warning: null,
             };
         },
         props: [
@@ -109,6 +110,7 @@
             clearSelection() {
                 this.content = null;
                 this.title = null;
+                this.warning = null;
             },
             findHumanReadableName() {
                 if(this.content) {
@@ -128,6 +130,10 @@
                         });
                         this.title = label;
                         this.loading = false;
+                    }).catch(() => {
+                        this.title = '#' + this.content;
+                        this.loading = false;
+                        this.warning = 'This content label "'+label+'" could not be resolved. Please make sure, that all field placeholders exist.'
                     });
                 }
             }
