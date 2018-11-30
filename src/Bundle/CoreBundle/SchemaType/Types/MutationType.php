@@ -6,13 +6,16 @@ use Doctrine\ORM\EntityManager;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
+use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Form\ContentDeleteFormType;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -54,6 +57,11 @@ class MutationType extends AbstractType
     private $fieldableFormBuilder;
 
     /**
+     * @var FormFactory $formFactory
+     */
+    private $formFactory;
+
+    /**
      * @var FieldTypeManager $fieldTypeManager
      */
     private $fieldTypeManager;
@@ -65,6 +73,7 @@ class MutationType extends AbstractType
         AuthorizationChecker $authorizationChecker,
         ValidatorInterface $validator,
         FieldableFormBuilder $fieldableFormBuilder,
+        FormFactory $formFactory,
         FieldTypeManager $fieldTypeManager
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
@@ -73,6 +82,7 @@ class MutationType extends AbstractType
         $this->authorizationChecker = $authorizationChecker;
         $this->validator = $validator;
         $this->fieldableFormBuilder = $fieldableFormBuilder;
+        $this->formFactory = $formFactory;
         $this->fieldTypeManager = $fieldTypeManager;
         parent::__construct();
     }
@@ -110,6 +120,20 @@ class MutationType extends AbstractType
                     'persist' => [
                         'type' => Type::nonNull(Type::boolean()),
                         'description' => 'Only if is set to true, the content will be updated. Data will be validated anyway.',
+                    ],
+                ],
+            ];
+
+            $fields['delete' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType('DeletedContentResult', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'The id of the content item to delete.',
+                    ],
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the content will be delete. Data will be validated anyway.',
                     ],
                 ],
             ];
@@ -175,6 +199,14 @@ class MutationType extends AbstractType
         // Resolve update content type
         elseif(substr($info->fieldName, 0, 6) == 'update') {
             return $this->resolveUpdateContent(
+                IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
+                $value, $args, $context, $info
+            );
+        }
+
+        // Resolve delete content type
+        elseif(substr($info->fieldName, 0, 6) == 'delete') {
+            return $this->resolveDeleteContent(
                 IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
                 $value, $args, $context, $info
             );
@@ -335,6 +367,74 @@ class MutationType extends AbstractType
                 }
 
                 return $content;
+            }
+        }
+
+        foreach($form->getErrors(true, true) as $error) {
+            throw UserErrorAtPath::createFromFormError($error);
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve delete content.
+     *
+     * @param $identifier
+     * @param $value
+     * @param $args
+     * @param $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     *
+     * @return mixed
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function resolveDeleteContent($identifier, $value, $args, $context, ResolveInfo $info) {
+
+        $id = $args['id'];
+        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id);
+
+        if(!$content) {
+            throw new UserError("Content was not found.");
+        }
+
+        if (!$this->authorizationChecker->isGranted(ContentVoter::DELETE, $content)) {
+            throw new UserError("You are not allowed to delete content with id '$id'.");
+        }
+
+        $form = $this->formFactory->create(ContentDeleteFormType::class);
+
+        // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
+        $data = [];
+        if(!empty($context['csrf_token'])) {
+            $data['_token'] = $context['csrf_token'];
+        }
+
+        $form->submit($data);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // If content errors were found, map them to the form.
+            $violations = $this->validator->validate($content, null, ['DELETE']);
+            if (count($violations) > 0) {
+                $violationMapper = new ViolationMapper();
+                foreach ($violations as $violation) {
+                    $violationMapper->mapViolation($violation, $form);
+                }
+
+                // If content is valid.
+            } else {
+
+                if($args['persist']) {
+                    $this->entityManager->remove($content);
+                    $this->entityManager->flush();
+                }
+
+                return [
+                    'id' => $args['id'],
+                    'deleted' => !!$args['persist'],
+                ];
             }
         }
 
