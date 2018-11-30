@@ -57,11 +57,23 @@ class ReferenceResolver
     }
 
     public function setFallbackFromContext(ExecutionContextInterface $context, $settings) {
-        if($context->getRoot() instanceof Domain && empty($context->getRoot()->getId()) && $context->getRoot()->getIdentifier() === $settings->domain) {
+
+        if(!$context->getRoot() instanceof Domain) {
+            return;
+        }
+
+        // If we are referencing the current domain during creation
+        if(empty($context->getRoot()->getId()) && $context->getRoot()->getIdentifier() === $settings->domain) {
             $this->fallbackDomain = $context->getRoot();
         }
 
-        if(!empty($this->uniteCMSManager->getDomain()) &&  $context->getRoot() instanceof Domain && $context->getRoot()->getId() === $this->uniteCMSManager->getDomain()->getId()) {
+        // If we are referencing the current domain during update
+        if(!empty($this->uniteCMSManager->getDomain()) && $context->getRoot()->getId() === $this->uniteCMSManager->getDomain()->getId()) {
+
+            if($context->getRoot()->getIdentifier() === $settings->domain || $context->getRoot()->getPreviousIdentifier() === $settings->domain) {
+                $this->fallbackDomain = $context->getRoot();
+            }
+
             $fallbackContentType = $context->getRoot()->getContentTypes()->filter(
                 function (ContentType $contentType) use ($settings) {
                     return $contentType->getIdentifier() == $settings->content_type;
@@ -98,28 +110,32 @@ class ReferenceResolver
             );
         }
 
-        $domain = $organization->getDomains()->filter(
-            function (Domain $domain) use ($domain_identifier) {
-                return $domain->getIdentifier() == $domain_identifier;
-            }
-        )->first();
-
-        if (!$domain) {
-            if(!empty($this->fallbackDomain) && $this->fallbackDomain->getIdentifier() === $domain_identifier) {
+        // If a fallback domain was found, use this domain.
+        if(!empty($this->fallbackDomain)) {
+            if($this->fallbackDomain->getIdentifier() === $domain_identifier) {
                 $domain = $this->fallbackDomain;
-            } else {
-                throw new MissingDomainException(
-                    "A reference field was configured with domain \"{$domain_identifier}\". However \"{$domain_identifier}\" does not exist, or you don't have access to it."
-                );
             }
+        } else {
+            $domain = $organization->getDomains()->filter(
+                function (Domain $domain) use ($domain_identifier) {
+                    return $domain->getIdentifier() == $domain_identifier;
+                }
+            )->first();
 
             // We need to reload the full domain. uniteCMSManager only holds infos for the current domain.
-        } else {
-            $domain = $this->entityManager->getRepository('UniteCMSCoreBundle:Domain')->findOneBy(
-                [
-                    'organization' => $organization,
-                    'id' => $domain->getId(),
-                ]
+            if($domain) {
+                $domain = $this->entityManager->getRepository('UniteCMSCoreBundle:Domain')->findOneBy(
+                    [
+                        'organization' => $organization,
+                        'id' => $domain->getId(),
+                    ]
+                );
+            }
+        }
+
+        if(empty($domain)) {
+            throw new MissingDomainException(
+                "A reference field was configured with domain \"{$domain_identifier}\". However \"{$domain_identifier}\" does not exist, or you don't have access to it."
             );
         }
 

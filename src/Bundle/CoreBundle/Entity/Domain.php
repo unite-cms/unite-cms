@@ -132,6 +132,12 @@ class Domain
     private $config;
 
     /**
+     * When updating a domain, this variable can hold the previous identifier during the current request.
+     * @var string
+     */
+    private $previousIdentifier = null;
+
+    /**
      * If the config has changed, this variable is set to true to force an update.
      *
      * @var bool
@@ -444,6 +450,10 @@ class Domain
      */
     public function setIdentifier($identifier)
     {
+        if(!empty($this->identifier) && $identifier !== $this->identifier) {
+            $this->setPreviousIdentifier($this->identifier);
+        }
+
         $this->identifier = $identifier;
 
         return $this;
@@ -751,6 +761,24 @@ class Domain
      */
     public function setConfigChanged($changed = true) {
         $this->configChanged = $changed;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPreviousIdentifier()
+    {
+        return $this->previousIdentifier;
+    }
+
+    /**
+     * @param string $previousIdentifier
+     * @return Domain
+     */
+    public function setPreviousIdentifier(string $previousIdentifier)
+    {
+        $this->previousIdentifier = $previousIdentifier;
+        return $this;
     }
 }
 

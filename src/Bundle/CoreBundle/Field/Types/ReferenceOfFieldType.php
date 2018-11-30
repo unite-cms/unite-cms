@@ -18,6 +18,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
@@ -123,7 +124,7 @@ class ReferenceOfFieldType extends FieldType
             $thisContentType = $context->getObject()->getContentType();
 
             // Check if field references the current content type.
-            if($field->getSettings()->domain !== $thisContentType->getDomain()->getIdentifier() || $field->getSettings()->content_type !== $thisContentType->getIdentifier()) {
+            if(($field->getSettings()->domain !== $thisContentType->getDomain()->getIdentifier() && $field->getSettings()->domain !== $thisContentType->getDomain()->getPreviousIdentifier()) || $field->getSettings()->content_type !== $thisContentType->getIdentifier()) {
                 $context->buildViolation('invalid_field_reference')->atPath('reference_field')->addViolation();
             }
 
