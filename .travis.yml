@@ -48,10 +48,6 @@ services:
 
 before_install:
   - |
-    if ! [[ $coverage ]]; then
-      phpenv config-rm xdebug.ini
-    fi
-  - |
     if ! [[ $coverage_group_xdebug ]]; then
       phpenv config-rm xdebug.ini
     fi
