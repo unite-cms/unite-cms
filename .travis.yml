@@ -60,9 +60,9 @@ before_script:
 script:
   - |
     if [[ $coverage ]]; then
-      phpdbg -qrr phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+      phpdbg -qrr vendor/bin/phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml
     else
-      phpunit --configuration $PHPUNIT_CONF
+      vendor/bin/phpunit --configuration $PHPUNIT_CONF
     fi
 
 after_success:
