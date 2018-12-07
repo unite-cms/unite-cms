@@ -89,6 +89,14 @@ class FieldEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
+        // Try to validate invalid identifier
+        $field->setIdentifier('1abc');
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+
+        $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
+
         // Test UniqueEntity Validation.
         $field->setIdentifier('identifier');
         $this->em->persist($field->getEntity()->getDomain()->getOrganization());

@@ -54,10 +54,18 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('identifier', $errors->get(1)->getPropertyPath());
         $this->assertEquals('too_long', $errors->get(1)->getMessageTemplate());
 
-        // Try to test invalid identifier.
+        // Try to set invalid identifier.
         $domain1
             ->setTitle($this->generateRandomUTF8String(255))
             ->setIdentifier($this->generateRandomMachineName(199).':');
+        $errors = static::$container->get('validator')->validate($domain1);
+        $this->assertGreaterThanOrEqual(1, $errors->count());
+
+        $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
+
+        // Try to set invalid identifier.
+        $domain1->setIdentifier('1abc');
         $errors = static::$container->get('validator')->validate($domain1);
         $this->assertGreaterThanOrEqual(1, $errors->count());
 

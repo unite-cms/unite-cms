@@ -17,11 +17,12 @@ abstract class ContainerAwareTestCase extends KernelTestCase
             $return .= $allowed[random_int(0, count($allowed) - 1)];
         }
 
-        // should start and end with an letter.
-        if(substr($return, 0, 1) === '_') {
+        // should start and end with a letter.
+        if(substr($return, 0, 1) === '_' || is_numeric(substr($return, 0, 1))) {
             $return = 'a'.substr($return, 1);
         }
 
+        // should start and end with a letter or a number.
         if(substr($return, -1, 1) === '_') {
             $return = substr($return, 0, -1).'a';
         }

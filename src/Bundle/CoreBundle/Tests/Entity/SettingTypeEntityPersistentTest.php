@@ -60,6 +60,13 @@ class SettingTypeEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
+        // Try to save invalid identifier.
+        $settingType->setIdentifier('1abc');
+        $errors = static::$container->get('validator')->validate($settingType);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
+
         $settingType->setIdentifier($this->generateRandomMachineName(201));
         $errors = static::$container->get('validator')->validate($settingType);
         $this->assertCount(1, $errors);
