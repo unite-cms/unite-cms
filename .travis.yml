@@ -30,6 +30,12 @@ matrix:
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
             - coverage=true
+        - php: 7.2
+          if: type == push AND branch = master AND fork = false
+          env:
+            - PHPUNIT_CONF=phpunit.xml.dist
+            - coverage=true
+            - coverage_group_xdebug = true
 
     fast_finish: true
 
@@ -41,7 +47,14 @@ services:
   - mysql
 
 before_install:
-  - phpenv config-rm xdebug.ini
+  - |
+    if ! [[ $coverage ]]; then
+      phpenv config-rm xdebug.ini
+    fi
+  - |
+    if ! [[ $coverage_group_xdebug ]]; then
+      phpenv config-rm xdebug.ini
+    fi
   - composer self-update
   - mysql -e 'CREATE DATABASE unite_test;'
   - cp .env.dist .env
@@ -60,12 +73,11 @@ before_script:
 script:
   - |
     if [[ $coverage ]]; then
-      phpdbg -qrr vendor/bin/phpunit src/Bundle/CollectionFieldBundle/ --configuration $PHPUNIT_CONF --coverage-clover clover.xml
-      phpdbg -qrr vendor/bin/phpunit src/Bundle/CoreBundle/ --configuration $PHPUNIT_CONF --coverage-clover clover.xml
-      phpdbg -qrr vendor/bin/phpunit src/Bundle/RegistrationBundle/ --configuration $PHPUNIT_CONF --coverage-clover clover.xml
-      phpdbg -qrr vendor/bin/phpunit src/Bundle/StorageBundle/ --configuration $PHPUNIT_CONF --coverage-clover clover.xml
-      phpdbg -qrr vendor/bin/phpunit src/Bundle/VariantsFieldBundle/ --configuration $PHPUNIT_CONF --coverage-clover clover.xml
-      phpdbg -qrr vendor/bin/phpunit src/Bundle/WysiwygFieldBundle/ --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+      if [[ $coverage_group_xdebug ]]; then
+        vendor/bin/phpunit --filter 'UniteCMS\\CoreBundle\\Tests' --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+      else
+        phpdbg -qrr vendor/bin/phpunit --filter 'UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests' --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+      fi
     else
       vendor/bin/phpunit --configuration $PHPUNIT_CONF
     fi
