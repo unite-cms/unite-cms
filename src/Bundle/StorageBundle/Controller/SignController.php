@@ -25,7 +25,7 @@ class SignController extends Controller
 
 
     /**
-     * @Route("/content/{content_type}/upload", methods={"POST"})
+     * @Route("/content/{content_type}/upload", methods={"POST", "OPTIONS"})
      * @Entity("contentType", expr="repository.findByIdentifiers(organization, domain, content_type)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), contentType)")
      *
@@ -62,7 +62,7 @@ class SignController extends Controller
     }
 
     /**
-     * @Route("/setting/{setting_type}/upload", methods={"POST"})
+     * @Route("/setting/{setting_type}/upload", methods={"POST", "OPTIONS"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), settingType)")
      *
