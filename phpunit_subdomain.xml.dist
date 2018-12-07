@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- https://phpunit.de/manual/current/en/appendixes.configuration.html -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.8/phpunit.xsd"
+         backupGlobals="false"
+         colors="true"
+         bootstrap="./src/TestBootstrap.php"
+         failOnRisky="true"
+         failOnWarning="true"
+>
+    <php>
+        <ini name="error_reporting" value="-1" />
+        <server name="KERNEL_CLASS" value="App\Kernel" />
+        <server name="KERNEL_DIR" value="src" />
+        <env name="APP_SECRET" value="SECRET"/>
+        <env name="APP_ENV" value="test"/>
+        <env name="APP_DEBUG" value="1"/>
+        <env name="DATABASE_HOST" value="127.0.0.1"/>
+        <env name="DATABASE_PORT" value=""/>
+        <env name="DATABASE_NAME" value="unite_test"/>
+        <env name="DATABASE_USER" value="root"/>
+        <env name="DATABASE_PASSWORD" value=""/>
+        <env name="ROUTING_APPROACH" value="subdomain"/>
+        <env name="DEFAULT_HOSTNAME" value=""/>
+        <env name="MAILER_SENDER" value="unite@unite.co.at"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="unite cms test cases">
+            <directory>./src/Bundle/*/Tests/</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory>./src/Bundle</directory>
+            <exclude>
+                <directory>./src/Bundle/*/Tests</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>
