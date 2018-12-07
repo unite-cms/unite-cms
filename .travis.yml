@@ -29,12 +29,12 @@ matrix:
           if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
-            - COVERAGE_FILTER=UniteCMS\\CoreBundle\\Tests
+            - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
         - php: 7.2
           if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
-            - COVERAGE_FILTER=UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests
+            - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
 
     fast_finish: true
 
@@ -68,7 +68,7 @@ before_script:
 script:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-        phpunit --filter '$COVERAGE_FILTER' --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER
     else
       phpunit --configuration $PHPUNIT_CONF
     fi
