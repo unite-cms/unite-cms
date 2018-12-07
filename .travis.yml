@@ -29,12 +29,12 @@ matrix:
           if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
-            - coverage_filter='UniteCMS\\CoreBundle\\Tests'
+            - COVERAGE_FILTER=UniteCMS\\CoreBundle\\Tests
         - php: 7.2
           if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
-            - coverage_filter='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
+            - COVERAGE_FILTER=UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests
 
     fast_finish: true
 
@@ -47,7 +47,7 @@ services:
 
 before_install:
   - |
-    if ! [[ $coverage_filter ]]; then
+    if ! [[ $COVERAGE_FILTER ]]; then
       phpenv config-rm xdebug.ini
     fi
   - composer self-update
@@ -59,7 +59,7 @@ install:
 
 before_script:
   - |
-    if [[ $coverage_filter ]]; then
+    if [[ $COVERAGE_FILTER ]]; then
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
       chmod +x ./cc-test-reporter
       ./cc-test-reporter before-build
@@ -67,15 +67,14 @@ before_script:
 
 script:
   - |
-    if [[ $coverage_filter ]]; then
-      if [[ $coverage_group_xdebug ]]; then
-        phpunit --filter $coverage_filter --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+    if [[ $COVERAGE_FILTER ]]; then
+        phpunit --filter '$coverage_filter' --configuration $PHPUNIT_CONF --coverage-clover clover.xml
     else
       phpunit --configuration $PHPUNIT_CONF
     fi
 
 after_success:
   - |
-    if [[ $coverage_filter ]]; then
+    if [[ $COVERAGE_FILTER ]]; then
       ./cc-test-reporter after-build -t clover --exit-code $TRAVIS_TEST_RESULT
     fi
