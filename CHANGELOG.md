@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.4 (2018-12-07)
+- Added #412: Update phpunit dist due to latest changes
+- Fixed #409: Cant select cross domain content type for reference_of field
+- Fixed #323: Mutation with Type 'StorageFileInput'
+- Partly Fixed #379: added validation to prevent identifiers starting with numbers
+
 ## 0.7.3 (2018-11-30)
 - Added #378: GraphQL API now allows to delete content
 - Added #380: GraphQL API Maximum nesting level is now configurable
