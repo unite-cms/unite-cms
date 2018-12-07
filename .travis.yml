@@ -60,7 +60,7 @@ before_script:
 script:
   - |
     if [[ $coverage ]]; then
-      phpdbg -qrr vendor/bin/phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+      phpdbg -qrr vendor/bin/phpunit src/Bundle/CollectionFieldBundle/ --configuration $PHPUNIT_CONF --coverage-clover clover.xml
     else
       vendor/bin/phpunit --configuration $PHPUNIT_CONF
     fi
