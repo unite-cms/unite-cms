@@ -68,7 +68,7 @@ before_script:
 script:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-        phpunit --filter '$coverage_filter' --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+        phpunit --filter '$COVERAGE_FILTER' --configuration $PHPUNIT_CONF --coverage-clover clover.xml
     else
       phpunit --configuration $PHPUNIT_CONF
     fi
