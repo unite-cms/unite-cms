@@ -58,6 +58,9 @@ class ReferenceResolver
 
     public function setFallbackFromContext(ExecutionContextInterface $context, $settings) {
 
+        $this->fallbackDomain = null;
+        $this->fallbackContentType = null;
+
         if(!$context->getRoot() instanceof Domain) {
             return;
         }

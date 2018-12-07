@@ -228,6 +228,12 @@ class ReferenceOfFieldTypeTest extends FieldTypeTestCase
         $ref_field->getSettings()->domain = 'new';
         $ref_field->getSettings()->content_type = 'baa';
         $this->assertCount(0, static::$container->get('validator')->validate($domain));
+
+        // Referenced field exists on another domain
+        $ref_field->getContentType()->setDomain($otherDomain);
+        $ctField->getSettings()->domain = 'other';
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
+
     }
 
     public function testFormOptionGeneration() {
