@@ -83,6 +83,15 @@ class ViewEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
         $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
 
+        // Try to validate invalid identifier
+        $view->setIdentifier('1abc');
+
+        $errors = static::$container->get('validator')->validate($view);
+        $this->assertCount(1, $errors);
+
+        $this->assertEquals('identifier', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('invalid_characters', $errors->get(0)->getMessageTemplate());
+
         // Try to validate invalid icon
         $view
             ->setIdentifier('any')
