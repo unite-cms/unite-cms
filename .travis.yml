@@ -50,6 +50,7 @@ before_install:
   - cp .env.dist .env
 
 install:
+  - phpenv config-rm xdebug.ini
   - composer install
 
 before_script:
@@ -63,7 +64,7 @@ before_script:
 script:
   - |
     if [[ $coverage ]]; then
-      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml
+      phpdbg -qrr phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml
     else
       phpunit --configuration $PHPUNIT_CONF
     fi
