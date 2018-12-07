@@ -22,7 +22,7 @@
         <env name="DATABASE_USER" value="root"/>
         <env name="DATABASE_PASSWORD" value=""/>
         <env name="ROUTING_APPROACH" value="parameter"/>
-        <env name="DEFAULT_HOSTNAME" value=""/>
+        <env name="DEFAULT_HOSTNAME" value="unite.test"/>
         <env name="MAILER_SENDER" value="unite@unite.co.at"/>
     </php>
 
