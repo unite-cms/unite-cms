@@ -75,7 +75,7 @@ before_script:
 script:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-      phpunit --configuration $PHPUNIT_CONF --coverage-clover coverage/clover.$COVERAGE_ID.xml --filter $COVERAGE_FILTER
+      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER
     else
       phpunit --configuration $PHPUNIT_CONF
     fi
@@ -84,8 +84,8 @@ after_success:
   - |
     if [[ $COVERAGE_FILTER ]]; then
       if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then 
-        ./cc-test-reporter format-coverage -t clover coverage/clover.$COVERAGE_ID.xml
-        ./cc-test-reporter sum-coverage coverage/clover.*.xml
+        ./cc-test-reporter format-coverage -t clover -o coverage/clover.$COVERAGE_ID.xml clover.xml
+        ./cc-test-reporter sum-coverage coverage/clover.*.xml -p 2
         ./cc-test-reporter upload-coverage
       fi
     fi
