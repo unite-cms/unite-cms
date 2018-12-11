@@ -29,12 +29,22 @@ class OrganizationUserController extends Controller
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
+     * @param Request $request
      * @return Response
      */
-    public function indexAction(Organization $organization)
+    public function indexAction(Organization $organization, Request $request)
     {
-        $users = $this->get('knp_paginator')->paginate($organization->getMembers());
-        $invites = $this->get('knp_paginator')->paginate($organization->getInvites());
+        $users = $this->get('knp_paginator')->paginate($organization->getMembers(),
+            $request->query->getInt('page_users', 1),
+            10,
+            ['pageParameterName' => 'page_users', 'sortDirectionParameterName' => 'sort_users']
+        );
+
+        $invites = $this->get('knp_paginator')->paginate($organization->getInvites(),
+            $request->query->getInt('page_invites', 1),
+            10,
+            ['pageParameterName' => 'page_invites', 'sortDirectionParameterName' => 'sort_invites']
+        );
 
         return $this->render(
             '@UniteCMSCore/Organization/User/index.html.twig',

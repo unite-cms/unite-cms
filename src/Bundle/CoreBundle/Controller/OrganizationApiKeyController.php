@@ -23,11 +23,16 @@ class OrganizationApiKeyController extends Controller
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\OrganizationVoter::UPDATE'), organization)")
      *
      * @param Organization $organization
+     * @param Request $request
      * @return Response
      */
-    public function indexAction(Organization $organization)
+    public function indexAction(Organization $organization, Request $request)
     {
-        $apiKeys = $this->get('knp_paginator')->paginate($organization->getApiKeys());
+        $apiKeys = $this->get('knp_paginator')->paginate($organization->getApiKeys(),
+            $request->query->getInt('page_keys', 1),
+            10,
+            ['pageParameterName' => 'page_keys', 'sortDirectionParameterName' => 'sort_keys']
+        );
 
         return $this->render(
             '@UniteCMSCore/Organization/ApiKey/index.html.twig',
