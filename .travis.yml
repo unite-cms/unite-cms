@@ -4,6 +4,11 @@ sudo: false
 dist: trusty
 os: linux
 
+cache:
+  directories:
+    - vendor
+    - coverage
+
 addons:
   apt:
     sources:
@@ -30,11 +35,13 @@ matrix:
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
             - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
+            - COVERAGE_ID=1
         - php: 7.2
           if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
             - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
+            - COVERAGE_ID=2
 
     fast_finish: true
 
@@ -68,7 +75,7 @@ before_script:
 script:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER
+      phpunit --configuration $PHPUNIT_CONF --coverage-clover coverage/clover$COVERAGE_ID.xml --filter $COVERAGE_FILTER
     else
       phpunit --configuration $PHPUNIT_CONF
     fi
@@ -76,5 +83,9 @@ script:
 after_success:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-      ./cc-test-reporter after-build -t clover --exit-code $TRAVIS_TEST_RESULT
+      if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then 
+        ./cc-test-reporter format-coverage -t clover coverage/clover$COVERAGE_ID.xml
+        ./cc-test-reporter sum-coverage coverage/clover.*.xml
+        ./cc-test-reporter upload-coverage
+      fi
     fi
