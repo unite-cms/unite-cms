@@ -40,12 +40,22 @@ class DomainMemberController extends Controller
      * @param Organization $organization
      * @param Domain $domain
      * @param DomainMemberType $memberType
+     * @param Request $request
      * @return Response
      */
-    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType)
+    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request)
     {
-        $members = $this->get('knp_paginator')->paginate($memberType->getDomainMembers());
-        $invites = $this->get('knp_paginator')->paginate($memberType->getInvites());
+        $members = $this->get('knp_paginator')->paginate($memberType->getDomainMembers(),
+            $request->query->getInt('page_members', 1),
+            10,
+            ['pageParameterName' => 'page_members', 'sortDirectionParameterName' => 'sort_members']
+        );
+
+        $invites = $this->get('knp_paginator')->paginate($memberType->getInvites(),
+            $request->query->getInt('page_invites', 1),
+            10,
+            ['pageParameterName' => 'page_invites', 'sortDirectionParameterName' => 'sort_invites']
+        );
 
         return $this->render(
             '@UniteCMSCore/Domain/Member/index.html.twig',
