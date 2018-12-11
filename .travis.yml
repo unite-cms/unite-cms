@@ -85,7 +85,10 @@ after_success:
     if [[ $COVERAGE_FILTER ]]; then
       if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then 
         ./cc-test-reporter format-coverage -t clover -o coverage/clover.$COVERAGE_ID.xml clover.xml
-        ./cc-test-reporter sum-coverage coverage/clover.*.xml -o coverage/clover.xml
-        ./cc-test-reporter upload-coverage -i coverage/clover.xml
+        
+        if [[ "$COVERAGE_ID" == 1 ]]; then 
+          ./cc-test-reporter sum-coverage coverage/clover.*.xml -o coverage/clover.xml
+          ./cc-test-reporter upload-coverage -i coverage/clover.xml
+        fi
       fi
     fi
