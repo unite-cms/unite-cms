@@ -11,12 +11,14 @@ namespace UniteCMS\CoreBundle\Service;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
 use UniteCMS\CoreBundle\Exception\InvalidOrganizationConfigurationException;
 use UniteCMS\CoreBundle\Exception\MissingDomainException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
+use UniteCMS\CoreBundle\Event\DomainConfigFileEvent;
 
 class DomainConfigManager
 {
@@ -35,11 +37,17 @@ class DomainConfigManager
      */
     private $filesystem;
 
-    public function __construct(string $domainConfigDir, DomainDefinitionParser $definitionParser, Filesystem $filesystem)
+    /**
+     * @var EventDispatcherInterface $dispatcher
+     */
+    private $dispatcher;
+
+    public function __construct(string $domainConfigDir, DomainDefinitionParser $definitionParser, Filesystem $filesystem, EventDispatcherInterface $dispatcher)
     {
         $this->domainConfigDir = $domainConfigDir;
         $this->domainDefinitionParser = $definitionParser;
         $this->filesystem = $filesystem;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -169,6 +177,16 @@ class DomainConfigManager
             $this->removeConfig($previous_domain);
             unset($previous_domain);
             unset($previous_organization);
+        }
+
+        // dispatch domain config create/update events
+        if ($previous_identifier) {
+            // update existing file
+            $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($domain));
+        }
+        else {
+            // create fiel
+            $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_CREATE, new DomainConfigFileEvent($domain));
         }
 
         $this->filesystem->dumpFile($path, json_encode(json_decode($config), JSON_PRETTY_PRINT));
@@ -339,6 +357,9 @@ class DomainConfigManager
         }
 
         $this->filesystem->remove($path);
+
+        // dispatch delete event
+        $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_DELETE, new DomainConfigFileEvent($domain));
     }
 
     /**
