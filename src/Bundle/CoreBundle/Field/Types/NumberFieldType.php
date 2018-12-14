@@ -31,7 +31,7 @@ class NumberFieldType extends FieldType
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
-        return Type::int();
+        return Type::float();
     }
 
     /**
@@ -39,7 +39,7 @@ class NumberFieldType extends FieldType
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
-        return Type::int();
+        return Type::float();
     }
 
     /**
@@ -47,6 +47,6 @@ class NumberFieldType extends FieldType
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
-        return (int)$value;
+        return (float)$value;
     }
 }
