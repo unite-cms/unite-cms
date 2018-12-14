@@ -7,10 +7,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 use Symfony\Component\Validator\Constraints as Assert;
-use GraphQL\Type\Definition\Type;
-use UniteCMS\CoreBundle\Entity\FieldableContent;
-use UniteCMS\CoreBundle\Entity\FieldableField;
-use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
 class NumberFieldType extends FieldType
 {
