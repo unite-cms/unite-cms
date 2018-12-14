@@ -21,4 +21,28 @@ class NumberFieldType extends FieldType
             $context->getValidator()->validate($value, new Assert\Type(['type' => 'numeric', 'message' => 'invalid_initial_data']))
         );
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
+        return Type::float();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    {
+        return Type::float();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    {
+        return (float)$value;
+    }
 }
