@@ -22,13 +22,13 @@ matrix:
           if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
-            - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
+            - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration)Bundle\\Tests'
             - COVERAGE_ID=1
         - php: 7.2
           if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
           env:
             - PHPUNIT_CONF=phpunit_parameter.xml.dist
-            - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
+            - COVERAGE_FILTER='UniteCMS\\(Storage|VariantsField|WysiwygField)Bundle\\Tests'
             - COVERAGE_ID=2
         - php: 7.2
           if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
