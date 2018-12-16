@@ -31,14 +31,14 @@ matrix:
         #  env:
         #    - PHPUNIT_CONF=phpunit_subdomain.xml.dist
         - php: 7.2
-           if: (type == pull_request)
+           if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
         #  if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
             - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
             - COVERAGE_ID=1
         - php: 7.2
-           if: (type == pull_request)
+           if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
         #  if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
