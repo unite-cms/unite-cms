@@ -18,26 +18,28 @@ addons:
 
 matrix:
     include:
-        - php: 7.1
-          if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
-          env:
-            - PHPUNIT_CONF=phpunit.xml.dist
+        #- php: 7.1
+        #  if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
+        #  env:
+        #    - PHPUNIT_CONF=phpunit.xml.dist
+        #- php: 7.2
+        #  if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
+        #  env:
+        #    - PHPUNIT_CONF=phpunit_parameter.xml.dist
+        #- php: 7.2
+        #  if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
+        #  env:
+        #    - PHPUNIT_CONF=phpunit_subdomain.xml.dist
         - php: 7.2
-          if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
-          env:
-            - PHPUNIT_CONF=phpunit_parameter.xml.dist
-        - php: 7.2
-          if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
-          env:
-            - PHPUNIT_CONF=phpunit_subdomain.xml.dist
-        - php: 7.2
-          if: type == push AND branch = master AND fork = false
+           if: (type == pull_request)
+        #  if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
             - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
             - COVERAGE_ID=1
         - php: 7.2
-          if: type == push AND branch = master AND fork = false
+           if: (type == pull_request)
+        #  if: type == push AND branch = master AND fork = false
           env:
             - PHPUNIT_CONF=phpunit.xml.dist
             - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
@@ -83,12 +85,12 @@ script:
 after_success:
   - |
     if [[ $COVERAGE_FILTER ]]; then
+
+      ./cc-test-reporter format-coverage -t clover -o coverage/clover.$COVERAGE_ID.xml clover.xml
+      ./cc-test-reporter sum-coverage --parts $COVERAGE_ID coverage/clover.*.xml -o coverage/clover.xml
+
       if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then 
-        ./cc-test-reporter format-coverage -t clover -o coverage/clover.$COVERAGE_ID.xml clover.xml
-        
-        if [[ "$COVERAGE_ID" == 1 ]]; then 
-          ./cc-test-reporter sum-coverage coverage/clover.*.xml -o coverage/clover.xml
-          ./cc-test-reporter upload-coverage -i coverage/clover.xml
-        fi
+        ./cc-test-reporter upload-coverage -i coverage/clover.xml
       fi
+
     fi
