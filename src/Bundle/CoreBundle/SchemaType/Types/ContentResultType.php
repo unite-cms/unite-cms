@@ -12,6 +12,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Knp\Component\Pager\Pagination\AbstractPagination;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -37,6 +38,11 @@ class ContentResultType extends AbstractType
     private $domain;
 
     /**
+     * @var ContentType $contentType
+     */
+    private $contentType;
+
+    /**
      * @var string $contentSchemaType
      */
     private $contentSchemaType;
@@ -51,12 +57,14 @@ class ContentResultType extends AbstractType
         AuthorizationChecker $authorizationChecker,
         UniteCMSManager $uniteCMSManager = null,
         Domain $domain = null,
+        ContentType $contentType = null,
         $contentSchemaType = 'ContentInterface',
         $nestingLevel = 0
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->domain = $domain ? $domain : $uniteCMSManager->getDomain();
+        $this->contentType = $contentType;
         $this->contentSchemaType = $contentSchemaType;
         $this->nestingLevel = $nestingLevel;
         parent::__construct();
@@ -78,11 +86,25 @@ class ContentResultType extends AbstractType
      */
     protected function fields()
     {
-        return [
+        $fields = [
             'result' => Type::listOf($this->schemaTypeManager->getSchemaType($this->contentSchemaType, $this->domain, $this->nestingLevel)),
             'total' => Type::int(),
             'page' => Type::int(),
         ];
+
+        // Create or get permissions type for this content type.
+        if($this->contentType) {
+            $permissionsTypeName = IdentifierNormalizer::graphQLType($this->contentType, 'ContentResultPermissions');
+            if (!$this->schemaTypeManager->hasSchemaType($permissionsTypeName)) {
+                $this->schemaTypeManager->registerSchemaType(
+                    new PermissionsType(ContentVoter::BUNDLE_PERMISSIONS, $permissionsTypeName)
+                );
+            }
+
+            $fields['_permissions'] = $this->schemaTypeManager->getSchemaType($permissionsTypeName);
+        }
+
+        return $fields;
     }
 
     /**
@@ -135,6 +157,21 @@ class ContentResultType extends AbstractType
                 return $total;
             case 'page':
                 return $value->getCurrentPageNumber();
+
+            case '_permissions':
+                $permissions = [];
+
+                if($this->contentType) {
+                    foreach (ContentVoter::BUNDLE_PERMISSIONS as $permission) {
+                        $permissions[$permission] = $this->authorizationChecker->isGranted(
+                            $permission,
+                            $this->contentType
+                        );
+                    }
+                }
+
+                return $permissions;
+
             default:
                 return null;
         }

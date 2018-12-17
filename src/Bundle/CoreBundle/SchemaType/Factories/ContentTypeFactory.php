@@ -17,6 +17,7 @@ use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\SchemaType\Types\PermissionsType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentTypeFactory implements SchemaTypeFactoryInterface
@@ -161,6 +162,12 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
             }
         }
 
+        // Create or get permissions type for this content type.
+        $permissionsTypeName = IdentifierNormalizer::graphQLType($identifier, 'ContentPermissions');
+        if(!$schemaTypeManager->hasSchemaType($permissionsTypeName)) {
+            $schemaTypeManager->registerSchemaType(new PermissionsType(ContentVoter::ENTITY_PERMISSIONS, $permissionsTypeName));
+        }
+
         if ($isInputType) {
             return new InputObjectType(
                 [
@@ -183,6 +190,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                         [
                             'id' => Type::id(),
                             'type' => Type::string(),
+                            '_permissions' => $schemaTypeManager->getSchemaType($permissionsTypeName, $domain),
                         ],
                         empty($contentType->getLocales()) ? [] : [
                             'locale' => Type::string(),
@@ -226,6 +234,13 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                 return $value->getId();
                             case 'type':
                                 return $value->getContentType()->getIdentifier();
+                            case '_permissions':
+                                $permissions = [];
+                                foreach(ContentVoter::ENTITY_PERMISSIONS as $permission) {
+                                    $permissions[$permission] = $this->authorizationChecker->isGranted($permission, $value);
+                                }
+                                return $permissions;
+
                             case 'locale':
                                 return $value->getLocale();
                             case 'created':
