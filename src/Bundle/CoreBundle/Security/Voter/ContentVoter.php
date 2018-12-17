@@ -16,9 +16,10 @@ class ContentVoter extends Voter
     const VIEW = 'view content';
     const UPDATE = 'update content';
     const DELETE = 'delete content';
+    const TRANSLATE = 'translate content';
 
     const BUNDLE_PERMISSIONS = [self::LIST, self::CREATE];
-    const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE, self::DELETE];
+    const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE, self::DELETE, self::TRANSLATE];
 
     /**
      * @var AccessExpressionChecker $accessExpressionChecker
@@ -63,6 +64,7 @@ class ContentVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
+
         if(!$subject instanceof Content && !$subject instanceof ContentType) {
             return self::ACCESS_ABSTAIN;
         }
@@ -83,6 +85,12 @@ class ContentVoter extends Voter
         // Only work for non-deleted content
         if ($subject instanceof Content && $subject->getDeleted() != null) {
             return self::ACCESS_ABSTAIN;
+        }
+
+        // special case Translate, if not set fallback to update permission
+        if (empty($contentType->getPermissions()[$attribute]) && $attribute == self::TRANSLATE) {
+            // check for update permission in this case
+            $attribute = self::UPDATE;
         }
 
         // If the requested permission is not defined, throw an exception.

@@ -59,6 +59,12 @@ class DeletedContentVoter extends ContentVoter
             return self::ACCESS_ABSTAIN;
         }
 
+        // special case Translate, if not set fallback to update permission
+        if (empty($contentType->getPermissions()[$attribute]) && $attribute == self::TRANSLATE) {
+            // check for update permission in this case
+            $attribute = self::UPDATE;
+        }
+
         // If the requested permission is not defined, throw an exception.
         if (empty($contentType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
