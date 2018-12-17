@@ -13,9 +13,9 @@ use UniteCMS\CoreBundle\Entity\Domain;
 
 class DomainConfigFileEvent extends Event
 {
-    const DOMAIN_CONFIG_FILE_CREATE = 'unite.domain_config.create';
-    const DOMAIN_CONFIG_FILE_UPDATE = 'unite.domain_config.update';
-    const DOMAIN_CONFIG_FILE_DELETE = 'unite.domain_config.delete';
+    const DOMAIN_CONFIG_FILE_CREATE = 'unite.domain_config_file.create';
+    const DOMAIN_CONFIG_FILE_UPDATE = 'unite.domain_config_file.update';
+    const DOMAIN_CONFIG_FILE_DELETE = 'unite.domain_config_file.delete';
 
     /**
      * @var Donain $domain

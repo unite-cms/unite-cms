@@ -180,7 +180,7 @@ class DomainConfigManager
         }
 
         // dispatch domain config create/update events
-        if ($previous_identifier) {
+        if ($this->filesystem->exists($path)) {
             // update existing file
             $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($domain));
         }
