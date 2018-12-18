@@ -80,6 +80,17 @@ class DeletedContentVoter extends ContentVoter
             if($this->accessExpressionChecker->evaluate($contentType->getPermissions()[$attribute], $domainMember, $subject instanceof Content ? $subject : null)) {
                 return self::ACCESS_GRANTED;
             }
+            else {
+
+                // if "translate content" permission is explicitly set, but user does not have update or create permission, let him update or create nevertheless
+                if (($attribute == self::UPDATE or $attribute == self::CREATE)
+                    && !empty($contentType->getPermissions()[self::TRANSLATE])
+                    && $this->accessExpressionChecker->evaluate($contentType->getPermissions()[self::TRANSLATE], $domainMember, $subject instanceof Content ? $subject : null)
+                ) {
+                    return self::ACCESS_GRANTED;
+                }
+
+            }
         }
 
         return self::ACCESS_ABSTAIN;

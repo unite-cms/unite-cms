@@ -87,9 +87,8 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        // special case Translate, if not set fallback to update permission
+        // special case Translate, if "translate content" permission is not set, check for update content permission instead
         if (empty($contentType->getPermissions()[$attribute]) && $attribute == self::TRANSLATE) {
-            // check for update permission in this case
             $attribute = self::UPDATE;
         }
 
@@ -100,8 +99,20 @@ class ContentVoter extends Voter
 
         // If the expression evaluates to true, we grant access.
         foreach ($domainMembers as $domainMember) {
+
             if($this->accessExpressionChecker->evaluate($contentType->getPermissions()[$attribute], $domainMember, $subject instanceof Content ? $subject : null)) {
                 return self::ACCESS_GRANTED;
+            }
+            else {
+
+                // if "translate content" permission is explicitly set, but user does not have update or create permission, let him update or create nevertheless
+                if (($attribute == self::UPDATE or $attribute == self::CREATE)
+                    && !empty($contentType->getPermissions()[self::TRANSLATE])
+                    && $this->accessExpressionChecker->evaluate($contentType->getPermissions()[self::TRANSLATE], $domainMember, $subject instanceof Content ? $subject : null)
+                ) {
+                    return self::ACCESS_GRANTED;
+                }
+
             }
         }
 

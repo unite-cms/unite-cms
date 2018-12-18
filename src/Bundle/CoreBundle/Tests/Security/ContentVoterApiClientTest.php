@@ -151,9 +151,9 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         // test translate action
         static::$container->get('security.token_storage')->setToken($this->u['domain_translator']);
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType3));
-        $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType3));
+        $this->assertTrue($dm->isGranted([ContentVoter::CREATE], $this->contentType3));
         $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content3));
-        $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content3));
+        $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content3));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content3));
         $this->assertTrue($dm->isGranted([ContentVoter::TRANSLATE], $this->content3));
     }
@@ -197,9 +197,9 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         // test translate action
         static::$container->get('security.token_storage')->setToken($this->u['domain_translator']);
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType3));
-        $this->assertFalse($dm->isGranted([ContentVoter::CREATE], $this->contentType3));
+        $this->assertTrue($dm->isGranted([ContentVoter::CREATE], $this->contentType3));
         $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content3));
-        $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content3));
+        $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content3));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content3));
         $this->assertTrue($dm->isGranted([ContentVoter::TRANSLATE], $this->content3));
     }
