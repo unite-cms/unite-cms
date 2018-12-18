@@ -196,6 +196,16 @@
     </unite-cms-core-link-field>
 {%- endblock -%}
 
+{%- block unite_cms_core_auto_text_widget -%}
+    <unite-cms-core-auto-text-field
+            label="{{ form.vars.label }}"
+            auto-label="{{ form.auto.vars.label }}"
+            name="{{ form.vars.full_name }}"
+            text-value="{{ form.text.vars.value }}"
+            auto-value="{{ form.auto.vars.value }}">
+    </unite-cms-core-auto-text-field>
+{%- endblock -%}
+
 {%- block unite_cms_core_state_widget -%}
     <unite-cms-core-state-field
         state='{

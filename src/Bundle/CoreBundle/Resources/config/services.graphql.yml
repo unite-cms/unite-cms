@@ -58,6 +58,9 @@ services:
     UniteCMS\CoreBundle\SchemaType\Types\LinkFieldType:
         tags: [unite_cms.graphql.schema_type]
 
+    UniteCMS\CoreBundle\SchemaType\Types\AutoTextFieldType:
+        tags: [unite_cms.graphql.schema_type]
+
     # Input Type implementations, that get registered in the schema_type_manager.
     UniteCMS\CoreBundle\SchemaType\Types\Input\SortInput:
         tags: [unite_cms.graphql.schema_type]
@@ -70,6 +73,9 @@ services:
         tags: [unite_cms.graphql.schema_type]
 
     UniteCMS\CoreBundle\SchemaType\Types\Input\LinkFieldInputType:
+        tags: [unite_cms.graphql.schema_type]
+
+    UniteCMS\CoreBundle\SchemaType\Types\Input\AutoTextFieldInputType:
         tags: [unite_cms.graphql.schema_type]
 
     UniteCMS\CoreBundle\SchemaType\Types\Input\StateFieldInputType:
