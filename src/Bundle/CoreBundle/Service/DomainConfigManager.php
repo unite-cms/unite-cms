@@ -147,7 +147,9 @@ class DomainConfigManager
 
         $path = $this->getDomainConfigPath($domain);
 
-        if($this->filesystem->exists($path) && !$forceOverride) {
+        $domain_config_file_exists = $this->filesystem->exists($path);
+
+        if($domain_config_file_exists && !$forceOverride) {
             return false;
         }
 
@@ -179,8 +181,10 @@ class DomainConfigManager
             unset($previous_organization);
         }
 
+        $this->filesystem->dumpFile($path, json_encode(json_decode($config), JSON_PRETTY_PRINT));
+
         // dispatch domain config create/update events
-        if ($this->filesystem->exists($path)) {
+        if ($domain_config_file_exists) {
             // update existing file
             $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($domain));
         }
@@ -189,7 +193,6 @@ class DomainConfigManager
             $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_CREATE, new DomainConfigFileEvent($domain));
         }
 
-        $this->filesystem->dumpFile($path, json_encode(json_decode($config), JSON_PRETTY_PRINT));
         return true;
     }
 
