@@ -47,6 +47,7 @@ jobs:
         - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
         - COVERAGE_ID=2
     - stage: submit
+      if: type == push AND branch = master AND fork = false
       addons:
       services:
       php: 7.2
