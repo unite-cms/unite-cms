@@ -8,8 +8,10 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\AutoTextType;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -21,13 +23,24 @@ class AutoTextFieldType extends TextFieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['expression', 'not_empty', 'description', 'default'];
+    const SETTINGS = ['expression', 'auto_update', 'text_widget', 'not_empty', 'description'];
 
     /**
      * All required settings for this field type.
      */
     const REQUIRED_SETTINGS = ['expression'];
 
+    function getFormOptions(FieldableField $field): array
+    {
+        return array_merge(
+            parent::getFormOptions($field),
+            [
+                'expression' => $field->getSettings()->expression,
+                'text_widget' => $field->getSettings()->text_widget ?? TextType::class,
+                'auto_update' => !!$field->getSettings()->auto_update
+            ]
+        );
+    }
 
     /**
      * {@inheritdoc}
@@ -50,15 +63,18 @@ class AutoTextFieldType extends TextFieldType
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
-        if(!is_array($value) || !array_key_exists('auto', $value) || !array_key_exists('text', $value)) {
-            return null;
-        }
+        // Automatic value was generated and stored on submit.
+        return [
+            'auto' => $value['auto'] ?? true,
+            'text' => $value['text'] ?? '',
+        ];
+    }
 
-        // If auto is set to true, we need to resolve the content of this field here.
-        if(!!$value['auto']) {
-            $value['text'] = 'TODO: Set auto text';
-        }
-
-        return $value;
+    /**
+     * {@inheritdoc}
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+        // TODO
     }
 }
