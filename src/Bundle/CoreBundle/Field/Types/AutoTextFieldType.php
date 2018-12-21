@@ -8,10 +8,13 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Expression\ContentExpressionChecker;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Form\AutoTextType;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -36,10 +39,21 @@ class AutoTextFieldType extends TextFieldType
             parent::getFormOptions($field),
             [
                 'expression' => $field->getSettings()->expression,
-                'text_widget' => $field->getSettings()->text_widget ?? TextType::class,
+                'text_widget' => $field->getSettings()->text_widget === 'text' ? TextType::class : TextareaType::class,
                 'auto_update' => !!$field->getSettings()->auto_update
             ]
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getDefaultValue(FieldableField $field)
+    {
+        return [
+            'auto' => true,
+            'text' => '',
+        ];
     }
 
     /**
@@ -73,8 +87,27 @@ class AutoTextFieldType extends TextFieldType
     /**
      * {@inheritdoc}
      */
-    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
-        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
-        // TODO
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
+    {
+        // Validate allowed and required settings.
+        parent::validateSettings($settings, $context);
+
+        // Only continue, if there are no violations yet.
+        if($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        $expressionChecker = new ContentExpressionChecker();
+        if(!$expressionChecker->validate($settings->expression)) {
+            $context->buildViolation('invalid_expression')->atPath('expression')->addViolation();
+        }
+
+        if(isset($settings->auto_update) && !is_bool($settings->auto_update)) {
+            $context->buildViolation('noboolean_value')->atPath('auto_update')->addViolation();
+        }
+
+        if(isset($settings->text_widget) && (!is_string($settings->text_widget) || !in_array($settings->text_widget, ['text', 'textarea']))) {
+            $context->buildViolation('invalid_auto_text_widget')->atPath('text_widget')->addViolation();
+        }
     }
 }

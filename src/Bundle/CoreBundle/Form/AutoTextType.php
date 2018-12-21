@@ -18,6 +18,9 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\VarDumper\Tests\Fixture\DumbFoo;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Expression\ContentExpressionChecker;
 
 class AutoTextType extends AbstractType
 {
@@ -26,9 +29,9 @@ class AutoTextType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
+        $resolver->setRequired(['expression']);
         $resolver->setDefaults([
             'compound' => true,
-            'expression' => '',
             'label_alternative' => 'Manual',
             'text_widget' => TextType::class,
             'auto_update' => false,
@@ -58,11 +61,44 @@ class AutoTextType extends AbstractType
             ->add('auto', CheckboxType::class, ['label' => $options['label']]);
 
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
-            if(!empty($event->getData()['auto'])) {
-                $event->setData([
-                    'auto' => true,
-                    'text' => 'TODO From AutoTextType Form',
-                ]);
+
+            if(isset($event->getData()['auto']) && ($event->getData()['auto'] == true || $event->getData()['auto'] == 'on')) {
+
+                // If this is a fieldable content form, use the content object and the defined expression to generate the auto value.
+                if($event->getForm()->getRoot()->getConfig()->hasOption('content')) {
+
+                    $content = $event->getForm()->getRoot()->getConfig()->getOption('content');
+                    $auto_value = ($event->getData()['auto'] === true || $event->getData()['auto'] === 'on') ? true : false;
+
+                    if(empty($content->getId()) || $event->getForm()->getConfig()->getOption('auto_update') || $event->getForm()->getData()['auto'] != $auto_value) {
+
+                        // Get currently submitted data
+                        // TODO: WE NEED TO GET THE CURRENT SUBMITTED DATA. THIS APPROACH HERE IS NOT WORKING!
+                        $contentData = $content->getData();
+                        foreach($contentData as $key => $value) {
+                            $contentData[$key] = $event->getForm()->getRoot()->has($key) ?
+                                $event->getForm()->getRoot()->get($key)->getData() :
+                                $contentData[$key] = $value;
+                        }
+
+                        $expressionChecker = new ContentExpressionChecker();
+                        $event->setData([
+                            'auto' => true,
+                            'text' => $expressionChecker->evaluate(
+                                $event->getForm()->getConfig()->getOption('expression'),
+                                $event->getForm()->getRoot()->getConfig()->getOption('content'),
+                                $contentData
+                            ),
+                        ]);
+                    } else {
+
+                        // Set original data
+                        $event->setData([
+                            'auto' => true,
+                            'text' => $event->getForm()->getData()['text']
+                        ]);
+                    }
+                }
             }
         });
     }

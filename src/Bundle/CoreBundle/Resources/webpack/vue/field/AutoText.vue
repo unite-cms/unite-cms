@@ -1,10 +1,10 @@
 <template>
     <div class="uk-margin">
         <div class="uk-form-controls">
-            <label :for="input_id + '_auto'" class="uk-button" :class="{ 'uk-button-primary': auto, 'uk-button-default': !auto }">
+            <label :for="input_id + '_auto'" class="uk-button uk-button-small" :class="{ 'uk-button-secondary': auto, 'uk-button-default': !auto }">
                 <input :id="input_id + '_auto'" type="checkbox" class="uk-checkbox" :name="name + '[auto]'" v-model="auto" />
                 {{ auto ? autoLabel : autoLabelAlternative }}
-                <span v-if="auto" v-html="feather.icons['check'].toSvg({ width: 20, height: 20 })"></span>
+                <span v-if="auto" v-html="feather.icons['check'].toSvg({ width: 16, height: 16 })"></span>
             </label>
 
             <div class="uk-form-custom">
@@ -40,8 +40,13 @@
 
         watch: {
             auto(val) {
-                if(!val) {
-                    this.text = '';
+                this.text = '';
+
+                if(val) {
+                    // TODO: Load text from server
+                    setTimeout(() => {
+                        this.text = '// TODO: Load text from server';
+                    }, 300);
                 }
             }
         }
@@ -50,17 +55,21 @@
 </script>
 
 <style lang="scss" scoped>
-    @import "../../sass/base/variables";
-
     .uk-form-controls {
-        display: flex;
-        align-items: flex-start;
-
         label.uk-button {
             position: relative;
+            padding: 0 5px 0 10px;
+            flex-shrink: 0;
+            margin-bottom: 5px;
+            font-size: 12px;
+            text-transform: uppercase;
 
             &.uk-button-default {
                 background: white;
+                padding: 0 10px;
+                box-shadow: none;
+                border-color: #e5e5e5;
+                color: #999;
             }
 
             input {
@@ -73,10 +82,20 @@
 
         .uk-form-custom {
             width: 100%;
-            margin-left: 2px;
 
             textarea {
                 resize: vertical;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .uk-form-controls {
+                display: flex;
+                align-items: flex-start;
+
+                label.uk-button {
+                    margin: 4px 5px 0 0;
+                }
             }
         }
     }
