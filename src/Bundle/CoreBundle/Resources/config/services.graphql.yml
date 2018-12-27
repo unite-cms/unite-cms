@@ -26,7 +26,7 @@ services:
     # Query Type implementations, that get registered in the schema_type_manager.
     UniteCMS\CoreBundle\SchemaType\Types\QueryType:
         tags: [unite_cms.graphql.schema_type]
-        arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@knp_paginator']
+        arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@knp_paginator', '%query_limit%']
 
     UniteCMS\CoreBundle\SchemaType\Types\MutationType:
         tags: [unite_cms.graphql.schema_type]

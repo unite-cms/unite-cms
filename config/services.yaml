@@ -17,6 +17,9 @@ parameters:
     # You can add more allowed hostnames by adding each with a pipe: '%default_hostname%|unitecms.io|example.com'
     allowed_hostname: '%default_hostname%'
 
+    # Limit of Graphql Queries
+    query_limit: 100
+
 services:
     # default configuration for services in *this* file
     _defaults:
