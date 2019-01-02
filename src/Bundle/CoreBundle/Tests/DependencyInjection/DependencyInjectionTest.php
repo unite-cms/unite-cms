@@ -10,6 +10,7 @@ namespace UniteCMS\CoreBundle\Tests\DependencyInjection;
 
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use UniteCMS\CoreBundle\SchemaType\Types\QueryType;
 
 class DependencyInjectionTest extends KernelTestCase
 {
@@ -25,6 +26,12 @@ class DependencyInjectionTest extends KernelTestCase
 
         // Test default maximum nesting level is 8
         $this->assertEquals(8, $kernel->getContainer()->get('unite.cms.graphql.schema_type_manager')->getMaximumNestingLevel());
+
+        // Test default maximum_query_limit is 100
+        $queryType = $kernel->getContainer()->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Query');
+        $accessor = new \ReflectionProperty($queryType, 'maximumQueryLimit');
+        $accessor->setAccessible(true);
+        $this->assertEquals(100, $accessor->getValue($queryType));
     }
 
     public function testOverrideDomainConfigDirInjection() {
@@ -39,5 +46,11 @@ class DependencyInjectionTest extends KernelTestCase
 
         // Test default maximum nesting level is set to overridden value
         $this->assertEquals(6, $kernel->getContainer()->get('unite.cms.graphql.schema_type_manager')->getMaximumNestingLevel());
+
+        // Test default maximum_query_limit is set to overridden value
+        $queryType = $kernel->getContainer()->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Query');
+        $accessor = new \ReflectionProperty($queryType, 'maximumQueryLimit');
+        $accessor->setAccessible(true);
+        $this->assertEquals(101, $accessor->getValue($queryType));
     }
 }
