@@ -1,81 +1,99 @@
 language: php
 
 sudo: false
-dist: trusty
+dist: xenial
 os: linux
 
 cache:
   directories:
     - vendor
     - coverage
+    - $HOME/.composer/cache/files
 
 addons:
   apt:
     sources:
-      - mysql-5.7-trusty
+      - mysql-5.7-xenial
     packages:
       - mysql-server
 
-matrix:
-    include:
-        - php: 7.1
-          if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
-          env:
-            - PHPUNIT_CONF=phpunit.xml.dist
-        - php: 7.2
-          if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
-          env:
-            - PHPUNIT_CONF=phpunit_parameter.xml.dist
-        - php: 7.2
-          if: (type == push AND fork = false) OR (type == pull_request AND forke = true)
-          env:
-            - PHPUNIT_CONF=phpunit_subdomain.xml.dist
-        - php: 7.2
-          if: type == push AND branch = master AND fork = false
-          env:
-            - PHPUNIT_CONF=phpunit.xml.dist
-            - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
-            - COVERAGE_ID=1
-        - php: 7.2
-          if: type == push AND branch = master AND fork = false
-          env:
-            - PHPUNIT_CONF=phpunit.xml.dist
-            - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
-            - COVERAGE_ID=2
-
-    fast_finish: true
-
-cache:
-    directories:
-        - $HOME/.composer/cache/files
-
 services:
   - mysql
+
+jobs:
+  include:
+    - php: 7.1
+      if: (type == push AND fork = false) OR (type == pull_request AND fork = true)
+      env:
+        - PHPUNIT_CONF=phpunit.xml.dist
+    - php: 7.2
+      if: (type == push AND fork = false) OR (type == pull_request AND fork = true)
+      env:
+        - PHPUNIT_CONF=phpunit_parameter.xml.dist
+    - php: 7.2
+      if: (type == push AND fork = false) OR (type == pull_request AND fork = true)
+      env:
+        - PHPUNIT_CONF=phpunit_subdomain.xml.dist
+    - php: 7.2
+      if: type == push AND branch = master AND fork = false
+      env:
+        - PHPUNIT_CONF=phpunit.xml.dist
+        - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
+        - COVERAGE_ID=1
+        - CMD_APPEND=' --exclude-group=slow'
+    - php: 7.2
+      if: type == push AND branch = master AND fork = false
+      env:
+        - PHPUNIT_CONF=phpunit.xml.dist
+        - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
+        - COVERAGE_ID=2
+        - CMD_APPEND=' --group=slow'
+    - php: 7.2
+      if: type == push AND branch = master AND fork = false
+      env:
+        - PHPUNIT_CONF=phpunit.xml.dist
+        - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
+        - COVERAGE_ID=3
+        - CMD_APPEND=
+    - stage: submit
+      if: type == push AND branch = master AND fork = false
+      addons:
+      services:
+      php: 7.2
+      env:
+        - JOB_COUNT_COVERAGE=3 # 3 jobs are generating coverage reports
+      script:
+        - echo "do not run script"
+      after_script:
+        - s3cmd sync "s3://$S3_BUCKET/coverage/" coverage/ --secret_key=$S3_SECRET_KEY --access_key=$S3_ACCESS_KEY --host=$S3_HOST --host-bucket=$S3_HOST --force
+        - ./cc-test-reporter sum-coverage --output - --parts $JOB_COUNT_COVERAGE coverage/clover.*.xml | ./cc-test-reporter upload-coverage --input -
+      after_success:
+        - echo "do not after success"
 
 before_install:
   - |
     if ! [[ $COVERAGE_FILTER ]]; then
       phpenv config-rm xdebug.ini
     fi
-  - composer self-update
-  - mysql -e 'CREATE DATABASE unite_test;'
-  - cp .env.dist .env
+
+    composer self-update
+    mysql -e 'CREATE DATABASE unite_test;'
+    cp .env.dist .env
 
 install:
+  - sudo apt-get install -y awscli s3cmd
   - composer install
 
 before_script:
   - |
-    if [[ $COVERAGE_FILTER ]]; then
-      curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-      chmod +x ./cc-test-reporter
-      ./cc-test-reporter before-build
-    fi
+    curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    chmod +x ./cc-test-reporter
+    ./cc-test-reporter before-build
 
 script:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER
+      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER $CMD_APPEND
     else
       phpunit --configuration $PHPUNIT_CONF
     fi
@@ -83,12 +101,8 @@ script:
 after_success:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-      if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then 
+      if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then
         ./cc-test-reporter format-coverage -t clover -o coverage/clover.$COVERAGE_ID.xml clover.xml
-        
-        if [[ "$COVERAGE_ID" == 1 ]]; then 
-          ./cc-test-reporter sum-coverage coverage/clover.*.xml -o coverage/clover.xml
-          ./cc-test-reporter upload-coverage -i coverage/clover.xml
-        fi
+        s3cmd sync coverage/ "s3://$S3_BUCKET/coverage/" --secret_key=$S3_SECRET_KEY --access_key=$S3_ACCESS_KEY --host=$S3_HOST --host-bucket=$S3_HOST --force
       fi
     fi

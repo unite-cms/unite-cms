@@ -36,7 +36,7 @@ services:
     autowire: true
     public: true
     arguments:
-      ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem']
+      ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem', '@event_dispatcher']
 
   # In order to autowire DomainConfigManager, we need to alis the full class path
   UniteCMS\CoreBundle\Service\DomainConfigManager: "@unite.cms.domain_config_manager"
