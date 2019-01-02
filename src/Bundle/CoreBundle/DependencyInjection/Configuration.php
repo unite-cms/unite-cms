@@ -28,6 +28,10 @@ class Configuration implements ConfigurationInterface
                 ->integerNode('maximum_nesting_level')
                     ->defaultValue(8)
                     ->info('Set the maximum nesting level of GraphQL API queries. A high value can easily lead to performance issues!')
+                ->end()
+                ->integerNode('maximum_query_limit')
+                    ->defaultValue(2)
+                    ->info('Set the maximum query limit of GraphQL API queries. A high value can easily lead to performance issues!')
             ->end();
         return $treeBuilder;
     }

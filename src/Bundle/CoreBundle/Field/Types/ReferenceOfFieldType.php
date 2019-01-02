@@ -64,9 +64,9 @@ class ReferenceOfFieldType extends FieldType
     private $paginator;
 
     /**
-     * @var int $queryLimit
+     * @var int $maximumQueryLimit
      */
-    private $queryLimit;
+    private $maximumQueryLimit;
 
     function __construct(
         ValidatorInterface $validator,
@@ -74,13 +74,13 @@ class ReferenceOfFieldType extends FieldType
         UniteCMSManager $uniteCMSManager,
         EntityManager $entityManager,
         PaginatorInterface $paginator,
-        int $queryLimit
+        int $maximumQueryLimit = 100
     ) {
         $this->validator = $validator;
         $this->referenceResolver = new ReferenceResolver($uniteCMSManager, $entityManager, $authorizationChecker);
         $this->entityManager = $entityManager;
         $this->paginator = $paginator;
-        $this->queryLimit = $queryLimit;
+        $this->maximumQueryLimit = $maximumQueryLimit;
     }
 
     /**
@@ -185,7 +185,7 @@ class ReferenceOfFieldType extends FieldType
                 }
 
                 $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
-                $args['limit'] = $args['limit'] > $this->queryLimit ? $this->queryLimit : $args['limit'];
+                $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
                 $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
 
                 // Resolve content type and field.
