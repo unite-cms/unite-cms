@@ -40,19 +40,28 @@ jobs:
         - PHPUNIT_CONF=phpunit.xml.dist
         - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
         - COVERAGE_ID=1
+        - CMD_APPEND=' --exclude-group=slow'
+    - php: 7.2
+      if: type == push AND branch = master AND fork = false
+      env:
+        - PHPUNIT_CONF=phpunit.xml.dist
+        - COVERAGE_FILTER='UniteCMS\\CoreBundle\\Tests'
+        - COVERAGE_ID=2
+        - CMD_APPEND=' --group=slow'
     - php: 7.2
       if: type == push AND branch = master AND fork = false
       env:
         - PHPUNIT_CONF=phpunit.xml.dist
         - COVERAGE_FILTER='UniteCMS\\(CollectionField|Registration|Storage|VariantsField|WysiwygField)Bundle\\Tests'
-        - COVERAGE_ID=2
+        - COVERAGE_ID=3
+        - CMD_APPEND=
     - stage: submit
       if: type == push AND branch = master AND fork = false
       addons:
       services:
       php: 7.2
       env:
-        - JOB_COUNT_COVERAGE=2 # 2 jobs are generating coverage reports
+        - JOB_COUNT_COVERAGE=3 # 3 jobs are generating coverage reports
       script:
         - echo "do not run script"
       after_script:
@@ -84,7 +93,7 @@ before_script:
 script:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER
+      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER $CMD_APPEND
     else
       phpunit --configuration $PHPUNIT_CONF
     fi
