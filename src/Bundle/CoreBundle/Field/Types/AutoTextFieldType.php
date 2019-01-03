@@ -8,9 +8,11 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Expression\ContentExpressionChecker;
@@ -33,6 +35,16 @@ class AutoTextFieldType extends TextFieldType
      */
     const REQUIRED_SETTINGS = ['expression'];
 
+    /**
+     * @var Router $router
+     */
+    private $router;
+
+    public function __construct(Router $router)
+    {
+        $this->router = $router;
+    }
+
     function getFormOptions(FieldableField $field): array
     {
         return array_merge(
@@ -40,7 +52,8 @@ class AutoTextFieldType extends TextFieldType
             [
                 'expression' => $field->getSettings()->expression,
                 'text_widget' => $field->getSettings()->text_widget === 'text' ? TextType::class : TextareaType::class,
-                'auto_update' => !!$field->getSettings()->auto_update
+                'auto_update' => !!$field->getSettings()->auto_update,
+                'validation_url' => $this->router->generate('unitecms_core_content_validation', [$field->getEntity()]),
             ]
         );
     }
@@ -95,6 +108,12 @@ class AutoTextFieldType extends TextFieldType
         // Only continue, if there are no violations yet.
         if($context->getViolations()->count() > 0) {
             return;
+        }
+
+        // At the moment, auto text fields are only available on content types, because there is no settings mutation api endpoint at the moment.
+        // TODO: Change this, once setting mutations are available
+        if(!$context->getObject() instanceof ContentTypeField) {
+            $context->buildViolation('invalid_entity_type')->addViolation();
         }
 
         $expressionChecker = new ContentExpressionChecker();

@@ -208,6 +208,54 @@ class ContentController extends Controller
     }
 
     /**
+     * @Route("/{content_type}/{view}/validation/generate", methods={"POST"})
+     * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), view.getContentType())")
+     *
+     * @param View $view
+     * @param Request $request
+     * @return Response
+     */
+    public function validationAction(View $view, Request $request)
+    {
+        // User must have create or update permissions for this content type.
+        $genericContent = new Content();
+        $genericContent->setContentType($view->getContentType());
+
+        if(!$this->isGranted(ContentVoter::CREATE, $view->getContentType()) && !$this->isGranted(ContentVoter::UPDATE, $genericContent)) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $result = null;
+        $content = new Content();
+        $content->setContentType($view->getContentType());
+        $form = $this->get('unite.cms.fieldable_form_builder')->createForm($view->getContentType(), $content);
+        $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $data = $form->getData();
+
+            if (isset($data['locale'])) {
+                $content->setLocale($data['locale']);
+                unset($data['locale']);
+            }
+
+            $content->setData($data);
+
+            $query = $request->query->get('query', 'query { type }');
+
+            // Create GraphQL Schema
+            $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($view->getContentType()->getDomain(), ucfirst($view->getContentType()->getIdentifier()) . 'Content');
+            $result = GraphQL::executeQuery($schema, $query, $content);
+            $result = $this->container->get('jms_serializer')->serialize($result->data, 'json');
+        }
+
+        return new Response($result);
+    }
+
+    /**
      * @Route("/{content_type}/{view}/preview/generate", methods={"POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), view.getContentType())")
@@ -232,6 +280,7 @@ class ContentController extends Controller
 
         $data_uri = '';
         $content = new Content();
+        $content->setContentType($view->getContentType());
         $form = $this->get('unite.cms.fieldable_form_builder')->createForm($view->getContentType(), $content);
         $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
         $form->handleRequest($request);

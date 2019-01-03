@@ -22,11 +22,44 @@
     export default {
         data() {
             return {
+                loading: false,
+                form: null,
                 input_id: this.name.replace('[', '_').replace(']', '_') + 'url',
                 text: this.textValue,
                 auto: !!this.autoValue,
                 feather: feather,
             }
+        },
+
+        mounted() {
+
+            this.form = document.querySelector('form[name="fieldable_form"]');
+
+            // Listen to all actual form elements.
+            this.form.querySelectorAll('input, select, textarea').forEach((element) =>{
+                element.addEventListener('change', this.generateAutoText);
+            });
+
+            // Listen to all dynamic form elements.
+            let observer = new MutationObserver((mutationsList) => {
+                for(let mutation of mutationsList) {
+                    mutation.addedNodes.forEach((node) => {
+                        if(node instanceof HTMLElement) {
+                            node.querySelectorAll('input, select, textarea').forEach((element) => {
+                                element.addEventListener('change', this.generateAutoText);
+                            });
+                        }
+                    });
+                    mutation.removedNodes.forEach((node) => {
+                        if(node instanceof HTMLElement) {
+                            node.querySelectorAll('input, select, textarea').forEach((element) => {
+                                element.removeEventListener('change', this.generateAutoText);
+                            });
+                        }
+                    });
+                }
+            });
+            observer.observe(this.form, { childList: true, subtree: true });
         },
 
         props: [
@@ -36,17 +69,55 @@
             'textValue',
             'autoValue',
             'widgetType',
+            'validationUrl',
         ],
 
         watch: {
-            auto(val) {
-                this.text = '';
+            auto() {
+                this.generateAutoText();
+            }
+        },
+        methods: {
+            wrapNestedFieldName(fieldName) {
+                let parts = fieldName.split('][');
+                let rootPart = parts.shift();
+                if(parts.length === 0) {
+                    return rootPart;
+                }
+                return this.wrapNestedFieldName(rootPart + '{'+(parts.join(']['))+'}');
+            },
 
-                if(val) {
-                    // TODO: Load text from server
-                    setTimeout(() => {
-                        this.text = '// TODO: Load text from server';
-                    }, 300);
+            queryFromFieldName(fieldName) {
+                fieldName = fieldName.replace('fieldable_form[', 'query{');
+                fieldName = fieldName.substr(0, fieldName.length - 1);
+                fieldName = fieldName + '{text}}';
+                return this.wrapNestedFieldName(fieldName);
+            },
+            findNestedValue(result) {
+                if(typeof result === 'object') {
+                    return this.findNestedValue(result[Object.keys(result)[0]]);
+                }
+                return result;
+            },
+
+            generateAutoText() {
+                if(this.auto && !this.loading) {
+
+                    this.loading = true;
+                    let queryUrl = this.validationUrl + '?query=' + this.queryFromFieldName(this.name);
+
+                    let request = new XMLHttpRequest();
+                    request.onload = () => {
+                        this.text = this.findNestedValue(JSON.parse(request.responseText));
+                        this.loading = false;
+                    };
+
+                    console.log(queryUrl);
+                    request.open("POST", queryUrl, true);
+
+                    let formData = new FormData(this.form);
+                    formData.append('fieldable_form[submit]', '');
+                    request.send(formData);
                 }
             }
         }

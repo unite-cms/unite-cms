@@ -92,3 +92,5 @@ services:
   UniteCMS\CoreBundle\Field\Types\AutoTextFieldType:
     public: false
     tags: [unite_cms.field_type]
+    arguments:
+      ['@router']

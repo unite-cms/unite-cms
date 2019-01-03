@@ -43,7 +43,7 @@ class FieldableFormType extends AbstractType
 
             $childEvent = new FieldableFormEvent($child, $child->getData(), $event->getData());
 
-            if($child->getConfig()->getEventDispatcher()->hasListeners($event_type)) {
+            if($child->getConfig()->getEventDispatcher() && $child->getConfig()->getEventDispatcher()->hasListeners($event_type)) {
                 $child->getConfig()->getEventDispatcher()->dispatch($event_type, $childEvent);
 
                 // Allow event listeners to override data for the current form type.
