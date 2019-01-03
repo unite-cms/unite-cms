@@ -18,12 +18,17 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\VarDumper\Tests\Fixture\DumbFoo;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Event\FieldableFormEvent;
 use UniteCMS\CoreBundle\Expression\ContentExpressionChecker;
 
 class AutoTextType extends AbstractType
 {
+    /**
+     * @var FormInterface $currentForm
+     */
+    private $currentForm;
+
     /**
      * {@inheritdoc}
      */
@@ -60,45 +65,40 @@ class AutoTextType extends AbstractType
             ->add('text', $this->normalizeWidgetType($options['text_widget']), ['label' => $options['label'], 'not_empty' => $options['not_empty']])
             ->add('auto', CheckboxType::class, ['label' => $options['label']]);
 
-        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+        $propertyPath = $builder->getPropertyPath();
 
-            if(isset($event->getData()['auto']) && ($event->getData()['auto'] == true || $event->getData()['auto'] == 'on')) {
+        $builder->addEventListener(FieldableFormType::FIELDABLE_FORM_SUBMIT, function(FieldableFormEvent $event) use ($propertyPath) {
 
-                // If this is a fieldable content form, use the content object and the defined expression to generate the auto value.
-                if($event->getForm()->getRoot()->getConfig()->hasOption('content')) {
+            // If auto is set to true
+            if(!empty($event->getData()['auto'])) {
 
-                    $content = $event->getForm()->getRoot()->getConfig()->getOption('content');
-                    $auto_value = ($event->getData()['auto'] === true || $event->getData()['auto'] === 'on') ? true : false;
+                $fieldableForm = $event->getForm()->getRoot();
 
-                    if(empty($content->getId()) || $event->getForm()->getConfig()->getOption('auto_update') || $event->getForm()->getData()['auto'] != $auto_value) {
+                // If this is a fieldable content form with a set content object.
+                if($fieldableForm->getConfig()->hasOption('content')) {
 
-                        // Get currently submitted data
-                        // TODO: WE NEED TO GET THE CURRENT SUBMITTED DATA. THIS APPROACH HERE IS NOT WORKING!
-                        $contentData = $content->getData();
-                        foreach($contentData as $key => $value) {
-                            $contentData[$key] = $event->getForm()->getRoot()->has($key) ?
-                                $event->getForm()->getRoot()->get($key)->getData() :
-                                $contentData[$key] = $value;
-                        }
+                    /**
+                     * @var Content $content
+                     */
+                    $content = $fieldableForm->getConfig()->getOption('content');
+                    $prevData = empty($event->getForm()->getParent()->getData()[$event->getForm()->getName()]) ? null : $event->getForm()->getParent()->getData()[$event->getForm()->getName()];
+                    $textValue = empty($prevData['text']) ? '' : $prevData['text'];
+
+                    // If content is new or auto_update is set to true or prev. auto value was false, we update value
+                    if(empty($content->getId()) || $event->getForm()->getConfig()->getOption('auto_update') || empty($prevData) || empty($prevData['auto'])) {
 
                         $expressionChecker = new ContentExpressionChecker();
-                        $event->setData([
-                            'auto' => true,
-                            'text' => $expressionChecker->evaluate(
-                                $event->getForm()->getConfig()->getOption('expression'),
-                                $event->getForm()->getRoot()->getConfig()->getOption('content'),
-                                $contentData
-                            ),
-                        ]);
-                    } else {
+                        $textValue = $expressionChecker->evaluate(
+                            $event->getForm()->getConfig()->getOption('expression'),
+                            $content,
+                            $event->getFieldableData());
 
-                        // Set original data
-                        $event->setData([
-                            'auto' => true,
-                            'text' => $event->getForm()->getData()['text']
-                        ]);
                     }
+
+                    // Set new textValue or reset to old text value if we don't allow update here.
+                    $event->setData(['auto' => true, 'text' => $textValue]);
                 }
+
             }
         });
     }

@@ -231,7 +231,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $ctField->getContentType(),
             $content
         );
-        $form->submit(['f1' => ['auto' => true]], false);
+        $form->submit(['f1' => ['auto' => 'on']], false);
         $this->assertEquals(['f1' => [
             'auto' => true,
             'text' => 'Any, 1'
@@ -245,7 +245,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $content
         );
         $form1->submit([
-            'f1' => ['auto' => true, 'text' => 'this is not relevant'],
+            'f1' => ['auto' => 'on', 'text' => 'this is not relevant'],
             'title' => 'My new title'
         ]);
 
