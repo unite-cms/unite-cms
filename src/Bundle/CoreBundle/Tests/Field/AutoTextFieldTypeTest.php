@@ -258,7 +258,130 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
 
     public function testWritingGraphQLData()
     {
-        // TODO: Test with and without persisting
-        // TODO: Use it in vue field widget to generate value.
+        $field = $this->createContentTypeField('auto_text');
+        $field->setIdentifier('f1');
+
+        $field->getContentType()->getDomain()->getOrganization()->setIdentifier('baa');
+        $field->getContentType()->getDomain()->setIdentifier('foo');
+        $field->getContentType()->setIdentifier('ct1');
+
+        $ctTextField = $this->createContentTypeField('text');
+        $ctTextField->setIdentifier('title');
+        $field->getContentType()->addField($ctTextField);
+
+        $field->setSettings(new FieldableFieldSettings(
+            [
+                'expression' => '"Any, " ~ content.data.title',
+                'auto_update' => false,
+            ]
+        ));
+
+        $this->em->persist($field->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($field->getContentType()->getDomain());
+        $this->em->persist($field->getContentType());
+        $this->em->flush();
+
+        $this->em->refresh($field->getContentType()->getDomain());
+        $this->em->refresh($field->getContentType());
+        $this->em->refresh($field);
+
+        // Inject created domain into untied.cms.manager.
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+        $domain = $field->getContentType()->getDomain();
+
+        // In this test, we don't care about access checking.
+        $admin = new User();
+        $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        static::$container->get('security.token_storage')->setToken(
+            new PostAuthenticationGuardToken($admin, 'api', [])
+        );
+
+        // Create GraphQL Schema
+        $schema = static::$container->get('unite.cms.graphql.schema_type_manager')->createSchema($domain, 'Query', 'Mutation');
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
+                createCt1(persist: false, data: { title: "My title", f1: { auto: true } }) {
+                    f1 { text, auto },
+                    title
+                }
+            }'
+        );
+
+        $result = json_decode(json_encode($result->toArray(true)), true);
+        $this->assertEquals([
+            'f1' => ['text' => 'Any, My title', 'auto' => true],
+            'title' => 'My title'
+        ], $result['data']['createCt1']);
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
+                createCt1(persist: false, data: { title: "My title", f1: { auto: true, text: "Override" } }) {
+                    f1 { text, auto },
+                    title
+                }
+            }'
+        );
+
+        $result = json_decode(json_encode($result->toArray(true)), true);
+        $this->assertEquals([
+            'f1' => ['text' => 'Any, My title', 'auto' => true],
+            'title' => 'My title'
+        ], $result['data']['createCt1']);
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
+                createCt1(persist: false, data: { title: "My title", f1: { auto: false, text: "Override" } }) {
+                    f1 { text, auto },
+                    title
+                }
+            }'
+        );
+
+        $result = json_decode(json_encode($result->toArray(true)), true);
+        $this->assertEquals([
+            'f1' => ['text' => 'Override', 'auto' => false],
+            'title' => 'My title'
+        ], $result['data']['createCt1']);
+
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
+                createCt1(persist: true, data: { title: "My title", f1: { auto: true, text: "" } }) {
+                    id,
+                    f1 { text, auto },
+                    title
+                }
+            }'
+        );
+
+        $result = json_decode(json_encode($result->toArray(true)), true);
+        $this->assertEquals([
+            'id' => $result['data']['createCt1']['id'],
+            'f1' => ['text' => 'Any, My title', 'auto' => true],
+            'title' => 'My title'
+        ], $result['data']['createCt1']);
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
+                updateCt1(id: "'.$result['data']['createCt1']['id'].'"persist: true, data: { title: "Updated", f1: { auto: true, text: "" } }) {
+                    f1 { text, auto },
+                    title
+                }
+            }'
+        );
+
+        $result = json_decode(json_encode($result->toArray(true)), true);
+        $this->assertEquals([
+            'f1' => ['text' => 'Any, My title', 'auto' => true],
+            'title' => 'Updated'
+        ], $result['data']['updateCt1']);
     }
 }
