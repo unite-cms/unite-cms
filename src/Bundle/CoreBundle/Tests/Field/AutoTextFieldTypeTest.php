@@ -2,13 +2,11 @@
 
 namespace UniteCMS\CoreBundle\Tests\Field;
 
-use GraphQL\Error\Error;
 use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
 use UniteCMS\CoreBundle\Entity\User;
 
 
@@ -136,6 +134,15 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             ]
         ));
 
+        $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($ctField->getContentType()->getDomain());
+        $this->em->persist($ctField->getContentType());
+        $this->em->flush();
+
+        $this->em->refresh($ctField->getContentType()->getDomain());
+        $this->em->refresh($ctField->getContentType());
+        $this->em->refresh($ctField);
+
         $content = new Content();
         $id = new \ReflectionProperty($content, 'id');
         $id->setAccessible(true);
@@ -191,19 +198,27 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $content
         );
         $form->submit(['f1' => ['auto' => 'on', 'text' => 'will_get_ov by auto']], false);
+        $content->setData($form->getData());
+        $this->em->persist($content);
+        $this->em->flush($content);
+
         $this->assertEquals(['f1' => [
             'auto' => true,
             'text' => 'Any, 1'
-        ], 'title' => '1'], $form->getData());
+        ], 'title' => '1'], $content->getData());
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $ctField->getContentType(),
             $content
         );
-        $form->submit(['f1' => ['text' => 'foo']], false);
+        $form->submit(['f1' => ['text' => 'foo'], 'title' => 1]);
+        $content->setData($form->getData());
+        $this->em->flush($content);
+
         $this->assertEquals(['f1' => [
+            'auto' => false,
             'text' => 'foo'
-        ], 'title' => '1'], $form->getData());
+        ], 'title' => '1'], $content->getData());
 
         // Try to update text, but auto_update was set to false: Should update, because previous auto was false
         $ctField->getSettings()->auto_update = false;
@@ -216,10 +231,13 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $content
         );
         $form->submit(['f1' => ['auto' => true], 'title' => '1']);
+        $content->setData($form->getData());
+        $this->em->flush($content);
+
         $this->assertEquals(['f1' => [
             'auto' => true,
             'text' => 'Any, 1'
-        ], 'title' => '1'], $form->getData());
+        ], 'title' => '1'], $content->getData());
 
         // Try to update text, but auto_update=false: Should not work, because prev. auto was also true.
         $content->setData(['f1' => [
@@ -232,10 +250,13 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $content
         );
         $form->submit(['f1' => ['auto' => 'on']], false);
+        $content->setData($form->getData());
+        $this->em->flush($content);
+
         $this->assertEquals(['f1' => [
             'auto' => true,
             'text' => 'Any, 1'
-        ], 'title' => '2'], $form->getData());
+        ], 'title' => '2'], $content->getData());
 
 
         // Try to use currently submitted data.
@@ -248,11 +269,13 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             'f1' => ['auto' => 'on', 'text' => 'this is not relevant'],
             'title' => 'My new title'
         ]);
+        $content->setData($form1->getData());
+        $this->em->flush($content);
 
         $this->assertEquals(['f1' => [
             'auto' => true,
             'text' => 'Any, My new title'
-        ], 'title' => 'My new title'], $form1->getData());
+        ], 'title' => 'My new title'], $content->getData());
 
     }
 
@@ -305,7 +328,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $schema,
             'mutation { 
                 createCt1(persist: false, data: { title: "My title", f1: { auto: true } }) {
-                    f1 { text, auto },
+                    f1 { text, auto, text_generated },
                     title
                 }
             }'
@@ -313,7 +336,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
 
         $result = json_decode(json_encode($result->toArray(true)), true);
         $this->assertEquals([
-            'f1' => ['text' => 'Any, My title', 'auto' => true],
+            'f1' => ['text' => '', 'auto' => true, 'text_generated' => 'Any, My title'],
             'title' => 'My title'
         ], $result['data']['createCt1']);
 
@@ -321,7 +344,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $schema,
             'mutation { 
                 createCt1(persist: false, data: { title: "My title", f1: { auto: true, text: "Override" } }) {
-                    f1 { text, auto },
+                    f1 { text, auto, text_generated },
                     title
                 }
             }'
@@ -329,7 +352,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
 
         $result = json_decode(json_encode($result->toArray(true)), true);
         $this->assertEquals([
-            'f1' => ['text' => 'Any, My title', 'auto' => true],
+            'f1' => ['text' => 'Override', 'auto' => true, 'text_generated' => 'Any, My title'],
             'title' => 'My title'
         ], $result['data']['createCt1']);
 
@@ -337,7 +360,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $schema,
             'mutation { 
                 createCt1(persist: false, data: { title: "My title", f1: { auto: false, text: "Override" } }) {
-                    f1 { text, auto },
+                    f1 { text, auto, text_generated },
                     title
                 }
             }'
@@ -345,7 +368,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
 
         $result = json_decode(json_encode($result->toArray(true)), true);
         $this->assertEquals([
-            'f1' => ['text' => 'Override', 'auto' => false],
+            'f1' => ['text' => 'Override', 'auto' => false, 'text_generated' => 'Any, My title'],
             'title' => 'My title'
         ], $result['data']['createCt1']);
 
@@ -355,7 +378,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             'mutation { 
                 createCt1(persist: true, data: { title: "My title", f1: { auto: true, text: "" } }) {
                     id,
-                    f1 { text, auto },
+                    f1 { text, auto, text_generated },
                     title
                 }
             }'
@@ -364,7 +387,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
         $result = json_decode(json_encode($result->toArray(true)), true);
         $this->assertEquals([
             'id' => $result['data']['createCt1']['id'],
-            'f1' => ['text' => 'Any, My title', 'auto' => true],
+            'f1' => ['text' => 'Any, My title', 'auto' => true, 'text_generated' => 'Any, My title'],
             'title' => 'My title'
         ], $result['data']['createCt1']);
 
@@ -372,7 +395,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $schema,
             'mutation { 
                 updateCt1(id: "'.$result['data']['createCt1']['id'].'"persist: true, data: { title: "Updated", f1: { auto: true, text: "" } }) {
-                    f1 { text, auto },
+                    f1 { text, auto, text_generated },
                     title
                 }
             }'
@@ -380,7 +403,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
 
         $result = json_decode(json_encode($result->toArray(true)), true);
         $this->assertEquals([
-            'f1' => ['text' => 'Any, My title', 'auto' => true],
+            'f1' => ['text' => 'Any, My title', 'auto' => true, 'text_generated' => 'Any, Updated'],
             'title' => 'Updated'
         ], $result['data']['updateCt1']);
     }

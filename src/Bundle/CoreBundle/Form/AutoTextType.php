@@ -16,9 +16,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Event\FieldableFormEvent;
-use UniteCMS\CoreBundle\Expression\ContentExpressionChecker;
 
 class AutoTextType extends AbstractType
 {
@@ -57,43 +54,6 @@ class AutoTextType extends AbstractType
         $builder
             ->add('text', $this->normalizeWidgetType($options['text_widget']), ['label' => $options['label'], 'not_empty' => $options['not_empty']])
             ->add('auto', CheckboxType::class, ['label' => $options['label']]);
-
-        $propertyPath = $builder->getPropertyPath();
-
-        $builder->addEventListener(FieldableFormType::FIELDABLE_FORM_SUBMIT, function(FieldableFormEvent $event) use ($propertyPath) {
-
-            // If auto is set to true
-            if(!empty($event->getData()['auto'])) {
-
-                $fieldableForm = $event->getForm()->getRoot();
-
-                // If this is a fieldable content form with a set content object.
-                if($fieldableForm->getConfig()->hasOption('content')) {
-
-                    /**
-                     * @var Content $content
-                     */
-                    $content = $fieldableForm->getConfig()->getOption('content');
-                    $prevData = empty($event->getForm()->getParent()->getData()[$event->getForm()->getName()]) ? null : $event->getForm()->getParent()->getData()[$event->getForm()->getName()];
-                    $textValue = empty($prevData['text']) ? '' : $prevData['text'];
-
-                    // If content is new or auto_update is set to true or prev. auto value was false, we update value
-                    if(empty($content->getId()) || $event->getForm()->getConfig()->getOption('auto_update') || empty($prevData) || empty($prevData['auto'])) {
-
-                        $expressionChecker = new ContentExpressionChecker();
-                        $textValue = $expressionChecker->evaluate(
-                            $event->getForm()->getConfig()->getOption('expression'),
-                            $content,
-                            $event->getFieldableData());
-
-                    }
-
-                    // Set new textValue or reset to old text value if we don't allow update here.
-                    $event->setData(['auto' => true, 'text' => $textValue]);
-                }
-
-            }
-        });
     }
 
     /**
@@ -103,6 +63,7 @@ class AutoTextType extends AbstractType
     {
         $view->vars['widget_type'] = $this->normalizeWidgetType($options['text_widget']);
         $view->vars['label_alternative'] = $options['label_alternative'];
+        $view->vars['update_text'] = $options['auto_update'] || empty($form->getRoot()->getConfig()->getOption('content')->getId());
         $view->vars['validation_url'] = $options['validation_url'];
     }
 

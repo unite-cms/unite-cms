@@ -8,11 +8,11 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Expression\ContentExpressionChecker;
@@ -70,6 +70,18 @@ class AutoTextFieldType extends TextFieldType
     }
 
     /**
+     * Generates the auto text value based on the current content object.
+     *
+     * @param FieldableField $field
+     * @param FieldableContent $content
+     * @return string
+     */
+    function generateAutoText(FieldableField $field, FieldableContent $content) {
+        $expressionChecker = new ContentExpressionChecker();
+        return $expressionChecker->evaluate($field->getSettings()->expression, $content);
+    }
+
+    /**
      * {@inheritdoc}
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
@@ -90,11 +102,35 @@ class AutoTextFieldType extends TextFieldType
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
-        // Automatic value was generated and stored on submit.
+        // We always return a regenerated text. This allows the to provide a preview and to compare with the stored text.
         return [
             'auto' => $value['auto'] ?? true,
             'text' => $value['text'] ?? '',
+            'text_generated' => $this->generateAutoText($field, $content),
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {
+
+        // If auto = true, generate value on create
+        if($data[$field->getIdentifier()]['auto']) {
+            $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $content);
+        }
+    }
+
+    public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
+
+        // If auto = true and auto_update = true or old value was false, generate text
+        if($data[$field->getIdentifier()]['auto']) {
+            if(($field->getSettings()->auto_update || !$old_data[$field->getIdentifier()]['auto'])) {
+                $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $content);
+            } else {
+                $data[$field->getIdentifier()]['text'] = $old_data[$field->getIdentifier()]['text'];
+            }
+        }
     }
 
     /**
@@ -108,12 +144,6 @@ class AutoTextFieldType extends TextFieldType
         // Only continue, if there are no violations yet.
         if($context->getViolations()->count() > 0) {
             return;
-        }
-
-        // At the moment, auto text fields are only available on content types, because there is no settings mutation api endpoint at the moment.
-        // TODO: Change this, once setting mutations are available
-        if(!$context->getObject() instanceof ContentTypeField) {
-            $context->buildViolation('invalid_entity_type')->addViolation();
         }
 
         $expressionChecker = new ContentExpressionChecker();

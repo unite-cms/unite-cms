@@ -23,6 +23,7 @@ class AutoTextFieldType extends AbstractType
         return [
             'text' => Type::string(),
             'auto' => Type::boolean(),
+            'text_generated' => Type::string(),
         ];
     }
 

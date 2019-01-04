@@ -10,6 +10,9 @@
             <div class="uk-form-custom">
                 <input v-if="widgetType === 'Symfony\\Component\\Form\\Extension\\Core\\Type\\TextType'" :disabled="auto" :id="input_id + '_text'" type="text" class="uk-input" :name="name + '[text]'" v-model="text" />
                 <textarea v-else :disabled="auto" :id="input_id + '_text'" type="text" class="uk-textarea" :name="name + '[text]'" v-model="text"></textarea>
+                <span class="uk-text-meta" v-if="updateText && auto">Text will be updated</span>
+                <span class="uk-text-meta" v-else-if="!updateText && auto">Text will NOT be updated</span>
+                <span class="uk-text-meta" v-else>Enter custom text</span>
             </div>
         </div>
     </div>
@@ -70,11 +73,18 @@
             'autoValue',
             'widgetType',
             'validationUrl',
+            'updateText',
         ],
 
         watch: {
-            auto() {
-                this.generateAutoText();
+            auto(auto) {
+                if(auto) {
+                    if(this.updateText) {
+                        this.generateAutoText();
+                    } else {
+                        this.text = this.textValue;
+                    }
+                }
             }
         },
         methods: {
@@ -90,7 +100,7 @@
             queryFromFieldName(fieldName) {
                 fieldName = fieldName.replace('fieldable_form[', 'query{');
                 fieldName = fieldName.substr(0, fieldName.length - 1);
-                fieldName = fieldName + '{text}}';
+                fieldName = fieldName + '{text_generated}}';
                 return this.wrapNestedFieldName(fieldName);
             },
             findNestedValue(result) {
@@ -101,7 +111,7 @@
             },
 
             generateAutoText() {
-                if(this.auto && !this.loading) {
+                if(this.auto && this.updateText && !this.loading) {
 
                     this.loading = true;
                     let queryUrl = this.validationUrl + '?query=' + this.queryFromFieldName(this.name);
