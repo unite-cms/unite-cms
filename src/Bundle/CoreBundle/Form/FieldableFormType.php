@@ -12,9 +12,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class FieldableFormType extends AbstractType
 {
-    const FIELDABLE_FORM_PRE_SUBMIT = 'unite.fieldable.form.pre_submit';
-    const FIELDABLE_FORM_SUBMIT = 'unite.fieldable.form.submit';
-
     /**
      * @var TokenStorage $tokenStorage
      */
@@ -69,7 +66,6 @@ class FieldableFormType extends AbstractType
         $resolver->setRequired('fields');
         $resolver->setDefined('locales');
         $resolver->setDefined('content');
-
         if ($this->tokenStorage->getToken() && $this->tokenStorage->getToken()->getProviderKey() == "api") {
             $resolver->setDefault('csrf_protection', false);
         }
