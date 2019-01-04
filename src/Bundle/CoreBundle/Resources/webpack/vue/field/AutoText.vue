@@ -1,19 +1,22 @@
 <template>
     <div class="uk-margin">
         <div class="uk-form-controls">
-            <label :for="input_id + '_auto'" class="uk-button uk-button-small" :class="{ 'uk-button-secondary': auto, 'uk-button-default': !auto }">
-                <input :id="input_id + '_auto'" type="checkbox" class="uk-checkbox" :name="name + '[auto]'" v-model="auto" />
-                {{ auto ? autoLabel : autoLabelAlternative }}
-                <span v-if="auto" v-html="feather.icons['check'].toSvg({ width: 16, height: 16 })"></span>
-            </label>
-
             <div class="uk-form-custom">
                 <input v-if="widgetType === 'Symfony\\Component\\Form\\Extension\\Core\\Type\\TextType'" :disabled="auto" :id="input_id + '_text'" type="text" class="uk-input" :name="name + '[text]'" v-model="text" />
                 <textarea v-else :disabled="auto" :id="input_id + '_text'" type="text" class="uk-textarea" :name="name + '[text]'" v-model="text"></textarea>
-                <span class="uk-text-meta" v-if="willUpdateText && auto">Text will be updated</span>
-                <span class="uk-text-meta" v-else-if="!willUpdateText && auto">Text will NOT be updated</span>
-                <span class="uk-text-meta" v-else>Enter custom text</span>
             </div>
+
+            <label :for="input_id + '_auto'" class="uk-button uk-button-small" :class="{ 'uk-button-secondary': auto, 'uk-button-default': !auto }">
+                <input :id="input_id + '_auto'" type="checkbox" class="uk-checkbox" :name="name + '[auto]'" v-model="auto" />
+                {{ auto ? fieldLabels.auto : fieldLabels.manual }}
+                <span v-if="auto" v-html="feather.icons['check'].toSvg({ width: 16, height: 16 })"></span>
+            </label>
+
+            <p class="uk-form-help-inline">
+                <span v-if="willUpdateText && auto">{{ fieldLabels.desc_auto_update }}</span>
+                <span v-else-if="!willUpdateText && auto">{{ fieldLabels.desc_no_auto_update }}</span>
+                <span v-else>{{ fieldLabels.desc_manual }}</span>
+            </p>
         </div>
     </div>
 </template>
@@ -32,11 +35,11 @@
                 auto: !!this.autoValue,
                 feather: feather,
                 willUpdateText: this.updateText || (!this.autoValue),
-            }
+                fieldLabels: JSON.parse(this.labels),
+            };
         },
 
         mounted() {
-
             this.form = document.querySelector('form[name="fieldable_form"]');
 
             // Listen to all actual form elements.
@@ -67,8 +70,7 @@
         },
 
         props: [
-            'autoLabel',
-            'autoLabelAlternative',
+            'labels',
             'name',
             'textValue',
             'autoValue',
@@ -146,9 +148,10 @@
             position: relative;
             padding: 0 5px 0 10px;
             flex-shrink: 0;
-            margin-bottom: 5px;
+            margin-top: 5px;
             font-size: 12px;
             text-transform: uppercase;
+            line-height: 24px;
 
             &.uk-button-default {
                 background: white;
@@ -176,11 +179,17 @@
 
         @media (min-width: 600px) {
             .uk-form-controls {
-                display: flex;
-                align-items: flex-start;
+                position: relative;
+
+                input, textarea {
+                    padding-right: 100px;
+                }
 
                 label.uk-button {
-                    margin: 4px 5px 0 0;
+                    position: absolute;
+                    z-index: 20;
+                    right: 7px;
+                    top: 2px;
                 }
             }
         }

@@ -198,9 +198,6 @@
 
 {%- block unite_cms_core_auto_text_widget -%}
     <unite-cms-core-auto-text-field
-            label="{{ form.vars.label }}"
-            auto-label="{{ form.auto.vars.label }}"
-            auto-label-alternative="{{ form.vars.label_alternative }}"
             name="{{ form.vars.full_name }}"
             text-value="{{ form.text.vars.value }}"
             widget-type="{{ form.vars.widget_type }}"
@@ -208,7 +205,13 @@
             generation-url="{{ form.vars.generation_url }}"
             update-text="{{ form.vars.update_text }}"
             content-id="{{ form.vars.content_id }}"
-            >
+            labels='{
+                "auto": "{% trans %}auto_text.field.auto{% endtrans %}",
+                "manual": "{% trans %}auto_text.field.manual{% endtrans %}",
+                "desc_auto_update": "{% trans %}auto_text.field.desc.auto_update{% endtrans %}",
+                "desc_no_auto_update": "{% trans %}auto_text.field.desc.no_auto_update{% endtrans %}",
+                "desc_manual": "{% trans %}auto_text.field.desc.manual{% endtrans %}"
+            }'>
     </unite-cms-core-auto-text-field>
 {%- endblock -%}
 

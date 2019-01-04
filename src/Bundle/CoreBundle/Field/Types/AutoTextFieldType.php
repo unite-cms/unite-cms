@@ -52,7 +52,7 @@ class AutoTextFieldType extends TextFieldType
             parent::getFormOptions($field),
             [
                 'expression' => $field->getSettings()->expression,
-                'text_widget' => $field->getSettings()->text_widget === 'text' ? TextType::class : TextareaType::class,
+                'text_widget' => $field->getSettings()->text_widget === 'textarea' ? TextareaType::class : TextType::class,
                 'auto_update' => !!$field->getSettings()->auto_update,
                 'generation_url' => $this->router->generate(($field->getEntity() instanceof ContentType ? 'unitecms_core_content_preview' : 'unitecms_core_setting_preview'), [$field->getEntity()]),
             ]
