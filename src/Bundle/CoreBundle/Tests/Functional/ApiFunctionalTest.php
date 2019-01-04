@@ -596,7 +596,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           }
         }');
 
-        // Result should contain 60x news and other 40x news_category
+        // Result should contain 60x news and other 41x news_category (default limit is 101)
         $count_news = 0;
         $count_category = 0;
 
@@ -610,7 +610,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }
 
         $this->assertEquals(60, $count_news);
-        $this->assertEquals(40, $count_category);
+        $this->assertEquals(41, $count_category);
     }
 
     public function testAPIFiltering() {
