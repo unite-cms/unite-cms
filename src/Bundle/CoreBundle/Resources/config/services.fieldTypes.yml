@@ -87,3 +87,10 @@ services:
   UniteCMS\CoreBundle\Field\Types\StateFieldType:
     public: false
     tags: [unite_cms.field_type]
+
+  # Auto Text Field Type
+  UniteCMS\CoreBundle\Field\Types\AutoTextFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+    arguments:
+      ['@router']

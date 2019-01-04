@@ -20,6 +20,7 @@ import VariantsVariant from "./vue/components/VariantsVariant.vue";
 import Reference from "./vue/field/Reference.vue";
 import Link from "./vue/field/Link.vue";
 import State from "./vue/field/State.vue";
+import AutoText from "./vue/field/AutoText.vue";
 
 require("./sass/unite.scss");
 
@@ -35,6 +36,7 @@ Vue.use(uniteViewFieldsPlugin, {
         'id': require('./vue/views/Fields/Id').default,
         'text': require('./vue/views/Fields/Text').default,
         'textarea': require('./vue/views/Fields/Textarea').default,
+        'auto_text': require('./vue/views/Fields/AutoText').default,
         'date': require('./vue/views/Fields/Date').default,
         'state': require('./vue/views/Fields/State').default,
         'checkbox': require('./vue/views/Fields/Checkbox').default,
@@ -55,6 +57,7 @@ Vue.customElement('unite-cms-core-iframe-preview', iFramePreview);
 Vue.customElement('unite-cms-core-reference-field', Reference);
 Vue.customElement('unite-cms-core-link-field', Link);
 Vue.customElement('unite-cms-core-state-field', State);
+Vue.customElement('unite-cms-core-auto-text-field', AutoText);
 
 // Register views.
 Vue.customElement('unite-cms-core-view-table', {

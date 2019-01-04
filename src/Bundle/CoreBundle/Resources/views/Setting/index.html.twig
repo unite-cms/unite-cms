@@ -16,7 +16,7 @@
     {{ form(form) }}
 
     {% if settingType.preview is not empty %}
-        <unite-cms-core-iframe-preview url="{{ url('unitecms_core_setting_preview', [setting_type]) }}"></unite-cms-core-iframe-preview>
+        <unite-cms-core-iframe-preview url="{{ url('unitecms_core_setting_preview', [settingType]) }}" preview-url="{{ settingType.preview.url }}" query="{{ settingType.preview.query|url_encode }}"></unite-cms-core-iframe-preview>
     {% endif %}
 </article>
 {% endblock content %}

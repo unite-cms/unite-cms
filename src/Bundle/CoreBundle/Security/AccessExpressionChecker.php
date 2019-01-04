@@ -63,7 +63,7 @@ class AccessExpressionChecker
     }
 
     /**
-     * Returns true, of the expression is valid (syntax and allowed variables).
+     * Returns true, if the expression is valid (syntax and allowed variables).
      *
      * @param string $expression
      * @return bool
