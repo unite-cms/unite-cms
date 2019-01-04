@@ -81,6 +81,9 @@ class SettingController extends Controller
                 // If content is valid.
             } else {
                 $this->getDoctrine()->getManager()->flush();
+
+                // On form submit, reload the current page so setting gets reloaded from db.
+                return $this->redirectToRoute('unitecms_core_setting_index', [$setting]);
             }
         }
 
@@ -107,12 +110,9 @@ class SettingController extends Controller
      */
     public function previewAction(SettingType $settingType, Request $request)
     {
-        if(empty($settingType->getPreview())) {
-            throw $this->createNotFoundException('No preview defined for this setting type.');
-        }
-
-        $data_uri = '';
         $setting = $settingType->getSetting();
+        $response = null;
+
         $form = $this->get('unite.cms.fieldable_form_builder')->createForm($settingType, $setting);
         $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
         $form->handleRequest($request);
@@ -129,14 +129,15 @@ class SettingController extends Controller
             $setting->setData($data);
 
             // Create GraphQL Schema
-            $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($settingType->getDomain(), ucfirst($settingType->getIdentifier()) . 'Setting');
-            $result = GraphQL::executeQuery($schema, $settingType->getPreview()->getQuery(), $setting);
-            $data_uri = urlencode($this->container->get('jms_serializer')->serialize($result->data, 'json'));
+            $domain = $settingType->getDomain();
+            $queryType = ucfirst($settingType->getIdentifier()) . 'Setting';
+            $query = $request->query->get('query', 'query{type}');
+            $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($domain, $queryType);
+            $result = GraphQL::executeQuery($schema, $query, $setting);
+            $response = $this->container->get('jms_serializer')->serialize($result->data, 'json');
         }
 
-        $preview_url = $settingType->getPreview()->getUrl();
-        $param_seperator = strpos($preview_url, '?') === false ? '?' : '&';
-        return new Response($preview_url . $param_seperator . 'data=' . $data_uri);
+        return new Response($response);
     }
 
     /**

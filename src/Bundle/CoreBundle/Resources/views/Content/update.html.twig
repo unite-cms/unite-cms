@@ -21,7 +21,7 @@
     {{ form(form) }}
 
     {% if contentType.preview is not empty %}
-        <unite-cms-core-iframe-preview url="{{ url('unitecms_core_content_preview', [view]) }}"></unite-cms-core-iframe-preview>
+        <unite-cms-core-iframe-preview url="{{ url('unitecms_core_content_preview', [view]) }}" preview-url="{{ contentType.preview.url }}" content-id="{{ content.id }}" query="{{ contentType.preview.query|url_encode }}"></unite-cms-core-iframe-preview>
     {% endif %}
 </article>
 {% endblock content %}
