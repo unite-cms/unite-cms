@@ -11,7 +11,7 @@
                 </header>
                 <div class="uk-flex-1">
                     <div class="iframe-transform-wrapper" v-bind:style="wrapperStyle">
-                        <iframe v-bind:src="previewUrl"></iframe>
+                        <iframe v-bind:src="fullPreviewUrl"></iframe>
                     </div>
                 </div>
             </section>
@@ -32,7 +32,7 @@
         data() {
             return {
                 active: false,
-                previewUrl: '',
+                fullPreviewUrl: '',
                 size: 0,
                 width: 0,
                 minWidth: 50,
@@ -40,7 +40,10 @@
             };
         },
         props: [
-            'url'
+            'url',
+            'query',
+            'previewUrl',
+            'contentId',
         ],
         watch: {
             width: function(width) {
@@ -177,11 +180,19 @@
             },
             reload: function() {
 
-                this.previewUrl = '';
+                let previewUrl = this.url + '?query=' + this.query;
 
-                var request = new XMLHttpRequest();
-                request.onload = () => { this.previewUrl = request.responseText; };
-                request.open("POST", this.url, true);
+                if(this.contentId) {
+                    previewUrl += '&id=' + this.contentId;
+                }
+
+                this.fullPreviewUrl = '';
+
+                let request = new XMLHttpRequest();
+                request.onload = () => {
+                    this.fullPreviewUrl = this.previewUrl + (this.previewUrl.indexOf('?') >= 0 ? '&' : '?') + 'data=' + request.responseText;
+                };
+                request.open("POST", previewUrl , true);
 
                 let formData = new FormData(this.form);
                 formData.append('fieldable_form[submit]', '');

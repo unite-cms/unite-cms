@@ -205,8 +205,10 @@
             text-value="{{ form.text.vars.value }}"
             widget-type="{{ form.vars.widget_type }}"
             auto-value="{{ form.auto.vars.checked }}"
-            validation-url="{{ form.vars.validation_url }}"
-            update-text="{{ form.vars.update_text }}">
+            generation-url="{{ form.vars.generation_url }}"
+            update-text="{{ form.vars.update_text }}"
+            content-id="{{ form.vars.content_id }}"
+            >
     </unite-cms-core-auto-text-field>
 {%- endblock -%}
 

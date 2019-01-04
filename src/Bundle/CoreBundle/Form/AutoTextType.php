@@ -24,7 +24,7 @@ class AutoTextType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setRequired(['expression', 'validation_url']);
+        $resolver->setRequired(['expression', 'generation_url']);
         $resolver->setDefaults([
             'compound' => true,
             'label_alternative' => 'Manual',
@@ -64,7 +64,8 @@ class AutoTextType extends AbstractType
         $view->vars['widget_type'] = $this->normalizeWidgetType($options['text_widget']);
         $view->vars['label_alternative'] = $options['label_alternative'];
         $view->vars['update_text'] = $options['auto_update'] || empty($form->getRoot()->getConfig()->getOption('content')->getId());
-        $view->vars['validation_url'] = $options['validation_url'];
+        $view->vars['content_id'] = empty($form->getRoot()->getConfig()->getOption('content')->getId()) ? null : $form->getRoot()->getConfig()->getOption('content')->getId();
+        $view->vars['generation_url'] = $options['generation_url'];
     }
 
     /**

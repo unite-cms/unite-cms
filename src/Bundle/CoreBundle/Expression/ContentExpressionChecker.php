@@ -19,15 +19,14 @@ class ContentExpressionChecker
      *
      * @param string $expression
      * @param FieldableContent|null $fieldableContent
-     * @param array $contentData
      * @return string
      */
-    public function evaluate(string $expression, FieldableContent $fieldableContent, array $contentData = []) : string {
+    public function evaluate(string $expression, FieldableContent $fieldableContent) : string {
         $expressionLanguage = new PlainExpressionLanguage();
 
         $variables['content'] = (object)[
             'locale' => $fieldableContent->getLocale(),
-            'data' => json_decode(json_encode(empty($contentData) ?$fieldableContent->getData() : $contentData)),
+            'data' => json_decode(json_encode($fieldableContent->getData())),
         ];
 
         try {

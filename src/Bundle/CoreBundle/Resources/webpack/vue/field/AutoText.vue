@@ -10,8 +10,8 @@
             <div class="uk-form-custom">
                 <input v-if="widgetType === 'Symfony\\Component\\Form\\Extension\\Core\\Type\\TextType'" :disabled="auto" :id="input_id + '_text'" type="text" class="uk-input" :name="name + '[text]'" v-model="text" />
                 <textarea v-else :disabled="auto" :id="input_id + '_text'" type="text" class="uk-textarea" :name="name + '[text]'" v-model="text"></textarea>
-                <span class="uk-text-meta" v-if="updateText && auto">Text will be updated</span>
-                <span class="uk-text-meta" v-else-if="!updateText && auto">Text will NOT be updated</span>
+                <span class="uk-text-meta" v-if="willUpdateText && auto">Text will be updated</span>
+                <span class="uk-text-meta" v-else-if="!willUpdateText && auto">Text will NOT be updated</span>
                 <span class="uk-text-meta" v-else>Enter custom text</span>
             </div>
         </div>
@@ -31,6 +31,7 @@
                 text: this.textValue,
                 auto: !!this.autoValue,
                 feather: feather,
+                willUpdateText: this.updateText || (!this.autoValue),
             }
         },
 
@@ -72,14 +73,15 @@
             'textValue',
             'autoValue',
             'widgetType',
-            'validationUrl',
+            'generationUrl',
             'updateText',
+            'contentId',
         ],
 
         watch: {
             auto(auto) {
                 if(auto) {
-                    if(this.updateText) {
+                    if(this.willUpdateText) {
                         this.generateAutoText();
                     } else {
                         this.text = this.textValue;
@@ -111,10 +113,14 @@
             },
 
             generateAutoText() {
-                if(this.auto && this.updateText && !this.loading) {
+                if(this.auto && this.willUpdateText && !this.loading) {
 
                     this.loading = true;
-                    let queryUrl = this.validationUrl + '?query=' + this.queryFromFieldName(this.name);
+                    let queryUrl = this.generationUrl + '?query=' + this.queryFromFieldName(this.name);
+
+                    if(this.contentId) {
+                        queryUrl += '&id=' + this.contentId;
+                    }
 
                     let request = new XMLHttpRequest();
                     request.onload = () => {
@@ -122,7 +128,6 @@
                         this.loading = false;
                     };
 
-                    console.log(queryUrl);
                     request.open("POST", queryUrl, true);
 
                     let formData = new FormData(this.form);

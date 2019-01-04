@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Expression\ContentExpressionChecker;
@@ -53,7 +54,7 @@ class AutoTextFieldType extends TextFieldType
                 'expression' => $field->getSettings()->expression,
                 'text_widget' => $field->getSettings()->text_widget === 'text' ? TextType::class : TextareaType::class,
                 'auto_update' => !!$field->getSettings()->auto_update,
-                'validation_url' => $this->router->generate('unitecms_core_content_validation', [$field->getEntity()]),
+                'generation_url' => $this->router->generate(($field->getEntity() instanceof ContentType ? 'unitecms_core_content_preview' : 'unitecms_core_setting_preview'), [$field->getEntity()]),
             ]
         );
     }
@@ -116,7 +117,7 @@ class AutoTextFieldType extends TextFieldType
     public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {
 
         // If auto = true, generate value on create
-        if($data[$field->getIdentifier()]['auto']) {
+        if(!empty($data[$field->getIdentifier()]['auto'])) {
             $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $content);
         }
     }
@@ -124,11 +125,11 @@ class AutoTextFieldType extends TextFieldType
     public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
 
         // If auto = true and auto_update = true or old value was false, generate text
-        if($data[$field->getIdentifier()]['auto']) {
-            if(($field->getSettings()->auto_update || !$old_data[$field->getIdentifier()]['auto'])) {
+        if(!empty($data[$field->getIdentifier()]['auto'])) {
+            if(($field->getSettings()->auto_update || empty($old_data[$field->getIdentifier()]['auto']))) {
                 $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $content);
             } else {
-                $data[$field->getIdentifier()]['text'] = $old_data[$field->getIdentifier()]['text'];
+                $data[$field->getIdentifier()]['text'] = empty($old_data[$field->getIdentifier()]['text']) ? '' : $old_data[$field->getIdentifier()]['text'];
             }
         }
     }
