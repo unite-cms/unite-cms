@@ -65,6 +65,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         return array_merge(
             parent::getFormOptions($field),
             [
+                'required' => true,         // Please see CollectionFormType::buildView() for more information.
                 'allow_add' => true,
                 'allow_delete' => true,
                 'delete_empty' => true,
