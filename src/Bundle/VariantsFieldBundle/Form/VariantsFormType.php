@@ -5,6 +5,8 @@ namespace UniteCMS\VariantsFieldBundle\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
@@ -38,6 +40,7 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
 
         // Add choices type to select type.
         $builder->add('type', ChoiceCardsType::class, [
+            'required' => false,
             'label' => false,
             'choices' => array_map(function($variant){
                 return new ChoiceCardOption($variant['identifier'], $variant['title'], $variant['description'] ?? '', $variant['icon'] ?? '');
@@ -60,6 +63,19 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
 
         // Remove all unused variants.
         $builder->addModelTransformer($this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        parent::buildView($view, $form, $options);
+
+        // In order to be able to have required child elements (see Symfony\Component\Form\Form::isRequired()), we
+        // set the variant form type to required. Here we undo this to avoid a * in the label. At this point,
+        // however the children are already built, so any required fields are already marked as required.
+        $view->vars['required'] = false;
     }
 
     /**
