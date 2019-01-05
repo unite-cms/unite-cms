@@ -38,6 +38,14 @@
                 if(value) {
                     setTimeout(()=> {
                         feather.replace();
+
+                        // When variant was selected, enable all disabled input elements if they are not disabled intentionally.
+                        this.$el.querySelectorAll('input, textarea, select').forEach((element) => {
+                            if(!element.classList.contains('disabled')) {
+                                element.disabled = false;
+                            }
+                        });
+
                     }, 2);
                 }
             }
