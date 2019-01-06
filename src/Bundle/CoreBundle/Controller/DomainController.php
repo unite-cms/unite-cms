@@ -104,7 +104,8 @@ class DomainController extends Controller
 
             try {
                 $domain = $domainConfigManager->parse($form->getData()['domain']);
-                $domain->setConfig($form->getData()['domain']);
+                $domainSerialized = $domainConfigManager->serialize($domain);
+                $domain->setConfig($domainSerialized);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
             }
@@ -265,7 +266,8 @@ class DomainController extends Controller
 
             try {
                 $updatedDomain = $domainConfigManager->parse($form->getData()['domain']);
-                $updatedDomain->setConfig($form->getData()['domain']);
+                $domainSerialized = $domainConfigManager->serialize($domain);
+                $domain->setConfig($domainSerialized);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
                 $formView = $form->createView();
