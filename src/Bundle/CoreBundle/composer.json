@@ -3,7 +3,7 @@
     "type": "symfony-bundle",
     "description": "Core functionality for unite cms",
     "require": {
-        "symfony/symfony": "4.1.*",
+        "symfony/symfony": "4.1.8",
         "doctrine/doctrine-bundle": "^1.9",
         "doctrine/orm": "^2.6",
         "jms/serializer-bundle": "^2.4",
