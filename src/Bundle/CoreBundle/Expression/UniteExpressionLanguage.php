@@ -8,6 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Expression;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
@@ -16,9 +17,14 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
  */
 class UniteExpressionLanguage extends ExpressionLanguage
 {
+    public function __construct(CacheItemPoolInterface $cache = null, $providers = array())
+    {
+        $providers[] = new UniteExpressionLanguageProvider();
+        parent::__construct($cache, $providers);
+    }
+
     /**
      * Don't register the constant function.
      */
-    protected function registerFunctions()
-    {}
+    protected function registerFunctions() {}
 }
