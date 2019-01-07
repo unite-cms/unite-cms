@@ -8,14 +8,20 @@
 
 namespace UniteCMS\CoreBundle\Expression;
 
+use Cocur\Slugify\Slugify;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
 
 class UniteExpressionLanguageProvider implements ExpressionFunctionProviderInterface
 {
-    static function generateSlug($string) {
-        
-        return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $string)));
+    /**
+     * Callback for "slug" expression function. Generates a slug by using the Slugify library.
+     * @param string $string
+     * @return string
+     */
+    static function generateSlug(string $string) : string {
+        $slugify = new Slugify();
+        return $slugify->slugify($string);
     }
 
     /**
