@@ -6,10 +6,10 @@
  * Time: 17:06
  */
 
-namespace UniteCMS\CoreBundle\Tests\Security;
+namespace UniteCMS\CoreBundle\Tests\Expression;
 
 
-use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
+use UniteCMS\CoreBundle\Expression\AccessExpressionChecker;
 use PHPUnit\Framework\TestCase;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;

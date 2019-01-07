@@ -8,10 +8,9 @@
 
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
-use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
+use UniteCMS\CoreBundle\Expression\WebhookExpressionChecker;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 
 
 class ValidWebhookConditionValidator extends ConstraintValidator

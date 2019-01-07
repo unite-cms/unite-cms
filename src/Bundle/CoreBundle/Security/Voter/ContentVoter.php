@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
+use UniteCMS\CoreBundle\Expression\AccessExpressionChecker;
 
 class ContentVoter extends Voter
 {

@@ -10,7 +10,6 @@ namespace UniteCMS\CoreBundle\Expression;
 
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
-use UniteCMS\CoreBundle\Security\PlainExpressionLanguage;
 
 class ContentExpressionChecker
 {

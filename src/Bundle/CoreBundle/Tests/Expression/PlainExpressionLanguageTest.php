@@ -6,11 +6,11 @@
  * Time: 16:43
  */
 
-namespace UniteCMS\CoreBundle\Tests\Security;
+namespace UniteCMS\CoreBundle\Tests\Expression;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use UniteCMS\CoreBundle\Security\PlainExpressionLanguage;
+use UniteCMS\CoreBundle\Expression\PlainExpressionLanguage;
 
 define('TEST_PLAIN_EXPRESSION_LANGUAGE_TEST_CONSTANT', 'foo');
 

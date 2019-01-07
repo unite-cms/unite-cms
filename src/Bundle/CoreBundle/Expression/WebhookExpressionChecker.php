@@ -1,6 +1,6 @@
 <?php
 
-namespace UniteCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Expression;
 
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use UniteCMS\CoreBundle\Entity\FieldableContent;

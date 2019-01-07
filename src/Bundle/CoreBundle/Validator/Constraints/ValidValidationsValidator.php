@@ -5,7 +5,7 @@ namespace UniteCMS\CoreBundle\Validator\Constraints;
 use UniteCMS\CoreBundle\Field\FieldableValidation;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use UniteCMS\CoreBundle\Security\ValidationExpressionChecker;
+use UniteCMS\CoreBundle\Expression\ValidationExpressionChecker;
 
 class ValidValidationsValidator extends ConstraintValidator
 {

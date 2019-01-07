@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
+use UniteCMS\CoreBundle\Expression\AccessExpressionChecker;
 
 class DomainVoter extends Voter
 {
