@@ -162,7 +162,9 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $this->assertNotNull($domain);
         $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
         static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
-        $this->assertJsonStringEqualsJsonString($values['form']['domain'], $domain->getConfig());
+
+        $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
+        $this->assertJsonStringEqualsJsonString($domainSerialized, $domain->getConfig());
 
         $this->client->disableReboot();
 
@@ -256,7 +258,10 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Assert domain config file.
         $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
         static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
-        $this->assertJsonStringEqualsJsonString($values['form']['domain'], $domain->getConfig());
+
+        $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
+        $this->assertJsonStringEqualsJsonString($domainSerialized, $domain->getConfig());
+
         $this->assertEquals('Domain 1', $domain->getTitle());
 
         // Click on domain delete.

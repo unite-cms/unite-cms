@@ -90,7 +90,8 @@
         "ext-spl": "*",
         "ext-xml": "*",
         "ext-filter": "*",
-        "ext-intl": "*"
+        "ext-intl": "*",
+        "symfony/symfony": "4.1.8"
     },
     "require-dev": {
         "doctrine/data-fixtures": "^1.3",
