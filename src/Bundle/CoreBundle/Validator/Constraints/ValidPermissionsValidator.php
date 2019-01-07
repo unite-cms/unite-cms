@@ -2,22 +2,25 @@
 
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
-use UniteCMS\CoreBundle\Expression\AccessExpressionChecker;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
+use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 
 class ValidPermissionsValidator extends ConstraintValidator
 {
 
     /**
-     * @var AccessExpressionChecker $accessExpressionChecker
+     * @var UniteExpressionChecker $accessExpressionChecker
      */
     private $accessExpressionChecker;
 
     public function __construct()
     {
-        $this->accessExpressionChecker = new AccessExpressionChecker();
+        $this->accessExpressionChecker = new UniteExpressionChecker();
+        $this->accessExpressionChecker
+            ->registerFieldableContent(null)
+            ->registerDomainMember(null);
     }
 
     public function validate($value, Constraint $constraint)

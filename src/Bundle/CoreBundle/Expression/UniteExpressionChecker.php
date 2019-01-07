@@ -28,6 +28,7 @@ class UniteExpressionChecker
 
     public function __construct()
     {
+        $this->variables = [];
         $this->expressionLanguage = new UniteExpressionLanguage();
     }
 
@@ -54,8 +55,8 @@ class UniteExpressionChecker
         } else {
             $this->variables[$variableName] = (object)[
                 'data' => json_decode(json_encode($domainMember->getData())),
-                'type' => $domainMember->getDomainMemberType()->getIdentifier(),
-                'accessor' => [
+                'type' => empty($domainMember->getDomainMemberType()) ? null : $domainMember->getDomainMemberType()->getIdentifier(),
+                'accessor' => (object)[
                     'name' => (string)$domainMember->getAccessor(),
                     'id' => (string)$domainMember->getAccessor()->getId(),
                     'type' => ($domainMember->getAccessor() instanceof ApiKey) ? 'api_key' : 'user',
@@ -84,7 +85,7 @@ class UniteExpressionChecker
             ];
 
             if($fieldableContent instanceof Content) {
-                $data['id'] = $fieldableContent->getId();
+                $data['id'] = (string)$fieldableContent->getId();
             }
 
             $this->variables[$variableName] = (object)$data;
