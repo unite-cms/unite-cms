@@ -55,6 +55,12 @@ class CollectionFormType extends CollectionType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
+
+        // In order to be able to have required child elements (see Symfony\Component\Form\Form::isRequired()), we
+        // set the collection form type to required. Here we undo this to avoid a * in the label. At this point,
+        // however the children are already built, so any required fields are already marked as required.
+        $view->vars['required'] = false;
+
         $view->vars['tag'] = 'unite-cms-collection-field';
         $view->vars['assets'] = [
             ['css' => 'main.css', 'package' => 'UniteCMSCollectionFieldBundle'],
