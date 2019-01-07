@@ -43,7 +43,7 @@ class UniteExpressionLanguageTest extends TestCase
         $this->assertEquals('foo', eval('return ' . $plainLang->compile('slug("foo")') . ';'));
         $this->assertEquals('foo', $plainLang->evaluate('slug("foo")'));
         $this->assertEquals('baa', $plainLang->evaluate('slug("BaA")'));
-        $this->assertEquals('a-b-c-', $plainLang->evaluate('slug("A B C!")'));
-        $this->assertEquals('this-is-a-test---', $plainLang->evaluate('slug("This is a Test !-ö")'));
+        $this->assertEquals('a-b-c', $plainLang->evaluate('slug("A B C!")'));
+        $this->assertEquals('this-is-a-test-oe', $plainLang->evaluate('slug("This is a Test !-ö")'));
     }
 }
