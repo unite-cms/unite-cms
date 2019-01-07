@@ -5,6 +5,10 @@ namespace UniteCMS\CoreBundle\Expression;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 
+/**
+ * @deprecated 0.8 This checker will be replaced by UniteExpressionChecker which have other variables: content, member
+ * "locale" and "data" variable of this checker will become "content.locale" und "content.X" in version 0.8
+ */
 class WebhookExpressionChecker
 {
 
