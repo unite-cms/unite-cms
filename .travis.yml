@@ -6,7 +6,7 @@ os: linux
 
 cache:
   directories:
-    - vendor
+#    - vendor
     - coverage
     - $HOME/.composer/cache/files
 
