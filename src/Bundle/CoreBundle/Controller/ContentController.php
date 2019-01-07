@@ -72,6 +72,7 @@ class ContentController extends Controller
      */
     public function createAction(View $view, Request $request)
     {
+
         $content = new Content();
 
         // Allow to set locale and translation of via GET parameters.
@@ -486,7 +487,7 @@ class ContentController extends Controller
      * @Route("/{content_type}/{view}/translations/{content}", methods={"GET"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::TRANSLATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -528,7 +529,7 @@ class ContentController extends Controller
      * @Route("/{content_type}/{view}/translations/{content}/add/{locale}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::TRANSLATE'), content)")
      *
      * @param View $view
      * @param Content $content
@@ -614,7 +615,7 @@ class ContentController extends Controller
      * @Route("/{content_type}/{view}/translations/{content}/remove/{locale}", methods={"GET", "POST"})
      * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
      * @Entity("content")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::TRANSLATE'), content)")
      *
      * @param View $view
      * @param Content $content

@@ -86,11 +86,6 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        // special case Translate, if "translate content" permission is not set, check for update content permission instead
-        if (empty($contentType->getPermissions()[$attribute]) && $attribute == self::TRANSLATE) {
-            $attribute = self::UPDATE;
-        }
-
         // If the requested permission is not defined, throw an exception.
         if (empty($contentType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
@@ -98,11 +93,9 @@ class ContentVoter extends Voter
 
         // If the expression evaluates to true, we grant access.
         foreach ($domainMembers as $domainMember) {
-
             if($this->accessExpressionChecker->evaluate($contentType->getPermissions()[$attribute], $domainMember, $subject instanceof Content ? $subject : null)) {
                 return self::ACCESS_GRANTED;
             }
-
         }
 
         return self::ACCESS_ABSTAIN;
