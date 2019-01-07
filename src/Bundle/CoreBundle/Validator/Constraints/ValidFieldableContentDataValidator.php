@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
-use UniteCMS\CoreBundle\Security\ValidationExpressionChecker;
+use UniteCMS\CoreBundle\Expression\ValidationExpressionChecker;
 
 class ValidFieldableContentDataValidator extends ConstraintValidator
 {

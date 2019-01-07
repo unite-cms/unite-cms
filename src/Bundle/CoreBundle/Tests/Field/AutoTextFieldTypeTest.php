@@ -9,7 +9,6 @@ use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\User;
 
-
 class AutoTextFieldTypeTest extends FieldTypeTestCase
 {
     public function testEmptySettings()

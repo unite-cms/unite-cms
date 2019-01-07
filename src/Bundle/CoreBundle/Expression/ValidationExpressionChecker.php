@@ -6,11 +6,15 @@
  * Time: 16:18
  */
 
-namespace UniteCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Expression;
 
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 
+/**
+ * @deprecated 0.8 This checker will be replaced by UniteExpressionChecker which have other variables: content, member
+ * "locale" and "data" variable of this checker will become "content.locale" und "content.X" in version 0.8
+ */
 class ValidationExpressionChecker
 {
 
@@ -22,7 +26,7 @@ class ValidationExpressionChecker
      * @return bool
      */
     public function evaluate(string $expression, FieldableContent $fieldableContent) : bool {
-        $expressionLanguage = new PlainExpressionLanguage();
+        $expressionLanguage = new UniteExpressionLanguage();
 
 
         $variables = [
@@ -47,7 +51,7 @@ class ValidationExpressionChecker
      * @return bool
      */
     public function validate(string $expression) : bool {
-        $expressionLanguage = new PlainExpressionLanguage();
+        $expressionLanguage = new UniteExpressionLanguage();
         $variables = ['locale', 'data'];
 
         try {

@@ -15,7 +15,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
+use UniteCMS\CoreBundle\Expression\WebhookExpressionChecker;
 use UniteCMS\CoreBundle\Entity\Webhook;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 
