@@ -11,10 +11,10 @@ namespace UniteCMS\CoreBundle\Expression;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
- * The plain expression language don't provide any functions and can only decide based on variables and basic syntax
- * elements.
+ * The unite expression language don't provide any functions that would expose sensitive information to the user.
+ * Expressions can be defined at different places by a domain admin
  */
-class PlainExpressionLanguage extends ExpressionLanguage
+class UniteExpressionLanguage extends ExpressionLanguage
 {
     /**
      * Don't register the constant function.

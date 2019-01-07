@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
-use UniteCMS\CoreBundle\Expression\ContentExpressionChecker;
+use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Form\AutoTextType;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -78,8 +78,10 @@ class AutoTextFieldType extends TextFieldType
      * @return string
      */
     function generateAutoText(FieldableField $field, FieldableContent $content) {
-        $expressionChecker = new ContentExpressionChecker();
-        return $expressionChecker->evaluate($field->getSettings()->expression, $content);
+        $expressionChecker = new UniteExpressionChecker();
+        return $expressionChecker
+            ->registerFieldableContent($content)
+            ->evaluateToString($field->getSettings()->expression);
     }
 
     /**
@@ -147,7 +149,9 @@ class AutoTextFieldType extends TextFieldType
             return;
         }
 
-        $expressionChecker = new ContentExpressionChecker();
+        $expressionChecker = new UniteExpressionChecker();
+        $expressionChecker->registerFieldableContent(null);
+
         if(!$expressionChecker->validate($settings->expression)) {
             $context->buildViolation('invalid_expression')->atPath('expression')->addViolation();
         }

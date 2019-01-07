@@ -25,7 +25,7 @@ class AccessExpressionChecker
      * @return bool
      */
     public function evaluate(string $expression, DomainMember $domainMember, FieldableContent $fieldableContent = null) : bool {
-        $expressionLanguage = new PlainExpressionLanguage();
+        $expressionLanguage = new UniteExpressionLanguage();
 
         $variables = ['member' => [
             'data' => json_decode(json_encode($domainMember->getData())),
@@ -69,7 +69,7 @@ class AccessExpressionChecker
      * @return bool
      */
     public function validate(string $expression) : bool {
-        $expressionLanguage = new PlainExpressionLanguage();
+        $expressionLanguage = new UniteExpressionLanguage();
         $variables = ['member', 'content'];
 
         try {

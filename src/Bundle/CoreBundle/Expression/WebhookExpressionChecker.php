@@ -18,7 +18,7 @@ class WebhookExpressionChecker
      */
     public function evaluate(string $expression, string $eventName, FieldableContent $fieldableContent) : bool {
 
-        $expressionLanguage = new PlainExpressionLanguage();
+        $expressionLanguage = new UniteExpressionLanguage();
 
         $variables = [
           'locale' => $fieldableContent->getLocale(),
@@ -43,7 +43,7 @@ class WebhookExpressionChecker
      * @return bool
      */
     public function validate(string $expression) : bool {
-        $expressionLanguage = new PlainExpressionLanguage();
+        $expressionLanguage = new UniteExpressionLanguage();
         $variables = ['event', 'locale', 'data'];
 
         try {

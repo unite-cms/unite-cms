@@ -10,11 +10,11 @@ namespace UniteCMS\CoreBundle\Tests\Expression;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use UniteCMS\CoreBundle\Expression\PlainExpressionLanguage;
+use UniteCMS\CoreBundle\Expression\UniteExpressionLanguage;
 
 define('TEST_PLAIN_EXPRESSION_LANGUAGE_TEST_CONSTANT', 'foo');
 
-class PlainExpressionLanguageTest extends TestCase
+class UniteExpressionLanguageTest extends TestCase
 {
 
     private $expression;
@@ -33,7 +33,7 @@ class PlainExpressionLanguageTest extends TestCase
      * @expectedException \Symfony\Component\ExpressionLanguage\SyntaxError
      */
     public function testConstantNotAvailable() {
-        $plainLang = new PlainExpressionLanguage();
+        $plainLang = new UniteExpressionLanguage();
         $this->assertNull($plainLang->evaluate($this->expression));
     }
 }

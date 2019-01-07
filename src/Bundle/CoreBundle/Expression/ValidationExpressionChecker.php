@@ -22,7 +22,7 @@ class ValidationExpressionChecker
      * @return bool
      */
     public function evaluate(string $expression, FieldableContent $fieldableContent) : bool {
-        $expressionLanguage = new PlainExpressionLanguage();
+        $expressionLanguage = new UniteExpressionLanguage();
 
 
         $variables = [
@@ -47,7 +47,7 @@ class ValidationExpressionChecker
      * @return bool
      */
     public function validate(string $expression) : bool {
-        $expressionLanguage = new PlainExpressionLanguage();
+        $expressionLanguage = new UniteExpressionLanguage();
         $variables = ['locale', 'data'];
 
         try {
