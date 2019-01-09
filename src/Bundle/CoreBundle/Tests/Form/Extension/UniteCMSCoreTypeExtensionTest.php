@@ -11,6 +11,7 @@ namespace UniteCMS\CoreBundle\Tests\Form\Extension;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Form\Extension\UniteCMSCoreTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -24,7 +25,7 @@ class UniteCMSCoreTypeExtensionTest extends TypeTestCase
     protected function getTypeExtensions()
     {
         return array(
-            new UniteCMSCoreTypeExtension()
+            new UniteCMSCoreTypeExtension($this->createMock(TranslatorInterface::class))
         );
     }
 
@@ -50,7 +51,7 @@ class UniteCMSCoreTypeExtensionTest extends TypeTestCase
 
         // test if description is in form vars
         $form = $this->createMock(Form::class);
-        $formExtension = new UniteCMSCoreTypeExtension();
+        $formExtension = new UniteCMSCoreTypeExtension($this->createMock(TranslatorInterface::class));
         $formView = new FormView();
         $formExtension->buildView(
             $formView,
