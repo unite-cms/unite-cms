@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.6 (2019-01-09)
+- Fixed #463: expression language doctrine content functions are not available when validating validatons
+
 ## 0.7.5 (2019-01-09)
 - Fixed #459: API: not_empty error messages don't have correct path
 - Fixed #440: Missing required label marker (*) when setting not_empty inside a collection
