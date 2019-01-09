@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.7.5 (2019-01-09)
+- Fixed #459: API: not_empty error messages don't have correct path
+- Fixed #440: Missing required label marker (*) when setting not_empty inside a collection
+- Fixed #448: Followup for 440: Variants field variant required not_empty get checked when not selected
+- Fixed #444: Collection sorting and deleting Variation Fields which contains another Collection cause strange sorting and duplicate Fields
+- Fixed #439: Content Type / Setting Type additional settings not validated
+- Fixed #422: Numbertype returns Type String in Graphql
+- Fixed #420: Checkboxtype returns Type String in Graphql
+- Fixed #415: Can't paginate the users list
+- Added #428: Fix Test Splitting Code Climate in travis.yml
+- Added #436: Configure GraphQL Query Limit
+- Added #441: Travis Split core bundle Tests for faster coverage runs
+- Added #457: unique expression language function
+- Added #445: Unify different expression language classes + provide more functions
+- Added #340: Trigger events on domain config file actions
+- Added #218: field data processors or tokens
+
 ## 0.7.4 (2018-12-07)
 - Added #412: Update phpunit dist due to latest changes
 - Fixed #409: Cant select cross domain content type for reference_of field
