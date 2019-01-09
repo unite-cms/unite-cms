@@ -8,7 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Expression;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -32,11 +32,11 @@ class ValidationExpressionChecker
     /**
      * Register content functions that are performed using the given content type and doctrine entity manager.
      *
-     * @param EntityManager $entityManager
+     * @param EntityManagerInterface $entityManager
      * @param ContentType $contentType
      * @return $this
      */
-    public function registerDoctrineContentFunctionsProvider(EntityManager $entityManager, ContentType $contentType) {
+    public function registerDoctrineContentFunctionsProvider(EntityManagerInterface $entityManager, ContentType $contentType) {
         $this->expressionLanguage->registerProvider(new UniteExpressionLanguageDoctrineContentProvider($entityManager, $contentType));
         return $this;
     }
