@@ -27,8 +27,10 @@ class WebhookExpressionChecker
         $variables = [
           'locale' => $fieldableContent->getLocale(),
           'data' => json_decode(json_encode($fieldableContent->getData())),
-          'event' => $eventName
         ];
+
+        $variables['content'] = (object)$variables;
+        $variables['event'] = $eventName;
 
         try {
             return (bool) $expressionLanguage->evaluate($expression, $variables);

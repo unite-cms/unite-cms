@@ -8,9 +8,11 @@
 
 namespace UniteCMS\CoreBundle\Expression;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 
@@ -104,6 +106,18 @@ class UniteExpressionChecker
      */
     public function registerVariable($variableName, $variable = null) {
         $this->variables[$variableName] = $variable;
+        return $this;
+    }
+
+    /**
+     * Register content functions that are performed using the given content type and doctrine entity manager.
+     *
+     * @param EntityManager $entityManager
+     * @param ContentType $contentType
+     * @return $this
+     */
+    public function registerDoctrineContentFunctionsProvider(EntityManager $entityManager, ContentType $contentType) {
+        $this->expressionLanguage->registerProvider(new UniteExpressionLanguageDoctrineContentProvider($entityManager, $contentType));
         return $this;
     }
 

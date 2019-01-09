@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Tests\Validator;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
@@ -26,15 +27,16 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
     public function testEmptyObjectAndContextObject() {
         $object = new \stdClass();
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
+        $entityManager = $this->createMock(EntityManager::class);
 
         // When validation a non-array or don't provide a context object, the validator just skips this.
-        $context = $this->validate(null, new ValidFieldableContentDataValidator($fieldTypeManager), null, $object);
+        $context = $this->validate(null, new ValidFieldableContentDataValidator($fieldTypeManager, $entityManager), null, $object);
         $this->assertCount(0, $context->getViolations());
 
-        $context = $this->validate((object)[], new ValidFieldableContentDataValidator($fieldTypeManager), null, $object);
+        $context = $this->validate((object)[], new ValidFieldableContentDataValidator($fieldTypeManager, $entityManager), null, $object);
         $this->assertCount(0, $context->getViolations());
 
-        $context = $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager));
+        $context = $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager, $entityManager));
         $this->assertCount(0, $context->getViolations());
     }
 
@@ -45,7 +47,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
     public function testInvalidObject() {
         $object = new \stdClass();
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
-        $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager), null, $object);
+        $entityManager = $this->createMock(EntityManager::class);
+        $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager, $entityManager), null, $object);
     }
 
     /**
@@ -59,7 +62,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
             ->willReturn(new \stdClass());
 
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
-        $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager), null, $object);
+        $entityManager = $this->createMock(EntityManager::class);
+        $this->validate([], new ValidFieldableContentDataValidator($fieldTypeManager, $entityManager), null, $object);
     }
 
     public function testInvalidAdditionalValue() {
@@ -72,7 +76,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
         $content->setContentType($ct);
 
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
-        $context = $this->validate(['f1' => 'foo', 'f2' => 'baa'], new ValidFieldableContentDataValidator($fieldTypeManager), null, $content);
+        $entityManager = $this->createMock(EntityManager::class);
+        $context = $this->validate(['f1' => 'foo', 'f2' => 'baa'], new ValidFieldableContentDataValidator($fieldTypeManager, $entityManager), null, $content);
         $this->assertCount(1, $context->getViolations());
         $this->assertEquals('The content unit contains invalid additional data.', $context->getViolations()->get(0)->getMessageTemplate());
     }
@@ -96,7 +101,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
             }
         });
 
-        $context = $this->validate(['f1' => 'foo'], new ValidFieldableContentDataValidator($fieldTypeManagerMock), null, $content);
+        $entityManager = $this->createMock(EntityManager::class);
+        $context = $this->validate(['f1' => 'foo'], new ValidFieldableContentDataValidator($fieldTypeManagerMock, $entityManager), null, $content);
         $this->assertCount(2, $context->getViolations());
         $this->assertEquals('m1', $context->getViolations()->get(0)->getMessageTemplate());
         $this->assertEquals('m2', $context->getViolations()->get(1)->getMessageTemplate());
@@ -116,7 +122,8 @@ class ValidFieldableContentDataValidatorTest extends ConstraintValidatorTestCase
             ->method('validateFieldData')
             ->willReturn([]);
 
-        $context = $this->validate(['f1' => 'foo'], new ValidFieldableContentDataValidator($fieldTypeManager), null, $content);
+        $entityManager = $this->createMock(EntityManager::class);
+        $context = $this->validate(['f1' => 'foo'], new ValidFieldableContentDataValidator($fieldTypeManager, $entityManager), null, $content);
         $this->assertCount(0, $context->getViolations());
     }
 }
