@@ -8,7 +8,9 @@
 
 namespace UniteCMS\CoreBundle\Expression;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
+use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 
 /**
@@ -17,6 +19,27 @@ use UniteCMS\CoreBundle\Entity\FieldableContent;
  */
 class ValidationExpressionChecker
 {
+    /**
+     * @var UniteExpressionLanguage  $expressionLanguage
+     */
+    private $expressionLanguage;
+
+    public function __construct()
+    {
+        $this->expressionLanguage = new UniteExpressionLanguage();
+    }
+
+    /**
+     * Register content functions that are performed using the given content type and doctrine entity manager.
+     *
+     * @param EntityManager $entityManager
+     * @param ContentType $contentType
+     * @return $this
+     */
+    public function registerDoctrineContentFunctionsProvider(EntityManager $entityManager, ContentType $contentType) {
+        $this->expressionLanguage->registerProvider(new UniteExpressionLanguageDoctrineContentProvider($entityManager, $contentType));
+        return $this;
+    }
 
     /**
      * Returns the expression evaluation result, makes fieldable content available in the expression.
@@ -26,16 +49,16 @@ class ValidationExpressionChecker
      * @return bool
      */
     public function evaluate(string $expression, FieldableContent $fieldableContent) : bool {
-        $expressionLanguage = new UniteExpressionLanguage();
-
 
         $variables = [
             'locale' => $fieldableContent->getLocale(),
             'data' => json_decode(json_encode($fieldableContent->getData())),
         ];
 
+        $variables['content'] = (object)$variables;
+
         try {
-            return (bool) $expressionLanguage->evaluate($expression, $variables);
+            return (bool) $this->expressionLanguage->evaluate($expression, $variables);
         }
 
         // Silently cache all exceptions. The expression can be defined by the user and we don't want to show him_her an error page.
@@ -51,11 +74,10 @@ class ValidationExpressionChecker
      * @return bool
      */
     public function validate(string $expression) : bool {
-        $expressionLanguage = new UniteExpressionLanguage();
-        $variables = ['locale', 'data'];
+        $variables = ['locale', 'data', 'content'];
 
         try {
-            $expressionLanguage->parse($expression, $variables);
+            $this->expressionLanguage->parse($expression, $variables);
         }
 
         catch (SyntaxError $error) {
