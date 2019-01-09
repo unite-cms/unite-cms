@@ -81,6 +81,10 @@ class DoctrineContentFunctionsTest extends DatabaseAwareTestCase
 
     public function testContentUniqueFunction() {
 
+        // Test with invalid argument types.
+        $this->assertEquals(false, $this->expressionChecker->evaluateToBool('content_unique(["foo"], "f1")'));
+        $this->assertEquals(false, $this->expressionChecker->evaluateToBool('content_unique("foo", 23'));
+
         // Create and persist two content objects
         $content1 = new Content();
         $content1->setData(['f1' => 'Foo', 'f2' => 'Foo_f2'])->setContentType($this->contentType);
@@ -117,6 +121,79 @@ class DoctrineContentFunctionsTest extends DatabaseAwareTestCase
         $this->assertFalse($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f1")'));
         $this->assertTrue($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f2")'));
         $this->assertTrue($this->expressionChecker->evaluateToBool('content_unique(slug(content.data.f1), "f2")'));
+    }
+
+    public function testContentUniquifyFunction() {
+
+        // Test with invalid argument types.
+        $this->assertEquals(true, $this->expressionChecker->evaluateToString('content_uniquify(true, "f1")'));
+        $this->assertEquals(false, $this->expressionChecker->evaluateToString('content_uniquify(false, "f1")'));
+        $this->assertEquals("foo", $this->expressionChecker->evaluateToString('content_uniquify("foo", 23)'));
+        $this->assertEquals('', $this->expressionChecker->evaluateToString('content_uniquify(["foo"], "f1")'));
+
+        // Create a uniquify when no content was stored before
+        $content1 = new Content();
+        $content1->setContentType($this->contentType);
+        $this->expressionChecker->registerFieldableContent($content1);
+        $content1->setData([
+            'f1' => $this->expressionChecker->evaluateToString('content_uniquify(slug("This is my title"), "f1")'),
+        ]);
+        $this->assertEquals(['f1' => 'this-is-my-title'], $content1->getData());
+        $this->em->persist($content1);
+        $this->em->flush();
+
+        // Now uniquify the same string, should be uniquified
+        $content2 = new Content();
+        $content2->setContentType($this->contentType);
+        $this->expressionChecker->registerFieldableContent($content2);
+        $content2->setData([
+            'f1' => $this->expressionChecker->evaluateToString('content_uniquify(slug("This is my title       "), "f1")'),
+        ]);
+        $this->assertEquals(['f1' => 'this-is-my-title-1'], $content2->getData());
+        $this->em->persist($content2);
+        $this->em->flush();
+
+        // Now create a content that would have the next unique suffix
+        $content3 = new Content();
+        $content3->setContentType($this->contentType);
+        $this->expressionChecker->registerFieldableContent($content3);
+        $content3->setData([
+            'f1' => 'this-is-my-title-2',
+        ]);
+        $this->em->persist($content3);
+        $this->em->flush();
+
+        // Because this-is-my-title-2 is already taken, the next uniquify call should suffix 3
+        $content4 = new Content();
+        $content4->setContentType($this->contentType);
+        $this->expressionChecker->registerFieldableContent($content4);
+        $content4->setData([
+            'f1' => $this->expressionChecker->evaluateToString('content_uniquify(slug("This is my title"), "f1")'),
+        ]);
+        $this->assertEquals(['f1' => 'this-is-my-title-3'], $content4->getData());
+
+        // Save this content with suffix 4. uniquify will first try to add suffix based on the sql count of LIKE $value%.
+        // This would produce 4. Because 4 is already taken, it should add an additional suffix.
+        $content4->setData(['f1' => 'this-is-my-title-4']);
+        $this->em->persist($content4);
+        $this->em->flush();
+
+        // Saving a content with the same prefix bug not a numeric suffix should not change anything.
+        $content5 = new Content();
+        $content5->setContentType($this->contentType);
+        $this->expressionChecker->registerFieldableContent($content4);
+        $content5->setData([
+            'f1' => 'this-is-my-title-a',
+        ]);
+        $this->em->persist($content5);
+        $this->em->flush();
+
+        // Now test different uiquify calls based on the existing content
+        $this->assertEquals('this-is-my-title-5', $this->expressionChecker->evaluateToString('content_uniquify(slug("This is my title"), "f1")'));
+        $this->assertEquals('this-is-my-title', $this->expressionChecker->evaluateToString('content_uniquify(slug("This is my title"), "f2")'));
+        $this->assertEquals('this-is-my-title-3', $this->expressionChecker->evaluateToString('content_uniquify(slug("This is my title 3"), "f1")'));
+        $this->assertEquals('this-is-my-title-4-1', $this->expressionChecker->evaluateToString('content_uniquify(slug("This is my title 4"), "f1")'));
+
     }
 
     public function testUniqueValidation() {
