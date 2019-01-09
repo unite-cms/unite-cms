@@ -68,6 +68,14 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             "domain": "marketing",
             "content_type": "news_category"
           }
+        },
+        {
+          "title": "Not Empty",
+          "identifier": "not_empty",
+          "type": "text",
+          "settings": {
+            "not_empty": true
+          }
         }
       ],
       "views": [
@@ -1076,7 +1084,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
-                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category }, persist: true) {
+                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category, not_empty: "" }, persist: true) {
                     id, 
                     title_title,
                     content,
@@ -1094,6 +1102,30 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             ]);
 
         $this->assertNotEmpty($response->errors);
+        $this->assertEquals(static::$container->get('translator')->trans('not_blank', [], 'validators'), $response->errors[0]->message);
+        $this->assertEquals(['createNews', 'data', 'not_empty'], $response->errors[0]->path);
+
+        $response = $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
+                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category, not_empty: "Foo" }, persist: true) {
+                    id, 
+                    title_title,
+                    content,
+                    category {
+                      id,
+                      name
+                    }
+                }
+            }', [
+            'category' => [
+                'domain' => 'marketing',
+                'content_type' => 'news_category',
+                'content' => 'foo',
+            ]
+        ]);
+
+        $this->assertNotEmpty($response->errors);
         $this->assertEquals(static::$container->get('translator')->trans('invalid_reference_definition', [], 'validators'), $response->errors[0]->message);
         $this->assertEquals(['createNews', 'data', 'category'], $response->errors[0]->path);
 
@@ -1101,7 +1133,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation($category: ReferenceFieldTypeInput) {
-                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category }, persist: true) {
+                createNews(data: { title_title: "First News", content: "<p>Hello World</p>", category: $category, not_empty: "FOO" }, persist: true) {
                     id, 
                     title_title,
                     content,
@@ -1501,7 +1533,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation {
-                createNews(data: { title_title: "First News" }, persist: true) {
+                createNews(data: { title_title: "First News", not_empty: "Foo" }, persist: true) {
                     id, 
                     title_title
                 }
@@ -1515,7 +1547,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $response = $this->api(
             $this->domains['marketing'],
             $this->users['marketing_editor'], 'mutation {
-                createNews(data: { title_title: "First News" }, persist: true) {
+                createNews(data: { title_title: "First News", not_empty: "Foo" }, persist: true) {
                     id, 
                     title_title
                 }

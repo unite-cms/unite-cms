@@ -18,9 +18,17 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Validator\ConstraintViolation;
 
 class UniteCMSCoreTypeExtension extends AbstractTypeExtension
 {
+    private $translator;
+
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
 
     /**
      * {@inheritdoc}
@@ -31,7 +39,15 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
         if (isset($options['not_empty']) && $options['not_empty']) {
             $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
                 if($event->getForm()->isEmpty()) {
-                    $event->getForm()->addError(new FormError('This value should not be blank.'));
+                    $error = new FormError($this->translator->trans('not_blank', [], 'validators'), null, [], null, new ConstraintViolation(
+                        $this->translator->trans('not_blank', [], 'validators'),
+                        null,
+                        [],
+                        null,
+                        'data'.$event->getForm()->getPropertyPath(),
+                        ''
+                    ));
+                    $event->getForm()->addError($error);
                 }
             });
         }

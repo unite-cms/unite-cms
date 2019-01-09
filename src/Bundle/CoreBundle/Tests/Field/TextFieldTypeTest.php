@@ -95,7 +95,7 @@ class TextFieldTypeTest extends FieldTypeTestCase
         $form->submit([]);
         $this->assertTrue($form->isSubmitted());
         $this->assertFalse($form->isValid());
-        $this->assertEquals('This value should not be blank.', $form->getErrors(true, true)->offsetGet(0)->getMessage());
+        $this->assertEquals(static::$container->get('translator')->trans('not_blank', [], 'validators'), $form->getErrors(true, true)->offsetGet(0)->getMessage());
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $ctField->getContentType(),
@@ -111,7 +111,7 @@ class TextFieldTypeTest extends FieldTypeTestCase
         );
         $this->assertTrue($form->isSubmitted());
         $this->assertFalse($form->isValid());
-        $this->assertEquals('This value should not be blank.', $form->getErrors(true, true)->offsetGet(0)->getMessage());
+        $this->assertEquals(static::$container->get('translator')->trans('not_blank', [], 'validators'), $form->getErrors(true, true)->offsetGet(0)->getMessage());
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $ctField->getContentType(),
