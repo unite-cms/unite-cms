@@ -53,3 +53,9 @@ services:
   UniteCMS\CoreBundle\Validator\Constraints\ValidGraphQLQueryValidator:
     tags: [validator.constraint_validator]
     public: false
+
+  # Checks, that Fieldable validations are valid
+  UniteCMS\CoreBundle\Validator\Constraints\ValidValidationsValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['@doctrine.orm.entity_manager']
+    public: false

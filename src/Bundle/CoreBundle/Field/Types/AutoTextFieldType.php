@@ -8,6 +8,8 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -41,9 +43,15 @@ class AutoTextFieldType extends TextFieldType
      */
     private $router;
 
-    public function __construct(Router $router)
+    /**
+     * @var EntityManagerInterface $entityManager
+     */
+    private $entityManager;
+
+    public function __construct(Router $router, EntityManagerInterface $entityManager)
     {
         $this->router = $router;
+        $this->entityManager = $entityManager;
     }
 
     function getFormOptions(FieldableField $field): array
@@ -151,6 +159,7 @@ class AutoTextFieldType extends TextFieldType
 
         $expressionChecker = new UniteExpressionChecker();
         $expressionChecker->registerFieldableContent(null);
+        $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, new ContentType());
 
         if(!$expressionChecker->validate($settings->expression)) {
             $context->buildViolation('invalid_expression')->atPath('expression')->addViolation();

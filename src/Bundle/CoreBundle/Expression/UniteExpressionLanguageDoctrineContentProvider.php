@@ -8,7 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Expression;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Orx;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
@@ -24,7 +24,7 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
     const MAXIMUM_NESTING_UNIQUIFY_TEST_RUNS = 8;
 
     /**
-     * @var EntityManager $entityManager
+     * @var EntityManagerInterface $entityManager
      */
     private $entityManager;
 
@@ -33,7 +33,7 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
      */
     private $contentType;
 
-    public function __construct(EntityManager $entityManager, ContentType $contentType)
+    public function __construct(EntityManagerInterface $entityManager, ContentType $contentType)
     {
         $this->entityManager = $entityManager;
         $this->contentType = $contentType;
