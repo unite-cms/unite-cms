@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.7 (2019-01-15)
+- Fixed #455: Searching views should reset paging to page 1
+- Improved #121: Users only see view row actions they have permissions for
+
 ## 0.7.6 (2019-01-09)
 - Fixed #463: expression language doctrine content functions are not available when validating validatons
 
