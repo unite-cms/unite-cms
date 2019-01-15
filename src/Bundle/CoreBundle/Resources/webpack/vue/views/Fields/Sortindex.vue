@@ -1,6 +1,6 @@
 <template>
     <div v-if="sortable" class="view-field view-field-sortindex fixed-width">
-        <div class="uk-sortable-handle" v-html="feather.icons['move'].toSvg({ width: 16, height: 16 })"></div>
+        <div v-if="row._actions.update" class="uk-sortable-handle" v-html="feather.icons['move'].toSvg({ width: 16, height: 16 })"></div>
     </div>
 </template>
 

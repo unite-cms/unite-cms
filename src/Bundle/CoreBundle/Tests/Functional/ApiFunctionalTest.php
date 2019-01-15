@@ -16,7 +16,6 @@ use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Controller\GraphQLApiController;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -146,7 +145,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       ],
       "permissions": {
         "view setting": "true",
-        "update setting": "true"
+        "update setting": "member.type == \"editor\""
       },
       "locales": []
     },
@@ -549,6 +548,114 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 },
                 findNews_category {
                     page
+                }
+            }')
+        );
+
+        // Test accessing content / setting permissions
+        $this->assertApiResponse([
+            'data' => [
+                'findNews' => [
+
+                    '_permissions' => [
+                        'LIST_CONTENT' => true,
+                        'CREATE_CONTENT' => false,
+                    ],
+
+                    'result' => [
+                        [
+                            '_permissions' => [
+                                'VIEW_CONTENT' => true,
+                                'UPDATE_CONTENT' => false,
+                                'DELETE_CONTENT' => false,
+                            ],
+                        ],
+                    ],
+                ],
+                'WebsiteSetting' => [
+                    '_permissions' => [
+                        'VIEW_SETTING' => true,
+                        'UPDATE_SETTING' => false,
+                    ],
+                ]
+            ]
+        ], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+                findNews(limit:1) {
+                
+                    _permissions {
+                        LIST_CONTENT,
+                        CREATE_CONTENT
+                    }
+                   
+                    result {
+                        _permissions {
+                            VIEW_CONTENT,
+                            UPDATE_CONTENT,
+                            DELETE_CONTENT
+                        }
+                    }
+                },
+                WebsiteSetting {
+                    _permissions {
+                        VIEW_SETTING,
+                        UPDATE_SETTING
+                    }
+                }
+            }')
+        );
+
+        // Test accessing content / setting permissions
+        $this->assertApiResponse([
+            'data' => [
+                'findNews' => [
+
+                    '_permissions' => [
+                        'LIST_CONTENT' => true,
+                        'CREATE_CONTENT' => true,
+                    ],
+
+                    'result' => [
+                        [
+                            '_permissions' => [
+                                'VIEW_CONTENT' => true,
+                                'UPDATE_CONTENT' => true,
+                                'DELETE_CONTENT' => true,
+                            ],
+                        ],
+                    ],
+                ],
+                'WebsiteSetting' => [
+                    '_permissions' => [
+                        'VIEW_SETTING' => true,
+                        'UPDATE_SETTING' => true,
+                    ],
+                ]
+            ]
+        ], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_editor'],'query {
+                findNews(limit:1) {
+                
+                    _permissions {
+                        LIST_CONTENT,
+                        CREATE_CONTENT
+                    }
+                   
+                    result {
+                        _permissions {
+                            VIEW_CONTENT,
+                            UPDATE_CONTENT,
+                            DELETE_CONTENT
+                        }
+                    }
+                },
+                WebsiteSetting {
+                    _permissions {
+                        VIEW_SETTING,
+                        UPDATE_SETTING
+                    }
                 }
             }')
         );

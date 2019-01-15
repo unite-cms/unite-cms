@@ -121,7 +121,14 @@ export default {
                 result: ` + this.queryMethod + `(limit: $limit, page: $page, sort: $sort, filter: $filter, deleted: $deleted) {
                     page,
                     total,
+                    _permissions {
+                        CREATE_CONTENT
+                    },
                     result {
+                        _permissions {
+                            UPDATE_CONTENT,
+                            DELETE_CONTENT
+                        },
                         ` + this.fieldQuery.join(',') + `
                     }
                 },
@@ -151,6 +158,10 @@ export default {
             this.client.request(`
               mutation($id: ID!, $data: ` + this.updateDataObjectName + `!) {
                 ` + this.updateMethod + `(id: $id, data: $data, persist: true) {
+                    _permissions {
+                        UPDATE_CONTENT,
+                        DELETE_CONTENT
+                    },
                     ` + this.fieldQuery.join(',') + `
                 }
               }`, {
