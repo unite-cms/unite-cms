@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Tests\Validator;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Validator\ConstraintViolationList;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
@@ -49,7 +50,10 @@ class ValidFieldableContentDataCustomValidationsTest extends ConstraintValidator
     {
         parent::setUp();
 
-        $this->constraintValidator = new ValidFieldableContentDataValidator($this->createMock(FieldTypeManager::class));
+        $this->constraintValidator = new ValidFieldableContentDataValidator(
+            $this->createMock(FieldTypeManager::class),
+            $this->createMock(EntityManager::class)
+        );
 
         $this->contentType = new ContentType();
         $this->contentType->setTitle('Content Type 1')->setIdentifier('ct1');

@@ -99,8 +99,9 @@ class Content implements FieldableContent
      */
     private $deleted;
 
-    public function __construct()
+    public function __construct($id = null)
     {
+        $this->id = $id;
         $this->translations = new ArrayCollection();
         $this->translationOf = null;
     }

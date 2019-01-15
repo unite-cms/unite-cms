@@ -219,19 +219,16 @@ class ContentController extends Controller
     public function previewAction(View $view, Request $request)
     {
         // User must have create or update permissions for this content type.
-        $genericContent = new Content();
-        $genericContent->setContentType($view->getContentType());
+        $content = new Content($request->query->get('id', null));
+        $content->setContentType($view->getContentType());
+        $hasAccess = ($this->isGranted(ContentVoter::CREATE, $view->getContentType()) || $this->isGranted(ContentVoter::UPDATE, $content));
 
-        if(!$this->isGranted(ContentVoter::CREATE, $view->getContentType()) && !$this->isGranted(ContentVoter::UPDATE, $genericContent)) {
+        if(!$hasAccess) {
             throw $this->createAccessDeniedException();
         }
 
-        if(empty($view->getContentType()->getPreview())) {
-            throw $this->createNotFoundException('No preview defined for this content type.');
-        }
+        $response = null;
 
-        $data_uri = '';
-        $content = new Content();
         $form = $this->get('unite.cms.fieldable_form_builder')->createForm($view->getContentType(), $content);
         $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
         $form->handleRequest($request);
@@ -248,15 +245,15 @@ class ContentController extends Controller
             $content->setData($data);
 
             // Create GraphQL Schema
-            $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($view->getContentType()->getDomain(), ucfirst($view->getContentType()->getIdentifier()) . 'Content');
-            $result = GraphQL::executeQuery($schema, $view->getContentType()->getPreview()->getQuery(), $content);
-
-            $data_uri = urlencode($this->container->get('jms_serializer')->serialize($result->data, 'json'));
+            $domain = $view->getContentType()->getDomain();
+            $queryType = ucfirst($view->getContentType()->getIdentifier()) . 'Content';
+            $query = $request->query->get('query', 'query{type}');
+            $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($domain, $queryType);
+            $result = GraphQL::executeQuery($schema, $query, $content);
+            $response = $this->container->get('jms_serializer')->serialize($result->data, 'json');
         }
 
-        $preview_url = $view->getContentType()->getPreview()->getUrl();
-        $param_seperator = strpos($preview_url, '?') === false ? '?' : '&';
-        return new Response($preview_url . $param_seperator . 'data=' . $data_uri);
+        return new Response($response);
     }
 
     /**

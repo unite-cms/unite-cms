@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div uk-sortable="handle: .uk-sortable-handle; animation: 300">
+        <div class="collection-wrapper">
             <unite-cms-collection-field-row
                     v-for="row in sortedRows"
                     :key="row.delta"
@@ -20,6 +20,7 @@
 
 <script>
     import feather from 'feather-icons';
+    import UIkit from 'uikit';
 
     export default {
         data() {
@@ -66,6 +67,15 @@
         ],
         mounted() {
 
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    UIkit.sortable(this.$el.querySelector('.collection-wrapper'), {
+                        handle: '.uk-sortable-handle',
+                        animation: 300,
+                    });
+                }, 100);
+            });
+
             // After an element was moved, update all sort positions.
             this.$el.addEventListener('moved', () => {
                 this.calculatePositions();
@@ -80,7 +90,8 @@
                 return null;
             },
             calculatePositions() {
-                this.$el.querySelectorAll('unite-cms-collection-field-row').forEach((element, index) => {
+                console.log(this.$el.childNodes[0].childNodes);
+                this.$el.childNodes[0].childNodes.forEach((element, index) => {
                     let row = this.getRow(element.attributes.delta.value);
                     if(row) {
                         row.position = index;
@@ -174,7 +185,7 @@
     }
 
     unite-cms-collection-field-row + unite-cms-collection-field-row {
-        .collection-add-button-wrapper {
+        > div > .collection-add-button-wrapper {
             padding: 5px auto;
 
             button.uk-button:not(.uk-button-text):not(.uk-button-link) {

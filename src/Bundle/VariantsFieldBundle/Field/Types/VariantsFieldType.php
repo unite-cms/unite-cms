@@ -55,6 +55,9 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     {
         // Configure the variants from type.
         return array_merge(parent::getFormOptions($field), [
+            // TODO: In the future, we could also add a not_empty option to the variants field type and pass it as an extra argument to  VariantsFormType->type child form element.
+            // Please see VariantsFormType::buildView() for more information.
+            'required' => true,
             'variants' => self::getNestableFieldable($field),
         ]);
     }

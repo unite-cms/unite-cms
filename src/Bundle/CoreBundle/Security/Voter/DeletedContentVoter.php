@@ -71,7 +71,13 @@ class DeletedContentVoter extends ContentVoter
 
         // If the expression evaluates to true, we grant access.
         foreach ($domainMembers as $domainMember) {
-            if($this->accessExpressionChecker->evaluate($contentType->getPermissions()[$attribute], $domainMember, $subject instanceof Content ? $subject : null)) {
+
+            $this
+                ->accessExpressionChecker->clearVariables()
+                ->registerDomainMember($domainMember)
+                ->registerFieldableContent($subject instanceof Content ? $subject : null);
+
+            if($this->accessExpressionChecker->evaluateToBool($contentType->getPermissions()[$attribute])) {
                 return self::ACCESS_GRANTED;
             }
         }

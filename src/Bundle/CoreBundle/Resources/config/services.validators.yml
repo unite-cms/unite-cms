@@ -16,7 +16,7 @@ services:
   # Checks, that the fieldableContent (content or setting) data is valid according to the contentType / settingType definition.
   UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentDataValidator:
     tags: [validator.constraint_validator]
-    arguments: ['@unite.cms.field_type_manager']
+    arguments: ['@unite.cms.field_type_manager', '@doctrine.orm.entity_manager']
     public: false
 
   # Checks, that the field setting data is valid by asking the corresponding fieldType.
@@ -52,4 +52,10 @@ services:
   # Checks, that a GraphQL query for a fieldable (content or setting) is valid.
   UniteCMS\CoreBundle\Validator\Constraints\ValidGraphQLQueryValidator:
     tags: [validator.constraint_validator]
+    public: false
+
+  # Checks, that Fieldable validations are valid
+  UniteCMS\CoreBundle\Validator\Constraints\ValidValidationsValidator:
+    tags: [validator.constraint_validator]
+    arguments: ['@doctrine.orm.entity_manager']
     public: false

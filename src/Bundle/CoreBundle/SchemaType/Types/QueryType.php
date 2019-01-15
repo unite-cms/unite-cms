@@ -46,18 +46,25 @@ class QueryType extends AbstractType
      */
     private $paginator;
 
+    /**
+     * @var int $maximumQueryLimit
+     */
+    private $maximumQueryLimit;
+
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
         EntityManager $entityManager,
         UniteCMSManager $uniteCMSManager,
         AuthorizationChecker $authorizationChecker,
-        Paginator $paginator
+        Paginator $paginator,
+        int $maximumQueryLimit = 100
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->entityManager = $entityManager;
         $this->uniteCMSManager = $uniteCMSManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->paginator = $paginator;
+        $this->maximumQueryLimit = $maximumQueryLimit;
         parent::__construct();
     }
 
@@ -233,10 +240,9 @@ class QueryType extends AbstractType
      */
     private function resolveFindContent($resultType, $value, array $args, $context, ResolveInfo $info) : AbstractPagination
     {
-
         $args['types'] = $args['types'] ?? [];
         $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
-        $args['limit'] = $args['limit'] > 100 ? 100 : $args['limit'];
+        $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
         $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
         $args['deleted'] = $args['deleted'] ?? false;
 
