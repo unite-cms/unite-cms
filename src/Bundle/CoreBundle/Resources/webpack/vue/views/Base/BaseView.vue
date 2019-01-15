@@ -211,7 +211,7 @@
             },
             onSearch(term) {
                 this.dataFetcher.search(term);
-                this.load();
+                this.load(1);
             },
             onUpdateSort(sort) {
                 this.sort = sort;
