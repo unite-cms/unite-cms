@@ -16,7 +16,7 @@
                 <a v-on:click.prevent="onSearch" href="" class="uk-search-icon-flip" uk-search-icon></a>
                 <input v-model="searchTerm" class="uk-search-input" type="search" placeholder="Search..." v-on:keyup="onDebouncedSearch">
             </form>
-            <a v-if="!selectable" :target="embedded ? '_blank' : '_self'" :href="createUrl" class="uk-button uk-button-primary">
+            <a v-if="allowCreate && !selectable" :target="embedded ? '_blank' : '_self'" :href="createUrl" class="uk-button uk-button-primary">
                 <span v-html="feather.icons['plus'].toSvg()"></span>
                 {{ createLabel }}
             </a>
@@ -46,7 +46,8 @@
             'createUrl',
             'selectable',
             'sortable',
-            'embedded'
+            'embedded',
+            'allowCreate'
         ],
         methods: {
             onDebouncedSearch(e) {

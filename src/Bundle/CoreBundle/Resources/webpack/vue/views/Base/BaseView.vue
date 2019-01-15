@@ -9,6 +9,7 @@
                    :createLabel="labels.create"
                    :sortable="sort.sortable && !selectable && !deleted.showDeleted"
                    :createUrl="urls.create"
+                   :allowCreate="allowCreate"
                    @search="onSearch"></component>
 
         <div v-if="error" class="unite-table-error uk-alert-danger uk-flex uk-flex-middle">
@@ -109,6 +110,7 @@
                 selectable: selectable,
                 urls: bag.urls,
                 hasTranslations: bag.settings.hasTranslations,
+                allowCreate: false,
                 deleted: {
                     hasDeleted: false,
                     showDeleted: false
@@ -185,21 +187,20 @@
                     .then(
                         (data) => {
 
-                            // In the future, allowed actions will be returned by the api, allowing to display action
-                            // buttons based on content and not only content type. At the moment, we fake this here.
                             this.rows = data.result.result.map((row) => {
                                 let deleted = !(row.deleted == null);
                                 row._actions = {
-                                    delete: !deleted,
-                                    delete_definitely: deleted,
-                                    recover: deleted,
-                                    translations: !deleted && this.hasTranslations,
-                                    revisions: !deleted,
-                                    update: !deleted
+                                    delete: row._permissions.DELETE_CONTENT && !deleted,
+                                    delete_definitely: row._permissions.DELETE_CONTENT && deleted,
+                                    recover: row._permissions.UPDATE_CONTENT && deleted,
+                                    translations: row._permissions.UPDATE_CONTENT && !deleted && this.hasTranslations,
+                                    revisions: row._permissions.UPDATE_CONTENT && !deleted,
+                                    update: row._permissions.UPDATE_CONTENT && !deleted
                                 };
                                 return row;
                             });
 
+                            this.allowCreate = data.result._permissions.CREATE_CONTENT;
                             this.page = data.result.page;
                             this.total = data.result.total;
                             this.deleted.hasDeleted = data.deleted.total > 0;
