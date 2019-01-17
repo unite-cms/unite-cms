@@ -1,1 +1,12 @@
-{"entrypoints":{"main":{"css":["bundles/unitecmsvariantsfield/main.2d4fc50f.css"],"js":["bundles/unitecmsvariantsfield/main.7cb32482.js"]}}}
+{
+  "entrypoints": {
+    "main": {
+      "css": [
+        "/bundles/unitecmsvariantsfield/main.0e25c412.css"
+      ],
+      "js": [
+        "/bundles/unitecmsvariantsfield/main.6cce0a8b.js"
+      ]
+    }
+  }
+}
