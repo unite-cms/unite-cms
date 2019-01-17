@@ -435,7 +435,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('unite-cms-storage-file-field', $root->vars['tag']);
 
         // Assert values
-        $this->assertEquals(json_encode($content->getData()['f1']), $root->vars['value']);
+        $this->assertEquals($content->getData()['f1'], $root->vars['value']);
 
         // Assert correct sign url generation.
         $this->assertEquals(
@@ -494,7 +494,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('unite-cms-storage-file-field', $root->vars['tag']);
 
         // Assert values
-        $this->assertEquals(json_encode($setting->getData()['f1']), $root->vars['value']);
+        $this->assertEquals($setting->getData()['f1'], $root->vars['value']);
 
         // Assert correct sign url generation.
         $this->assertEquals(
