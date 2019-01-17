@@ -2,18 +2,18 @@
   "name": "UniteCMSWysiwygFieldBundle",
   "version": "1.0.0",
   "dependencies": {
-    "@ckeditor/ckeditor5-autosave": "^10.0.1",
-    "@ckeditor/ckeditor5-build-classic": "^11.1.1"
+    "@ckeditor/ckeditor5-autosave": "^10.0.2",
+    "@ckeditor/ckeditor5-build-classic": "^11.2.0"
   },
   "devDependencies": {
-    "@symfony/webpack-encore": "^0.21.0",
-    "node-sass": "^4.9.3",
-    "npm": "^6.4.1",
+    "@symfony/webpack-encore": "^0.22.4",
+    "node-sass": "^4.11.0",
+    "npm": "^6.5.0",
     "sass-loader": "^7.1.0",
-    "vue": "^2.5.6",
-    "vue-custom-element": "^3.2.5",
-    "vue-loader": "^15.4.2",
-    "vue-template-compiler": "^2.5.6"
+    "vue": "^2.5.22",
+    "vue-custom-element": "^3.2.6",
+    "vue-loader": "^15.5.1",
+    "vue-template-compiler": "^2.5.22"
   },
   "scripts": {
     "dev": "./node_modules/.bin/encore dev --watch",
