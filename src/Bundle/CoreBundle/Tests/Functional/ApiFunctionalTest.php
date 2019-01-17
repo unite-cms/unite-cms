@@ -1342,7 +1342,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 }
             }', [
             'id' => $news->id,
-            'category' => null
+            'category' => [
+                'content' => null,
+            ]
         ]);
 
         $this->assertTrue(empty($response->errors));
@@ -1366,7 +1368,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 }
             }', [
             'id' => $news->id,
-            'category' => null
+            'category' => [
+                'content' => null,
+            ]
         ]);
 
         $this->assertTrue(empty($response->errors));
