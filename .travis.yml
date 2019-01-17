@@ -20,6 +20,9 @@ addons:
 services:
   - mysql
 
+env:
+  - SYMFONY_DEPRECATIONS_HELPER=weak
+
 jobs:
   include:
     - php: 7.1
