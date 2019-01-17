@@ -27,6 +27,7 @@ class AutoTextType extends AbstractType
         $resolver->setRequired(['expression', 'generation_url']);
         $resolver->setDefaults([
             'compound' => true,
+            'error_bubbling' => true,
             'text_widget' => TextType::class,
             'auto_update' => false,
         ]);

@@ -9,19 +9,13 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class WebComponentType extends AbstractType implements DataTransformerInterface
+class WebComponentType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
-        $builder->addModelTransformer($this);
-    }
-
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setRequired('tag');
         $resolver->setDefaults(
             [
-                'compound' => false,
                 'label' => false,
             ]
         );
@@ -40,8 +34,6 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
         if (empty($form->getData()) && !empty($options['empty_data'])) {
             $view->vars['value'] = $options['empty_data'];
         }
-
-        $view->vars['value'] = $this->transform($view->vars['value']);
     }
 
     /**
@@ -50,30 +42,5 @@ class WebComponentType extends AbstractType implements DataTransformerInterface
     public function getBlockPrefix()
     {
         return 'unite_cms_web_component';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function transform($data)
-    {
-        if (!is_string($data) && null !== $data) {
-            return json_encode($data);
-        }
-
-        // Model data should not be transformed
-        return $data;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function reverseTransform($data)
-    {
-        if (empty($data)) {
-            return null;
-        }
-
-        return null === $data ? '' : $data;
     }
 }

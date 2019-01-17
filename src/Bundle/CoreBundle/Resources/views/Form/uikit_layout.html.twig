@@ -150,7 +150,7 @@
 
 
 {%- block unite_cms_web_component_widget -%}
-    <{{ tag }} {{ block('widget_attributes') }} value="{{ value }}"></{{ tag }}>
+    <{{ tag }} {{ block('widget_attributes') }} value="{{ value is iterable ? value|json_encode : value }}"></{{ tag }}>
 {%- endblock unite_cms_web_component_widget -%}
 
 {%- block unite_cms_choice_cards_widget -%}

@@ -20,8 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Translation\TranslatorInterface;
-use UniteCMS\CoreBundle\Model\State;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class StateType extends AbstractType implements DataTransformerInterface
 {
@@ -162,7 +161,8 @@ class StateType extends AbstractType implements DataTransformerInterface
         $resolver->setDefaults([
             'label_prefix' => 'state',
             'settings' => [],
-            'compound' => true
+            'compound' => true,
+            'error_bubbling' => true
         ]);
 
     }

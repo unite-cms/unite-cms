@@ -6,7 +6,6 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -141,6 +140,7 @@ class FileFieldType extends FieldType
 
         if(empty($data['size']) || empty($data['id']) || empty($data['name']) || empty($data['checksum'])) {
             $context->buildViolation('storage.missing_file_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
+            return;
         }
 
         if(empty($violations)) {

@@ -27,11 +27,6 @@ class WysiwygType extends WebComponentType
         $this->antiXss = new AntiXSS();
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
-        $builder->addModelTransformer($this);
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -51,6 +46,7 @@ class WysiwygType extends WebComponentType
             [
                 'tag' => 'unite-cms-wysiwyg-field',
                 'empty_data' => '',
+                'compound' => false,
             ]
         );
     }

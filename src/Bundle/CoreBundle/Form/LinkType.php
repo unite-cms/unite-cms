@@ -44,6 +44,7 @@ class LinkType extends AbstractType
         $resolver->setDefaults([
             'label_prefix' => 'link_type',
             'compound' => true,
+            'error_bubbling' => true,
             'title_widget' => false,
             'target_widget' => false,
         ]);

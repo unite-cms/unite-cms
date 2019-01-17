@@ -92,7 +92,7 @@ class DomainController extends AbstractController
         $form = $this->createFormBuilder([
             'domain' => $domain->getConfig(),
         ])
-            ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
+            ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'compound' => false])
             ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->getForm();
 
@@ -254,6 +254,7 @@ class DomainController extends AbstractController
             'domain' => $outOfSyncPersistedConfig ? $outOfSyncPersistedConfig : $domain->getConfig(),
         ])
         ->add('domain', WebComponentType::class, [
+            'compound' => false,
             'tag' => 'unite-cms-core-domaineditor',
             'error_bubbling' => true,
             'attr' => $outOfSyncPersistedConfig ? ['diff-value' => json_encode(json_decode($domain->getConfig()))] : [],

@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Form;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -17,9 +18,15 @@ class FieldableFormType extends AbstractType
      */
     private $tokenStorage;
 
-    public function __construct(TokenStorage $tokenStorage)
+    /**
+     * @var LoggerInterface $logger
+     */
+    private $logger;
+
+    public function __construct(TokenStorage $tokenStorage, LoggerInterface $logger)
     {
         $this->tokenStorage = $tokenStorage;
+        $this->logger = $logger;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -53,6 +60,7 @@ class FieldableFormType extends AbstractType
                     $field->getFieldType()->getFormOptions($field->getFieldDefinition())
                 );
             } catch (\Exception $e) {
+                $this->logger->error('Field could not be added to this fieldable form.', ['exception' => $e]);
                 $builder->add(
                     $field->getFieldType()->getIdentifier($field->getFieldDefinition()),
                     FieldExceptionFormType::class
