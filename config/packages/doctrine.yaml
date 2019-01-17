@@ -19,7 +19,7 @@ doctrine:
             gedmo_loggable:
                 type: annotation
                 prefix: Gedmo\Loggable\Entity
-                dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Loggable/Entity"
+                dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/lib/Gedmo/Loggable/Entity"
                 alias: GedmoLoggable # (optional) it will default to the name set for the mappingmapping
                 is_bundle: false
         filters:
@@ -28,10 +28,10 @@ doctrine:
                 enabled: true
         dql:
             string_functions:
-                JSON_EXTRACT:   Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
-                JSON_SET:       Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
-                JSON_REMOVE:    Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
-                JSON_UNQUOTE:   Syslogic\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
+                JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
+                JSON_SET:       Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
+                JSON_REMOVE:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
+                JSON_UNQUOTE:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
                 CAST:           Oro\ORM\Query\AST\Functions\Cast
 
 stof_doctrine_extensions:

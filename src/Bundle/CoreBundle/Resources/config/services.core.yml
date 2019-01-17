@@ -38,9 +38,6 @@ services:
     arguments:
       ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem', '@event_dispatcher']
 
-  # In order to autowire DomainConfigManager, we need to alis the full class path
-  UniteCMS\CoreBundle\Service\DomainConfigManager: "@unite.cms.domain_config_manager"
-
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
   unite.cms.fieldable_form_builder:
     class: UniteCMS\CoreBundle\Form\FieldableFormBuilder
@@ -94,3 +91,11 @@ services:
     arguments: ['@translator']
     tags:
     - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
+
+
+  # In order to autowire services, we need to alis the full class path
+  UniteCMS\CoreBundle\Service\UniteCMSManager: "@unite.cms.manager"
+  UniteCMS\CoreBundle\Field\FieldTypeManager: "@unite.cms.field_type_manager"
+  UniteCMS\CoreBundle\View\ViewTypeManager: "@unite.cms.view_type_manager"
+  UniteCMS\CoreBundle\Service\DomainConfigManager: "@unite.cms.domain_config_manager"
+  UniteCMS\CoreBundle\Form\FieldableFormBuilder: "@unite.cms.fieldable_form_builder"

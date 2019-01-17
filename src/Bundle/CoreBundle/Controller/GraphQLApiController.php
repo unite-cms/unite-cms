@@ -10,14 +10,15 @@ use GraphQL\Server\StandardServer;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
-class GraphQLApiController extends Controller
+class GraphQLApiController extends AbstractController
 {
 
     /**
@@ -26,18 +27,20 @@ class GraphQLApiController extends Controller
      * @param Request $request
      * @param LoggerInterface $logger
      *
+     * @param SchemaTypeManager $schemaTypeManagere
+     * @param bool $kernelDebug
      * @return \Symfony\Component\HttpFoundation\Response
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::VIEW'), domain)")
      */
-    public function indexAction(Organization $organization, Domain $domain, Request $request, LoggerInterface $logger)
+    public function indexAction(Organization $organization, Domain $domain, Request $request, LoggerInterface $logger, SchemaTypeManager $schemaTypeManagere, bool $kernelDebug = false)
     {
-        $schema = $this->get('unite.cms.graphql.schema_type_manager')->createSchema($domain, 'Query', 'Mutation');
+        $schema = $schemaTypeManagere->createSchema($domain, 'Query', 'Mutation');
         $server = new StandardServer(ServerConfig::create()
             ->setSchema($schema)
             ->setQueryBatching(true)
-            ->setDebug($this->getParameter('kernel.debug'))
+            ->setDebug($kernelDebug)
             ->setContext(
                 function () use ($request) {
                     return [

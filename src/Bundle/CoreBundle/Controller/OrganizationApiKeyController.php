@@ -2,10 +2,11 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use Knp\Component\Pager\PaginatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,7 @@ use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
-class OrganizationApiKeyController extends Controller
+class OrganizationApiKeyController extends AbstractController
 {
     /**
      * @Route("/", methods={"GET"})
@@ -26,9 +27,9 @@ class OrganizationApiKeyController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function indexAction(Organization $organization, Request $request)
+    public function indexAction(Organization $organization, Request $request, PaginatorInterface $paginator)
     {
-        $apiKeys = $this->get('knp_paginator')->paginate($organization->getApiKeys(),
+        $apiKeys = $paginator->paginate($organization->getApiKeys(),
             $request->query->getInt('page_keys', 1),
             10,
             ['pageParameterName' => 'page_keys', 'sortDirectionParameterName' => 'sort_keys']

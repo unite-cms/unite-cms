@@ -3,7 +3,7 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
@@ -11,7 +11,7 @@ use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 
-class IndexController extends Controller
+class IndexController extends AbstractController
 {
 
     /**

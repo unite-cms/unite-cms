@@ -3,17 +3,18 @@
 namespace UniteCMS\CoreBundle\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Bundle\FrameworkBundle\Routing\Router;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-class AuthenticationController extends Controller
+class AuthenticationController extends AbstractController
 {
 
     /**
      * @Route("/login", methods={"GET", "POST"})
+     * @param AuthenticationUtils $authenticationUtils
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function loginAction()
+    public function loginAction(AuthenticationUtils $authenticationUtils)
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -21,10 +22,10 @@ class AuthenticationController extends Controller
         }
 
         // get the login error if there is one
-        $error = $this->get('security.authentication_utils')->getLastAuthenticationError();
+        $error = $authenticationUtils->getLastAuthenticationError();
 
         // last username entered by the user
-        $lastUsername = $this->get('security.authentication_utils')->getLastUsername();
+        $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render(
             '@UniteCMSCore/Authentication/login.html.twig',

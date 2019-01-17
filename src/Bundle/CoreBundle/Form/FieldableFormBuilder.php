@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Form;
 
-use Symfony\Component\Form\FormFactory;
+use Symfony\Component\Form\FormFactoryInterface;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
@@ -12,7 +12,7 @@ class FieldableFormBuilder
     private $formFactory;
     private $fieldTypeManager;
 
-    public function __construct(FormFactory $formFactory, FieldTypeManager $fieldTypeManager)
+    public function __construct(FormFactoryInterface $formFactory, FieldTypeManager $fieldTypeManager)
     {
         $this->formFactory = $formFactory;
         $this->fieldTypeManager = $fieldTypeManager;

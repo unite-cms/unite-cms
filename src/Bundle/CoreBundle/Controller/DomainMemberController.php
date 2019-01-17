@@ -2,20 +2,22 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use Knp\Component\Pager\PaginatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\Router;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
@@ -25,10 +27,11 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
+use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
-class DomainMemberController extends Controller
+class DomainMemberController extends AbstractController
 {
     /**
      * @Route("/{member_type}", methods={"GET"})
@@ -41,17 +44,18 @@ class DomainMemberController extends Controller
      * @param Domain $domain
      * @param DomainMemberType $memberType
      * @param Request $request
+     * @param PaginatorInterface $paginator
      * @return Response
      */
-    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request)
+    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request, PaginatorInterface $paginator)
     {
-        $members = $this->get('knp_paginator')->paginate($memberType->getDomainMembers(),
+        $members = $paginator->paginate($memberType->getDomainMembers(),
             $request->query->getInt('page_members', 1),
             10,
             ['pageParameterName' => 'page_members', 'sortDirectionParameterName' => 'sort_members']
         );
 
-        $invites = $this->get('knp_paginator')->paginate($memberType->getInvites(),
+        $invites = $paginator->paginate($memberType->getInvites(),
             $request->query->getInt('page_invites', 1),
             10,
             ['pageParameterName' => 'page_invites', 'sortDirectionParameterName' => 'sort_invites']
@@ -80,9 +84,15 @@ class DomainMemberController extends Controller
      * @param Domain $domain
      * @param DomainMemberType $memberType
      * @param Request $request
+     * @param TranslatorInterface $translator
+     * @param FormFactoryInterface $formFactory
+     * @param ValidatorInterface $validator
+     * @param \Swift_Mailer $mailer
+     * @param string $mailerSender
      * @return Response
+     * @throws \Exception
      */
-    public function createAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request)
+    public function createAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request, TranslatorInterface $translator, FormFactoryInterface $formFactory, ValidatorInterface $validator, \Swift_Mailer $mailer, string $mailerSender)
     {
         // Get a list of ids of all accessors, that are already member of this domain.
         $domain_member_type_members = [];
@@ -99,14 +109,14 @@ class DomainMemberController extends Controller
         ] as $type => $icon) {
             $add_types[] = new ChoiceCardOption(
                 $type,
-                $this->get('translator')->trans('domain.member.create.headline.' . $type),
-                $this->get('translator')->trans('domain.member.create.text.' . $type),
+                $translator->trans('domain.member.create.headline.' . $type),
+                $translator->trans('domain.member.create.text.' . $type),
                 $icon
             );
         }
 
         // Create the two-step create form.
-        $form = $this->get('form.factory')->createNamedBuilder(
+        $form = $formFactory->createNamedBuilder(
                 'create_domain_user',
                 FormType::class,
                 null,
@@ -172,7 +182,7 @@ class DomainMemberController extends Controller
                     $member->setAccessor($data['existing_api_key']);
                 }
 
-                $violations = $this->get('validator')->validate($member);
+                $violations = $validator->validate($member);
                 if($violations->count() > 0) {
                     $violationMapper = new ViolationMapper();
                     foreach ($violations as $violation) {
@@ -194,7 +204,7 @@ class DomainMemberController extends Controller
                 $invitation->setDomainMemberType($memberType);
                 $invitation->setEmail($data['invite_user']);
 
-                $violations = $this->get('validator')->validate($invitation);
+                $violations = $validator->validate($invitation);
                 if($violations->count() > 0) {
                     $violationMapper = new ViolationMapper();
                     foreach ($violations as $violation) {
@@ -205,8 +215,8 @@ class DomainMemberController extends Controller
                     $this->getDoctrine()->getManager()->flush();
 
                     // Send out email using the default mailer.
-                    $message = (new \Swift_Message($this->get('translator')->trans('email.invitation.headline', ['%invitor%' => $this->getUser()])))
-                        ->setFrom($this->getParameter('mailer_sender'))
+                    $message = (new \Swift_Message($translator->trans('email.invitation.headline', ['%invitor%' => $this->getUser()])))
+                        ->setFrom($mailerSender)
                         ->setTo($invitation->getEmail())
                         ->setBody(
                             $this->renderView(
@@ -218,7 +228,7 @@ class DomainMemberController extends Controller
                             ),
                             'text/html'
                         );
-                    $this->get('mailer')->send($message);
+                    $mailer->send($message);
 
                     return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
                 }
@@ -250,11 +260,13 @@ class DomainMemberController extends Controller
      * @param \UniteCMS\CoreBundle\Entity\DomainMember $member
      * @param Request $request
      *
+     * @param FieldableFormBuilder $fieldableFormBuilder
+     * @param ValidatorInterface $validator
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function updateAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
+    public function updateAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request, FieldableFormBuilder $fieldableFormBuilder, ValidatorInterface $validator)
     {
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = $fieldableFormBuilder->createForm(
             $memberType,
             $member,
             ['attr' => ['class' => 'uk-form-vertical']]
@@ -267,7 +279,7 @@ class DomainMemberController extends Controller
             $member->setData($form->getData());
 
             // If member field errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($member);
+            $violations = $validator->validate($member);
 
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
