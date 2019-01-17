@@ -9,7 +9,7 @@ parameters:
     routing_approach: '%env(ROUTING_APPROACH)%'
 
     # This pattern will be used for organization and domain identifier url matching (allows "-").
-    identifier_url_pattern: '^[a-z0-9]+[a-z0-9-_]*[a-z0-9]+$'
+    identifier_url_pattern: '^[a-z]+[a-z0-9-_]*[a-z0-9]+$'
 
     # This pattern will be used for organization, domain and field identifier validation (allows "_").
     identifier_pattern: '^[a-z]+[a-z0-9_]*[a-z0-9]+$'
