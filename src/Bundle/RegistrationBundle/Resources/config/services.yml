@@ -11,3 +11,10 @@ services:
     arguments: ['@security.token_storage']
     tags:
       - { name: doctrine.event_listener, event: prePersist }
+
+
+  # This allows controller actions to inject services in the method call instead of calling $this->get('').
+  UniteCMS\RegistrationBundle\Controller\:
+    resource: '../../Controller'
+    autowire: true
+    tags: ['controller.service_arguments']
