@@ -21,7 +21,8 @@ services:
   - mysql
 
 env:
-  - SYMFONY_DEPRECATIONS_HELPER=weak
+  global:
+    - SYMFONY_DEPRECATIONS_HELPER=weak
 
 jobs:
   include:
