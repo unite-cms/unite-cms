@@ -19,6 +19,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\StorageBundle\Form\PreSignFormType;
+use UniteCMS\StorageBundle\Service\StorageService;
 
 class SignController extends AbstractController
 {
@@ -32,9 +33,12 @@ class SignController extends AbstractController
      * @param ContentType $contentType
      * @param Request $request
      *
+     * @param StorageService $storageService
+     * @param string $kernelSecret
      * @return Response
+     * @throws \Exception
      */
-    public function uploadContentTypeAction(ContentType $contentType, Request $request)
+    public function uploadContentTypeAction(ContentType $contentType, Request $request, StorageService $storageService, string $kernelSecret)
     {
 
         $form = $this->createForm(PreSignFormType::class, null);
@@ -42,14 +46,12 @@ class SignController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $preSignedUrl = $this->container->get(
-                    'unite.cms.storage.service'
-                )->createPreSignedUploadUrlForFieldPath(
+                $preSignedUrl = $storageService->createPreSignedUploadUrlForFieldPath(
                     $form->getData()['filename'],
                     $contentType,
                     $form->getData()['field']
                 );
-                $preSignedUrl->sign($this->container->getParameter('kernel.secret'));
+                $preSignedUrl->sign($kernelSecret);
 
                 return new JsonResponse($preSignedUrl);
 
@@ -69,9 +71,12 @@ class SignController extends AbstractController
      * @param SettingType $settingType
      * @param Request $request
      *
+     * @param StorageService $storageService
+     * @param string $kernelSecret
      * @return Response
+     * @throws \Exception
      */
-    public function uploadSettingTypeAction(SettingType $settingType, Request $request)
+    public function uploadSettingTypeAction(SettingType $settingType, Request $request, StorageService $storageService, string $kernelSecret)
     {
 
         $form = $this->createForm(PreSignFormType::class, null);
@@ -79,14 +84,12 @@ class SignController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $preSignedUrl = $this->container->get(
-                    'unite.cms.storage.service'
-                )->createPreSignedUploadUrlForFieldPath(
+                $preSignedUrl = $storageService->createPreSignedUploadUrlForFieldPath(
                     $form->getData()['filename'],
                     $settingType,
                     $form->getData()['field']
                 );
-                $preSignedUrl->sign($this->container->getParameter('kernel.secret'));
+                $preSignedUrl->sign($kernelSecret);
 
                 return new JsonResponse($preSignedUrl);
 

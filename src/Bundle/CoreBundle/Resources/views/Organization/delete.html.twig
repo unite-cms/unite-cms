@@ -23,8 +23,6 @@
         <a class="uk-button" style="background: white; margin: 10px;" href="{{ url('unitecms_core_organization_index') }}">{% trans %}organizations.delete.cancel{% endtrans %}</a>
         {{ form_widget(form.submit, {attr: {style: 'margin: 10px;'}}) }}
     </p>
-    {{ form_rest(form) }}
-
-    {{ form(form) }}
+    {{ form_end(form) }}
 </article>
 {% endblock content %}
