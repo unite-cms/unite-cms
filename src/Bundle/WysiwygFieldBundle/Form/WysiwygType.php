@@ -8,6 +8,7 @@
 
 namespace UniteCMS\WysiwygFieldBundle\Form;
 
+use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
@@ -15,7 +16,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use UniteCMS\CoreBundle\Form\WebComponentType;
 use voku\helper\AntiXSS;
 
-class WysiwygType extends WebComponentType
+class WysiwygType extends WebComponentType implements DataTransformerInterface
 {
     /**
      * @var AntiXSS $antiXss
@@ -27,8 +28,12 @@ class WysiwygType extends WebComponentType
         $this->antiXss = new AntiXSS();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        parent::buildForm($builder, $options);
         $builder->addModelTransformer($this);
     }
 
@@ -51,6 +56,7 @@ class WysiwygType extends WebComponentType
             [
                 'tag' => 'unite-cms-wysiwyg-field',
                 'empty_data' => '',
+                'compound' => false,
             ]
         );
     }

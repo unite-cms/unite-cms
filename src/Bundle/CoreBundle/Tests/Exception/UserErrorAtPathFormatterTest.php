@@ -33,7 +33,9 @@ class UserErrorAtPathFormatterTest extends TestCase
         $formattedError = UserErrorAtPath::createFormattedErrorFromException($error);
         $this->assertEquals([
             'message' => 'This is my message',
-            'category' => 'custom category',
+            'extensions' => [
+                'category' => 'custom category',
+            ],
             'path' => ['prev_foo', 'prev_baa'],
         ], $formattedError);
 

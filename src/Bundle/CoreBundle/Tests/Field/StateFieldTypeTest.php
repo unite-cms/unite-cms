@@ -260,7 +260,7 @@ class StateFieldTypeTest extends FieldTypeTestCase
         $form->submit(
             [
                 $ctField->getIdentifier() => [
-                    'state' => [],
+                    'state' => 'foo',
                     'transition' => null
                 ],
             ]

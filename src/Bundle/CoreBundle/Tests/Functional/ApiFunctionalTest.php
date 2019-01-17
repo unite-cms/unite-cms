@@ -502,7 +502,14 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         static::$container->get('security.token_storage')->setToken(new PostAuthenticationGuardToken($user, $firewall, []));
 
-        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request, static::$container->get('logger'));
+        $response = $this->controller->indexAction(
+            $domain->getOrganization(),
+            $domain,
+            $request,
+            static::$container->get('logger'),
+            static::$container->get('unite.cms.graphql.schema_type_manager'),
+            true
+        );
         return json_decode($response->getContent());
     }
 
@@ -1335,7 +1342,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 }
             }', [
             'id' => $news->id,
-            'category' => null
+            'category' => [
+                'content' => null,
+            ]
         ]);
 
         $this->assertTrue(empty($response->errors));
@@ -1359,7 +1368,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 }
             }', [
             'id' => $news->id,
-            'category' => null
+            'category' => [
+                'content' => null,
+            ]
         ]);
 
         $this->assertTrue(empty($response->errors));

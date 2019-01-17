@@ -13,7 +13,13 @@ imports:
 
 services:
 
+  _defaults:
+    bind:
+      $mailerSender: '%mailer_sender%'
+      $kernelDebug: '%kernel.debug%'
+
   # This allows controller actions to inject services in the method call instead of calling $this->get('').
   UniteCMS\CoreBundle\Controller\:
     resource: '../../Controller'
+    autowire: true
     tags: ['controller.service_arguments']

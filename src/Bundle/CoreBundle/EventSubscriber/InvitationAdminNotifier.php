@@ -11,8 +11,7 @@ namespace UniteCMS\CoreBundle\EventSubscriber;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Translation\Translator;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Error\Error;
 use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -37,7 +36,7 @@ class InvitationAdminNotifier implements EventSubscriberInterface
     private $template;
 
     /**
-     * @var Translator $translator
+     * @var TranslatorInterface $translator
      */
     private $translator;
 

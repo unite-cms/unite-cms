@@ -4,28 +4,27 @@ namespace UniteCMS\CoreBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
 use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Router;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\ReferenceType;
-use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
-use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Form\WebComponentType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\View\ViewTypeManager;
 
-class ContentController extends Controller
+class ContentController extends AbstractController
 {
     /**
      * @Route("/{content_type}/{view}", methods={"GET"})
@@ -35,15 +34,15 @@ class ContentController extends Controller
      * @param View $view
      * @return Response
      */
-    public function indexAction(View $view)
+    public function indexAction(View $view, ViewTypeManager $viewTypeManager, CsrfTokenManagerInterface $csrfTokenManager)
     {
         $template = null;
         $parameters = null;
 
         try {
-            $template = $this->get('unite.cms.view_type_manager')->getViewType($view->getType())::getTemplate();
-            $parameters = $this->get('unite.cms.view_type_manager')->getTemplateRenderParameters($view);
-            $parameters->setCsrfToken($this->get('security.csrf.token_manager')->getToken('fieldable_form'));
+            $template = $viewTypeManager->getViewType($view->getType())::getTemplate();
+            $parameters = $viewTypeManager->getTemplateRenderParameters($view);
+            $parameters->setCsrfToken($csrfTokenManager->getToken('fieldable_form'));
         }
         catch (\Symfony\Component\Config\Definition\Exception\Exception $e) {
             $this->addFlash('danger', $e->getMessage());
@@ -68,9 +67,11 @@ class ContentController extends Controller
      *
      * @param View $view
      * @param Request $request
+     * @param FieldableFormBuilder $fieldableFormBuilder
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function createAction(View $view, Request $request)
+    public function createAction(View $view, Request $request, FieldableFormBuilder $fieldableFormBuilder, ValidatorInterface $validator)
     {
         $content = new Content();
 
@@ -88,7 +89,7 @@ class ContentController extends Controller
             }
         }
 
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = $fieldableFormBuilder->createForm(
             $view->getContentType(),
             $content,
             ['attr' => ['class' => 'uk-form-vertical']]
@@ -109,7 +110,7 @@ class ContentController extends Controller
                 ->setData($data);
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content);
+            $violations = $validator->validate($content);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -148,16 +149,18 @@ class ContentController extends Controller
      * @param View $view
      * @param Content $content
      * @param Request $request
+     * @param FieldableFormBuilder $fieldableFormBuilder
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function updateAction(View $view, Content $content, Request $request)
+    public function updateAction(View $view, Content $content, Request $request, FieldableFormBuilder $fieldableFormBuilder, ValidatorInterface $validator)
     {
         // Otherwise, a user could update content, he_she has access to, from another domain.
         if($content->getContentType() !== $view->getContentType()) {
             throw $this->createNotFoundException();
         }
 
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = $fieldableFormBuilder->createForm(
             $view->getContentType(),
             $content,
             ['attr' => ['class' => 'uk-form-vertical']]
@@ -177,7 +180,7 @@ class ContentController extends Controller
             $content->setData($data);
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content);
+            $violations = $validator->validate($content);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -214,9 +217,10 @@ class ContentController extends Controller
      *
      * @param View $view
      * @param Request $request
+     * @param FieldableFormBuilder $fieldableFormBuilder
      * @return Response
      */
-    public function previewAction(View $view, Request $request)
+    public function previewAction(View $view, Request $request, FieldableFormBuilder $fieldableFormBuilder)
     {
         // User must have create or update permissions for this content type.
         $content = new Content($request->query->get('id', null));
@@ -229,7 +233,7 @@ class ContentController extends Controller
 
         $response = null;
 
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm($view->getContentType(), $content);
+        $form = $fieldableFormBuilder->createForm($view->getContentType(), $content);
         $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
         $form->handleRequest($request);
 
@@ -265,9 +269,10 @@ class ContentController extends Controller
      * @param View $view
      * @param Content $content
      * @param Request $request
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function deleteAction(View $view, Content $content, Request $request)
+    public function deleteAction(View $view, Content $content, Request $request, ValidatorInterface $validator)
     {
         // Otherwise, a user could update content, he_she has access to, from another domain.
         if($content->getContentType() !== $view->getContentType()) {
@@ -286,7 +291,7 @@ class ContentController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
+            $violations = $validator->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -323,12 +328,13 @@ class ContentController extends Controller
      * @param View $view
      * @param string $content
      * @param Request $request
+     * @param ValidatorInterface $validator
      * @return Response
      *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function deleteDefinitelyAction(View $view, string $content, Request $request)
+    public function deleteDefinitelyAction(View $view, string $content, Request $request, ValidatorInterface $validator)
     {
 
         $em = $this->getDoctrine()->getManager();
@@ -372,7 +378,7 @@ class ContentController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
+            $violations = $validator->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -413,7 +419,7 @@ class ContentController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function recoverAction(View $view, string $content, Request $request)
+    public function recoverAction(View $view, string $content, Request $request, ValidatorInterface $validator)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -452,7 +458,7 @@ class ContentController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($content, null, ['DELETE']);
+            $violations = $validator->validate($content, null, ['DELETE']);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -534,9 +540,10 @@ class ContentController extends Controller
      * @param Content $content
      * @param String $locale
      * @param Request $request
+     * @param FieldTypeManager $fieldTypeManager
      * @return Response
      */
-    public function addTranslationAction(View $view, Content $content, String $locale, Request $request)
+    public function addTranslationAction(View $view, Content $content, String $locale, Request $request, FieldTypeManager $fieldTypeManager, ValidatorInterface $validator)
     {
         // Otherwise, a user could update content, he_she has access to, from another domain.
         if($content->getContentType() !== $view->getContentType()) {
@@ -553,7 +560,7 @@ class ContentController extends Controller
             ->add(
                 'translation',
                 ReferenceType::class,
-                $this->get('unite.cms.field_type_manager')->getFieldType('reference')->getFormOptions($virtualField)
+                $fieldTypeManager->getFieldType('reference')->getFormOptions($virtualField)
             )
             ->add('submit', SubmitType::class, ['label' => 'content.translations.add_existing.submit'])->getForm();
 
@@ -578,7 +585,7 @@ class ContentController extends Controller
                     $content->addTranslation($translation);
 
                     // If content errors were found, map them to the form.
-                    $violations = $this->get('validator')->validate($content);
+                    $violations = $validator->validate($content);
                     if (count($violations) > 0) {
                         $violationMapper = new ViolationMapper();
                         foreach ($violations as $violation) {

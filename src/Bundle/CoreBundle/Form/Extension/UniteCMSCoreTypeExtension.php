@@ -84,9 +84,9 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
     /**
      * {@inheritdoc}
      */
-    public function getExtendedType()
+    static public function getExtendedTypes()
     {
-        return FormType::class;
+        return [ FormType::class ];
     }
 
 }

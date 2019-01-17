@@ -13,6 +13,7 @@ use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\Form\LinkType;
 use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 
 class FieldableFormBuilderTest extends ContainerAwareTestCase
@@ -136,15 +137,18 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             ->willReturn('field2');
         $ft2->expects($this->any())
             ->method('getFormType')
-            ->willReturn(TextType::class);
+            ->willReturn(LinkType::class);
+        $ft2->expects($this->any())
+            ->method('getFormOptions')
+            ->willReturn(['title_widget' => true]);
 
         $ft2Field = $this->createMock(FieldableField::class);
 
         $data = [
             'field1' => 'Just Text',
             'field2' => [
-                [ 'title' => 'Row 1' ],
-                [ 'title' => 'Row 2' ],
+                'url' => 'https://foo.com',
+                'title' => 'Foo',
             ]
         ];
         $options = ['fields' => [
@@ -160,7 +164,10 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
 
         $newData = [
             'field1' => 'A new value',
-            'field2' => [['a' => 'b'], ['c' => 'd']],
+            'field2' => [
+                'url' => 'https://new.com',
+                'title' => 'New',
+            ],
         ];
 
         $form->submit(array_merge($newData, ['field3' => 'Does not exist']));

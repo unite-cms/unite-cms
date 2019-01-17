@@ -7,17 +7,19 @@ use GraphQL\Type\Schema;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
-class SettingController extends Controller
+class SettingController extends AbstractController
 {
     /**
      * @Route("/{setting_type}/{locale}", defaults={"locale"=null}, methods={"GET", "POST"})
@@ -30,7 +32,7 @@ class SettingController extends Controller
      *
      * @return Response
      */
-    public function indexAction(SettingType $settingType, $locale, Request $request)
+    public function indexAction(SettingType $settingType, $locale, Request $request, FieldableFormBuilder $fieldableFormBuilder, ValidatorInterface $validator)
     {
         if (!$locale && !empty($settingType->getLocales())) {
             $locale = $settingType->getLocales()[0];
@@ -48,7 +50,7 @@ class SettingController extends Controller
             $this->getDoctrine()->getManager()->flush();
         }
 
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = $fieldableFormBuilder->createForm(
             $settingType,
             $setting,
             ['attr' => ['class' => 'uk-form-vertical']]
@@ -71,7 +73,7 @@ class SettingController extends Controller
             }
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($setting);
+            $violations = $validator->validate($setting);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -108,12 +110,12 @@ class SettingController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function previewAction(SettingType $settingType, Request $request)
+    public function previewAction(SettingType $settingType, Request $request, FieldableFormBuilder $fieldableFormBuilder)
     {
         $setting = $settingType->getSetting();
         $response = null;
 
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm($settingType, $setting);
+        $form = $fieldableFormBuilder->createForm($settingType, $setting);
         $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
         $form->handleRequest($request);
 

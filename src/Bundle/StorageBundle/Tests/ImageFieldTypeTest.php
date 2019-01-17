@@ -353,7 +353,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('unite-cms-storage-file-field', $root->vars['tag']);
 
         // Assert values
-        $this->assertEquals(json_encode($content->getData()['f1']), $root->vars['value']);
+        $this->assertEquals($content->getData()['f1'], $root->vars['value']);
 
         // Assert attribute passing
         $this->assertEquals('https://thumbnail.com/{endpoint}/{id}/{name}', $root->vars['attr']['thumbnail-url']);

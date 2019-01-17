@@ -2,13 +2,13 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 
-class ExceptionController extends Controller
+class ExceptionController extends AbstractController
 {
     /**
      * Converts an Exception to a Response.

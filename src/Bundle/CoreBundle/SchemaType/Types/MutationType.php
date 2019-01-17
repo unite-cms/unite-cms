@@ -6,9 +6,8 @@ use Doctrine\ORM\EntityManager;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
-use Symfony\Component\Form\FormFactory;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -57,7 +56,7 @@ class MutationType extends AbstractType
     private $fieldableFormBuilder;
 
     /**
-     * @var FormFactory $formFactory
+     * @var FormFactoryInterface $formFactory
      */
     private $formFactory;
 
@@ -73,7 +72,7 @@ class MutationType extends AbstractType
         AuthorizationChecker $authorizationChecker,
         ValidatorInterface $validator,
         FieldableFormBuilder $fieldableFormBuilder,
-        FormFactory $formFactory,
+        FormFactoryInterface $formFactory,
         FieldTypeManager $fieldTypeManager
     ) {
         $this->schemaTypeManager = $schemaTypeManager;

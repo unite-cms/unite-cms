@@ -17,9 +17,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('unite_cms_core');
-        $rootNode
+        $treeBuilder = new TreeBuilder('unite_cms_core');
+        $treeBuilder->getRootNode()
             ->children()
                 ->scalarNode('domain_config_dir')
                     ->defaultValue('%kernel.project_dir%/config/unite/')

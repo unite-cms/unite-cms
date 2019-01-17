@@ -438,7 +438,14 @@ abstract class APITestCase extends ContainerAwareTestCase
             []
         ));
 
-        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request, static::$container->get('logger'));
+        $response = $this->controller->indexAction(
+            $domain->getOrganization(),
+            $domain,
+            $request,
+            static::$container->get('logger'),
+            static::$container->get('unite.cms.graphql.schema_type_manager'),
+            true
+        );
         return json_decode($response->getContent());
     }
 

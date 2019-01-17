@@ -49,8 +49,8 @@ class TableViewConfiguration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $treeBuilder->root('settings')
+        $treeBuilder = new TreeBuilder('settings');
+        $treeBuilder->getRootNode()
 
             ->beforeNormalization()->always(\Closure::fromCallable([$this, 'handleDeprecatedConfig']))->end()
             ->beforeNormalization()->always(\Closure::fromCallable([$this, 'normalizeConfig']))->end()
@@ -68,8 +68,8 @@ class TableViewConfiguration implements ConfigurationInterface
     }
 
     protected function appendFieldsNode() : ArrayNodeDefinition {
-        $treeBuilder = new TreeBuilder();
-        return $treeBuilder->root('fields')
+        $treeBuilder = new TreeBuilder('fields');
+        return $treeBuilder->getRootNode()
             ->beforeNormalization()
                 ->ifArray()->then(\Closure::fromCallable([$this, 'normalizeFields']))
             ->end()
@@ -84,8 +84,8 @@ class TableViewConfiguration implements ConfigurationInterface
             ->end();
     }
     protected function appendFilterNode() : VariableNodeDefinition {
-        $treeBuilder = new TreeBuilder();
-        return $treeBuilder->root('filter', 'variable')
+        $treeBuilder = new TreeBuilder('filter', 'variable');
+        return $treeBuilder->getRootNode()
             ->validate()
                 ->always(
                     function ($v) {
@@ -117,8 +117,8 @@ class TableViewConfiguration implements ConfigurationInterface
             ->end();
     }
     protected function appendSortNode() : ArrayNodeDefinition {
-        $treeBuilder = new TreeBuilder();
-        return $treeBuilder->root('sort')
+        $treeBuilder = new TreeBuilder('sort');
+        return $treeBuilder->getRootNode()
             ->children()
                 ->scalarNode('field')->isRequired()->end()
                 ->booleanNode('asc')->treatNullLike(false)->end()

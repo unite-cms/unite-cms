@@ -108,7 +108,7 @@ class DeprecatedTableViewTypeTest extends ContainerAwareTestCase
         // View should not be valid.
         $errors = static::$container->get('validator')->validate($view);
         $this->assertCount(1, $errors);
-        $this->assertEquals('Unrecognized option "foo" under "settings"', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('Unrecognized option "foo" under "settings". Available options are "columns", "fields", "filter", "sort", "sort_asc", "sort_field".', $errors->get(0)->getMessageTemplate());
 
         $view->setSettings(new ViewSettings([]));
 

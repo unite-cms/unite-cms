@@ -6,13 +6,14 @@ use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
@@ -20,7 +21,7 @@ use UniteCMS\CoreBundle\Form\WebComponentType;
 use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
-class DomainController extends Controller
+class DomainController extends AbstractController
 {
     /**
      * @Route("/", methods={"GET"})
@@ -65,9 +66,10 @@ class DomainController extends Controller
      * @param Request $request
      * @param DomainConfigManager $domainConfigManager
      * @param LoggerInterface $logger
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function createAction(Organization $organization, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
+    public function createAction(Organization $organization, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger, ValidatorInterface $validator)
     {
         $domain = new Domain();
         $import_config = $request->query->has('import');
@@ -90,7 +92,7 @@ class DomainController extends Controller
         $form = $this->createFormBuilder([
             'domain' => $domain->getConfig(),
         ])
-            ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
+            ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'compound' => false])
             ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->getForm();
 
@@ -114,7 +116,7 @@ class DomainController extends Controller
             if ($domain) {
                 $domain->setOrganization($organization);
 
-                $errors = $this->get('validator')->validate($domain);
+                $errors = $validator->validate($domain);
 
                 if ($errors->count() == 0) {
                     $this->getDoctrine()->getManager()->persist($domain);
@@ -174,9 +176,10 @@ class DomainController extends Controller
      * @param Request $request
      * @param DomainConfigManager $domainConfigManager
      * @param LoggerInterface $logger
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function updateAction(Organization $organization, Domain $domain, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
+    public function updateAction(Organization $organization, Domain $domain, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger, ValidatorInterface $validator)
     {
         $outOfSyncPersistedConfig = null;
         $configNotInFilesystem = false;
@@ -251,6 +254,7 @@ class DomainController extends Controller
             'domain' => $outOfSyncPersistedConfig ? $outOfSyncPersistedConfig : $domain->getConfig(),
         ])
         ->add('domain', WebComponentType::class, [
+            'compound' => false,
             'tag' => 'unite-cms-core-domaineditor',
             'error_bubbling' => true,
             'attr' => $outOfSyncPersistedConfig ? ['diff-value' => json_encode(json_decode($domain->getConfig()))] : [],
@@ -279,7 +283,7 @@ class DomainController extends Controller
                 // In order to avoid persistence conflicts, we create a new domain from serialized domain.
                 $originalDomain = $domainConfigManager->parse($domainConfigManager->serialize($domain));
                 $domain->setFromEntity($updatedDomain);
-                $violations = $this->get('validator')->validate($domain);
+                $violations = $validator->validate($domain);
 
                 // If this config is valid and could be saved.
                 if ($violations->count() == 0) {
@@ -355,9 +359,10 @@ class DomainController extends Controller
      * @param Organization $organization
      * @param Domain $domain
      * @param Request $request
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function deleteAction(Organization $organization, Domain $domain, Request $request)
+    public function deleteAction(Organization $organization, Domain $domain, Request $request, ValidatorInterface $validator)
     {
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, [
@@ -368,7 +373,7 @@ class DomainController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $violations = $this->get('validator')->validate($domain, null, ['DELETE']);
+            $violations = $validator->validate($domain, null, ['DELETE']);
 
             // If there where violation problems.
             if($violations->count() > 0) {

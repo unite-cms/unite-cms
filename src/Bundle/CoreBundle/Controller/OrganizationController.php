@@ -11,20 +11,19 @@ namespace UniteCMS\CoreBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Router;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
-use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 
-class OrganizationController extends Controller
+class OrganizationController extends AbstractController
 {
     /**
      * @Route("/", methods={"GET"})
@@ -125,7 +124,7 @@ class OrganizationController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function deleteAction(Organization $organization, Request $request) {
+    public function deleteAction(Organization $organization, Request $request, ValidatorInterface $validator) {
 
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, ['label' => 'organizations.delete.form.submit', 'attr' => ['class' => 'uk-button-danger']])
@@ -134,7 +133,7 @@ class OrganizationController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $violations = $this->get('validator')->validate($organization, null, ['DELETE']);
+            $violations = $validator->validate($organization, null, ['DELETE']);
 
             if($violations->count() > 0) {
                 $violationMapper = new ViolationMapper();
