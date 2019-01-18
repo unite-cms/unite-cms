@@ -8,21 +8,23 @@
 
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
-use UniteCMS\CoreBundle\Expression\WebhookExpressionChecker;
+use Doctrine\ORM\EntityManagerInterface;
+use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-
 
 class ValidWebhookConditionValidator extends ConstraintValidator
 {
     /**
-     * @var WebhookExpressionChecker $webhookExpressionChecker
+     * @var EntityManagerInterface $entityManager
      */
-    private $webhookExpressionChecker;
+    private $entityManager;
 
-    public function __construct()
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->webhookExpressionChecker = new WebhookExpressionChecker();
+        $this->entityManager = $entityManager;
     }
 
     public function validate($value, Constraint $constraint)
@@ -31,7 +33,26 @@ class ValidWebhookConditionValidator extends ConstraintValidator
             return;
         }
 
-        if (!$this->webhookExpressionChecker->validate($value)) {
+        /**
+         * @var UniteExpressionChecker $expressionChecker
+         */
+        $expressionChecker = new UniteExpressionChecker();
+        $expressionChecker->registerVariable('event');
+
+        /**
+         * @var FieldableContent $content
+         */
+        $content = $this->context->getObject();
+
+        if($content instanceof FieldableContent) {
+            $expressionChecker->registerFieldableContent($content);
+        }
+
+        if($content instanceof Content) {
+            $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, $content->getContentType());
+        }
+
+        if (!$expressionChecker->validate($value)) {
             $this->context->buildViolation($constraint->message)->addViolation();
         }
     }
