@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -85,6 +86,11 @@ class AutoTextFieldType extends TextFieldType
      */
     function generateAutoText(FieldableField $field, FieldableContent $content) {
         $expressionChecker = new UniteExpressionChecker();
+
+        if($content instanceof Content) {
+            $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, $content->getContentType());
+        }
+
         return $expressionChecker
             ->registerFieldableContent($content)
             ->evaluateToString($field->getSettings()->expression);
@@ -124,6 +130,10 @@ class AutoTextFieldType extends TextFieldType
      */
     function alterData(FieldableField $field, &$data, FieldableContent $content)
     {
+        if(empty($data[$field->getIdentifier()])) {
+            $data[$field->getIdentifier()] = $this->getDefaultValue($field);
+        }
+
         if(!empty($data[$field->getIdentifier()]['auto'])) {
             if(($field->getSettings()->auto_update || empty($content->getData()[$field->getIdentifier()]['auto']))) {
 
