@@ -251,6 +251,30 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    function alterData(FieldableField $field, &$data, FieldableContent $content)
+    {
+        if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type'])) {
+            return;
+        }
+
+        $type = $data[$field->getIdentifier()]['type'];
+        $variant_data = empty($data[$field->getIdentifier()][$type]) ? [] : $data[$field->getIdentifier()][$type];
+
+        // Alter all fields for the given type.
+        $variants = self::getNestableFieldable($field);
+
+        foreach($variants->getFieldsForVariant($type) as $row_field) {
+            $this->fieldTypeManager->alterFieldData($row_field, $variant_data, $content);
+        }
+
+        if($variant_data != $data[$field->getIdentifier()][$type]) {
+            $data[$field->getIdentifier()][$type] = $variant_data;
+        }
+    }
+
+    /**
      * @param FieldableField $field
      * @return Variants
      */

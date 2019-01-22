@@ -73,7 +73,7 @@ class FieldTypeManager
      * @param mixed $data
      * @param FieldableContent $content
      */
-    public function alterFieldData(FieldableField $field, $data, FieldableContent $content)
+    public function alterFieldData(FieldableField $field, &$data, FieldableContent $content)
     {
         $fieldType = $this->getFieldType($field->getType());
         $fieldType->alterData($field, $data, $content);
