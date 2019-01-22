@@ -146,14 +146,13 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
         $id = new \ReflectionProperty($content, 'id');
         $id->setAccessible(true);
         $id->setValue($content, 1);
-        $content->setData(
-            [
-                'f1' => [
-                    'auto' => true,
-                    'text' => '',
-                ],
-            ]
-        )->setContentType($ctField->getContentType());
+        $content->setContentType($ctField->getContentType());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, [
+            'f1' => [
+                'auto' => true,
+                'text' => '',
+            ],
+        ]);
         
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $ctField->getContentType(),
@@ -167,14 +166,14 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             'text' => ''
         ], $root->vars['value']);
 
-        $content->setData(
-            [
+        $content->setContentType($ctField->getContentType());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, [
                 'f1' => [
                     'auto' => false,
                     'text' => 'foo'
                 ],
             ]
-        )->setContentType($ctField->getContentType());
+        );
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
             $ctField->getContentType(),
@@ -189,7 +188,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
         ], $root->vars['value']);
 
 
-        $content->setData([
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, [
             'title' => '1',
         ]);
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
@@ -197,7 +196,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $content
         );
         $form->submit(['f1' => ['auto' => 'on', 'text' => 'will_get_ov by auto']], false);
-        $content->setData($form->getData());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
         $this->em->persist($content);
         $this->em->flush($content);
 
@@ -211,7 +210,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $content
         );
         $form->submit(['f1' => ['text' => 'foo'], 'title' => 1]);
-        $content->setData($form->getData());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
         $this->em->flush($content);
 
         $this->assertEquals(['f1' => [
@@ -221,7 +220,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
 
         // Try to update text, but auto_update was set to false: Should update, because previous auto was false
         $ctField->getSettings()->auto_update = false;
-        $content->setData(['f1' => [
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, ['f1' => [
             'text' => 'foo',
             'auto' => false,
         ], 'title' => '1']);
@@ -230,7 +229,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $content
         );
         $form->submit(['f1' => ['auto' => true], 'title' => '1']);
-        $content->setData($form->getData());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
         $this->em->flush($content);
 
         $this->assertEquals(['f1' => [
@@ -239,7 +238,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
         ], 'title' => '1'], $content->getData());
 
         // Try to update text, but auto_update=false: Should not work, because prev. auto was also true.
-        $content->setData(['f1' => [
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, ['f1' => [
             'auto' => true,
             'text' => 'Any, 1'
         ], 'title' => '2']);
@@ -249,7 +248,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             $content
         );
         $form->submit(['f1' => ['auto' => 'on']], false);
-        $content->setData($form->getData());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
         $this->em->flush($content);
 
         $this->assertEquals(['f1' => [
@@ -268,7 +267,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
             'f1' => ['auto' => 'on', 'text' => 'this is not relevant'],
             'title' => 'My new title'
         ]);
-        $content->setData($form1->getData());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form1->getData());
         $this->em->flush($content);
 
         $this->assertEquals(['f1' => [
@@ -335,7 +334,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
 
         $result = json_decode(json_encode($result->toArray(true)), true);
         $this->assertEquals([
-            'f1' => ['text' => '', 'auto' => true, 'text_generated' => 'Any, My title'],
+            'f1' => ['text' => 'Any, My title', 'auto' => true, 'text_generated' => 'Any, My title'],
             'title' => 'My title'
         ], $result['data']['createCt1']);
 
@@ -351,7 +350,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
 
         $result = json_decode(json_encode($result->toArray(true)), true);
         $this->assertEquals([
-            'f1' => ['text' => 'Override', 'auto' => true, 'text_generated' => 'Any, My title'],
+            'f1' => ['text' => 'Any, My title', 'auto' => true, 'text_generated' => 'Any, My title'],
             'title' => 'My title'
         ], $result['data']['createCt1']);
 

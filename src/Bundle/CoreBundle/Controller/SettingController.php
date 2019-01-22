@@ -60,17 +60,8 @@ class SettingController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            if (isset($data['locale'])) {
-                $setting->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            // Only set data if it has changed
-            if ($data != $setting->getData()) {
-                $setting->setData($data);
-            }
+            // Assign data to content object.
+            $fieldableFormBuilder->assignDataToFieldableContent($setting, $form->getData());
 
             // If content errors were found, map them to the form.
             $violations = $validator->validate($setting);
@@ -121,14 +112,8 @@ class SettingController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            if (isset($data['locale'])) {
-                $setting->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            $setting->setData($data);
+            // Assign data to content object.
+            $fieldableFormBuilder->assignDataToFieldableContent($setting, $form->getData());
 
             // Create GraphQL Schema
             $domain = $settingType->getDomain();

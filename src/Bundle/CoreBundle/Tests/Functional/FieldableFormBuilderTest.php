@@ -93,6 +93,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             public function getEntity() { return $this->entity; }
             public function setEntity(Fieldable $entity) { $this->entity = $entity; }
             public function getLocale() { return null; }
+            public function setLocale($locale) { return $this; }
             public function isNew() : bool { return false; }
         };
 

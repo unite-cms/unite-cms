@@ -170,6 +170,33 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     }
 
     /**
+     * {@inheritdoc}
+     */
+    function alterData(FieldableField $field, &$data, FieldableContent $content)
+    {
+        if(empty($data[$field->getIdentifier()])) {
+            return;
+        }
+
+        $collection = self::getNestableFieldable($field);
+
+        // Alter data for each row.
+        foreach($data[$field->getIdentifier()] as $delta => $row) {
+            if(is_array($row)) {
+                $row_data = $row;
+
+                foreach ($collection->getFields() as $row_field) {
+                    $this->fieldTypeManager->alterFieldData($row_field, $row_data, $content);
+                }
+
+                if($row_data != $row) {
+                    $data[$field->getIdentifier()][$delta] = $row_data;
+                }
+            }
+        }
+    }
+
+    /**
      * Recursively validate all fields in this collection.
      *
      * @param FieldableField $field

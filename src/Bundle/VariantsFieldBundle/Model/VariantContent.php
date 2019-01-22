@@ -61,6 +61,15 @@ class VariantContent implements FieldableContent
     }
 
     /**
+     * @param $locale string|null
+     * @return FieldableContent
+     */
+    public function setLocale($locale)
+    {
+        return $this;
+    }
+
+    /**
      * @return Fieldable
      */
     public function getEntity()

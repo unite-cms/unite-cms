@@ -98,16 +98,10 @@ class ContentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
 
-            if (isset($data['locale'])) {
-                $content->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            $content
-                ->setContentType($view->getContentType())
-                ->setData($data);
+            // Assign data to content object.
+            $content->setContentType($view->getContentType());
+            $fieldableFormBuilder->assignDataToFieldableContent($content, $form->getData());
 
             // If content errors were found, map them to the form.
             $violations = $validator->validate($content);
@@ -170,14 +164,8 @@ class ContentController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            if (isset($data['locale'])) {
-                $content->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            $content->setData($data);
+            // Assign data to content object.
+            $fieldableFormBuilder->assignDataToFieldableContent($content, $form->getData());
 
             // If content errors were found, map them to the form.
             $violations = $validator->validate($content);
@@ -239,14 +227,8 @@ class ContentController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            if (isset($data['locale'])) {
-                $content->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            $content->setData($data);
+            // Assign data to content object.
+            $fieldableFormBuilder->assignDataToFieldableContent($content, $form->getData());
 
             // Create GraphQL Schema
             $domain = $view->getContentType()->getDomain();
