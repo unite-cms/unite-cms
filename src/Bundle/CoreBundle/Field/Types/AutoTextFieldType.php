@@ -8,9 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -124,22 +122,18 @@ class AutoTextFieldType extends TextFieldType
     /**
      * {@inheritdoc}
      */
-    public function onCreate(FieldableField $field, FieldableContent $content, EntityRepository $repository, &$data) {
-
-        // If auto = true, generate value on create
+    function alterData(FieldableField $field, &$data, FieldableContent $content)
+    {
         if(!empty($data[$field->getIdentifier()]['auto'])) {
-            $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $content);
-        }
-    }
+            if(($field->getSettings()->auto_update || empty($content->getData()[$field->getIdentifier()]['auto']))) {
 
-    public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
+                $tmp_content = clone $content;
+                $tmp_content->setData($data);
+                $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $tmp_content);
+                unset($tmp_content);
 
-        // If auto = true and auto_update = true or old value was false, generate text
-        if(!empty($data[$field->getIdentifier()]['auto'])) {
-            if(($field->getSettings()->auto_update || empty($old_data[$field->getIdentifier()]['auto']))) {
-                $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $content);
             } else {
-                $data[$field->getIdentifier()]['text'] = empty($old_data[$field->getIdentifier()]['text']) ? '' : $old_data[$field->getIdentifier()]['text'];
+                $data[$field->getIdentifier()]['text'] = empty($content->getData()[$field->getIdentifier()]['text']) ? '' : $content->getData()[$field->getIdentifier()]['text'];
             }
         }
     }
