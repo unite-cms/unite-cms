@@ -15,8 +15,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Form\AutoTextType;
@@ -55,13 +58,23 @@ class AutoTextFieldType extends TextFieldType
 
     function getFormOptions(FieldableField $field): array
     {
+        $generation_url = null;
+
+        if($field->getEntity() instanceof ContentType) {
+            $generation_url = $this->router->generate('unitecms_core_content_preview', [$field->getEntity()]);
+        }
+
+        else if($field->getEntity() instanceof SettingType) {
+            $generation_url = $this->router->generate('unitecms_core_setting_preview', [$field->getEntity()]);
+        }
+
         return array_merge(
             parent::getFormOptions($field),
             [
                 'expression' => $field->getSettings()->expression,
                 'text_widget' => $field->getSettings()->text_widget === 'textarea' ? TextareaType::class : TextType::class,
                 'auto_update' => !!$field->getSettings()->auto_update,
-                'generation_url' => $this->router->generate(($field->getEntity() instanceof ContentType ? 'unitecms_core_content_preview' : 'unitecms_core_setting_preview'), [$field->getEntity()]),
+                'generation_url' => $generation_url,
             ]
         );
     }
@@ -161,9 +174,16 @@ class AutoTextFieldType extends TextFieldType
             return;
         }
 
+        if(!$context->getObject() instanceof ContentTypeField && !$context->getObject() instanceof SettingTypeField) {
+            $context->buildViolation('invalid_entity_type')->addViolation();
+        }
+
         $expressionChecker = new UniteExpressionChecker();
         $expressionChecker->registerFieldableContent(null);
-        $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, new ContentType());
+
+        if($context->getObject() instanceof ContentTypeField) {
+            $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, new ContentType());
+        }
 
         if(!$expressionChecker->validate($settings->expression)) {
             $context->buildViolation('invalid_expression')->atPath('expression')->addViolation();
