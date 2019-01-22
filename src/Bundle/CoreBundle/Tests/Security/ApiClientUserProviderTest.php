@@ -3,19 +3,14 @@
 namespace UniteCMS\CoreBundle\Tests\Security;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use UniteCMS\CoreBundle\Entity\ApiKey;
-use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Repository\ApiKeyRepository;
 use UniteCMS\CoreBundle\Security\ApiKeyUserProvider;
-use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
 class ApiClientUserProviderTest extends TestCase
 {
@@ -71,7 +66,7 @@ class ApiClientUserProviderTest extends TestCase
     /**
      * Test load invalid user form ApiClientUserProvider
      *
-     * @expectedException \Symfony\Component\Security\Core\Exception\TokenNotFoundException
+     * @expectedException \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
      */
     public function testLoadInValidUser() {
 
