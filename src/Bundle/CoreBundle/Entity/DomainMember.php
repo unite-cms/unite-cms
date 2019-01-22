@@ -273,11 +273,21 @@ class DomainMember implements FieldableContent
 
     /**
      * DomainMembers do not support setting locales.
-     * @return array|null|string
+     * @return null|string
      */
     public function getLocale()
     {
-        return [];
+        return null;
+    }
+
+    /**
+     * DomainMembers do not support setting locales.
+     * @param null|string $locale
+     * @return DomainMember
+     */
+    public function setLocale($locale)
+    {
+        return $this;
     }
 
     /**

@@ -62,6 +62,15 @@ class CollectionRow implements FieldableContent
     }
 
     /**
+     * @param $locale string|null
+     * @return CollectionRow
+     */
+    public function setLocale($locale)
+    {
+        return $this;
+    }
+
+    /**
      * @return Fieldable
      */
     public function getEntity()

@@ -276,7 +276,8 @@ class DomainMemberController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $member->setData($form->getData());
+            // Assign data to content object.
+            $fieldableFormBuilder->assignDataToFieldableContent($member, $form->getData());
 
             // If member field errors were found, map them to the form.
             $violations = $validator->validate($member);

@@ -247,11 +247,11 @@ class Content implements FieldableContent
     }
 
     /**
-     * @param string $locale
+     * @param string|null $locale
      *
      * @return Content
      */
-    public function setLocale(string $locale)
+    public function setLocale($locale)
     {
         $this->locale = $locale;
 

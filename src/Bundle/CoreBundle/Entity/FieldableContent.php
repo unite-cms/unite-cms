@@ -30,6 +30,12 @@ interface FieldableContent
     public function getLocale();
 
     /**
+     * @param string|null $locale
+     * @return Fieldable
+     */
+    public function setLocale($locale);
+
+    /**
      * @return Fieldable
      */
     public function getEntity();

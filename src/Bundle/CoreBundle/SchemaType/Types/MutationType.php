@@ -260,16 +260,9 @@ class MutationType extends AbstractType
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            if (isset($data['locale'])) {
-                $content->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            $content
-                ->setContentType($contentType)
-                ->setData($data);
+            // Assign data to content object.
+            $content->setContentType($contentType);
+            $this->fieldableFormBuilder->assignDataToFieldableContent($content, $form->getData());
 
             // If content errors were found, map them to the form.
             $violations = $this->validator->validate($content);
@@ -341,14 +334,8 @@ class MutationType extends AbstractType
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            if (isset($data['locale'])) {
-                $content->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            $content->setData($data);
+            // Assign data to content object.
+            $this->fieldableFormBuilder->assignDataToFieldableContent($content, $form->getData());
 
             // If content errors were found, map them to the form.
             $violations = $this->validator->validate($content);

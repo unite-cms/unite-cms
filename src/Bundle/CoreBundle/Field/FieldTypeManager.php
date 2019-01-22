@@ -4,10 +4,10 @@ namespace UniteCMS\CoreBundle\Field;
 
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingTypeField;
@@ -64,6 +64,19 @@ class FieldTypeManager
     {
         $fieldType = $this->getFieldType($context->getObject()->getType());
         $fieldType->validateSettings($settings, $context);
+    }
+
+    /**
+     * Alter content data for given field.
+     *
+     * @param FieldableField $field
+     * @param mixed $data
+     * @param FieldableContent $content
+     */
+    public function alterFieldData(FieldableField $field, $data, FieldableContent $content)
+    {
+        $fieldType = $this->getFieldType($field->getType());
+        $fieldType->alterData($field, $data, $content);
     }
 
     public function onContentInsert(ContentTypeField $field, Content $content, LifecycleEventArgs $args)

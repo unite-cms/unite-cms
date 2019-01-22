@@ -118,6 +118,18 @@ interface FieldTypeInterface
     function validateData(FieldableField $field, $data, ExecutionContextInterface $context);
 
     /**
+     * This method will be called in situations like after form submit, before validation.
+     *
+     * It allows the field to alter the data array based on the (old) content object, the new data and a fieldableField
+     * object. NOTE: It is generally not a good idea to alter data from other fields than this one.
+     *
+     * @param FieldableField $field
+     * @param array $data
+     * @param FieldableContent $content
+     */
+    function alterData(FieldableField $field, &$data, FieldableContent $content);
+
+    /**
      * Allows the field to alter defined settings. The field can always overrule configured settings.
      * Allowed keys are: label, type, settings, assets.
      *
