@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="accessor_type", type="string")
- * @ORM\DiscriminatorMap({"user" = "User", "api_key" = "ApiKey", "api_user" = "BaseApiUser"})
+ * @ORM\DiscriminatorMap({"user" = "User", "api_key" = "ApiKey", "api_user" = "PlaceholderApiUser"})
  */
 abstract class DomainAccessor
 {

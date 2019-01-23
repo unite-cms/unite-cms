@@ -11,7 +11,7 @@ namespace UniteCMS\CoreBundle\Expression;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use UniteCMS\CoreBundle\Entity\ApiKey;
-use UniteCMS\CoreBundle\Entity\BaseApiUser;
+use UniteCMS\CoreBundle\Entity\ApiUserInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainMember;
@@ -62,7 +62,7 @@ class UniteExpressionChecker
                 'accessor' => (object)[
                     'name' => (string)$domainMember->getAccessor(),
                     'id' => (string)$domainMember->getAccessor()->getId(),
-                    'type' => ($domainMember->getAccessor() instanceof ApiKey) ? 'api_key' : (($domainMember->getAccessor() instanceof BaseApiUser) ? 'api_user' : 'user'),
+                    'type' => ($domainMember->getAccessor() instanceof ApiKey) ? 'api_key' : (($domainMember->getAccessor() instanceof ApiUserInterface) ? 'api_user' : 'user'),
                 ],
             ];
         }
