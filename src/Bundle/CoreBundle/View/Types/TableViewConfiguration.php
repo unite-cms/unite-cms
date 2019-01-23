@@ -59,6 +59,7 @@ class TableViewConfiguration implements ConfigurationInterface
                 ->append($this->appendFieldsNode())
                 ->append($this->appendFilterNode())
                 ->append($this->appendSortNode())
+                ->append($this->appendActionsNode())
                 ->variableNode('sort_field')->setDeprecated()->end()
                 ->variableNode('sort_asc')->setDeprecated()->end()
                 ->variableNode('columns')->setDeprecated()->end()
@@ -83,6 +84,7 @@ class TableViewConfiguration implements ConfigurationInterface
                 ->end()
             ->end();
     }
+
     protected function appendFilterNode() : VariableNodeDefinition {
         $treeBuilder = new TreeBuilder('filter', 'variable');
         return $treeBuilder->getRootNode()
@@ -116,6 +118,7 @@ class TableViewConfiguration implements ConfigurationInterface
                 )
             ->end();
     }
+
     protected function appendSortNode() : ArrayNodeDefinition {
         $treeBuilder = new TreeBuilder('sort');
         return $treeBuilder->getRootNode()
@@ -123,6 +126,21 @@ class TableViewConfiguration implements ConfigurationInterface
                 ->scalarNode('field')->isRequired()->end()
                 ->booleanNode('asc')->treatNullLike(false)->end()
                 ->booleanNode('sortable')->end()
+            ->end();
+    }
+
+    protected function appendActionsNode() : ArrayNodeDefinition {
+        $treeBuilder = new TreeBuilder('actions');
+        return $treeBuilder->getRootNode()
+            ->beforeNormalization()
+                ->ifArray()->then(\Closure::fromCallable([$this, 'normalizeActions']))
+            ->end()
+            ->arrayPrototype()
+                ->children()
+                    ->scalarNode('url')->isRequired()->end()
+                    ->scalarNode('target')->defaultValue('_self')->end()
+                    ->scalarNode('icon')->defaultValue('file')->end()
+                ->end()
             ->end();
     }
 
@@ -240,6 +258,39 @@ class TableViewConfiguration implements ConfigurationInterface
 
             // Allow to override all default fields from config
             $transformed[$key] = $this->defaultFieldConfig((array)$value, $key);
+        }
+        return $transformed;
+    }
+
+    protected function normalizeActions(array $actions) : array {
+        $transformed = [];
+        foreach ($actions as $index => $action) {
+
+            if (!isset($action['url'])) {
+                $exception = new InvalidConfigurationException('No Action Url given!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            if (!filter_var($action['url'], FILTER_VALIDATE_URL) or strlen($action['url']) > 255) {
+                $exception = new InvalidConfigurationException('Invalid Action Url given!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            if (isset($action['target']) && !in_array($action['target'], ['_self', '_blank'])) {
+                $exception = new InvalidConfigurationException('Invalid Action Target given, the allowed options are "_self" and "_target"!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            if (isset($action['icon']) && !is_string($action['icon']) or strlen($action['icon']) > 255) {
+                $exception = new InvalidConfigurationException('Invalid Action Icon given!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            $transformed[$index] = $action;
         }
         return $transformed;
     }
