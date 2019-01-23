@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="accessor_type", type="string")
- * @ORM\DiscriminatorMap({"user" = "User", "api_key" = "ApiKey", "api_user" = "PlaceholderApiUser"})
+ * @ORM\DiscriminatorMap({"user" = "User", "api_key" = "ApiKey"})
  */
 abstract class DomainAccessor
 {
@@ -36,6 +36,13 @@ abstract class DomainAccessor
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="accessor", cascade={"persist", "remove", "merge"})
      */
     protected $domains;
+
+    /**
+     * Returns the unique type of this accessor.
+     *
+     * @return string
+     */
+    abstract static function getType() : string;
 
     public function __construct()
     {

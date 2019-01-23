@@ -20,6 +20,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class User extends DomainAccessor implements UserInterface, \Serializable
 {
+    static function getType() : string { return 'user'; }
+
     const PASSWORD_RESET_TTL = 14400; // Default to 4h
     const ROLE_USER = "ROLE_USER";
     const ROLE_PLATFORM_ADMIN = "ROLE_PLATFORM_ADMIN";
