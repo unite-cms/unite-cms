@@ -19,6 +19,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class ApiKey extends DomainAccessor implements UserInterface, \Serializable
 {
+    static function getType() : string { return 'api_key'; }
+
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")

@@ -17,12 +17,12 @@ class ApiKeyUserProvider implements UserProviderInterface
     /**
      * @var RequestStack $requestStack
      */
-    private $requestStack;
+    protected $requestStack;
 
     /**
      * @var EntityManager $entityManager
      */
-    private $entityManager;
+    protected $entityManager;
 
     public function __construct(RequestStack $requestStack, EntityManager $entityManager)
     {
@@ -79,6 +79,7 @@ class ApiKeyUserProvider implements UserProviderInterface
      * @return UserInterface
      *
      * @throws UnsupportedUserException if the user is not supported
+     * @throws MissingOrganizationException
      */
     public function refreshUser(UserInterface $user)
     {

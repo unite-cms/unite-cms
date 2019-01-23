@@ -37,6 +37,13 @@ abstract class DomainAccessor
      */
     protected $domains;
 
+    /**
+     * Returns the unique type of this accessor.
+     *
+     * @return string
+     */
+    abstract static function getType() : string;
+
     public function __construct()
     {
         $this->domains = new ArrayCollection();
