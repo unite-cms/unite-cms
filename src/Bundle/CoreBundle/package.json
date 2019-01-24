@@ -4,8 +4,7 @@
   "dependencies": {
     "document-register-element": "github:WebReflection/document-register-element",
     "lodash": "^4.17.11",
-    "uikit3-nestable": "^0.2.2",
-    "webpack-cli": "^3.2.1"
+    "uikit3-nestable": "^0.2.2"
   },
   "devDependencies": {
     "@symfony/webpack-encore": "^0.22.4",
