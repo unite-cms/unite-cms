@@ -82,6 +82,7 @@ class TableViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
     }
 
@@ -109,6 +110,7 @@ class TableViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
 
         $config = $this->processor->processConfiguration($this->configuration, ['settings' => [
@@ -133,6 +135,7 @@ class TableViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
 
         $config = $this->processor->processConfiguration($this->configuration, ['settings' => [
@@ -170,6 +173,7 @@ class TableViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
     }
 
@@ -236,6 +240,98 @@ class TableViewConfigurationTest extends TestCase
         $this->processor->processConfiguration($this->configuration, ['settings' => ['sort' => ['sortable' => true]]]);
     }
 
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid Action Url given!
+     */
+    public function testInvalidActionUrl()
+    {
+        $actions = [
+           [
+               'url' => true
+           ]
+        ];
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['actions' => $actions]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage No Action Url given!
+     */
+    public function testNoActionUrl()
+    {
+        $actions = [
+           [
+               'target' => '1212'
+           ]
+        ];
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['actions' => $actions]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid Action Target given, the allowed options are "_self" and "_target"!
+     */
+    public function testInvalidActionTarget()
+    {
+        $actions = [
+           [
+               'url' => 'http://www.orf.at',
+               'target' => '1212'
+           ]
+        ];
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['actions' => $actions]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid Action Label given!
+     */
+    public function testInvalidActionLabel()
+    {
+        $actions = [
+            [
+                'url' => 'http://www.orf.at',
+                'label' => true
+            ]
+        ];
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['actions' => $actions]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid Action Icon given!
+     */
+    public function testInvalidActionIcon()
+    {
+        $actions = [
+           [
+               'url' => 'http://www.orf.at',
+               'icon' => 1212
+           ]
+        ];
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['actions' => $actions]]);
+    }
+
+     /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid Action Icon given!
+     */
+    public function testInvalidActionIconMultiple()
+    {
+        $actions = [
+           [
+               'url' => 'http://www.orf.at',
+               'icon' => 'file'
+           ],
+           [
+               'url' => 'http://www.orf.at',
+               'icon' => 1212
+           ]
+        ];
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['actions' => $actions]]);
+    }
+
     public function testSortableWithSort()
     {
         $config = $this->processor->processConfiguration($this->configuration, ['settings' => ['sort' => [
@@ -268,4 +364,5 @@ class TableViewConfigurationTest extends TestCase
             'sortable' => true,
         ], $config['sort']);
     }
+
 }

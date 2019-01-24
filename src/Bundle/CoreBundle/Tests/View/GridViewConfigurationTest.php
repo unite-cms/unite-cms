@@ -76,6 +76,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
 
         $this->view->getContentType()->getFields()->removeElement($this->view->getContentType()->getFields()->first());
@@ -97,6 +98,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
     }
 
@@ -125,6 +127,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
 
         $config = $this->processor->processConfiguration($this->configuration, ['settings' => [
@@ -149,6 +152,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
 
         $config = $this->processor->processConfiguration($this->configuration, ['settings' => [
@@ -186,6 +190,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
     }
 }

@@ -8,6 +8,7 @@
                    :embedded="embedded"
                    :createLabel="labels.create"
                    :sortable="sort.sortable && !selectable && !deleted.showDeleted"
+                   :actions="actions"
                    :createUrl="urls.create"
                    :allowCreate="allowCreate"
                    @search="onSearch"></component>
@@ -59,6 +60,7 @@
             let error = null;
             let fieldQuery = [];
             let filterQuery = [];
+            let actions = bag.settings.actions;
             let sort = bag.settings.sort || {
                 field: null,
                 asc: true
@@ -101,6 +103,7 @@
                 error: error,
                 rows: [],
                 sort: sort,
+                actions: actions,
                 initialSort: Object.assign({}, sort),
                 limit: 10,
                 page: 1,

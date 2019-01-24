@@ -1,4 +1,5 @@
 <template>
+
     <header class="uk-card-header">
         <div class="uk-flex uk-flex-middle unite-div-table-header">
             <div class="unite-div-table-headline uk-flex uk-flex-1 uk-flex-middle">
@@ -21,7 +22,20 @@
                 {{ createLabel }}
             </a>
         </div>
+
+         <div v-if="actions.length > 0" class="uk-flex uk-flex-right uk-margin">
+            <button class="uk-button uk-button-default" type="button">Action Links</button>
+            <div uk-dropdown>
+                <ul class="uk-nav uk-dropdown-nav">
+                    <li v-for="v in actions">
+                        <a :href="v.url" :target="v.target"><span v-html="feather.icons[v.icon].toSvg()"></span> {{ v.label }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
     </header>
+
 </template>
 
 <script>
@@ -47,6 +61,7 @@
             'selectable',
             'sortable',
             'embedded',
+            'actions',
             'allowCreate'
         ],
         methods: {
