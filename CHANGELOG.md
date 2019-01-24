@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.8.0 (2019-01-24)
+- Added #429: Provide export options for content type data
+- Fixed #479: API Key Authenticator should check detailed token structure in supports method
+- Fixed #478: API Key User Provider should throw UsernameNotFoundException instead of TokenNotFoundException
+- Fixed #477: 500 error if empty AUTHORIZATION for API calls
+- Fixed #476: core needs GuzzleHttp but does not require guzzle
+- Fixed #379: Error Access the Graphql Api Definition
+- Improved #327: Allow to display fields of a variants field on a view (table)
+- Improved #245: Variables Same variable content
+- Improved #471: Update npm dependencies
+- Improved #468: Allow other bundles to provide api users
+- Improved #458: Allow fields to alter data after form submit but before validation
+- Improved #454: Replace validation and access expression language classes
+- Improved #433: UI improvement: Hide Content Actions if user has no permission
+- Improved #404: Symfony 4.2 compatible
+
 ## 0.7.7 (2019-01-15)
 - Fixed #455: Searching views should reset paging to page 1
 - Improved #121: Users only see view row actions they have permissions for
