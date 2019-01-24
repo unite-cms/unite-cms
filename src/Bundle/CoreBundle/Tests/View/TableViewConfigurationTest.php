@@ -285,6 +285,21 @@ class TableViewConfigurationTest extends TestCase
 
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid Action Label given!
+     */
+    public function testInvalidActionLabel()
+    {
+        $actions = [
+            [
+                'url' => 'http://www.orf.at',
+                'label' => true
+            ]
+        ];
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['actions' => $actions]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      * @expectedExceptionMessage Invalid Action Icon given!
      */
     public function testInvalidActionIcon()

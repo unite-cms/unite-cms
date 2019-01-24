@@ -28,7 +28,7 @@
             <div uk-dropdown>
                 <ul class="uk-nav uk-dropdown-nav">
                     <li v-for="v in actions">
-                        <a :href="v.url" :target="v.target"><span v-html="feather.icons[v.icon].toSvg()"></span></a>
+                        <a :href="v.url" :target="v.target"><span v-html="feather.icons[v.icon].toSvg()"></span> {{ v.label }}</a>
                     </li>
                 </ul>
             </div>

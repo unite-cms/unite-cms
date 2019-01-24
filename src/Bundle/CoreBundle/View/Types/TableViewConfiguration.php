@@ -138,6 +138,7 @@ class TableViewConfiguration implements ConfigurationInterface
             ->arrayPrototype()
                 ->children()
                     ->scalarNode('url')->isRequired()->end()
+                    ->scalarNode('label')->defaultValue('')->end()
                     ->scalarNode('target')->defaultValue('_self')->end()
                     ->scalarNode('icon')->defaultValue('file')->end()
                 ->end()
@@ -278,13 +279,19 @@ class TableViewConfiguration implements ConfigurationInterface
                 throw $exception;
             }
 
-            if (isset($action['target']) && !in_array($action['target'], ['_self', '_blank'])) {
+            if (isset($action['label']) && (!is_string($action['label']) or strlen($action['label']) > 255)) {
+                $exception = new InvalidConfigurationException('Invalid Action Label given!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            if (isset($action['target']) && (!in_array($action['target'], ['_self', '_blank']))) {
                 $exception = new InvalidConfigurationException('Invalid Action Target given, the allowed options are "_self" and "_target"!');
                 $exception->setPath($index);
                 throw $exception;
             }
 
-            if (isset($action['icon']) && !is_string($action['icon']) or strlen($action['icon']) > 255) {
+            if (isset($action['icon']) && (!is_string($action['icon']) or strlen($action['icon']) > 255)) {
                 $exception = new InvalidConfigurationException('Invalid Action Icon given!');
                 $exception->setPath($index);
                 throw $exception;
@@ -292,6 +299,7 @@ class TableViewConfiguration implements ConfigurationInterface
 
             $transformed[$index] = $action;
         }
+
         return $transformed;
     }
 
