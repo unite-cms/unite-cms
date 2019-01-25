@@ -103,6 +103,10 @@ class CollectionFieldTypeFactory
                     },
                     'resolveField' => function($value, array $args, $context, ResolveInfo $info) use ($collection, $fields, $fieldTypes) {
 
+                      if(!isset($value[$info->fieldName]) && isset($fields[$info->fieldName]->getSettings()->default)) {
+                        return $fields[$info->fieldName]->getSettings()->default;
+                      }
+
                       if(!isset($fieldTypes[$info->fieldName]) || !isset($fields[$info->fieldName]) || !isset($value[$info->fieldName])) {
                         return null;
                       }
