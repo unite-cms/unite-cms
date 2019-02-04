@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="{ 'uk-background-muted': readOnly }">
         <div class="collection-wrapper">
             <unite-cms-collection-field-row
                     v-for="row in sortedRows"
@@ -8,11 +8,12 @@
                     :prototype="row.prototype"
                     :form-layout="rowFormLayout"
                     :hide-labels="rowLabelHidden"
+                    :read-only="readOnly"
                     @remove="removeRow"
                     @add="addRow"
             ></unite-cms-collection-field-row>
         </div>
-        <div v-if="!maxRows || rows.length < maxRows" class="collection-add-button-wrapper uk-sortable-nodrag">
+        <div v-if="!readOnly && (!maxRows || rows.length < maxRows)" class="collection-add-button-wrapper uk-sortable-nodrag">
             <button  class="uk-button uk-button-default" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></button>
         </div>
     </div>
@@ -61,6 +62,7 @@
             'initRows',
             'minRows',
             'maxRows',
+            'readOnly',
             'labelLayout',
             'dataPrototype',
             'dataIdentifier'
@@ -102,7 +104,7 @@
                 return this.dataPrototype.replace(new RegExp('__' + this.dataIdentifier + 'Name__', 'g'), (delta));
             },
             addRow(event) {
-                if(!this.maxRows || this.rows.length < this.maxRows) {
+                if(!this.readOnly && (!this.maxRows || this.rows.length < this.maxRows)) {
 
                     let position = (event && event.detail && event.detail[0] && event.detail[0].delta !== null) ? this.getRow(event.detail[0].delta).position : null;
 

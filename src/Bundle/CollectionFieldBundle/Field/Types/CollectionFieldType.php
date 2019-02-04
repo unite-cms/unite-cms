@@ -25,7 +25,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 {
     const TYPE                      = "collection";
     const FORM_TYPE                 = CollectionFormType::class;
-    const SETTINGS                  = ['description', 'fields', 'min_rows', 'max_rows'];
+    const SETTINGS                  = ['description', 'fields', 'min_rows', 'max_rows', 'read_only'];
     const REQUIRED_SETTINGS         = ['fields'];
 
     private $collectionFieldTypeFactory;
@@ -66,8 +66,8 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             parent::getFormOptions($field),
             [
                 'required' => true,         // Please see CollectionFormType::buildView() for more information.
-                'allow_add' => true,
-                'allow_delete' => true,
+                'allow_add' => !($settings->read_only ?? false),
+                'allow_delete' => !($settings->read_only ?? false),
                 'delete_empty' => true,
                 'error_bubbling' => false,
                 'prototype_name' => '__'.str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')).'Name__',
@@ -75,6 +75,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                     'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
                     'min-rows' => $settings->min_rows ?? 0,
                     'max-rows' => $settings->max_rows ?? null,
+                    'read-only' => $settings->read_only ?? false,
                 ],
                 'entry_type' => FieldableFormType::class,
                 'entry_options' => $options,

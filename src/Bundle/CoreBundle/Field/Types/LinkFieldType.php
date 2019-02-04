@@ -81,6 +81,10 @@ class LinkFieldType extends FieldType
         if (!empty($settings->target_widget) && !is_bool($settings->target_widget)) {
             $context->buildViolation('noboolean_value')->atPath('target_widget')->addViolation();
         }
+
+        if (!empty($settings->read_only) && !is_bool($settings->read_only)) {
+            $context->buildViolation('noboolean_value')->atPath('target_widget')->addViolation();
+        }
     }
 
     /**

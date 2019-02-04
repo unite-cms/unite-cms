@@ -18,7 +18,7 @@ class TextAreaFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['not_empty', 'description', 'default', 'rows'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'rows', 'read_only'];
 
     function getFormOptions(FieldableField $field): array
     {
@@ -26,7 +26,8 @@ class TextAreaFieldType extends FieldType
             parent::getFormOptions($field),
               [
                 'attr' => [
-                    'rows' => $field->getSettings()->rows ?? 2
+                    'rows' => $field->getSettings()->rows ?? 2,
+                    'read_only' => $field->getSettings()->read_only ?? false
                 ],
               ]
         );

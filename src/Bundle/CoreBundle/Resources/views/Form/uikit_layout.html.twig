@@ -68,16 +68,25 @@
 
 {%- block form_widget_simple -%}
     {%- set attr = attr|merge({class: (attr.class|default('') ~ ' uk-input')|trim}) -%}
+    {% if form.vars.read_only is defined and form.vars.read_only == true %}
+        {% set attr = attr|merge({disabled: "true"}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock form_widget_simple -%}
 
 {% block button_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-button')|trim}) %}
+    {% if form.vars.read_only is defined and form.vars.read_only == true %}
+        {% set attr = attr|merge({disabled: "true"}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock %}
 
 {%- block textarea_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-textarea')|trim}) %}
+    {% if form.vars.read_only is defined and form.vars.read_only == true %}
+        {% set attr = attr|merge({disabled: "true"}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock textarea_widget -%}
 
@@ -92,11 +101,17 @@
 
 {%- block radio_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-radio')|trim}) %}
+    {% if form.vars.read_only is defined and form.vars.read_only == true %}
+        {% set attr = attr|merge({disabled: "true"}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock radio_widget -%}
 
 {%- block choice_widget_collapsed -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-select')|trim}) %}
+    {% if form.vars.read_only is defined and form.vars.read_only == true %}
+        {% set attr = attr|merge({disabled: "true"}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock choice_widget_collapsed -%}
 
@@ -111,6 +126,9 @@
 
 {%- block range_widget -%}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-range')|trim}) %}
+    {% if form.vars.read_only is defined and form.vars.read_only == true %}
+        {% set attr = attr|merge({disabled: "true"}) %}
+    {% endif %}
     {{- parent() -}}
 {%- endblock range_widget %}
 

@@ -15,7 +15,7 @@ class SortIndexFieldType extends FieldType
 {
     const TYPE = "sortindex";
     const FORM_TYPE = IntegerType::class;
-    const SETTINGS = ['description'];
+    const SETTINGS = ['description', 'read_only'];
 
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {

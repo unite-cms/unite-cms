@@ -64,6 +64,10 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
             $view->vars['description'] = $options['description'];
         }
 
+        // pass read_only to template
+        if (isset($options['read_only'])) {
+            $view->vars['read_only'] = $options['read_only'];
+        }
     }
 
     /**
@@ -74,6 +78,7 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
         $resolver->setDefined('description');
         $resolver->setDefined('default');
         $resolver->setDefined('not_empty');
+        $resolver->setDefined('read_only');
 
         // If not_empty is set, also set the required option to true
         $resolver->setNormalizer('required', function(Options $options, $value){

@@ -27,7 +27,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['not_empty', 'description', 'default'];
+    const SETTINGS = ['not_empty', 'description', 'read_only', 'default'];
 
     /**
      * All required settings for this field type.
@@ -60,6 +60,7 @@ abstract class FieldType implements FieldTypeInterface
             'required' => false,
             'not_empty' => (isset($field->getSettings()->not_empty)) ? (boolean) $field->getSettings()->not_empty : false,
             'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
+            'read_only' => (isset($field->getSettings()->read_only)) ? (boolean) $field->getSettings()->read_only: false,
         ];
     }
 
@@ -148,6 +149,13 @@ abstract class FieldType implements FieldTypeInterface
         if (!empty($settingsArray['not_empty'])) {
             $context->getViolations()->addAll(
                 $context->getValidator()->validate($settingsArray['not_empty'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
+            );
+        }
+
+        // validate read only is boolean
+        if (!empty($settingsArray['read_only'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($settingsArray['read_only'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
             );
         }
 
