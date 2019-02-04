@@ -1,12 +1,12 @@
 <template>
     <div>
-        <div class="collection-add-button-wrapper">
-            <a href="#" class="uk-button uk-button-default" v-on:click.prevent="addRowBefore" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></a>
+        <div v-if="!readOnly" class="collection-add-button-wrapper">
+          <a href="#" class="uk-button uk-button-default" v-on:click.prevent="addRowBefore" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></a>
         </div>
         <div class="uk-placeholder uk-padding-small">
-            <div class="uk-sortable-handle" v-html="feather.icons['menu'].toSvg({ width: 16, height: 16 })"></div>
+            <div v-if="!readOnly" class="uk-sortable-handle" v-html="feather.icons['menu'].toSvg({ width: 16, height: 16 })"></div>
             <div :class="formLayout" v-if="prototype" v-html="prototype"></div>
-            <a href="#" class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="removeRow"></a>
+            <a v-if="!readOnly" href="#" class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="removeRow"></a>
         </div>
     </div>
 </template>
@@ -27,7 +27,8 @@
             'delta',
             'prototype',
             'formLayout',
-            'labelHidden'
+            'labelHidden',
+            'readOnly'
         ],
         methods: {
             removeRow() {
