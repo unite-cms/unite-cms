@@ -16,7 +16,7 @@
 
 {%- block form_row -%}
     {% if block_prefixes[1] is defined and block_prefixes[1] == 'checkbox' %}
-        <div class="uk-margin">
+        <div class="uk-margin"{% if form.vars.hidden is defined and form.vars.hidden == true %} hidden{%- endif -%}>
             <div class="uk-form-controls uk-form-controls-text uk-form-controls-checkbox">
                 {{- form_widget(form) -}}
             </div>
@@ -26,7 +26,7 @@
             {{- form_errors(form) -}}
         </div>
     {% elseif label is not same as(false) -%}
-        <div class="uk-margin">
+        <div class="uk-margin"{% if form.vars.hidden is defined and form.vars.hidden == true %} hidden{%- endif -%}>
             {{- form_label(form) -}}
             <div class="uk-form-controls">
                 {{- form_widget(form) -}}

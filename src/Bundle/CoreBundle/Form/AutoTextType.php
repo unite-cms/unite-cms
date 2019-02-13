@@ -56,6 +56,7 @@ class AutoTextType extends AbstractType
                 'label' => $options['label'],
                 'not_empty' => $options['not_empty'],
                 'error_bubbling' => true,
+                'hidden' => $options['hidden'],
             ])
             ->add('auto', CheckboxType::class, ['label' => $options['label']]);
     }

@@ -27,7 +27,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['not_empty', 'description', 'default'];
+    const SETTINGS = ['not_empty', 'description', 'hidden', 'default'];
 
     /**
      * All required settings for this field type.
@@ -60,6 +60,7 @@ abstract class FieldType implements FieldTypeInterface
             'required' => false,
             'not_empty' => (isset($field->getSettings()->not_empty)) ? (boolean) $field->getSettings()->not_empty : false,
             'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
+            'hidden' => (isset($field->getSettings()->hidden)) ? (boolean) $field->getSettings()->hidden: false,
         ];
     }
 
@@ -148,6 +149,13 @@ abstract class FieldType implements FieldTypeInterface
         if (!empty($settingsArray['not_empty'])) {
             $context->getViolations()->addAll(
                 $context->getValidator()->validate($settingsArray['not_empty'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
+            );
+        }
+
+        // validate hidden is boolean
+        if (!empty($settingsArray['hidden'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($settingsArray['hidden'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
             );
         }
 
