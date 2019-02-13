@@ -52,7 +52,7 @@ class AutoTextType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('text', $this->normalizeWidgetType($options['text_widget']), ['label' => $options['label'], 'not_empty' => $options['not_empty']])
+            ->add('text', $this->normalizeWidgetType($options['text_widget']), ['label' => $options['label'], 'not_empty' => $options['not_empty'], 'hidden' => $options['hidden']])
             ->add('auto', CheckboxType::class, ['label' => $options['label']]);
     }
 

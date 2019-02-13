@@ -51,8 +51,10 @@
 {%- endblock button_row -%}
 
 {% block form_label -%}
-    {%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' uk-form-label')|trim}) -%}
-    {{- parent() -}}
+    {% if form.vars.hidden is not defined or form.vars.hidden == false %}
+        {%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' uk-form-label')|trim}) -%}
+        {{- parent() -}}
+    {%- endif -%}
 {%- endblock form_label %}
 
 {%- block form_errors -%}
@@ -67,8 +69,10 @@
 {%- endblock form_errors -%}
 
 {%- block form_widget_simple -%}
-    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' uk-input')|trim}) -%}
-    {{- parent() -}}
+    {% if form.vars.hidden is not defined or form.vars.hidden == false %}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' uk-input')|trim}) -%}
+        {{- parent() -}}
+    {% endif %}
 {%- endblock form_widget_simple -%}
 
 {% block button_widget -%}
@@ -77,8 +81,10 @@
 {%- endblock %}
 
 {%- block textarea_widget -%}
-    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-textarea')|trim}) %}
-    {{- parent() -}}
+    {% if form.vars.hidden is not defined or form.vars.hidden == false %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-textarea')|trim}) %}
+        {{- parent() -}}
+    {% endif %}
 {%- endblock textarea_widget -%}
 
 {%- block checkbox_widget -%}
@@ -110,8 +116,10 @@
 {%- endblock choice_widget_expanded -%}
 
 {%- block range_widget -%}
-    {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-range')|trim}) %}
-    {{- parent() -}}
+    {% if form.vars.hidden is not defined or form.vars.hidden == false %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ ' uk-range')|trim}) %}
+        {{- parent() -}}
+    {% endif %}
 {%- endblock range_widget %}
 
 {%- block submit_widget -%}
