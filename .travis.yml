@@ -87,6 +87,7 @@ before_install:
 install:
   - sudo apt-get install -y awscli s3cmd
   - composer install
+  - composer require --dev phpunit
 
 before_script:
   - |
@@ -97,9 +98,9 @@ before_script:
 script:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER $CMD_APPEND
+      ./vendor/bin/simple-phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER $CMD_APPEND
     else
-      phpunit --configuration $PHPUNIT_CONF
+      ./vendor/bin/simple-phpunit --configuration $PHPUNIT_CONF
     fi
 
 after_success:
