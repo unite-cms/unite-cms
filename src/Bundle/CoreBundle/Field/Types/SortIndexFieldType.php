@@ -57,6 +57,32 @@ class SortIndexFieldType extends FieldType
     ) {
         if ($content instanceof Content) {
 
+            // If this field is used to sort a tree view, we need to:
+            // 1. Get the view's children_field
+            // 2. Get the children_field's reference_field (parent)
+            // 3. Restrict the renumbering queries to only affect entities with the same value in reference_field
+            // TODO: Handle multiple tree views.
+            $parentJsonId = null;
+            $parentValue = null;
+            foreach ($content->getContentType()->getViews() as $view) {
+                if ($view->getType() === 'tree') {
+                    $settings = $view->getSettings();
+                    if ($field->getIdentifier() === $settings->sort['field']) {
+                        $childrenField = $content->getContentType()->getFields()[$settings->children_field];
+                        $parentField = $content->getContentType()->getFields()[$childrenField->getSettings()->reference_field];
+
+                        $parentValue = $content->getData()[$parentField->getIdentifier()];
+                        if ($parentValue === null) {
+                            $parentJsonId = $parentField->getJsonExtractIdentifier();
+                        } else {
+                            $parentJsonId = $parentField->getJsonExtractIdentifier() . '.content';
+                            $parentValue = $parentValue['content'];
+                        }
+                        break;
+                    }
+                }
+            }
+
             // if we recover a deleted content, it's like we are moving the item from the end of the list to its original position.
             $originalPosition = null;
 
@@ -72,7 +98,7 @@ class SortIndexFieldType extends FieldType
             // If we shift left, all items in between must be shifted right.
             if ($originalPosition !== null && $originalPosition > $updatedPosition) {
 
-                $repository->createQueryBuilder('c')
+                $queryBuilder = $repository->createQueryBuilder('c')
                     ->update('UniteCMSCoreBundle:Content', 'c')
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) +1 AS int))")
                     ->where('c.contentType = :contentType')
@@ -84,15 +110,21 @@ class SortIndexFieldType extends FieldType
                             ':first' => $updatedPosition,
                             ':last' => $originalPosition - 1,
                         ]
-                    )
-                    ->getQuery()->execute();
+                    );
 
+                if ($parentJsonId !== null) {
+                    $queryBuilder->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :parent_identifier)) = :parent_value");
+                    $queryBuilder->setParameter(':parent_identifier', $parentJsonId);
+                    $queryBuilder->setParameter(':parent_value', $parentValue ?? 'null');
+                }
+
+                $queryBuilder->getQuery()->execute();
             }
 
             // if we shift right, all items in between must be shifted left.
             if ($originalPosition !== null && $originalPosition < $updatedPosition) {
 
-                $repository->createQueryBuilder('c')
+                $queryBuilder = $repository->createQueryBuilder('c')
                     ->update('UniteCMSCoreBundle:Content', 'c')
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) -1 AS int))")
                     ->where('c.contentType = :contentType')
@@ -104,14 +136,21 @@ class SortIndexFieldType extends FieldType
                             ':first' => $originalPosition + 1,
                             ':last' => $updatedPosition,
                         ]
-                    )
-                    ->getQuery()->execute();
+                    );
+
+                if ($parentJsonId !== null) {
+                    $queryBuilder->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :parent_identifier)) = :parent_value");
+                    $queryBuilder->setParameter(':parent_identifier', $parentJsonId);
+                    $queryBuilder->setParameter(':parent_value', $parentValue ?? 'null');
+                }
+
+                $queryBuilder->getQuery()->execute();
             }
 
             // If we have no originalPosition, for example if we recover a deleted content.
             if ($originalPosition === null) {
 
-                $repository->createQueryBuilder('c')
+                $queryBuilder = $repository->createQueryBuilder('c')
                     ->update('UniteCMSCoreBundle:Content', 'c')
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) +1 AS int))")
                     ->where('c.contentType = :contentType')
@@ -122,8 +161,15 @@ class SortIndexFieldType extends FieldType
                             ':contentType' => $content->getContentType(),
                             ':first' => $updatedPosition,
                         ]
-                    )
-                    ->getQuery()->execute();
+                    );
+
+                if ($parentJsonId !== null) {
+                    $queryBuilder->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :parent_identifier)) = :parent_value");
+                    $queryBuilder->setParameter(':parent_identifier', $parentJsonId);
+                    $queryBuilder->setParameter(':parent_value', $parentValue ?? 'null');
+                }
+
+                $queryBuilder->getQuery()->execute();
             }
 
         }
