@@ -137,6 +137,13 @@
             },
 
             updateRow(id, data) {
+                // Need to explicitly set parent.content to null, or the parent
+                // field won't get updated. This would prevent items in a tree
+                // view being moved to the top level.
+                if(data.hasOwnProperty('parent') && data.parent === null) {
+                    data.parent = { content: null };
+                }
+
                 this.dataFetcher.update(id, data).then(
                     (data) => {
                         let rowToUpdate = this.rows.filter((row) => { return row.id === id });
