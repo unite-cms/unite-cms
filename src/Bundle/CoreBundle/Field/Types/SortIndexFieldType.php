@@ -93,49 +93,55 @@ class SortIndexFieldType extends FieldType
             // Get new position.
             $updatedPosition = $data[$field->getIdentifier()];
 
+            list($parentJsonId, $parentValue) = $this->findParentFieldValue($field, $content, $data);
+            list($oldParentJsonId, $oldParentValue) = $this->findParentFieldValue($field, $content, $old_data);
+            $isTreeView = $parentJsonId !== null;
+
             $queryBuilder = $repository->createQueryBuilder('c');
 
-
-            list($parentJsonId, $parentValue) = $this->findParentFieldValue($field, $content, $data);
-
             // If this field is used to sort a tree view, make sure we only re-number tree sibling items.
-            if ($parentJsonId !== null) {
+            if ($isTreeView) {
                 $queryBuilder->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :parent_identifier)) = :parent_value");
                 $queryBuilder->setParameter(':parent_identifier', $parentJsonId);
                 $queryBuilder->setParameter(':parent_value', $parentValue ?? 'null');
             }
 
-            // If we shift left, all items in between must be shifted right.
-            if ($originalPosition !== null && $originalPosition > $updatedPosition) {
+            // If the item already had a position and if this attribute isn't used to
+            // sort a tree view, or it is and the item hasn't changed parents:
+            if ($originalPosition !== null && (!$isTreeView || $parentValue === $oldParentValue)) {
+                // If we shift left, all items in between must be shifted right.
+                if ($originalPosition > $updatedPosition) {
 
-                $queryBuilder->update('UniteCMSCoreBundle:Content', 'c')
-                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) +1 AS int))")
-                    ->andWhere('c.contentType = :contentType')
-                    ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) BETWEEN :first AND :last")
-                    ->setParameter('identifier', $field->getJsonExtractIdentifier())
-                    ->setParameter(':contentType', $content->getContentType())
-                    ->setParameter(':first', $updatedPosition)
-                    ->setParameter(':last', $originalPosition - 1)
-                    ->getQuery()->execute();
+                    $queryBuilder->update('UniteCMSCoreBundle:Content', 'c')
+                        ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) +1 AS int))")
+                        ->andWhere('c.contentType = :contentType')
+                        ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) BETWEEN :first AND :last")
+                        ->setParameter('identifier', $field->getJsonExtractIdentifier())
+                        ->setParameter(':contentType', $content->getContentType())
+                        ->setParameter(':first', $updatedPosition)
+                        ->setParameter(':last', $originalPosition - 1)
+                        ->getQuery()->execute();
+                }
+
+                // If we shift right, all items in between must be shifted left.
+                if ($originalPosition < $updatedPosition) {
+
+                    $queryBuilder->update('UniteCMSCoreBundle:Content', 'c')
+                        ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) -1 AS int))")
+                        ->andWhere('c.contentType = :contentType')
+                        ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) BETWEEN :first AND :last")
+                        ->setParameter('identifier', $field->getJsonExtractIdentifier())
+                        ->setParameter(':contentType', $content->getContentType())
+                        ->setParameter(':first', $originalPosition + 1)
+                        ->setParameter(':last', $updatedPosition)
+                        ->getQuery()->execute();
+                }
             }
 
-            // if we shift right, all items in between must be shifted left.
-            if ($originalPosition !== null && $originalPosition < $updatedPosition) {
-
-                $queryBuilder->update('UniteCMSCoreBundle:Content', 'c')
-                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) -1 AS int))")
-                    ->andWhere('c.contentType = :contentType')
-                    ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) BETWEEN :first AND :last")
-                    ->setParameter('identifier', $field->getJsonExtractIdentifier())
-                    ->setParameter(':contentType', $content->getContentType())
-                    ->setParameter(':first', $originalPosition + 1)
-                    ->setParameter(':last', $updatedPosition)
-                    ->getQuery()->execute();
-            }
-
-            // If we have no originalPosition, for example if we recover a deleted content.
-            if ($originalPosition === null) {
-
+            // If we have no originalPosition, for example if we recover a deleted content,
+            // or if this field is used for a tree view and the item was moved to under a
+            // different parent, shift all following items up.
+            if ($originalPosition === null || $isTreeView && $parentValue !== $oldParentValue) {
                 $queryBuilder->update('UniteCMSCoreBundle:Content', 'c')
                     ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) +1 AS int))")
                     ->andWhere('c.contentType = :contentType')
@@ -146,6 +152,25 @@ class SortIndexFieldType extends FieldType
                     ->getQuery()->execute();
             }
 
+            // If the content item has been moved to be under a different parent, decrement
+            // the positions of all its previous sibling items with higher positions.
+            if ($isTreeView && $parentValue !== $oldParentValue) {
+                $repository->createQueryBuilder('c')->update('UniteCMSCoreBundle:Content', 'c')
+                    ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) -1 AS int))")
+                    ->where('c.contentType = :contentType')
+                    ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) > :last")
+                    ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :old_parent_identifier)) = :old_parent_value")
+                    ->setParameters(
+                        [
+                            'identifier' => $field->getJsonExtractIdentifier(),
+                            ':contentType' => $content->getContentType(),
+                            ':last' => $old_data[$field->getIdentifier()],
+                            ':old_parent_identifier' => $oldParentJsonId,
+                            ':old_parent_value' => $oldParentValue ?? 'null',
+                        ]
+                    )
+                    ->getQuery()->execute();
+            }
         }
     }
 
