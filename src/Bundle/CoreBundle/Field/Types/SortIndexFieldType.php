@@ -102,8 +102,6 @@ class SortIndexFieldType extends FieldType
             if ($parentJsonId !== null) {
                 $queryBuilder->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :parent_identifier)) = :parent_value");
                 $queryBuilder->setParameter(':parent_identifier', $parentJsonId);
-                // If this is a top-level item, JSON-extracting its parent value field will
-                // return the string 'null'.
                 $queryBuilder->setParameter(':parent_value', $parentValue ?? 'null');
             }
 
@@ -153,10 +151,10 @@ class SortIndexFieldType extends FieldType
 
     public function onSoftDelete(FieldableField $field, Content $content, EntityRepository $repository, $data)
     {
+        $queryBuilder = $repository->createQueryBuilder('c');
 
-        // all content after the deleted one should get --.
-        $repository->createQueryBuilder('c')
-            ->update('UniteCMSCoreBundle:Content', 'c')
+        // All content after the deleted one should get --.
+        $queryBuilder->update('UniteCMSCoreBundle:Content', 'c')
             ->set('c.data', "JSON_SET(c.data, :identifier, CAST(JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) -1 AS int))")
             ->where('c.contentType = :contentType')
             ->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :identifier)) > :last")
@@ -166,8 +164,18 @@ class SortIndexFieldType extends FieldType
                     ':contentType' => $content->getContentType(),
                     ':last' => $data[$field->getIdentifier()],
                 ]
-            )
-            ->getQuery()->execute();
+            );
+
+        // If this field is used to sort a tree view, then we only want to
+        // adjust sibling items.
+        list($parentJsonId, $parentValue) = $this->findParentFieldValue($field, $content, $data);
+        if ($parentJsonId !== null) {
+            $queryBuilder->andWhere("JSON_UNQUOTE(JSON_EXTRACT(c.data, :parent_identifier)) = :parent_value");
+            $queryBuilder->setParameter(':parent_identifier', $parentJsonId);
+            $queryBuilder->setParameter(':parent_value', $parentValue ?? 'null');
+        }
+
+        $queryBuilder->getQuery()->execute();
     }
 
     /**
