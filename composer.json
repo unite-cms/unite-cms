@@ -111,10 +111,10 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "bin/console assets:install --symlink"
+            "bin/console assets:install --symlink --relative"
         ],
         "post-update-cmd": [
-            "bin/console assets:install --symlink"
+            "bin/console assets:install --symlink --relative"
         ]
     }
 }
