@@ -1,6 +1,8 @@
 
 import { GraphQLClient } from 'graphql-request'
 
+import cloneDeep from 'lodash/cloneDeep';
+
 export default {
 
     client: null,
@@ -21,15 +23,17 @@ export default {
     deletedArgument: false,
 
     create(bag, fieldQuery = [], filterQuery = []) {
-        this.fieldQuery = fieldQuery;
-        this.filterQuery = filterQuery;
+        let fetcher = cloneDeep(this);
 
-        if(this.fieldQuery.indexOf('id') < 0) {
-            this.fieldQuery.push('id');
+        fetcher.fieldQuery = fieldQuery;
+        fetcher.filterQuery = filterQuery;
+
+        if(fetcher.fieldQuery.indexOf('id') < 0) {
+            fetcher.fieldQuery.push('id');
         }
 
-        if(this.fieldQuery.indexOf('deleted') < 0) {
-            this.fieldQuery.push('deleted');
+        if(fetcher.fieldQuery.indexOf('deleted') < 0) {
+            fetcher.fieldQuery.push('deleted');
         }
 
         let clientConfig = {
@@ -44,18 +48,19 @@ export default {
         }
 
         if(bag.settings.filter) {
-            this.filter(bag.settings.filter);
+            fetcher.filter(bag.settings.filter);
         }
 
-        this.client = new GraphQLClient(bag.endpoint, clientConfig);
+        fetcher.client = new GraphQLClient(bag.endpoint, clientConfig);
 
         let contentTypeName = bag.settings.contentType.charAt(0).toUpperCase() + bag.settings.contentType.slice(1);
-        this.queryMethod = 'find' + contentTypeName;
-        this.updateMethod = 'update' + contentTypeName;
-        this.updateDataObjectName = contentTypeName + 'ContentInput';
+        fetcher.queryMethod = 'find' + contentTypeName;
+        fetcher.updateMethod = 'update' + contentTypeName;
+        fetcher.updateDataObjectName = contentTypeName + 'ContentInput';
 
         // Return a copy of this object on create.
-        return Object.assign({}, this);
+        //return Object.assign({}, this);
+        return fetcher;
     },
 
     sort(sort) {
