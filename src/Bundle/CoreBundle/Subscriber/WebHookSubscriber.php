@@ -25,7 +25,7 @@ class WebHookSubscriber
         $this->webHookManager = $webHookManager;
     }
 
-    public function postRemove(LifecycleEventArgs $args)
+    public function preRemove(LifecycleEventArgs $args)
     {
         $entity = $args->getObject();
 
