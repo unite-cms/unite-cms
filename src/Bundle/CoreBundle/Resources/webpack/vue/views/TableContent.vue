@@ -53,7 +53,7 @@
         },
         updated() {
             [].forEach.call(this.$el.querySelectorAll('.unite-div-table-row > *'), (cell) => {
-                cell.style.width = '0px';
+                cell.style.width = cell.clientWidth + 'px';
             });
         },
         computed: {
