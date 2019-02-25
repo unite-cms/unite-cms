@@ -77,7 +77,13 @@
             }
         },
         mounted() {
-            this.modal = UIkit.modal(this.$el.querySelector('#' + this.modalId));
+            let $modalEl = this.$el.querySelector('#' + this.modalId);
+            this.modal = UIkit.modal($modalEl);
+
+            // When closing a modal, we stop listening to contentSelected events.
+            UIkit.util.on($modalEl, 'beforehide', () => {
+                window.UniteCMSEventBus.$off('contentSelected');
+            });
         },
         computed: {
             modalId() {
@@ -94,18 +100,11 @@
                         this.content = data[0].row.id;
                         this.contentType = data[0].contentType;
                         this.findHumanReadableName();
-                        this.closeModal();
+                        this.modal.hide();
                     }
                 });
 
                 this.modal.show();
-            },
-            closeModal() {
-
-                // When closing a modal, we stop listen to contentSelected events.
-                window.UniteCMSEventBus.$off('contentSelected');
-
-                this.modal.hide();
             },
             clearSelection() {
                 this.content = null;
