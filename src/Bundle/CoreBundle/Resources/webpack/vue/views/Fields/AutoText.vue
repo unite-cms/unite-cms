@@ -22,7 +22,7 @@
             filterQuery(identifier, field) {
                 return {
                     field: identifier + '.text',
-                    operator: 'LIKE',
+                    operator: 'ILIKE',
                     value: (value) => { return '%' + value + '%' }
                 };
             }
