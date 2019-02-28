@@ -170,7 +170,7 @@ class FileFieldType extends FieldType
 
         // Validate required bucket configuration.
         if($context->getViolations()->count() == 0) {
-            foreach(['endpoint', 'key', 'secret', 'bucket'] as $required_field) {
+            foreach(['endpoint', 'bucket'] as $required_field) {
                 if(!isset($settings->bucket[$required_field])) {
                     $context->buildViolation('required')->atPath('bucket.' . $required_field)->addViolation();
                 }
