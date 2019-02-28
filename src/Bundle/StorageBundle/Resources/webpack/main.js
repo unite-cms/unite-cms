@@ -2,7 +2,7 @@
 import Vue from "vue";
 import vueCustomElement from 'vue-custom-element';
 
-import File from "./vue/field/file.vue";
+import File from "./vue/field/File.vue";
 import uniteViewFieldsPlugin from "../../../CoreBundle/Resources/webpack/js/uniteViewFieldsPlugin";
 
 // Use VueCustomElement

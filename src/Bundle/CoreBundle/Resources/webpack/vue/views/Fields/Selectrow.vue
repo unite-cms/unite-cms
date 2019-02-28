@@ -65,6 +65,7 @@
             display: inline-block;
             cursor: pointer;
             opacity: 0.75;
+            width: 30px;
         }
 
         &:hover {
