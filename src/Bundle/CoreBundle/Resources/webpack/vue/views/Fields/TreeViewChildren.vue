@@ -11,7 +11,7 @@
                                :urls="urls"
                                :embedded="embedded"
             ></table-content-row>
-            <tree-view-children :isSortable="isSortable" v-if="childRows(row).length > 0"
+            <tree-view-children :isSortable="isSortable"
                                 :showActions="showActions"
                                 :updateable="updateable"
                                 :rows="childRows(row)"
@@ -22,6 +22,7 @@
                                 :embedded="embedded"
                                 :dataFetcher="dataFetcher"
                                 :sort="sort"
+                                uk-sortable="true"
             ></tree-view-children>
         </div>
     </div>
