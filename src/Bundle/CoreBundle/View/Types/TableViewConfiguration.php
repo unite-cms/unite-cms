@@ -58,6 +58,7 @@ class TableViewConfiguration implements ConfigurationInterface
             ->children()
                 ->append($this->appendFieldsNode())
                 ->append($this->appendFilterNode())
+                ->append($this->appendRowsPerPageNode())
                 ->append($this->appendSortNode())
                 ->append($this->appendActionsNode())
                 ->variableNode('sort_field')->setDeprecated()->end()
@@ -110,6 +111,24 @@ class TableViewConfiguration implements ConfigurationInterface
                         }
 
                         if (!$filter_structure->getFilter()) {
+                            throw $exception;
+                        }
+
+                        return $v;
+                    }
+                )
+            ->end();
+    }
+
+    protected function appendRowsPerPageNode() : VariableNodeDefinition {
+        $treeBuilder = new TreeBuilder('rows_per_page', 'scalar');
+        return $treeBuilder->getRootNode()
+            ->validate()
+                ->always(
+                    function ($v) {
+                        if (!is_int($v)) {
+                            $exception = new InvalidConfigurationException('Invalid rows_per_page configuration - must be an integer');
+                            $exception->setPath('rows_per_page');
                             throw $exception;
                         }
 

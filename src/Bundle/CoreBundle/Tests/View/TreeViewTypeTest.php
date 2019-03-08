@@ -218,6 +218,31 @@ class TreeViewTypeTest extends ContainerAwareTestCase
         $this->view->setSettings(new ViewSettings(['children_field' => 'child_comments']));
         $this->assertCount(0, static::$container->get('validator')->validate($this->view));
 
+
+        // A tree view with a non-scalar "rows_per_page" field is not valid
+        $this->view->setSettings(new ViewSettings(['children_field' => 'child_comments', 'rows_per_page' => ['foo' => 'baa']]));
+        $errors = static::$container->get('validator')->validate($this->view);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('Invalid type for path "settings.rows_per_page". Expected scalar, but got array.', $errors->get(0)->getMessage());
+
+        // A tree view with a string "rows_per_page" field is not valid
+        $this->view->setSettings(new ViewSettings(['children_field' => 'child_comments', 'rows_per_page' => '20']));
+        $errors = static::$container->get('validator')->validate($this->view);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('Invalid rows_per_page configuration - must be an integer', $errors->get(0)->getMessage());
+
+        // A tree view with a float "rows_per_page" field is not valid
+        $this->view->setSettings(new ViewSettings(['children_field' => 'child_comments', 'rows_per_page' => 20.5]));
+        $errors = static::$container->get('validator')->validate($this->view);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('Invalid rows_per_page configuration - must be an integer', $errors->get(0)->getMessage());
+
+        // A tree view with an integer "rows_per_page" field is valid
+        $this->view->setSettings(new ViewSettings(['children_field' => 'child_comments', 'rows_per_page' => 20]));
+        $errors = static::$container->get('validator')->validate($this->view);
+        $this->assertCount(0, static::$container->get('validator')->validate($this->view));
+
+
         // Test templateRenderParameters.
         $parameters = static::$container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($this->view);
         $this->assertTrue($parameters->isSelectModeNone());

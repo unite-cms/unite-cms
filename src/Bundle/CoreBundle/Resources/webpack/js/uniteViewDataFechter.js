@@ -51,6 +51,10 @@ export default {
             fetcher.filter(bag.settings.filter);
         }
 
+        if(bag.settings.rows_per_page) {
+            fetcher.limit = bag.settings.rows_per_page;
+        }
+
         fetcher.client = new GraphQLClient(bag.endpoint, clientConfig);
 
         let contentTypeName = bag.settings.contentType.charAt(0).toUpperCase() + bag.settings.contentType.slice(1);

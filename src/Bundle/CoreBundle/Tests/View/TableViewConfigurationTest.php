@@ -197,6 +197,33 @@ class TableViewConfigurationTest extends TestCase
 
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid type for path "settings.rows_per_page". Expected scalar, but got array.
+     */
+    public function testInvalidRowsPerPageSettingsKeyArray()
+    {
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['rows_per_page' => ['foo' => 'baa']]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid rows_per_page configuration - must be an integer
+     */
+    public function testInvalidRowsPerPageSettingsKeyString()
+    {
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['rows_per_page' => '20']]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid rows_per_page configuration - must be an integer
+     */
+    public function testInvalidRowsPerPageSettingsKeyFloat()
+    {
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['rows_per_page' => 20.5]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      * @expectedExceptionMessage Unrecognized option "foo" under "settings.sort"
      */
     public function testInvalidSortSettingsKey()
