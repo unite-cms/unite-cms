@@ -16,7 +16,7 @@ class CheckboxFieldType extends FieldType
 {
     const TYPE = "checkbox";
     const FORM_TYPE = CheckboxType::class;
-    const SETTINGS = ['default', 'description'];
+    const SETTINGS = ['default', 'description', 'hidden'];
 
     /**
      * {@inheritdoc}
@@ -50,5 +50,33 @@ class CheckboxFieldType extends FieldType
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         return (boolean)$value;
+    }
+
+    /**
+     * Basic settings validation based on self::SETTINGS and self::REQUIRED_SETTINGS constants. More sophisticated
+     * validation should be done in child implementations.
+     *
+     * @param FieldableFieldSettings $settings
+     * @param ExecutionContextInterface $context
+     *
+     */
+    function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
+    {
+        // Validate allowed and required settings.
+        parent::validateSettings($settings, $context);
+
+        // Only continue, if there are no violations yet.
+        if($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        $settingsArray = $settings ? get_object_vars($settings) : [];
+
+        // validate hidden is boolean
+        if (!empty($settingsArray['hidden'])) {
+            $context->getViolations()->addAll(
+                $context->getValidator()->validate($settingsArray['hidden'], new Assert\Type(['type' => 'boolean', 'message' => 'noboolean_value']))
+            );
+        }
     }
 }

@@ -17,11 +17,17 @@ class EmailFieldTypeTest extends FieldTypeTestCase
     {
         // Email Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('email');
-        $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'hidden' => 123,
+                'foo' => 'baa'
+            ]
+        ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
 
         $ctField->setSettings(new FieldableFieldSettings(['default' => 'baa.asdfasdf.at']));
 
@@ -37,6 +43,7 @@ class EmailFieldTypeTest extends FieldTypeTestCase
             [
                 'not_empty' => true,
                 'description' => 'my description',
+                'hidden' => true,
                 'default' => 'admin@unite.co.at'
             ]
         ));

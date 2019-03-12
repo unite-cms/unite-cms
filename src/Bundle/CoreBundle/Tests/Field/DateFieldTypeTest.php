@@ -28,14 +28,16 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
-                'not_empty' => 124
+                'not_empty' => 124,
+                'hidden' => 123
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(2, $errors);
+        $this->assertCount(3, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(2)->getMessageTemplate());
 
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
@@ -56,7 +58,8 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'default' => '2018-05-24',
-                'not_empty' => true
+                'not_empty' => true,
+                'hidden' => true
             ]
         ));
 
@@ -72,7 +75,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $id = new \ReflectionProperty($content, 'id');
         $id->setAccessible(true);
         $id->setValue($content, 1);
-        
+
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);

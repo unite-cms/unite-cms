@@ -29,13 +29,15 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         // validate wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'default' => 123
+                'default' => 123,
+                'hidden' => 123
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
+        $this->assertCount(2, $errors);
+        $this->assertEquals('noboolean_value', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_initial_data', $errors->get(1)->getMessageTemplate());
     }
 
     public function testFormSubmit() {
@@ -69,7 +71,8 @@ class CheckboxFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'default' => true,
-                'description' => 'blabla'
+                'description' => 'blabla',
+                'hidden' => false
             ]
         ));
 

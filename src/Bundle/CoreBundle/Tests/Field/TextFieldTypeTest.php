@@ -23,15 +23,17 @@ class TextFieldTypeTest extends FieldTypeTestCase
             [
                 'foo' => 'baa',
                 'not_empty' => 'foo',
-                'description' => $this->generateRandomMachineName(500)
+                'description' => $this->generateRandomMachineName(500),
+                'hidden' => 123
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(3, $errors);
+        $this->assertCount(4, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('too_long', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('too_long', $errors->get(3)->getMessageTemplate());
 
          // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(

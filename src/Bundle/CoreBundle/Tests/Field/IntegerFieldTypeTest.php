@@ -17,11 +17,17 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
     {
         // Integer Type Field with invalid settings should not be valid.
         $ctField = $this->createContentTypeField('integer');
-        $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'hidden' => 123,
+                'foo' => 'baa'
+            ]
+        ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
 
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(['default' => 'baa']));
@@ -38,6 +44,7 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
             [
                 'not_empty' => true,
                 'description' => 'my description',
+                'hidden' => true,
                 'default' => 123
             ]
         ));

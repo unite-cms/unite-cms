@@ -8,6 +8,7 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
 class SortIndexFieldTypeTest extends FieldTypeTestCase
 {
@@ -17,6 +18,39 @@ class SortIndexFieldTypeTest extends FieldTypeTestCase
         $ctField = $this->createContentTypeField('sortindex');
         $this->assertCount(0, static::$container->get('validator')->validate($ctField));
     }
+
+    public function testSortIndexFieldTypeWithInvalidSettings()
+    {
+        // Sort Index Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('sortindex');
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'hidden' => 123,
+                'foo' => 'baa'
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(2, $errors);
+        $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+    }
+
+    public function testSortIndexFieldTypeWithValidSettings()
+    {
+        // Phone Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('sortindex');
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'description' => 'my description',
+                'hidden' => true
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(0, $errors);
+    }
+
 
     public function testAutoUpdateSortIndexOnInsertUpdateDelete() {
 
