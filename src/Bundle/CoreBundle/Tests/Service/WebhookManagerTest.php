@@ -21,7 +21,7 @@ use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 /**
  * @group slow
  */
-class WebhookFunctionalTest extends DatabaseAwareTestCase
+class WebhookManagerTest extends DatabaseAwareTestCase
 {
 
     /**
@@ -82,7 +82,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
                     "condition": "event == \"update\""
                   },
                   {
-                    "query": "query { type, text }",
+                    "query": "query { id, type, text }",
                     "url": "http://www.example3.com",
                     "check_ssl": true,
                     "authentication_header": "key1212494949494",
@@ -119,13 +119,13 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
               ],
               "webhooks": [
                   {
-                    "query": "query { type, choice, longtext }",
+                    "query": "query { id, type, choice, longtext }",
                     "url": "http://www.example4.com",
                     "content_type": "form_data",
                     "condition": "event == \"create\""
                   },
                   {
-                    "query": "query { type, choice, longtext  }",
+                    "query": "query { id, type, choice, longtext  }",
                     "url": "http://www.example5.com",
                     "check_ssl": true,
                     "content_type": "form_data",
@@ -264,13 +264,14 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
         $this->assertEquals('{"type":"website","text":"Foo","longtext":"my longtext 1"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
 
         $this->em->refresh($content);
+        $content_id = $content->getId();
 
         $this->em->remove($content);
         $this->em->flush();
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
         $this->assertEquals('key1212494949494', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
-        $this->assertEquals('', $this->mockHandler->getLastRequest()->getBody()->getContents());
+        $this->assertEquals('{"id":"'.$content_id.'","type":"website","text":"Foo"}', $this->mockHandler->getLastRequest()->getBody()->getContents());
        
     }
 
@@ -295,7 +296,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
         $this->assertEquals([], $this->mockHandler->getLastRequest()->getHeader('Authorization'));
-        $this->assertEquals('type=website2&choice=red&longtext=my+longtext+123', $this->mockHandler->getLastRequest()->getBody()->getContents());
+        $this->assertEquals('id='.$content->getId().'&type=website2&choice=red&longtext=my+longtext+123', $this->mockHandler->getLastRequest()->getBody()->getContents());
 
         $content_data = [
             'choice' => "green",
@@ -307,7 +308,7 @@ class WebhookFunctionalTest extends DatabaseAwareTestCase
 
         $this->assertNotNull($this->mockHandler->getLastRequest());
         $this->assertEquals('key1212', $this->mockHandler->getLastRequest()->getHeader('Authorization')[0]);
-        $this->assertEquals('type=website2&choice=green&longtext=my+longtext+123', $this->mockHandler->getLastRequest()->getBody()->getContents());
+        $this->assertEquals('id='.$content->getId().'&type=website2&choice=green&longtext=my+longtext+123', $this->mockHandler->getLastRequest()->getBody()->getContents());
 
     }
 

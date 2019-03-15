@@ -19,7 +19,7 @@
 
             /**
              * Each field must implement a filter Query method that gets called to alter the search command. The default
-             * implementation just adds a LIKE filter. If null is returned, this field is not searchable.
+             * implementation just adds an ILIKE filter. If null is returned, this field is not searchable.
              *
              * @param identifier, the specified identifier
              * @param field, the field object config
@@ -27,7 +27,7 @@
             filterQuery(identifier, field) {
                 return {
                     field: identifier,
-                    operator: 'LIKE',
+                    operator: 'ILIKE',
                     value: (value) => { return '%' + value + '%' }
                 };
             }
