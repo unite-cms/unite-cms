@@ -23,7 +23,7 @@
             </a>
         </div>
 
-         <div v-if="actions.length > 0" class="uk-flex uk-flex-right uk-margin">
+         <div v-if="actions && actions.length > 0" class="uk-flex uk-flex-right uk-margin">
             <button class="uk-button uk-button-default" type="button">Action Links</button>
             <div uk-dropdown>
                 <ul class="uk-nav uk-dropdown-nav">

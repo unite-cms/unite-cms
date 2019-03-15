@@ -22,7 +22,7 @@
                                 :embedded="embedded"
                                 :dataFetcher="dataFetcher"
                                 :sort="sort"
-                                uk-sortable="true"
+                                :uk-sortable="isSortable"
             ></tree-view-children>
         </div>
     </div>
@@ -128,7 +128,11 @@
                             domain: this.domain
                         };
                     } else {
-                        data[this.parentField] = null;
+                        data[this.parentField] = {
+                            content: null,
+                            content_type: this.contentType,
+                            domain: this.domain
+                        };
                     }
 
                     data[this.sort.field] = UIkit.util.index(event.detail[1]);
