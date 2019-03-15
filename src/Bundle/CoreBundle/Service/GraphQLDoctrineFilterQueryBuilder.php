@@ -144,6 +144,8 @@ class GraphQLDoctrineFilterQueryBuilder
                             return $this->expr->isNotNull($leftSide);
                         case 'LIKE':
                             return $this->expr->like($leftSide, $rightSide);
+                        case 'ILIKE':
+                            return $this->expr->like($this->expr->lower($leftSide), $this->expr->lower($rightSide));
                         default:
                             if (in_array(
                                 $filterInput['operator'],
