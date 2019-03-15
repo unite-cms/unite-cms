@@ -39,7 +39,7 @@ services:
     public: false
     arguments: ['@unite.cms.webhook_manager']
     tags:
-      - { name: doctrine.event_listener, event: postRemove, lazy: true }
+      - { name: doctrine.event_listener, event: preRemove, lazy: true }
       - { name: doctrine.event_listener, event: postPersist, lazy: true }
       - { name: doctrine.event_listener, event: postUpdate, lazy: true }
 
