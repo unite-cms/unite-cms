@@ -160,7 +160,7 @@
 @media (min-width: 2100px) {
   .uk-card.full-content-card {
     &:not(.always-full) {
-      width: 1600px;
+      min-width: 1550px;
       align-self: center;
     }
   }
