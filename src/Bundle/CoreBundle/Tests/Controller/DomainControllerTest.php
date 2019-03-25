@@ -161,7 +161,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Assert domain config file.
         $this->assertNotNull($domain);
         $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
-        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain, true);
+        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
 
         $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
         $this->assertJsonStringEqualsJsonString($domainSerialized, $domain->getConfig());
@@ -258,7 +258,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Assert domain config file.
         $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
         $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
-        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain, true);
+        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
 
 
         $this->assertJsonStringEqualsJsonString($domainSerialized, static::$container->get('unite.cms.domain_config_manager')->serialize($domain));

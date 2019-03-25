@@ -118,7 +118,8 @@ class CreateDomainCommand extends Command
         $domain = empty($domainDefinition) ? new Domain() : $this->domainConfigManager->parse($domainDefinition);
         $domain
             ->setOrganization($organization)
-            ->setIdentifier($domainIdentifier);
+            ->setIdentifier($domainIdentifier)
+            ->setConfig($domainDefinition ?? '');
 
         if(empty($domain->getTitle())) {
             $domain->setTitle(str_replace('_', ' ', ucfirst($domain->getIdentifier())));

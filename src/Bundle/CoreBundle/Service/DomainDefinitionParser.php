@@ -91,7 +91,6 @@ class DomainDefinitionParser
          * @var Domain $domain
          */
         $domain = $this->serializer->deserialize($JSON, Domain::class, 'json');
-
         return $domain;
     }
 
