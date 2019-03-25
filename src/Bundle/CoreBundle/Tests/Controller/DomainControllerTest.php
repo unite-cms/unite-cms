@@ -483,7 +483,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Merge the diff value into the value and submit.
         $form = $crawler->filter('form');
-        $editorValue = json_decode($form->filter('unite-cms-core-domaineditor')->attr('diff-value'));
+        $editorValue = json_decode($form->filter('unite-cms-core-domaineditor')->attr('value'));
         $this->assertEquals('test_create_domain_from_config', $editorValue->identifier);
         $this->assertEquals('Updated', $editorValue->title);
         $this->em->clear();

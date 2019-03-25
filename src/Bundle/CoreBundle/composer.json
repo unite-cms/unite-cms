@@ -4,7 +4,7 @@
     "description": "Core functionality for unite cms",
     "require": {
         "symfony/symfony": "^4.2",
-        "doctrine/doctrine-bundle": "^1.10",
+        "doctrine/collections": "1.5",
         "doctrine/orm": "^2.6",
         "jms/serializer-bundle": "^2.4",
         "knplabs/knp-paginator-bundle": "^2.8",

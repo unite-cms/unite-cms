@@ -67,6 +67,7 @@
         }
     ],
     "require": {
+        "doctrine/collections": "1.5",
         "unite-cms/core-bundle": "0@dev",
         "unite-cms/collection-field-bundle": "0@dev",
         "unite-cms/registration-bundle": "0@dev",
