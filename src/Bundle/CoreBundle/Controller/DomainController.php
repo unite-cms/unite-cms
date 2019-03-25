@@ -220,17 +220,11 @@ class DomainController extends AbstractController
         $originalDomain = null;
         $updatedDomain = null;
 
-        $form = $this->createFormBuilder([
-            'domain' => $outOfSyncPersistedConfig ? $outOfSyncPersistedConfig : $domain->getConfig(),
-        ])
+        $form = $this->createFormBuilder(['domain' => $domain->getConfig()])
         ->add('domain', WebComponentType::class, [
             'compound' => false,
             'tag' => 'unite-cms-core-domaineditor',
             'error_bubbling' => true,
-            'attr' => $outOfSyncPersistedConfig ? [
-                'diff-value' => json_encode(json_decode($domain->getConfig())),
-                'diff-value-serialized' => $domainConfigManager->serialize($domain),
-            ] : [],
         ])
         ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
@@ -306,7 +300,7 @@ class DomainController extends AbstractController
         }
         else {
             if($outOfSyncPersistedConfig) {
-                $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. You can use the diff tool to update the config.');
+                $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. If you click "validate" and "Save changes", the updated domain config will be persisted to the database.');
             }
 
             if($configNotInFilesystem) {
