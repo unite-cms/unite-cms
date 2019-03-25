@@ -187,7 +187,7 @@ class DomainController extends AbstractController
 
                 // Check if filesystem config is equal to database config.
                 $originalDomainConfig = $domainConfigManager->serialize($domain);
-                $domainConfigManager->loadConfig($domain, true);
+                $domainConfigManager->loadConfig($domain);
                 $fileSystemDomainConfig = $domainConfigManager->serialize($domain);
 
                 // Check if config is different from domain entity.
