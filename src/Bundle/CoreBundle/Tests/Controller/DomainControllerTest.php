@@ -164,7 +164,10 @@ class DomainControllerTest extends DatabaseAwareTestCase
         static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
 
         $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
-        $this->assertJsonStringEqualsJsonString($domainSerialized, $domain->getConfig());
+        $this->assertJsonStringEqualsJsonString($values['form']['domain'], $domain->getConfig());
+        $this->assertJsonStringEqualsJsonString($domainSerialized, static::$container->get('unite.cms.domain_config_manager')->serialize(
+            static::$container->get('unite.cms.domain_config_manager')->parse($domain->getConfig()))
+        );
 
         $this->client->disableReboot();
 
@@ -257,10 +260,14 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Assert domain config file.
         $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
+        $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
         static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
 
-        $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
-        $this->assertJsonStringEqualsJsonString($domainSerialized, $domain->getConfig());
+
+        $this->assertJsonStringEqualsJsonString($domainSerialized, static::$container->get('unite.cms.domain_config_manager')->serialize($domain));
+
+        // Make sure, that the serialized domain config is equal to the initial saved one.
+        $this->assertJsonStringEqualsJsonString($values['form']['domain'], $domain->getConfig());
 
         $this->assertEquals('Domain 1', $domain->getTitle());
 
@@ -453,7 +460,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Merge the diff value into the value and submit.
         $form = $crawler->filter('form');
-        $editorValue = json_decode($form->filter('unite-cms-core-domaineditor')->attr('diff-value'));
+        $editorValue = json_decode($form->filter('unite-cms-core-domaineditor')->attr('value'));
         $this->assertEquals('test_create_domain_from_config', $editorValue->identifier);
         $this->assertEquals('Updated', $editorValue->title);
         $this->em->clear();

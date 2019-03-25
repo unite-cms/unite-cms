@@ -106,8 +106,7 @@ class DomainController extends AbstractController
 
             try {
                 $domain = $domainConfigManager->parse($form->getData()['domain']);
-                $domainSerialized = $domainConfigManager->serialize($domain);
-                $domain->setConfig($domainSerialized);
+                $domain->setConfig($form->getData()['domain']);
 
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
@@ -184,55 +183,28 @@ class DomainController extends AbstractController
         $outOfSyncPersistedConfig = null;
         $configNotInFilesystem = false;
 
+        // First check if the config file exists in the filesystem.
         try {
             if ($domainConfigManager->configExists($domain)) {
+
+                // Check if filesystem config is equal to database config.
+                $originalDomainConfig = $domainConfigManager->serialize($domain);
                 $domainConfigManager->loadConfig($domain);
+                $fileSystemDomainConfig = $domainConfigManager->serialize($domain);
 
-                // Check if config (once parsed) is different from domain entity.
-                $outOfSyncPersistedConfig = $domainConfigManager->serialize($domain);
-                if ($outOfSyncPersistedConfig === $domainConfigManager->serialize(
-                        $domainConfigManager->parse($domain->getConfig())
-                    )) {
-                    $outOfSyncPersistedConfig = null;
+                // Check if config is different from domain entity.
+                if ($originalDomainConfig !== $fileSystemDomainConfig) {
+                    $outOfSyncPersistedConfig = $originalDomainConfig;
                 }
 
-                // If the file does not exist, serialize the current domain instead and save the file.
+            // If the file does not exist, we use the config from database.
             } else {
-                $domain->setConfig($domainConfigManager->serialize($domain));
-
-                /**
-                 * @deprecated 0.8 Before Version 0.7, variables could be saved to $domain->configVariables. They where
-                 * auto-replaced by the domain config parser. To be backward compatible we need to to this here. This block can
-                 * be deleted, once we reach version 0.8.
-                 */
-                if (!empty($domain->getConfigVariables())) {
-
-                    $JSON = $domain->getConfig();
-                    foreach ($domain->getConfigVariables() as $variable => $value) {
-                        $value = json_encode($value);
-                        $JSON = str_replace($value, '"'.$variable.'"', $JSON);
-                    }
-
-                    $JSON_ARRAY = json_decode($JSON, true);
-                    $JSON_ARRAY['variables'] = $domain->getConfigVariables();
-                    uksort(
-                        $JSON_ARRAY,
-                        function ($a, $b) {
-                            if (in_array($a, ['title', 'identifier', 'variables'])) {
-                                return -1;
-                            }
-                            if (in_array($b, ['title', 'identifier', 'variables'])) {
-                                return +1;
-                            }
-
-                            return 0;
-                        }
-                    );
-                    $JSON = json_encode($JSON_ARRAY);
-                    $domain->setConfig($JSON);
-                }
 
                 // Force update of the domain config.
+                if(empty($domain->getConfig())) {
+                    $domain->setConfig($domainConfigManager->serialize($domain));
+                }
+
                 $domain->setConfigChanged();
                 $configNotInFilesystem = true;
             }
@@ -250,14 +222,11 @@ class DomainController extends AbstractController
         $originalDomain = null;
         $updatedDomain = null;
 
-        $form = $this->createFormBuilder([
-            'domain' => $outOfSyncPersistedConfig ? $outOfSyncPersistedConfig : $domain->getConfig(),
-        ])
+        $form = $this->createFormBuilder(['domain' => $domain->getConfig()])
         ->add('domain', WebComponentType::class, [
             'compound' => false,
             'tag' => 'unite-cms-core-domaineditor',
             'error_bubbling' => true,
-            'attr' => $outOfSyncPersistedConfig ? ['diff-value' => json_encode(json_decode($domain->getConfig()))] : [],
         ])
         ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
@@ -271,8 +240,7 @@ class DomainController extends AbstractController
 
             try {
                 $updatedDomain = $domainConfigManager->parse($form->getData()['domain']);
-                $domainSerialized = $domainConfigManager->serialize($updatedDomain);
-                $updatedDomain->setConfig($domainSerialized);
+                $updatedDomain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
                 $formView = $form->createView();
@@ -335,7 +303,7 @@ class DomainController extends AbstractController
         }
         else {
             if($outOfSyncPersistedConfig) {
-                $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. You can use the diff tool to update the config.');
+                $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. If you click "validate" and "Save changes", the updated domain config will be persisted to the database.');
             }
 
             if($configNotInFilesystem) {
