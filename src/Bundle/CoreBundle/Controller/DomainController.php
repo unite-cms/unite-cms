@@ -106,6 +106,8 @@ class DomainController extends AbstractController
 
             try {
                 $domain = $domainConfigManager->parse($form->getData()['domain']);
+                $domain->setConfig($form->getData()['domain']);
+
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
             }
@@ -238,6 +240,7 @@ class DomainController extends AbstractController
 
             try {
                 $updatedDomain = $domainConfigManager->parse($form->getData()['domain']);
+                $updatedDomain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
                 $formView = $form->createView();
