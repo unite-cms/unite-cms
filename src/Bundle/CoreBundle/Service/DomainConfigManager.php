@@ -336,8 +336,6 @@ class DomainConfigManager
         if($updateDomain) {
             $domain->setFromEntity($loadedDomain);
         }
-
-        $domain->setConfig($loadedConfig);
     }
 
     /**

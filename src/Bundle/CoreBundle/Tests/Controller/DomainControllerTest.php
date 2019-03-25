@@ -161,7 +161,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         // Assert domain config file.
         $this->assertNotNull($domain);
         $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
-        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
+        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain, true);
 
         $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
         $this->assertJsonStringEqualsJsonString($domainSerialized, $domain->getConfig());
@@ -257,10 +257,40 @@ class DomainControllerTest extends DatabaseAwareTestCase
 
         // Assert domain config file.
         $this->assertTrue(static::$container->get('unite.cms.domain_config_manager')->configExists($domain));
-        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain);
-
         $domainSerialized = static::$container->get('unite.cms.domain_config_manager')->serialize($domain);
-        $this->assertJsonStringEqualsJsonString($domainSerialized, $domain->getConfig());
+        static::$container->get('unite.cms.domain_config_manager')->loadConfig($domain, true);
+
+
+        $this->assertJsonStringEqualsJsonString($domainSerialized, static::$container->get('unite.cms.domain_config_manager')->serialize($domain));
+
+        // Make sure, that the serialized domain config is equal to the initial saved one.
+        $this->assertJsonStringEqualsJsonString('{
+            "title": "@replaced_by_variable",
+            "identifier": "d1_domain_controller_test",
+            "content_types": [],
+            "setting_types": [],
+            "domain_member_types": [
+                {
+                    "title": "Editor",
+                    "identifier": "editor",
+                    "domain_member_label": "{accessor}",
+                    "fields":[]
+                },
+                {
+                    "title": "Viewer",
+                    "identifier": "viewer",
+                    "domain_member_label": "{accessor}",
+                    "fields": []
+                }
+            ],
+            "variables": {
+                "@replaced_by_variable": "Domain 1"
+            },
+            "permissions": {
+                "view domain": "true",
+                "update domain": "member.type == \"user\""
+            }
+        }', $domain->getConfig());
 
         $this->assertEquals('Domain 1', $domain->getTitle());
 

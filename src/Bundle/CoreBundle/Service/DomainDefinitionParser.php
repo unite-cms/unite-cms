@@ -60,6 +60,24 @@ class DomainDefinitionParser
     }
 
     /**
+     * Recursively assign (default) variables to an array, if not present.
+     * @param $array
+     * @param $defaults
+     * @return mixed
+     */
+    private function assignRecursively($array, $defaults) {
+        foreach($defaults as $key => $value) {
+            if(!isset($array[$key])) {
+                $array[$key] = $value;
+            }
+            elseif(is_array($array[$key]) && is_array($value)) {
+                $array[$key] = $this->assignRecursively($array[$key], $value);
+            }
+        }
+        return $array;
+    }
+
+    /**
      * Parses the given domain definition in JSON format and returns a new domain object.
      *
      * @param string $JSON
@@ -69,6 +87,7 @@ class DomainDefinitionParser
     public function parse(string $JSON): Domain
     {
         // First check if there are any variables in the json config, prepare them and remove them from the JSON doc.
+        $original_JSON = $JSON;
         $json_doc = json_decode($JSON, true);
         $variables = [];
 
@@ -91,6 +110,13 @@ class DomainDefinitionParser
          * @var Domain $domain
          */
         $domain = $this->serializer->deserialize($JSON, Domain::class, 'json');
+
+        // Save the original config to the new domain, adding missing default keys.
+        $default_domain_doc = json_decode($this->serializer->serialize(new Domain(), 'json'), true);
+        $original_JSON_doc = json_decode($original_JSON, true);
+        $original_JSON_doc = $this->assignRecursively($original_JSON_doc, $default_domain_doc);
+        $domain->setConfig(json_encode($original_JSON_doc));
+
         return $domain;
     }
 
