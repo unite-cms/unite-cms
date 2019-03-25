@@ -3,6 +3,7 @@
     "type": "symfony-bundle",
     "description": "Core functionality for unite cms",
     "require": {
+        "doctrine/collections": "1.5.*",
         "symfony/symfony": "^4.2",
         "doctrine/doctrine-bundle": "^1.10",
         "doctrine/orm": "^2.6",
