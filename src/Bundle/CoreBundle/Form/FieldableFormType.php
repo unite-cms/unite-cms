@@ -63,7 +63,10 @@ class FieldableFormType extends AbstractType
                 $this->logger->error('Field could not be added to this fieldable form.', ['exception' => $e]);
                 $builder->add(
                     $field->getFieldType()->getIdentifier($field->getFieldDefinition()),
-                    FieldExceptionFormType::class
+                    FieldExceptionFormType::class,
+                    [
+                        'exception' => $e,
+                    ]
                 );
             }
         }

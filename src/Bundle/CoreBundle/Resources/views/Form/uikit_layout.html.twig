@@ -237,5 +237,9 @@
 {%- endblock unite_cms_core_state_widget -%}
 
 {%- block unite_cms_core_field_exception_widget %}
-    <div class="uk-alert-danger" uk-alert>There was a problem rendering this field. Please check the domain configuration or ask an administrator.</div>
+    {% if exception is defined and exception is instanceof('UniteCMS\\CoreBundle\\Exception\\AccessDeniedException') %}
+        <div class="uk-alert-plain" uk-alert>You are not allowed to update this field.</div>
+    {% else %}
+        <div class="uk-alert-danger" uk-alert>There was a problem rendering this field. Please check the domain configuration or ask an administrator.</div>
+    {% endif %}
 {%- endblock unite_cms_core_field_exception_widget -%}
