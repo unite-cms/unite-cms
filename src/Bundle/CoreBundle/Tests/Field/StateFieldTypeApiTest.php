@@ -91,7 +91,7 @@ class StateFieldTypeApiTest extends APITestCase
 
         // test empty read
         $result = json_decode(json_encode($this->api('query {
-            getCt(id: '.$content->getId().') {
+            getCt(id: "'.$content->getId().'") {
                  state
             }
          }')), true);
@@ -106,7 +106,7 @@ class StateFieldTypeApiTest extends APITestCase
         );
 
         $result = json_decode(json_encode($this->api('query {
-            getCt(id: '.$content->getId().') {
+            getCt(id: "'.$content->getId().'") {
                  state
             }
          }')), true);
@@ -125,7 +125,7 @@ class StateFieldTypeApiTest extends APITestCase
 
         // test empty update
         $query = 'mutation {
-            updateCt(id: '.$content->getId().', data: {}, persist: false) {
+            updateCt(id: "'.$content->getId().'", data: {}, persist: false) {
                 state
             }
         }';
@@ -136,7 +136,7 @@ class StateFieldTypeApiTest extends APITestCase
 
         // test wrong transitions
         $query = 'mutation {
-            updateCt(id: '.$content->getId().', data: { state: { transition: "to_published" }  }, persist: false) {
+            updateCt(id: "'.$content->getId().'", data: { state: { transition: "to_published" }  }, persist: false) {
                 state
             }
         }';
@@ -147,7 +147,7 @@ class StateFieldTypeApiTest extends APITestCase
 
         // test valid transitions
         $query = 'mutation {
-            updateCt(id: '.$content->getId().', data: { state: { transition: "to_review" }  }, persist: false) {
+            updateCt(id: "'.$content->getId().'", data: { state: { transition: "to_review" }  }, persist: false) {
                 state
             }
         }';

@@ -140,7 +140,7 @@ class VariantsGraphQLTest extends APITestCase
                     }
                 }
             },
-            getVariants(id: '.$c->getId().') {
+            getVariants(id: "'.$c->getId().'") {
                 variants {
                     type,
                     

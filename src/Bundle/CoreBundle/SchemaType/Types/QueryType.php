@@ -292,8 +292,8 @@ class QueryType extends AbstractType
             // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
 
             // TODO: Replace field names with nested field selectors.
-            $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
 
+            $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
             $contentQuery->andWhere($a->getFilter());
             foreach($a->getParameters() as $parameter => $value) {
                 $contentQuery->setParameter($parameter, $value);
