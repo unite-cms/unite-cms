@@ -13,7 +13,6 @@ use GraphQL\Type\Definition\EnumType;
 class CastEnum extends EnumType
 {
     const CAST_INTEGER = 'INTEGER';
-    const CAST_FLOAT = 'FLOAT';
     const CAST_BOOLEAN = 'BOOLEAN';
     const CAST_DATE = 'DATE';
     const CAST_DATETIME = 'DATETIME';
@@ -26,9 +25,6 @@ class CastEnum extends EnumType
             'values' => [
                 'CAST_INTEGER' => [
                     'value' => static::CAST_INTEGER,
-                ],
-                'CAST_FLOAT' => [
-                    'value' => static::CAST_FLOAT,
                 ],
                 'CAST_BOOLEAN' => [
                     'value' => static::CAST_BOOLEAN,

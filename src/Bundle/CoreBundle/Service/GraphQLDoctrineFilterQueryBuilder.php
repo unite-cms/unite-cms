@@ -82,7 +82,6 @@ class GraphQLDoctrineFilterQueryBuilder
     protected function transformFilterValue(string $value = '', string $transformation = null) {
         switch ($transformation) {
             case CastEnum::CAST_INTEGER: return intval($value);
-            case CastEnum::CAST_FLOAT: return floatval($value);
             case CastEnum::CAST_BOOLEAN: return is_numeric($value) ? boolval($value) : filter_var($value, FILTER_VALIDATE_BOOLEAN);
             case CastEnum::CAST_DATE: return is_numeric($value) ? date('Y-m-d', $value) : $value;
             case CastEnum::CAST_DATETIME: return is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value;
