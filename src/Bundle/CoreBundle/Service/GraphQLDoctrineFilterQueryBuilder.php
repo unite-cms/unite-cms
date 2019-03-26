@@ -83,7 +83,7 @@ class GraphQLDoctrineFilterQueryBuilder
         switch ($transformation) {
             case CastEnum::CAST_INTEGER: return intval($value);
             case CastEnum::CAST_FLOAT: return floatval($value);
-            case CastEnum::CAST_BOOLEAN: return boolval($value);
+            case CastEnum::CAST_BOOLEAN: return is_numeric($value) ? boolval($value) : filter_var($value, FILTER_VALIDATE_BOOLEAN);
             case CastEnum::CAST_DATE: return is_numeric($value) ? date('Y-m-d', $value) : $value;
             case CastEnum::CAST_DATETIME: return is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value;
             default: return $value;
@@ -99,7 +99,6 @@ class GraphQLDoctrineFilterQueryBuilder
      */
     private function getQueryBuilderComposite(array $filterInput)
     {
-
         // filterInput can contain AND, OR or a direct expression
 
         if (!empty($filterInput['AND'])) {
@@ -135,14 +134,14 @@ class GraphQLDoctrineFilterQueryBuilder
                     $rightSide = null;
                     $parameter_name = null;
 
-                    if (!empty($filterInput['value']) && !in_array(
+                    if ((!empty($filterInput['value']) || $filterInput['value'] === '0') && !in_array(
                             $filterInput['operator'],
                             ['IS NULL', 'IS NOT NULL']
                         )) {
                         $this->parameterCount++;
                         $parameter_name = 'graphql_filter_builder_parameter'.$this->parameterCount;
 
-                        $this->parameters[$parameter_name] = $this->transformFilterValue($filterInput['value'], $filterInput['cast']);
+                        $this->parameters[$parameter_name] = $this->transformFilterValue($filterInput['value'], $filterInput['cast'] ?? null);
                         $rightSide = ':'.$parameter_name;
                     }
 
@@ -155,6 +154,12 @@ class GraphQLDoctrineFilterQueryBuilder
                         $leftSide = "JSON_EXTRACT(".$this->contentEntityPrefix.".data, '$.".$filterInput['field']."')";
                     }
 
+                    // This is a little hack, because MySQL PDO is transmitting boolean values as int. THis will work
+                    // for default tinyint comparing but not for json boolean comparing. https://github.com/doctrine/orm/issues/7550
+                    if(is_bool($this->parameters[$parameter_name])) {
+                        $leftSide = 'CAST('.$leftSide.' AS string)';
+                        $this->parameters[$parameter_name] = $this->parameters[$parameter_name] ? 'true' : 'false';
+                    }
 
                     // Support for special Operator, using ex Expr builder. This should be extended in the future.
                     switch ($filterInput['operator']) {
