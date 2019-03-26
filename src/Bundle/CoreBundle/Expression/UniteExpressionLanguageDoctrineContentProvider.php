@@ -43,9 +43,10 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
      * Returns true, if the value is unique for the given (nested) json path.
      * @param $value
      * @param $path
+     * @param array $excluded_ids
      * @return bool
      */
-    private function contentDataUnique($value, $path) : bool {
+    private function contentDataUnique($value, $path, $excluded_ids = []) : bool {
         $query = $this->entityManager->createQueryBuilder()
             ->select('count(c.id)')
             ->where('c.contentType = :contentType')
@@ -57,8 +58,19 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
                     ':identifier' => '$.'.$path,
                     ':value' => $value,
                 ]
-            )
-            ->getQuery();
+            );
+
+        // If excluded_ids is set, don't check them for uniqueness (for example on update the content element itself).
+        if(!empty($excluded_ids)) {
+            $excluded_ids = array_filter($excluded_ids, function($id){ return !empty($id); });
+            if(!empty($excluded_ids)) {
+                $query
+                    ->andWhere('c.id NOT IN (:excluded_ids)')
+                    ->setParameter(':excluded_ids', $excluded_ids);
+            }
+        }
+
+        $query = $query->getQuery();
 
         try {
             return $query->getSingleScalarResult() == 0;
@@ -69,7 +81,14 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
         }
     }
 
-    private function contentDataUniquify($value, $path, $depth = 0) :string {
+    /**
+     * @param $value
+     * @param $path
+     * @param array $excluded_ids
+     * @param int $depth
+     * @return string
+     */
+    private function contentDataUniquify($value, $path, $excluded_ids = [], $depth = 0) :string {
 
         // We only allow MAXIMUM_NESTING_UNIQUIFY_TEST_RUNS nested calls to prevent an infinity loop.
         if($depth >= static::MAXIMUM_NESTING_UNIQUIFY_TEST_RUNS) {
@@ -77,7 +96,7 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
         }
 
         // First check if the value is already unique.
-        if($this->contentDataUnique($value, $path)) {
+        if($this->contentDataUnique($value, $path, $excluded_ids)) {
             return $value;
         }
 
@@ -100,8 +119,19 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
             ->from('UniteCMSCoreBundle:Content', 'c')
             ->orderBy('JSON_EXTRACT(c.data, :identifier)', 'DESC')
             ->setMaxResults(1)
-            ->setParameters($parameters)
-            ->getQuery();
+            ->setParameters($parameters);
+
+        // If excluded_ids is set, don't check them for uniqueness (for example on update the content element itself).
+        if(!empty($excluded_ids)) {
+            $excluded_ids = array_filter($excluded_ids, function($id){ return !empty($id); });
+            if(!empty($excluded_ids)) {
+                $getLastExistingSuffixedEntry
+                    ->andWhere('c.id NOT IN (:excluded_ids)')
+                    ->setParameter(':excluded_ids', $excluded_ids);
+            }
+        }
+
+        $getLastExistingSuffixedEntry = $getLastExistingSuffixedEntry->getQuery();
 
         try {
             $lastExistingSuffixedEntry = $getLastExistingSuffixedEntry->getSingleScalarResult();
@@ -124,7 +154,7 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
         $lastCount = (int)array_pop($parts);
 
         // Just return the next numeric value
-        return $this->contentDataUniquify($value.'-'.($lastCount+1), $path, $depth+1);
+        return $this->contentDataUniquify($value.'-'.($lastCount+1), $path, $excluded_ids, $depth+1);
     }
 
     /**
@@ -135,7 +165,7 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
         return [
 
             // Returns true, if the value at the given data_path is unique in this content type.
-            new ExpressionFunction('content_unique', function ($str) {}, function ($arguments, $value, $path) {
+            new ExpressionFunction('content_unique', function ($str) {}, function ($arguments, $value, $path, $excluded_ids = []) {
 
                 if (!is_string($value) && !is_bool($value) && !is_numeric($value)) {
                     return false;
@@ -145,11 +175,11 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
                     return false;
                 }
 
-                return $this->contentDataUnique($value, $path);
+                return $this->contentDataUnique($value, $path, $excluded_ids);
             }),
 
             // Returns an uniquified representation of the given string by adding increasing suffixes.
-            new ExpressionFunction('content_uniquify', function ($str) {}, function ($arguments, $value, $path) {
+            new ExpressionFunction('content_uniquify', function ($str) {}, function ($arguments, $value, $path, $excluded_ids = []) {
 
                 if (!is_string($value)) {
                     return $value;
@@ -159,7 +189,7 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
                     return $value;
                 }
 
-                return $this->contentDataUniquify($value, $path);
+                return $this->contentDataUniquify($value, $path, $excluded_ids);
             }),
         ];
     }
