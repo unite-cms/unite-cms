@@ -314,7 +314,9 @@ class DomainController extends AbstractController
         return $this->render('@UniteCMSCore/Domain/update.html.twig', [
             'form' => $formView,
             'originalDomain' => $originalDomain,
-            'updatedDomain' => $updatedDomain
+            'updatedDomain' => $updatedDomain,
+            'originalDomainSerialized' => $originalDomain ? $domainConfigManager->serialize($originalDomain) : '',
+            'updatedDomainSerialized' => $updatedDomain ? $domainConfigManager->serialize($updatedDomain) : '',
         ]);
     }
 

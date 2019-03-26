@@ -22,6 +22,9 @@ import Link from "./vue/field/Link.vue";
 import State from "./vue/field/State.vue";
 import AutoText from "./vue/field/AutoText.vue";
 
+import AceDiff from 'ace-diff';
+import 'ace-diff/dist/ace-diff.min.css';
+
 require("./sass/unite.scss");
 
 // Use VueCustomElement
@@ -101,4 +104,33 @@ window.onload = function() {
 
     // Add a generic unload warning message to all pages with forms.
     pageUnload.init('You have unsaved changes! Do you really want to navigate away and discard them?');
+
+    let diffVisualization = document.querySelector('.unite-domain-change-visualization');
+    if(diffVisualization) {
+
+        let formatJSON = function(value) {
+            value = JSON.stringify(JSON.parse(value), null, 2);
+            value = value.replace(/^( *)(.*\[)(\],*)$/gm, "$1$2\n$1$3");
+            value = value.replace(/^( *)(.*\{)(\},*)$/gm, "$1$2\n$1$3");
+            return value;
+        };
+
+        let JSONDiff = new AceDiff({
+            element: diffVisualization,
+            mode: 'ace/mode/json',
+            left: {
+                content: formatJSON(diffVisualization.dataset.leftContent),
+                editable: false,
+                copyLinkEnabled: false
+            },
+            right: {
+                content: formatJSON(diffVisualization.dataset.rightContent),
+                editable: false,
+                copyLinkEnabled: false
+            },
+        });
+
+        JSONDiff.editors.left.ace.setFontSize(10);
+        JSONDiff.editors.right.ace.setFontSize(10);
+    }
 };

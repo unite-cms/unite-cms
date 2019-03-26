@@ -235,7 +235,7 @@ class DomainControllerTest extends DatabaseAwareTestCase
         $values['form']['submit'] = '';
         unset($values['form']['back']);
         $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
-        $this->assertCount(1, $crawler->filter('.unite-domain-change-visualization'));
+        $this->assertCount(1, $crawler->filter('.uk-alert-success:contains("The updated domain configuration is equal to the persisted one. Nothing to update.")'));
         $this->assertCount(1, $crawler->filter('button[name="form[confirm]"]'));
 
         // click on confirmation button.
