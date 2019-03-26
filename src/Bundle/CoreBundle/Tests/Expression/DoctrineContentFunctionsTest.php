@@ -142,6 +142,14 @@ class DoctrineContentFunctionsTest extends DatabaseAwareTestCase
         $this->assertFalse($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f1")'));
         $this->assertTrue($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f2")'));
         $this->assertTrue($this->expressionChecker->evaluateToBool('content_unique(slug(content.data.f1), "f2")'));
+
+        // Try to evaluate content_unique for persisted valued of same object on update.
+        $this->expressionChecker->registerFieldableContent($content1);
+        $this->assertFalse($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f1")'));
+        $this->assertFalse($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f1", ["X"])'));
+        $this->assertFalse($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f1", [])'));
+        $this->assertFalse($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f1", [null])'));
+        $this->assertTrue($this->expressionChecker->evaluateToBool('content_unique(content.data.f1, "f1", [content.id])'));
     }
 
     public function testContentUniquifyFunction() {
