@@ -33,7 +33,11 @@ class FilterInput extends InputObjectType
                         'value' => [
                             'type' => Type::string(),
                             'description' => 'Set the field value',
-                        ]
+                        ],
+                        'cast' => [
+                            'type' => $schemaTypeManager->getSchemaType('Cast'),
+                            'description' => 'Allows to use one of the defined cast transformation functions to transform value before adding it as SQL filter.',
+                        ],
                     ];
                 },
             ]

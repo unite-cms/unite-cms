@@ -75,6 +75,21 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {
             "not_empty": true
           }
+        },
+        {
+          "title": "Number",
+          "identifier": "number",
+          "type": "integer"
+        },
+        {
+          "title": "Float",
+          "identifier": "float",
+          "type": "number"
+        },
+        {
+          "title": "Boolean",
+          "identifier": "boolean",
+          "type": "checkbox"
         }
       ],
       "views": [
@@ -448,6 +463,9 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                             switch ($field->getType()) {
                                 case 'text': $content_data[$field->getIdentifier()] = $this->generateRandomMachineName(100); break;
                                 case 'textarea': $content_data[$field->getIdentifier()] = '<p>' . $this->generateRandomMachineName(100) . '</p>'; break;
+                                case 'integer': $content_data[$field->getIdentifier()] = $i; break;
+                                case 'number': $content_data[$field->getIdentifier()] = $i / 3; break;
+                                case 'checkbox': $content_data[$field->getIdentifier()] = ($i % 2 == 0); break;
                             }
                         }
 
@@ -974,6 +992,117 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals(2, $news->data->findNews->total);
         $this->assertEquals('ZZZ', $news->data->findNews->result[0]->content);
         $this->assertEquals('AAA', $news->data->findNews->result[1]->content);
+    }
+
+    public function testFilteringWithCastFunction() {
+
+        // Half of the content should have a checked checkbox
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 30 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "checkbox", operator: "=", value: "true", cast: CAST_BOOLEAN }) { total }
+        }'));
+
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 30 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "checkbox", operator: "=", value: "false", cast: CAST_BOOLEAN }) { total }
+        }'));
+
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 30 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "checkbox", operator: "=", value: "1", cast: CAST_BOOLEAN }) { total }
+        }'));
+
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 30 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "checkbox", operator: "=", value: "0", cast: CAST_BOOLEAN }) { total }
+        }'));
+
+        // Number is greater than 50. This should be 10 in total
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 10 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "number", operator: ">", value: "50", cast: CAST_INTEGER }) { total }
+        }'));
+
+        // Number is greater or equals 50. This should be 11 in total
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 11 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "number", operator: ">=", value: "50", cast: CAST_FLOAT }) { total }
+        }'));
+
+        // Number is lower or equals 50. This should be 50 in total
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 50 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "number", operator: "<=", value: "50", cast: CAST_INTEGER }) { total }
+        }'));
+
+        // Number is lower 50. This should be 49 in total
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 49 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "number", operator: "<", value: "50", cast: CAST_INTEGER }) { total }
+        }'));
+
+        // Float is lower 10. This should be 30 in total
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 30 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "float", operator: "<", value: "10", cast: CAST_FLOAT }) { total }
+        }'));
+
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 30 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "float", operator: "<", value: "10", cast: CAST_INTEGER }) { total }
+        }'));
+
+
+        // Now get the updated value of one of the content elements and update the content.
+        $news = $this->domains['marketing']->getContentTypes()->get('news')->getContent()->get(0);
+        $updated = $news->getUpdated();
+        $data = $news->getData();
+        $data['title_title'] .= 'updated';
+        $this->em->flush($news);
+
+        // Now we should have at least one element that has greater timestamp.
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 1 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "updated", operator: ">=", value: "' . $updated . '", cast: CAST_DATETIME }) { total }
+        }'));
+
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 60 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "updated", operator: ">=", value: "' . $updated . '", cast: CAST_DATE }) { total }
+        }'));
+
+        // Now we should have at least one element that has greater timestamp.
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 1 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "updated", operator: ">=", value: "' . date("Y-m-d H:i:s", $updated) . '" }) { total }
+        }'));
+
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 1 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "updated", operator: ">=", value: "' . date("Y-m-d H:i:s", $updated) . '", cast: CAST_DATETIME }) { total }
+        }'));
+
+        $this->assertApiResponse(['data' => [ 'findNews' => [ 'total' => 60 ]]], $this->api(
+            $this->domains['marketing'],
+            $this->users['marketing_viewer'],'query {
+            findNews(filter: { field: "updated", operator: ">=", value: "' . date("Y-m-d H:i:s", $updated) . '", cast: CAST_DATE }) { total }
+        }'));
+
+
     }
 
     public function testAccessReferencedValue() {

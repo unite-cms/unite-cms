@@ -9,6 +9,9 @@ services:
 
   UniteCMS\CoreBundle\SchemaType\SchemaTypeManager: "@unite.cms.graphql.schema_type_manager"
 
+  UniteCMS\CoreBundle\SchemaType\Types\CastEnum:
+    tags: [unite_cms.graphql.schema_type]
+
   # SchemaTypeFactory implementations
   unite.cms.graphql.content_type_factory:
     class: UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory

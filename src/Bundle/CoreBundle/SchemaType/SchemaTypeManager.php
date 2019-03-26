@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType;
 
+use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\InterfaceType;
@@ -146,9 +147,9 @@ class SchemaTypeManager
      */
     public function registerSchemaType(Type $schemaType, $detectable = true)
     {
-        if (!$schemaType instanceof InputObjectType && !$schemaType instanceof ObjectType && !$schemaType instanceof InterfaceType && !$schemaType instanceof UnionType && !$schemaType instanceof ListOfType) {
+        if (!$schemaType instanceof InputObjectType && !$schemaType instanceof ObjectType && !$schemaType instanceof InterfaceType && !$schemaType instanceof UnionType && !$schemaType instanceof ListOfType && !$schemaType instanceof EnumType) {
             throw new \InvalidArgumentException(
-                'Schema type must be of type '.ObjectType::class.' or '.InputObjectType::class.' or '.InterfaceType::class.' or '.UnionType::class.' or '.ListOfType::class
+                'Schema type must be of type '.ObjectType::class.' or '.InputObjectType::class.' or '.InterfaceType::class.' or '.UnionType::class.' or '.ListOfType::class.' or '.EnumType::class
             );
         }
 

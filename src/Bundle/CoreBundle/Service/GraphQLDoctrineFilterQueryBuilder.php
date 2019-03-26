@@ -7,6 +7,7 @@ use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\Expr\Andx;
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\Query\Expr\Orx;
+use UniteCMS\CoreBundle\SchemaType\Types\CastEnum;
 
 /**
  * Builds an doctrine query expression by evaluating a nested filter array:
@@ -72,6 +73,24 @@ class GraphQLDoctrineFilterQueryBuilder
     }
 
     /**
+     * GraphQL does not allow to get mixed input values, so we always get a string. By providing a transform input
+     * argument, we allow the user to use one of the defined transformation functions
+     * @param string $value
+     * @param string|null $transformation
+     * @return mixed
+     */
+    protected function transformFilterValue(string $value = '', string $transformation = null) {
+        switch ($transformation) {
+            case CastEnum::CAST_INTEGER: return intval($value);
+            case CastEnum::CAST_FLOAT: return floatval($value);
+            case CastEnum::CAST_BOOLEAN: return boolval($value);
+            case CastEnum::CAST_DATE: return is_numeric($value) ? date('Y-m-d', $value) : $value;
+            case CastEnum::CAST_DATETIME: return is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value;
+            default: return $value;
+        }
+    }
+
+    /**
      * Build the nested doctrine filter object.
      *
      * @param array $filterInput
@@ -122,7 +141,8 @@ class GraphQLDoctrineFilterQueryBuilder
                         )) {
                         $this->parameterCount++;
                         $parameter_name = 'graphql_filter_builder_parameter'.$this->parameterCount;
-                        $this->parameters[$parameter_name] = $filterInput['value'];
+
+                        $this->parameters[$parameter_name] = $this->transformFilterValue($filterInput['value'], $filterInput['cast']);
                         $rightSide = ':'.$parameter_name;
                     }
 
