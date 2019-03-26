@@ -4,32 +4,20 @@ namespace UniteCMS\CoreBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
-
-use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
-use UniteCMS\CoreBundle\Exception\MissingDomainException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
-class CreateDomainCommand extends Command
+class ListDomainCommand extends Command
 {
 
     /**
      * @var EntityManager
      */
     private $em;
-
-    /**
-     * @var ValidatorInterface
-     */
-    private $validator;
 
     /**
      * @var DomainConfigManager $domainConfigManager
@@ -41,11 +29,9 @@ class CreateDomainCommand extends Command
      */
     public function __construct(
         EntityManager $em,
-        ValidatorInterface $validator,
         DomainConfigManager $domainConfigManager
     ) {
         $this->em = $em;
-        $this->validator = $validator;
         $this->domainConfigManager = $domainConfigManager;
 
         parent::__construct();
@@ -58,38 +44,50 @@ class CreateDomainCommand extends Command
     {
         $this
             ->setName('unite:domain:list')
-            ->setDescription('Creates a new domain for an organization and saves it to the database and to the filesystem.');
+            ->addArgument('organization', InputArgument::REQUIRED)
+            ->setDescription('List all domains in an organization.');
     }
 
-    /**
-     * Validates the domain and prints a message if not valid.
-     *
-     * @param OutputInterface $output
-     * @param Domain $domain
-     * @return bool
-     */
-    protected function validate(OutputInterface $output, Domain $domain) {
-        $errors = $this->validator->validate($domain);
-        if (count($errors) > 0) {
-
-            // A later flush would throw an exception, if the organization would include the invalid domain.
-            $domain->getOrganization()->getDomains()->removeElement($domain);
-            unset($domain);
-
-            $output->writeln("<error>\n\nThere was an error while creating the domain\n \n$errors\n</error>");
-            return false;
-        }
-
-        return true;
-    }
 
     /**
      * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $organizations = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll();
+        $organization = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(['identifier' => $input->getArgument('organization')]);
 
+        if(!$organization) {
+            throw new MissingOrganizationException();
+        }
+
+        $table = new Table($output);
+        $table->setHeaders(['Identifier', 'Title', 'Persisted?', 'Config in filesystem?']);
+
+        $domains = [];
+
+        foreach($organization->getDomains() as $domain) {
+            $domains[$domain->getIdentifier()] = [
+                $domain->getIdentifier(),
+                $domain->getTitle(),
+                '<info>Yes</info>',
+                '<error>No</error>',
+            ];
+        }
+
+        foreach ($this->domainConfigManager->listConfig($organization) as $config) {
+            if(!array_key_exists($config, $domains)) {
+                $domains[$config] = [
+                    $config,
+                    '',
+                    '<error>No</error>',
+                ];
+            }
+            $domains[$config][3] = '<info>Yes</info>';
+        }
+
+        $table->addRows($domains);
+        $table->render();
+/*
         $helper = $this->getHelper('question');
         $question = new ChoiceQuestion(
             '<info>Please select the organization to create the domain for:</info> ',
@@ -97,9 +95,6 @@ class CreateDomainCommand extends Command
         );
         $organization_title = $helper->ask($input, $output, $question);
 
-        /**
-         * @var Organization $organization
-         */
         $organization = null;
         foreach ($organizations as $org) {
             if ($organization_title === $org->getTitle()) {
@@ -171,6 +166,6 @@ class CreateDomainCommand extends Command
             $this->em->persist($domain);
             $this->em->flush();
             $output->writeln(['', '<info>Database entry was created successfully!</info>', '<info>Domain configuration file was created successfully at path: </info>"'.$this->domainConfigManager->getDomainConfigPath( $domain ).'"', '']);
-        }
+        }*/
     }
 }

@@ -13,6 +13,7 @@ use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Exception\InvalidOrganizationConfigurationException;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
 /**

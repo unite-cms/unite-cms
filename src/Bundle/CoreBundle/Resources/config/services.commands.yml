@@ -6,6 +6,16 @@ services:
         tags:
             - { name: 'console.command', command: 'unite:domain:create' }
 
+    UniteCMS\CoreBundle\Command\ImportDomainCommand:
+        arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@unite.cms.domain_config_manager']
+        tags:
+            - { name: 'console.command', command: 'unite:domain:import' }
+
+    UniteCMS\CoreBundle\Command\ListDomainCommand:
+        arguments: ['@doctrine.orm.default_entity_manager', '@unite.cms.domain_config_manager']
+        tags:
+            - { name: 'console.command', command: 'unite:domain:list' }
+
     UniteCMS\CoreBundle\Command\CreateOrganizationCommand:
         arguments: ['@doctrine.orm.default_entity_manager', '@validator']
         tags:

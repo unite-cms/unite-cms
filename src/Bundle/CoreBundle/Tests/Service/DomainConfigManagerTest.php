@@ -267,6 +267,27 @@ class DomainConfigManagerTest extends KernelTestCase
     }
 
     /**
+     * @expectedException \UniteCMS\CoreBundle\Exception\InvalidOrganizationConfigurationException
+     * @expectedExceptionMessage An organization folder with this identifier already exists! Please delete the folder first, to create an organization with this identifier.
+     */
+    public function testCreatingOrgWithExistingFolderAndNotAllowed() {
+        $organization = new Organization();
+        $organization->setIdentifier('existing');
+        $fileContent = '{ "title": "Existing D", "identifier": "existing_d" }';
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/existing_d.json', $fileContent);
+        $this->manager->createOrganizationFolder($organization);
+    }
+
+    public function testCreatingOrgWithExistingFolderAndAllowed() {
+        $organization = new Organization();
+        $organization->setIdentifier('existing')->setAllowCreateWithExistingConfigFolder(true);
+        $fileContent = '{ "title": "Existing D", "identifier": "existing_d" }';
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/existing_d.json', $fileContent);
+        $this->manager->createOrganizationFolder($organization);
+        $this->assertStringEqualsFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/existing_d.json', $fileContent);
+    }
+
+    /**
      * @expectedException \UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException
      * @expectedExceptionMessage The domain configuration identifier "foo" does not match with the filename "my_test_domain.json".
      */

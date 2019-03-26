@@ -81,10 +81,19 @@ class Organization
     private $invites;
 
     /**
-     * If set, thisholds config identifiers, that are in the filesystem but not not in the database.
+     * If set, this holds config identifiers, that are in the filesystem but not not in the database.
      * @var array $newDomainsFromConfig
      */
     private $missingDomainConfigIdentifiers = [];
+
+    /**
+     * If this is set to true, creation of this organization is allowed, even if an organization folder exists. Be
+     * careful! This should only be set to true during an action performed by an admin, the creating uer of this
+     * organization will get access to any existing domain config files in the existing organization folder.
+     *
+     * @var bool
+     */
+    protected $allowCreateWithExistingConfigFolder = false;
 
     public function __toString()
     {
@@ -310,5 +319,22 @@ class Organization
         $this->missingDomainConfigIdentifiers = $missingDomainConfigIdentifiers;
         return $this;
     }
-}
 
+    /**
+     * @return bool
+     */
+    public function isAllowCreateWithExistingConfigFolder(): bool
+    {
+        return $this->allowCreateWithExistingConfigFolder;
+    }
+
+    /**
+     * @param bool $allowCreateWithExistingConfigFolder
+     * @return Organization
+     */
+    public function setAllowCreateWithExistingConfigFolder(bool $allowCreateWithExistingConfigFolder)
+    {
+        $this->allowCreateWithExistingConfigFolder = $allowCreateWithExistingConfigFolder;
+        return $this;
+    }
+}

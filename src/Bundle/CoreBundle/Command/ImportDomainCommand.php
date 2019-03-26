@@ -4,21 +4,17 @@ namespace UniteCMS\CoreBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
 
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
-use UniteCMS\CoreBundle\Exception\MissingDomainException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
-class CreateDomainCommand extends Command
+class ImportDomainCommand extends Command
 {
 
     /**
@@ -57,8 +53,10 @@ class CreateDomainCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('unite:domain:list')
-            ->setDescription('Creates a new domain for an organization and saves it to the database and to the filesystem.');
+            ->setName('unite:domain:import')
+            ->addArgument('organization', InputArgument::REQUIRED)
+            ->addArgument('domain', InputArgument::REQUIRED)
+            ->setDescription('Import a domain from an existing domain configuration file.');
     }
 
     /**
@@ -88,42 +86,26 @@ class CreateDomainCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $organizations = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findAll();
-
         $helper = $this->getHelper('question');
-        $question = new ChoiceQuestion(
-            '<info>Please select the organization to create the domain for:</info> ',
-            $organizations
-        );
-        $organization_title = $helper->ask($input, $output, $question);
+        $organization = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(['identifier' => $input->getArgument('organization')]);
+        $domain_identifier = $input->getArgument('domain');
 
-        /**
-         * @var Organization $organization
-         */
-        $organization = null;
-        foreach ($organizations as $org) {
-            if ($organization_title === $org->getTitle()) {
-                $organization = $org;
+        if(!$organization) {
+            throw new MissingOrganizationException();
+        }
+
+        $domain = $organization->getDomains()->filter(
+            function (Domain $domain) use ($domain_identifier) {
+                return $domain->getIdentifier() == $domain_identifier;
             }
+        )->first();
+
+        if(!$domain) {
+            $domain = new Domain();
+            $domain->setOrganization($organization)->setIdentifier($domain_identifier);
         }
 
-        $helper = $this->getHelper('question');
-        $question = new Question("\n<info>Domain identifier</info> (numbers, lowercase chars and underscore is allowed): ");
-        $domainIdentifier = $helper->ask($input, $output, $question);
-
-        $helper = $this->getHelper('question');
-        $question = new Question("\n<info>Domain configuration</info> (If left blank, an empty domain will get created and you can update it later.): </info>");
-        $domainDefinition = $helper->ask($input, $output, $question);
-
-        $domain = empty($domainDefinition) ? new Domain() : $this->domainConfigManager->parse($domainDefinition);
-        $domain
-            ->setOrganization($organization)
-            ->setIdentifier($domainIdentifier)
-            ->setConfig($domainDefinition ?? '');
-
-        if(empty($domain->getTitle())) {
-            $domain->setTitle(str_replace('_', ' ', ucfirst($domain->getIdentifier())));
-        }
+        $this->domainConfigManager->loadConfig($domain, true);
 
         if(!$this->validate($output, $domain)) { return; }
 
@@ -157,20 +139,39 @@ class CreateDomainCommand extends Command
 
         $output->writeln([']', '']);
 
-        $question = new ConfirmationQuestion(
-            '<info>Should the domain for the organization: "'.$organization.'" be created</info>? [<comment>Y/n</comment>] ',
-            true,
-            '/^(y|j)/i'
-        );
+        if($domain->getId()) {
+            $question = new ConfirmationQuestion(
+                '<info>Should the existing domain for the organization: "'.$organization.'" be updated</info>? [<comment>Y/n</comment>] ',
+                true,
+                '/^(y|j)/i'
+            );
 
-        if (!$helper->ask($input, $output, $question)) {
-            return;
-        }
+            if (!$helper->ask($input, $output, $question)) {
+                $this->em->refresh($domain);
+                return;
+            }
 
-        if ($this->validate($output, $domain)) {
-            $this->em->persist($domain);
-            $this->em->flush();
-            $output->writeln(['', '<info>Database entry was created successfully!</info>', '<info>Domain configuration file was created successfully at path: </info>"'.$this->domainConfigManager->getDomainConfigPath( $domain ).'"', '']);
+            if ($this->validate($output, $domain)) {
+                $this->em->flush();
+                $output->writeln(['', '<info>Domain entry in database was updated successfully!</info>','']);
+            }
+        } else {
+            $question = new ConfirmationQuestion(
+                '<info>Should the domain for the organization: "'.$organization.'" be imported</info>? [<comment>Y/n</comment>] ',
+                true,
+                '/^(y|j)/i'
+            );
+
+            if (!$helper->ask($input, $output, $question)) {
+                unset($domain);
+                return;
+            }
+
+            if ($this->validate($output, $domain)) {
+                $this->em->persist($domain);
+                $this->em->flush();
+                $output->writeln(['', '<info>Database entry was created successfully!</info>','']);
+            }
         }
     }
 }
