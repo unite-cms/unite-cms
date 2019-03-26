@@ -293,6 +293,7 @@ class QueryType extends AbstractType
 
             // TODO: Replace field names with nested field selectors.
             $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
+
             $contentQuery->andWhere($a->getFilter());
             foreach($a->getParameters() as $parameter => $value) {
                 $contentQuery->setParameter($parameter, $value);

@@ -203,7 +203,7 @@ class MockedRepositoryFactory implements RepositoryFactory {
             try {
                 $reflector = new \ReflectionProperty(get_class($object), 'id');
                 $reflector->setAccessible(true);
-                $reflector->setValue($object, count($this->repositories[$entityName]->objects) + 1);
+                $reflector->setValue($object, (count($this->repositories[$entityName]->objects) + 1) . '-1');
             } catch (\ReflectionException $e) {
                 throw new \InvalidArgumentException('We can only handle objects with an id property');
             }

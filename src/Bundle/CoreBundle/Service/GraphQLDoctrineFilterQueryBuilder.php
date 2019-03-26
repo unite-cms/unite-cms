@@ -133,7 +133,7 @@ class GraphQLDoctrineFilterQueryBuilder
                     $rightSide = null;
                     $parameter_name = null;
 
-                    if ((!empty($filterInput['value']) || $filterInput['value'] === '0') && !in_array(
+                    if ((!empty($filterInput['value']) || (isset($filterInput['value']) && $filterInput['value'] === '0')) && !in_array(
                             $filterInput['operator'],
                             ['IS NULL', 'IS NOT NULL']
                         )) {
@@ -155,7 +155,7 @@ class GraphQLDoctrineFilterQueryBuilder
 
                     // This is a little hack, because MySQL PDO is transmitting boolean values as int. THis will work
                     // for default tinyint comparing but not for json boolean comparing. https://github.com/doctrine/orm/issues/7550
-                    if(is_bool($this->parameters[$parameter_name])) {
+                    if(isset($this->parameters[$parameter_name]) && is_bool($this->parameters[$parameter_name])) {
                         $leftSide = 'CAST('.$leftSide.' AS string)';
                         $this->parameters[$parameter_name] = $this->parameters[$parameter_name] ? 'true' : 'false';
                     }
