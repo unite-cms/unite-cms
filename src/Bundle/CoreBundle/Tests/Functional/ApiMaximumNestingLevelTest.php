@@ -199,7 +199,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
         $sibling->setData(['sibling' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'self', 'content' => $self->getId()]]);
 
         $result = json_decode(json_encode($this->api('query {
-                getSelf(id: '.$self->getId().') {
+                getSelf(id: "'.$self->getId().'") {
                     sibling {
                         sibling {
                           sibling {
@@ -266,7 +266,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
 
 
         $result = json_decode(json_encode($this->api('query {
-            getSelf(id: '.$self->getId().') {
+            getSelf(id: "'.$self->getId().'") {
                 collection {
                     sibling {
                         collection {

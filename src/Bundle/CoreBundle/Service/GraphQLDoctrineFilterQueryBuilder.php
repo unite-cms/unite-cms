@@ -7,6 +7,7 @@ use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\Expr\Andx;
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\Query\Expr\Orx;
+use UniteCMS\CoreBundle\SchemaType\Types\CastEnum;
 
 /**
  * Builds an doctrine query expression by evaluating a nested filter array:
@@ -72,6 +73,23 @@ class GraphQLDoctrineFilterQueryBuilder
     }
 
     /**
+     * GraphQL does not allow to get mixed input values, so we always get a string. By providing a transform input
+     * argument, we allow the user to use one of the defined transformation functions
+     * @param string $value
+     * @param string|null $transformation
+     * @return mixed
+     */
+    protected function transformFilterValue(string $value = '', string $transformation = null) {
+        switch ($transformation) {
+            case CastEnum::CAST_INTEGER: return intval($value);
+            case CastEnum::CAST_BOOLEAN: return is_numeric($value) ? boolval($value) : filter_var($value, FILTER_VALIDATE_BOOLEAN);
+            case CastEnum::CAST_DATE: return is_numeric($value) ? date('Y-m-d', $value) : $value;
+            case CastEnum::CAST_DATETIME: return is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value;
+            default: return $value;
+        }
+    }
+
+    /**
      * Build the nested doctrine filter object.
      *
      * @param array $filterInput
@@ -80,7 +98,6 @@ class GraphQLDoctrineFilterQueryBuilder
      */
     private function getQueryBuilderComposite(array $filterInput)
     {
-
         // filterInput can contain AND, OR or a direct expression
 
         if (!empty($filterInput['AND'])) {
@@ -116,13 +133,14 @@ class GraphQLDoctrineFilterQueryBuilder
                     $rightSide = null;
                     $parameter_name = null;
 
-                    if (!empty($filterInput['value']) && !in_array(
+                    if ((!empty($filterInput['value']) || (isset($filterInput['value']) && $filterInput['value'] === '0')) && !in_array(
                             $filterInput['operator'],
                             ['IS NULL', 'IS NOT NULL']
                         )) {
                         $this->parameterCount++;
                         $parameter_name = 'graphql_filter_builder_parameter'.$this->parameterCount;
-                        $this->parameters[$parameter_name] = $filterInput['value'];
+
+                        $this->parameters[$parameter_name] = $this->transformFilterValue($filterInput['value'], $filterInput['cast'] ?? null);
                         $rightSide = ':'.$parameter_name;
                     }
 
@@ -135,6 +153,12 @@ class GraphQLDoctrineFilterQueryBuilder
                         $leftSide = "JSON_EXTRACT(".$this->contentEntityPrefix.".data, '$.".$filterInput['field']."')";
                     }
 
+                    // This is a little hack, because MySQL PDO is transmitting boolean values as int. THis will work
+                    // for default tinyint comparing but not for json boolean comparing. https://github.com/doctrine/orm/issues/7550
+                    if(isset($this->parameters[$parameter_name]) && is_bool($this->parameters[$parameter_name])) {
+                        $leftSide = 'CAST('.$leftSide.' AS string)';
+                        $this->parameters[$parameter_name] = $this->parameters[$parameter_name] ? 'true' : 'false';
+                    }
 
                     // Support for special Operator, using ex Expr builder. This should be extended in the future.
                     switch ($filterInput['operator']) {
