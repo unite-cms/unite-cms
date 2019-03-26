@@ -65,7 +65,7 @@ class CreateOrganizationCommand extends Command
         $identifier = $helper->ask($input, $output, $question);
 
         $organization = new Organization();
-        $organization->setTitle($title)->setIdentifier($identifier);
+        $organization->setTitle($title)->setIdentifier($identifier)->setAllowCreateWithExistingConfigFolder(true);
 
         $question = new ConfirmationQuestion(
             '<info>Should the organization with title: "'.$organization->getTitle(

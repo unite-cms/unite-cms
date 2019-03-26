@@ -209,10 +209,16 @@ class DomainConfigManager
         $path = $this->getOrganizationConfigPath($organization);
 
         if($this->filesystem->exists($path)) {
-            throw new InvalidOrganizationConfigurationException('An organization folder with this identifier already exists! Please delete the folder first, to create an organization with this identifier.');
-        }
 
-        $this->filesystem->mkdir($path);
+            // If org is not allowed to be creating with existing config folder, throw an exception.
+            if(!$organization->isAllowCreateWithExistingConfigFolder()) {
+                throw new InvalidOrganizationConfigurationException(
+                    'An organization folder with this identifier already exists! Please delete the folder first, to create an organization with this identifier.'
+                );
+            }
+        } else {
+            $this->filesystem->mkdir($path);
+        }
     }
 
     /**
