@@ -153,5 +153,12 @@ class Setting implements FieldableContent
     public function isNew(): bool {
         return empty($this->getId());
     }
-}
 
+    /**
+     * @return FieldableContent
+     */
+    public function getRootFieldableContent(): FieldableContent
+    {
+        return $this;
+    }
+}

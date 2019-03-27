@@ -97,4 +97,12 @@ class VariantContent implements FieldableContent
     public function isNew(): bool {
         return false;
     }
+
+    /**
+     * @return FieldableContent
+     */
+    public function getRootFieldableContent(): FieldableContent
+    {
+        return $this->variant->getRootContent();
+    }
 }

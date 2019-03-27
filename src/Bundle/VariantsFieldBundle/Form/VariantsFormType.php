@@ -15,8 +15,10 @@ use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
+use UniteCMS\VariantsFieldBundle\Model\Variant;
 use UniteCMS\VariantsFieldBundle\Model\VariantsField;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
+use UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory;
 
 class VariantsFormType extends AbstractType implements DataTransformerInterface
 {
@@ -56,6 +58,9 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
                 'label' => false,
                 'attr' => [
                     'data-variant-title' => $variant['title'],
+                    'data-graphql-query-mapper' => $variant['identifier'] . '=... on ' .VariantFactory::schemaTypeNameForVariant(
+                        new Variant(null, $variants->getFieldsForVariant($variant['identifier']), $variant['identifier'], $variant['title'], $variants)
+                    ),
                 ],
                 'fields' => array_map(function(VariantsField $variant){
                     return new FieldableFormField($this->fieldTypeManager->getFieldType($variant->getType()), $variant);

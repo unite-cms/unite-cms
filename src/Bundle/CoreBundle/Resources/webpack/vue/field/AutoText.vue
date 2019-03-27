@@ -36,10 +36,12 @@
                 feather: feather,
                 willUpdateText: this.updateText || (!this.autoValue),
                 fieldLabels: JSON.parse(this.labels),
+                queryModifier: [],
             };
         },
 
         mounted() {
+            this.queryModifier = this.collectQueryModifier(this.$el);
             this.form = document.querySelector('form[name="fieldable_form"]');
 
             // Listen to all actual form elements.
@@ -92,12 +94,35 @@
             }
         },
         methods: {
+            collectQueryModifier($el) {
+                if($el.tagName === 'FORM') {
+                    return [];
+                }
+                let modifiers = [];
+                if($el.dataset.graphqlQueryMapper) {
+                    let parts = $el.dataset.graphqlQueryMapper.split('=');
+                    modifiers.push(parts);
+                }
+                return modifiers.concat(this.collectQueryModifier($el.parentElement));
+            },
             wrapNestedFieldName(fieldName) {
                 let parts = fieldName.split('][');
                 let rootPart = parts.shift();
                 if(parts.length === 0) {
                     return rootPart;
                 }
+
+                parts = parts.filter((part) => {
+                    return isNaN(part);
+                }).map((part) => {
+                    let foundPart = this.queryModifier.filter((m) => { return m[0] === part });
+                    if(foundPart.length > 0) {
+                        return foundPart.pop()[1];
+                    } else {
+                        return part;
+                    }
+                });
+
                 return this.wrapNestedFieldName(rootPart + '{'+(parts.join(']['))+'}');
             },
 

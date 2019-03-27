@@ -49,7 +49,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
         $options = [
             'label' => false,
-            'content' => new CollectionRow($collection, []),
+            'content' => new CollectionRow($collection, [], null),
         ];
         $options['fields'] = [];
 
@@ -114,7 +114,12 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
-        return (array)$value;
+        return array_map(function($row) use($content) {
+            return [
+                'value' => $row,
+                'content' => $content,
+            ];
+        }, (array)$value);
     }
 
     /**
@@ -213,7 +218,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         // Make sure, that there is no additional data in content that is not in settings.
         foreach($data as $delta => $row) {
 
-            $context->setNode($context->getValue(), new CollectionRow($collection, $data), $context->getMetadata(), $path . '['.$delta.']');
+            $context->setNode($context->getValue(), new CollectionRow($collection, $data, $current_object), $context->getMetadata(), $path . '['.$delta.']');
 
             foreach (array_keys($row) as $data_key) {
 

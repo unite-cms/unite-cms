@@ -95,6 +95,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             public function getLocale() { return null; }
             public function setLocale($locale) { return $this; }
             public function isNew() : bool { return false; }
+            public function getRootFieldableContent(): FieldableContent { return $this; }
         };
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($fieldable, $content);

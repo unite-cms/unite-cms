@@ -15,11 +15,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Form\AutoTextType;
@@ -59,13 +57,12 @@ class AutoTextFieldType extends TextFieldType
     function getFormOptions(FieldableField $field): array
     {
         $generation_url = null;
-
-        if($field->getEntity() instanceof ContentType) {
-            $generation_url = $this->router->generate('unitecms_core_content_preview', [$field->getEntity()]);
+        if($field->getEntity()->getRootEntity() instanceof ContentType) {
+            $generation_url = $this->router->generate('unitecms_core_content_preview', [$field->getEntity()->getRootEntity()]);
         }
 
-        else if($field->getEntity() instanceof SettingType) {
-            $generation_url = $this->router->generate('unitecms_core_setting_preview', [$field->getEntity()]);
+        else if($field->getEntity()->getRootEntity() instanceof SettingType) {
+            $generation_url = $this->router->generate('unitecms_core_setting_preview', [$field->getEntity()->getRootEntity()]);
         }
 
         return array_merge(
@@ -99,6 +96,7 @@ class AutoTextFieldType extends TextFieldType
      */
     function generateAutoText(FieldableField $field, FieldableContent $content) {
         $expressionChecker = new UniteExpressionChecker();
+        $content = $content->getRootFieldableContent();
 
         if($content instanceof Content) {
             $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, $content->getContentType());
@@ -148,6 +146,8 @@ class AutoTextFieldType extends TextFieldType
         }
 
         if(!empty($data[$field->getIdentifier()]['auto'])) {
+            $content = $content->getRootFieldableContent();
+
             if(($field->getSettings()->auto_update || empty($content->getData()[$field->getIdentifier()]['auto']))) {
 
                 $tmp_content = clone $content;
@@ -174,14 +174,14 @@ class AutoTextFieldType extends TextFieldType
             return;
         }
 
-        if(!$context->getObject() instanceof ContentTypeField && !$context->getObject() instanceof SettingTypeField) {
+        if(!$context->getObject()->getEntity()->getRootEntity() instanceof ContentType && !$context->getObject()->getEntity()->getRootEntity()  instanceof SettingType) {
             $context->buildViolation('invalid_entity_type')->addViolation();
         }
 
         $expressionChecker = new UniteExpressionChecker();
         $expressionChecker->registerFieldableContent(null);
 
-        if($context->getObject() instanceof ContentTypeField) {
+        if($context->getObject()->getEntity()->getRootEntity()  instanceof ContentType) {
             $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, new ContentType());
         }
 

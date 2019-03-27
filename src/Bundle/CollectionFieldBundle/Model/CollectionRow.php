@@ -8,7 +8,6 @@
 
 namespace UniteCMS\CollectionFieldBundle\Model;
 
-
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 
@@ -24,10 +23,16 @@ class CollectionRow implements FieldableContent
      */
     private $data;
 
-    public function __construct(Collection $collection, array $data)
+    /**
+     * @var FieldableContent $rootContent
+     */
+    private $rootContent;
+
+    public function __construct(Collection $collection, array $data, FieldableContent $rootContent = null)
     {
         $this->collection = $collection;
         $this->data = $data;
+        $this->rootContent = $rootContent;
     }
 
     /**
@@ -97,5 +102,13 @@ class CollectionRow implements FieldableContent
      */
     public function isNew(): bool {
         return false;
+    }
+
+    /**
+     * @return FieldableContent
+     */
+    public function getRootFieldableContent(): FieldableContent
+    {
+        return $this->rootContent;
     }
 }

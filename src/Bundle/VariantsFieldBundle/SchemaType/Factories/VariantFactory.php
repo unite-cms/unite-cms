@@ -133,6 +133,7 @@ class VariantFactory
             foreach($variants->getVariantsMetadata() as $meta) {
 
                 $variant = new Variant(
+                    null,
                     $variants->getFieldsForVariant($meta['identifier']),
                     $meta['identifier'],
                     $meta['title'],
