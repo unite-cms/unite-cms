@@ -22,6 +22,7 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
 use UniteCMS\VariantsFieldBundle\Form\VariantsFormType;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
+use UniteCMS\VariantsFieldBundle\Model\VariantContent;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
 use UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory;
 
@@ -256,7 +257,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function alterData(FieldableField $field, &$data, FieldableContent $content)
+    function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData)
     {
         if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type'])) {
             return;
@@ -269,7 +270,8 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
         $variants = self::getNestableFieldable($field);
 
         foreach($variants->getFieldsForVariant($type) as $row_field) {
-            $this->fieldTypeManager->alterFieldData($row_field, $variant_data, $content);
+            $variant = new Variant($content, $variants->getFieldsForVariant($row_field->getIdentifier()), $row_field->getIdentifier(), $row_field->getTitle(), $variants);
+            $this->fieldTypeManager->alterFieldData($row_field, $variant_data, new VariantContent($variant, $variant_data), $rootData);
         }
 
         if($variant_data != $data[$field->getIdentifier()][$type]) {

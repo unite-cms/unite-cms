@@ -139,19 +139,18 @@ class AutoTextFieldType extends TextFieldType
     /**
      * {@inheritdoc}
      */
-    function alterData(FieldableField $field, &$data, FieldableContent $content)
+    function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData)
     {
         if(empty($data[$field->getIdentifier()])) {
             $data[$field->getIdentifier()] = $this->getDefaultValue($field);
         }
 
         if(!empty($data[$field->getIdentifier()]['auto'])) {
-            $content = $content->getRootFieldableContent();
 
             if(($field->getSettings()->auto_update || empty($content->getData()[$field->getIdentifier()]['auto']))) {
 
-                $tmp_content = clone $content;
-                $tmp_content->setData($data);
+                $tmp_content = clone $content->getRootFieldableContent();
+                $tmp_content->setData($rootData);
                 $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $tmp_content);
                 unset($tmp_content);
 

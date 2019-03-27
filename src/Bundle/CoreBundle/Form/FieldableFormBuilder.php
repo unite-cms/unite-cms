@@ -78,7 +78,7 @@ class FieldableFormBuilder
         // Allow all fields to alter data before we set it to the content object.
         if(!empty($content->getEntity()) && $content->getEntity() instanceof Fieldable) {
             foreach ($content->getEntity()->getFields() as $field) {
-                $this->fieldTypeManager->alterFieldData($field, $data, $content);
+                $this->fieldTypeManager->alterFieldData($field, $data, $content, $data);
             }
         }
 

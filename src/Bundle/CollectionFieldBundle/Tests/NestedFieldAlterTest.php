@@ -29,7 +29,7 @@ class NestedFieldAlterTest extends TestCase
         $manager->registerFieldType(new CollectionFieldType($this->createMock(CollectionFieldTypeFactory::class), $manager));
         $manager->registerFieldType(new class extends FieldType {
             const TYPE = 't_f1';
-            public function alterData(FieldableField $field, &$data, FieldableContent $content) { $data[$field->getIdentifier()] = 'FOO'; }
+            public function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData) { $data[$field->getIdentifier()] = 'FOO'; }
         });
         $manager->registerFieldType(new class extends FieldType { const TYPE = 't_f2'; });
 
@@ -53,13 +53,13 @@ class NestedFieldAlterTest extends TestCase
         $contentType->addField($field);
 
         $data = [];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([], $data);
 
         $data = [
             'collection' => []
         ];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([
             'collection' => [],
         ], $data);
@@ -70,7 +70,7 @@ class NestedFieldAlterTest extends TestCase
                 []
             ],
         ];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([
             'collection' => [
                 [
@@ -94,7 +94,7 @@ class NestedFieldAlterTest extends TestCase
                 ],
             ],
         ];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([
             'collection' => [
                 [

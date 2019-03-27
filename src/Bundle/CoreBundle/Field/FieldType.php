@@ -188,7 +188,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function alterData(FieldableField $field, &$data, FieldableContent $content) {}
+    function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData) {}
 
     /**
      * {@inheritdoc}

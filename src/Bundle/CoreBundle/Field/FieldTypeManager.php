@@ -72,11 +72,12 @@ class FieldTypeManager
      * @param FieldableField $field
      * @param mixed $data
      * @param FieldableContent $content
+     * @param array $rootData
      */
-    public function alterFieldData(FieldableField $field, &$data, FieldableContent $content)
+    public function alterFieldData(FieldableField $field, &$data, FieldableContent $content, $rootData)
     {
         $fieldType = $this->getFieldType($field->getType());
-        $fieldType->alterData($field, $data, $content);
+        $fieldType->alterData($field, $data, $content, $rootData);
     }
 
     public function onContentInsert(ContentTypeField $field, Content $content, LifecycleEventArgs $args)

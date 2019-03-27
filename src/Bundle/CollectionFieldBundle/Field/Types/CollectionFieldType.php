@@ -177,7 +177,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function alterData(FieldableField $field, &$data, FieldableContent $content)
+    function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData)
     {
         if(empty($data[$field->getIdentifier()])) {
             return;
@@ -191,7 +191,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 $row_data = $row;
 
                 foreach ($collection->getFields() as $row_field) {
-                    $this->fieldTypeManager->alterFieldData($row_field, $row_data, $content);
+                    $this->fieldTypeManager->alterFieldData($row_field, $row_data, new CollectionRow($collection, $data[$field->getIdentifier()], $content), $rootData);
                 }
 
                 if($row_data != $row) {
