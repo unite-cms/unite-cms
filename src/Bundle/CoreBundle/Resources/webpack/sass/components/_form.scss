@@ -1,4 +1,23 @@
 
+/* Readonly */
+.uk-input:read-only,
+.uk-select:read-only,
+.uk-textarea:read-only,
+.uk-input.read-only,
+.uk-select.read-only,
+.uk-textarea.read-only {
+   background-color: $form-disabled-background;
+   color: $form-disabled-color;
+   @if(mixin-exists(hook-form-disabled)) {@include hook-form-disabled();}
+}
+
+.uk-input:-moz-read-only,
+.uk-select:-moz-read-only,
+.uk-textarea:-moz-read-only {
+   background-color: $form-disabled-background;
+   color: $form-disabled-color;
+   @if(mixin-exists(hook-form-disabled)) {@include hook-form-disabled();}
+}
 
 .uk-form-label {
    &.required:after {

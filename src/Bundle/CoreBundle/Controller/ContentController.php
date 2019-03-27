@@ -225,7 +225,7 @@ class ContentController extends AbstractController
         $form->add('submit', SubmitType::class, ['label' => 'content.update.submit']);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted()) {
 
             // Assign data to content object.
             $fieldableFormBuilder->assignDataToFieldableContent($content, $form->getData());

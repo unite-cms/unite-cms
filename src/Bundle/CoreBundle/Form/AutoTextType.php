@@ -27,7 +27,7 @@ class AutoTextType extends AbstractType
         $resolver->setRequired(['expression', 'generation_url']);
         $resolver->setDefaults([
             'compound' => true,
-            'error_bubbling' => true,
+            'error_bubbling' => false,
             'text_widget' => TextType::class,
             'auto_update' => false,
         ]);
@@ -52,7 +52,11 @@ class AutoTextType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('text', $this->normalizeWidgetType($options['text_widget']), ['label' => $options['label'], 'not_empty' => $options['not_empty']])
+            ->add('text', $this->normalizeWidgetType($options['text_widget']), [
+                'label' => $options['label'],
+                'not_empty' => $options['not_empty'],
+                'error_bubbling' => true,
+            ])
             ->add('auto', CheckboxType::class, ['label' => $options['label']]);
     }
 
