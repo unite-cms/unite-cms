@@ -2,8 +2,8 @@
     <div class="uk-margin">
         <div class="uk-form-controls">
             <div class="uk-form-custom">
-                <input v-if="widgetType === 'Symfony\\Component\\Form\\Extension\\Core\\Type\\TextType'" :disabled="auto" :id="input_id + '_text'" type="text" class="uk-input" :name="name + '[text]'" v-model="text" />
-                <textarea v-else :disabled="auto" :id="input_id + '_text'" type="text" class="uk-textarea" :name="name + '[text]'" v-model="text"></textarea>
+                <input v-if="widgetType === 'Symfony\\Component\\Form\\Extension\\Core\\Type\\TextType'" :readonly="auto" :class="{'read-only': auto}" :id="input_id + '_text'" type="text" class="uk-input" :name="name + '[text]'" v-model="text" />
+                <textarea v-else :readonly="auto" :class="{'read-only': auto}" :id="input_id + '_text'" type="text" class="uk-textarea" :name="name + '[text]'" v-model="text"></textarea>
             </div>
 
             <label :for="input_id + '_auto'" class="uk-button uk-button-small" :class="{ 'uk-button-secondary': auto, 'uk-button-default': !auto }">
