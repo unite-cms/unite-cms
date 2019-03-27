@@ -110,7 +110,7 @@ class SettingController extends AbstractController
         $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted()) {
 
             // Assign data to content object.
             $fieldableFormBuilder->assignDataToFieldableContent($setting, $form->getData());
