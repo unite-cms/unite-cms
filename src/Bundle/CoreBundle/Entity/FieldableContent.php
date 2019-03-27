@@ -56,4 +56,9 @@ interface FieldableContent
      * @return FieldableContent
      */
     public function getRootFieldableContent(): FieldableContent;
+
+    /**
+     * @return mixed
+     */
+    public function getId();
 }

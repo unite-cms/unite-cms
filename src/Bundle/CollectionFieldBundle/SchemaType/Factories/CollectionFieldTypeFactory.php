@@ -117,7 +117,7 @@ class CollectionFieldTypeFactory
 
                       $return_value = null;
                       $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName], new CollectionRow($collection, $value, $rootContent));
+                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName], new CollectionRow($collection, $value, $rootContent, $info->path[count($info->path) - 2]));
                       return $return_value;
                     }
                   ]));

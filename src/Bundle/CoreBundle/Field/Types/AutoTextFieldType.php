@@ -13,8 +13,10 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CollectionFieldBundle\Model\CollectionRow;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -96,6 +98,8 @@ class AutoTextFieldType extends TextFieldType
      */
     function generateAutoText(FieldableField $field, FieldableContent $content) {
         $expressionChecker = new UniteExpressionChecker();
+
+        $expressionChecker->registerVariable('id', $content->getId());
         $content = $content->getRootFieldableContent();
 
         if($content instanceof Content) {
@@ -149,7 +153,7 @@ class AutoTextFieldType extends TextFieldType
 
             if(($field->getSettings()->auto_update || empty($content->getData()[$field->getIdentifier()]['auto']))) {
 
-                $tmp_content = clone $content->getRootFieldableContent();
+                $tmp_content = clone $content;
                 $tmp_content->setData($rootData);
                 $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $tmp_content);
                 unset($tmp_content);
@@ -180,7 +184,11 @@ class AutoTextFieldType extends TextFieldType
         $expressionChecker = new UniteExpressionChecker();
         $expressionChecker->registerFieldableContent(null);
 
-        if($context->getObject()->getEntity()->getRootEntity()  instanceof ContentType) {
+        if($context->getObject()->getEntity() instanceof Fieldable) {
+            $expressionChecker->registerVariable('id');
+        }
+
+        if($context->getObject()->getEntity()->getRootEntity() instanceof ContentType) {
             $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, new ContentType());
         }
 

@@ -28,11 +28,17 @@ class CollectionRow implements FieldableContent
      */
     private $rootContent;
 
-    public function __construct(Collection $collection, array $data, FieldableContent $rootContent = null)
+    /**
+     * @var int $delta
+     */
+    private $delta;
+
+    public function __construct(Collection $collection, array $data, FieldableContent $rootContent = null, int $delta = 0)
     {
         $this->collection = $collection;
         $this->data = $data;
         $this->rootContent = $rootContent;
+        $this->delta = $delta;
     }
 
     /**
@@ -102,6 +108,14 @@ class CollectionRow implements FieldableContent
      */
     public function isNew(): bool {
         return false;
+    }
+
+    /**
+     * Get id
+     */
+    public function getId()
+    {
+        return $this->delta;
     }
 
     /**

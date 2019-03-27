@@ -191,7 +191,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 $row_data = $row;
 
                 foreach ($collection->getFields() as $row_field) {
-                    $this->fieldTypeManager->alterFieldData($row_field, $row_data, new CollectionRow($collection, $data[$field->getIdentifier()], $content), $rootData);
+                    $this->fieldTypeManager->alterFieldData($row_field, $row_data, new CollectionRow($collection, $data[$field->getIdentifier()], $content, $delta), $rootData);
                 }
 
                 if($row_data != $row) {
@@ -218,7 +218,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         // Make sure, that there is no additional data in content that is not in settings.
         foreach($data as $delta => $row) {
 
-            $context->setNode($context->getValue(), new CollectionRow($collection, $data, $current_object), $context->getMetadata(), $path . '['.$delta.']');
+            $context->setNode($context->getValue(), new CollectionRow($collection, $data, $current_object, $delta), $context->getMetadata(), $path . '['.$delta.']');
 
             foreach (array_keys($row) as $data_key) {
 
