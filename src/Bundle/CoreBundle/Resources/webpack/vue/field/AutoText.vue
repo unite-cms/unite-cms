@@ -132,9 +132,22 @@
                 fieldName = fieldName + '{text_generated}}';
                 return this.wrapNestedFieldName(fieldName);
             },
-            findNestedValue(result) {
+            findNestedValue(result, parentName = null) {
                 if(typeof result === 'object') {
-                    return this.findNestedValue(result[Object.keys(result)[0]]);
+                    let objectKeys = Object.keys(result);
+                    if(objectKeys.length === 1) {
+                        return this.findNestedValue(result[objectKeys[0]], objectKeys[0]);
+                    } else {
+
+                        // TODO: This is a little hack for arrays of content (e.g. collection fields). In the future we should improve this!
+                        if(this.name.split(parentName + '][').length > 1) {
+                            let id = this.name.split(parentName + '][')[1].split('][')[0];
+                            if(result[id]) {
+                                return this.findNestedValue(result[id], id);
+                            }
+                        }
+                        return this.findNestedValue(result[objectKeys[0]], objectKeys[0]);
+                    }
                 }
                 return result;
             },
