@@ -47,16 +47,22 @@ class UniteExpressionLanguageDoctrineContentProvider implements ExpressionFuncti
      * @return bool
      */
     private function contentDataUnique($value, $path, $excluded_ids = []) : bool {
+
+        $valueWhere = new Orx();
+        $valueWhere->add('JSON_EXTRACT(c.data, :identifier) = :value');
+        $valueWhere->add('JSON_EXTRACT(c.data, :identifier) LIKE :likeValue');
+
         $query = $this->entityManager->createQueryBuilder()
             ->select('count(c.id)')
             ->where('c.contentType = :contentType')
-            ->andWhere('JSON_EXTRACT(c.data, :identifier) = :value')
+            ->andWhere($valueWhere)
             ->from('UniteCMSCoreBundle:Content', 'c')
             ->setParameters(
                 [
                     ':contentType' => $this->contentType,
                     ':identifier' => '$.'.$path,
                     ':value' => $value,
+                    ':likeValue' => '%"' . $value . '"%',
                 ]
             );
 

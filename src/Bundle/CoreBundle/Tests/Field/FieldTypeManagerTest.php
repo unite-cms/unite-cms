@@ -39,7 +39,7 @@ class FieldTypeManagerTest extends TestCase
         $manager = new FieldTypeManager();
         $manager->registerFieldType(new class extends FieldType {
             const TYPE = 'test_t1';
-            public function alterData(FieldableField $field, &$data, FieldableContent $content)
+            public function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData)
             {
                 if(array_key_exists($field->getIdentifier(), $content->getData())) {
                     $data[$field->getIdentifier()] .= '_' . $content->getData()[$field->getIdentifier()];
@@ -75,9 +75,9 @@ class FieldTypeManagerTest extends TestCase
 
         $data = [];
 
-        $manager->alterFieldData($ctField1, $data, $content);
-        $manager->alterFieldData($ctField2, $data, $content);
-        $manager->alterFieldData($ctField3, $data, $content);
+        $manager->alterFieldData($ctField1, $data, $content, $data);
+        $manager->alterFieldData($ctField2, $data, $content, $data);
+        $manager->alterFieldData($ctField3, $data, $content, $data);
 
         $this->assertEquals([
             'f1' => 'NEW',
@@ -87,9 +87,9 @@ class FieldTypeManagerTest extends TestCase
         $data['f3'] = 'FOO';
         $content->setData($data);
 
-        $manager->alterFieldData($ctField1, $data, $content);
-        $manager->alterFieldData($ctField2, $data, $content);
-        $manager->alterFieldData($ctField3, $data, $content);
+        $manager->alterFieldData($ctField1, $data, $content, $data);
+        $manager->alterFieldData($ctField2, $data, $content, $data);
+        $manager->alterFieldData($ctField3, $data, $content, $data);
 
         $this->assertEquals([
             'f1' => 'NEW_NEW',

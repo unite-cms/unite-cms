@@ -51,4 +51,14 @@ interface FieldableContent
      * @return boolean
      */
     public function isNew(): bool;
+
+    /**
+     * @return FieldableContent
+     */
+    public function getRootFieldableContent(): FieldableContent;
+
+    /**
+     * @return mixed
+     */
+    public function getId();
 }

@@ -29,7 +29,7 @@ class NestedFieldAlterTest extends TestCase
         $manager->registerFieldType(new VariantsFieldType($manager, $this->createMock(VariantFactory::class)));
         $manager->registerFieldType(new class extends FieldType {
             const TYPE = 't_f1';
-            public function alterData(FieldableField $field, &$data, FieldableContent $content) { $data[$field->getIdentifier()] = 'FOO'; }
+            public function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData) { $data[$field->getIdentifier()] = 'FOO'; }
         });
         $manager->registerFieldType(new class extends FieldType { const TYPE = 't_f2'; });
 
@@ -75,13 +75,13 @@ class NestedFieldAlterTest extends TestCase
         $contentType->addField($field);
 
         $data = [];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([], $data);
 
         $data = [
             'variants' => null,
         ];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([
             'variants' => null,
         ], $data);
@@ -92,7 +92,7 @@ class NestedFieldAlterTest extends TestCase
                 'a' => [],
             ],
         ];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([
             'variants' => [
                 'type' => 'a',
@@ -108,7 +108,7 @@ class NestedFieldAlterTest extends TestCase
                 'b' => [],
             ],
         ];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([
             'variants' => [
                 'type' => 'b',
@@ -125,7 +125,7 @@ class NestedFieldAlterTest extends TestCase
                 ],
             ],
         ];
-        $manager->alterFieldData($field, $data, new Content());
+        $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([
             'variants' => [
                 'type' => 'a',

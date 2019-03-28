@@ -13,13 +13,13 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CollectionFieldBundle\Model\CollectionRow;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Form\AutoTextType;
@@ -59,13 +59,12 @@ class AutoTextFieldType extends TextFieldType
     function getFormOptions(FieldableField $field): array
     {
         $generation_url = null;
-
-        if($field->getEntity() instanceof ContentType) {
-            $generation_url = $this->router->generate('unitecms_core_content_preview', [$field->getEntity()]);
+        if($field->getEntity()->getRootEntity() instanceof ContentType) {
+            $generation_url = $this->router->generate('unitecms_core_content_preview', [$field->getEntity()->getRootEntity()]);
         }
 
-        else if($field->getEntity() instanceof SettingType) {
-            $generation_url = $this->router->generate('unitecms_core_setting_preview', [$field->getEntity()]);
+        else if($field->getEntity()->getRootEntity() instanceof SettingType) {
+            $generation_url = $this->router->generate('unitecms_core_setting_preview', [$field->getEntity()->getRootEntity()]);
         }
 
         return array_merge(
@@ -95,10 +94,12 @@ class AutoTextFieldType extends TextFieldType
      *
      * @param FieldableField $field
      * @param FieldableContent $content
+     * @param $content_id
      * @return string
      */
-    function generateAutoText(FieldableField $field, FieldableContent $content) {
+    function generateAutoText(FieldableField $field, FieldableContent $content, $content_id) {
         $expressionChecker = new UniteExpressionChecker();
+        $expressionChecker->registerVariable('id', $content_id);
 
         if($content instanceof Content) {
             $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, $content->getContentType());
@@ -130,29 +131,43 @@ class AutoTextFieldType extends TextFieldType
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
+        if(!$content instanceof Content && $content->getRootFieldableContent() instanceof Content) {
+            $use_content = $content->getRootFieldableContent();
+        } else {
+            $use_content = $content;
+        }
+
         // We always return a regenerated text. This allows the to provide a preview and to compare with the stored text.
         return [
             'auto' => $value['auto'] ?? true,
             'text' => $value['text'] ?? '',
-            'text_generated' => $this->generateAutoText($field, $content),
+            'text_generated' => $this->generateAutoText($field, $use_content, $content->getId()),
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    function alterData(FieldableField $field, &$data, FieldableContent $content)
+    function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData)
     {
         if(empty($data[$field->getIdentifier()])) {
             $data[$field->getIdentifier()] = $this->getDefaultValue($field);
         }
 
         if(!empty($data[$field->getIdentifier()]['auto'])) {
+
             if(($field->getSettings()->auto_update || empty($content->getData()[$field->getIdentifier()]['auto']))) {
 
-                $tmp_content = clone $content;
-                $tmp_content->setData($data);
-                $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $tmp_content);
+                $content_id = $content->getId();
+
+                if(!$content instanceof Content && $content->getRootFieldableContent() instanceof Content) {
+                    $tmp_content = clone $content->getRootFieldableContent();
+                } else {
+                    $tmp_content = clone $content;
+                }
+
+                $tmp_content->setData($rootData);
+                $data[$field->getIdentifier()]['text'] = $this->generateAutoText($field, $tmp_content, $content_id);
                 unset($tmp_content);
 
             } else {
@@ -174,14 +189,18 @@ class AutoTextFieldType extends TextFieldType
             return;
         }
 
-        if(!$context->getObject() instanceof ContentTypeField && !$context->getObject() instanceof SettingTypeField) {
+        if(!$context->getObject()->getEntity()->getRootEntity() instanceof ContentType && !$context->getObject()->getEntity()->getRootEntity()  instanceof SettingType) {
             $context->buildViolation('invalid_entity_type')->addViolation();
         }
 
         $expressionChecker = new UniteExpressionChecker();
         $expressionChecker->registerFieldableContent(null);
 
-        if($context->getObject() instanceof ContentTypeField) {
+        if($context->getObject()->getEntity() instanceof Fieldable) {
+            $expressionChecker->registerVariable('id');
+        }
+
+        if($context->getObject()->getEntity()->getRootEntity() instanceof ContentType) {
             $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, new ContentType());
         }
 

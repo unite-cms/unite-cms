@@ -11,11 +11,17 @@ namespace UniteCMS\VariantsFieldBundle\Model;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
 
 class Variant implements Fieldable
 {
+    /**
+     * @var FieldableContent $rootContent
+     */
+    private $rootContent;
+
     /**
      * @var VariantsField[]|ArrayCollection
      * @Assert\Valid()
@@ -47,8 +53,9 @@ class Variant implements Fieldable
      */
     private $data;
 
-    public function __construct($fields, $identifier, $title, $parent = null, $data = [])
+    public function __construct(FieldableContent $rootContent = null, $fields = [], $identifier = null, $title = null, $parent = null, $data = [])
     {
+        $this->rootContent = $rootContent;
         $this->fields = new ArrayCollection($fields);
         $this->identifier = $identifier;
         $this->title = $title;
@@ -135,6 +142,13 @@ class Variant implements Fieldable
         }
 
         return $field;
+    }
+
+    /**
+     * @return FieldableContent
+     */
+    public function getRootContent() : FieldableContent {
+        return $this->rootContent;
     }
 
     /**

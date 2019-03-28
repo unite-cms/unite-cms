@@ -22,6 +22,7 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
 use UniteCMS\VariantsFieldBundle\Form\VariantsFormType;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
+use UniteCMS\VariantsFieldBundle\Model\VariantContent;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
 use UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory;
 
@@ -72,6 +73,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
             // Creates a new schema type object for this variant and register it to schema type manager.
             $this->variantFactory->createVariantType($schemaTypeManager, $nestingLevel, new Variant(
+                null,
                 $variants->getFieldsForVariant($meta['identifier']),
                 $meta['identifier'],
                 $meta['title'],
@@ -96,12 +98,13 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
         if(empty($value['type'])) {
-            return new Variant([], null, null);
+            return new Variant($content);
         }
 
         $variants = self::getNestableFieldable($field);
 
         return new Variant(
+            $content,
             $variants->getFieldsForVariant($value['type']),
             $value['type'],
             $value['type'],
@@ -156,6 +159,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             foreach($variants->getVariantsMetadata() as $delta => $meta) {
 
                 $variant = new Variant(
+                    null,
                     $variants->getFieldsForVariant($meta['identifier']),
                     $meta['identifier'],
                     $meta['title'],
@@ -253,7 +257,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function alterData(FieldableField $field, &$data, FieldableContent $content)
+    function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData)
     {
         if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type'])) {
             return;
@@ -266,7 +270,8 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
         $variants = self::getNestableFieldable($field);
 
         foreach($variants->getFieldsForVariant($type) as $row_field) {
-            $this->fieldTypeManager->alterFieldData($row_field, $variant_data, $content);
+            $variant = new Variant($content, $variants->getFieldsForVariant($row_field->getIdentifier()), $row_field->getIdentifier(), $row_field->getTitle(), $variants);
+            $this->fieldTypeManager->alterFieldData($row_field, $variant_data, new VariantContent($variant, $variant_data), $rootData);
         }
 
         if($variant_data != $data[$field->getIdentifier()][$type]) {
@@ -289,14 +294,16 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
     /**
      * Creates a virtual variant model for the given field and a variant identifier.
+     * @param FieldableContent $content
      * @param FieldableField $field
      * @param string $variant
      * @param array $data
      * @return Variant
      */
-    static function createVariant(FieldableField $field, string $variant, array $data = []) : Variant {
+    static function createVariant(FieldableContent $content, FieldableField $field, string $variant, array $data = []) : Variant {
         $variants = self::getNestableFieldable($field);
         return new Variant(
+            $content,
             $variants->getFieldsForVariant($variant),
             $variant,
             $variant,
@@ -315,7 +322,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             return;
         }
 
-        $variant = static::createVariant($field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
+        $variant = static::createVariant($content, $field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
 
         // If child field implements onCreate, call it!
         foreach($variant->getFields() as $subField) {
@@ -364,7 +371,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
             // Case 4B: Old has same variant as new.
             else {
-                $variant = static::createVariant($field, $data[$field->getIdentifier()]['type']);
+                $variant = static::createVariant($content, $field, $data[$field->getIdentifier()]['type']);
 
                 // If child field implements onUpdate, call it!
                 foreach($variant->getFields() as $subField) {
@@ -398,7 +405,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             return;
         }
 
-        $variant = static::createVariant($field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
+        $variant = static::createVariant($content, $field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
 
         // If child field implements onCreate, call it!
         foreach($variant->getFields() as $subField) {
@@ -422,7 +429,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             return;
         }
 
-        $variant = static::createVariant($field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
+        $variant = static::createVariant($content, $field, $data[$field->getIdentifier()]['type'], $data[$field->getIdentifier()][$data[$field->getIdentifier()]['type']]);
 
         // If child field implements onCreate, call it!
         foreach($variant->getFields() as $subField) {
@@ -457,7 +464,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             $variants = self::getNestableFieldable($field);
             foreach($settings['settings']['on'] as $v => $fields) {
                 $processor = new Processor();
-                $variant = new Variant($variants->getFieldsForVariant($v), $v, $v, $variants);
+                $variant = new Variant(null, $variants->getFieldsForVariant($v), $v, $v, $variants);
                 $config = $processor->processConfiguration(new TableViewConfiguration($variant, $fieldTypeManager), ['settings' => ['fields' => $fields]]);
                 $settings['settings']['on'][$v] = $config['fields'];
                 $settings['settings']['variant_schema_types'][$v] = VariantFactory::schemaTypeNameForVariant($variant);

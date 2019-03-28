@@ -36,10 +36,12 @@
                 feather: feather,
                 willUpdateText: this.updateText || (!this.autoValue),
                 fieldLabels: JSON.parse(this.labels),
+                queryModifier: [],
             };
         },
 
         mounted() {
+            this.queryModifier = this.collectQueryModifier(this.$el);
             this.form = document.querySelector('form[name="fieldable_form"]');
 
             // Listen to all actual form elements.
@@ -92,12 +94,35 @@
             }
         },
         methods: {
+            collectQueryModifier($el) {
+                if($el.tagName === 'FORM') {
+                    return [];
+                }
+                let modifiers = [];
+                if($el.dataset.graphqlQueryMapper) {
+                    let parts = $el.dataset.graphqlQueryMapper.split('=');
+                    modifiers.push(parts);
+                }
+                return modifiers.concat(this.collectQueryModifier($el.parentElement));
+            },
             wrapNestedFieldName(fieldName) {
                 let parts = fieldName.split('][');
                 let rootPart = parts.shift();
                 if(parts.length === 0) {
                     return rootPart;
                 }
+
+                parts = parts.filter((part) => {
+                    return isNaN(part);
+                }).map((part) => {
+                    let foundPart = this.queryModifier.filter((m) => { return m[0] === part });
+                    if(foundPart.length > 0) {
+                        return foundPart.pop()[1];
+                    } else {
+                        return part;
+                    }
+                });
+
                 return this.wrapNestedFieldName(rootPart + '{'+(parts.join(']['))+'}');
             },
 
@@ -107,9 +132,22 @@
                 fieldName = fieldName + '{text_generated}}';
                 return this.wrapNestedFieldName(fieldName);
             },
-            findNestedValue(result) {
+            findNestedValue(result, parentName = null) {
                 if(typeof result === 'object') {
-                    return this.findNestedValue(result[Object.keys(result)[0]]);
+                    let objectKeys = Object.keys(result);
+                    if(objectKeys.length === 1) {
+                        return this.findNestedValue(result[objectKeys[0]], objectKeys[0]);
+                    } else {
+
+                        // TODO: This is a little hack for arrays of content (e.g. collection fields). In the future we should improve this!
+                        if(this.name.split(parentName + '][').length > 1) {
+                            let id = this.name.split(parentName + '][')[1].split('][')[0];
+                            if(result[id]) {
+                                return this.findNestedValue(result[id], id);
+                            }
+                        }
+                        return this.findNestedValue(result[objectKeys[0]], objectKeys[0]);
+                    }
                 }
                 return result;
             },
