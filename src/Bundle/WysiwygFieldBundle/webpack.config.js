@@ -31,7 +31,27 @@ Encore
     .enableVersioning(Encore.isProduction())
 
     // We don't need a runtime.js for unite cms at the moment
-    .disableSingleRuntimeChunk();
+    .disableSingleRuntimeChunk()
+    .disableImagesLoader()
+
+    .addRule({
+        test: /ckeditor5-[^/]+\/theme\/icons\/[^/]+\.svg$/,
+        use: [ {
+            loader: 'raw-loader'
+        } ]
+    })
+    // Next one is pretty much the default encore rule for handling images but excluding CKEditor
+    .addRule({
+        test: /\.(svg|png|jpg|jpeg|gif|ico)/,
+        exclude: /ckeditor5-[^/]+\/theme\/icons\/[^/]+\.svg$/,
+        use: [{
+            loader: 'file-loader',
+            options: {
+                filename: 'images/[name].[hash:8].[ext]',
+                publicPath: '/build/'
+            }
+        }]
+    })
 
 // export the final configuration
 module.exports = Encore.getWebpackConfig();
