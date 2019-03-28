@@ -183,11 +183,12 @@ class WysiwygFieldTypeTest extends FieldTypeTestCase
                 [
                     'view' => [
                         'name' => 'p',
-                        'classes' => 'fancy'
+                        'classes' => 'fancy',
                     ],
                     'model' => 'fancyParagraph',
                     'title' => 'Fancy Pargraph',
-                    'class' => 'ck-heading_paragraph'
+                    'class' => 'ck-heading_paragraph',
+                    'converterPriority' => 'high'
                 ]
             ],
         ], json_decode($formOptions['attr']['data-options'], true));
