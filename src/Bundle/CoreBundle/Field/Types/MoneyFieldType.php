@@ -91,7 +91,9 @@ class MoneyFieldType extends TextFieldType
 
             foreach($settings->currencies as $currency) {
                 if(Intl::getCurrencyBundle()->getCurrencyName($currency) === null) {
-                    $context->buildViolation('invalid_currency')->atPath('currencies')->setInvalidValue($currency)->addViolation();
+                    $context->buildViolation('invalid_currency')->atPath('currencies')
+                        ->setParameter('%value%', $currency)
+                        ->setInvalidValue($currency)->addViolation();
                 }
             }
         }

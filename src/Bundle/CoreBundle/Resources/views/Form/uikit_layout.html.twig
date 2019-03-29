@@ -243,3 +243,14 @@
         <div class="uk-alert-danger" uk-alert>There was a problem rendering this field. Please check the domain configuration or ask an administrator.</div>
     {% endif %}
 {%- endblock unite_cms_core_field_exception_widget -%}
+
+{%- block unite_cms_core_money_widget -%}
+    <div class="uk-flex uk-flex-wrap unite-core-form-field-money">
+        <div class="uk-width-1-1 uk-width-auto@s">
+            {{ form_widget(form.children.value) }}
+        </div>
+        <div class="uk-width-1-1 uk-width-auto@s">
+            {{ form_widget(form.children.currency) }}
+        </div>
+    </div>
+{%- endblock -%}
