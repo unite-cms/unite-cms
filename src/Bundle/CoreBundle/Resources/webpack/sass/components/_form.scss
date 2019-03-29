@@ -49,3 +49,16 @@
       padding: 3px 10px;
    }
 }
+
+.unite-core-form-field-money {
+   .uk-select:not([multiple]):not([size]) {
+      padding-right: 30px;
+   }
+
+   @media (min-width: $breakpoint-small) {
+      .uk-select:not([multiple]):not([size]) {
+         border-left: none;
+         padding-right: 30px;
+      }
+   }
+}

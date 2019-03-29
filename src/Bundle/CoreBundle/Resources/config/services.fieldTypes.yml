@@ -94,3 +94,8 @@ services:
     tags: [unite_cms.field_type]
     arguments:
       ['@router', '@doctrine.orm.entity_manager']
+
+  # Money Field Type
+  UniteCMS\CoreBundle\Field\Types\MoneyFieldType:
+    public: false
+    tags: [unite_cms.field_type]
