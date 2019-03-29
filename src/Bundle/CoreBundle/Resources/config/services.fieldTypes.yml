@@ -125,3 +125,8 @@ services:
   UniteCMS\CoreBundle\Field\Types\TokenFieldType:
     public: false
     tags: [unite_cms.field_type]
+
+  # Colour Picker Field Type
+  UniteCMS\CoreBundle\Field\Types\ColourPickerFieldType:
+    public: false
+    tags: [unite_cms.field_type]

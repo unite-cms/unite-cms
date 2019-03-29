@@ -21,6 +21,7 @@ import Link from "./vue/field/Link.vue";
 import Location from "./vue/field/Location.vue";
 import State from "./vue/field/State.vue";
 import AutoText from "./vue/field/AutoText.vue";
+import ColourPicker from "./vue/field/ColourPicker.vue";
 
 import AceDiff from 'ace-diff/dist/ace-diff.min';
 import 'ace-diff/dist/ace-diff.min.css';
@@ -60,6 +61,7 @@ Vue.customElement('unite-cms-core-link-field', Link);
 Vue.customElement('unite-cms-core-location-field', Location);
 Vue.customElement('unite-cms-core-state-field', State);
 Vue.customElement('unite-cms-core-auto-text-field', AutoText);
+Vue.customElement('unite-cms-colour-picker-field', ColourPicker);
 
 // Register views.
 Vue.customElement('unite-cms-core-view-table', TableView);
