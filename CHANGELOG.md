@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.8.1 (2019-03-30)
+- Fixed #505: A problem where images could not be removed
+- Fixed #475: A bug with multiple reference and reference_of fields on the same form
+- Fixed #287: Missing validation of fields in variant settings
+- Fixed #497: Variables in domain configuration now work as designed
+- Fixed #492: Now org and domains can be created from existing config files
+- Fixed #496: Fixed a problem with collection fields inside variant fields
+- Fixed #522: Auto text field could not generate values, if the form was not valid 
+- Fixed: Fixed a bug where sorting table rows to lower levels did not work
+- Improved #502: content_unique and content_uniquify now accept an array with ids to exclude (for example the current content itself) 
+- Improved #341: domain update visualization is now a config diff
+- Improved #520: GraphQL filter import now has an cast parameter to compare integer, float, boolean, date and datetime values
+- Improved: GraphQL filter now have a ILIKE operator to compare case insensitive values. Default table search now uses ILIKE
+- Improved #511: Show a better message to the user, if he_she does not have access to an (reference field)
+- Improved #540: Added a experimental feature to allow auto_text fields as variant and collection fields
+- Improved #539: Added more toolbar options (table, alginment, highlight) to wysiwyg field and fixed a bug with custom headings
+
+- Added #292: Added more CLI commands (domain config import, list domains)
+- Added #542: Added a new money field (that stores a float value and a currency)
+
+
 ## 0.8.0 (2019-01-24)
 - Added #429: Provide export options for content type data
 - Fixed #479: API Key Authenticator should check detailed token structure in supports method
