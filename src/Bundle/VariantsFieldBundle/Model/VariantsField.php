@@ -61,11 +61,11 @@ class VariantsField implements FieldableField
     private $settings;
 
     /**
-     * @var Variants $parent
+     * @var Variant $parent
      */
     private $parent;
 
-    public function __construct(Variants $parent, string $variantIdentifier, string $identifier, string $title, string $type, FieldableFieldSettings $settings)
+    public function __construct(Variant $parent, string $variantIdentifier, string $identifier, string $title, string $type, FieldableFieldSettings $settings)
     {
         $this->variantIdentifier = $variantIdentifier;
         $this->identifier = $identifier;
@@ -126,7 +126,7 @@ class VariantsField implements FieldableField
             $path .= $delimiter;
         }
 
-        return $path.$this->getVariantIdentifier().$delimiter.$this->getIdentifier();
+        return $path.$this->getIdentifier();
     }
 
     /**
