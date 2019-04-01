@@ -242,7 +242,8 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             $fields_per_key[$field->getIdentifier()] = $field;
         }
 
-        $context->setNode($context->getValue(), null, $context->getMetadata(), $context->getPropertyPath() . '[' . $field->getEntity()->getIdentifier() . '][' . $data['type'] . ']');
+        // variant fields have at least 3 identifier path elements (field, variant and variants).
+        $context->setNode($context->getValue(), null, $context->getMetadata(), 'data[' . $field->getEntity()->getIdentifierPath('][', false) . ']');
 
         foreach($data[$data['type']] as $field_key => $field_value) {
 
