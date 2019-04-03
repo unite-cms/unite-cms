@@ -5,12 +5,17 @@ namespace UniteCMS\CoreBundle\Command;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
@@ -33,16 +38,30 @@ class ImportDomainCommand extends Command
     private $domainConfigManager;
 
     /**
+     * @var RequestStack $requestStack
+     */
+    private $requestStack;
+
+    /**
+     * @var TokenStorageInterface $tokenStorage
+     */
+    private $tokenStorage;
+
+    /**
      * {@inheritdoc}
      */
     public function __construct(
         EntityManager $em,
         ValidatorInterface $validator,
-        DomainConfigManager $domainConfigManager
+        DomainConfigManager $domainConfigManager,
+        RequestStack $requestStack,
+        TokenStorageInterface $tokenStorage
     ) {
         $this->em = $em;
         $this->validator = $validator;
         $this->domainConfigManager = $domainConfigManager;
+        $this->requestStack = $requestStack;
+        $this->tokenStorage = $tokenStorage;
 
         parent::__construct();
     }
@@ -93,6 +112,15 @@ class ImportDomainCommand extends Command
         if(!$organization) {
             throw new MissingOrganizationException();
         }
+
+        // Some fields like the reference field needs an organization and also checks authorization.
+        // Here we inject a a request for this organization and fake authorization.
+        $request = new Request();
+        $request->attributes->set('organization', $organization->getIdentifier());
+        $admin = new User();
+        $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        $this->tokenStorage->setToken(new UsernamePasswordToken($admin, null, 'main', $admin->getRoles()));
+        $this->requestStack->push($request);
 
         $domain = $organization->getDomains()->filter(
             function (Domain $domain) use ($domain_identifier) {
