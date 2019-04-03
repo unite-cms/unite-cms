@@ -32,6 +32,12 @@ class DependencyInjectionTest extends KernelTestCase
         $accessor = new \ReflectionProperty($queryType, 'maximumQueryLimit');
         $accessor->setAccessible(true);
         $this->assertEquals(100, $accessor->getValue($queryType));
+
+        // Test default domain config parameters array
+        $domainConfigManager = $kernel->getContainer()->get('unite.cms.domain_config_manager');
+        $accessor = new \ReflectionProperty($domainConfigManager, 'domainConfigParameters');
+        $accessor->setAccessible(true);
+        $this->assertEquals([], $accessor->getValue($domainConfigManager));
     }
 
     public function testOverrideDomainConfigDirInjection() {
@@ -52,5 +58,16 @@ class DependencyInjectionTest extends KernelTestCase
         $accessor = new \ReflectionProperty($queryType, 'maximumQueryLimit');
         $accessor->setAccessible(true);
         $this->assertEquals(101, $accessor->getValue($queryType));
+
+        // Test default domain config parameters array
+        $domainConfigManager = $kernel->getContainer()->get('unite.cms.domain_config_manager');
+        $accessor = new \ReflectionProperty($domainConfigManager, 'domainConfigParameters');
+        $accessor->setAccessible(true);
+        $this->assertEquals([
+            'foo' => 'baa',
+            'foo1' => '["Foo", "Baa"]',
+            'foo2' => '{ "title": "Foo", "identifier": "baa" }',
+            'foo3' => 'test',
+        ], $accessor->getValue($domainConfigManager));
     }
 }

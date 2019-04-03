@@ -344,6 +344,58 @@ class DomainConfigManagerTest extends KernelTestCase
         $this->assertCount(1, $domain->getDomainMemberTypes());
     }
 
+    public function testParsingDomainWithDomainConfigParameters() {
+
+        $organization = new Organization();
+        $organization->setIdentifier('my_test_organization');
+        $domain = new Domain();
+        $domain
+            ->setOrganization($organization)
+            ->setIdentifier('my_test_domain');
+
+        $domainConfig = $this->exampleConfig;
+        $domainConfig = str_replace('My test Domain', '%title%', $domainConfig);
+        $domainConfig = str_replace('{
+            "view domain": "true",
+            "update domain": "true"
+        }', '%permissions%', $domainConfig);
+
+        // First create a domain config .json file in the correct location
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json', $domainConfig);
+
+        $accessor = new \ReflectionProperty($this->manager, 'domainConfigParameters');
+        $accessor->setAccessible(true);
+        $accessor->setValue($this->manager, [
+            'title' => 'Updated domain title',
+            'permissions' => '{
+                "view domain": "false",
+                "update domain": "false"
+            }'
+        ]);
+
+        // Then update domain from config.
+        $this->manager->loadConfig($domain, true);
+
+        // Make sure, that domain now reflects the config .json file
+        $this->assertEquals('Updated domain title', $domain->getTitle());
+        $this->assertEquals('my_test_domain', $domain->getIdentifier());
+        $this->assertEquals(["view domain" => "true", "update domain" => "true"], $domain->getPermissions());
+        $this->assertEquals($domainConfig, $domain->getConfig());
+
+        $this->assertCount(2, $domain->getContentTypes());
+
+        /**
+         * @var ContentType $ct
+         */
+        $ct = $domain->getContentTypes()->first();
+        $this->assertEquals('First Content Type', $ct->getTitle());
+        $this->assertEquals('first_ct', $ct->getIdentifier());
+        $this->assertEquals(new FieldablePreview("https://example.com", "query { type }"), $ct->getPreview());
+        $this->assertCount(3, $ct->getFields());
+        $this->assertCount(2, $domain->getSettingTypes());
+        $this->assertCount(1, $domain->getDomainMemberTypes());
+    }
+
     public function testDumpingDomainConfig() {
 
         $organization = new Organization();

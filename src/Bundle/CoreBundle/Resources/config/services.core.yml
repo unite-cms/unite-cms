@@ -36,7 +36,7 @@ services:
     autowire: true
     public: true
     arguments:
-      ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem', '@event_dispatcher']
+      ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem', '@event_dispatcher', []]
 
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
   unite.cms.fieldable_form_builder:
