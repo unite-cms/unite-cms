@@ -23,7 +23,9 @@ class ImportDomainCommandTest extends DatabaseAwareTestCase
         $application->add(new ImportDomainCommand(
             static::$container->get('doctrine.orm.default_entity_manager'),
             static::$container->get('validator'),
-            static::$container->get('unite.cms.domain_config_manager')
+            static::$container->get('unite.cms.domain_config_manager'),
+            static::$container->get('request_stack'),
+            static::$container->get('security.token_storage')
         ));
 
         $command = $application->find('unite:domain:import');
@@ -78,7 +80,9 @@ class ImportDomainCommandTest extends DatabaseAwareTestCase
         $application->add(new ImportDomainCommand(
             static::$container->get('doctrine.orm.default_entity_manager'),
             static::$container->get('validator'),
-            static::$container->get('unite.cms.domain_config_manager')
+            static::$container->get('unite.cms.domain_config_manager'),
+            static::$container->get('request_stack'),
+            static::$container->get('security.token_storage')
         ));
 
         $command = $application->find('unite:domain:import');
@@ -98,7 +102,27 @@ class ImportDomainCommandTest extends DatabaseAwareTestCase
 
         $filesystem = static::$container->get('filesystem');
         $manager = static::$container->get('unite.cms.domain_config_manager');
-        $filesystem->dumpFile($manager->getOrganizationConfigPath($organization) . 'domain2.json', '{ "title": "Domain 2", "identifier": "domain2" }');
+        $filesystem->dumpFile($manager->getOrganizationConfigPath($organization) . 'domain2.json', '{
+            "title": "Domain 2",
+            "identifier": "domain2",
+            "content_types": [
+                {
+                    "title": "CT with reference",
+                    "identifier": "ct_with_reference",
+                    "fields": [
+                        {
+                            "title": "Reference",
+                            "identifier": "reference",
+                            "type": "reference",
+                            "settings": {
+                                "domain": "domain2",
+                                "content_type": "ct_with_reference"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }');
 
 
         // Try to import an existing domain config without any updates.
