@@ -99,3 +99,8 @@ services:
   UniteCMS\CoreBundle\Field\Types\MoneyFieldType:
     public: false
     tags: [unite_cms.field_type]
+
+  # Language Field Type
+  UniteCMS\CoreBundle\Field\Types\LanguageFieldType:
+      public: false
+      tags: [unite_cms.field_type]
