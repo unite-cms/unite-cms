@@ -28,6 +28,11 @@ class DomainConfigManager
     private $domainConfigDir;
 
     /**
+     * @var array $domainConfigParameters
+     */
+    private $domainConfigParameters;
+
+    /**
      * @var DomainDefinitionParser $domainDefinitionParser
      */
     private $domainDefinitionParser;
@@ -42,9 +47,10 @@ class DomainConfigManager
      */
     private $dispatcher;
 
-    public function __construct(string $domainConfigDir, DomainDefinitionParser $definitionParser, Filesystem $filesystem, EventDispatcherInterface $dispatcher)
+    public function __construct(string $domainConfigDir, DomainDefinitionParser $definitionParser, Filesystem $filesystem, EventDispatcherInterface $dispatcher, array $domainConfigParameters)
     {
         $this->domainConfigDir = $domainConfigDir;
+        $this->domainConfigParameters = $domainConfigParameters;
         $this->domainDefinitionParser = $definitionParser;
         $this->filesystem = $filesystem;
         $this->dispatcher = $dispatcher;
@@ -114,6 +120,12 @@ class DomainConfigManager
      * @return Domain
      */
     public function parse(string $config) : Domain {
+
+        // Replace all defined config parameters via str_replace.
+        foreach($this->domainConfigParameters as $key => $value) {
+            $config = str_replace('%' . $key . '%', $value, $config);
+        }
+
         return $this->domainDefinitionParser->parse($config);
     }
 

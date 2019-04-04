@@ -31,6 +31,12 @@ class Configuration implements ConfigurationInterface
                 ->integerNode('maximum_query_limit')
                     ->defaultValue(100)
                     ->info('Set the maximum query limit of GraphQL API queries. A high value can easily lead to performance issues!')
+                ->end()
+                ->arrayNode('domain_config_parameters')
+                    ->useAttributeAsKey('name')
+                    ->prototype('scalar')->end()
+                    ->info('Allows to define an array of global parameters that can be used inside all domain configurations. (example configuration: foo: "Baa", usage in domain config: "%foo%".')
+                ->end()
             ->end();
         return $treeBuilder;
     }
