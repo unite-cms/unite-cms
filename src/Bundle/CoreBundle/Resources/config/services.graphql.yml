@@ -91,3 +91,19 @@ services:
 
   UniteCMS\CoreBundle\SchemaType\Types\Input\MoneyFieldInputType:
     tags: [unite_cms.graphql.schema_type]
+
+  UniteCMS\CoreBundle\SchemaType\Types\LocationFieldAdminLevelType:
+    tags: [unite_cms.graphql.schema_type]
+
+  UniteCMS\CoreBundle\SchemaType\Types\Input\LocationFieldAdminLevelInputType:
+    tags: [unite_cms.graphql.schema_type]
+
+  UniteCMS\CoreBundle\SchemaType\Types\LocationFieldType:
+    tags: [unite_cms.graphql.schema_type]
+    arguments:
+      ['@unite.cms.graphql.schema_type_manager']
+
+  UniteCMS\CoreBundle\SchemaType\Types\Input\LocationFieldInputType:
+    tags: [unite_cms.graphql.schema_type]
+    arguments:
+      ['@unite.cms.graphql.schema_type_manager']

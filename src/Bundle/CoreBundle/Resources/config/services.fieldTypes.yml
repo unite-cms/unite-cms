@@ -104,3 +104,8 @@ services:
   UniteCMS\CoreBundle\Field\Types\LanguageFieldType:
       public: false
       tags: [unite_cms.field_type]
+
+  # Location Field Type
+  UniteCMS\CoreBundle\Field\Types\LocationFieldType:
+    public: false
+    tags: [unite_cms.field_type]
