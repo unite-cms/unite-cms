@@ -254,3 +254,9 @@
         </div>
     </div>
 {%- endblock -%}
+
+{%- block unite_cms_core_location_widget -%}
+    <unite-cms-core-location-field
+            name="{{ form.vars.full_name }}"
+            value="{{ form.vars.value|json_encode }}"></unite-cms-core-location-field>
+{%- endblock -%}
