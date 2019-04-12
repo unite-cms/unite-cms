@@ -53,12 +53,15 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         ];
         $options['fields'] = [];
 
+        $prototype_data = [];
+
         // Add the definition of the all collection fields to the options.
         foreach ($collection->getFields() as $fieldDefinition) {
             $options['fields'][] = new FieldableFormField(
                 $this->fieldTypeManager->getFieldType($fieldDefinition->getType()),
                 $fieldDefinition
             );
+            $prototype_data[$fieldDefinition->getIdentifier()] = $this->fieldTypeManager->getFieldType($fieldDefinition->getType())->getDefaultValue($fieldDefinition);
         }
 
         // Configure the collection from type.
@@ -71,6 +74,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 'delete_empty' => true,
                 'error_bubbling' => false,
                 'prototype_name' => '__'.str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')).'Name__',
+                'prototype_data' => $prototype_data,
                 'attr' => [
                     'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
                     'min-rows' => $settings->min_rows ?? 0,
