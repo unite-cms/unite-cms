@@ -33,6 +33,7 @@ class StateSettings
      * @var StatePlace[]
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Type(type="array", message="workflow_invalid_place")
+     * @Assert\Valid()
      */
     private $places;
 
@@ -40,6 +41,7 @@ class StateSettings
      * @var StateTransition[]
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Type(type="array", message="workflow_invalid_transition")
+     * @Assert\Valid()
      */
     private $transitions;
 
