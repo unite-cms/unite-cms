@@ -3,13 +3,16 @@
 namespace UniteCMS\CoreBundle\Tests\SchemaType;
 
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeAlterationInterface;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeCompilerPass;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
+use UniteCMS\CoreBundle\Tests\Mocks\SchemaTypeAlterationMock;
 
 class SchemaTypeManagerTest extends ContainerAwareTestCase {
 
@@ -42,16 +45,24 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
             }
         };
 
+        $schemaTypeAlteration = new class implements SchemaTypeAlterationInterface {
+            public function supports(string $schemaTypeName): bool { return false; }
+            public function alter(Type $schemaType): void {}
+        };
+
         $this->assertNotContains($schemaType, static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypes());
         $this->assertNotContains($schemaTypeFactory, static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypeFactories());
+        $this->assertNotContains($schemaTypeAlteration, static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypeAlterations());
         $this->assertFalse(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('my_anonymous_type'));
 
         // Now register the schemaType an the schemaTypeFactory as service.
         static::$container->get('unite.cms.graphql.schema_type_manager')->registerSchemaType($schemaType);
         static::$container->get('unite.cms.graphql.schema_type_manager')->registerSchemaTypeFactory($schemaTypeFactory);
+        static::$container->get('unite.cms.graphql.schema_type_manager')->registerSchemaTypeAlteration($schemaTypeAlteration);
 
         $this->assertContains($schemaType, static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypes());
         $this->assertContains($schemaTypeFactory, static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypeFactories());
+        $this->assertContains($schemaTypeAlteration, static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaTypeAlterations());
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('my_anonymous_type'));
     }
 
@@ -64,6 +75,51 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
     public function testGetUnknownSchemaType() {
         $schemaTypeManager = new SchemaTypeManager();
         $schemaTypeManager->getSchemaType('any_unknown');
+    }
+
+    public function testAlterType() {
+
+        $schemaTypeManager = new SchemaTypeManager();
+
+        $schemaTypeManager->registerSchemaTypeAlteration(new SchemaTypeAlterationMock('Test1'));
+
+        $schemaTypeManager->registerSchemaType(new ObjectType([
+            'name' => 'Test1',
+            'fields' => function(){
+                return [ 'foo' => Type::string(), ];
+            },
+            'resolveField' => function($value, array $args, $context, ResolveInfo $info){
+                return 'YAY';
+            },
+        ]));
+        $schemaTypeManager->registerSchemaType(new ObjectType([
+            'name' => 'Test2',
+            'fields' => function(){
+                return [ 'foo' => Type::string(), ];
+            },
+            'resolveField' => function($value, array $args, $context, ResolveInfo $info){
+                return 'YAY';
+            },
+        ]));
+
+        $this->assertEquals([
+            'foo' => Type::string(),
+            'altered' => Type::string(),
+        ], $schemaTypeManager->getSchemaType('Test1')->config['fields']());
+
+        $this->assertEquals([
+            'foo' => Type::string(),
+        ], $schemaTypeManager->getSchemaType('Test2')->config['fields']());
+
+
+        // Functional test for Query schema manipulation.
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.manager'), new Domain());
+
+        // In config/packages/test/services.yaml we defined the alteration.
+        $this->assertArrayHasKey('altered', static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Query')->getFields());
+        $this->assertArrayNotHasKey('altered', static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Mutation')->getFields());
     }
 
     /**

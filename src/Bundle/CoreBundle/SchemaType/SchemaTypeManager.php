@@ -32,6 +32,11 @@ class SchemaTypeManager
     private $schemaTypeFactories = [];
 
     /**
+     * @var SchemaTypeAlterationInterface[]
+     */
+    private $schemaTypeAlterations = [];
+
+    /**
      * @var int $maximumNestingLevel
      */
     private $maximumNestingLevel;
@@ -67,6 +72,14 @@ class SchemaTypeManager
     public function getSchemaTypeFactories(): array
     {
         return $this->schemaTypeFactories;
+    }
+
+    /**
+     * @return SchemaTypeAlterationInterface[]
+     */
+    public function getSchemaTypeAlterations(): array
+    {
+        return $this->schemaTypeAlterations;
     }
 
     public function hasSchemaType($key): bool
@@ -161,6 +174,12 @@ class SchemaTypeManager
             $this->nonDetectableSchemaTypes[$schemaType->name] = $schemaType;
         }
 
+        foreach ($this->getSchemaTypeAlterations() as $schemaTypeAlteration) {
+            if($schemaTypeAlteration->supports($schemaType->name)) {
+                $schemaTypeAlteration->alter($schemaType);
+            }
+        }
+
         return $this;
     }
 
@@ -173,6 +192,20 @@ class SchemaTypeManager
     {
         if (!in_array($schemaTypeFactory, $this->schemaTypeFactories)) {
             $this->schemaTypeFactories[] = $schemaTypeFactory;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param SchemaTypeAlterationInterface $schemaTypeAlteration
+     *
+     * @return SchemaTypeManager
+     */
+    public function registerSchemaTypeAlteration(SchemaTypeAlterationInterface $schemaTypeAlteration)
+    {
+        if (!in_array($schemaTypeAlteration, $this->schemaTypeAlterations)) {
+            $this->schemaTypeAlterations[] = $schemaTypeAlteration;
         }
 
         return $this;
