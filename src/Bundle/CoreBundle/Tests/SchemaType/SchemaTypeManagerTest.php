@@ -12,6 +12,7 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeAlterationInterface;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeCompilerPass;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
+use UniteCMS\CoreBundle\Tests\Mocks\SchemaTypeAlterationMock;
 
 class SchemaTypeManagerTest extends ContainerAwareTestCase {
 
@@ -80,24 +81,7 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
 
         $schemaTypeManager = new SchemaTypeManager();
 
-        $alteration = new class implements SchemaTypeAlterationInterface {
-            public function supports(string $schemaTypeName): bool { return $schemaTypeName === 'Test1'; }
-            public function alter(Type $schemaType): void {
-                $originalFn = $schemaType->config['fields'];
-                $schemaType->config['fields'] = function() use ($originalFn) {
-                    return array_merge($originalFn(), ['altered' => Type::string()]);
-                };
-                $originalFn = $schemaType->config['resolveField'];
-                $schemaType->config['resolveField'] = function($value, array $args, $context, ResolveInfo $info) use ($originalFn) {
-                    if($info->fieldName === 'altered') {
-                        return 'Altered value';
-                    }
-                    return $originalFn($value, $args, $context, $info);
-                };
-            }
-        };
-
-        $schemaTypeManager->registerSchemaTypeAlteration($alteration);
+        $schemaTypeManager->registerSchemaTypeAlteration(new SchemaTypeAlterationMock('Test1'));
 
         $schemaTypeManager->registerSchemaType(new ObjectType([
             'name' => 'Test1',
@@ -127,6 +111,15 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
             'foo' => Type::string(),
         ], $schemaTypeManager->getSchemaType('Test2')->config['fields']());
 
+
+        // Functional test for Query schema manipulation.
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.manager'), new Domain());
+
+        // In config/packages/test/services.yaml we defined the alteration.
+        $this->assertArrayHasKey('altered', static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Query')->getFields());
+        $this->assertArrayNotHasKey('altered', static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Mutation')->getFields());
     }
 
     /**
