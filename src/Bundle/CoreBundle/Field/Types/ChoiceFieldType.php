@@ -44,10 +44,6 @@ class ChoiceFieldType extends FieldType
         $settings['settings'] = [
             'choices' => $field ? array_flip($field->getSettings()->choices) : []
         ];
-        $settings['assets'] = [
-            ['js' => 'main.js', 'package' => 'UniteCMSWysiwygFieldBundle'],
-            ['css' => 'main.css', 'package' => 'UniteCMSWysiwygFieldBundle'],
-        ];
     }
 
     /**
