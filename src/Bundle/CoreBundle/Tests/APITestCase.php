@@ -410,13 +410,10 @@ abstract class APITestCase extends ContainerAwareTestCase
         }
 
         // Fake a real HTTP request.
-        $request = new Request([], [], [
+        $request = Request::create('http://example.com/foo/baa/api', 'POST', [
             'organization' => $domain->getOrganization(),
             'domain' => $domain,
-        ], [], [], [
-            'REQUEST_METHOD' => 'POST',
-        ], json_encode(['query' => $query, 'variables' => $variables]));
-
+        ], [], [], [], json_encode(['query' => $query, 'variables' => $variables]));
 
         // Inject domain into unite.cms.manager.
         try {
@@ -437,6 +434,8 @@ abstract class APITestCase extends ContainerAwareTestCase
             $domainMember->getAccessor() instanceof ApiKey ? 'api': 'main',
             []
         ));
+
+        static::$container->get('router.request_context')->fromRequest($request);
 
         $response = $this->controller->indexAction(
             $domain->getOrganization(),

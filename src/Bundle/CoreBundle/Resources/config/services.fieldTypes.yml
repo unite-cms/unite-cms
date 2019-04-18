@@ -24,6 +24,7 @@ services:
   # A simple choices input field that allows to select multiple values
   UniteCMS\CoreBundle\Field\Types\ChoicesFieldType:
     public: false
+    arguments: ['@router.request_context']
     tags: [unite_cms.field_type]
 
   # A simple range input field
