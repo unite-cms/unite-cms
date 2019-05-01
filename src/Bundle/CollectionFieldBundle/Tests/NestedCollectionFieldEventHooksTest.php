@@ -16,6 +16,7 @@ use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\View\Types\Factories\TableViewConfigurationFactory;
 
 class NestedCollectionFieldEventHooksTest extends TestCase {
 
@@ -69,7 +70,8 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         $this->repository = $this->createMock(EntityRepository::class);
         $this->collectionFieldType = new CollectionFieldType(
             $this->createMock(CollectionFieldTypeFactory::class),
-            $fieldTypeManager
+            $fieldTypeManager,
+            new TableViewConfigurationFactory(100)
         );
 
         $this->contentTypeField = new ContentTypeField();
