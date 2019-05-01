@@ -52,7 +52,7 @@ class TableViewConfigurationTest extends TestCase
             ['textarea', new TextAreaFieldType()],
         ]));
 
-        $this->configuration = new TableViewConfiguration($this->view->getContentType(), $this->fieldTypeManager);
+        $this->configuration = new TableViewConfiguration($this->view->getContentType(), $this->fieldTypeManager, 80);
         $this->processor = new Processor();
     }
 
@@ -220,6 +220,15 @@ class TableViewConfigurationTest extends TestCase
     public function testInvalidRowsPerPageSettingsKeyFloat()
     {
         $this->processor->processConfiguration($this->configuration, ['settings' => ['rows_per_page' => 20.5]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Invalid rows_per_page configuration - must be within max_query_limit of 80
+     */
+    public function testInvalidRowsPerPageSettingsKeyMaxQueryLimit()
+    {
+        $this->processor->processConfiguration($this->configuration, ['settings' => ['rows_per_page' => 90]]);
     }
 
     /**

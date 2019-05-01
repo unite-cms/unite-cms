@@ -35,8 +35,12 @@ class UniteCMSCoreExtension extends Extension
         $container->getDefinition('unite.cms.graphql.schema_type_manager')->setArgument(0, $config['maximum_nesting_level']);
         $container->getDefinition('UniteCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType')->setArgument(0, $config['maximum_nesting_level']);
 
-        // Set maximum query limit as fifth argument to query type and maximum reference of field type.
+        // Set maximum query limit as sixth argument to query type and maximum reference of field type, and
+        // as first argument to table/tree/grid view config factory classes.
         $container->getDefinition('UniteCMS\CoreBundle\SchemaType\Types\QueryType')->setArgument(5, $config['maximum_query_limit']);
         $container->getDefinition('UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType')->setArgument(5, $config['maximum_query_limit']);
+        $container->getDefinition('UniteCMS\CoreBundle\View\Types\Factories\GridViewConfigurationFactory')->setArgument(0, $config['maximum_query_limit']);
+        $container->getDefinition('UniteCMS\CoreBundle\View\Types\Factories\TableViewConfigurationFactory')->setArgument(0, $config['maximum_query_limit']);
+        $container->getDefinition('UniteCMS\CoreBundle\View\Types\Factories\TreeViewConfigurationFactory')->setArgument(0, $config['maximum_query_limit']);
     }
 }

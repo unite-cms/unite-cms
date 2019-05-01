@@ -36,10 +36,16 @@ class TableViewConfiguration implements ConfigurationInterface
      */
     protected $fieldTypeManager;
 
-    public function __construct(Fieldable $fieldable, FieldTypeManager $fieldTypeManager)
+    /**
+     * @var int $maxQueryLimit
+     */
+    protected $maxQueryLimit;
+
+    public function __construct(Fieldable $fieldable, FieldTypeManager $fieldTypeManager, int $maxQueryLimit = 100)
     {
         $this->fieldable = $fieldable;
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->maxQueryLimit = $maxQueryLimit;
     }
 
     /**
@@ -128,6 +134,14 @@ class TableViewConfiguration implements ConfigurationInterface
                     function ($v) {
                         if (!is_int($v)) {
                             $exception = new InvalidConfigurationException('Invalid rows_per_page configuration - must be an integer');
+                            $exception->setPath('rows_per_page');
+                            throw $exception;
+                        }
+
+                        if ($v > $this->maxQueryLimit) {
+                            $exception = new InvalidConfigurationException(
+                                "Invalid rows_per_page configuration - must be within max_query_limit of {$this->maxQueryLimit}"
+                            );
                             $exception->setPath('rows_per_page');
                             throw $exception;
                         }

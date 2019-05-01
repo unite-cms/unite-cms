@@ -11,6 +11,7 @@ use UniteCMS\CoreBundle\Exception\DeprecationException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Validator\Constraints\Warning;
+use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 use UniteCMS\CoreBundle\View\ViewSettings;
 use UniteCMS\CoreBundle\View\ViewType;
 
@@ -24,13 +25,19 @@ class TableViewType extends ViewType
      */
     protected $fieldTypeManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager)
+    /**
+     * @var ViewConfigurationFactoryInterface $tableViewConfigurationFactory;
+     */
+    protected $tableViewConfigurationFactory;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, ViewConfigurationFactoryInterface $tableViewConfigurationFactory)
     {
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
     }
 
     protected function createConfig(ContentType $contentType) : ConfigurationInterface {
-        return new TableViewConfiguration($contentType, $this->fieldTypeManager);
+        return $this->tableViewConfigurationFactory->create($contentType, $this->fieldTypeManager);
     }
 
     /**
