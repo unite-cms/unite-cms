@@ -139,13 +139,14 @@ class StorageService
             }
         }
 
-        $command = $s3Client->getCommand(
-            'PutObject',
-            [
-                'Bucket' => $bucket_settings['bucket'],
-                'Key' => $filePath,
-            ]
-        );
+        $putObjectParams = [
+            'Bucket' => $bucket_settings['bucket'],
+            'Key' => $filePath,
+        ];
+        if (isset($bucket_settings['acl'])) {
+            $putObjectParams['ACL'] = $bucket_settings['acl'];
+        }
+        $command = $s3Client->getCommand('PutObject', $putObjectParams);
 
         return new PreSignedUrl(
             (string)$s3Client->createPresignedRequest($command, '+5 minutes')

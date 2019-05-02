@@ -162,7 +162,7 @@ class FileFieldType extends FieldType
         // Validate allowed bucket configuration.
         if($context->getViolations()->count() == 0) {
             foreach($settings->bucket as $field => $value) {
-                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region'])) {
+                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region', 'acl'])) {
                     $context->buildViolation('additional_data')->atPath('bucket.' . $field)->addViolation();
                 }
             }

@@ -48,15 +48,11 @@ class FileFieldTypeTest extends FieldTypeTestCase
         );
 
         $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(4, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.key', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('settings.bucket.bucket', $errors->get(1)->getPropertyPath());
         $this->assertEquals('required', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.secret', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(2)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.bucket', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(3)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -67,6 +63,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'key' => 'XXX',
                         'secret' => 'XXX',
                         'bucket' => 'foo',
+                        'acl' => 'public-read',
                     ],
                 ]
             )
@@ -87,6 +84,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'secret' => 'XXX',
                         'bucket' => 'foo',
                         "path" => "/any",
+                        'acl' => 'public-read',
                     ],
                 ]
             )
@@ -106,6 +104,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'secret' => 'XXX',
                         'bucket' => 'foo',
                         "region" => "east",
+                        'acl' => 'public-read',
                     ],
                 ]
             )
@@ -126,6 +125,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'bucket' => 'foo',
                         "region" => "east",
                         "path" => "/any",
+                        'acl' => 'public-read',
                         'foo' => 'baa',
                     ],
                 ]
