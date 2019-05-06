@@ -8,7 +8,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Exception\DeprecationException;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Validator\Constraints\Warning;
 use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
@@ -19,25 +18,18 @@ class TableViewType extends ViewType
 {
     const TYPE = "table";
     const TEMPLATE = "UniteCMSCoreBundle:Views:Table/index.html.twig";
-
     /**
-     * @var FieldTypeManager $fieldTypeManager
+     * @var ViewConfigurationFactoryInterface $viewConfigurationFactory;
      */
-    protected $fieldTypeManager;
+    protected $viewConfigurationFactory;
 
-    /**
-     * @var ViewConfigurationFactoryInterface $tableViewConfigurationFactory;
-     */
-    protected $tableViewConfigurationFactory;
-
-    public function __construct(FieldTypeManager $fieldTypeManager, ViewConfigurationFactoryInterface $tableViewConfigurationFactory)
+    public function __construct(ViewConfigurationFactoryInterface $viewConfigurationFactory)
     {
-        $this->fieldTypeManager = $fieldTypeManager;
-        $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
+        $this->viewConfigurationFactory = $viewConfigurationFactory;
     }
 
-    protected function createConfig(ContentType $contentType) : ConfigurationInterface {
-        return $this->tableViewConfigurationFactory->create($contentType, $this->fieldTypeManager);
+    protected function createConfig(ContentType $contentType): ConfigurationInterface {
+        return $this->viewConfigurationFactory->create($contentType);
     }
 
     /**

@@ -472,7 +472,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             foreach($settings['settings']['on'] as $v => $fields) {
                 $processor = new Processor();
                 $variant = new Variant(null, $variants->getFieldsForVariant($v), $v, $v, $variants);
-                $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($variant, $fieldTypeManager), ['settings' => ['fields' => $fields]]);
+                $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($variant), ['settings' => ['fields' => $fields]]);
                 $settings['settings']['on'][$v] = $config['fields'];
                 $settings['settings']['variant_schema_types'][$v] = VariantFactory::schemaTypeNameForVariant($variant);
 

@@ -6,21 +6,21 @@ services:
     tags: [unite_cms.view_type]
     public: false
     arguments:
-      ['@unite.cms.field_type_manager', '@unite.cms.field_type.config_factory.table_view']
+      ['@unite.cms.field_type.config_factory.table_view']
 
   # A grid view type that renders all content documents in a 2d grid.
   UniteCMS\CoreBundle\View\Types\GridViewType:
     tags: [unite_cms.view_type]
     public: false
     arguments:
-      ['@unite.cms.field_type_manager', '@unite.cms.field_type.config_factory.grid_view']
+      ['@unite.cms.field_type.config_factory.grid_view']
 
   # A tree view type that renders content as a nested tree.
   UniteCMS\CoreBundle\View\Types\TreeViewType:
     tags: [unite_cms.view_type]
     public: false
     arguments:
-      ['@unite.cms.field_type_manager', '@unite.cms.field_type.config_factory.tree_view']
+      ['@unite.cms.field_type.config_factory.tree_view']
 
   # @deprecated
   # A table view type that allows the user to sort rows via drag and drop.
@@ -28,25 +28,25 @@ services:
     tags: [unite_cms.view_type]
     public: false
     arguments:
-      ['@unite.cms.field_type_manager', '@unite.cms.field_type.config_factory.table_view']
+      ['@unite.cms.field_type.config_factory.table_view']
 
   # Grid view configuration object factory
   UniteCMS\CoreBundle\View\Types\Factories\GridViewConfigurationFactory:
     public: false
     tags: [unite_cms.field_type.config_factory]
-    arguments: [100]
+    arguments: ['@unite.cms.field_type_manager', 100]
 
   # Table view configuration object factory
   UniteCMS\CoreBundle\View\Types\Factories\TableViewConfigurationFactory:
     public: false
     tags: [unite_cms.field_type.config_factory]
-    arguments: [100]
+    arguments: ['@unite.cms.field_type_manager', 100]
 
   # Tree view configuration object factory
   UniteCMS\CoreBundle\View\Types\Factories\TreeViewConfigurationFactory:
     public: false
     tags: [unite_cms.field_type.config_factory]
-    arguments: [100]
+    arguments: ['@unite.cms.field_type_manager', 100]
 
   unite.cms.field_type.config_factory.grid_view:
     alias: UniteCMS\CoreBundle\View\Types\Factories\GridViewConfigurationFactory

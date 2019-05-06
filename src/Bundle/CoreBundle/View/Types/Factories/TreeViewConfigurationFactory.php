@@ -10,19 +10,20 @@ use UniteCMS\CoreBundle\View\Types\TreeViewConfiguration;
 class TreeViewConfigurationFactory implements ViewConfigurationFactoryInterface
 {
     protected $maxQueryLimit;
+    protected $fieldTypeManager;
 
-    public function __construct(int $maxQueryLimit)
+    public function __construct(FieldTypeManager $fieldTypeManager, int $maxQueryLimit)
     {
+        $this->fieldTypeManager = $fieldTypeManager;
         $this->maxQueryLimit = $maxQueryLimit;
     }
 
     /**
      * @param Fieldable $fieldable
-     * @param FieldTypeManager $fieldTypeManager
      * @return TreeViewConfiguration
      */
-    public function create(Fieldable $fieldable, FieldTypeManager $fieldTypeManager): ConfigurationInterface
+    public function create(Fieldable $fieldable): ConfigurationInterface
     {
-        return new TreeViewConfiguration($fieldable, $fieldTypeManager, $this->maxQueryLimit);
+        return new TreeViewConfiguration($fieldable, $this->fieldTypeManager, $this->maxQueryLimit);
     }
 }

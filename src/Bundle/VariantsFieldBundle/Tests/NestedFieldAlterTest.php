@@ -31,7 +31,7 @@ class NestedFieldAlterTest extends TestCase
             new VariantsFieldType(
                 $manager,
                 $this->createMock(VariantFactory::class),
-                new TableViewConfigurationFactory(100)
+                new TableViewConfigurationFactory($manager, 100)
             )
         );
         $manager->registerFieldType(new class extends FieldType {

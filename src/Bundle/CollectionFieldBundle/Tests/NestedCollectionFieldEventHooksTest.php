@@ -71,7 +71,7 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         $this->collectionFieldType = new CollectionFieldType(
             $this->createMock(CollectionFieldTypeFactory::class),
             $fieldTypeManager,
-            new TableViewConfigurationFactory(100)
+            new TableViewConfigurationFactory($fieldTypeManager, 100)
         );
 
         $this->contentTypeField = new ContentTypeField();

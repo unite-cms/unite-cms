@@ -410,7 +410,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             // normalize settings for nested fields.
             if(!empty($settings['settings']['fields'])) {
                 $processor = new Processor();
-                $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create(self::getNestableFieldable($field), $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
+                $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create(self::getNestableFieldable($field)), ['settings' => ['fields' => $settings['settings']['fields']]]);
                 $settings['settings']['fields'] = $config['fields'];
 
                 // Template will only include assets from root fields, so we need to add any child templates to the root field.

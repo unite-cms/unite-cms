@@ -10,19 +10,20 @@ use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
 class TableViewConfigurationFactory implements ViewConfigurationFactoryInterface
 {
     protected $maxQueryLimit;
+    protected $fieldTypeManager;
 
-    public function __construct(int $maxQueryLimit)
+    public function __construct(FieldTypeManager $fieldTypeManager, int $maxQueryLimit)
     {
+        $this->fieldTypeManager = $fieldTypeManager;
         $this->maxQueryLimit = $maxQueryLimit;
     }
 
     /**
      * @param Fieldable $fieldable
-     * @param FieldTypeManager $fieldTypeManager
      * @return TableViewConfiguration
      */
-    public function create(Fieldable $fieldable, FieldTypeManager $fieldTypeManager): ConfigurationInterface
+    public function create(Fieldable $fieldable): ConfigurationInterface
     {
-        return new TableViewConfiguration($fieldable, $fieldTypeManager, $this->maxQueryLimit);
+        return new TableViewConfiguration($fieldable, $this->fieldTypeManager, $this->maxQueryLimit);
     }
 }

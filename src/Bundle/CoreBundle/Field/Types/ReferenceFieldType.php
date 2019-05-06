@@ -335,7 +335,7 @@ class ReferenceFieldType extends FieldType
                 $this->referenceResolver->resolveDomain($field->getSettings()->domain),
                 $field->getSettings()->content_type);
             $processor = new Processor();
-            $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($contentType, $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
+            $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($contentType), ['settings' => ['fields' => $settings['settings']['fields']]]);
             $settings['settings']['fields'] = $config['fields'];
 
             // Template will only include assets from root fields, so we need to add any child templates to the root field.
