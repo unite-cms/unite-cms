@@ -31,7 +31,7 @@ class NestedFieldAlterTest extends TestCase
             new CollectionFieldType(
                 $this->createMock(CollectionFieldTypeFactory::class),
                 $manager,
-                new TableViewConfigurationFactory(100)
+                new TableViewConfigurationFactory($manager, 100)
             )
         );
         $manager->registerFieldType(new class extends FieldType {

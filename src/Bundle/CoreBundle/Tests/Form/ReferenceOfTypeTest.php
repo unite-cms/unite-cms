@@ -125,7 +125,7 @@ class ReferenceOfTypeTest extends TestCase
         $viewTypeManager = $this->createMock(ViewTypeManager::class);
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
         $viewTypeManager->expects($this->any())->method('getViewType')->willReturn(
-            new TableViewType($fieldTypeManager, new TableViewConfigurationFactory($fieldTypeManager, 100))
+            new TableViewType(new TableViewConfigurationFactory($fieldTypeManager, 100))
         );
         $viewParameterBag = new ViewParameterBag();
         $viewTypeManager->expects($this->any())->method('getTemplateRenderParameters')->willReturn($viewParameterBag);
@@ -147,7 +147,7 @@ class ReferenceOfTypeTest extends TestCase
         $viewTypeManager = $this->createMock(ViewTypeManager::class);
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
         $viewTypeManager->expects($this->any())->method('getViewType')->willReturn(
-            new TableViewType($fieldTypeManager, new TableViewConfigurationFactory($fieldTypeManager, 100))
+            new TableViewType(new TableViewConfigurationFactory($fieldTypeManager, 100))
         );
         $viewParameterBag = new ViewParameterBag();
         $viewTypeManager->expects($this->any())->method('getTemplateRenderParameters')->willReturn($viewParameterBag);
