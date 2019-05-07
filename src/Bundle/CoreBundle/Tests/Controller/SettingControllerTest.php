@@ -197,7 +197,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $error_text = static::$container->get('translator')->trans('missing_reference_definition', [], 'validators');
+        $error_text = static::$container->get('translator')->trans('required', [], 'validators');
         $alert = $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p');
         $this->assertCount(1, $alert);
         $this->assertEquals($error_text, $alert->text());

@@ -268,13 +268,13 @@ class ReferenceFieldType extends FieldType
         }
 
         // Only validate available data.
-        if (empty($data)) {
+        if (empty($data) && !$field->getSettings()->not_empty) {
             return;
         }
 
         // Make sure, that all required fields are set.
         if (empty($data['domain']) || empty($data['content_type']) || empty($data['content'])) {
-            $context->buildViolation('missing_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
+            $context->buildViolation('required')->atPath('['.$field->getIdentifier().']')->addViolation();
         } // Try to resolve the data to check if the current user is allowed to access it.
         else {
             try {
