@@ -10,8 +10,10 @@ use Knp\Component\Pager\Pagination\AbstractPagination;
 use Knp\Component\Pager\Paginator;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -155,7 +157,7 @@ class QueryType extends AbstractType
         // Append Domain Member types.
         foreach ($this->uniteCMSManager->getDomain()->getDomainMemberTypes() as $domainMemberType) {
             $key = IdentifierNormalizer::graphQLType($domainMemberType, '');
-            $fields['get' . $key] = [
+            $fields['get' . $key . 'Member'] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'Member', $this->uniteCMSManager->getDomain()),
                 'args' => [
                     'id' => [
@@ -165,7 +167,7 @@ class QueryType extends AbstractType
                 ],
             ];
 
-            $fields['find' . $key] = [
+            $fields['find' . $key . 'Member'] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'MemberResult', $this->uniteCMSManager->getDomain()),
                 'args' => [
                     'limit' => [
@@ -225,15 +227,31 @@ class QueryType extends AbstractType
 
             $id = $args['id'];
 
-            if(!$content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id)) {
-                throw new UserError("Content with id '$id' was not found.");
+            // Resolve get domainMember
+            if(substr($info->fieldName, -strlen('Member')) === 'Member' && $info->fieldName !== 'getMember') {
+                if(!$domainMember = $this->entityManager->getRepository('UniteCMSCoreBundle:DomainMember')->find($id)) {
+                    throw new UserError("DomainMember with id '$id' was not found.");
+                }
+
+                if ($domainMember && !$this->authorizationChecker->isGranted(DomainMemberVoter::VIEW, $domainMember)) {
+                    throw new UserError("You are not allowed to view domain member with id '$id'.");
+                }
+
+                return $domainMember;
             }
 
-            if ($content && !$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
-                throw new UserError("You are not allowed to view content with id '$id'.");
-            }
+            // Resolve get content
+            else {
+                if(!$content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id)) {
+                    throw new UserError("Content with id '$id' was not found.");
+                }
 
-            return $content;
+                if ($content && !$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
+                    throw new UserError("You are not allowed to view content with id '$id'.");
+                }
+
+                return $content;
+            }
         }
 
         // Resolve single setting type.
@@ -255,9 +273,19 @@ class QueryType extends AbstractType
 
         // Resolve list content type.
         elseif(substr($info->fieldName, 0, 4) == 'find' && strlen($info->fieldName) > 4) {
+
             $identifier = IdentifierNormalizer::fromGraphQLFieldName($info->fieldName);
             $args['types'] = [$identifier];
-            return $this->resolveFindContent(IdentifierNormalizer::graphQLType($identifier, 'ContentResult'),  $value, $args, $context, $info);
+
+            // Resolve get domainMember
+            if(substr($info->fieldName, -strlen('Member')) === 'Member' && $info->fieldName !== 'findMember') {
+                return $this->resolveFindDomainMember(IdentifierNormalizer::graphQLType($identifier, 'MemberResult'),  $value, $args, $context, $info);
+            }
+
+            // Resolve get content type
+            else {
+                return $this->resolveFindContent(IdentifierNormalizer::graphQLType($identifier, 'ContentResult'),  $value, $args, $context, $info);
+            }
         }
 
         // Resolve generic find type
@@ -354,6 +382,98 @@ class QueryType extends AbstractType
         if($args['deleted']) {
             // We need to clear content cache, so deleted entities will not be shown on next turn.
             $this->entityManager->clear(Content::class);
+            $this->entityManager->getFilters()->enable('gedmo_softdeleteable');
+        }
+
+        return $pagination;
+    }
+
+    /**
+     * Resolve the domain member results.
+     *
+     * @param $resultType
+     * @param $value
+     * @param array $args
+     * @param $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     *
+     * @return mixed
+     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
+     * @throws \Doctrine\ORM\Query\QueryException
+     */
+    private function resolveFindDomainMember($resultType, $value, array $args, $context, ResolveInfo $info) : AbstractPagination
+    {
+        $args['types'] = $args['types'] ?? [];
+        $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
+        $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
+        $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
+        $args['deleted'] = $args['deleted'] ?? false;
+
+        // Get all requested contentTypes, the user can access.
+        $domainMemberTypes = [];
+        foreach($this->entityManager->getRepository('UniteCMSCoreBundle:DomainMemberType')->findBy([
+            'identifier' => $args['types'],
+            'domain' => $this->uniteCMSManager->getDomain(),
+        ]) as $domainMemberType) {
+            if ($this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $domainMemberType)) {
+                $domainMemberTypes[] = $domainMemberType;
+            }
+        }
+
+
+        // Get content from all domainMemberTypes
+        $domainMemberEntityFields = $this->entityManager->getClassMetadata(DomainMember::class)->getFieldNames();
+        $contentQuery = $this->entityManager->getRepository(
+            'UniteCMSCoreBundle:DomainMember'
+        )->createQueryBuilder('m')
+            ->select('m')
+            ->where('m.domainMemberType IN (:domainMemberTypes)')
+            ->setParameter(':domainMemberTypes', $domainMemberTypes);
+
+        // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
+        if (!empty($args['sort'])) {
+            foreach ($args['sort'] as $sort) {
+
+                $key = $sort['field'];
+                $order = $sort['order'];
+
+                // if we sort by a content field.
+                if (in_array($key, $domainMemberEntityFields)) {
+                    $contentQuery->addOrderBy('m.'.$key, $order);
+
+                    // if we sort by a nested content data field.
+                } else {
+                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                }
+            }
+        }
+
+        // Adding where filter to the query.
+        if (!empty($args['filter'])) {
+
+
+            // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
+
+            // TODO: Replace field names with nested field selectors.
+
+            $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $domainMemberEntityFields, 'm');
+            $contentQuery->andWhere($a->getFilter());
+            foreach($a->getParameters() as $parameter => $value) {
+                $contentQuery->setParameter($parameter, $value);
+            }
+        }
+
+        // Also show deleted content.
+        if($args['deleted']) {
+            $this->entityManager->getFilters()->disable('gedmo_softdeleteable');
+        }
+
+        // Get all content in one request for all contentTypes.
+        $pagination = $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], ['alias' => $resultType]);
+
+        if($args['deleted']) {
+            // We need to clear content cache, so deleted entities will not be shown on next turn.
+            $this->entityManager->clear(DomainMember::class);
             $this->entityManager->getFilters()->enable('gedmo_softdeleteable');
         }
 
