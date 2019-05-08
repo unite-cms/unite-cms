@@ -357,7 +357,7 @@ class DomainMemberController extends AbstractController
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
      * @ParamConverter("invite")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::UPDATE'), member)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::CREATE'), memberType)")
      *
      * @param Organization $organization
      * @param Domain $domain

@@ -119,7 +119,14 @@ class DomainDefinitionParserTest extends DatabaseAwareTestCase
                     "title": "Any",
                     "identifier": "any",
                     "domain_member_label": "Any",
-                    "fields": ["@text_field"]
+                    "fields": ["@text_field"],
+                    "permissions": {
+                        "view member": "false",
+                        "list member": "false",
+                        "create member": "false",
+                        "update member": "false",
+                        "delete member": "false"
+                    }
                 }
             ]
         }';
@@ -249,7 +256,14 @@ class DomainDefinitionParserTest extends DatabaseAwareTestCase
                             "identifier": "title",
                             "type": "text"
                         }
-                    ]
+                    ],
+                    "permissions": {
+                        "view member": "false",
+                        "list member": "false",
+                        "create member": "false",
+                        "update member": "false",
+                        "delete member": "false"
+                    }
                 }
             ],
             "permissions": {
