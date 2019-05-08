@@ -17,7 +17,7 @@ class ContentResultInterface extends InterfaceType
             [
                 'fields' => function () use ($schemaTypeManager) {
                     return [
-                        'result' => Type::listOf($schemaTypeManager->getSchemaType('ContentInterface')),
+                        'result' => Type::listOf($schemaTypeManager->getSchemaType('FieldableContentInterface')),
                         'total' => Type::int(),
                         'page' => Type::int(),
                     ];

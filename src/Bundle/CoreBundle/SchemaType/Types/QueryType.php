@@ -152,6 +152,49 @@ class QueryType extends AbstractType
             ];
         }
 
+        // Append Domain Member types.
+        foreach ($this->uniteCMSManager->getDomain()->getDomainMemberTypes() as $domainMemberType) {
+            $key = IdentifierNormalizer::graphQLType($domainMemberType, '');
+            $fields['get' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'Member', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'The id of the domain member item to get.',
+                    ],
+                ],
+            ];
+
+            $fields['find' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'MemberResult', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'limit' => [
+                        'type' => Type::int(),
+                        'description' => 'Set maximal number of domain member items to return.',
+                        'defaultValue' => 20,
+                    ],
+                    'page' => [
+                        'type' => Type::int(),
+                        'description' => 'Set the pagination page to get the domain member from.',
+                        'defaultValue' => 1,
+                    ],
+                    'sort' => [
+                        'type' => Type::listOf($this->schemaTypeManager->getSchemaType('SortInput')),
+                        'description' => 'Set one or many fields to sort by.',
+                    ],
+                    'filter' => [
+                        'type' => $this->schemaTypeManager->getSchemaType('FilterInput'),
+                        'description' => 'Set one optional filter condition.',
+                    ],
+                    'deleted' => [
+                        'type' => Type::boolean(),
+                        'description' => 'Also show deleted entries. Only user who can also update domain members can view deleted domain members.',
+                        'defaultValue' => false,
+                    ],
+                ],
+            ];
+        }
+
         // Append Setting types.
         foreach ($this->uniteCMSManager->getDomain()->getSettingTypes() as $settingType) {
             $key = IdentifierNormalizer::graphQLType($settingType);

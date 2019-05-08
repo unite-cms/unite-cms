@@ -14,12 +14,16 @@ use Knp\Component\Pager\Pagination\AbstractPagination;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
-class ContentResultType extends AbstractType
+class FieldableContentResultType extends AbstractType
 {
 
     /**
@@ -38,9 +42,9 @@ class ContentResultType extends AbstractType
     private $domain;
 
     /**
-     * @var ContentType $contentType
+     * @var Fieldable $fieldable
      */
-    private $contentType;
+    private $fieldable;
 
     /**
      * @var string $contentSchemaType
@@ -57,14 +61,14 @@ class ContentResultType extends AbstractType
         AuthorizationChecker $authorizationChecker,
         UniteCMSManager $uniteCMSManager = null,
         Domain $domain = null,
-        ContentType $contentType = null,
-        $contentSchemaType = 'ContentInterface',
+        Fieldable $fieldable = null,
+        $contentSchemaType = 'FieldableContentInterface',
         $nestingLevel = 0
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->domain = $domain ? $domain : $uniteCMSManager->getDomain();
-        $this->contentType = $contentType;
+        $this->fieldable = $fieldable;
         $this->contentSchemaType = $contentSchemaType;
         $this->nestingLevel = $nestingLevel;
         parent::__construct();
@@ -93,11 +97,25 @@ class ContentResultType extends AbstractType
         ];
 
         // Create or get permissions type for this content type.
-        if($this->contentType) {
-            $permissionsTypeName = IdentifierNormalizer::graphQLType($this->contentType, 'ContentResultPermissions');
+        if($this->fieldable) {
+
+            $permissionsTypeName = null;
+            $bundlePermissions = [];
+
+            if($this->fieldable instanceof ContentType) {
+                $permissionsTypeName = 'ContentResultPermissions';
+                $bundlePermissions = ContentVoter::BUNDLE_PERMISSIONS;
+            }
+
+            else if($this->fieldable instanceof DomainMemberType) {
+                $permissionsTypeName = 'MemberResultPermissions';
+                $bundlePermissions = DomainMemberVoter::BUNDLE_PERMISSIONS;
+            }
+
+            $permissionsTypeName = IdentifierNormalizer::graphQLType($this->fieldable, $permissionsTypeName);
             if (!$this->schemaTypeManager->hasSchemaType($permissionsTypeName)) {
                 $this->schemaTypeManager->registerSchemaType(
-                    new PermissionsType(ContentVoter::BUNDLE_PERMISSIONS, $permissionsTypeName)
+                    new PermissionsType($bundlePermissions, $permissionsTypeName)
                 );
             }
 
@@ -120,9 +138,21 @@ class ContentResultType extends AbstractType
      */
     protected function resolveField($value, array $args, $context, ResolveInfo $info)
     {
-
         if (!$value instanceof AbstractPagination) {
             throw new \InvalidArgumentException('Value must be instance of '.AbstractPagination::class.'.');
+        }
+
+        $bundlePermissions = [];
+        $viewPermission = null;
+
+        if($this->fieldable instanceof ContentType) {
+            $viewPermission = ContentVoter::VIEW;
+            $bundlePermissions = ContentVoter::BUNDLE_PERMISSIONS;
+        }
+
+        else if($this->fieldable instanceof DomainMemberType) {
+            $viewPermission = DomainMemberVoter::VIEW;
+            $bundlePermissions = DomainMemberVoter::BUNDLE_PERMISSIONS;
         }
 
         switch ($info->fieldName) {
@@ -130,14 +160,14 @@ class ContentResultType extends AbstractType
                 $items = [];
 
                 /**
-                 * @var \UniteCMS\CoreBundle\Entity\Content $item
+                 * @var FieldableContent $item
                  */
                 foreach ($value->getItems() as $item) {
-                    if ($this->authorizationChecker->isGranted(ContentVoter::VIEW, $item)) {
+                    if ($this->authorizationChecker->isGranted($viewPermission, $item)) {
                         $items[] = $item;
 
                         // Create content schema type for current domain.
-                        $type = IdentifierNormalizer::graphQLType($item->getContentType());
+                        $type = IdentifierNormalizer::graphQLType($item->getEntity());
                         $this->schemaTypeManager->getSchemaType($type, $this->domain);
                     }
                 }
@@ -149,7 +179,7 @@ class ContentResultType extends AbstractType
                 // Reduce the total number of items by the number of items we don't have access to. This will only be
                 // correct, if we have not more than $limit items, but it is better than nothing.
                 foreach ($value->getItems() as $item) {
-                    if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $item)) {
+                    if (!$this->authorizationChecker->isGranted($viewPermission, $item)) {
                         $total--;
                     }
                 }
@@ -161,11 +191,11 @@ class ContentResultType extends AbstractType
             case '_permissions':
                 $permissions = [];
 
-                if($this->contentType) {
-                    foreach (ContentVoter::BUNDLE_PERMISSIONS as $permission) {
+                if($this->fieldable) {
+                    foreach ($bundlePermissions as $permission) {
                         $permissions[$permission] = $this->authorizationChecker->isGranted(
                             $permission,
-                            $this->contentType
+                            $this->fieldable
                         );
                     }
                 }

@@ -20,7 +20,7 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
 
         // Check that core schemaTypes and factories are already registered via compiler pass.
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('Query'));
-        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResult'));
+        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FieldableContentResult'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentInterface'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResultInterface'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResult'));

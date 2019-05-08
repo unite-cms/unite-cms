@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\SchemaType;
 
 use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\SettingType;
 
 /**
@@ -85,7 +86,7 @@ class IdentifierNormalizer
             $identifier = $resource->getIdentifier();
         }
 
-        return $identifier;
+        return (string)$identifier;
     }
 
     /**
@@ -104,6 +105,10 @@ class IdentifierNormalizer
 
             if($resource instanceof SettingType) {
                 $suffix = 'Setting';
+            }
+
+            if($resource instanceof DomainMemberType) {
+                $suffix = 'Member';
             }
         }
 
