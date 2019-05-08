@@ -160,7 +160,7 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
         }
 
         // Load the full entity if it is not already loaded.
-        if (!$this->entityManager->contains($fieldable)) {
+        if (!$this->entityManager->contains($fieldable) && !empty($fieldable->getId())) {
             $fieldable = $this->entityManager->getRepository(get_class($fieldable))->find(
                 $fieldable->getId()
             );

@@ -142,17 +142,12 @@ class FieldableContentResultType extends AbstractType
             throw new \InvalidArgumentException('Value must be instance of '.AbstractPagination::class.'.');
         }
 
-        $bundlePermissions = [];
-        $viewPermission = null;
-
-        if($this->fieldable instanceof ContentType) {
-            $viewPermission = ContentVoter::VIEW;
-            $bundlePermissions = ContentVoter::BUNDLE_PERMISSIONS;
-        }
-
-        else if($this->fieldable instanceof DomainMemberType) {
+        if($this->fieldable instanceof DomainMemberType) {
             $viewPermission = DomainMemberVoter::VIEW;
             $bundlePermissions = DomainMemberVoter::BUNDLE_PERMISSIONS;
+        } else {
+            $viewPermission = ContentVoter::VIEW;
+            $bundlePermissions = ContentVoter::BUNDLE_PERMISSIONS;
         }
 
         switch ($info->fieldName) {

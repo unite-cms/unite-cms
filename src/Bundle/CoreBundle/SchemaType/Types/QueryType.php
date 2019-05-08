@@ -188,11 +188,6 @@ class QueryType extends AbstractType
                         'type' => $this->schemaTypeManager->getSchemaType('FilterInput'),
                         'description' => 'Set one optional filter condition.',
                     ],
-                    'deleted' => [
-                        'type' => Type::boolean(),
-                        'description' => 'Also show deleted entries. Only user who can also update domain members can view deleted domain members.',
-                        'defaultValue' => false,
-                    ],
                 ],
             ];
         }
@@ -290,7 +285,7 @@ class QueryType extends AbstractType
 
         // Resolve generic find type
         elseif(substr($info->fieldName, 0, 4) == 'find' && strlen($info->fieldName) == 4) {
-            return $this->resolveFindContent('ContentResult', $value, $args, $context, $info);
+            return $this->resolveFindContent('FieldableContentResult', $value, $args, $context, $info);
         }
 
         return null;
@@ -407,7 +402,6 @@ class QueryType extends AbstractType
         $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
         $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
         $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
-        $args['deleted'] = $args['deleted'] ?? false;
 
         // Get all requested contentTypes, the user can access.
         $domainMemberTypes = [];
@@ -463,20 +457,7 @@ class QueryType extends AbstractType
             }
         }
 
-        // Also show deleted content.
-        if($args['deleted']) {
-            $this->entityManager->getFilters()->disable('gedmo_softdeleteable');
-        }
-
         // Get all content in one request for all contentTypes.
-        $pagination = $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], ['alias' => $resultType]);
-
-        if($args['deleted']) {
-            // We need to clear content cache, so deleted entities will not be shown on next turn.
-            $this->entityManager->clear(DomainMember::class);
-            $this->entityManager->getFilters()->enable('gedmo_softdeleteable');
-        }
-
-        return $pagination;
+        return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], ['alias' => $resultType]);
     }
 }

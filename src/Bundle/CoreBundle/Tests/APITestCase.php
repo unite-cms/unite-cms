@@ -220,6 +220,12 @@ class MockedRepositoryFactory implements RepositoryFactory {
      */
     public function getRepository(EntityManagerInterface $entityManager, $entityName)
     {
+        if(strpos($entityName, '\\') !== false) {
+            $classParts = explode('\\', $entityName);
+            $className = array_pop($classParts);
+            $entityName = 'UniteCMSCoreBundle:'.$className;
+        }
+
         if(!isset($this->repositories[$entityName])) {
             $this->repositories[$entityName] = new MockedObjectRepository($entityName);
         }

@@ -47,7 +47,7 @@ class DomainMemberVoter extends Voter
         }
 
         if (in_array($attribute, self::ENTITY_PERMISSIONS)) {
-            return ($subject instanceof DomainMember && $subject->getDeleted() == null);
+            return ($subject instanceof DomainMember);
         }
 
         return false;
@@ -82,11 +82,6 @@ class DomainMemberVoter extends Voter
 
         $domainMembers = $token->getUser()->getDomainMembers($domainMemberType->getDomain());
 
-        // Only work for non-deleted content
-        if ($subject instanceof DomainMember && $subject->getDeleted() != null) {
-            return self::ACCESS_ABSTAIN;
-        }
-
         // If the requested permission is not defined, throw an exception.
         if (empty($domainMemberType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in DomainMemberType '$domainMemberType'");
@@ -98,7 +93,7 @@ class DomainMemberVoter extends Voter
             $this->accessExpressionChecker
                 ->clearVariables()
                 ->registerDomainMember($domainMember)
-                ->registerFieldableContent($subject instanceof Content ? $subject : null);
+                ->registerFieldableContent($subject instanceof DomainMember ? $subject : null);
 
             if($this->accessExpressionChecker->evaluateToBool($domainMemberType->getPermissions()[$attribute])) {
                 return self::ACCESS_GRANTED;

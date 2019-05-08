@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\AccessType;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Type;
@@ -13,8 +14,10 @@ use JMS\Serializer\Annotation\Accessor;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UniteCMS\CoreBundle\Field\FieldableValidation;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
  * DomainMemberType
@@ -99,6 +102,15 @@ class DomainMemberType implements Fieldable
     private $fields;
 
     /**
+     * @var array
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="invalid_selection")
+     * @ORM\Column(name="permissions", type="array", nullable=true)
+     * @AccessType("public_method")
+     * @Expose
+     */
+    private $permissions;
+
+    /**
      * @var int
      * @ORM\Column(name="weight", type="integer")
      */
@@ -122,6 +134,7 @@ class DomainMemberType implements Fieldable
         $this->fields = new ArrayCollection();
         $this->invites = new ArrayCollection();
         $this->domainMembers = new ArrayCollection();
+        $this->addDefaultPermissions();
     }
 
     public function __toString()
@@ -168,6 +181,7 @@ class DomainMemberType implements Fieldable
             ->setWeight($domainMemberType->getWeight())
             ->setIcon($domainMemberType->getIcon())
             ->setDomainMemberLabel($domainMemberType->getDomainMemberLabel())
+            ->setPermissions($domainMemberType->getPermissions())
             ->setDescription($domainMemberType->getDescription());
 
         // Fields to delete
@@ -205,6 +219,20 @@ class DomainMemberType implements Fieldable
             $field->setWeight($weight);
             $weight++;
         }
+    }
+
+    private function addDefaultPermissions()
+    {
+        $this->permissions[DomainMemberVoter::VIEW] = 'false';
+        $this->permissions[DomainMemberVoter::LIST] = 'false';
+        $this->permissions[DomainMemberVoter::CREATE] = 'false';
+        $this->permissions[DomainMemberVoter::UPDATE] = 'false';
+        $this->permissions[DomainMemberVoter::DELETE] = 'false';
+    }
+
+    public function allowedPermissionKeys(): array
+    {
+        return array_merge(DomainMemberVoter::ENTITY_PERMISSIONS, DomainMemberVoter::BUNDLE_PERMISSIONS);
     }
 
     /**
@@ -424,6 +452,39 @@ class DomainMemberType implements Fieldable
         }
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPermissions() : array
+    {
+        // Prevent null values. We always need an array response.
+        $this->permissions = $this->permissions ?? [];
+        return $this->permissions;
+    }
+
+
+    /**
+     * @param array $permissions
+     *
+     * @return DomainMemberType
+     */
+    public function setPermissions($permissions)
+    {
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        foreach ($permissions as $attribute => $expression) {
+            $this->addPermission($attribute, $expression);
+        }
+
+        return $this;
+    }
+
+    public function addPermission($attribute, string $expression)
+    {
+        $this->permissions[$attribute] = $expression;
     }
 
     /**
