@@ -25,7 +25,7 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\ReferenceType;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
-use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
+use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 use UniteCMS\CoreBundle\Entity\View;
@@ -58,6 +58,7 @@ class ReferenceFieldType extends FieldType
     private $templating;
     private $csrfTokenManager;
     private $router;
+    private $tableViewConfigurationFactory;
 
     function __construct(
         ValidatorInterface $validator,
@@ -67,7 +68,8 @@ class ReferenceFieldType extends FieldType
         ViewTypeManager $viewTypeManager,
         TwigEngine $templating,
         Router $router,
-        CsrfTokenManager $csrfTokenManager
+        CsrfTokenManager $csrfTokenManager,
+        ViewConfigurationFactoryInterface $tableViewConfigurationFactory
     ) {
         $this->referenceResolver = new ReferenceResolver($uniteCMSManager, $entityManager, $authorizationChecker);
         $this->validator = $validator;
@@ -77,6 +79,7 @@ class ReferenceFieldType extends FieldType
         $this->templating = $templating;
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
+        $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
     }
 
     /**
@@ -332,7 +335,7 @@ class ReferenceFieldType extends FieldType
                 $this->referenceResolver->resolveDomain($field->getSettings()->domain),
                 $field->getSettings()->content_type);
             $processor = new Processor();
-            $config = $processor->processConfiguration(new TableViewConfiguration($contentType, $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
+            $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($contentType), ['settings' => ['fields' => $settings['settings']['fields']]]);
             $settings['settings']['fields'] = $config['fields'];
 
             // Template will only include assets from root fields, so we need to add any child templates to the root field.

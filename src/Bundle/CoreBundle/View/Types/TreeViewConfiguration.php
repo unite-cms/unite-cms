@@ -35,6 +35,7 @@ class TreeViewConfiguration extends TableViewConfiguration
                 ->append($this->appendChildrenFieldNode())
                 ->append($this->appendFieldsNode())
                 ->append($this->appendFilterNode())
+                ->append($this->appendRowsPerPageNode())
                 ->append($this->appendSortNode())
             ->end();
 

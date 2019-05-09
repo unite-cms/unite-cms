@@ -16,6 +16,7 @@ use UniteCMS\CoreBundle\Form\ReferenceOfType;
 use UniteCMS\CoreBundle\View\Types\TableViewType;
 use UniteCMS\CoreBundle\View\ViewParameterBag;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
+use UniteCMS\CoreBundle\View\Types\Factories\TableViewConfigurationFactory;
 
 class ReferenceOfTypeTest extends TestCase
 {
@@ -123,7 +124,9 @@ class ReferenceOfTypeTest extends TestCase
     {
         $viewTypeManager = $this->createMock(ViewTypeManager::class);
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
-        $viewTypeManager->expects($this->any())->method('getViewType')->willReturn(new TableViewType($fieldTypeManager));
+        $viewTypeManager->expects($this->any())->method('getViewType')->willReturn(
+            new TableViewType(new TableViewConfigurationFactory($fieldTypeManager, 100))
+        );
         $viewParameterBag = new ViewParameterBag();
         $viewTypeManager->expects($this->any())->method('getTemplateRenderParameters')->willReturn($viewParameterBag);
         $dispatcherMock = $this->createMock(EventDispatcherInterface::class);
@@ -143,7 +146,9 @@ class ReferenceOfTypeTest extends TestCase
     {
         $viewTypeManager = $this->createMock(ViewTypeManager::class);
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
-        $viewTypeManager->expects($this->any())->method('getViewType')->willReturn(new TableViewType($fieldTypeManager));
+        $viewTypeManager->expects($this->any())->method('getViewType')->willReturn(
+            new TableViewType(new TableViewConfigurationFactory($fieldTypeManager, 100))
+        );
         $viewParameterBag = new ViewParameterBag();
         $viewTypeManager->expects($this->any())->method('getTemplateRenderParameters')->willReturn($viewParameterBag);
         $dispatcherMock = $this->createMock(EventDispatcherInterface::class);

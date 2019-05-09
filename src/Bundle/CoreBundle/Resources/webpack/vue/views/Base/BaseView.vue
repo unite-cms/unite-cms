@@ -58,6 +58,7 @@
             let bag = JSON.parse(this.parameters);
             let fields = bag.settings.fields;
             let error = null;
+            let limit = bag.settings.rows_per_page ? bag.settings.rows_per_page : 10;
             let fieldQuery = [];
             let filterQuery = [];
             let actions = bag.settings.actions;
@@ -105,7 +106,7 @@
                 sort: sort,
                 actions: actions,
                 initialSort: Object.assign({}, sort),
-                limit: 10,
+                limit: limit,
                 page: 1,
                 total: 0,
                 autoUpdateFields: [],

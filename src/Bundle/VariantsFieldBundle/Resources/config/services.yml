@@ -4,7 +4,7 @@ services:
   UniteCMS\VariantsFieldBundle\Field\Types\VariantsFieldType:
     tags: [unite_cms.field_type]
     arguments:
-      ['@unite.cms.field_type_manager', '@unite.cms.graphql.variants_field_variant_factory']
+      ['@unite.cms.field_type_manager', '@unite.cms.graphql.variants_field_variant_factory', '@unite.cms.field_type.config_factory.table_view']
 
   # A form type that renders a variant choice field and all variants.
   UniteCMS\VariantsFieldBundle\Form\VariantsFormType:

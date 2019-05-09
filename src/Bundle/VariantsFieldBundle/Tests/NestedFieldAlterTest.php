@@ -17,6 +17,7 @@ use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\View\Types\Factories\TableViewConfigurationFactory;
 use UniteCMS\VariantsFieldBundle\Field\Types\VariantsFieldType;
 use UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory;
 
@@ -26,7 +27,13 @@ class NestedFieldAlterTest extends TestCase
 
         $manager = new FieldTypeManager();
 
-        $manager->registerFieldType(new VariantsFieldType($manager, $this->createMock(VariantFactory::class)));
+        $manager->registerFieldType(
+            new VariantsFieldType(
+                $manager,
+                $this->createMock(VariantFactory::class),
+                new TableViewConfigurationFactory($manager, 100)
+            )
+        );
         $manager->registerFieldType(new class extends FieldType {
             const TYPE = 't_f1';
             public function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData) { $data[$field->getIdentifier()] = 'FOO'; }
