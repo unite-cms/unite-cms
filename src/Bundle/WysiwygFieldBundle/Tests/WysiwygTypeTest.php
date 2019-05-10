@@ -27,4 +27,18 @@ class WysiwygTypeTest extends TypeTestCase
         $form->submit(['wysiwyg' => $string_with_xss]);
         $this->assertEquals('<a href="https://example.com">alert&#40;"XSS"&#41;;</a>', $data->wysiwyg);
     }
+
+    public function testFormXssAllowInlineStyles() {
+
+        $string_with_inline_styles = '<p style="text-align: center;">Foo</p>';
+
+
+        $data = new class { public $wysiwyg; };
+        $form = $this->factory->createBuilder(FormType::class, $data)
+            ->add('wysiwyg', WysiwygType::class)
+            ->getForm();
+
+        $form->submit(['wysiwyg' => $string_with_inline_styles]);
+        $this->assertEquals($string_with_inline_styles, $data->wysiwyg);
+    }
 }

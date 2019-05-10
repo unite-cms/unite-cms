@@ -26,6 +26,9 @@ class WysiwygType extends WebComponentType implements DataTransformerInterface
     public function __construct()
     {
         $this->antiXss = new AntiXSS();
+
+        // Allow inline styles, we need this for example for CKEditor's align feature.
+        $this->antiXss->removeEvilAttributes(['style']);
     }
 
     /**
