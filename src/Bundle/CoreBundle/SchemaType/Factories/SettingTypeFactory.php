@@ -200,7 +200,6 @@ class SettingTypeFactory implements SchemaTypeFactoryInterface
                             $translations = [];
                             $includeLocales = $args['locales'] ?? $value->getSettingType()->getLocales();
                             $includeLocales = is_string($includeLocales) ? [$includeLocales] : $includeLocales;
-                            $includeLocales = array_diff($includeLocales, [$value->getLocale()]);
 
                             foreach ($value->getSettingType()->getLocales() as $locale) {
                                 if(in_array($locale, $includeLocales)) {
