@@ -241,14 +241,6 @@ class UniteUrlGeneratorTest extends KernelTestCase
             ),
             $this->router->generate('unitecms_core_setting_index', $this->setting)
         );
-
-        $this->assertEquals(
-            $this->router->generate(
-                'unitecms_core_setting_translations',
-                ['organization' => 'org1-org1', 'domain' => 'domain-domain', 'setting_type' => 'st-1', 'setting' => $this->setting->getId()]
-            ),
-            $this->router->generate('unitecms_core_setting_translations', $this->setting)
-        );
     }
 
     public function testGeneratingDomainMemberUrls()
