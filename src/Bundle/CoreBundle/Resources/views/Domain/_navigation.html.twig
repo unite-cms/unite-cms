@@ -83,14 +83,23 @@
                 <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
                 {% for type in unite.domain.contentTypes %}
                     {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), type) %}
-                        <li><a {% spaceless %}
-                                {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
-                                    class="uk-active"
+                        <li>
+                            <div class="uk-flex">
+                                <a class="uk-flex-0 {% spaceless %}
+                                    {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
+                                         uk-active
+                                    {% endif %}
+                                {% endspaceless %}" href="{{ url('unitecms_core_content_index', [type]) }}">
+                                    <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'layers' }}"></i>
+                                    {{ type }}
+                                </a>
+
+                                {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::CREATE'), type) %}
+                                    <a uk-tooltip title="{{ 'content.create.title'|trans({ "%type%": type.title|escape }) }}" href="{{ url('unitecms_core_content_create', [type]) }}" class="uk-margin-small-left create-content-button uk-icon">
+                                        <i data-feather="plus-circle" class="uk-margin-small-right-small"></i>
+                                    </a>
                                 {% endif %}
-                            {% endspaceless %} href="{{ url('unitecms_core_content_index', [type]) }}">
-                                <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'layers' }}"></i>
-                                {{ type }}
-                            </a>
+                            </div>
 
                             {% if type.views|length > 1 %}
                                 <ul class="uk-nav-sub">
