@@ -357,7 +357,9 @@ class TableViewConfiguration implements ConfigurationInterface
         }
 
         $type = $config['type'] ?? $fieldEntity->getType();
-        $this->fieldTypeManager->getFieldType($type)->alterViewFieldSettings($config, $this->fieldTypeManager, $fieldEntity);
+        if($this->fieldTypeManager->hasFieldType($type)) {
+            $this->fieldTypeManager->getFieldType($type)->alterViewFieldSettings($config, $this->fieldTypeManager, $fieldEntity);
+        }
         return $config;
     }
 }
