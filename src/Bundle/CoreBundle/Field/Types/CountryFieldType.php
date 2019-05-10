@@ -8,34 +8,35 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
-use Symfony\Component\Form\Extension\Core\Type\LanguageType;
+use Symfony\Component\Form\Extension\Core\Type\CountryType;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
-class LanguageFieldType extends TextFieldType
+class CountryFieldType extends TextFieldType
 {
-    const TYPE = "language";
-    const FORM_TYPE = LanguageType::class;
+    const TYPE = "country";
+    const FORM_TYPE = CountryType::class;
 
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['languages'];
+    const SETTINGS = ['countries'];
 
     function getFormOptions(FieldableField $field): array
     {
         $choice_settings = [];
 
-        if(!empty($field->getSettings()->languages)) {
+        if(!empty($field->getSettings()->countries)) {
+
             $choice_settings = [
                 'choices' => [],
                 'choice_loader' => null,
             ];
 
-            foreach($field->getSettings()->languages as $language) {
-                $choice_settings['choices'][Intl::getLanguageBundle()->getLanguageName($language)] = $language;
+            foreach($field->getSettings()->countries as $country) {
+                $choice_settings['choices'][Intl::getRegionBundle()->getCountryName($country)] = $country;
             }
         }
 
@@ -55,18 +56,18 @@ class LanguageFieldType extends TextFieldType
             return;
         }
 
-        if(!empty($settings->languages)) {
+        if(!empty($settings->countries)) {
 
-            if(!is_array($settings->languages)) {
-                $context->buildViolation('not_an_array')->atPath('languages')->addViolation();
+            if(!is_array($settings->countries)) {
+                $context->buildViolation('not_an_array')->atPath('countries')->addViolation();
                 return;
             }
 
-            foreach($settings->languages as $language) {
-                if(Intl::getLanguageBundle()->getLanguageName($language) === null) {
-                    $context->buildViolation('invalid_language')->atPath('languages')
-                        ->setParameter('%value%', $language)
-                        ->setInvalidValue($language)->addViolation();
+            foreach($settings->countries as $country) {
+                if(Intl::getRegionBundle()->getCountryName($country) === null) {
+                    $context->buildViolation('invalid_country')->atPath('countries')
+                        ->setParameter('%value%', $country)
+                        ->setInvalidValue($country)->addViolation();
                 }
             }
         }
