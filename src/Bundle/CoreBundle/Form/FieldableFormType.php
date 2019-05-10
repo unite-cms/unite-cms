@@ -34,15 +34,11 @@ class FieldableFormType extends AbstractType
     {
 
         // Handle content locales
-        if (!empty($options['locales'])) {
+        if (!empty($options['locales']) && (empty($options['content']) || !is_object($options['content']) || !$options['content'] instanceof Setting || empty($options['content']->getLocale()))) {
 
             // if this fieldable has exactly one possible locale, add it as hidden field.
             if (count($options['locales']) == 1) {
                 $builder->add('locale', HiddenType::class, ['data' => $options['locales'][0]]);
-
-            // if this fieldable is from type setting and locale is already set, we don't allow the user to change it
-            } elseif(!empty($options['content']) && is_object($options['content']) && $options['content'] instanceof Setting && !empty($options['content']->getLocale())) {
-                $builder->add('locale', HiddenType::class, ['data' => $options['content']->getLocale()]);
 
             // if this fieldable has more than one possible locale, render a selection list.
             } else {

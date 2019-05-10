@@ -5,14 +5,16 @@
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
     <header class="uk-card-header uk-flex uk-flex-middle">
 
-        <h2 class="uk-flex-1">{% trans with {"%type%": settingType|escape } %}setting.update.headline{% endtrans %}</h2>
+        <h2 class="uk-flex-{% if settingType.locales|length > 0 %}0{% else %}1{% endif %}">{% trans with {"%type%": settingType|escape } %}setting.update.headline{% endtrans %}</h2>
 
         {% if settingType.locales|length > 0 %}
-            <ul class="uk-flex-0 unite-div-table-tabs uk-tab" v-if="deleted.hasDeleted">
-                {% for locale in settingType.locales %}
-                    <li{% if setting.locale == locale %} class="uk-active"{% endif %}><a href="{{ url('unitecms_core_setting_index', {setting: setting, locale: locale}) }}">{{ locale }}</a></li>
-                {% endfor %}
-            </ul>
+            <div class="uk-flex-1">
+                <ul style="justify-content: left" class="unite-div-table-tabs uk-tab" v-if="deleted.hasDeleted">
+                    {% for locale in settingType.locales %}
+                        <li{% if setting.locale == locale %} class="uk-active"{% endif %}><a href="{{ url('unitecms_core_setting_index', {setting: setting, locale: locale}) }}">{{ locale }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
         {% endif %}
 
         <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>

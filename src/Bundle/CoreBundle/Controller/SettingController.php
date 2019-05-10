@@ -77,7 +77,7 @@ class SettingController extends AbstractController
                 $this->getDoctrine()->getManager()->flush();
 
                 // On form submit, reload the current page so setting gets reloaded from db.
-                return $this->redirectToRoute('unitecms_core_setting_index', [$setting]);
+                return $this->redirectToRoute('unitecms_core_setting_index', ['setting' => $setting, 'locale' => $setting->getLocale()]);
             }
         }
 

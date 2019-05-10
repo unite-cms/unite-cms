@@ -141,26 +141,22 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $form->disableValidation();
         $form['fieldable_form[f1]'] = 'Updated Field value 1';
         $form['fieldable_form[f2]'] = 'invalid';
-        $form['fieldable_form[locale]'] = 'it';
         $crawler = $this->client->submit($form);
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $this->assertCount(1, $crawler->filter('#fieldable_form_locale + .uk-alert-danger p:contains("This value is not valid.")'));
         $this->assertCount(1, $crawler->filter('#fieldable_form_f2 + .uk-alert-danger p:contains("This value is not valid.")'));
 
         $form = $crawler->filter('form');
         $form = $form->form();
         $form['fieldable_form[f1]'] = 'Updated Field value 1';
         $form['fieldable_form[f2]'] = 'b';
-        $form['fieldable_form[locale]'] = 'en';
 
         $this->client->submit($form);
 
         // Assert update
         $setting = $this->em->getRepository('UniteCMSCoreBundle:Setting')->findOneBy([
             'settingType' => $this->domain->getSettingTypes()->first(),
-            'locale' => 'en',
         ]);
         $this->assertEquals('Updated Field value 1', $setting->getData()['f1']);
         $this->assertEquals('b', $setting->getData()['f2']);
@@ -253,9 +249,6 @@ class SettingControllerTest extends DatabaseAwareTestCase {
 
         // Submit valid form data.
         $form = $form->form();
-
-        // Make sure, that the other language was pre-filled per default.
-        $this->assertEquals('en', $form->get('fieldable_form[locale]')->getValue());
 
         $form['fieldable_form[f1]'] = 'Any';
         $form['fieldable_form[f2]'] = 'b';
