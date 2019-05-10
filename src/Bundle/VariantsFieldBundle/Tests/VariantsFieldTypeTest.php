@@ -415,7 +415,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data[' . $field->getIdentifier() . '][baa][ref]', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('missing_reference_definition', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
         // Try to submit valid data and check, that content was updated correctly.
 

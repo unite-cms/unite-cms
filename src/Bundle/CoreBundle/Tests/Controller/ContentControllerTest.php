@@ -62,6 +62,30 @@ class ContentControllerTest extends DatabaseAwareTestCase {
             { "title": "Other", "identifier": "other", "type": "table" }
         ],
         "locales": ["de", "en"]
+      },
+      {
+        "title": "CT 2 (Referenced entity)",
+        "identifier": "ct2",
+        "fields": [
+            { "title": "Field 1", "identifier": "f1", "type": "text" }
+        ],
+        "views": [
+            { "title": "All", "identifier": "all", "type": "table" }
+        ],
+        "locales": ["de", "en"]
+      },
+      {
+        "title": "CT 3 (Required reference field test)",
+        "identifier": "ct3",
+        "fields": [
+            { "title": "Field 1", "identifier": "f1", "type": "text" },
+            { "title": "Field 2", "identifier": "f2", "type": "choice", "settings": { "choices": ["a", "b"] } },
+            { "title": "Field 4", "identifier": "f3", "type": "reference", "settings": { "domain": "d1", "content_type": "ct2", "not_empty": true } }
+        ],
+        "views": [
+            { "title": "All", "identifier": "all", "type": "table" }
+        ],
+        "locales": ["de", "en"]
       }
     ], 
     "setting_types": [
@@ -337,7 +361,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $error_text = static::$container->get('translator')->trans('missing_reference_definition', [], 'validators');
+        $error_text = static::$container->get('translator')->trans('required', [], 'validators');
         $alert = $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p');
         $this->assertCount(1, $alert);
         $this->assertEquals($error_text, $alert->text());
@@ -387,7 +411,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Should stay on the same page.
         $this->assertFalse($this->client->getResponse()->isRedirection());
-        $error_text = static::$container->get('translator')->trans('missing_reference_definition', [], 'validators');
+        $error_text = static::$container->get('translator')->trans('required', [], 'validators');
         $alert = $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p');
         $this->assertCount(1, $alert);
         $this->assertEquals($error_text, $alert->text());
@@ -953,5 +977,70 @@ class ContentControllerTest extends DatabaseAwareTestCase {
         $this->assertCount(1, $crawler->filter('tr:nth-child(3) a:contains("' . static::$container->get('translator')->trans('content.revisions.revert.button') .'")'));
         $this->assertCount(0, $crawler->filter('tr:nth-child(2) a:contains("' . static::$container->get('translator')->trans('content.revisions.revert.button') .'")'));
         $this->assertCount(0, $crawler->filter('tr:nth-child(1) a:contains("' . static::$container->get('translator')->trans('content.revisions.revert.button') .'")'));
+    }
+
+    public function testNotEmptyReference() {
+
+        $ct2 = $this->domain->getContentTypes()->get('ct2');
+
+        $c2 = new Content();
+        $c2->setContentType($ct2)->setData(['f1' => 'abcd']);
+        $this->em->persist($c2);
+        $this->em->flush();
+
+        $url_list = static::$container->get('router')->generate('unitecms_core_content_index', [
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+            'domain' => $this->domain->getIdentifier(),
+            'content_type' => $this->domain->getContentTypes()->get('ct3')->getIdentifier(),
+            'view' => 'all',
+        ], Router::ABSOLUTE_URL);
+
+        $crawler = $this->client->request('GET', $url_list);
+
+        // Assert view rendering.
+        $view = $crawler->filter('unite-cms-core-view-table');
+        $this->assertCount(1, $view);
+        $viewData = json_decode($view->attr('parameters'));
+
+        // Click on add button.
+        $crawler = $this->client->request('GET', $viewData->urls->create);
+
+        // Assert add form
+        $form = $crawler->filter('form');
+        $this->assertCount(1, $form);
+
+        // Submit invalid form data - missing not_empty reference content.
+        $form = $form->form();
+        $values = $form->getPhpValues();
+        $values['fieldable_form']['f1'] = 'Field value 1';
+        $values['fieldable_form']['f2'] = 'a';
+        $values['fieldable_form']['f3'] = [
+            'domain' => 'd1',
+            'content_type' => 'ct2',
+        ];
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        // Should stay on the same page.
+        $this->assertFalse($this->client->getResponse()->isRedirection());
+        $this->assertCount(1, $crawler->filter('#fieldable_form_f3 + .uk-alert-danger p:contains("This field is required.")'));
+
+
+        // Submit valid form data
+        $values = $form->getPhpValues();
+        $values['fieldable_form']['f1'] = 'Field value 1';
+        $values['fieldable_form']['f2'] = 'a';
+        $values['fieldable_form']['f3'] = [
+            'domain' => 'd1',
+            'content_type' => 'ct2',
+            'content' => $c2->getId(),
+        ];
+        $crawler = $this->client->request($form->getMethod(), $form->getUri(), $values, $form->getPhpFiles());
+
+        // Assert redirect to index.
+        $this->assertTrue($this->client->getResponse()->isRedirect($url_list));
+        $crawler = $this->client->followRedirect();
+
+        // Assert creation message.
+        $this->assertCount(1, $crawler->filter('.uk-alert-success:contains("Content created.")'));
     }
 }

@@ -46,12 +46,14 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
             'content_type' => 'baa',
             'view' => 'foo',
             'content_label' => 'laa',
-            'foo' => 'baa'
+            'foo' => 'baa',
+            'not_empty' => '123',
         ]));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
     }
 
     public function testContentTypeFieldTypeWithInvalidDomainAndContentTypeSetting() {
@@ -193,6 +195,7 @@ class ReferenceFieldTypeTest extends FieldTypeTestCase
             'content_type' => 'baa',
             'view' => 'foo',
             'content_label' => 'laa',
+            'not_empty' => true,
         ]));
 
         // Fake organization
