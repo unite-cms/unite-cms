@@ -10,18 +10,18 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
 use UniteCMS\CoreBundle\Entity\User;
 
-class LanguageFieldTypeTest extends FieldTypeTestCase
+class CountryFieldTypeTest extends FieldTypeTestCase
 {
-    public function testLanguageFieldTypeWithEmptySettings()
+    public function testCountryFieldTypeWithEmptySettings()
     {
-        $ctField = $this->createContentTypeField('language');
+        $ctField = $this->createContentTypeField('country');
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(0, $errors);
     }
 
-    public function testLanguageFieldTypeWithInvalidSettings()
+    public function testCountryFieldTypeWithInvalidSettings()
     {
-        $ctField = $this->createContentTypeField('language');
+        $ctField = $this->createContentTypeField('country');
         
         $ctField->setSettings(new FieldableFieldSettings(
             [
@@ -35,17 +35,17 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'languages' => ['invalid']
+                'countries' => ['invalid']
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_language', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_country', $errors->get(0)->getMessageTemplate());
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'languages' => 'de',
+                'countries' => 'DE',
             ]
         ));
 
@@ -53,45 +53,45 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('not_an_array', $errors->get(0)->getMessageTemplate());
 
-        // test wrong language data
+        // test wrong country data
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'languages' => ['XXX'],
+                'countries' => ['XXX'],
             ]
         ));
 
-        // test wrong language
+        // test wrong country
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'languages' => ['DE'],
-            ]
-        ));
-
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_language', $errors->get(0)->getMessageTemplate());
-
-        // test wrong language
-        $ctField->setSettings(new FieldableFieldSettings(
-            [
-                'languages' => [23],
+                'countries' => ['de'],
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_language', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('invalid_country', $errors->get(0)->getMessageTemplate());
+
+        // test wrong country
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'countries' => [23],
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('invalid_country', $errors->get(0)->getMessageTemplate());
     }
 
-    public function testLanguageFieldTypeWithValidSettings()
+    public function testCountryFieldTypeWithValidSettings()
     {
-        $ctField = $this->createContentTypeField('language');
+        $ctField = $this->createContentTypeField('country');
 
         $fieldType = static::$container->get('unite.cms.field_type_manager')->getFieldType($ctField->getType());
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'languages' => ['de', 'en', 'de_AT'],
+                'countries' => ['AT', 'DE', 'US'],
             ]
         ));
 
@@ -100,16 +100,16 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
 
         $options = $fieldType->getFormOptions($ctField);
         $this->assertEquals([
-            'German' => 'de',
-            'English' => 'en',
-            'Austrian German' => 'de_AT',
+            'Austria' => 'AT',
+            'Germany' => 'DE',
+            'United States' => 'US',
         ], $options['choices']);
         $this->assertEquals(null, $options['choice_loader']);
     }
 
-    public function testLanguageFieldTypeContentFormBuild()
+    public function testCountryFieldTypeContentFormBuild()
     {
-        $ctField = $this->createContentTypeField('language');
+        $ctField = $this->createContentTypeField('country');
         $ctField->setIdentifier('f1');
         
         $ctField->getContentType()->getDomain()->getOrganization()->setIdentifier('baa_baa');
@@ -136,9 +136,9 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals($content->getData()['f1'], $root->vars['value']);
     }
 
-    public function testLanguageFieldTypeWritingGraphQLData()
+    public function testCountryFieldTypeWritingGraphQLData()
     {
-        $ctField = $this->createContentTypeField('language');
+        $ctField = $this->createContentTypeField('country');
         $ctField->setIdentifier('f1');
         $ctField->getContentType()->setIdentifier('ct1');
         $this->em->persist($ctField->getContentType()->getDomain()->getOrganization());
@@ -172,7 +172,7 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
                 createCt1(
                     persist: true,
                     data: {
-                        f1: "en"
+                        f1: "US"
                     }
                 ) 
                 {
@@ -194,7 +194,7 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         $content = $this->em->getRepository('UniteCMSCoreBundle:Content')->find($result->data->createCt1->id);
 
         $this->assertNotNull($content);
-        $this->assertEquals('en', $result->data->createCt1->f1);
+        $this->assertEquals('US', $result->data->createCt1->f1);
 
         $result = GraphQL::executeQuery(
             $schema,
@@ -223,13 +223,13 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('This value is not valid.', $result->errors[0]->message);
     }
 
-    public function testLanguageFieldTypeFormSubmitData()
+    public function testCountryFieldTypeFormSubmitData()
     {
-        $ctField = $this->createContentTypeField('language');
+        $ctField = $this->createContentTypeField('country');
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'languages' => ['de', 'en'],
+                'countries' => ['DE', 'US'],
             ]
         ));
 
@@ -240,13 +240,13 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         ]);
 
         $form->submit([
-            $ctField->getIdentifier() => "de"
+            $ctField->getIdentifier() => "DE"
         ]);
 
         $this->assertCount(0, $form->getErrors(true, true));
-        $this->assertEquals("de", $form->getData()[$ctField->getIdentifier()]);
+        $this->assertEquals("DE", $form->getData()[$ctField->getIdentifier()]);
 
-        # test without languages
+        # test without countries
         $ctField->setSettings(new FieldableFieldSettings());
         
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
@@ -254,14 +254,14 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         ]);
 
         $form->submit([
-            $ctField->getIdentifier() => "en"
+            $ctField->getIdentifier() => "US"
         ]);
 
         $this->assertCount(0, $form->getErrors(true, true));
-        $this->assertEquals("en", $form->getData()[$ctField->getIdentifier()]);
+        $this->assertEquals("US", $form->getData()[$ctField->getIdentifier()]);
 
 
-        # test with wrong language
+        # test with wrong country
         $ctField->setSettings(new FieldableFieldSettings());
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
@@ -269,7 +269,7 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         ]);
 
         $form->submit([
-            $ctField->getIdentifier() => "wrong_language"
+            $ctField->getIdentifier() => "wrong_country"
         ]);
 
         $this->assertCount(1, $form->getErrors(true, true));
