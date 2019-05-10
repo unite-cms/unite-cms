@@ -233,19 +233,9 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->em->flush($setting);
         $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:Setting')->findAll());
 
-        // Try to access translations page with invalid content id.
-        $doctrineUUIDGenerator = new UuidGenerator();
-        $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
-            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
-            'domain' => $this->domain->getIdentifier(),
-            'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
-            'setting' => $doctrineUUIDGenerator->generate($this->em, $setting),
-        ], Router::ABSOLUTE_URL));
 
-        $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
-
-        // Try to access translations page with valid setting id.
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
+        // Try to access default setting page with valid setting id.
+        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_index', [
             'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
             'domain' => $this->domain->getIdentifier(),
             'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
@@ -255,7 +245,7 @@ class SettingControllerTest extends DatabaseAwareTestCase {
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
         // Create english translation.
-        $crawler = $this->client->click($crawler->filter('a:contains("' . static::$container->get('translator')->trans('setting.translations.create.button', ['%locale%' => $this->client->getRequest()->getLocale()]) .'")')->link());
+        $crawler = $this->client->click($crawler->filter('a:contains("en")')->link());
 
         // Assert add form
         $form = $crawler->filter('form');
@@ -285,20 +275,6 @@ class SettingControllerTest extends DatabaseAwareTestCase {
             'f2' => 'b',
             'f3' => null,
         ], $setting_en->getData());
-
-
-        // Try to access translations page with valid setting id.
-        $crawler = $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_setting_translations', [
-            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
-            'domain' => $this->domain->getIdentifier(),
-            'setting_type' => $this->domain->getSettingTypes()->first()->getIdentifier(),
-            'setting' => $setting->getId(),
-        ], Router::ABSOLUTE_URL));
-
-        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-
-        // Make sure, that there is no create translation link on this page anymore.
-        $this->assertCount(0, $crawler->filter('a.uk-button:contains("Add translation")'));
     }
 
     public function testRevisionActions() {
