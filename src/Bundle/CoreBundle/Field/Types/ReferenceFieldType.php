@@ -199,7 +199,6 @@ class ReferenceFieldType extends FieldType
     /**
      * {@inheritdoc}
      * @throws InvalidFieldConfigurationException
-     * @throws ContentTypeAccessDeniedException
      * @throws DomainAccessDeniedException
      * @throws MissingOrganizationException
      */
@@ -211,7 +210,7 @@ class ReferenceFieldType extends FieldType
             $field->getSettings()->content_type);
 
         if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
-            throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$contentType}\".");
+            return null;
         }
 
         return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $contentType->getDomain(), $nestingLevel);
