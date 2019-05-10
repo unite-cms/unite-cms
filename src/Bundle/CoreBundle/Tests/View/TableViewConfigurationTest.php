@@ -51,6 +51,10 @@ class TableViewConfigurationTest extends TestCase
             ['text', new TextFieldType()],
             ['textarea', new TextAreaFieldType()],
         ]));
+        $this->fieldTypeManager->expects($this->any())->method('hasFieldType')->will($this->returnValueMap([
+            ['text', true],
+            ['textarea', true],
+        ]));
 
         $this->configuration = new TableViewConfiguration($this->view->getContentType(), $this->fieldTypeManager, 80);
         $this->processor = new Processor();
