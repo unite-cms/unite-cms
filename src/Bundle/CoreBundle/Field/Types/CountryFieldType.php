@@ -22,7 +22,7 @@ class CountryFieldType extends TextFieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['countries'];
+    const SETTINGS = ['countries', 'not_empty', 'description', 'default', 'form_group'];
 
     function getFormOptions(FieldableField $field): array
     {

@@ -22,7 +22,7 @@ class LocationFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['description'];
+    const SETTINGS = ['description', 'form_group'];
 
     /**
      * {@inheritdoc}

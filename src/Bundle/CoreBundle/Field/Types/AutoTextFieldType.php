@@ -33,7 +33,7 @@ class AutoTextFieldType extends TextFieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['expression', 'auto_update', 'text_widget', 'not_empty', 'description'];
+    const SETTINGS = ['expression', 'auto_update', 'text_widget', 'not_empty', 'description', 'form_group'];
 
     /**
      * All required settings for this field type.

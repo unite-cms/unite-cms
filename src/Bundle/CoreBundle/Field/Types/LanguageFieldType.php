@@ -22,7 +22,7 @@ class LanguageFieldType extends TextFieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['languages'];
+    const SETTINGS = ['languages', 'not_empty', 'description', 'default', 'form_group'];
 
     function getFormOptions(FieldableField $field): array
     {

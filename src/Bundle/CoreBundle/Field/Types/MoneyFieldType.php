@@ -24,7 +24,7 @@ class MoneyFieldType extends TextFieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['currencies'];
+    const SETTINGS = ['currencies', 'description', 'form_group'];
 
     function getFormOptions(FieldableField $field): array
     {

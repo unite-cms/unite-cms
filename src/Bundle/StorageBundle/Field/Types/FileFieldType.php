@@ -23,7 +23,7 @@ class FileFieldType extends FieldType
 {
     const TYPE                      = "file";
     const FORM_TYPE                 = StorageFileType::class;
-    const SETTINGS                  = ['not_empty', 'description', 'file_types', 'bucket'];
+    const SETTINGS                  = ['not_empty', 'description', 'file_types', 'bucket', 'form_group'];
     const REQUIRED_SETTINGS         = ['bucket'];
 
     private $router;
