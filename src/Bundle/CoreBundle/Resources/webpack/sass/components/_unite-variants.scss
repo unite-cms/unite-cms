@@ -11,7 +11,7 @@ unite-cms-core-variants-variant {
     header {
       background: map-get($colors, grey);
       margin: -16px -16px 15px -16px;
-      padding: 5px;
+      padding: 5px 0 5px 10px;
       margin-bottom: 5px;
       font-size: 1rem;
       color: map-get($colors, grey-dark);
@@ -29,23 +29,48 @@ unite-cms-core-variants-variant {
         display: inline-block;
         margin-right: 8px;
 
+        &.clear {
+          color: map-get($colors, white);
+          background: map-get($colors, red);
+        }
+
+        &.collapse {
+          color: map-get($colors, white);
+          background: map-get($colors, green);
+        }
+
         svg {
           width: 100%;
           height: 100%;
         }
       }
     }
-  }
 
-  &:hover {
-    article {
+    &.collapsed {
+      padding-bottom: 0;
+      margin-bottom: 0;
+
       header {
+        margin-bottom: 0;
+        padding: 10px 5px 9px 15px;
+        background: none;
 
-        color: map-get($colors, grey-very-dark);
+        a.collapse {
+          background: map-get($colors, grey-dark);
+          padding: 3px;
+        }
+      }
+    }
+  }
+}
 
-        a {
-          color: map-get($colors, white);
-          background: map-get($colors, red);
+.uk-placeholder {
+  > .uk-form-vertical {
+    > div {
+      > unite-cms-core-variants-variant {
+        article {
+          border: none;
+          padding: 0;
         }
       }
     }
