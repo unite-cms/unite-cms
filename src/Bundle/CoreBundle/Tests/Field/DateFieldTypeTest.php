@@ -56,7 +56,8 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'default' => '2018-05-24',
-                'not_empty' => true
+                'not_empty' => true,
+                'form_group' => 'foo',
             ]
         ));
 

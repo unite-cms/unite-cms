@@ -44,6 +44,56 @@
 
 {%- endblock form_row -%}
 
+{%- block form_rows -%}
+
+    {% set field_groups = [] %}
+
+    {# get all field groups #}
+    {% for child in form if not child.rendered %}
+        {% if child.vars.form_group is defined %}
+            {% if not child.vars.form_group == false and child.vars.form_group not in field_groups %}
+                {% set field_groups = field_groups|merge([child.vars.form_group]) %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {# render field group fields in groups #}
+    {% if field_groups|length > 0 %}
+        <div uk-grid>
+            <div class="uk-width-auto@m">
+                <ul class="uk-tab-left" uk-tab="connect: #{{ form.vars.id }}-group; animation: uk-animation-fade">
+                    {% for delta,group in field_groups %}
+                        <li><a href="#{{ form.vars.id }}-group-{{ delta }}">{{ group|capitalize }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="uk-width-expand@m">
+                <div id="{{ form.vars.id }}-group" class="uk-switcher">
+                    {% for delta,group in field_groups %}
+                        <div class="unite-form-group-container" id="{{ form.vars.id }}-group-{{ delta }}">
+                            {% for child in form if not child.rendered %}
+                                {% if child.vars.form_group is defined and child.vars.form_group == group %}
+                                    {{- form_row(child) -}}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# render all fields, that are not in a group #}
+    {% for child in form if not child.rendered %}
+        {% if child.vars.form_group is not defined %}
+            {{- form_row(child) -}}
+        {% else %}
+            <div class="uk-hidden">{{- form_row(child) -}}</div>
+        {% endif %}
+    {% endfor %}
+
+{%- endblock form_rows -%}
+
 {%- block button_row -%}
     <div class="uk-text-right" uk-margin>
         {{- form_widget(form) -}}

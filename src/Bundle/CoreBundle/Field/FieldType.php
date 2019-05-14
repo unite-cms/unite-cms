@@ -27,7 +27,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['not_empty', 'description', 'default'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'form_group'];
 
     /**
      * All required settings for this field type.
@@ -60,6 +60,7 @@ abstract class FieldType implements FieldTypeInterface
             'required' => false,
             'not_empty' => (isset($field->getSettings()->not_empty)) ? (boolean) $field->getSettings()->not_empty : false,
             'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
+            'form_group' => (isset($field->getSettings()->form_group)) ? $field->getSettings()->form_group : null,
         ];
     }
 
@@ -159,6 +160,13 @@ abstract class FieldType implements FieldTypeInterface
                     new Assert\Length(['max' => 255, 'maxMessage' => 'too_long'])
                 ])
             );
+        }
+
+        // validate form_group is false or string
+        if(!empty($settingsArray['form_group'])) {
+            if(!(is_bool($settingsArray['form_group']) && $settingsArray['form_group'] === false) && !is_string($settingsArray['form_group'])) {
+                $context->buildViolation('invalid_form_group')->atPath($setting)->addViolation();
+            }
         }
 
         if (!empty($settingsArray['default'])) {

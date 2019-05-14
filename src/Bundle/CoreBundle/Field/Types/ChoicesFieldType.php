@@ -16,7 +16,7 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 class ChoicesFieldType extends ChoiceFieldType
 {
     const TYPE = "choices";
-    const SETTINGS = ['not_empty', 'description', 'default', 'choices'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'choices', 'form_group'];
 
     /**
      * @var RequestContext $requestContext

@@ -6,6 +6,7 @@ import vueCustomElement from 'vue-custom-element';
 import moment from 'moment';
 import feather from 'feather-icons';
 import pageUnload from "./js/pageUnload";
+import formGroupErrorHandler from "./js/formGroupErrorHandler";
 import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
 
 import BaseView from './vue/views/Base/BaseView.vue';
@@ -106,6 +107,9 @@ window.onload = function() {
 
     // Add a generic unload warning message to all pages with forms.
     pageUnload.init('You have unsaved changes! Do you really want to navigate away and discard them?');
+
+    // Show error indicator in form group labels for all children.
+    formGroupErrorHandler.init();
 
     let diffVisualization = document.querySelector('.unite-domain-change-visualization');
     if(diffVisualization) {

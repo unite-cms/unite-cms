@@ -26,7 +26,7 @@ class StateFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['description', 'initial_place', 'places', 'transitions'];
+    const SETTINGS = ['description', 'initial_place', 'places', 'transitions', 'form_group'];
 
     /**
      * All required settings for this field type.

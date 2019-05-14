@@ -54,7 +54,8 @@ class StateFieldTypeTest extends FieldTypeTestCase
                 'from' => [ 'review2' ],
                 'to' => 'published'
             ]
-        ]
+        ],
+        'form_group' => false,
     ];
 
     public function testStateFieldTypeWithEmptySettings()

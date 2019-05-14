@@ -60,7 +60,8 @@ class ChoiceFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'choices' => ['foo' => 'baa'],
-                'default' => 'baa'
+                'default' => 'baa',
+                'form_group' => 'foo',
             ]
         ));
 

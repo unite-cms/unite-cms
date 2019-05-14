@@ -38,7 +38,8 @@ class IntegerFieldTypeTest extends FieldTypeTestCase
             [
                 'not_empty' => true,
                 'description' => 'my description',
-                'default' => 123
+                'default' => 123,
+                'form_group' => 'foo',
             ]
         ));
 

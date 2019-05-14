@@ -92,6 +92,7 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'languages' => ['de', 'en', 'de_AT'],
+                'form_group' => 'foo',
             ]
         ));
 
