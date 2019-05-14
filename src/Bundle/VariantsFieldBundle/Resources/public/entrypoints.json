@@ -2,10 +2,10 @@
   "entrypoints": {
     "main": {
       "css": [
-        "/bundles/unitecmsvariantsfield/main.0e25c412.css"
+        "/bundles/unitecmsvariantsfield/main.css"
       ],
       "js": [
-        "/bundles/unitecmsvariantsfield/main.6cce0a8b.js"
+        "/bundles/unitecmsvariantsfield/main.js"
       ]
     }
   }

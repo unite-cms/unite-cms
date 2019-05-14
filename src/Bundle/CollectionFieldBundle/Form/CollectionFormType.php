@@ -70,6 +70,13 @@ class CollectionFormType extends CollectionType
         if(!empty($view->vars['prototype'])) {
             $this->mergeChildAssets($view->vars['prototype'], $view->vars['assets']);
         }
+
+        // If a collection only has one field, remove it's label. The label of the collection is enough information.
+        if(count($view->vars['prototype']->children) == 1) {
+            foreach($view->vars['prototype']->children as $child) {
+                $child->vars['label'] = false;
+            }
+        }
     }
 
     private function mergeChildAssets(FormView $view, &$assets) {
