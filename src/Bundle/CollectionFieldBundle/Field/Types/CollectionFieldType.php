@@ -52,6 +52,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         $options = [
             'label' => false,
             'content' => new CollectionRow($collection, [], null),
+            'hide_labels' => count($collection->getFields()) < 2,
         ];
         $options['fields'] = [];
 
