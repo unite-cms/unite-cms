@@ -365,10 +365,11 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('Baa', $root->children['type']->vars['choices'][1]->label);
         $this->assertEquals('baa', $root->children['type']->vars['choices'][1]->value);
         $this->assertEquals(['icon' => 'any', 'description' => 'Fooo'], $root->children['type']->vars['choices'][1]->attr);
-        $this->assertEquals(['data-variant-title', 'data-graphql-query-mapper'], array_keys($root->children['foo']->vars['attr']));
+        $this->assertEquals(['data-variant-title', 'data-variant-icon', 'data-graphql-query-mapper'], array_keys($root->children['foo']->vars['attr']));
         $this->assertEquals('Foo', $root->children['foo']->vars['attr']['data-variant-title']);
-        $this->assertEquals(['data-variant-title', 'data-graphql-query-mapper'], array_keys($root->children['baa']->vars['attr']));
+        $this->assertEquals(['data-variant-title', 'data-variant-icon', 'data-graphql-query-mapper'], array_keys($root->children['baa']->vars['attr']));
         $this->assertEquals('Baa', $root->children['baa']->vars['attr']['data-variant-title']);
+        $this->assertEquals('any', $root->children['baa']->vars['attr']['data-variant-icon']);
 
         // Check, that child form fields get rendered.
         $this->assertCount(1, $root->children['foo']->children);
