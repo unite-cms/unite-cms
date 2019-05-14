@@ -1,7 +1,7 @@
 {%- block unite_cms_variants_widget -%}
     {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: form }) }}
     {% set input_selector = form.type.vars.full_name %}
-    {% for key, child in form.children %}
+    {% for key, child in form %}
         {% if key == 'type' %}
             <unite-cms-core-variants-select input="{{ input_selector }}" content="{{ form_row(child)|escape }}"></unite-cms-core-variants-select>
         {% else %}
