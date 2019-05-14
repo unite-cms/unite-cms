@@ -64,7 +64,8 @@ class TextAreaTypeTest extends FieldTypeTestCase
           [
               'foo' => 'baa',
               'not_empty' => 'foo',
-              'description' => true
+              'description' => true,
+              'form_group' => 'foo',
           ]
         ));
 

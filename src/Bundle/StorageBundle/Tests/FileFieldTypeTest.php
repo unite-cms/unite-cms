@@ -88,6 +88,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'bucket' => 'foo',
                         "path" => "/any",
                     ],
+                    'form_group' => "Group 1",
                 ]
             )
         );

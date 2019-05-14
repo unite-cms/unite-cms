@@ -83,6 +83,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
                         "region" => "east",
                         "path" => "/any",
                     ],
+                    'form_group' => false,
                 ]
             )
         );

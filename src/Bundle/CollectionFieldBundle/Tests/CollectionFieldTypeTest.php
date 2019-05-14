@@ -48,6 +48,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                     'fields' => [],
                     'min_rows' => 0,
                     'max_rows' => 100,
+                    'form_group' => "Group 1",
                 ]
             )
         );

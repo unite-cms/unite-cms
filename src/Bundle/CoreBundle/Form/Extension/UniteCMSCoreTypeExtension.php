@@ -69,6 +69,8 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
                 $view->vars['form_group'] = false;
             } elseif(is_string($options['form_group'])) {
                 $view->vars['form_group'] = $options['form_group'];
+            } else {
+                unset($view->vars['form_group']);
             }
         }
     }

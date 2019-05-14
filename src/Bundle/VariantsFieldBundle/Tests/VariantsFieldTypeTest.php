@@ -272,6 +272,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'description' => 'Foo',
                         ]
                     ],
+                    'form_group' => "Group 1",
                 ]
             )
         );

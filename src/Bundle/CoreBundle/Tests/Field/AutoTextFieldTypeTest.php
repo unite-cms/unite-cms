@@ -69,6 +69,7 @@ class AutoTextFieldTypeTest extends FieldTypeTestCase
                 'expression' => '"Any"',
                 'auto_update' => false,
                 'text_widget' => 'textarea',
+                'form_group' => 'foo',
             ]
         ));
 
