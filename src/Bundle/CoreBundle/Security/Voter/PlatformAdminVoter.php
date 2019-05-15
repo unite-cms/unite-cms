@@ -13,6 +13,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -23,10 +25,12 @@ class PlatformAdminVoter extends Voter
     const SUPPORTED_OBJECTS = [
         Organization::class,
         Domain::class,
+        DomainMemberType::class,
         SettingType::class,
         ContentType::class,
         Setting::class,
         Content::class,
+        DomainMember::class,
     ];
 
     /**

@@ -15,6 +15,7 @@ use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -109,6 +110,14 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $this->domain->setOrganization($this->organization);
         $this->domain->addPermission(DomainVoter::UPDATE, 'member.type == "editor"');
+
+        foreach ($this->domain->getDomainMemberTypes() as $domainMemberType) {
+            $domainMemberType->addPermission(DomainMemberVoter::LIST, 'member.type == "editor"');
+            $domainMemberType->addPermission(DomainMemberVoter::VIEW, 'member.type == "editor"');
+            $domainMemberType->addPermission(DomainMemberVoter::CREATE, 'member.type == "editor"');
+            $domainMemberType->addPermission(DomainMemberVoter::UPDATE, 'member.type == "editor"');
+            $domainMemberType->addPermission(DomainMemberVoter::DELETE, 'member.type == "editor"');
+        }
 
         $this->em->persist($this->organization);
         $this->em->persist($this->domain);
@@ -458,9 +467,15 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->persist($setting2);
         $this->em->flush();
 
+        $member2 = new DomainMember();
+        $member2->setDomainMemberType($domain2->getDomainMemberTypes()->first());
+        $this->em->persist($member2);
+        $this->em->flush();
+
         $parameter['domain'] = $domain2->getIdentifier();
         $parameter['content'] = $content2->getId();
         $parameter['setting'] = $setting2->getId();
+        $parameter['member'] = $member2->getId();
 
         $this->checkRoutes([
             'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
@@ -726,16 +741,21 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $setting2 = new Setting();
         $setting2->setSettingType($domain2->getSettingTypes()->get('st1'));
 
+        $member2 = new DomainMember();
+        $member2->setDomainMemberType($domain2->getDomainMemberTypes()->first());
+
         $this->em->persist($org2);
         $this->em->persist($domain2);
         $this->em->persist($content2);
         $this->em->persist($setting2);
+        $this->em->persist($member2);
         $this->em->flush();
 
         $parameter['organization'] = $org2->getIdentifier();
         $parameter['domain'] = $domain2->getIdentifier();
         $parameter['content'] = $content2->getId();
         $parameter['setting'] = $setting2->getId();
+        $parameter['member'] = $member2->getId();
 
         $this->checkRoutes([
             'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],

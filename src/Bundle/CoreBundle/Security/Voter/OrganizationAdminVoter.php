@@ -13,6 +13,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -27,6 +29,8 @@ class OrganizationAdminVoter extends Voter
         ContentType::class,
         Setting::class,
         Content::class,
+        DomainMemberType::class,
+        DomainMember::class,
     ];
 
     /**
@@ -135,6 +139,14 @@ class OrganizationAdminVoter extends Voter
 
         if($subject instanceof Content) {
             return $subject->getContentType()->getDomain()->getOrganization();
+        }
+
+        if($subject instanceof DomainMemberType) {
+            return $subject->getDomain()->getOrganization();
+        }
+
+        if($subject instanceof DomainMember) {
+            return $subject->getDomainMemberType()->getDomain()->getOrganization();
         }
 
         return null;

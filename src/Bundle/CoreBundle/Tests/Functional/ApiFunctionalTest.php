@@ -18,12 +18,14 @@ use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Form\ContentDeleteFormType;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
@@ -430,12 +432,39 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 $domain = static::$container->get('unite.cms.domain_definition_parser')->parse($domain_data);
                 $domain->setOrganization($org);
                 $this->domains[$domain->getIdentifier()] = $domain;
+
+                // Allow editors to CRUD on viewer type and list / view on editor type.
+                $domain->getDomainMemberTypes()->get('viewer')->setPermissions([
+                    DomainMemberVoter::VIEW => 'true',
+                    DomainMemberVoter::LIST => 'false',
+                ]);
+
+                $dmtField = new DomainMemberTypeField();
+                $dmtField
+                    ->setIdentifier('foo')
+                    ->setTitle('foo')
+                    ->setType('text');
+                $domain->getDomainMemberTypes()->get('viewer')->addField($dmtField);
+
+                $domain->getDomainMemberTypes()->get('editor')->setPermissions([
+                    DomainMemberVoter::VIEW => 'member.type == "editor"',
+                    DomainMemberVoter::LIST => 'member.type == "editor"',
+                ]);
+
+                $dmtField2 = new DomainMemberTypeField();
+                $dmtField2
+                    ->setIdentifier('foo')
+                    ->setTitle('foo')
+                    ->setType('text');
+                $domain->getDomainMemberTypes()->get('editor')->addField($dmtField2);
+
                 $this->em->persist($domain);
                 $this->em->flush($domain);
 
                 foreach($this->member_types as $mtype) {
                     $domainMember = new DomainMember();
                     $domainMember->setDomain($domain)->setDomainMemberType($domain->getDomainMemberTypes()->get($mtype));
+                    $domainMember->setData(['foo' => 'baa']);
                     $this->users[$domain->getIdentifier() . '_' . $mtype] = new ApiKey();
                     $this->users[$domain->getIdentifier() . '_' . $mtype]->setName($domain->getIdentifier() . '_' . $mtype)->setOrganization($org);
                     $this->users[$domain->getIdentifier() . '_' . $mtype]->addDomain($domainMember);
@@ -1899,5 +1928,100 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }', [], false, 'main');
         $this->assertCount(1, $response->data->findLang->result);
         $this->assertEquals(1, $response->data->findLang->total);
+    }
+
+    public function testFindDomainMemberForEditor() {
+
+        // Editors can be listed and viewed by editors.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            findEditorMember {
+                total,
+                result {
+                    id,
+                    type,
+                    created,
+                    updated,
+                    foo,
+                    _name
+                }
+            }
+        }');
+        $this->assertFalse(isset($response->errors));
+        $this->assertEquals(1, $response->data->findEditorMember->total);
+        $this->assertEquals($this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(), $response->data->findEditorMember->result[0]->id);
+        $this->assertEquals('editor', $response->data->findEditorMember->result[0]->type);
+        $this->assertEquals('baa', $response->data->findEditorMember->result[0]->foo);
+        $this->assertEquals('marketing_editor', $response->data->findEditorMember->result[0]->_name);
+
+        // Editors can get a single editor.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query($id: ID!) {
+            getEditorMember(id: $id) {
+                id,
+                type,
+                created,
+                updated,
+                foo,
+                _name
+            }
+        }', ['id' => $this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId()]);
+        $this->assertFalse(isset($response->errors));
+        $this->assertEquals($this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(), $response->data->getEditorMember->id);
+        $this->assertEquals('editor', $response->data->getEditorMember->type);
+        $this->assertEquals('baa', $response->data->getEditorMember->foo);
+        $this->assertEquals('marketing_editor', $response->data->getEditorMember->_name);
+
+        // Editors cannot access view member at all
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            findViewerMember {
+                total,
+                result {
+                    id,
+                    type,
+                    created,
+                    updated,
+                    foo
+                }
+            }
+        }');
+
+        $this->assertNotNull($response->errors);
+        $this->assertStringStartsWith('Cannot query field "findViewerMember" on type "Query".', $response->errors[0]->message);
+        $this->assertFalse(isset($response->data));
+
+        // If a user cannot list fieldable content, he_she also cannot get one.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            getViewerMember(id: 2) {
+                id,
+                type,
+                created,
+                updated,
+                foo,
+                _name
+            }
+        }');
+        $this->assertNotNull($response->errors);
+        $this->assertStringStartsWith('Cannot query field "getViewerMember" on type "Query".', $response->errors[0]->message);
+        $this->assertFalse(isset($response->data));
+    }
+
+    public function testFindDomainMemberForViewer() {
+
+        // Viewers cannot access editors at all.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query {
+            findEditorMember {
+                total,
+                result {
+                    id,
+                    type,
+                    created,
+                    updated,
+                    foo
+                }
+            }
+        }');
+
+        $this->assertNotNull($response->errors);
+        $this->assertStringStartsWith('Cannot query field "findEditorMember" on type "Query".', $response->errors[0]->message);
+        $this->assertFalse(isset($response->data));
     }
 }

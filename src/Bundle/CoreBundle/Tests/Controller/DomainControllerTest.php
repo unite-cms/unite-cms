@@ -18,6 +18,7 @@ use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
@@ -331,6 +332,16 @@ class DomainControllerTest extends DatabaseAwareTestCase
             ->setOrganization($this->organization);
 
         $domain->addPermission(DomainVoter::UPDATE, 'member.accessor.name == "Domain Admin"');
+
+        foreach($domain->getDomainMemberTypes() as $domainMemberType) {
+            $domainMemberType->setPermissions([
+                DomainMemberVoter::LIST => 'member.accessor.name == "Domain Admin"',
+                DomainMemberVoter::VIEW => 'member.accessor.name == "Domain Admin"',
+                DomainMemberVoter::CREATE => 'member.accessor.name == "Domain Admin"',
+                DomainMemberVoter::UPDATE => 'member.accessor.name == "Domain Admin"',
+                DomainMemberVoter::DELETE => 'member.accessor.name == "Domain Admin"',
+            ]);
+        }
 
         $this->em->persist($domain);
         $this->em->flush($domain);

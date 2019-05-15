@@ -14,17 +14,12 @@ services:
 
   # SchemaTypeFactory implementations
   unite.cms.graphql.content_type_factory:
-    class: UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory
+    class: UniteCMS\CoreBundle\SchemaType\Factories\FieldableTypeFactory
     tags: [unite_cms.graphql.schema_type_factory]
     arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.entity_manager', '@security.authorization_checker']
 
-  unite.cms.graphql.setting_type_factory:
-    class: UniteCMS\CoreBundle\SchemaType\Factories\SettingTypeFactory
-    tags: [unite_cms.graphql.schema_type_factory]
-    arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.default_entity_manager', '@security.authorization_checker']
-
   unite.cms.graphql.content_result_type_factory:
-    class: UniteCMS\CoreBundle\SchemaType\Factories\ContentResultTypeFactory
+    class: UniteCMS\CoreBundle\SchemaType\Factories\FieldableResultTypeFactory
     tags: [unite_cms.graphql.schema_type_factory]
     arguments: [ '@security.authorization_checker']
 
@@ -41,15 +36,11 @@ services:
     tags: [unite_cms.graphql.schema_type]
     arguments: ['@unite.cms.graphql.schema_type_manager', '@unite.cms.manager']
 
-  UniteCMS\CoreBundle\SchemaType\Types\ContentResultType:
+  UniteCMS\CoreBundle\SchemaType\Types\FieldableContentResultType:
     tags: [unite_cms.graphql.schema_type]
     arguments: ['@unite.cms.graphql.schema_type_manager', '@security.authorization_checker', '@unite.cms.manager']
 
-  UniteCMS\CoreBundle\SchemaType\Types\ContentInterface:
-    tags: [unite_cms.graphql.schema_type]
-    arguments: ['@unite.cms.graphql.schema_type_manager']
-
-  UniteCMS\CoreBundle\SchemaType\Types\SettingInterface:
+  UniteCMS\CoreBundle\SchemaType\Types\FieldableContentInterface:
     tags: [unite_cms.graphql.schema_type]
     arguments: ['@unite.cms.graphql.schema_type_manager']
 

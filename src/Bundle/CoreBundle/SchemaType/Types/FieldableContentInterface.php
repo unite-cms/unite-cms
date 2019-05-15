@@ -4,11 +4,11 @@ namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
-use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
-class SettingInterface extends InterfaceType
+class FieldableContentInterface extends InterfaceType
 {
 
     public function __construct(SchemaTypeManager $schemaTypeManager)
@@ -18,15 +18,20 @@ class SettingInterface extends InterfaceType
             [
                 'fields' => function () use ($schemaTypeManager) {
                     return [
+                        'id' => Type::id(),
                         'type' => Type::string(),
+                        'created' => Type::int(),
+                        'updated' => Type::int(),
                     ];
                 },
                 'resolveType' => function ($value) use ($schemaTypeManager) {
-                    if (!$value instanceof Setting) {
-                        throw new \InvalidArgumentException('Value must be instance of '.Setting::class.'.');
+                    if (!$value instanceof FieldableContent) {
+                        throw new \InvalidArgumentException(
+                            'Value must be instance of '.FieldableContent::class.'.'
+                        );
                     }
 
-                    $type = IdentifierNormalizer::graphQLType($value->getSettingType());
+                    $type = IdentifierNormalizer::graphQLType($value->getEntity());
 
                     return $schemaTypeManager->getSchemaType($type);
                 },

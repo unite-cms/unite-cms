@@ -6,7 +6,9 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeAlterationInterface;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeCompilerPass;
@@ -20,11 +22,10 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
 
         // Check that core schemaTypes and factories are already registered via compiler pass.
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('Query'));
-        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResult'));
-        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentInterface'));
+        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FieldableContentResult'));
+        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FieldableContentInterface'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResultInterface'));
-        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResult'));
-        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('SettingInterface'));
+        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FieldableContentResult'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FilterInput'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('SortInput'));
 
@@ -78,6 +79,13 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
     }
 
     public function testAlterType() {
+
+        // In this test, we don't care about access checking.
+        $admin = new User();
+        $admin->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        static::$container->get('security.token_storage')->setToken(
+            new PostAuthenticationGuardToken($admin, 'api', [])
+        );
 
         $schemaTypeManager = new SchemaTypeManager();
 

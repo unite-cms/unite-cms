@@ -11,6 +11,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use UniteCMS\CoreBundle\Field\FieldType;
@@ -19,10 +26,11 @@ use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\SchemaType\Types\PermissionsType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 
-class ContentTypeFactory implements SchemaTypeFactoryInterface
+class FieldableTypeFactory implements SchemaTypeFactoryInterface
 {
-
     /**
      * @var FieldTypeManager $fieldTypeManager
      */
@@ -46,6 +54,27 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
     }
 
     /**
+     * Returns a list of GraphQL schema type names that are supported by this factory.
+     */
+    public function getSupportedEntities() : array {
+
+        $contentType = new ContentType();
+        $settingType = new SettingType();
+        $domainMemberType = new DomainMemberType();
+
+        $names = [
+            IdentifierNormalizer::graphQLType($contentType),
+            IdentifierNormalizer::graphQLType($settingType),
+            IdentifierNormalizer::graphQLType($domainMemberType),
+        ];
+
+        unset($contentType);
+        unset($settingType);
+        unset($domainMemberType);
+        return $names;
+    }
+
+    /**
      * Returns true, if this factory can create a schema for the given name.
      *
      * @param string $schemaTypeName
@@ -55,16 +84,16 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
     {
         $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
 
-        // Support for content type.
+        // Support for fieldable types.
         if (count($nameParts) == 2) {
-            if ($nameParts[1] == 'Content') {
+            if (in_array($nameParts[1], $this->getSupportedEntities())) {
                 return true;
             }
         }
 
-        // Support for content input type.
+        // Support for fieldable input types.
         if (count($nameParts) == 3) {
-            if ($nameParts[1] == 'Content' && $nameParts[2] == 'Input') {
+            if (in_array($nameParts[1], $this->getSupportedEntities()) && $nameParts[2] == 'Input') {
                 return true;
             }
         }
@@ -88,7 +117,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
     ): Type {
         if (!$domain) {
             throw new \InvalidArgumentException(
-                'UniteCMS\CoreBundle\SchemaType\Factories\ContentTypeFactory::createSchemaType needs an domain as second argument'
+                'UniteCMS\CoreBundle\SchemaType\Factories\FieldableTypeFactory::createSchemaType needs an domain as second argument'
             );
         }
 
@@ -96,19 +125,45 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
         $identifier = IdentifierNormalizer::fromGraphQLSchema($schemaTypeName);
         $isInputType = (count($nameParts) == 3 && $nameParts[2] == 'Input');
 
+        $entityType = $nameParts[1];
+        $entityPermissions = [];
+
         /**
-         * @var ContentType $contentType
+         * @var Fieldable $fieldable
          */
-        if (!$contentType = $domain->getContentTypes()->get($identifier)) {
+        $fieldable = null;
+
+        if(!in_array($entityType, $this->getSupportedEntities())) {
             throw new \InvalidArgumentException(
-                "No contentType with identifier '$identifier' found for in the given domain."
+                "Invalid entity type '$entityType'."
             );
         }
 
-        // Load the full contentType if it is not already loaded.
-        if (!$this->entityManager->contains($contentType)) {
-            $contentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find(
-                $contentType->getId()
+        if($entityType === 'Content' && $domain->getContentTypes()->get($identifier)) {
+            $fieldable = $domain->getContentTypes()->get($identifier);
+            $entityPermissions = ContentVoter::ENTITY_PERMISSIONS;
+        }
+
+        else if($entityType === 'Setting' && $domain->getSettingTypes()->get($identifier)) {
+            $fieldable = $domain->getSettingTypes()->get($identifier);
+            $entityPermissions = SettingVoter::ENTITY_PERMISSIONS;
+        }
+
+        else if($entityType === 'Member' && $domain->getDomainMemberTypes()->get($identifier)) {
+            $fieldable = $domain->getDomainMemberTypes()->get($identifier);
+            $entityPermissions = DomainMemberVoter::ENTITY_PERMISSIONS;
+        }
+
+        if (!$fieldable) {
+            throw new \InvalidArgumentException(
+                "No '$entityType' type with identifier '$identifier' found for in the given domain."
+            );
+        }
+
+        // Load the full entity if it is not already loaded.
+        if (!$this->entityManager->contains($fieldable) && !empty($fieldable->getId())) {
+            $fieldable = $this->entityManager->getRepository(get_class($fieldable))->find(
+                $fieldable->getId()
             );
         }
 
@@ -123,9 +178,9 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
         $fieldTypes = [];
 
         /**
-         * @var \UniteCMS\CoreBundle\Entity\ContentTypeField $field
+         * @var FieldableField $field
          */
-        foreach ($contentType->getFields() as $field) {
+        foreach ($fieldable->getFields() as $field) {
 
             $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
 
@@ -162,10 +217,10 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
             }
         }
 
-        // Create or get permissions type for this content type.
-        $permissionsTypeName = IdentifierNormalizer::graphQLType($identifier, 'ContentPermissions');
+        // Create or get permissions type for this fieldable type.
+        $permissionsTypeName = IdentifierNormalizer::graphQLType($identifier, $entityType . 'Permissions');
         if(!$schemaTypeManager->hasSchemaType($permissionsTypeName)) {
-            $schemaTypeManager->registerSchemaType(new PermissionsType(ContentVoter::ENTITY_PERMISSIONS, $permissionsTypeName));
+            $schemaTypeManager->registerSchemaType(new PermissionsType($entityPermissions, $permissionsTypeName));
         }
 
         if ($isInputType) {
@@ -173,7 +228,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                 [
                     'name' => IdentifierNormalizer::graphQLType(
                             $identifier,
-                            'ContentInput'
+                        $entityType . 'Input'
                         ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                     'fields' => $fields,
                 ]
@@ -184,7 +239,7 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                 [
                     'name' => IdentifierNormalizer::graphQLType(
                             $identifier,
-                            'Content'
+                            $entityType
                         ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
                     'fields' => array_merge(
                         [
@@ -192,12 +247,12 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             'type' => Type::string(),
                             '_permissions' => $schemaTypeManager->getSchemaType($permissionsTypeName, $domain),
                         ],
-                        empty($contentType->getLocales()) ? [] : [
+                        empty($fieldable->getLocales()) ? [] : [
                             'locale' => Type::string(),
                             'translations' => [
                                 'type' => Type::listOf(
                                     $schemaTypeManager->getSchemaType(
-                                        IdentifierNormalizer::graphQLType($identifier, 'Content').'Level'.($nestingLevel + 1),
+                                        IdentifierNormalizer::graphQLType($identifier, $entityType).'Level'.($nestingLevel + 1),
                                         $domain,
                                         $nestingLevel + 1
                                     )
@@ -214,18 +269,24 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                         [
                             'created' => Type::int(),
                             'updated' => Type::int(),
-                            'deleted' => Type::int(),
                         ],
+                        ($fieldable instanceof ContentType) ? [
+                            'deleted' => Type::int(),
+                        ] : [],
+                        ($fieldable instanceof DomainMemberType) ? [
+                            '_name' => Type::string(),
+                        ] : [],
                         $fields
                     ),
                     'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use (
-                        $contentType,
+                        $fieldable,
+                        $entityPermissions,
                         $fieldTypes
                     ) {
 
-                        if (!$value instanceof Content) {
+                        if (!$value instanceof FieldableContent) {
                             throw new \InvalidArgumentException(
-                                'Value must be instance of '.Content::class.'.'
+                                'Value must be instance of '.FieldableContent::class.'.'
                             );
                         }
 
@@ -233,10 +294,10 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             case 'id':
                                 return $value->getId();
                             case 'type':
-                                return $value->getContentType()->getIdentifier();
+                                return $value->getEntity()->getIdentifier();
                             case '_permissions':
                                 $permissions = [];
-                                foreach(ContentVoter::ENTITY_PERMISSIONS as $permission) {
+                                foreach($entityPermissions as $permission) {
                                     $permissions[$permission] = $this->authorizationChecker->isGranted($permission, $value);
                                 }
                                 return $permissions;
@@ -252,38 +313,60 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                             case 'translations':
 
                                 $translations = [];
-                                $includeLocales = $args['locales'] ?? $value->getContentType()->getLocales();
+                                $includeLocales = $args['locales'] ?? $value->getEntity()->getLocales();
                                 $includeLocales = is_string($includeLocales) ? [$includeLocales] : $includeLocales;
-                                $includeLocales = array_diff($includeLocales, [$value->getLocale()]);
 
-                                // Case 1: This is the base translation
-                                if(empty($value->getTranslationOf())) {
-                                    foreach($value->getTranslations() as $translation) {
-                                        if(in_array($translation->getLocale(), $includeLocales)) {
-                                            $translations[$translation->getLocale()] = $translation;
+                                if($value instanceof Content) {
+
+                                    // Case 1: This is the base translation
+                                    if (empty($value->getTranslationOf())) {
+                                        foreach ($value->getTranslations() as $translation) {
+                                            if (in_array($translation->getLocale(), $includeLocales)) {
+                                                $translations[$translation->getLocale()] = $translation;
+                                            }
+                                        }
+                                    }
+
+                                    // Case 2: This is a translation of a base translation
+                                    else {
+                                        if (in_array($value->getTranslationOf()->getLocale(), $includeLocales)) {
+                                            $translations[$value->getTranslationOf()->getLocale(
+                                            )] = $value->getTranslationOf();
+                                        }
+                                        foreach ($value->getTranslationOf()->getTranslations() as $translation) {
+                                            if (in_array($translation->getLocale(), $includeLocales)) {
+                                                $translations[$translation->getLocale()] = $translation;
+                                            }
+                                        }
+                                    }
+
+                                    // Remove all translations, we don't have access to.
+                                    foreach ($translations as $locale => $translation) {
+                                        if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $translation)) {
+                                            unset($translations[$locale]);
                                         }
                                     }
                                 }
-                                // Case 2: This is a translation of a base translation
-                                else {
-                                    if(in_array($value->getTranslationOf()->getLocale(), $includeLocales)) {
-                                        $translations[$value->getTranslationOf()->getLocale()] = $value->getTranslationOf();
-                                    }
-                                    foreach($value->getTranslationOf()->getTranslations() as $translation) {
-                                        if(in_array($translation->getLocale(), $includeLocales)) {
-                                            $translations[$translation->getLocale()] = $translation;
+
+                                elseif($value instanceof Setting) {
+                                    foreach ($value->getSettingType()->getLocales() as $locale) {
+                                        if(in_array($locale, $includeLocales)) {
+                                            $translations[] = $value->getSettingType()->getSetting($locale);
                                         }
                                     }
-                                }
 
-                                // Remove all translations, we don't have access to.
-                                foreach($translations as $locale => $translation) {
-                                    if(!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $translation)) {
-                                        unset($translations[$locale]);
+                                    // Remove all translations, we don't have access to.
+                                    foreach($translations as $locale => $translation) {
+                                        if(!$this->authorizationChecker->isGranted(SettingVoter::VIEW, $translation)) {
+                                            unset($translations[$locale]);
+                                        }
                                     }
                                 }
 
                                 return $translations;
+
+                            case '_name':
+                                return $value instanceof DomainMember ? (string)$value : null;
 
                             default:
 
@@ -295,13 +378,13 @@ class ContentTypeFactory implements SchemaTypeFactoryInterface
                                 )[$info->fieldName] : null;
 
                                 return $fieldTypes[$info->fieldName]->resolveGraphQLData(
-                                    $contentType->getFields()->get($info->fieldName),
+                                    $fieldable->getFields()->get($info->fieldName),
                                     $fieldData,
                                     $value
                                 );
                         }
                     },
-                    'interfaces' => [$schemaTypeManager->getSchemaType('ContentInterface')],
+                    'interfaces' => [$schemaTypeManager->getSchemaType('FieldableContentInterface')],
                 ]
             );
         }
