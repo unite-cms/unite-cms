@@ -309,7 +309,6 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                                 $translations = [];
                                 $includeLocales = $args['locales'] ?? $value->getEntity()->getLocales();
                                 $includeLocales = is_string($includeLocales) ? [$includeLocales] : $includeLocales;
-                                $includeLocales = array_diff($includeLocales, [$value->getLocale()]);
 
                                 if($value instanceof Content) {
 
