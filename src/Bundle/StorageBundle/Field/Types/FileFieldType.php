@@ -23,7 +23,7 @@ class FileFieldType extends FieldType
 {
     const TYPE                      = "file";
     const FORM_TYPE                 = StorageFileType::class;
-    const SETTINGS                  = ['not_empty', 'description', 'file_types', 'bucket'];
+    const SETTINGS                  = ['not_empty', 'description', 'file_types', 'bucket', 'form_group'];
     const REQUIRED_SETTINGS         = ['bucket'];
 
     private $router;
@@ -162,7 +162,7 @@ class FileFieldType extends FieldType
         // Validate allowed bucket configuration.
         if($context->getViolations()->count() == 0) {
             foreach($settings->bucket as $field => $value) {
-                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region'])) {
+                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region', 'acl'])) {
                     $context->buildViolation('additional_data')->atPath('bucket.' . $field)->addViolation();
                 }
             }
@@ -170,7 +170,7 @@ class FileFieldType extends FieldType
 
         // Validate required bucket configuration.
         if($context->getViolations()->count() == 0) {
-            foreach(['endpoint', 'key', 'secret', 'bucket'] as $required_field) {
+            foreach(['endpoint', 'bucket'] as $required_field) {
                 if(!isset($settings->bucket[$required_field])) {
                     $context->buildViolation('required')->atPath('bucket.' . $required_field)->addViolation();
                 }

@@ -35,3 +35,18 @@
     }
   }
 }
+
+.uk-tab {
+  a.group-with-errors {
+    &:after {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: $global-danger-background;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin: 0 5px 13px;
+    }
+  }
+}

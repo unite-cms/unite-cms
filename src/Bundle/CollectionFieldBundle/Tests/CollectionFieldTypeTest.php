@@ -48,6 +48,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                     'fields' => [],
                     'min_rows' => 0,
                     'max_rows' => 100,
+                    'form_group' => "Group 1",
                 ]
             )
         );
@@ -665,7 +666,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('['.$field->getIdentifier().'][2][n1][0][n2][0][f2]', $violations[1]->getPropertyPath());
         $this->assertEquals('invalid_reference_definition', $violations[1]->getMessageTemplate());
         $this->assertEquals('['.$field->getIdentifier().'][3][n1][0][n2][0][f2]', $violations[2]->getPropertyPath());
-        $this->assertEquals('missing_reference_definition', $violations[2]->getMessageTemplate());
+        $this->assertEquals('required', $violations[2]->getMessageTemplate());
         $this->assertEquals('['.$field->getIdentifier().'][3][n1][0][n2][0][foo]',
             $violations[3]->getPropertyPath()
         );

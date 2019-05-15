@@ -13,7 +13,7 @@ class WysiwygFieldType extends FieldType
 {
     const TYPE                      = "wysiwyg";
     const FORM_TYPE                 = WysiwygType::class;
-    const SETTINGS                  = ['not_empty', 'description', 'default', 'toolbar', 'heading', 'placeholder'];
+    const SETTINGS                  = ['not_empty', 'description', 'default', 'toolbar', 'heading', 'placeholder', 'form_group'];
     const REQUIRED_SETTINGS         = [];
     const ALLOWED_TOOLBAR           = ['|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'alignment', 'insertTable', 'tableColumn', 'mergeTableCells', 'tableRow', 'highlight'];
     const ALLOWED_HEADING           = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code'];

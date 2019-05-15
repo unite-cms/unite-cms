@@ -18,7 +18,7 @@ class ChoiceFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['not_empty', 'description', 'default', 'choices'];
+    const SETTINGS = ['not_empty', 'description', 'default', 'choices', 'form_group'];
 
     /**
      * All required settings for this field type.

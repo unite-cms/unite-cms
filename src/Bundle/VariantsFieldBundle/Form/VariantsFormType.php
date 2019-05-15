@@ -58,6 +58,7 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
                 'label' => false,
                 'attr' => [
                     'data-variant-title' => $variant['title'],
+                    'data-variant-icon' => $variant['icon'],
                     'data-graphql-query-mapper' => $variant['identifier'] . '=... on ' .VariantFactory::schemaTypeNameForVariant(
                         new Variant(null, $variants->getFieldsForVariant($variant['identifier']), $variant['identifier'], $variant['title'], $variants)
                     ),

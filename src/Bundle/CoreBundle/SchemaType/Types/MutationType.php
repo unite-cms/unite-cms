@@ -97,6 +97,12 @@ class MutationType extends AbstractType
 
         // Append Content types.
         foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
+
+            // If the current user is not allowed to access this content type, skip adding a get and find action.
+            if(!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+                continue;
+            }
+
             $key = IdentifierNormalizer::graphQLType($contentType, '');
 
             $fields['create' . $key] = [

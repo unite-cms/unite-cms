@@ -71,11 +71,6 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('invalid_language', $errors->get(0)->getMessageTemplate());
 
-
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_language', $errors->get(0)->getMessageTemplate());
-
         // test wrong language
         $ctField->setSettings(new FieldableFieldSettings(
             [
@@ -97,6 +92,7 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'languages' => ['de', 'en', 'de_AT'],
+                'form_group' => 'foo',
             ]
         ));
 
@@ -104,7 +100,11 @@ class LanguageFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(0, $errors);
 
         $options = $fieldType->getFormOptions($ctField);
-        $this->assertEquals(['de', 'en', 'de_AT'], $options['choices']);
+        $this->assertEquals([
+            'German' => 'de',
+            'English' => 'en',
+            'Austrian German' => 'de_AT',
+        ], $options['choices']);
         $this->assertEquals(null, $options['choice_loader']);
     }
 

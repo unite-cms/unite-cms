@@ -40,7 +40,7 @@ class ReferenceOfFieldType extends FieldType
     const TYPE = "reference_of";
     const FORM_TYPE = ReferenceOfType::class;
 
-    const SETTINGS = ['domain', 'content_type', 'reference_field'];
+    const SETTINGS = ['domain', 'content_type', 'reference_field', 'form_group'];
     const REQUIRED_SETTINGS = ['domain', 'content_type', 'reference_field'];
 
     /**

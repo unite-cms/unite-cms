@@ -1,0 +1,7 @@
+services:
+
+  # A recaptcha input field
+  UniteCMS\RecaptchaFieldBundle\Field\Types\RecaptchaFieldType:
+    tags: [unite_cms.field_type]
+    arguments:
+      ['@request_stack']

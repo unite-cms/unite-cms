@@ -50,13 +50,14 @@ class ChoicesFieldTypeTest extends FieldTypeTestCase
 
     public function testContentTypeFieldTypeWithValidSettings()
     {
-        // Content Type Field with invalid settings should not be valid.
+        // Content Type Field with valid settings should be valid.
         $ctField = $this->createContentTypeField('choices');
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'choices' => ['foo1' => 'foo1', 'foo2' => 'foo2', 'foo3' => 'foo3'],
-                'default' => ['foo1', 'foo2']
+                'default' => ['foo1', 'foo2'],
+                'form_group' => 'foo',
             ]
         ));
 

@@ -22,17 +22,24 @@ class LanguageFieldType extends TextFieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['languages'];
+    const SETTINGS = ['languages', 'not_empty', 'description', 'default', 'form_group'];
 
     function getFormOptions(FieldableField $field): array
     {
-        return array_merge(
-            parent::getFormOptions($field),
-            empty($field->getSettings()->languages) ? [] : [
-                'choices' => $field->getSettings()->languages,
+        $choice_settings = [];
+
+        if(!empty($field->getSettings()->languages)) {
+            $choice_settings = [
+                'choices' => [],
                 'choice_loader' => null,
-            ]
-        );
+            ];
+
+            foreach($field->getSettings()->languages as $language) {
+                $choice_settings['choices'][Intl::getLanguageBundle()->getLanguageName($language)] = $language;
+            }
+        }
+
+        return array_merge(parent::getFormOptions($field), $choice_settings);
     }
 
     /**

@@ -14,7 +14,7 @@ use UniteCMS\CoreBundle\Entity\FieldableField;
 class ImageFieldType extends FileFieldType
 {
     const TYPE                      = "image";
-    const SETTINGS                  = ['not_empty', 'description', 'bucket', 'thumbnail_url', 'file_types'];
+    const SETTINGS                  = ['not_empty', 'description', 'bucket', 'thumbnail_url', 'file_types', 'form_group'];
     const REQUIRED_SETTINGS         = ['bucket'];
 
     /**

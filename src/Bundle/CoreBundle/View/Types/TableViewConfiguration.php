@@ -36,10 +36,16 @@ class TableViewConfiguration implements ConfigurationInterface
      */
     protected $fieldTypeManager;
 
-    public function __construct(Fieldable $fieldable, FieldTypeManager $fieldTypeManager)
+    /**
+     * @var int $maxQueryLimit
+     */
+    protected $maxQueryLimit;
+
+    public function __construct(Fieldable $fieldable, FieldTypeManager $fieldTypeManager, int $maxQueryLimit = 100)
     {
         $this->fieldable = $fieldable;
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->maxQueryLimit = $maxQueryLimit;
     }
 
     /**
@@ -58,6 +64,7 @@ class TableViewConfiguration implements ConfigurationInterface
             ->children()
                 ->append($this->appendFieldsNode())
                 ->append($this->appendFilterNode())
+                ->append($this->appendRowsPerPageNode())
                 ->append($this->appendSortNode())
                 ->append($this->appendActionsNode())
                 ->variableNode('sort_field')->setDeprecated()->end()
@@ -110,6 +117,32 @@ class TableViewConfiguration implements ConfigurationInterface
                         }
 
                         if (!$filter_structure->getFilter()) {
+                            throw $exception;
+                        }
+
+                        return $v;
+                    }
+                )
+            ->end();
+    }
+
+    protected function appendRowsPerPageNode() : VariableNodeDefinition {
+        $treeBuilder = new TreeBuilder('rows_per_page', 'scalar');
+        return $treeBuilder->getRootNode()
+            ->validate()
+                ->always(
+                    function ($v) {
+                        if (!is_int($v)) {
+                            $exception = new InvalidConfigurationException('Invalid rows_per_page configuration - must be an integer');
+                            $exception->setPath('rows_per_page');
+                            throw $exception;
+                        }
+
+                        if ($v > $this->maxQueryLimit) {
+                            $exception = new InvalidConfigurationException(
+                                "Invalid rows_per_page configuration - must be within max_query_limit of {$this->maxQueryLimit}"
+                            );
+                            $exception->setPath('rows_per_page');
                             throw $exception;
                         }
 
@@ -324,7 +357,9 @@ class TableViewConfiguration implements ConfigurationInterface
         }
 
         $type = $config['type'] ?? $fieldEntity->getType();
-        $this->fieldTypeManager->getFieldType($type)->alterViewFieldSettings($config, $this->fieldTypeManager, $fieldEntity);
+        if($this->fieldTypeManager->hasFieldType($type)) {
+            $this->fieldTypeManager->getFieldType($type)->alterViewFieldSettings($config, $this->fieldTypeManager, $fieldEntity);
+        }
         return $config;
     }
 }

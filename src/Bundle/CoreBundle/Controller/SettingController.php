@@ -56,6 +56,7 @@ class SettingController extends AbstractController
             ['attr' => ['class' => 'uk-form-vertical']]
         );
         $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -76,7 +77,7 @@ class SettingController extends AbstractController
                 $this->getDoctrine()->getManager()->flush();
 
                 // On form submit, reload the current page so setting gets reloaded from db.
-                return $this->redirectToRoute('unitecms_core_setting_index', [$setting]);
+                return $this->redirectToRoute('unitecms_core_setting_index', ['setting' => $setting, 'locale' => $setting->getLocale()]);
             }
         }
 
@@ -125,33 +126,6 @@ class SettingController extends AbstractController
         }
 
         return new Response($response);
-    }
-
-    /**
-     * @Route("/{setting_type}/translations/{setting}", methods={"GET"})
-     * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
-     * @Entity("setting")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
-     *
-     * @param SettingType $settingType
-     * @param Setting $setting
-     * @param Request $request
-     * @return Response
-     */
-    public function translationsAction(SettingType $settingType, Setting $setting, Request $request)
-    {
-        // Otherwise, a user could update setting, he_she has access to, from another domain.
-        if($setting->getSettingType() !== $settingType) {
-            throw $this->createNotFoundException();
-        }
-
-        return $this->render(
-            '@UniteCMSCore/Setting/translations.html.twig',
-            [
-                'settingType' => $settingType,
-                'setting' => $setting,
-            ]
-        );
     }
 
     /**

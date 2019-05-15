@@ -19,7 +19,7 @@ use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
+use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 use UniteCMS\VariantsFieldBundle\Form\VariantsFormType;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
 use UniteCMS\VariantsFieldBundle\Model\VariantContent;
@@ -30,7 +30,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 {
     const TYPE                      = "variants";
     const FORM_TYPE                 = VariantsFormType::class;
-    const SETTINGS                  = ["description", 'variants'];
+    const SETTINGS                  = ["description", 'variants', 'form_group'];
     const REQUIRED_SETTINGS         = ['variants'];
 
     /**
@@ -43,10 +43,16 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
      */
     private $variantFactory;
 
-    function __construct(FieldTypeManager $fieldTypeManager, VariantFactory $variantFactory)
+    /**
+     * @var ViewConfigurationFactoryInterface $tableViewConfigurationFactory;
+     */
+    protected $tableViewConfigurationFactory;
+
+    function __construct(FieldTypeManager $fieldTypeManager, VariantFactory $variantFactory, ViewConfigurationFactoryInterface $tableViewConfigurationFactory)
     {
         $this->fieldTypeManager = $fieldTypeManager;
         $this->variantFactory = $variantFactory;
+        $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
     }
 
     /**
@@ -466,7 +472,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             foreach($settings['settings']['on'] as $v => $fields) {
                 $processor = new Processor();
                 $variant = new Variant(null, $variants->getFieldsForVariant($v), $v, $v, $variants);
-                $config = $processor->processConfiguration(new TableViewConfiguration($variant, $fieldTypeManager), ['settings' => ['fields' => $fields]]);
+                $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($variant), ['settings' => ['fields' => $fields]]);
                 $settings['settings']['on'][$v] = $config['fields'];
                 $settings['settings']['variant_schema_types'][$v] = VariantFactory::schemaTypeNameForVariant($variant);
 

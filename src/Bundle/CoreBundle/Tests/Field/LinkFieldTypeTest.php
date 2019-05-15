@@ -63,6 +63,7 @@ class LinkFieldTypeTest extends FieldTypeTestCase
                 'description' => 'my description',
                 'not_empty' => false,
                 'default' => ['url' => 'https://www.unitecms.io'],
+                'form_group' => 'foo',
             ]
         ));
 

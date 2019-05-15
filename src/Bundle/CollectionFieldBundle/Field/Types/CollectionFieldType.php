@@ -19,22 +19,24 @@ use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
+use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 
 class CollectionFieldType extends FieldType implements NestableFieldTypeInterface
 {
     const TYPE                      = "collection";
     const FORM_TYPE                 = CollectionFormType::class;
-    const SETTINGS                  = ['description', 'fields', 'min_rows', 'max_rows'];
+    const SETTINGS                  = ['description', 'fields', 'min_rows', 'max_rows', 'form_group'];
     const REQUIRED_SETTINGS         = ['fields'];
 
     private $collectionFieldTypeFactory;
     private $fieldTypeManager;
+    private $tableViewConfigurationFactory;
 
-    function __construct(CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager)
+    function __construct(CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager, ViewConfigurationFactoryInterface $tableViewConfigurationFactory)
     {
         $this->collectionFieldTypeFactory = $collectionFieldTypeFactory;
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
     }
 
     /**
@@ -50,6 +52,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         $options = [
             'label' => false,
             'content' => new CollectionRow($collection, [], null),
+            'hide_labels' => count($collection->getFields()) < 2,
         ];
         $options['fields'] = [];
 
@@ -408,7 +411,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             // normalize settings for nested fields.
             if(!empty($settings['settings']['fields'])) {
                 $processor = new Processor();
-                $config = $processor->processConfiguration(new TableViewConfiguration(self::getNestableFieldable($field), $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
+                $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create(self::getNestableFieldable($field)), ['settings' => ['fields' => $settings['settings']['fields']]]);
                 $settings['settings']['fields'] = $config['fields'];
 
                 // Template will only include assets from root fields, so we need to add any child templates to the root field.

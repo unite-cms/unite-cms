@@ -111,18 +111,22 @@ class StorageService
         $uuid = (string)Uuid::uuid1();
 
         // Return pre-signed url
-        $s3Client = new S3Client(
-            [
-                'version' => 'latest',
-                'region' => $bucket_settings['region'] ?? 'us-east-1',
-                'endpoint' => $bucket_settings['endpoint'],
-                'use_path_style_endpoint' => true,
-                'credentials' => [
-                    'key' => $bucket_settings['key'],
-                    'secret' => $bucket_settings['secret'],
-                ],
-            ]
-        );
+        $s3Config = [
+            'version' => 'latest',
+            'region' => $bucket_settings['region'] ?? 'us-east-1',
+            'endpoint' => $bucket_settings['endpoint'],
+            'use_path_style_endpoint' => true,
+        ];
+        // The key and secret are optional - if they're not specified, the S3 client
+        // object will attempt to fetch them from the EC2 instance metadata server.
+        if (isset($bucket_settings['key']) && isset($bucket_settings['secret'])) {
+            $s3Config['credentials'] = [
+                'key' => $bucket_settings['key'],
+                'secret' => $bucket_settings['secret'],
+            ];
+        }
+
+        $s3Client = new S3Client($s3Config);
 
         // Set the upload file path to an optional path + uuid + filename.
         $filePath = $uuid.'/'.$filename;
@@ -135,13 +139,14 @@ class StorageService
             }
         }
 
-        $command = $s3Client->getCommand(
-            'PutObject',
-            [
-                'Bucket' => $bucket_settings['bucket'],
-                'Key' => $filePath,
-            ]
-        );
+        $putObjectParams = [
+            'Bucket' => $bucket_settings['bucket'],
+            'Key' => $filePath,
+        ];
+        if (isset($bucket_settings['acl'])) {
+            $putObjectParams['ACL'] = $bucket_settings['acl'];
+        }
+        $command = $s3Client->getCommand('PutObject', $putObjectParams);
 
         return new PreSignedUrl(
             (string)$s3Client->createPresignedRequest($command, '+5 minutes')
@@ -206,18 +211,22 @@ class StorageService
      */
     public function deleteObject(string $uuid, string $filename, array $bucket_settings)
     {
-        $s3Client = new S3Client(
-            [
-                'version' => 'latest',
-                'region' => $bucket_settings['region'] ?? 'us-east-1',
-                'endpoint' => $bucket_settings['endpoint'],
-                'use_path_style_endpoint' => true,
-                'credentials' => [
-                    'key' => $bucket_settings['key'],
-                    'secret' => $bucket_settings['secret'],
-                ],
-            ]
-        );
+        $s3Config = [
+            'version' => 'latest',
+            'region' => $bucket_settings['region'] ?? 'us-east-1',
+            'endpoint' => $bucket_settings['endpoint'],
+            'use_path_style_endpoint' => true
+        ];
+        // The key and secret are optional - if they're not specified, the S3 client
+        // object will attempt to fetch them from the EC2 instance metadata server.
+        if (isset($bucket_settings['key']) && isset($bucket_settings['secret'])) {
+            $s3Config['credentials'] = [
+                'key' => $bucket_settings['key'],
+                'secret' => $bucket_settings['secret'],
+            ];
+        }
+
+        $s3Client = new S3Client($s3Config);
 
         // Set the upload file path to an optional path + uuid + filename.
         $filePath = $uuid.'/'.$filename;

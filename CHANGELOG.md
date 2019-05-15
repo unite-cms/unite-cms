@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.8.2 (2019-05-14)
+- Added #313: A recaptcha field to secure graphql mutations
+- Added #407, #419: A field_group settings to allow to group or hide fields from the form
+- Added #383: A country field type
+- Added #556: A new geolocation field type
+- Added #554: A new language field type
+- Added #555: Allow to pass env variable to domain config json
+- Added #526: Added a rows_per_page option to view settings
+- Added #565: Added a new service tag unite_cms.graphql.schema_type_alteration to alter existing schemas
+- Added #498: Introduce a new ILIKE operator for case-insensitive comparing + use it for table view search
+- Improved #365: Collection and variant form widgets
+- Improved #506: You can now use any custom kind of view field to render a field, not only field types
+- Improved #501: Improve sidebar view
+- Improved #484: Settings translation now include all languages
+- Improved #572: Refactored settings translation admin view
+- Improved #563: Make it more easy to override core templates
+- Fixed #573: Only add graphql types for types if the user is allowed to ContentVoter::LIST and SettingVoter::View 
+- Fixed #577: Allow inline styles in wysiwyg editor (needed for alignment feature)
+- Fixed #575: Fixed a css bug for big screens
+- Fixed #504: Fix a rendering bug with multiple reference fields
+- Fixed #567: Fixed a bug, where deleting choices values via api won't work
+- Fixed #561: Default data for fields in a collection was not working
+- Fixed #552: Fixed a bug in domain config import script
+- Fixed #550: Fixed a bug with incorrect identifiers of fieldable content inside variants
+
 ## 0.8.1 (2019-03-30)
 - Fixed #505: A problem where images could not be removed
 - Fixed #475: A bug with multiple reference and reference_of fields on the same form

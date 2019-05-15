@@ -33,6 +33,7 @@ return [
 
     # unite cms bundles that are not part of the standard installation
     UniteCMS\RegistrationBundle\UniteCMSRegistrationBundle::class => ['dev_registration' => true, 'test_registration' => true],
+    UniteCMS\RecaptchaFieldBundle\UniteCMSRecaptchaFieldBundle::class => ['all' => true],
 
     # Dev and Test bundles
     Symfony\Bundle\DebugBundle\DebugBundle::class => ($dev_env + $test_env),

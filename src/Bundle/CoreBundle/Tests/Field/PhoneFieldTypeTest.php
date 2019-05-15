@@ -39,7 +39,8 @@ class PhoneFieldTypeTest extends FieldTypeTestCase
             [
                 'not_empty' => true,
                 'description' => 'my description',
-                'default' => '+436605277131'
+                'default' => '+436605277131',
+                'form_group' => false,
             ]
         ));
 

@@ -49,7 +49,22 @@ class UniteCMSCoreTypeExtensionTest extends TypeTestCase
         $form = $this->factory->create(TextType::class, null, ['description' => 'bla2']);
         $this->assertEquals('bla2', $form->getConfig()->getOption('description'));
 
-        // test if description is in form vars
+        $form = $this->factory->create(TextType::class, null, ['form_group' => 'foo']);
+        $this->assertEquals('foo', $form->getConfig()->getOption('form_group'));
+
+        $form = $this->factory->create(TextType::class, null, ['form_group' => 'foo']);
+        $this->assertEquals('foo', $form->getConfig()->getOption('form_group'));
+
+        $form = $this->factory->create(TextType::class, null, ['form_group' => true]);
+        $this->assertEquals(true, $form->getConfig()->getOption('form_group'));
+
+        $form = $this->factory->create(TextType::class, null, ['form_group' => false]);
+        $this->assertEquals(false, $form->getConfig()->getOption('form_group'));
+
+        $form = $this->factory->create(TextType::class, null, ['form_group' => null]);
+        $this->assertEquals(null, $form->getConfig()->getOption('form_group'));
+
+        // test if description and from_group is in form vars
         $form = $this->createMock(Form::class);
         $formExtension = new UniteCMSCoreTypeExtension($this->createMock(TranslatorInterface::class));
         $formView = new FormView();
@@ -57,11 +72,31 @@ class UniteCMSCoreTypeExtensionTest extends TypeTestCase
             $formView,
             $form,
             [
-                'description' => 'test123'
+                'description' => 'test123',
+                'form_group' => 'foo',
             ]
         );
 
         $this->assertEquals('test123', $formView->vars['description']);
+        $this->assertEquals('foo', $formView->vars['form_group']);
+
+        // Test different false options (to hide the field)
+        $formExtension->buildView($formView, $form, ['form_group' => 'off']);
+        $this->assertEquals(false, $formView->vars['form_group']);
+
+        $formExtension->buildView($formView, $form, ['form_group' => false]);
+        $this->assertEquals(false, $formView->vars['form_group']);
+
+        $formExtension->buildView($formView, $form, ['form_group' => 'no']);
+        $this->assertEquals(false, $formView->vars['form_group']);
+
+        // Test true
+        $formExtension->buildView($formView, $form, ['form_group' => true]);
+        $this->assertArrayNotHasKey('form_group', $formView->vars);
+
+        // Test null
+        $formExtension->buildView($formView, $form, ['form_group' => null]);
+        $this->assertArrayNotHasKey('form_group', $formView->vars);
     }
 
 }

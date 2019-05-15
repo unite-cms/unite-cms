@@ -64,6 +64,15 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
             $view->vars['description'] = $options['description'];
         }
 
+        if (isset($options['form_group']) && $options['form_group'] !== null) {
+            if(filter_var($options['form_group'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === false) {
+                $view->vars['form_group'] = false;
+            } elseif(is_string($options['form_group'])) {
+                $view->vars['form_group'] = $options['form_group'];
+            } else {
+                unset($view->vars['form_group']);
+            }
+        }
     }
 
     /**
@@ -74,6 +83,7 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
         $resolver->setDefined('description');
         $resolver->setDefined('default');
         $resolver->setDefined('not_empty');
+        $resolver->setDefined('form_group');
 
         // If not_empty is set, also set the required option to true
         $resolver->setNormalizer('required', function(Options $options, $value){

@@ -25,7 +25,7 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\ReferenceType;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
-use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
+use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 use UniteCMS\CoreBundle\Entity\View;
@@ -39,7 +39,7 @@ class ReferenceFieldType extends FieldType
 {
     const TYPE = "reference";
     const FORM_TYPE = ReferenceType::class;
-    const SETTINGS = ['not_empty', 'description', 'domain', 'content_type', 'view', 'content_label'];
+    const SETTINGS = ['not_empty', 'description', 'domain', 'content_type', 'view', 'content_label', 'form_group'];
     const REQUIRED_SETTINGS = ['domain', 'content_type'];
 
     /**
@@ -58,6 +58,7 @@ class ReferenceFieldType extends FieldType
     private $templating;
     private $csrfTokenManager;
     private $router;
+    private $tableViewConfigurationFactory;
 
     function __construct(
         ValidatorInterface $validator,
@@ -67,7 +68,8 @@ class ReferenceFieldType extends FieldType
         ViewTypeManager $viewTypeManager,
         TwigEngine $templating,
         Router $router,
-        CsrfTokenManager $csrfTokenManager
+        CsrfTokenManager $csrfTokenManager,
+        ViewConfigurationFactoryInterface $tableViewConfigurationFactory
     ) {
         $this->referenceResolver = new ReferenceResolver($uniteCMSManager, $entityManager, $authorizationChecker);
         $this->validator = $validator;
@@ -77,6 +79,7 @@ class ReferenceFieldType extends FieldType
         $this->templating = $templating;
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
+        $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
     }
 
     /**
@@ -196,7 +199,6 @@ class ReferenceFieldType extends FieldType
     /**
      * {@inheritdoc}
      * @throws InvalidFieldConfigurationException
-     * @throws ContentTypeAccessDeniedException
      * @throws DomainAccessDeniedException
      * @throws MissingOrganizationException
      */
@@ -208,7 +210,7 @@ class ReferenceFieldType extends FieldType
             $field->getSettings()->content_type);
 
         if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
-            throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$contentType}\".");
+            return null;
         }
 
         return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $contentType->getDomain(), $nestingLevel);
@@ -268,13 +270,13 @@ class ReferenceFieldType extends FieldType
         }
 
         // Only validate available data.
-        if (empty($data)) {
+        if (empty($data) && !$field->getSettings()->not_empty) {
             return;
         }
 
         // Make sure, that all required fields are set.
         if (empty($data['domain']) || empty($data['content_type']) || empty($data['content'])) {
-            $context->buildViolation('missing_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
+            $context->buildViolation('required')->atPath('['.$field->getIdentifier().']')->addViolation();
         } // Try to resolve the data to check if the current user is allowed to access it.
         else {
             try {
@@ -332,7 +334,7 @@ class ReferenceFieldType extends FieldType
                 $this->referenceResolver->resolveDomain($field->getSettings()->domain),
                 $field->getSettings()->content_type);
             $processor = new Processor();
-            $config = $processor->processConfiguration(new TableViewConfiguration($contentType, $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
+            $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($contentType), ['settings' => ['fields' => $settings['settings']['fields']]]);
             $settings['settings']['fields'] = $config['fields'];
 
             // Template will only include assets from root fields, so we need to add any child templates to the root field.

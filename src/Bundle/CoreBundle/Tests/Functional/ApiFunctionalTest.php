@@ -1727,12 +1727,15 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $this->assertTrue(empty($response->errors));
 
-        // Make sure, that only de translation is filled out and not fr translation, we do not have access to.
+        // Make sure, that only de and en translations are present and not fr translation, we do not have access to.
         $this->assertEquals('en', $response->data->LangSetting->locale);
         $this->assertEquals('Updated title', $response->data->LangSetting->title);
-        $this->assertCount(1, $response->data->LangSetting->translations);
+
+        $this->assertCount(2, $response->data->LangSetting->translations);
         $this->assertEquals('DE title', $response->data->LangSetting->translations[0]->title);
         $this->assertEquals('de', $response->data->LangSetting->translations[0]->locale);
+        $this->assertEquals('Updated title', $response->data->LangSetting->translations[1]->title);
+        $this->assertEquals('en', $response->data->LangSetting->translations[1]->locale);
     }
 
     public function testAPICRUDActionsWithCookieAuthentication() {

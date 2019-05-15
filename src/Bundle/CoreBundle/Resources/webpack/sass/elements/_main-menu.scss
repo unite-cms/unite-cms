@@ -181,6 +181,14 @@
         &:hover {
           opacity: 1;
         }
+
+        &.create-content-button {
+          opacity: 0.25;
+          &:hover {
+            opacity: 1;
+            color: $unite-color;
+          }
+        }
       }
     }
 

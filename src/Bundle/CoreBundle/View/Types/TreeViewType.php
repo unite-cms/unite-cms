@@ -2,18 +2,12 @@
 
 namespace UniteCMS\CoreBundle\View\Types;
 
-use Symfony\Component\Config\Definition\ConfigurationInterface;
-use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\View;
 
 class TreeViewType extends TableViewType
 {
     const TYPE = "tree";
     const TEMPLATE = "UniteCMSCoreBundle:Views:Tree/index.html.twig";
-
-    protected function createConfig(ContentType $contentType) : ConfigurationInterface {
-        return new TreeViewConfiguration($contentType, $this->fieldTypeManager);
-    }
 
     protected function addRecursiveChildrenFields($fields, $children_field, $sort, $level = 6) {
         return array_merge($fields, [

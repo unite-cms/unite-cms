@@ -113,6 +113,12 @@ class QueryType extends AbstractType
 
         // Append Content types.
         foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
+
+            // If the current user is not allowed to access this content type, skip adding a get and find action.
+            if(!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+                continue;
+            }
+
             $key = IdentifierNormalizer::graphQLType($contentType, '');
             $fields['get' . $key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
@@ -194,6 +200,12 @@ class QueryType extends AbstractType
 
         // Append Setting types.
         foreach ($this->uniteCMSManager->getDomain()->getSettingTypes() as $settingType) {
+
+            // If the current user is not allowed to access this setting, skip adding a get action.
+            if(!$this->authorizationChecker->isGranted(SettingVoter::VIEW, $settingType)) {
+                continue;
+            }
+
             $key = IdentifierNormalizer::graphQLType($settingType);
             $fields[$key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
