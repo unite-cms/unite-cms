@@ -142,9 +142,13 @@
         {% endblock setting_types %}
 
         {% block member_types %}
-            {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), unite.domain) %}
-                <li class="uk-nav-header">{% trans %}domain.menu.domain_member_types.headline{% endtrans %}</li>
-                {% for type in unite.domain.domainMemberTypes %}
+            {% set domain_member_header_rendered = false %}
+            {% for type in unite.domain.domainMemberTypes %}
+                {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::LIST'), type) %}
+                    {% if not domain_member_header_rendered %}
+                        {% set domain_member_header_rendered = true %}
+                        <li class="uk-nav-header">{% trans %}domain.menu.domain_member_types.headline{% endtrans %}</li>
+                    {% endif %}
                     <li><a {% spaceless %}
                             {% if memberType is defined and memberType.identifier == type.identifier %}
                                 class="uk-active"
@@ -154,8 +158,8 @@
                             {{ type }}
                         </a>
                     </li>
-                {% endfor %}
-            {% endif %}
+                {% endif %}
+            {% endfor %}
         {% endblock member_types %}
     </ul>
 
