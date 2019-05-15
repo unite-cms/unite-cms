@@ -5,8 +5,6 @@ namespace UniteCMS\CoreBundle\Security\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
-use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
@@ -81,6 +79,11 @@ class DomainMemberVoter extends Voter
         }
 
         $domainMembers = $token->getUser()->getDomainMembers($domainMemberType->getDomain());
+
+        // Set default permissions for entities created before version 0.9.0
+        if(empty($domainMemberType->getPermissions())) {
+            $domainMemberType->setPermissions([]);
+        }
 
         // If the requested permission is not defined, throw an exception.
         if (empty($domainMemberType->getPermissions()[$attribute])) {

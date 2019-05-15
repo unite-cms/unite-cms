@@ -190,7 +190,7 @@ class UniteCMSManager
 
             $this->domain->setDomainMemberTypes([]);
             $data = $this->em->createQueryBuilder()
-                ->select('dmt.id', 'dmt.identifier', 'dmt.title', 'dmt.icon')
+                ->select('dmt.id', 'dmt.identifier', 'dmt.title', 'dmt.icon', 'dmt.permissions')
                 ->from('UniteCMSCoreBundle:DomainMemberType', 'dmt')
                 ->leftJoin('dmt.domain', 'd')
                 ->where('dmt.domain = :domain')
@@ -201,7 +201,8 @@ class UniteCMSManager
             foreach ($data as $row) {
                 $domainMemberType = new DomainMemberType();
                 $domainMemberType->setId($row['id'])->setIdentifier($row['identifier'])->setTitle($row['title'])->setIcon(
-                    $row['icon']);
+                    $row['icon'])
+                ->setPermissions($row['permissions'] ?? []);
                 $this->domain->addDomainMemberType($domainMemberType);
             }
         }

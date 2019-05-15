@@ -162,6 +162,12 @@ class QueryType extends AbstractType
 
         // Append Domain Member types.
         foreach ($this->uniteCMSManager->getDomain()->getDomainMemberTypes() as $domainMemberType) {
+
+            // If the current user is not allowed to access this content type, skip adding a get and find action.
+            if(!$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $domainMemberType)) {
+                continue;
+            }
+
             $key = IdentifierNormalizer::graphQLType($domainMemberType, '');
             $fields['get' . $key . 'Member'] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'Member', $this->uniteCMSManager->getDomain()),
