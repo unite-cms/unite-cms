@@ -164,7 +164,7 @@ class ReferenceFieldType extends FieldType
                 $contentLabel = $fieldable->getContentLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
             }
             if ($fieldable instanceof DomainMemberType) {
-                $contentLabel = $fieldable->getDomainMemberLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
+                $contentLabel = $fieldable->getDomainMemberLabel() ? $fieldable->getDomainMemberLabel() : (string)$fieldable.' #{id}';
             }
         }
 
@@ -180,6 +180,7 @@ class ReferenceFieldType extends FieldType
                 'attr' => [
                     'api-url' => $this->router->generate('unitecms_core_api', [$fieldable]),
                     'content-label' => $contentLabel,
+                    'fieldable-type' => ($fieldable instanceof ContentType ? 'content' : 'member'),
                     'modal-html' => ($fieldable instanceof ContentType) ? $this->templating->render(
                         $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
                         [
@@ -210,11 +211,11 @@ class ReferenceFieldType extends FieldType
         );
 
         if ($fieldable instanceof ContentType && !$this->authorizationChecker->isGranted(ContentVoter::LIST, $fieldable)) {
-            throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$field->getSettings()->content_type}\".");
+            throw new ContentTypeAccessDeniedException("You are not allowed to list content of content type \"{$fieldable->getIdentifier()}\" on domain \"{$fieldable->getDomain()->getIdentifier()}\".");
         }
 
         if ($fieldable instanceof DomainMemberType && !$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $fieldable)) {
-            throw new ContentTypeAccessDeniedException("You are not allowed to view the domain member type \"{$field->getSettings()->domain_member_type}\".");
+            throw new ContentTypeAccessDeniedException("You are not allowed to list members of domain member type \"{$fieldable->getIdentifier()}\" on domain \"{$fieldable->getDomain()->getIdentifier()}\".");
         }
 
         $name = IdentifierNormalizer::graphQLType($fieldable);
@@ -288,13 +289,13 @@ class ReferenceFieldType extends FieldType
          */
         $fieldableContent = null;
 
-        if ($fieldable instanceof ContentType && !$this->authorizationChecker->isGranted(ContentVoter::LIST, $fieldable)) {
+        if ($fieldable instanceof ContentType && $this->authorizationChecker->isGranted(ContentVoter::LIST, $fieldable)) {
             $fieldableContent = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
-                ['contentType' => $fieldableContent, 'id' => $value['content']]
+                ['contentType' => $fieldable, 'id' => $value['content']]
             );
         }
 
-        if ($fieldable instanceof DomainMemberType && !$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $fieldable)) {
+        if ($fieldable instanceof DomainMemberType && $this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $fieldable)) {
             $fieldableContent = $this->entityManager->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy(
                 ['domainMemberType' => $fieldable, 'id' => $value['content']]
             );
