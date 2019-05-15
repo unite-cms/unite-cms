@@ -1948,7 +1948,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }');
         $this->assertFalse(isset($response->errors));
         $this->assertEquals(1, $response->data->findEditorMember->total);
-        $this->assertEquals(1, $response->data->findEditorMember->result[0]->id);
+        $this->assertEquals($this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(), $response->data->findEditorMember->result[0]->id);
         $this->assertEquals('editor', $response->data->findEditorMember->result[0]->type);
         $this->assertEquals('baa', $response->data->findEditorMember->result[0]->foo);
         $this->assertEquals('marketing_editor', $response->data->findEditorMember->result[0]->_name);
@@ -1965,7 +1965,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }
         }');
         $this->assertFalse(isset($response->errors));
-        $this->assertEquals(1, $response->data->getEditorMember->id);
+        $this->assertEquals($this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(), $response->data->getEditorMember->id);
         $this->assertEquals('editor', $response->data->getEditorMember->type);
         $this->assertEquals('baa', $response->data->getEditorMember->foo);
         $this->assertEquals('marketing_editor', $response->data->getEditorMember->_name);
