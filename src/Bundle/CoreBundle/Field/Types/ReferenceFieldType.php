@@ -33,6 +33,7 @@ use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
 use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
+use UniteCMS\CoreBundle\View\ViewSettings;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 use UniteCMS\CoreBundle\Entity\View;
@@ -119,6 +120,20 @@ class ReferenceFieldType extends FieldType
             throw new ContentTypeAccessDeniedException("You are not allowed to view the domain member type \"{$settings->domain_member_type}\".");
         }
 
+        if ($fieldable instanceof DomainMemberType) {
+            $settings->content_label = '{_name}';
+            $view = new View();
+            $view
+                ->setTitle('All')
+                ->setIdentifier('all')
+                ->setType('table')
+                ->setContentType(new ContentType())
+                ->getContentType()
+                    ->setIdentifier($fieldable->getIdentifier() . 'Member')
+                    ->setTitle($fieldable->getTitle())
+                    ->setDomain($fieldable->getDomain());
+        }
+
         if ($fieldable instanceof ContentType) {
             // Get view.
             $settings->view = $settings->view ?? 'all';
@@ -140,7 +155,9 @@ class ReferenceFieldType extends FieldType
                     'id' => $view->getId(),
                 ]
             );
+        }
 
+        if($view) {
             $viewParameters = $this->viewTypeManager
                 ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
                 ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form'));
@@ -164,9 +181,21 @@ class ReferenceFieldType extends FieldType
             if ($fieldable instanceof ContentType) {
                 $contentLabel = $fieldable->getContentLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
             }
-            if ($fieldable instanceof DomainMemberType) {
-                $contentLabel = $fieldable->getDomainMemberLabel() ? $fieldable->getDomainMemberLabel() : (string)$fieldable.' #{id}';
-            }
+        }
+
+        if($fieldable instanceof DomainMemberType) {
+            $settings = $viewParameters->getSettings();
+            $settings['fields'] = [
+                '_name' => [
+                    'label' => 'Name',
+                    'type' => 'text',
+                ],
+                'id' => [
+                    'label' => 'Id',
+                    'type' => 'id',
+                ]
+            ];
+            $viewParameters->setSettings($settings);
         }
 
         // Pass the rendered view HTML and other parameters as a form option.
@@ -182,7 +211,7 @@ class ReferenceFieldType extends FieldType
                     'api-url' => $this->router->generate('unitecms_core_api', [$fieldable]),
                     'content-label' => $contentLabel,
                     'fieldable-type' => ($fieldable instanceof ContentType ? 'content' : 'member'),
-                    'modal-html' => ($fieldable instanceof ContentType) ? $this->templating->render(
+                    'modal-html' => $view? $this->templating->render(
                         $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
                         [
                             'view' => $view,
