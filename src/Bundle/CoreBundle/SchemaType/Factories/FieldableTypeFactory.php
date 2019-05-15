@@ -11,6 +11,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -268,8 +269,13 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                         [
                             'created' => Type::int(),
                             'updated' => Type::int(),
-                            'deleted' => Type::int(),
                         ],
+                        ($fieldable instanceof ContentType) ? [
+                            'deleted' => Type::int(),
+                        ] : [],
+                        ($fieldable instanceof DomainMemberType) ? [
+                            '_name' => Type::string(),
+                        ] : [],
                         $fields
                     ),
                     'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use (
@@ -358,6 +364,9 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                                 }
 
                                 return $translations;
+
+                            case '_name':
+                                return $value instanceof DomainMember ? (string)$value : null;
 
                             default:
 
