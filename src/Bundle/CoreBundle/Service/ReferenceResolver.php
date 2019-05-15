@@ -15,9 +15,12 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\MissingContentTypeException;
 use UniteCMS\CoreBundle\Exception\MissingDomainException;
+use UniteCMS\CoreBundle\Exception\MissingDomainMemberTypeException;
 use UniteCMS\CoreBundle\Exception\MissingFieldException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use UniteCMS\CoreBundle\Security\Voter\DomainVoter;
@@ -185,6 +188,56 @@ class ReferenceResolver
         }
 
         return $contentType;
+    }
+
+    /**
+     * @param Domain $domain
+     * @param $domain_member_type_identifier
+     * identifier as content_type_identifier, we return this object.
+     * @return DomainMemberType
+     * @throws MissingDomainMemberTypeException
+     */
+    public function resolveDomainMemberType(Domain $domain, $domain_member_type_identifier) : DomainMemberType {
+        if (!$domain_member_type_identifier) {
+            throw new InvalidArgumentException("You must pass a domain member type identifier.");
+        }
+
+        /**
+         * @var DomainMemberType $domainMemberType
+         */
+        $domainMemberType = $domain->getDomainMemberTypes()->filter(
+            function (DomainMemberType $domainMemberType) use ($domain_member_type_identifier) {
+                return $domainMemberType->getIdentifier() === $domain_member_type_identifier;
+            }
+        )->first();
+
+        if (!$domainMemberType) {
+
+            if(!empty($this->fallbackDomainMemberType) && $this->fallbackDomainMemberType->getDomain()->getId() === $domain->getId() && $this->fallbackDomainMemberType->getIdentifier() === $domainMemberType) {
+                $domainMemberType = $this->fallbackDomainMemberType;
+            } else {
+                throw new MissingDomainMemberTypeException(
+                    "A reference field was configured with domain member type \"{$domain_member_type_identifier}\" on domain \"{$domain->getIdentifier()}\". However \"{$domain_member_type_identifier}\" does not exist."
+                );
+            }
+        }
+
+        return $domainMemberType;
+    }
+
+    /**
+     * @param Domain $domain
+     * @param $settings
+     * @return Fieldable
+     * @throws MissingContentTypeException
+     * @throws MissingDomainMemberTypeException
+     */
+    public function resolveFieldable(Domain $domain, $settings) : Fieldable {
+        if(!empty($settings->content_type)) {
+            return $this->resolveContentType($domain, $settings->content_type);
+        } else {
+            return $this->resolveDomainMemberType($domain, $settings->domain_member_type);
+        }
     }
 
     /**

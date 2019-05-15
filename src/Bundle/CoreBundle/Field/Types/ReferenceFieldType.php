@@ -2,8 +2,13 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Exception;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Routing\Router;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
@@ -11,6 +16,7 @@ use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
 use UniteCMS\CoreBundle\Exception\MissingContentTypeException;
 use UniteCMS\CoreBundle\Exception\MissingDomainException;
+use UniteCMS\CoreBundle\Exception\MissingDomainMemberTypeException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Twig\TwigEngine;
@@ -24,6 +30,7 @@ use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\ReferenceType;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
 use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
@@ -39,8 +46,8 @@ class ReferenceFieldType extends FieldType
 {
     const TYPE = "reference";
     const FORM_TYPE = ReferenceType::class;
-    const SETTINGS = ['not_empty', 'description', 'domain', 'content_type', 'view', 'content_label', 'form_group'];
-    const REQUIRED_SETTINGS = ['domain', 'content_type'];
+    const SETTINGS = ['not_empty', 'description', 'domain', 'content_type', 'domain_member_type', 'view', 'content_label', 'form_group'];
+    const REQUIRED_SETTINGS = ['domain'];
 
     /**
      * @var ValidatorInterface $validator
@@ -93,75 +100,93 @@ class ReferenceFieldType extends FieldType
     function getFormOptions(FieldableField $field): array
     {
         $settings = $field->getSettings();
-        $settings->view = $settings->view ?? 'all';
+        $viewFieldAssets = [];
 
-        // Get content type and check if we have access to it.
-        $contentType = $this->referenceResolver->resolveContentType(
+        /**
+         * @var Fieldable $fieldable
+         */
+        $fieldable = $this->referenceResolver->resolveFieldable(
             $this->referenceResolver->resolveDomain($settings->domain),
-            $settings->content_type);
+            $settings
+        );
 
-        if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+        if ($fieldable instanceof ContentType && !$this->authorizationChecker->isGranted(ContentVoter::LIST, $fieldable)) {
             throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$settings->content_type}\".");
         }
 
-        // Get view.
-        $view = $contentType->getViews()->filter(
-            function (View $view) use ($settings) {
-                return $view->getIdentifier() == $settings->view;
-            }
-        )->first();
-        if (!$view) {
-            throw new InvalidFieldConfigurationException(
-                "No view with identifier '{$settings->view}' was found for this organization, domain and content type."
-            );
+        if ($fieldable instanceof DomainMemberType && !$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $fieldable)) {
+            throw new ContentTypeAccessDeniedException("You are not allowed to view the domain member type \"{$settings->domain_member_type}\".");
         }
 
-        // Reload the full view object.
-        $view = $this->entityManager->getRepository('UniteCMSCoreBundle:View')->findOneBy(
-            [
-                'contentType' => $contentType,
-                'id' => $view->getId(),
-            ]
-        );
+        if ($fieldable instanceof ContentType) {
+            // Get view.
+            $settings->view = $settings->view ?? 'all';
+            $view = $fieldable->getViews()->filter(
+                function (View $view) use ($settings) {
+                    return $view->getIdentifier() == $settings->view;
+                }
+            )->first();
+            if (!$view) {
+                throw new InvalidFieldConfigurationException(
+                    "No view with identifier '{$settings->view}' was found for this organization, domain and content type."
+                );
+            }
 
-        $viewParameters = $this->viewTypeManager
-            ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
-            ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form'));
+            // Reload the full view object.
+            $view = $this->entityManager->getRepository('UniteCMSCoreBundle:View')->findOneBy(
+                [
+                    'contentType' => $fieldable,
+                    'id' => $view->getId(),
+                ]
+            );
 
-        // Add all view field assets to the form, so they get included only once and at form rendering time.
-        $viewFieldSettings = $viewParameters->getSettings();
-        $viewFieldAssets = [];
-        if(!empty($viewFieldSettings['fields'])) {
-            foreach ($viewFieldSettings['fields'] as $viewFieldKey => $viewField) {
-                if(!empty($viewField['assets'])) {
-                    $viewFieldAssets = array_merge($viewFieldAssets, $viewField['assets']);
-                    $viewFieldSettings['fields'][$viewFieldKey]['assets'] = [];
+            $viewParameters = $this->viewTypeManager
+                ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
+                ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form'));
+
+            // Add all view field assets to the form, so they get included only once and at form rendering time.
+            $viewFieldSettings = $viewParameters->getSettings();
+            if(!empty($viewFieldSettings['fields'])) {
+                foreach ($viewFieldSettings['fields'] as $viewFieldKey => $viewField) {
+                    if(!empty($viewField['assets'])) {
+                        $viewFieldAssets = array_merge($viewFieldAssets, $viewField['assets']);
+                        $viewFieldSettings['fields'][$viewFieldKey]['assets'] = [];
+                    }
                 }
             }
+            $viewParameters->setSettings($viewFieldSettings);
         }
-        $viewParameters->setSettings($viewFieldSettings);
+
+        $contentLabel = $settings->content_label;
+
+        if(empty($contentLabel)) {
+            if ($fieldable instanceof ContentType) {
+                $contentLabel = $fieldable->getContentLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
+            }
+            if ($fieldable instanceof DomainMemberType) {
+                $contentLabel = $fieldable->getDomainMemberLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
+            }
+        }
 
         // Pass the rendered view HTML and other parameters as a form option.
         return array_merge(
             parent::getFormOptions($field),
             [
                 'empty_data' => [
-                    'domain' => $contentType->getDomain()->getIdentifier(),
-                    'content_type' => $contentType->getIdentifier(),
+                    'domain' => $fieldable->getDomain()->getIdentifier(),
+                    'content_type' => $fieldable->getIdentifier(),
                 ],
                 'assets' => $viewFieldAssets,
                 'attr' => [
-                    'api-url' => $this->router->generate('unitecms_core_api', [$contentType]),
-                    'content-label' => $settings->content_label ?? (empty(
-                        $contentType->getContentLabel()
-                        ) ? (string)$contentType.' #{id}' : $contentType->getContentLabel()),
-                    'modal-html' => $this->templating->render(
+                    'api-url' => $this->router->generate('unitecms_core_api', [$fieldable]),
+                    'content-label' => $contentLabel,
+                    'modal-html' => ($fieldable instanceof ContentType) ? $this->templating->render(
                         $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
                         [
                             'view' => $view,
                             'parameters' => $viewParameters,
                         ]
-                    ),
+                    ) : null,
                 ],
             ]
         );
@@ -176,24 +201,30 @@ class ReferenceFieldType extends FieldType
      */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
-
-        // Get content type and check if we have access to it.
-        $contentType = $this->referenceResolver->resolveContentType(
+        /**
+         * @var Fieldable $fieldable
+         */
+        $fieldable = $this->referenceResolver->resolveFieldable(
             $this->referenceResolver->resolveDomain($field->getSettings()->domain),
-            $field->getSettings()->content_type);
+            $field->getSettings()
+        );
 
-        if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
-            throw new ContentTypeAccessDeniedException("You are not allowed to list content of content type \"{$contentType->getIdentifier()}\" on domain \"{$contentType->getDomain()->getIdentifier()}\".");
+        if ($fieldable instanceof ContentType && !$this->authorizationChecker->isGranted(ContentVoter::LIST, $fieldable)) {
+            throw new ContentTypeAccessDeniedException("You are not allowed to view the content type \"{$field->getSettings()->content_type}\".");
         }
 
-        $name = IdentifierNormalizer::graphQLType($contentType);
+        if ($fieldable instanceof DomainMemberType && !$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $fieldable)) {
+            throw new ContentTypeAccessDeniedException("You are not allowed to view the domain member type \"{$field->getSettings()->domain_member_type}\".");
+        }
+
+        $name = IdentifierNormalizer::graphQLType($fieldable);
 
         if ($nestingLevel > 0) {
             $name .= 'Level'.$nestingLevel;
         }
 
         // We use the default content factory to build the type.
-        return $schemaTypeManager->getSchemaType($name, $contentType->getDomain(), $nestingLevel);
+        return $schemaTypeManager->getSchemaType($name, $fieldable->getDomain(), $nestingLevel);
     }
 
     /**
@@ -204,16 +235,23 @@ class ReferenceFieldType extends FieldType
      */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
     {
-        // Get content type and check if we have access to it.
-        $contentType = $this->referenceResolver->resolveContentType(
+        /**
+         * @var Fieldable $fieldable
+         */
+        $fieldable = $this->referenceResolver->resolveFieldable(
             $this->referenceResolver->resolveDomain($field->getSettings()->domain),
-            $field->getSettings()->content_type);
+            $field->getSettings()
+        );
 
-        if (!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+        if ($fieldable instanceof ContentType && !$this->authorizationChecker->isGranted(ContentVoter::LIST, $fieldable)) {
             return null;
         }
 
-        return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $contentType->getDomain(), $nestingLevel);
+        if ($fieldable instanceof DomainMemberType && !$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $fieldable)) {
+            return null;
+        }
+
+        return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $fieldable->getDomain(), $nestingLevel);
     }
 
     /**
@@ -229,6 +267,7 @@ class ReferenceFieldType extends FieldType
      * @throws MissingContentTypeException
      * @throws MissingDomainException
      * @throws MissingOrganizationException
+     * @throws MissingDomainMemberTypeException
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
     {
@@ -236,25 +275,45 @@ class ReferenceFieldType extends FieldType
             return null;
         }
 
-        // Get content type and check if we have access to it.
-        $contentType = $this->referenceResolver->resolveContentType(
-            $this->referenceResolver->resolveDomain($value['domain']),
-            $value['content_type']);
-
-        // Find content for this content type.
-        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
-            ['contentType' => $contentType, 'id' => $value['content']]
+        /**
+         * @var Fieldable $fieldable
+         */
+        $fieldable = $this->referenceResolver->resolveFieldable(
+            $this->referenceResolver->resolveDomain($field->getSettings()->domain),
+            $field->getSettings()
         );
-        if (!$content) {
-            throw new InvalidArgumentException("No content with id '{$value['content']}' was found.");
+
+        /**
+         * @var FieldableContent $fieldableContent
+         */
+        $fieldableContent = null;
+
+        if ($fieldable instanceof ContentType && !$this->authorizationChecker->isGranted(ContentVoter::LIST, $fieldable)) {
+            $fieldableContent = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
+                ['contentType' => $fieldableContent, 'id' => $value['content']]
+            );
+        }
+
+        if ($fieldable instanceof DomainMemberType && !$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $fieldable)) {
+            $fieldableContent = $this->entityManager->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy(
+                ['domainMemberType' => $fieldable, 'id' => $value['content']]
+            );
+        }
+
+        if (!$fieldableContent) {
+            throw new InvalidArgumentException("No content / member with id '{$value['content']}' was found.");
         }
 
         // Check access to view content.
-        if (!$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
+        if ($fieldableContent instanceof Content && !$this->authorizationChecker->isGranted(ContentVoter::VIEW, $fieldableContent)) {
             throw new ContentAccessDeniedException("You are not allowed to view this content.");
         }
 
-        return $content;
+        if ($fieldableContent instanceof DomainMember && !$this->authorizationChecker->isGranted(DomainMemberVoter::VIEW, $fieldableContent)) {
+            throw new ContentAccessDeniedException("You are not allowed to view this member.");
+        }
+
+        return $fieldableContent;
     }
 
     /**
@@ -281,7 +340,7 @@ class ReferenceFieldType extends FieldType
         else {
             try {
                 $this->resolveGraphQLData($field, $data, new Content());
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
         }
@@ -300,6 +359,16 @@ class ReferenceFieldType extends FieldType
             return;
         }
 
+        if(empty($settings->content_type) && empty($settings->domain_member_type)) {
+            $context->buildViolation('reference_type_required')->addViolation();
+            return;
+        }
+
+        if(!empty($settings->content_type) && !empty($settings->domain_member_type)) {
+            $context->buildViolation('reference_type_required')->addViolation();
+            return;
+        }
+
         // At the moment of validating settings, the referenced domain / content type might not be persisted if we are
         // referencing to domain we are about to create. In this case, we provide a fallback domain / content type.
         $this->referenceResolver->setFallbackFromContext($context, $settings);
@@ -307,7 +376,7 @@ class ReferenceFieldType extends FieldType
         // Try to resolve content type. If it don't throw an exception, the domain and content_type exist and the user can access it.
         try {
             $domain = $this->referenceResolver->resolveDomain($settings->domain);
-            $this->referenceResolver->resolveContentType($domain, $settings->content_type);
+            $this->referenceResolver->resolveFieldable($domain, $settings);
         }
         catch (DomainAccessDeniedException $e) {
             $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
@@ -317,6 +386,8 @@ class ReferenceFieldType extends FieldType
             $context->buildViolation('invalid_domain')->atPath('domain')->addViolation();
         } catch (MissingContentTypeException $e) {
             $context->buildViolation('invalid_content_type')->atPath('content_type')->addViolation();
+        } catch (MissingDomainMemberTypeException $e) {
+            $context->buildViolation('invalid_domain_member_type')->atPath('domain_member_type')->addViolation();
         }
     }
 
@@ -330,18 +401,29 @@ class ReferenceFieldType extends FieldType
 
         // normalize settings for nested fields.
         if($field && !empty($settings['settings']['fields'])) {
-            $contentType = $this->referenceResolver->resolveContentType(
-                $this->referenceResolver->resolveDomain($field->getSettings()->domain),
-                $field->getSettings()->content_type);
-            $processor = new Processor();
-            $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($contentType), ['settings' => ['fields' => $settings['settings']['fields']]]);
-            $settings['settings']['fields'] = $config['fields'];
 
-            // Template will only include assets from root fields, so we need to add any child templates to the root field.
-            foreach($config['fields'] as $nestedField) {
-                if(!empty($nestedField['assets'])) {
-                    $settings['assets'] = array_merge($settings['assets'], $nestedField['assets']);
+            /**
+             * @var Fieldable $fieldable
+             */
+            try {
+                $fieldable = $this->referenceResolver->resolveFieldable(
+                    $this->referenceResolver->resolveDomain($field->getSettings()->domain),
+                    $field->getSettings()
+                );
+
+                $processor = new Processor();
+                $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create($fieldable), ['settings' => ['fields' => $settings['settings']['fields']]]);
+                $settings['settings']['fields'] = $config['fields'];
+
+                // Template will only include assets from root fields, so we need to add any child templates to the root field.
+                foreach($config['fields'] as $nestedField) {
+                    if(!empty($nestedField['assets'])) {
+                        $settings['assets'] = array_merge($settings['assets'], $nestedField['assets']);
+                    }
                 }
+
+            } catch (Exception $e) {
+                // Do nothing at this point, if we can't resolve domain.
             }
         }
     }
