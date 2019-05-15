@@ -89,11 +89,11 @@ class ReferenceOfFieldType extends FieldType
     function getFormOptions(FieldableField $field): array
     {
         $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
-        $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
-        $reference_field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
+        $fieldable = $this->referenceResolver->resolveFieldable($domain, $field->getSettings());
+        $reference_field = $this->referenceResolver->resolveField($fieldable, $field->getSettings()->reference_field, ReferenceFieldType::getType());
 
         return array_merge(parent::getFormOptions($field), [
-            'view' => $contentType->getView('all'),
+            'view' => $fieldable instanceof ContentType ? $fieldable->getView('all') : null,
             'reference_field' => $reference_field,
         ]);
     }

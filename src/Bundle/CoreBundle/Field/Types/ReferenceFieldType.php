@@ -101,6 +101,7 @@ class ReferenceFieldType extends FieldType
     {
         $settings = $field->getSettings();
         $viewFieldAssets = [];
+        $viewParameters = [];
 
         /**
          * @var Fieldable $fieldable
@@ -426,6 +427,11 @@ class ReferenceFieldType extends FieldType
             } catch (Exception $e) {
                 // Do nothing at this point, if we can't resolve domain.
             }
+        } elseif(!empty($field->getSettings()->domain_member_type)) {
+            $settings['settings']['fields']['_name'] = [
+                'label' => 'Name',
+                'type' => 'text',
+            ];
         }
     }
 }

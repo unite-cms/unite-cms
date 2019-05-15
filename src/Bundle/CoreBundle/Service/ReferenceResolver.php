@@ -17,6 +17,7 @@ use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Fieldable;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\MissingContentTypeException;
 use UniteCMS\CoreBundle\Exception\MissingDomainException;
@@ -241,29 +242,29 @@ class ReferenceResolver
     }
 
     /**
-     * @param ContentType $contentType
+     * @param Fieldable $fieldable
      * @param string $field_identifier
      * @param string|null $field_type
-     * @return ContentTypeField
+     * @return FieldableField
      * @throws MissingFieldException
      */
-    public function resolveField(ContentType $contentType, string $field_identifier, string $field_type = null) : ContentTypeField {
+    public function resolveField(Fieldable $fieldable, string $field_identifier, string $field_type = null) : FieldableField {
 
         if (!$field_identifier) {
             throw new InvalidArgumentException("You must pass a field identifier.");
         }
 
         /**
-         * @var ContentTypeField $field
+         * @var FieldableField $field
          */
-        $field = $contentType->getFields()->filter(
+        $field = $fieldable->getFields()->filter(
             function(ContentTypeField $field) use ($field_identifier, $field_type) {
                 return $field->getIdentifier() === $field_identifier && (!$field_type || $field->getType() === $field_type);
             }
         )->first();
 
         if(!$field) {
-            throw new MissingFieldException("A reference field was configured with reference field \"{$field_identifier}\" on content type \"{$contentType->getIdentifier()}\". However \"{$field_identifier}\" does not exist or is of wrong type.");
+            throw new MissingFieldException("A reference field was configured with reference field \"{$field_identifier}\" on type \"{$fieldable->getIdentifier()}\". However \"{$field_identifier}\" does not exist or is of wrong type.");
         }
 
         return $field;
