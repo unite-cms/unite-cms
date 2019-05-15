@@ -1954,8 +1954,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals('marketing_editor', $response->data->findEditorMember->result[0]->_name);
 
         // Editors can get a single editor.
-        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
-            getEditorMember(id: 1) {
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query($id: ID!) {
+            getEditorMember(id: $id) {
                 id,
                 type,
                 created,
@@ -1963,7 +1963,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 foo,
                 _name
             }
-        }');
+        }', ['id' => $this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId()]);
         $this->assertFalse(isset($response->errors));
         $this->assertEquals($this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(), $response->data->getEditorMember->id);
         $this->assertEquals('editor', $response->data->getEditorMember->type);
