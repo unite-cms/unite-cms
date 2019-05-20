@@ -34,7 +34,6 @@ use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
 use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 use UniteCMS\CoreBundle\View\Types\TableViewType;
-use UniteCMS\CoreBundle\View\ViewParameterBag;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 use UniteCMS\CoreBundle\Entity\View;
@@ -148,13 +147,14 @@ class ReferenceFieldType extends FieldType
                         'field' => 'updated',
                         'asc' => false,
                     ],
-                    'actions' => [],
-                    'view' => 'all',
                     'contentType' => $fieldable->getIdentifier() . 'Member',
                     'hasTranslations' => false,
                 ])
                 ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form'));
-            $contentLabel = $fieldable->getDomainMemberLabel() ? $fieldable->getDomainMemberLabel() : (string)$fieldable.' #{id}';
+
+            if(empty($contentLabel)) {
+                $contentLabel = $fieldable->getDomainMemberLabel() ? $fieldable->getDomainMemberLabel() : (string)$fieldable.' #{id}';
+            }
         }
 
         if ($fieldable instanceof ContentType) {
@@ -194,7 +194,10 @@ class ReferenceFieldType extends FieldType
                 }
             }
             $viewParameters->setSettings($viewFieldSettings);
-            $contentLabel = $fieldable->getContentLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
+
+            if(empty($contentLabel)) {
+                $contentLabel = $fieldable->getContentLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
+            }
         }
 
         // Pass the rendered view HTML and other parameters as a form option.
