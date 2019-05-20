@@ -71,6 +71,15 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           }
         },
         {
+          "title": "Author",
+          "identifier": "author",
+          "type": "reference",
+          "settings": {
+            "domain": "marketing",
+            "domain_member_type": "editor"
+          }
+        },
+        {
           "title": "Not Empty",
           "identifier": "not_empty",
           "type": "text",
@@ -1142,6 +1151,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 'content_type' => 'news_category',
                 'content' => $category->getId(),
             ],
+            'author' => [
+                'domain' => 'marketing',
+                'content_type' => 'editor',
+                'content' => $this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(),
+            ],
         ]);
 
         $this->em->flush();
@@ -1159,13 +1173,17 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                                 'id' => $category->getId(),
                                 'name' => $category->getData()['name'],
                             ],
+                            'author' => [
+                                'id' => $this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(),
+                                '_name' => 'marketing_editor',
+                            ],
                         ],
                     ],
                 ],
             ],
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_viewer'], 'query {
+            $this->users['marketing_editor'], 'query {
                 findNews(limit: 1, filter: { field: "title_title", operator: "=", value: "with_category" }) {
                     total,
                     result {
@@ -1173,6 +1191,10 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         category {
                             id,
                             name
+                        },
+                        author {
+                            id,
+                            _name
                         }
                     }
                 }

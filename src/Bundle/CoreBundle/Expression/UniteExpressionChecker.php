@@ -57,6 +57,7 @@ class UniteExpressionChecker
             $this->variables[$variableName] = (object)[
                 'data' => json_decode(json_encode($domainMember->getData())),
                 'type' => empty($domainMember->getDomainMemberType()) ? null : $domainMember->getDomainMemberType()->getIdentifier(),
+                '_name' => (string)$domainMember,
                 'accessor' => (object)[
                     'name' => (string)$domainMember->getAccessor(),
                     'id' => (string)$domainMember->getAccessor()->getId(),
@@ -87,6 +88,7 @@ class UniteExpressionChecker
 
             if($fieldableContent instanceof Content || $fieldableContent instanceof DomainMember) {
                 $data['id'] = (string)$fieldableContent->getId();
+                $data['_name'] = (string)$fieldableContent;
             }
 
             if($fieldableContent instanceof DomainMember) {
