@@ -37,6 +37,14 @@ class User extends DomainAccessor implements UserInterface, \Serializable
 
     /**
      * @var string
+     * @Assert\NotBlank(message="not_blank")
+     * @Assert\Length(max="255", maxMessage="too_long")
+     * @ORM\Column(name="name", type="string", length=255)
+     */
+    private $name;
+
+    /**
+     * @var string
      * @Assert\NotBlank(message="not_blank", groups={"CREATE"})
      * @Assert\Length(max="255", maxMessage="too_long")
      * @ORM\Column(name="password", type="string", length=255)
@@ -78,6 +86,11 @@ class User extends DomainAccessor implements UserInterface, \Serializable
         $this->roles = [self::ROLE_USER];
     }
 
+    public function __toString()
+    {
+        return ''.$this->getName();
+    }
+
     /**
      * Set email
      *
@@ -100,6 +113,30 @@ class User extends DomainAccessor implements UserInterface, \Serializable
     public function getEmail()
     {
         return $this->email;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return User
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**

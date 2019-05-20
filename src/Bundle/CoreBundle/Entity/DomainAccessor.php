@@ -31,14 +31,6 @@ abstract class DomainAccessor
     protected $id;
 
     /**
-     * @var string
-     * @Assert\NotBlank(message="not_blank")
-     * @Assert\Length(max="255", maxMessage="too_long")
-     * @ORM\Column(name="name", type="string", length=255)
-     */
-    protected $name;
-
-    /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="accessor", cascade={"persist", "remove", "merge"})
@@ -57,11 +49,6 @@ abstract class DomainAccessor
         $this->domains = new ArrayCollection();
     }
 
-    public function __toString()
-    {
-        return ''.$this->getName();
-    }
-
     /**
      * Get id
      *
@@ -70,30 +57,6 @@ abstract class DomainAccessor
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return DomainAccessor
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
     }
 
     /**
