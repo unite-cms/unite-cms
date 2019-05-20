@@ -22,9 +22,9 @@ class DomainMember implements FieldableContent
     /**
      * @var int
      *
-     * @ORM\Column(name="id", type="bigint")
+     * @ORM\Column(type="guid")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\GeneratedValue(strategy="UUID")
      */
     private $id;
 
