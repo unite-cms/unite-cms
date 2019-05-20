@@ -20,6 +20,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 class ApiKey extends DomainAccessor implements UserInterface, \Serializable
 {
     static function getType() : string { return 'api_key'; }
+    static function getNameField() : string { return 'name'; }
 
     /**
      * @var string

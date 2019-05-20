@@ -44,6 +44,13 @@ abstract class DomainAccessor
      */
     abstract static function getType() : string;
 
+    /**
+     * Returns one sql field that will be used for filtering anf sorting.
+     *
+     * @return string
+     */
+    abstract static function getNameField() : string;
+
     public function __construct()
     {
         $this->domains = new ArrayCollection();
