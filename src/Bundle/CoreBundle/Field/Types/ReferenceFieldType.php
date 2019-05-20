@@ -33,7 +33,8 @@ use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
 use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
-use UniteCMS\CoreBundle\View\ViewSettings;
+use UniteCMS\CoreBundle\View\Types\TableViewType;
+use UniteCMS\CoreBundle\View\ViewParameterBag;
 use UniteCMS\CoreBundle\View\ViewTypeInterface;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 use UniteCMS\CoreBundle\Entity\View;
@@ -101,6 +102,8 @@ class ReferenceFieldType extends FieldType
     function getFormOptions(FieldableField $field): array
     {
         $settings = $field->getSettings();
+        $contentLabel = $settings->content_label;
+        $view = null;
         $viewFieldAssets = [];
         $viewParameters = [];
 
@@ -121,17 +124,37 @@ class ReferenceFieldType extends FieldType
         }
 
         if ($fieldable instanceof DomainMemberType) {
-            $settings->content_label = '{_name}';
-            $view = new View();
-            $view
-                ->setTitle('All')
-                ->setIdentifier('all')
-                ->setType('table')
-                ->setContentType(new ContentType())
-                ->getContentType()
-                    ->setIdentifier($fieldable->getIdentifier() . 'Member')
-                    ->setTitle($fieldable->getTitle())
-                    ->setDomain($fieldable->getDomain());
+            $viewParameters = $this->viewTypeManager
+                ->getTemplateRenderParametersForDomainMemberType($fieldable, ViewTypeInterface::SELECT_MODE_SINGLE, [
+                    'fields' => [
+                        'id' => [
+                            'label' => 'ID',
+                            'type' => 'id',
+                        ],
+                        '_name' => [
+                            'label' => 'Name',
+                            'type' => 'text',
+                        ],
+                        'created' => [
+                            'label' => 'Created',
+                            'type' => 'date',
+                        ],
+                        'updated' => [
+                            'label' => 'Updated',
+                            'type' => 'date',
+                        ],
+                    ],
+                    'sort' => [
+                        'field' => 'updated',
+                        'asc' => false,
+                    ],
+                    'actions' => [],
+                    'view' => 'all',
+                    'contentType' => $fieldable->getIdentifier() . 'Member',
+                    'hasTranslations' => false,
+                ])
+                ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form'));
+            $contentLabel = $fieldable->getDomainMemberLabel() ? $fieldable->getDomainMemberLabel() : (string)$fieldable.' #{id}';
         }
 
         if ($fieldable instanceof ContentType) {
@@ -155,9 +178,7 @@ class ReferenceFieldType extends FieldType
                     'id' => $view->getId(),
                 ]
             );
-        }
 
-        if($view) {
             $viewParameters = $this->viewTypeManager
                 ->getTemplateRenderParameters($view, ViewTypeInterface::SELECT_MODE_SINGLE)
                 ->setCsrfToken($this->csrfTokenManager->getToken('fieldable_form'));
@@ -173,29 +194,7 @@ class ReferenceFieldType extends FieldType
                 }
             }
             $viewParameters->setSettings($viewFieldSettings);
-        }
-
-        $contentLabel = $settings->content_label;
-
-        if(empty($contentLabel)) {
-            if ($fieldable instanceof ContentType) {
-                $contentLabel = $fieldable->getContentLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
-            }
-        }
-
-        if($fieldable instanceof DomainMemberType) {
-            $settings = $viewParameters->getSettings();
-            $settings['fields'] = [
-                '_name' => [
-                    'label' => 'Name',
-                    'type' => 'text',
-                ],
-                'id' => [
-                    'label' => 'Id',
-                    'type' => 'id',
-                ]
-            ];
-            $viewParameters->setSettings($settings);
+            $contentLabel = $fieldable->getContentLabel() ? $fieldable->getContentLabel() : (string)$fieldable.' #{id}';
         }
 
         // Pass the rendered view HTML and other parameters as a form option.
@@ -211,13 +210,16 @@ class ReferenceFieldType extends FieldType
                     'api-url' => $this->router->generate('unitecms_core_api', [$fieldable]),
                     'content-label' => $contentLabel,
                     'fieldable-type' => ($fieldable instanceof ContentType ? 'content' : 'member'),
-                    'modal-html' => $view? $this->templating->render(
-                        $this->viewTypeManager->getViewType($view->getType())::getTemplate(),
+                    'modal-html' => $this->templating->render(
+                        ($view ?
+                            $this->viewTypeManager->getViewType($view->getType())::getTemplate() :
+                            TableViewType::getTemplate()
+                        ),
                         [
                             'view' => $view,
                             'parameters' => $viewParameters,
                         ]
-                    ) : null,
+                    ),
                 ],
             ]
         );

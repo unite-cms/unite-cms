@@ -166,13 +166,13 @@ class WebhookManagerTest extends DatabaseAwareTestCase
             {
               "title": "Editor",
               "identifier": "editor",
-              "domain_member_label": "{accessor}",
+              "domain_member_label": "{_name}",
               "fields": []
             },
             {
               "title": "Viewer",
               "identifier": "viewer",
-              "domain_member_label": "{accessor}",
+              "domain_member_label": "{_name}",
               "fields": []
             }
            ],

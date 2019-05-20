@@ -53,6 +53,11 @@ class ReferenceResolver
      */
     private $fallbackContentType = null;
 
+    /**
+     * @var DomainMemberType|null $fallbackDomainMemberType
+     */
+    private $fallbackDomainMemberType = null;
+
     public function __construct(UniteCMSManager $uniteCMSManager, EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
     {
         $this->uniteCMSManager = $uniteCMSManager;
@@ -64,6 +69,7 @@ class ReferenceResolver
 
         $this->fallbackDomain = null;
         $this->fallbackContentType = null;
+        $this->fallbackDomainMemberType = null;
 
         if(!$context->getRoot() instanceof Domain) {
             return;
@@ -87,6 +93,13 @@ class ReferenceResolver
                 }
             )->first();
             $this->fallbackContentType = $fallbackContentType ? $fallbackContentType : null;
+
+            $fallbackDomainMemberType = $context->getRoot()->getDomainMemberTypes()->filter(
+                function (DomainMemberType $domainMemberType) use ($settings) {
+                    return $domainMemberType->getIdentifier() == $settings->domain_member_type;
+                }
+            )->first();
+            $this->fallbackDomainMemberType = $fallbackDomainMemberType ? $fallbackDomainMemberType : null;
         }
     }
 

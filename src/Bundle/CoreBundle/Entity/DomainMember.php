@@ -128,6 +128,7 @@ class DomainMember implements FieldableContent
                     'updated' => ($this->getUpdated() ? $this->getUpdated()->format('Y-m-d H:i:s') : ''),
                     'type' => (string)$this->getDomainMemberType(),
                     'accessor' => (string)$this->getAccessor(),
+                    '_name' => (string)$this->getAccessor(),
                 ]
             );
         }

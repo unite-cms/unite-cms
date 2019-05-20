@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
@@ -116,6 +117,31 @@ class ViewParameterBag implements \JsonSerializable
 
         $bag->setRevisionsUrlPattern($generator->generate('unitecms_core_content_revisions', $urlParameter, Router::ABSOLUTE_URL));
 
+        $bag->setSelectMode($select_mode);
+
+        return $bag;
+    }
+
+    public static function createFromDomainMemberType(
+        DomainMemberType $domainMemberType,
+        UrlGeneratorInterface $generator,
+        string $select_mode = ViewTypeInterface::SELECT_MODE_NONE,
+        $settings = []
+    ) {
+        $bag = new ViewParameterBag($domainMemberType->getTitle(), $settings);
+
+        $urlParameter = [
+            'domain' => $domainMemberType->getDomain()->getIdentifier(),
+            'organization' => IdentifierNormalizer::denormalize($domainMemberType->getDomain()->getOrganization()->getIdentifier()),
+        ];
+        $bag->setApiEndpointPattern($generator->generate('unitecms_core_api', $urlParameter, Router::ABSOLUTE_URL));
+
+        $urlParameter['member_type'] = $domainMemberType->getIdentifier();
+        $bag->setCreateUrlPattern($generator->generate('unitecms_core_domainmember_create', $urlParameter, Router::ABSOLUTE_URL));
+
+        $urlParameter['member'] = '__id__';
+        $bag->setUpdateUrlPattern($generator->generate('unitecms_core_domainmember_update', $urlParameter, Router::ABSOLUTE_URL));
+        $bag->setDeleteUrlPattern($generator->generate('unitecms_core_domainmember_delete', $urlParameter, Router::ABSOLUTE_URL));
         $bag->setSelectMode($select_mode);
 
         return $bag;
