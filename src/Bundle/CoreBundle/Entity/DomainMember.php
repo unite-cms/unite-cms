@@ -20,7 +20,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
 class DomainMember implements FieldableContent
 {
     /**
-     * @var int
+     * @var string
      *
      * @ORM\Column(type="guid")
      * @ORM\Id
@@ -171,7 +171,7 @@ class DomainMember implements FieldableContent
     }
 
     /**
-     * @return int
+     * @return string
      */
     public function getId()
     {
@@ -179,11 +179,11 @@ class DomainMember implements FieldableContent
     }
 
     /**
-     * @param int $id
+     * @param string $id
      *
      * @return DomainMember
      */
-    public function setId(int $id)
+    public function setId(string $id)
     {
         $this->id = $id;
 

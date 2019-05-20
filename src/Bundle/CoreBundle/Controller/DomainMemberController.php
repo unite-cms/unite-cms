@@ -29,7 +29,6 @@ use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
-use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
 class DomainMemberController extends AbstractController
 {
@@ -251,7 +250,7 @@ class DomainMemberController extends AbstractController
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
-     * @ParamConverter("member")
+     * @Entity("member")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::UPDATE'), member)")
      *
      * @param Organization $organization
@@ -312,7 +311,7 @@ class DomainMemberController extends AbstractController
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
-     * @ParamConverter("member")
+     * @Entity("member")
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::DELETE'), member)")
      *
      * @param Organization $organization

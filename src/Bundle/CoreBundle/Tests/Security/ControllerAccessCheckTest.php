@@ -429,11 +429,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_domain_view'                     => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_domain_update'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
-            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
@@ -452,6 +447,15 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
         ], $parameter);
 
+        $parameter['member'] = $this->users['domain_editor']->getDomainMembers($this->domain)[0]->getId();
+        $this->checkRoutes([
+            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+        ], $parameter);
+
         $org = $this->em->getRepository('UniteCMSCoreBundle:Organization')->findOneBy(['identifier' => 'access_check']);
         $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
         $domain2->setIdentifier('access_check2')->setTitle('Domain 2')->setOrganization($org);
@@ -467,6 +471,11 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $this->em->persist($setting2);
         $this->em->flush();
 
+        $orgMember2 = new OrganizationMember();
+        $orgMember2->setOrganization($org);
+        $this->em->persist($orgMember2);
+        $this->em->flush();
+
         $member2 = new DomainMember();
         $member2->setDomainMemberType($domain2->getDomainMemberTypes()->first());
         $this->em->persist($member2);
@@ -475,7 +484,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $parameter['domain'] = $domain2->getIdentifier();
         $parameter['content'] = $content2->getId();
         $parameter['setting'] = $setting2->getId();
-        $parameter['member'] = $member2->getId();
+        $parameter['member'] = $orgMember2->getId();
 
         $this->checkRoutes([
             'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
@@ -502,11 +511,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_domain_view'                     => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
-            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -523,6 +527,15 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
             'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
+
+        $parameter['member'] = $member2->getId();
+        $this->checkRoutes([
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
         ], $parameter);
     }
 
@@ -570,11 +583,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_domain_view'                     => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
-            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -591,6 +599,15 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
             'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
+
+        $parameter['member'] = $this->users['domain_viewer']->getDomainMembers($this->domain)[0]->getId();
+        $this->checkRoutes([
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
         ], $parameter);
     }
 
@@ -639,11 +656,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_domain_view'                     => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
-            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -660,6 +672,15 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
             'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
+
+        $parameter['member'] = $this->users['domain_viewer']->getDomainMembers($this->domain)[0]->getId();
+        $this->checkRoutes([
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
         ], $parameter);
     }
 
@@ -707,11 +728,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_domain_view'                     => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_domain_update'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_domain_delete'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
-            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
@@ -730,6 +746,15 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
         ], $parameter);
 
+        $parameter['member'] = $this->users['domain_viewer']->getDomainMembers($this->domain)[0]->getId();
+        $this->checkRoutes([
+            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+        ], $parameter);
+
         $org2 = new Organization();
         $org2->setTitle('Org 2')->setIdentifier('access_check2');
         $domain2 = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
@@ -741,10 +766,14 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $setting2 = new Setting();
         $setting2->setSettingType($domain2->getSettingTypes()->get('st1'));
 
+        $orgMember2 = new OrganizationMember();
+        $orgMember2->setOrganization($org2);
+
         $member2 = new DomainMember();
         $member2->setDomainMemberType($domain2->getDomainMemberTypes()->first());
 
         $this->em->persist($org2);
+        $this->em->persist($orgMember2);
         $this->em->persist($domain2);
         $this->em->persist($content2);
         $this->em->persist($setting2);
@@ -755,7 +784,7 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
         $parameter['domain'] = $domain2->getIdentifier();
         $parameter['content'] = $content2->getId();
         $parameter['setting'] = $setting2->getId();
-        $parameter['member'] = $member2->getId();
+        $parameter['member'] = $orgMember2->getId();
 
         $this->checkRoutes([
             'unitecms_core_authentication_login'            => [ 'redirect' => true, 'methods' => ['GET'] ],
@@ -782,11 +811,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_domain_view'                     => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_domain_update'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_domain_delete'                   => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
-            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_index'                   => [ 'access' => false, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
@@ -803,6 +827,15 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
             'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
+
+        $parameter['member'] = $member2->getId();
+        $this->checkRoutes([
+            'unitecms_core_domainmember_index'              => [ 'access' => false, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => false, 'methods' => ['GET', 'POST'] ],
         ], $parameter);
     }
 
@@ -850,11 +883,6 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_domain_view'                     => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_domain_update'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_domain_delete'                   => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
-            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
-            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_index'                   => [ 'access' => true, 'methods' => ['GET'] ],
             'unitecms_core_content_create'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_content_update'                  => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
@@ -871,6 +899,15 @@ class ControllerAccessCheckTest extends DatabaseAwareTestCase
             'unitecms_core_setting_revisionsrevert'         => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
             'unitecms_core_api'                             => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
             'unitecms_core_graph_api'                       => [ 'access' => false, 'methods' => ['POST'], 'query' => 'token=X' ],
+        ], $parameter);
+
+        $parameter['member'] = $this->users['domain_editor']->getDomainMembers($this->domain)[0]->getId();
+        $this->checkRoutes([
+            'unitecms_core_domainmember_index'              => [ 'access' => true, 'methods' => ['GET'] ],
+            'unitecms_core_domainmember_create'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_update'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_delete'             => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
+            'unitecms_core_domainmember_deleteinvite'       => [ 'access' => true, 'methods' => ['GET', 'POST'] ],
         ], $parameter);
     }
 
