@@ -62,4 +62,9 @@ interface FieldableField
      * @return string
      */
     public function __toString();
+
+    /**
+     * @return array
+     */
+    public function getPermissions() : array;
 }

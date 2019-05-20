@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
+use App\Bundle\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -18,6 +19,7 @@ use UniteCMS\CoreBundle\Form\ContentDeleteFormType;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -262,6 +264,13 @@ class MutationType extends AbstractType
             $args['data']['locale'] = $args['locale'];
         }
 
+        // Remove field values from field, where the user has no access.
+        foreach($contentType->getFields() as $field) {
+            if(array_key_exists($field->getIdentifier(), $args['data']) && !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
+                unset($args['data'][$field->getIdentifier()]);
+            }
+        }
+
         $form->submit($args['data']);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -334,6 +343,13 @@ class MutationType extends AbstractType
         // Set default locale if non was set by the api.
         if (!empty($content->getContentType()->getLocales())) {
             $args['data']['locale'] = $args['locale'] ?? $content->getLocale();
+        }
+
+        // Remove field values from field, where the user has no access.
+        foreach($content->getContentType()->getFields() as $field) {
+            if(array_key_exists($field->getIdentifier(), $args['data']) && !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
+                unset($args['data'][$field->getIdentifier()]);
+            }
         }
 
         $form->submit($args['data'], false);
