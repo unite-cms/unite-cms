@@ -25,7 +25,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
 class Content implements FieldableContent
 {
     /**
-     * @var int
+     * @var string
      *
      * @ORM\Column(type="guid")
      * @ORM\Id
