@@ -24,14 +24,6 @@ class ApiKey extends DomainAccessor implements UserInterface, \Serializable
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
-     * @Assert\Length(max="255", maxMessage="too_long")
-     * @ORM\Column(name="name", type="string", length=255)
-     */
-    private $name;
-
-    /**
-     * @var string
-     * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="180", maxMessage="too_long")
      * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/", message="invalid_characters")
      * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
@@ -60,35 +52,6 @@ class ApiKey extends DomainAccessor implements UserInterface, \Serializable
      * @ORM\Column(type="datetime")
      */
     private $created;
-
-    public function __toString()
-    {
-        return ''.$this->getName();
-    }
-
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return ApiKey
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
 
     /**
      * @return Organization
