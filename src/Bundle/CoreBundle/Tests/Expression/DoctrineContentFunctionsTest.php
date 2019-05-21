@@ -8,11 +8,13 @@
 
 namespace UniteCMS\CoreBundle\Tests\Expression;
 
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldableValidation;
@@ -86,6 +88,10 @@ class DoctrineContentFunctionsTest extends DatabaseAwareTestCase
 
         $this->expressionChecker = new UniteExpressionChecker();
         $this->expressionChecker->registerDoctrineContentFunctionsProvider($this->em, $this->contentType);
+
+        $user = new User();
+        $user->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        static::$container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, '', 'main', $user->getRoles()));
     }
 
     public function testContentUniqueFunction() {
