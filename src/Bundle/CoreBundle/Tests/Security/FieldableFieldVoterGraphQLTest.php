@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Tests\Security;
 
 use GraphQL\Error\Error;
 use GraphQL\GraphQL;
+use ReflectionProperty;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -11,10 +12,15 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Exception\UserErrorAtPath;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
@@ -34,6 +40,11 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
      * @var ContentType
      */
     protected $contentType;
+
+    /**
+     * @var SettingType
+     */
+    protected $settingType;
 
     /**
      * @var UsernamePasswordToken[] $users
@@ -104,6 +115,26 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->content = new Content();
         $this->content->setContentType($this->contentType);
 
+        $this->settingType = new SettingType();
+        $this->settingType->setPermissions([SettingVoter::VIEW => 'true', SettingVoter::UPDATE => 'true']);
+        $this->settingType->setTitle('ST')->setIdentifier('st');
+        $this->settingType->setDomain($this->domain);
+        $sf1 = new SettingTypeField();
+        $sf1->setTitle('F1')->setIdentifier('f1')->setType('text')->setPermissions([
+            FieldableFieldVoter::LIST => 'member.type == "editor"',
+            FieldableFieldVoter::VIEW => 'content.data.f1 == "A" || content.data.f1 == "B"',
+            FieldableFieldVoter::UPDATE => 'content.data.f1 == "A"',
+        ]);
+        $this->settingType->addField($sf1);
+
+        $mf1 = new DomainMemberTypeField();
+        $mf1->setTitle('F1')->setIdentifier('f1')->setType('text')->setPermissions([
+            FieldableFieldVoter::LIST => 'member.type == "editor"',
+            FieldableFieldVoter::VIEW => 'content.data.f1 == "A" || content.data.f1 == "B"',
+            FieldableFieldVoter::UPDATE => 'content.data.f1 == "A"',
+        ]);
+        $this->domain->getDomainMemberTypes()->get('editor')->addField($mf1);
+        $this->domain->getDomainMemberTypes()->get('editor')->setPermissions([DomainMemberVoter::LIST => 'true', DomainMemberVoter::VIEW => 'true']);
 
         $apiKey1 = new ApiKey();
         $apiKey1->setToken('XXX1')->setName('XXX1')->setOrganization($org);
@@ -131,7 +162,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $m = static::$container->get('unite.cms.graphql.schema_type_manager');
         $this->schema = $m->createSchema($this->domain, 'Query', 'Mutation');
 
-        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
+        $d = new ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
         $d->setValue(static::$container->get('unite.cms.manager'),$this->domain);
     }
@@ -222,6 +253,46 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
             'f4' => 'F4',
         ], $getFullContent->getData());
 
+        // Test accessing setting and domain member fields
+        $this->settingType->getSetting()->setData(['f1' => 'F1']);
+        $this->users['editor']->getUser()->getDomainMembers($this->domain)[0]->setData(['f1' => 'F1']);
+        $this->em->flush();
+
+        $result = GraphQL::executeQuery(
+            $this->schema,
+            'query { 
+                StSetting { f1 }
+                findEditorMember { result { f1 } },
+            }'
+        );
+
+        $result->setErrorFormatter(function (Error $error) {
+            return UserErrorAtPath::createFormattedErrorFromException($error);
+        });
+
+        $result = json_decode(json_encode($result->toArray(true)));
+        $this->assertEquals(null, $result->data->StSetting->f1);
+        $this->assertEquals(null, $result->data->findEditorMember->result[0]->f1);
+
+        $this->settingType->getSetting()->setData(['f1' => 'A']);
+        $this->users['editor']->getUser()->getDomainMembers($this->domain)[0]->setData(['f1' => 'A']);
+        $this->em->flush();
+
+        $result = GraphQL::executeQuery(
+            $this->schema,
+            'query { 
+                StSetting { f1 }
+                findEditorMember { result { f1 } },
+            }'
+        );
+
+        $result->setErrorFormatter(function (Error $error) {
+            return UserErrorAtPath::createFormattedErrorFromException($error);
+        });
+
+        $result = json_decode(json_encode($result->toArray(true)));
+        $this->assertEquals('A', $result->data->StSetting->f1);
+        $this->assertEquals('A', $result->data->findEditorMember->result[0]->f1);
     }
 
     public function testGraphQLSchemaGenerationForViewer() {
@@ -229,6 +300,9 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         static::$container->get('security.token_storage')->setToken($this->users['viewer']);
         $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated', 'deleted', 'f1', 'f2', 'f3'], array_keys($m->getSchemaType('CtContent', $this->domain)->getFields()));
         $this->assertEquals(['f1', 'f2', 'f3'], array_keys($m->getSchemaType('CtContentInput', $this->domain)->getFields()));
+
+        $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated', '_name'], array_keys($m->getSchemaType('EditorMember', $this->domain)->getFields()));
+        $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated'], array_keys($m->getSchemaType('StSetting', $this->domain)->getFields()));
 
         $result = GraphQL::executeQuery(
             $this->schema,
