@@ -51,7 +51,7 @@ class FieldableFieldContent
     /**
      * @return FieldableContent
      */
-    public function getContent(): FieldableContent
+    public function getContent(): ?FieldableContent
     {
         return $this->content;
     }
@@ -59,9 +59,9 @@ class FieldableFieldContent
     /**
      * @param FieldableContent $content
      */
-    public function setContent(FieldableContent $content): void
+    public function setContent(FieldableContent $content = null): void
     {
-        if(!empty($this->field) && !empty($content->getEntity()) && $this->field->getEntity() !== $content->getEntity()) {
+        if(!empty($this->field) && !empty($contentd) && !empty($content->getEntity()) && $this->field->getEntity() !== $content->getEntity()) {
             throw new InvalidArgumentException('Fieldable of field and entity must be the same object.');
         }
 

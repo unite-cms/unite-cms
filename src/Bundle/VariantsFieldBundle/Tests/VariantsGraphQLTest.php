@@ -62,6 +62,31 @@ class VariantsGraphQLTest extends APITestCase
                                         "domain": "variants",
                                         "content_type": "other"
                                     }
+                                },
+                                {
+                                    "title": "Text",
+                                    "identifier": "hidden_text",
+                                    "type": "text",
+                                    "permissions": {
+                                        "list field": "false"
+                                    }
+                                },
+                                {
+                                    "title": "Text",
+                                    "identifier": "denied_text",
+                                    "type": "text",
+                                    "permissions": {
+                                        "view field": "false"
+                                    }
+                                },
+                                {
+                                    "title": "Text",
+                                    "identifier": "denied_update_text",
+                                    "type": "text",
+                                    "permissions": {
+                                        "view field": "true",
+                                        "update field": "false"
+                                    }
                                 }
                             ]
                         }
@@ -135,7 +160,8 @@ class VariantsGraphQLTest extends APITestCase
                         ... on VariantsContentVariantsVariant_2Variant {
                             collection {
                                 field_text
-                            }
+                            },
+                            denied_text
                         }
                     }
                 }
@@ -151,10 +177,16 @@ class VariantsGraphQLTest extends APITestCase
                     ... on VariantsContentVariantsVariant_2Variant {
                         collection {
                             field_text
-                        }
+                        },
+                        denied_text
                     }
                 }
-            }
+            },
+            __type(name: "VariantsContentVariantsVariant_2Variant") {
+                fields {
+                  name
+                }
+              }
         }';
 
         $this->assertEquals([
@@ -173,6 +205,15 @@ class VariantsGraphQLTest extends APITestCase
                         'type' => null,
                     ]
                 ],
+                '__type' => [
+                    'fields' => [
+                        ['name' => 'type'],
+                        ['name' => 'collection'],
+                        ['name' => 'ref'],
+                        ['name' => 'denied_text'],
+                        ['name' => 'denied_update_text'],
+                    ]
+                ]
             ]], json_decode(json_encode($this->api($query)), true));
 
         // 2. Content with field data.
@@ -183,7 +224,9 @@ class VariantsGraphQLTest extends APITestCase
                     'collection' => [
                         ['field_text' => 'Foo'],
                         ['field_text' => 'Baa'],
-                    ]
+                    ],
+                    'hidden_text' => 'Hidden',
+                    'denied_text' => 'Denied',
                 ],
             ]
         ]);
@@ -198,7 +241,8 @@ class VariantsGraphQLTest extends APITestCase
                                 'collection' => [
                                     ['field_text' => 'Foo'],
                                     ['field_text' => 'Baa'],
-                                ]
+                                ],
+                                'denied_text' => null,
                             ]
                         ]
                     ]
@@ -209,9 +253,19 @@ class VariantsGraphQLTest extends APITestCase
                         'collection' => [
                             ['field_text' => 'Foo'],
                             ['field_text' => 'Baa'],
-                        ]
+                        ],
+                        'denied_text' => null,
                     ]
                 ],
+                '__type' => [
+                    'fields' => [
+                        ['name' => 'type'],
+                        ['name' => 'collection'],
+                        ['name' => 'ref'],
+                        ['name' => 'denied_text'],
+                        ['name' => 'denied_update_text'],
+                    ]
+                ]
             ]], json_decode(json_encode($this->api($query)), true));
 
         // 3. Settings without any field data.
@@ -241,7 +295,7 @@ class VariantsGraphQLTest extends APITestCase
             'variants' => [
                 'type' => 'v1',
                 'v1' => [
-                    'text' => 'Foo'
+                    'text' => 'Foo',
                 ],
             ]
         ]);
@@ -269,7 +323,7 @@ class VariantsGraphQLTest extends APITestCase
                 createVariants(data: { variants: {
                     type: "variant_2",
                     variant_1: { field_text: "Foo" },
-                    variant_2: { collection: [ { field_text: "Foo" }, { field_text: "Baa" } ], ref: { content_type: "other", domain: "variants", content: "'.$other_c1->getId().'" } }
+                    variant_2: { denied_update_text: "DENIED", collection: [ { field_text: "Foo" }, { field_text: "Baa" } ], ref: { content_type: "other", domain: "variants", content: "'.$other_c1->getId().'" } }
                 } }, persist: false) {
                     variants {
                         type,
@@ -277,13 +331,36 @@ class VariantsGraphQLTest extends APITestCase
                         ... on VariantsContentVariantsVariant_2Variant {
                             collection {
                                 field_text
-                            }
+                            },
+                            denied_text,
+                            denied_update_text
                         }
                     }
                 }
             }')), true);
 
-        // Create nested content object.
+        $this->assertEquals('This form should not contain extra fields.', $response['errors'][0]['message']);
+
+        $response = json_decode(json_encode($this->api('mutation {
+                createVariants(data: { variants: {
+                    type: "variant_2",
+                    variant_1: { field_text: "Foo" },
+                    variant_2: { denied_text: "DENIED", collection: [ { field_text: "Foo" }, { field_text: "Baa" } ], ref: { content_type: "other", domain: "variants", content: "'.$other_c1->getId().'" } }
+                } }, persist: false) {
+                    variants {
+                        type,
+                        
+                        ... on VariantsContentVariantsVariant_2Variant {
+                            collection {
+                                field_text
+                            },
+                            denied_text,
+                            denied_update_text
+                        }
+                    }
+                }
+            }')), true);
+
         $this->assertEquals([
             'data' => [
                 'createVariants' => [
@@ -292,7 +369,9 @@ class VariantsGraphQLTest extends APITestCase
                         'collection' => [
                             ['field_text' => 'Foo'],
                             ['field_text' => 'Baa'],
-                        ]
+                        ],
+                        'denied_text' => null,
+                        'denied_update_text' => null,
                     ]
                 ],
             ]], $response);
