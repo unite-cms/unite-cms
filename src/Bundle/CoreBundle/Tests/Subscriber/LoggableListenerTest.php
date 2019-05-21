@@ -8,6 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Tests\Subscriber;
 
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Subscriber\LoggableListener;
@@ -74,7 +75,7 @@ class LoggableListenerTest extends DatabaseAwareTestCase
      * @param $data
      */
     protected function assertLastLogEntry($object, $action, $data) {
-        $logEntries = $this->em->getRepository('GedmoLoggable:LogEntry')->getLogEntries($object);
+        $logEntries = $this->em->getRepository(ContentLogEntry::class)->getLogEntries($object);
         $this->assertGreaterThan(0, count($logEntries));
         $logEntry = $logEntries[0];
         $this->assertEquals($action, $logEntry->getAction());
@@ -125,7 +126,7 @@ class LoggableListenerTest extends DatabaseAwareTestCase
         $this->em->remove($content);
         $this->em->flush();
 
-        $this->assertCount(0, $this->em->getRepository('GedmoLoggable:LogEntry')->getLogEntries($content));
+        $this->assertCount(0, $this->em->getRepository(ContentLogEntry::class)->getLogEntries($content));
     }
 
     public function testSettingLogger() {
@@ -145,7 +146,7 @@ class LoggableListenerTest extends DatabaseAwareTestCase
         $this->em->remove($setting);
         $this->em->flush();
 
-        $this->assertCount(0, $this->em->getRepository('GedmoLoggable:LogEntry')->getLogEntries($setting));
+        $this->assertCount(0, $this->em->getRepository(ContentLogEntry::class)->getLogEntries($setting));
     }
 
     public function testDomainMemberLogger() {
@@ -165,6 +166,6 @@ class LoggableListenerTest extends DatabaseAwareTestCase
         $this->em->remove($member);
         $this->em->flush();
 
-        $this->assertCount(0, $this->em->getRepository('GedmoLoggable:LogEntry')->getLogEntries($member));
+        $this->assertCount(0, $this->em->getRepository(ContentLogEntry::class)->getLogEntries($member));
     }
 }

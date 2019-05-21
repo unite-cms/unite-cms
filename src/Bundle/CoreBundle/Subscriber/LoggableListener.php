@@ -9,7 +9,6 @@
 namespace UniteCMS\CoreBundle\Subscriber;
 
 use Doctrine\Common\EventArgs;
-use Gedmo\Loggable\Entity\LogEntry;
 use Gedmo\Loggable\LoggableListener as BaseLoggableListener;
 use UniteCMS\CoreBundle\Entity\Content;
 

@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
@@ -151,9 +152,7 @@ class SettingController extends AbstractController
             [
                 'settingType' => $settingType,
                 'setting' => $setting,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository(
-                    'GedmoLoggable:LogEntry'
-                )->getLogEntries($setting),
+                'revisions' => $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class)->getLogEntries($setting),
             ]
         );
     }
@@ -184,7 +183,7 @@ class SettingController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $this->getDoctrine()->getManager()->getRepository('GedmoLoggable:LogEntry')->revert($setting, $version);
+            $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class)->revert($setting, $version);
             $this->getDoctrine()->getManager()->persist($setting);
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Setting reverted.');
