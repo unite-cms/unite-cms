@@ -4,6 +4,7 @@ namespace UniteCMS\CollectionFieldBundle\Tests\Field;
 
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CollectionFieldBundle\Field\Types\CollectionFieldType;
 use UniteCMS\CollectionFieldBundle\Model\CollectionField;
 use UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory;
@@ -59,6 +60,9 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
     {
         parent::setUp();
 
+        $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authChecker->expects($this->any())->method('isGranted')->willReturn(true);
+
         $fieldTypeManager = $this->createMock(FieldTypeManager::class);
         $this->nestedFieldType = $this
             ->getMockBuilder(FieldType::class)
@@ -71,7 +75,8 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         $this->collectionFieldType = new CollectionFieldType(
             $this->createMock(CollectionFieldTypeFactory::class),
             $fieldTypeManager,
-            new TableViewConfigurationFactory($fieldTypeManager, 100)
+            new TableViewConfigurationFactory($fieldTypeManager, 100),
+            $authChecker
         );
 
         $this->contentTypeField = new ContentTypeField();
