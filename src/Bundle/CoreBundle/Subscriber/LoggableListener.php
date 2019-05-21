@@ -14,6 +14,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 
 class LoggableListener extends BaseLoggableListener
 {
@@ -88,7 +89,13 @@ class LoggableListener extends BaseLoggableListener
         }
 
         if($logEntry instanceof ContentLogEntry && $this->user instanceof DomainAccessor) {
-            $logEntry->setAccessor($this->user);
+
+            // Avoid a circle reference problem when creating new domain members.
+            if(!$object instanceof DomainMember || !$logEntry->getAction() === self::ACTION_CREATE) {
+                $logEntry->setAccessor($this->user);
+            }
+
+
         }
     }
 
