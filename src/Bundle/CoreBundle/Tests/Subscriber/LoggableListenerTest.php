@@ -8,9 +8,15 @@
 
 namespace UniteCMS\CoreBundle\Tests\Subscriber;
 
+use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Subscriber\LoggableListener;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
@@ -167,5 +173,44 @@ class LoggableListenerTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         $this->assertCount(0, $this->em->getRepository(ContentLogEntry::class)->getLogEntries($member));
+    }
+
+    public function testLogAccessor() {
+
+        $content = new Content();
+        $content->setData(['field' => 'original data'])->setContentType($this->domain->getContentTypes()->first());
+        $this->em->persist($content);
+        $this->em->flush();
+        $logs = $this->em->getRepository(ContentLogEntry::class)->getLogEntries($content);
+        $this->assertCount(1, $logs);
+        $this->assertEmpty($logs[0]->getUsername());
+        $this->assertNull($logs[0]->getAccessor());
+
+        $user = new User();
+        $user->setName('My user')->setEmail('x@y.com')->setPassword('xxx');
+        $user->setRoles([User::ROLE_USER]);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        static::$container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, '', 'main', $user->getRoles()));
+        static::$container->get('stof_doctrine_extensions.event_listener.logger')->onKernelRequest(new GetResponseEvent(static::$kernel, new Request(), HttpKernelInterface::MASTER_REQUEST));
+
+        $content2 = new Content();
+        $content2->setData(['field' => 'original data'])->setContentType($this->domain->getContentTypes()->first());
+        $this->em->persist($content2);
+        $this->em->flush();
+        $logs = $this->em->getRepository(ContentLogEntry::class)->getLogEntries($content2);
+        $this->assertCount(1, $logs);
+        $this->assertEquals('x@y.com', $logs[0]->getUsername());
+        $this->assertNotNull($logs[0]->getAccessor());
+        $this->assertEquals($user, $logs[0]->getAccessor());
+
+        // When user gets deleted, we still have the username saved in the log table.
+        $this->em->remove($user);
+        $this->em->flush();
+        $this->em->refresh($logs[0]);
+        
+        $this->assertEquals('x@y.com', $logs[0]->getUsername());
+        $this->assertNull($logs[0]->getAccessor());
     }
 }

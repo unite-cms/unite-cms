@@ -21,5 +21,30 @@ use Gedmo\Loggable\Entity\LogEntry;
  */
 class ContentLogEntry extends LogEntry
 {
+    /**
+     * @var DomainAccessor
+     * @ORM\ManyToOne(targetEntity="DomainAccessor", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="accessor_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    private $accessor;
 
+    /**
+     * @return DomainAccessor
+     */
+    public function getAccessor()
+    {
+        return $this->accessor;
+    }
+
+    /**
+     * @param DomainAccessor $accessor
+     *
+     * @return ContentLogEntry
+     */
+    public function setAccessor(DomainAccessor $accessor)
+    {
+        $this->accessor = $accessor;
+
+        return $this;
+    }
 }
