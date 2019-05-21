@@ -11,6 +11,7 @@ namespace UniteCMS\CoreBundle\Subscriber;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -40,7 +41,7 @@ class DeleteFieldableContentSubscriber
     }
 
     private function deleteLogForFieldableContent(FieldableContent $content, EntityManager $em) {
-        foreach ($em->getRepository('GedmoLoggable:LogEntry')->getLogEntries($content) as $logEntry) {
+        foreach ($em->getRepository(ContentLogEntry::class)->getLogEntries($content) as $logEntry) {
             $em->remove($logEntry);
         }
     }

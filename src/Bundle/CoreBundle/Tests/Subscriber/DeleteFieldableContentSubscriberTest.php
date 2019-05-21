@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Tests\Subscriber;
 
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
@@ -93,7 +94,7 @@ class DeleteFieldableContentSubscriberTest extends DatabaseAwareTestCase
         // We have 10 CREATE content log entries.
         $this->assertEquals(
             10,
-            $this->em->getRepository('GedmoLoggable:LogEntry')->count(['objectClass' => Content::class])
+            $this->em->getRepository(ContentLogEntry::class)->count(['objectClass' => Content::class])
         );
 
         // Delete content type1
@@ -103,7 +104,7 @@ class DeleteFieldableContentSubscriberTest extends DatabaseAwareTestCase
         // We have 5 CREATE content log entries remaining
         $this->assertEquals(
             5,
-            $this->em->getRepository('GedmoLoggable:LogEntry')->count(['objectClass' => Content::class])
+            $this->em->getRepository(ContentLogEntry::class)->count(['objectClass' => Content::class])
         );
     }
 
@@ -112,7 +113,7 @@ class DeleteFieldableContentSubscriberTest extends DatabaseAwareTestCase
         // We have 10 CREATE setting log entries.
         $this->assertEquals(
             10,
-            $this->em->getRepository('GedmoLoggable:LogEntry')->count(['objectClass' => Setting::class])
+            $this->em->getRepository(ContentLogEntry::class)->count(['objectClass' => Setting::class])
         );
 
         // Delete setting type 1
@@ -122,20 +123,20 @@ class DeleteFieldableContentSubscriberTest extends DatabaseAwareTestCase
         // We have 5 CREATE setting log entries remaining
         $this->assertEquals(
             5,
-            $this->em->getRepository('GedmoLoggable:LogEntry')->count(['objectClass' => Setting::class])
+            $this->em->getRepository(ContentLogEntry::class)->count(['objectClass' => Setting::class])
         );
     }
 
     public function testAutoDeleteDomain() {
 
         // We have 5 CREATE member log entries
-        $this->assertEquals(5, $this->em->getRepository('GedmoLoggable:LogEntry')->count(['objectClass' => DomainMember::class]));
+        $this->assertEquals(5, $this->em->getRepository(ContentLogEntry::class)->count(['objectClass' => DomainMember::class]));
 
         // When deleting the domain, auto delete of all other log entries should be triggered
         $this->em->remove($this->domain);
         $this->em->flush();
 
         // Deleting the domain should trigger deleting of all log entries.
-        $this->assertEquals(0, $this->em->getRepository('GedmoLoggable:LogEntry')->count([]));
+        $this->assertEquals(0, $this->em->getRepository(ContentLogEntry::class)->count([]));
     }
 }

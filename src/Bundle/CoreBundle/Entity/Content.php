@@ -19,7 +19,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
  *
  * @ORM\Table(name="content")
  * @ORM\Entity
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="UniteCMS\CoreBundle\Entity\ContentLogEntry")
  * @Gedmo\SoftDeleteable(fieldName="deleted", timeAware=false)
  */
 class Content implements FieldableContent

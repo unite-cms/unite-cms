@@ -962,6 +962,7 @@ class ContentControllerTest extends DatabaseAwareTestCase {
 
         // Recover content.
         $content->recoverDeleted();
+        $this->client->reload();
         $this->em->flush();
         $this->em->clear();
 

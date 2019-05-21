@@ -14,7 +14,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
  *
  * @ORM\Table(name="domain_member")
  * @ORM\Entity
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="UniteCMS\CoreBundle\Entity\ContentLogEntry")
  * @UniqueEntity(fields={"domain", "accessor", "domainMemberType"}, message="user_already_member_of_domain_for_type")
  */
 class DomainMember implements FieldableContent
