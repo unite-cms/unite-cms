@@ -41,8 +41,10 @@ class FieldableFormBuilder
 
         foreach ($fieldable->getFields() as $fieldDefinition) {
 
-            // Only render field, if we are allowed to update it.
-            if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $content))) {
+            // Only render field, if we are allowed to list and update it.
+            if(
+                !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $fieldDefinition)
+                || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $content))) {
                 continue;
             }
 
@@ -80,6 +82,8 @@ class FieldableFormBuilder
      */
     public function alterFieldableContentData(FieldableContent $content, array $data = []) : array {
 
+        $originalData = $content->getData();
+
         if (isset($data['locale'])) {
             $content->setLocale($data['locale']);
             unset($data['locale']);
@@ -89,12 +93,16 @@ class FieldableFormBuilder
         if(!empty($content->getEntity()) && $content->getEntity() instanceof Fieldable) {
             foreach ($content->getEntity()->getFields() as $field) {
 
-                // Only alter field, if we are allowed to update it.
-                if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
-                    continue;
+                // Only alter field, if we are allowed to list and update it.
+                if(
+                    !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)
+                    || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
+                    if(isset($originalData[$field->getIdentifier()])) {
+                        $data[$field->getIdentifier()] = $originalData[$field->getIdentifier()];
+                    }
+                } else {
+                    $this->fieldTypeManager->alterFieldData($field, $data, $content, $data);
                 }
-
-                $this->fieldTypeManager->alterFieldData($field, $data, $content, $data);
             }
         }
 

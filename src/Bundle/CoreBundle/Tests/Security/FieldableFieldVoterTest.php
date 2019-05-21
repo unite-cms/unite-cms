@@ -80,6 +80,14 @@ class FieldableFieldVoterTest extends SecurityVoterTestCase
         ])->setType('text');
         $this->contentType->addField($f5);
 
+        $f6 = new ContentTypeField();
+        $f6->setTitle('F6')->setIdentifier('f6')->setPermissions([
+            FieldableFieldVoter::LIST => 'false',
+            FieldableFieldVoter::VIEW => 'true',
+            FieldableFieldVoter::UPDATE => 'true',
+        ])->setType('text');
+        $this->contentType->addField($f6);
+
         $this->content = new Content();
         $this->content->setContentType($this->contentType);
 
@@ -104,6 +112,7 @@ class FieldableFieldVoterTest extends SecurityVoterTestCase
         $subjectF3 = new FieldableFieldContent($this->contentType->getFields()->get('f3'), $this->content);
         $subjectF4 = new FieldableFieldContent($this->contentType->getFields()->get('f4'), $this->content);
         $subjectF5 = new FieldableFieldContent($this->contentType->getFields()->get('f5'), $this->content);
+        $subjectF6 = new FieldableFieldContent($this->contentType->getFields()->get('f6'), $this->content);
 
         // Platform admins can preform all field actions.
         static::$container->get('security.token_storage')->setToken($this->u['platform']);
@@ -122,6 +131,9 @@ class FieldableFieldVoterTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([FieldableFieldVoter::LIST], $subjectF5->getField()));
         $this->assertTrue($dm->isGranted([FieldableFieldVoter::VIEW], $subjectF5));
         $this->assertTrue($dm->isGranted([FieldableFieldVoter::UPDATE], $subjectF5));
+        $this->assertTrue($dm->isGranted([FieldableFieldVoter::LIST], $subjectF6->getField()));
+        $this->assertTrue($dm->isGranted([FieldableFieldVoter::VIEW], $subjectF6));
+        $this->assertTrue($dm->isGranted([FieldableFieldVoter::UPDATE], $subjectF6));
 
         // Organization admins can preform all field actions on their organization domain's content.
         static::$container->get('security.token_storage')->setToken($this->u['admin']);
@@ -140,6 +152,9 @@ class FieldableFieldVoterTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([FieldableFieldVoter::LIST], $subjectF5->getField()));
         $this->assertTrue($dm->isGranted([FieldableFieldVoter::VIEW], $subjectF5));
         $this->assertTrue($dm->isGranted([FieldableFieldVoter::UPDATE], $subjectF5));
+        $this->assertTrue($dm->isGranted([FieldableFieldVoter::LIST], $subjectF6->getField()));
+        $this->assertTrue($dm->isGranted([FieldableFieldVoter::VIEW], $subjectF6));
+        $this->assertTrue($dm->isGranted([FieldableFieldVoter::UPDATE], $subjectF6));
 
         // All other users can preform the actions they have access to.
         static::$container->get('security.token_storage')->setToken($this->u['domain_admin']);
@@ -158,6 +173,9 @@ class FieldableFieldVoterTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([FieldableFieldVoter::LIST], $subjectF5->getField()));
         $this->assertFalse($dm->isGranted([FieldableFieldVoter::VIEW], $subjectF5));
         $this->assertFalse($dm->isGranted([FieldableFieldVoter::UPDATE], $subjectF5));
+        $this->assertFalse($dm->isGranted([FieldableFieldVoter::LIST], $subjectF6->getField()));
+        $this->assertTrue($dm->isGranted([FieldableFieldVoter::VIEW], $subjectF6));
+        $this->assertTrue($dm->isGranted([FieldableFieldVoter::UPDATE], $subjectF6));
 
         $this->content->setData(['f1' => 'B']);
         $this->assertTrue($dm->isGranted([FieldableFieldVoter::VIEW], $subjectF5));
@@ -178,7 +196,7 @@ class FieldableFieldVoterTest extends SecurityVoterTestCase
 
         static::$container->get('security.token_storage')->setToken($this->u['platform']);
         $keys = array_keys($builder->createForm($this->contentType, $this->content)->all());
-        $this->assertEquals(['f1', 'f2', 'f3', 'f4', 'f5'], $keys);
+        $this->assertEquals(['f1', 'f2', 'f3', 'f4', 'f5', 'f6'], $keys);
 
         static::$container->get('security.token_storage')->setToken($this->u['domain_admin']);
         $keys = array_keys($builder->createForm($this->contentType, $this->content)->all());

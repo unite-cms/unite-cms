@@ -93,6 +93,14 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         ])->setType('text');
         $this->contentType->addField($f5);
 
+        $f6 = new ContentTypeField();
+        $f6->setTitle('F6')->setIdentifier('f6')->setPermissions([
+            FieldableFieldVoter::LIST => 'false',
+            FieldableFieldVoter::VIEW => 'true',
+            FieldableFieldVoter::UPDATE => 'true',
+        ])->setType('text');
+        $this->contentType->addField($f6);
+
         $this->content = new Content();
         $this->content->setContentType($this->contentType);
 
@@ -201,7 +209,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
 
         $result = json_decode(json_encode($result->toArray(true)));
         $this->assertEquals('A', $result->data->updateCt->f1);
-        $this->assertEquals('', $result->data->updateCt->f2);
+        $this->assertEquals('F2', $result->data->updateCt->f2);
         $this->assertEquals('F5 Updated', $result->data->updateCt->f5);
         $this->assertNull($result->data->updateCt->f3);
 
@@ -210,6 +218,8 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
             'f1' => 'A',
             'f3' => 'F3 Updated',
             'f5' => 'F5 Updated',
+            'f2' => 'F2',
+            'f4' => 'F4',
         ], $getFullContent->getData());
 
     }
@@ -284,7 +294,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
 
         $result = json_decode(json_encode($result->toArray(true)));
         $this->assertEquals('A', $result->data->updateCt->f1);
-        $this->assertEquals('', $result->data->updateCt->f2);
+        $this->assertEquals('F2', $result->data->updateCt->f2);
         $this->assertNull($result->data->updateCt->f3);
 
         $getFullContent = $this->em->getRepository(Content::class)->find($result->data->updateCt->id);
@@ -292,6 +302,8 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
             'f1' => 'A',
             'f3' => 'F3 Updated',
             'f5' => 'F5',
+            'f2' => 'F2',
+            'f4' => 'F4',
         ], $getFullContent->getData());
     }
 }
