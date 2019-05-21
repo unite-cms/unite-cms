@@ -2,20 +2,25 @@
 
 namespace UniteCMS\CoreBundle\Form;
 
+use App\Bundle\CoreBundle\Model\FieldableFieldContent;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 
 class FieldableFormBuilder
 {
     private $formFactory;
     private $fieldTypeManager;
+    protected $authorizationChecker;
 
-    public function __construct(FormFactoryInterface $formFactory, FieldTypeManager $fieldTypeManager)
+    public function __construct(FormFactoryInterface $formFactory, FieldTypeManager $fieldTypeManager, AuthorizationChecker $authorizationChecker)
     {
         $this->formFactory = $formFactory;
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     public function createForm(Fieldable $fieldable, FieldableContent $content = null, $options = [])
@@ -35,6 +40,13 @@ class FieldableFormBuilder
         $options['content'] = $content;
 
         foreach ($fieldable->getFields() as $fieldDefinition) {
+
+            // Only render field, if we are allowed to list and update it.
+            if(
+                !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $fieldDefinition)
+                || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $content))) {
+                continue;
+            }
 
             $fieldType = $this->fieldTypeManager->getFieldType($fieldDefinition->getType());
 
@@ -70,6 +82,8 @@ class FieldableFormBuilder
      */
     public function alterFieldableContentData(FieldableContent $content, array $data = []) : array {
 
+        $originalData = $content->getData();
+
         if (isset($data['locale'])) {
             $content->setLocale($data['locale']);
             unset($data['locale']);
@@ -78,7 +92,17 @@ class FieldableFormBuilder
         // Allow all fields to alter data before we set it to the content object.
         if(!empty($content->getEntity()) && $content->getEntity() instanceof Fieldable) {
             foreach ($content->getEntity()->getFields() as $field) {
-                $this->fieldTypeManager->alterFieldData($field, $data, $content, $data);
+
+                // Only alter field, if we are allowed to list and update it.
+                if(
+                    !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)
+                    || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
+                    if(isset($originalData[$field->getIdentifier()])) {
+                        $data[$field->getIdentifier()] = $originalData[$field->getIdentifier()];
+                    }
+                } else {
+                    $this->fieldTypeManager->alterFieldData($field, $data, $content, $data);
+                }
             }
         }
 

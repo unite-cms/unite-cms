@@ -4,6 +4,7 @@ namespace UniteCMS\VariantsFieldBundle\Tests;
 
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
@@ -223,14 +224,14 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'title' => 'Foo',
                             'identifier' => 'foo',
                             'fields' => [
-                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'text'],
+                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'text', 'permissions' => ['list field' => 'false', 'view field' => 'false', 'update field' => 'false']],
                             ],
                         ],
                         [
                             'title' => 'Baa',
                             'identifier' => 'baa',
                             'fields' => [
-                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'text'],
+                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'text', 'permissions' => ['list field' => 'false', 'view field' => 'false', 'update field' => 'false']],
                             ],
                         ]
                     ],
@@ -293,7 +294,17 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                                     'title' => 'Text',
                                     'identifier' => 'text',
                                     'type' => 'text',
-                                ]
+                                ],
+                                [
+                                    'title' => 'Hidden',
+                                    'identifier' => 'hidden',
+                                    'type' => 'text',
+                                    'permissions' => [
+                                        'list field' => 'false',
+                                        'view field' => 'false',
+                                        'update field' => 'false',
+                                    ]
+                                ],
                             ],
                         ],
                         [
@@ -340,7 +351,10 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
 
         // Fake user
         $user = new User();
-        $user->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        $domainMember = new DomainMember();
+        $domainMember->setDomain($field->getContentType()->getDomain())->setDomainMemberType($field->getContentType()->getDomain()->getDomainMemberTypes()->first());
+        $user->addDomain($domainMember);
+        $user->setRoles([User::ROLE_USER]);
         static::$container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
         );

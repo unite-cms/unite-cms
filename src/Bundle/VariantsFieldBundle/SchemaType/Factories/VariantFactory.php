@@ -8,10 +8,12 @@
 
 namespace UniteCMS\VariantsFieldBundle\SchemaType\Factories;
 
+use App\Bundle\CoreBundle\Model\FieldableFieldContent;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -19,6 +21,7 @@ use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
 use UniteCMS\VariantsFieldBundle\Model\VariantContent;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
@@ -26,10 +29,12 @@ use UniteCMS\VariantsFieldBundle\Model\Variants;
 class VariantFactory
 {
     private $fieldTypeManager;
+    protected $authorizationChecker;
 
-    public function __construct(FieldTypeManager $fieldTypeManager)
+    public function __construct(FieldTypeManager $fieldTypeManager, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -78,6 +83,11 @@ class VariantFactory
              */
             $fieldTypes = [];
             foreach($variant->getFields() as $field) {
+
+                if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)) {
+                    continue;
+                }
+
                 $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
                 $fields[$fieldIdentifier] = $field;
                 $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
@@ -109,9 +119,15 @@ class VariantFactory
                         return null;
                     }
 
+                    $variantContent = new VariantContent($value, $value->getData());
+
+                    if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::VIEW, new FieldableFieldContent($fields[$info->fieldName], $variantContent))) {
+                        return null;
+                    }
+
                     $return_value = null;
                     $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$info->fieldName], new VariantContent($value, $value->getData()));
+                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$info->fieldName], $variantContent);
                     return $return_value;
                 }
             ]), false);

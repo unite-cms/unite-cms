@@ -11,7 +11,7 @@ services:
     public: false
     tags: [form.type]
     arguments:
-      ['@unite.cms.field_type_manager']
+      ['@unite.cms.field_type_manager', '@security.authorization_checker']
 
   # A GraphQL interface type for all variants.
   UniteCMS\VariantsFieldBundle\SchemaType\Types\VariantsFieldInterface:
@@ -30,4 +30,4 @@ services:
     class: UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory
     public: false
     arguments:
-      ['@unite.cms.field_type_manager']
+      ['@unite.cms.field_type_manager', '@security.authorization_checker']

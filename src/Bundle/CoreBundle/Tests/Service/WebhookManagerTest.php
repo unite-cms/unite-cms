@@ -12,10 +12,12 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -210,6 +212,9 @@ class WebhookManagerTest extends DatabaseAwareTestCase
         $this->em->persist($this->domain);
         $this->em->flush();
 
+        $user = new User();
+        $user->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        static::$container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, '', 'main', $user->getRoles()));
     }
 
     /**

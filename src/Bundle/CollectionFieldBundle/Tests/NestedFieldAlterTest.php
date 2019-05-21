@@ -9,6 +9,7 @@
 namespace UniteCMS\CollectionFieldBundle\Tests\Field;
 
 use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CollectionFieldBundle\Field\Types\CollectionFieldType;
 use UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -26,12 +27,15 @@ class NestedFieldAlterTest extends TestCase
     public function testNestedFieldAlterTest() {
 
         $manager = new FieldTypeManager();
+        $authChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authChecker->expects($this->any())->method('isGranted')->willReturn(true);
 
         $manager->registerFieldType(
             new CollectionFieldType(
                 $this->createMock(CollectionFieldTypeFactory::class),
                 $manager,
-                new TableViewConfigurationFactory($manager, 100)
+                new TableViewConfigurationFactory($manager, 100),
+                $authChecker
             )
         );
         $manager->registerFieldType(new class extends FieldType {

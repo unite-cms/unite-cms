@@ -2,11 +2,13 @@
 
 namespace UniteCMS\CollectionFieldBundle\SchemaType\Factories;
 
+use App\Bundle\CoreBundle\Model\FieldableFieldContent;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
 use UniteCMS\CollectionFieldBundle\Model\CollectionRow;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -15,6 +17,7 @@ use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 
 class CollectionFieldTypeFactory
 {
@@ -23,9 +26,15 @@ class CollectionFieldTypeFactory
      */
     private $fieldTypeManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager)
+    /**
+     * @var AuthorizationCheckerInterface $authorizationChecker
+     */
+    protected $authorizationChecker;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -77,6 +86,10 @@ class CollectionFieldTypeFactory
                     $fields[$fieldIdentifier] = $field;
                     $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
 
+                    if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)) {
+                        continue;
+                    }
+
                     if($isInputType) {
                       $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
                     } else {
@@ -115,9 +128,15 @@ class CollectionFieldTypeFactory
                         return null;
                       }
 
+                      $collectionRow = new CollectionRow($collection, $value, $rootContent, $info->path[count($info->path) - 2]);
+
+                      if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::VIEW, new FieldableFieldContent($fields[$info->fieldName], $collectionRow))) {
+                          return null;
+                      }
+
                       $return_value = null;
                       $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName], new CollectionRow($collection, $value, $rootContent, $info->path[count($info->path) - 2]));
+                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName], $collectionRow);
                       return $return_value;
                     }
                   ]));

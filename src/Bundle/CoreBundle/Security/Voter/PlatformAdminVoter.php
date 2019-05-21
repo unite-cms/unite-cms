@@ -8,6 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Security\Voter;
 
+use App\Bundle\CoreBundle\Model\FieldableFieldContent;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -15,6 +16,7 @@ use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
@@ -31,6 +33,8 @@ class PlatformAdminVoter extends Voter
         Setting::class,
         Content::class,
         DomainMember::class,
+        FieldableFieldContent::class,
+        FieldableField::class,
     ];
 
     /**

@@ -57,7 +57,7 @@ class Variants implements Fieldable
             $variant_instance = new Variant(null, [], $variant['identifier'], $variant['title'], $this);
 
             foreach($variant['fields'] as $field) {
-                $field_instance = new VariantsField($variant_instance, $variant['identifier'], $field['identifier'] ?? "", $field['title'] ?? "", $field['type'] ?? "", new FieldableFieldSettings($field['settings'] ?? []));
+                $field_instance = new VariantsField($variant_instance, $variant['identifier'], $field['identifier'] ?? "", $field['title'] ?? "", $field['type'] ?? "", $field['permissions'] ?? [], new FieldableFieldSettings($field['settings'] ?? []));
                 $variant_fields[] = $field_instance;
                 $this->addField($field_instance);
             }
