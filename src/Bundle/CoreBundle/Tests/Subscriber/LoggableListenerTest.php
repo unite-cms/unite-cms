@@ -209,7 +209,7 @@ class LoggableListenerTest extends DatabaseAwareTestCase
         $this->em->remove($user);
         $this->em->flush();
         $this->em->refresh($logs[0]);
-        
+
         $this->assertEquals('x@y.com', $logs[0]->getUsername());
         $this->assertNull($logs[0]->getAccessor());
     }
