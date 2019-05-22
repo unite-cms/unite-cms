@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
-use App\Bundle\CoreBundle\Model\FieldableFieldContent;
+use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;

@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Form;
 
-use App\Bundle\CoreBundle\Model\FieldableFieldContent;
+use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Fieldable;

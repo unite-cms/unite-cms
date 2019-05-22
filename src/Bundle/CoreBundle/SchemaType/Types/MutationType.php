@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
-use App\Bundle\CoreBundle\Model\FieldableFieldContent;
+use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\ResolveInfo;

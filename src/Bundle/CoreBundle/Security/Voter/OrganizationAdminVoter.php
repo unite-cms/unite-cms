@@ -8,7 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Security\Voter;
 
-use App\Bundle\CoreBundle\Model\FieldableFieldContent;
+use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use UniteCMS\CoreBundle\Entity\Content;

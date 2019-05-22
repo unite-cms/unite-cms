@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
-use App\Bundle\CoreBundle\Model\FieldableFieldContent;
+use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;

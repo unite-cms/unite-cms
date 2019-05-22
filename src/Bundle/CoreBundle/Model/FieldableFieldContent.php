@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Bundle\CoreBundle\Model;
+namespace UniteCMS\CoreBundle\Model;
 
 use InvalidArgumentException;
 use UniteCMS\CoreBundle\Entity\FieldableContent;

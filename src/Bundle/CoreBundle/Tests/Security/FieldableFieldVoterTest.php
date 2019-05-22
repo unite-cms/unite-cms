@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Tests\Security;
 
-use App\Bundle\CoreBundle\Model\FieldableFieldContent;
+use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
