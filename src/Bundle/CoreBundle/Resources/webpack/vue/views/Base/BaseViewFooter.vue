@@ -1,6 +1,6 @@
 <template>
     <footer v-if="pages.length > 1">
-        <ul class="uk-pagination uk-flex-center" uk-margin>
+        <ul class="uk-pagination uk-flex-center uk-margin-small-bottom">
             <li class="first uk-visible@s" v-if="showArrows && current > 1">
                 <a v-on:click="change(1)" v-html="feather.icons['chevrons-left'].toSvg({ width: 16, height: 16 })"></a>
             </li>
@@ -19,7 +19,7 @@
                 <a v-on:click="change(pages.length)" v-html="feather.icons['chevrons-right'].toSvg({ width: 16, height: 16 })"></a>
             </li>
         </ul>
-        <div class="uk-pagination uk-flex-center" uk-margin>{{fromItem}}-{{toItem}} of {{total}}</div>
+        <div class="uk-text-center"><small>{{fromItem}} - {{toItem}} of {{total}}</small></div>
     </footer>
 </template>
 
