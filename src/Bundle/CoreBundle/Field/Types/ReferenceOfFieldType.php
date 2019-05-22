@@ -18,7 +18,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
-use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
+use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
@@ -103,7 +105,7 @@ class ReferenceOfFieldType extends FieldType
      */
     function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
-        if(!$context->getObject() instanceof ContentTypeField) {
+        if(!$context->getObject() instanceof ContentTypeField && !$context->getObject() instanceof DomainMemberTypeField) {
             $context->buildViolation('invalid_entity_type')->addViolation();
         }
 
@@ -124,14 +126,20 @@ class ReferenceOfFieldType extends FieldType
             $domain = $this->referenceResolver->resolveDomain($settings->domain);
             $contentType = $this->referenceResolver->resolveContentType($domain, $settings->content_type);
             $field = $this->referenceResolver->resolveField($contentType, $settings->reference_field, ReferenceFieldType::getType());
+            $ref_field_ct_setting = $field->getSettings()->content_type ?? $field->getSettings()->domain_member_type ?? null;
 
             /**
-             * @var ContentType $thisContentType
+             * @var Fieldable $thisFieldable
              */
-            $thisContentType = $context->getObject()->getContentType();
+            $thisFieldable = $context->getObject()->getEntity();
 
             // Check if field references the current content type.
-            if(($field->getSettings()->domain !== $thisContentType->getDomain()->getIdentifier() && $field->getSettings()->domain !== $thisContentType->getDomain()->getPreviousIdentifier()) || $field->getSettings()->content_type !== $thisContentType->getIdentifier()) {
+            if(
+                (
+                    $field->getSettings()->domain !== $thisFieldable->getDomain()->getIdentifier()
+                    && $field->getSettings()->domain !== $thisFieldable->getDomain()->getPreviousIdentifier()
+                ) || $ref_field_ct_setting !== $thisFieldable->getIdentifier()
+            ) {
                 $context->buildViolation('invalid_field_reference')->atPath('reference_field')->addViolation();
             }
 
@@ -155,6 +163,7 @@ class ReferenceOfFieldType extends FieldType
     {
         $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
         $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
+
         return [
             'type' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel), $domain, $nestingLevel),
             'args' => [
@@ -179,8 +188,8 @@ class ReferenceOfFieldType extends FieldType
             ],
             'resolve' => function ($value, array $args, $context, ResolveInfo $info) use ($field, $nestingLevel) {
 
-                // Reference of fields does only work for content entities.
-                if(!$value instanceof Content) {
+                // Reference of fields does only work for content and domain member entities.
+                if(!$value instanceof Content && !$value instanceof DomainMember) {
                     return null;
                 }
 
