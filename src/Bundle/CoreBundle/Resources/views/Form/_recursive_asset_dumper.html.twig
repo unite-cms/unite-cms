@@ -14,10 +14,8 @@
             {% endif %}
         {% endfor %}
     {% endif %}
-    {% if form.children is defined and form.children is not empty %}
-        {% for child in form %}
-            {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: child }) }}
-        {% endfor %}
-    {% endif %}
+    {% for child in form %}
+        {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: child }) }}
+    {% endfor %}
 {% endif %}
 {% endspaceless %}
