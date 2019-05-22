@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
+use App\Bundle\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
@@ -27,6 +28,7 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\SchemaType\Types\PermissionsType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 
 class FieldableTypeFactory implements SchemaTypeFactoryInterface
@@ -183,6 +185,10 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
         foreach ($fieldable->getFields() as $field) {
 
             $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
+
+            if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)) {
+                continue;
+            }
 
             try {
                 $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
@@ -371,6 +377,10 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                             default:
 
                                 if (!array_key_exists($info->fieldName, $fieldTypes)) {
+                                    return null;
+                                }
+
+                                if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::VIEW, new FieldableFieldContent($fieldable->getFields()->get($info->fieldName), $value))) {
                                     return null;
                                 }
 

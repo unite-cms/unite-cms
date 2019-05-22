@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Tests\Field;
 
 use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Entity\Content;

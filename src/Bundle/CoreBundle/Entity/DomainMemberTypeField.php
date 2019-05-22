@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\AccessType;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\SkipWhenEmpty;
@@ -10,11 +11,13 @@ use JMS\Serializer\Annotation\Type;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\FieldType;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
  * Field
@@ -93,9 +96,20 @@ class DomainMemberTypeField implements FieldableField
      */
     private $weight;
 
+    /**
+     * @var array
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="invalid_selection")
+     * @ORM\Column(name="permissions", type="array", nullable=true)
+     * @AccessType("public_method")
+     * @Expose
+     */
+    private $permissions;
+
     public function __construct()
     {
         $this->settings = new FieldableFieldSettings();
+        $this->permissions = [];
+        $this->addDefaultPermissions();
     }
 
     public function __toString()
@@ -116,9 +130,22 @@ class DomainMemberTypeField implements FieldableField
             ->setIdentifier($field->getIdentifier())
             ->setType($field->getType())
             ->setSettings($field->getSettings())
-            ->setWeight($field->getWeight());
+            ->setWeight($field->getWeight())
+            ->setPermissions($field->getPermissions());
 
         return $this;
+    }
+
+    private function addDefaultPermissions()
+    {
+        $this->permissions[FieldableFieldVoter::LIST] = 'true';
+        $this->permissions[FieldableFieldVoter::VIEW] = 'true';
+        $this->permissions[FieldableFieldVoter::UPDATE] = 'true';
+    }
+
+    public function allowedPermissionKeys(): array
+    {
+        return array_merge(FieldableFieldVoter::ENTITY_PERMISSIONS, FieldableFieldVoter::BUNDLE_PERMISSIONS);
     }
 
     /**
@@ -335,6 +362,41 @@ class DomainMemberTypeField implements FieldableField
         $this->setDomainMemberType($entity);
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPermissions() : array
+    {
+        // Prevent null values. We always need an array response.
+        if(empty($this->permissions)) {
+            $this->addDefaultPermissions();
+        }
+        return $this->permissions;
+    }
+
+
+    /**
+     * @param array $permissions
+     *
+     * @return DomainMemberTypeField
+     */
+    public function setPermissions($permissions)
+    {
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        foreach ($permissions as $attribute => $expression) {
+            $this->addPermission($attribute, $expression);
+        }
+
+        return $this;
+    }
+
+    public function addPermission($attribute, string $expression)
+    {
+        $this->permissions[$attribute] = $expression;
     }
 }
 

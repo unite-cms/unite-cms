@@ -34,6 +34,7 @@ identifier_already_taken: 'This identifier is already taken. Please choose anoth
 required: 'This field is required.'
 additional_data: 'This form contains additional fields that are not allowed. Please reload this page.'
 invalid_reference_definition: 'You cannot reference this content object. Either you are not allowed to select it, or it is not available. Please reload and try again or contact an administrator.'
+reference_type_required: 'Reference fields need ether a content_type or a domain_member_type.'
 wrong_setting_definition: 'Wrong setting definition. Please check https://www.unitecms.io/docs for details.'
 unknown_column: 'There is no column with this name.'
 invalid_validations: 'Invalid validations definition. Validations must be set as array of validation objects.'

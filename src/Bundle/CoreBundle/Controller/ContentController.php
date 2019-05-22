@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
@@ -689,9 +690,7 @@ class ContentController extends AbstractController
                 'view' => $view,
                 'contentType' => $view->getContentType(),
                 'content' => $content,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository(
-                    'GedmoLoggable:LogEntry'
-                )->getLogEntries($content),
+                'revisions' => $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class)->getLogEntries($content),
             ]
         );
     }
@@ -722,7 +721,7 @@ class ContentController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $this->getDoctrine()->getManager()->getRepository('GedmoLoggable:LogEntry')->revert($content, $version);
+            $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class)->revert($content, $version);
             $this->getDoctrine()->getManager()->persist($content);
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'Content reverted.');

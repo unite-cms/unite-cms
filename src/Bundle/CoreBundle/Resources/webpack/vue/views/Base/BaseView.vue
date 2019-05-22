@@ -50,6 +50,7 @@
     import BaseViewContent from './BaseViewContent.vue';
 
     import uniteViewDataFetcher from '../../../js/uniteViewDataFechter.js';
+    import uniteMemberViewDataFechter from '../../../js/uniteMemberViewDataFetcher.js';
 
     import feather from 'feather-icons';
 
@@ -91,15 +92,19 @@
                 }, fields);
             }
 
+            let dataFetcherArguments = {
+                endpoint: bag.urls.api,
+                csrf_token: bag.csrf_token,
+                settings: bag.settings
+            };
+
             return {
                 headerComponent: typeof this.$options.headerComponent !== 'undefined' ? this.$options.headerComponent : BaseViewHeader,
                 footerComponent: typeof this.$options.footerComponent !== 'undefined' ? this.$options.footerComponent : BaseViewFooter,
                 contentComponent: typeof this.$options.contentComponent !== 'undefined' ? this.$options.contentComponent : BaseViewContent,
-                dataFetcher: uniteViewDataFetcher.create({
-                    endpoint: bag.urls.api,
-                    csrf_token: bag.csrf_token,
-                    settings: bag.settings
-                }, fieldQuery, filterQuery),
+                dataFetcher: (bag.settings.contentType.endsWith('Member')) ?
+                    uniteMemberViewDataFechter.create(dataFetcherArguments, fieldQuery, filterQuery) :
+                    uniteViewDataFetcher.create(dataFetcherArguments, fieldQuery, filterQuery),
                 loading: false,
                 error: error,
                 rows: [],
@@ -190,24 +195,32 @@
                 this.dataFetcher.sort(this.sort).fetch(page)
                     .then(
                         (data) => {
-
                             this.rows = data.result.result.map((row) => {
                                 let deleted = !(row.deleted == null);
-                                row._actions = {
-                                    delete: row._permissions.DELETE_CONTENT && !deleted,
-                                    delete_definitely: row._permissions.DELETE_CONTENT && deleted,
-                                    recover: row._permissions.UPDATE_CONTENT && deleted,
-                                    translations: row._permissions.UPDATE_CONTENT && !deleted && this.hasTranslations,
-                                    revisions: row._permissions.UPDATE_CONTENT && !deleted,
-                                    update: row._permissions.UPDATE_CONTENT && !deleted
-                                };
+                                if(row._permissions) {
+                                    row._actions = {
+                                        delete: row._permissions.DELETE_CONTENT && !deleted,
+                                        delete_definitely: row._permissions.DELETE_CONTENT && deleted,
+                                        recover: row._permissions.UPDATE_CONTENT && deleted,
+                                        translations: row._permissions.UPDATE_CONTENT && !deleted && this.hasTranslations,
+                                        revisions: row._permissions.UPDATE_CONTENT && !deleted,
+                                        update: row._permissions.UPDATE_CONTENT && !deleted
+                                    };
+                                    this.allowCreate = data.result._permissions.CREATE_CONTENT;
+                                } else {
+                                    row._actions = {};
+                                    this.allowCreate = false;
+                                }
                                 return row;
                             });
 
-                            this.allowCreate = data.result._permissions.CREATE_CONTENT;
                             this.page = data.result.page;
                             this.total = data.result.total;
-                            this.deleted.hasDeleted = data.deleted.total > 0;
+
+                            if(data.deleted) {
+                                this.deleted.hasDeleted = data.deleted.total > 0;
+                            }
+
                             this.$refs.footer.$emit('goto', this.page);
                         },
                         (error) => { this.error = 'API Error: ' + error; })

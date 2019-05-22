@@ -147,17 +147,32 @@ class DomainDefinitionParserTest extends DatabaseAwareTestCase
                         {
                             "title": "Title",
                             "identifier": "title",
-                            "type": "text"
+                            "type": "text",
+                            "permissions": {
+                                "list field": "true",
+                                "view field": "true",
+                                "update field": "true"
+                            }
                         },
                         {
                           "title": "Slug",
                           "identifier": "slug",
-                          "type": "text"
+                          "type": "text",
+                          "permissions": {
+                            "list field": "true",
+                            "view field": "true",
+                            "update field": "true"
+                          }
                         },
                         {
                           "title": "Position",
                           "identifier": "position",
-                          "type": "sortindex"
+                          "type": "sortindex",
+                            "permissions": {
+                                "list field": "true",
+                                "view field": "true",
+                                "update field": "true"
+                            }
                         }
                     ],
                     "views": [
@@ -218,7 +233,12 @@ class DomainDefinitionParserTest extends DatabaseAwareTestCase
                         {
                             "title": "Title",
                             "identifier": "title",
-                            "type": "text"
+                            "type": "text",
+                            "permissions": {
+                                "list field": "true",
+                                "view field": "true",
+                                "update field": "true"
+                            }
                         }
                     ],
                     "permissions": {
@@ -254,7 +274,12 @@ class DomainDefinitionParserTest extends DatabaseAwareTestCase
                         {
                             "title": "Title",
                             "identifier": "title",
-                            "type": "text"
+                            "type": "text",
+                            "permissions": {
+                                "list field": "true",
+                                "view field": "true",
+                                "update field": "true"
+                            }
                         }
                     ],
                     "permissions": {

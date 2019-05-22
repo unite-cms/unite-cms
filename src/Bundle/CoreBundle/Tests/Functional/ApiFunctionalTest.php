@@ -21,6 +21,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Form\ContentDeleteFormType;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
@@ -68,6 +69,15 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
           "settings": {
             "domain": "marketing",
             "content_type": "news_category"
+          }
+        },
+        {
+          "title": "Author",
+          "identifier": "author",
+          "type": "reference",
+          "settings": {
+            "domain": "marketing",
+            "domain_member_type": "editor"
           }
         },
         {
@@ -1142,6 +1152,11 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 'content_type' => 'news_category',
                 'content' => $category->getId(),
             ],
+            'author' => [
+                'domain' => 'marketing',
+                'content_type' => 'editor',
+                'content' => $this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(),
+            ],
         ]);
 
         $this->em->flush();
@@ -1159,13 +1174,17 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                                 'id' => $category->getId(),
                                 'name' => $category->getData()['name'],
                             ],
+                            'author' => [
+                                'id' => $this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0]->getId(),
+                                '_name' => 'marketing_editor',
+                            ],
                         ],
                     ],
                 ],
             ],
         ], $this->api(
             $this->domains['marketing'],
-            $this->users['marketing_viewer'], 'query {
+            $this->users['marketing_editor'], 'query {
                 findNews(limit: 1, filter: { field: "title_title", operator: "=", value: "with_category" }) {
                     total,
                     result {
@@ -1173,6 +1192,10 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                         category {
                             id,
                             name
+                        },
+                        author {
+                            id,
+                            _name
                         }
                     }
                 }
@@ -2002,6 +2025,74 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertNotNull($response->errors);
         $this->assertStringStartsWith('Cannot query field "getViewerMember" on type "Query".', $response->errors[0]->message);
         $this->assertFalse(isset($response->data));
+    }
+
+    public function testFilterAndOrderDomainMember() {
+
+        for($i = 1; $i <= 5; $i++) {
+            $api_key = new ApiKey();
+            $api_key->setName('API Key '.$i.' X')->setToken('XXX'.$i);
+            $domainMember1 = new DomainMember();
+            $domainMember1->setDomain($this->domains['marketing'])->setAccessor($api_key)->setDomainMemberType($this->domains['marketing']->getDomainMemberTypes()->get('editor'));
+
+            $user = new User();
+            $user->setName('Editor ' . $i)->setEmail('test_filter_api_func_test'.$i.'@example.com')->setPassword('XXX');
+            $domainMember2 = new DomainMember();
+            $domainMember2->setDomain($this->domains['marketing'])->setAccessor($user)->setDomainMemberType($this->domains['marketing']->getDomainMemberTypes()->get('editor'));
+
+            $this->em->persist($api_key);
+            $this->em->persist($user);
+            $this->em->persist($domainMember1);
+            $this->em->persist($domainMember2);
+        }
+
+        $this->em->flush();
+
+        // Viewers cannot access editors at all.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query($sort: [SortInput], $filter: FilterInput) {
+            findEditorMember(filter: $filter, sort: $sort) {
+                total,
+                result {
+                    id,
+                    _name,
+                    type,
+                    created,
+                    updated,
+                    foo
+                }
+            }
+        }', [
+            'sort' => [
+                [ 'field' => '_name', 'order' => 'DESC' ],
+                [ 'field' => '_name', 'order' => 'DESC' ],
+                [ 'field' => 'id', 'order' => 'DESC' ]
+            ],
+            'filter' => [
+                'AND' => [
+                    [ 'field' => 'id', 'operator' => 'IS NOT NULL', 'value' => '' ],
+                    [ 'field' => '_name', 'operator' => 'IS NOT NULL', 'value' => '' ],
+                    [
+                        'OR' => [
+                            [ 'field' => '_name', 'operator' => 'LIKE', 'value' => 'E%' ],
+                            [ 'field' => '_name', 'operator' => 'LIKE', 'value' => '%X' ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->assertFalse(isset($response->errors));
+        $this->assertEquals(10, $response->data->findEditorMember->total);
+        $this->assertEquals('Editor 5', $response->data->findEditorMember->result[0]->_name);
+        $this->assertEquals('Editor 4', $response->data->findEditorMember->result[1]->_name);
+        $this->assertEquals('Editor 3', $response->data->findEditorMember->result[2]->_name);
+        $this->assertEquals('Editor 2', $response->data->findEditorMember->result[3]->_name);
+        $this->assertEquals('Editor 1', $response->data->findEditorMember->result[4]->_name);
+        $this->assertEquals('API Key 5 X', $response->data->findEditorMember->result[5]->_name);
+        $this->assertEquals('API Key 4 X', $response->data->findEditorMember->result[6]->_name);
+        $this->assertEquals('API Key 3 X', $response->data->findEditorMember->result[7]->_name);
+        $this->assertEquals('API Key 2 X', $response->data->findEditorMember->result[8]->_name);
+        $this->assertEquals('API Key 1 X', $response->data->findEditorMember->result[9]->_name);
     }
 
     public function testFindDomainMemberForViewer() {

@@ -3,14 +3,18 @@
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query\Expr\Join;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Knp\Component\Pager\Pagination\AbstractPagination;
 use Knp\Component\Pager\Paginator;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
@@ -442,6 +446,8 @@ class QueryType extends AbstractType
             ->where('m.domainMemberType IN (:domainMemberTypes)')
             ->setParameter(':domainMemberTypes', $domainMemberTypes);
 
+        $usedJoins = [];
+
         // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
         if (!empty($args['sort'])) {
             foreach ($args['sort'] as $sort) {
@@ -453,6 +459,17 @@ class QueryType extends AbstractType
                 if (in_array($key, $domainMemberEntityFields)) {
                     $contentQuery->addOrderBy('m.'.$key, $order);
 
+                    // if we sort by special _name field
+                } elseif($key === '_name') {
+
+                    foreach($this->entityManager->getClassMetadata(DomainAccessor::class)->discriminatorMap as $key => $class) {
+                        if(!in_array($key, $usedJoins)) {
+                            $contentQuery->leftJoin($class, $key, 'WITH', $key.'.id = m.accessor');
+                            $usedJoins[] = $key;
+                        }
+                        $contentQuery->addOrderBy($key . '.' . $class::getNameField(), $order);
+                    }
+
                     // if we sort by a nested content data field.
                 } else {
                     $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
@@ -463,15 +480,42 @@ class QueryType extends AbstractType
         // Adding where filter to the query.
         if (!empty($args['filter'])) {
 
+            // Domain members have a reference to domain accessors, that is an abstract entity and implemented by different entities.
+            // In order to allow to filter by name, we need to do different joins.
+            $accessorJoins = [];
+            $accessorNameFields = [];
+            foreach($this->entityManager->getClassMetadata(DomainAccessor::class)->discriminatorMap as $key => $class) {
+                $accessorJoins[] = new Join(Join::LEFT_JOIN, $class, $key, 'WITH', $key . '.id = m.accessor');
+                $accessorNameFields[] = $key . '.' . $class::getNameField();
+            }
+
 
             // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
-
-            // TODO: Replace field names with nested field selectors.
-
-            $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $domainMemberEntityFields, 'm');
+            $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $domainMemberEntityFields, 'm', $accessorJoins, function(array $filterInput) use ($accessorNameFields) {
+                if(!empty($filterInput['field']) && $filterInput['field'] === '_name') {
+                    $filter = ['OR' => []];
+                    foreach($accessorNameFields as $field) {
+                        $filter['OR'][] = [
+                            'field' => $field,
+                            'operator' => $filterInput['operator'],
+                            'value' => $filterInput['value'],
+                        ];
+                    }
+                    return $filter;
+                }
+                return $filterInput;
+            });
             $contentQuery->andWhere($a->getFilter());
+
             foreach($a->getParameters() as $parameter => $value) {
                 $contentQuery->setParameter($parameter, $value);
+            }
+
+            foreach($a->getJoins() as $join) {
+                if(!in_array($join->getAlias(), $usedJoins)) {
+                    $contentQuery->leftJoin($join->getJoin(), $join->getAlias(), $join->getConditionType(), $join->getCondition(), $join->getIndexBy());
+                    $usedJoins[] = $join->getAlias();
+                }
             }
         }
 

@@ -49,7 +49,7 @@ class VariantContent implements FieldableContent
      */
     public function getData(): array
     {
-        return $this->getData();
+        return $this->data;
     }
 
     /**

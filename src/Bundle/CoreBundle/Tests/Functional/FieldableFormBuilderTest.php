@@ -5,19 +5,30 @@ namespace UniteCMS\CoreBundle\Tests\Functional;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
+use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableValidation;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\Form\LinkType;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\CoreBundle\Tests\ContainerAwareTestCase;
 
 class FieldableFormBuilderTest extends ContainerAwareTestCase
 {
+    public function setUp()
+    {
+        parent::setUp();
+        $user = new User();
+        $user->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        static::$container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, '', 'main', $user->getRoles()));
+    }
 
     public function testFormBuilderAvailable() {
         $this->assertTrue(static::$container->has('unite.cms.fieldable_form_builder'));
@@ -28,7 +39,8 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
 
         $fieldable = new class implements Fieldable {
             public function getFields() {
-                return [new class implements FieldableField {
+                $a = new class implements FieldableField {
+                    public $entity;
                     public function __toString() { return "test"; }
                     public function getEntity() { return $this->entity; }
                     public function setEntity($entity) { $this->entity = $entity; }
@@ -37,6 +49,14 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
                     public function getTitle() { return 'Field 1'; }
                     public function getSettings() { return []; }
                     public function getJsonExtractIdentifier() { return '$.' . $this->getIdentifier(); }
+                    public function getPermissions(): array
+                    {
+                        return [
+                            FieldableFieldVoter::LIST => 'true',
+                            FieldableFieldVoter::VIEW => 'true',
+                            FieldableFieldVoter::UPDATE => 'true',
+                        ];
+                    }
                     public function getIdentifierPath($delimiter = '/', $include_root = true)
                     {
                         $path = '';
@@ -51,7 +71,9 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
 
                         return $path.$this->getIdentifier();
                     }
-                }];
+                };
+                $a->setEntity($this);
+                return [$a];
             }
             public function setFields($fields) {}
             public function addField(FieldableField $field) {}
@@ -61,6 +83,7 @@ class FieldableFormBuilderTest extends ContainerAwareTestCase
             public function getParentEntity() { return null; }
             public function getRootEntity(): Fieldable { return $this; }
             public function getValidations(): array { return []; }
+            public function getDomain(){ return new Domain(); }
 
             /**
              * Finds a (possible) nested field in this fieldable by a path ("title", "blocks/0/title" etc.). If $reduce_path is

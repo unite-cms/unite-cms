@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\View;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\View;
 
 class ViewTypeManager
@@ -56,6 +57,19 @@ class ViewTypeManager
         $viewType = $this->getViewType($view->getType());
         $settings = $viewType->getTemplateRenderParameters($view, $select_mode);
         return ViewParameterBag::createFromView($view, $this->urlGenerator, $select_mode, $settings ?? []);
+    }
+
+    /**
+     * Get template render parameters for the given domain member type.
+     *
+     * @param DomainMemberType $domainMemberType
+     * @param string $select_mode
+     *
+     * @param array $settings
+     * @return ViewParameterBag
+     */
+    public function getTemplateRenderParametersForDomainMemberType(DomainMemberType $domainMemberType, $select_mode = ViewTypeInterface::SELECT_MODE_NONE, array $settings = []): ViewParameterBag {
+        return ViewParameterBag::createFromDomainMemberType($domainMemberType, $this->urlGenerator, $select_mode, $settings);
     }
 
     /**

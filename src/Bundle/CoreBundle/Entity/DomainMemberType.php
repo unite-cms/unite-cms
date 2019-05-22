@@ -80,7 +80,7 @@ class DomainMemberType implements Fieldable
      * @ORM\Column(name="content_label", type="string", length=255, nullable=true)
      * @Expose
      */
-    private $domainMemberLabel = '{accessor}';
+    private $domainMemberLabel = '{_name}';
 
     /**
      * @var Domain

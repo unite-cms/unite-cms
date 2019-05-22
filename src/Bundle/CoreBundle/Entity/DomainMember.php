@@ -14,17 +14,17 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
  *
  * @ORM\Table(name="domain_member")
  * @ORM\Entity
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="UniteCMS\CoreBundle\Entity\ContentLogEntry")
  * @UniqueEntity(fields={"domain", "accessor", "domainMemberType"}, message="user_already_member_of_domain_for_type")
  */
 class DomainMember implements FieldableContent
 {
     /**
-     * @var int
+     * @var string
      *
-     * @ORM\Column(name="id", type="bigint")
+     * @ORM\Column(type="guid")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\GeneratedValue(strategy="UUID")
      */
     private $id;
 
@@ -128,6 +128,7 @@ class DomainMember implements FieldableContent
                     'updated' => ($this->getUpdated() ? $this->getUpdated()->format('Y-m-d H:i:s') : ''),
                     'type' => (string)$this->getDomainMemberType(),
                     'accessor' => (string)$this->getAccessor(),
+                    '_name' => (string)$this->getAccessor(),
                 ]
             );
         }
@@ -170,7 +171,7 @@ class DomainMember implements FieldableContent
     }
 
     /**
-     * @return int
+     * @return string
      */
     public function getId()
     {
@@ -178,11 +179,11 @@ class DomainMember implements FieldableContent
     }
 
     /**
-     * @param int $id
+     * @param string $id
      *
      * @return DomainMember
      */
-    public function setId(int $id)
+    public function setId(string $id)
     {
         $this->id = $id;
 

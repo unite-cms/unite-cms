@@ -2,8 +2,10 @@
 
 namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
+use App\Bundle\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
@@ -19,6 +21,7 @@ use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 
 class CollectionFieldType extends FieldType implements NestableFieldTypeInterface
@@ -31,12 +34,14 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     private $collectionFieldTypeFactory;
     private $fieldTypeManager;
     private $tableViewConfigurationFactory;
+    private $authorizationChecker;
 
-    function __construct(CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager, ViewConfigurationFactoryInterface $tableViewConfigurationFactory)
+    function __construct(CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager, ViewConfigurationFactoryInterface $tableViewConfigurationFactory, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->collectionFieldTypeFactory = $collectionFieldTypeFactory;
         $this->fieldTypeManager = $fieldTypeManager;
         $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -60,6 +65,14 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
         // Add the definition of the all collection fields to the options.
         foreach ($collection->getFields() as $fieldDefinition) {
+
+            // Only render field, if we are allowed to list and update it.
+            if(
+                !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $fieldDefinition)
+                || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $options['content']))) {
+                continue;
+            }
+
             $options['fields'][] = new FieldableFormField(
                 $this->fieldTypeManager->getFieldType($fieldDefinition->getType()),
                 $fieldDefinition
@@ -198,6 +211,13 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 $row_data = $row;
 
                 foreach ($collection->getFields() as $row_field) {
+
+                    // Only alter field, if we are allowed to list and update it.
+                    if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)
+                        || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
+                        continue;
+                    }
+
                     $this->fieldTypeManager->alterFieldData($row_field, $row_data, new CollectionRow($collection, $data[$field->getIdentifier()], $content, $delta), $rootData);
                 }
 
