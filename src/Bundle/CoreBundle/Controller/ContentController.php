@@ -81,6 +81,11 @@ class ContentController extends AbstractController
             $content->setLocale($request->query->get('locale'));
         }
 
+        // Allow to pre-fill content data from query parameter.
+        if ($request->query->has('data')) {
+            $content->setData($request->query->get('data'));
+        }
+
         if ($request->query->has('translation_of')) {
             $translationOf = $this->getDoctrine()->getRepository('UniteCMSCoreBundle:Content')->find(
                 $request->query->get('translation_of')
