@@ -68,6 +68,11 @@ class FieldableFormBuilder
 
         }
 
+        // If content object is available and it is new, merge any pre-set data from content object into default values.
+        if($content && $content->isNew()) {
+            $data = array_merge_recursive($data, $content->getData());
+        }
+
         return $this->formFactory->create(FieldableFormType::class, $data, $options);
     }
 
