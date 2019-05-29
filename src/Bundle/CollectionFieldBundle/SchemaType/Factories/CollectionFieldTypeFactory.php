@@ -102,6 +102,10 @@ class CollectionFieldTypeFactory
                     }
                 }
 
+                if(empty($fieldsSchemaTypes)) {
+                    return null;
+                }
+
                 if($isInputType) {
                   $schemaTypeManager->registerSchemaType(new InputObjectType([
                     'name' => $schemaTypeRowName,

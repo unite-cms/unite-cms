@@ -15,13 +15,16 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\AST;
 use GraphQL\Utils\BuildSchema;
 use GraphQL\Utils\SchemaPrinter;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
 
 class SchemaTypeManager
 {
+    const CACHE_PREFIX = 'unite.cms.graphql.schema';
+
     /**
      * @var ObjectType|InputObjectType|InterfaceType|UnionType[]
      */
@@ -48,19 +51,19 @@ class SchemaTypeManager
     private $maximumNestingLevel;
 
     /**
-     * @var AdapterInterface
+     * @var CacheInterface
      */
-    protected $cacheAdapter;
+    protected $cache;
 
     /**
      * @var Security $security
      */
     protected $security;
 
-    public function __construct(int $maximumNestingLevel = 8, AdapterInterface $cacheAdapter, Security $security)
+    public function __construct(int $maximumNestingLevel = 8, CacheInterface $cache, Security $security)
     {
         $this->maximumNestingLevel = $maximumNestingLevel;
-        $this->cacheAdapter = $cacheAdapter;
+        $this->cache = $cache;
         $this->security = $security;
     }
 
@@ -111,61 +114,76 @@ class SchemaTypeManager
      * @param Domain $domain , The Domain to create the schema for.
      * @param string|ObjectType|UnionType $query , The root query object. If string, $this>>getSchemaType() will be called.
      * @param string|InputType|UnionType $mutation , The root mutation object. If string, $this>>getSchemaType() will be called.
+     * @param bool $forceFreshGeneration , if set to true will not use a schema from cache but generate a fresh one.
      * @return Schema
      * @throws \GraphQL\Error\SyntaxError
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Psr\Cache\CacheException
      */
-    public function createSchema(Domain $domain, $query, $mutation = null) : Schema {
+    public function createSchema(Domain $domain, $query, $mutation = null, $forceFreshGeneration = false) : Schema {
 
         $manager = $this;
         $user = $this->security->getUser();
         $cacheKey = implode('.', [
-            'unite.cms.graphql.schema',
+            static::CACHE_PREFIX,
             $domain->getOrganization()->getIdentifier(),
             $domain->getIdentifier(),
             ($user ? $user->getId() : 'anon'),
         ]);
-        $cacheItem = $this->cacheAdapter->getItem($cacheKey);
 
-        // If the schema was already cached, get it from cache.
-        if($cacheItem->isHit()) {
+        $cacheMetadata = [
+            ItemInterface::METADATA_TAGS => [
+                static::CACHE_PREFIX,
+                implode('.', [static::CACHE_PREFIX, $domain->getOrganization()->getIdentifier()]),
+                implode('.', [static::CACHE_PREFIX, $domain->getOrganization()->getIdentifier(), $domain->getIdentifier()]),
+                implode('.', [static::CACHE_PREFIX . '_user' . ($user ? $user->getId() : 'anon')]),
+            ],
+        ];
 
-            // We get the schema from AST array (cached to file) but need to add resolve function calls.
-            return BuildSchema::build(AST::fromArray($cacheItem->get()), function($typeConfig, $typeDefinitionNode) use ($manager, $domain) {
-                $fullType = $manager->getSchemaType($typeConfig['name'], $domain);
-                if($fullType instanceof ObjectType) {
-                    $typeConfig['resolveField'] = $fullType->config['resolveField'];
-                }
+        $astArray = $this->cache->get($cacheKey,
 
-                if($fullType instanceof InterfaceType) {
-                    $typeConfig['resolveType'] = $fullType->config['resolveType'];
-                }
-                return $typeConfig;
-            });
-        }
+            // Create a fresh schema and save it to cache.
+            function() use ($query, $mutation, $manager, $domain) {
 
-        // If we come here, it means, that there was no cache hit and we need to generate the schema.
-        $query = is_string($query) ? $this->getSchemaType($query, $domain) : $query;
-        $mutation = $mutation ? (is_string($mutation) ? $this->getSchemaType($mutation, $domain) : $mutation) : null;
+                $query = is_string($query) ? $this->getSchemaType($query, $domain) : $query;
+                $mutation = $mutation ? (is_string($mutation) ? $this->getSchemaType($mutation, $domain) : $mutation) : null;
 
-        $schema = new Schema([
-            'query' => $query,
-            // At the moment only content (and not setting) can be mutated.
-            'mutation' => $domain->getContentTypes()->count() > 0 ? $mutation : null,
+                $schema = new Schema([
+                    'query' => $query,
+                    // At the moment only content (and not setting) can be mutated.
+                    'mutation' => $domain->getContentTypes()->count() > 0 ? $mutation : null,
 
-            'typeLoader' => function ($name) use ($manager, $domain) {
-                return $manager->getSchemaType($name, $domain);
+                    'typeLoader' => function ($name) use ($manager, $domain) {
+                        return $manager->getSchemaType($name, $domain);
+                    },
+                    'types' => function() use ($manager)  {
+                        return $manager->getNonDetectableSchemaTypes();
+                    }
+                ]);
+                return AST::toArray(Parser::parse(SchemaPrinter::doPrint($schema)));
+
             },
-            'types' => function() use ($manager)  {
-                return $manager->getNonDetectableSchemaTypes();
+
+            // If $forceFreshGeneration = true, expire cache, else use default beta (1.0).
+            ($forceFreshGeneration ? INF : 1.0),
+
+            // Set cache tags
+            $cacheMetadata
+        );
+
+        // Build the schema from cached array.
+        return BuildSchema::build(AST::fromArray($astArray), function($typeConfig, $typeDefinitionNode) use ($manager, $domain) {
+            $fullType = $manager->getSchemaType($typeConfig['name'], $domain);
+            if($fullType instanceof ObjectType) {
+                $typeConfig['resolveField'] = $fullType->config['resolveField'];
             }
-        ]);
 
-        // Save the schema to cache. At the moment we need to print & parse it in order to save it.
-        $cacheItem->set(AST::toArray(Parser::parse(SchemaPrinter::doPrint($schema))));
-        $this->cacheAdapter->save($cacheItem);
+            if($fullType instanceof InterfaceType) {
+                $typeConfig['resolveType'] = $fullType->config['resolveType'];
+            }
 
-        return $schema;
+            return $typeConfig;
+        });
     }
 
     /**
