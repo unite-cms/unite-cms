@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType;
 
+use GraphQL\Language\Parser;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InputType;
@@ -11,6 +12,11 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\UnionType;
 use GraphQL\Type\Schema;
+use GraphQL\Utils\AST;
+use GraphQL\Utils\BuildSchema;
+use GraphQL\Utils\SchemaPrinter;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\Security\Core\Security;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
 
@@ -41,9 +47,21 @@ class SchemaTypeManager
      */
     private $maximumNestingLevel;
 
-    public function __construct(int $maximumNestingLevel = 8)
+    /**
+     * @var AdapterInterface
+     */
+    protected $cacheAdapter;
+
+    /**
+     * @var Security $security
+     */
+    protected $security;
+
+    public function __construct(int $maximumNestingLevel = 8, AdapterInterface $cacheAdapter, Security $security)
     {
         $this->maximumNestingLevel = $maximumNestingLevel;
+        $this->cacheAdapter = $cacheAdapter;
+        $this->security = $security;
     }
 
     public function getMaximumNestingLevel() : int {
@@ -90,18 +108,47 @@ class SchemaTypeManager
     /**
      * Creates a new GraphQL schema with all registered types.
      *
-     * @param Domain $domain, The Domain to create the schema for.
-     * @param string|ObjectType|UnionType $query, The root query object. If string, $this>>getSchemaType() will be called.
-     * @param string|InputType|UnionType $mutation, The root mutation object. If string, $this>>getSchemaType() will be called.
+     * @param Domain $domain , The Domain to create the schema for.
+     * @param string|ObjectType|UnionType $query , The root query object. If string, $this>>getSchemaType() will be called.
+     * @param string|InputType|UnionType $mutation , The root mutation object. If string, $this>>getSchemaType() will be called.
      * @return Schema
+     * @throws \GraphQL\Error\SyntaxError
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function createSchema(Domain $domain, $query, $mutation = null) : Schema {
 
         $manager = $this;
+        $user = $this->security->getUser();
+        $cacheKey = implode('.', [
+            'unite.cms.graphql.schema',
+            $domain->getOrganization()->getIdentifier(),
+            $domain->getIdentifier(),
+            ($user ? $user->getId() : 'anon'),
+        ]);
+        $cacheItem = $this->cacheAdapter->getItem($cacheKey);
+
+        // If the schema was already cached, get it from cache.
+        if($cacheItem->isHit()) {
+
+            // We get the schema from AST array (cached to file) but need to add resolve function calls.
+            return BuildSchema::build(AST::fromArray($cacheItem->get()), function($typeConfig, $typeDefinitionNode) use ($manager, $domain) {
+                $fullType = $manager->getSchemaType($typeConfig['name'], $domain);
+                if($fullType instanceof ObjectType) {
+                    $typeConfig['resolveField'] = $fullType->config['resolveField'];
+                }
+
+                if($fullType instanceof InterfaceType) {
+                    $typeConfig['resolveType'] = $fullType->config['resolveType'];
+                }
+                return $typeConfig;
+            });
+        }
+
+        // If we come here, it means, that there was no cache hit and we need to generate the schema.
         $query = is_string($query) ? $this->getSchemaType($query, $domain) : $query;
         $mutation = $mutation ? (is_string($mutation) ? $this->getSchemaType($mutation, $domain) : $mutation) : null;
 
-        return new Schema([
+        $schema = new Schema([
             'query' => $query,
             // At the moment only content (and not setting) can be mutated.
             'mutation' => $domain->getContentTypes()->count() > 0 ? $mutation : null,
@@ -113,6 +160,12 @@ class SchemaTypeManager
                 return $manager->getNonDetectableSchemaTypes();
             }
         ]);
+
+        // Save the schema to cache. At the moment we need to print & parse it in order to save it.
+        $cacheItem->set(AST::toArray(Parser::parse(SchemaPrinter::doPrint($schema))));
+        $this->cacheAdapter->save($cacheItem);
+
+        return $schema;
     }
 
     /**
