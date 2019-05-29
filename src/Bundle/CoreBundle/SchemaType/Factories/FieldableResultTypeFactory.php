@@ -100,12 +100,17 @@ class FieldableResultTypeFactory implements SchemaTypeFactoryInterface
             $fieldable = $domain->getDomainMemberTypes()->get($identifier);
         }
 
+        // If no fieldable is found return a generic fieldable content result type.
         if (!$fieldable) {
-            throw new \InvalidArgumentException(
-                "No '$entityType' type with identifier '$identifier' found for in the given domain."
+            return new FieldableContentResultType(
+                $schemaTypeManager,
+                $this->authorizationChecker,
+                null,
+                $domain
             );
         }
 
+        // If we have a fieldable, create a type specific result type.
         $type = new FieldableContentResultType(
             $schemaTypeManager,
             $this->authorizationChecker,

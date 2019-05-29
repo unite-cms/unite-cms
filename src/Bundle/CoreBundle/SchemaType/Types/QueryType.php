@@ -10,11 +10,9 @@ use GraphQL\Type\Definition\Type;
 use Knp\Component\Pager\Pagination\AbstractPagination;
 use Knp\Component\Pager\Paginator;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
-use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
-use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
@@ -83,7 +81,7 @@ class QueryType extends AbstractType
     {
         $fields = [];
         $fields['find'] = [
-            'type' => $this->schemaTypeManager->getSchemaType('ContentResultInterface'),
+            'type' => $this->schemaTypeManager->getSchemaType('FieldableContentResult', $this->uniteCMSManager->getDomain()),
             'args' => [
                 'limit' => [
                     'type' => Type::int(),

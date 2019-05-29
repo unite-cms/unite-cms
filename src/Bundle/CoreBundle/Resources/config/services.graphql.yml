@@ -32,14 +32,6 @@ services:
     tags: [unite_cms.graphql.schema_type]
     arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@validator', '@unite.cms.fieldable_form_builder', '@form.factory', '@unite.cms.field_type_manager']
 
-  UniteCMS\CoreBundle\SchemaType\Types\ContentResultInterface:
-    tags: [unite_cms.graphql.schema_type]
-    arguments: ['@unite.cms.graphql.schema_type_manager', '@unite.cms.manager']
-
-  UniteCMS\CoreBundle\SchemaType\Types\FieldableContentResultType:
-    tags: [unite_cms.graphql.schema_type]
-    arguments: ['@unite.cms.graphql.schema_type_manager', '@security.authorization_checker', '@unite.cms.manager']
-
   UniteCMS\CoreBundle\SchemaType\Types\FieldableContentInterface:
     tags: [unite_cms.graphql.schema_type]
     arguments: ['@unite.cms.graphql.schema_type_manager']

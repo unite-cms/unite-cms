@@ -51,8 +51,6 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
      */
     protected $users = [];
 
-    protected $schema;
-
     public function setUp()
     {
         parent::setUp();
@@ -159,22 +157,20 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->users['editor'] = new UsernamePasswordToken($apiKey1, 'password', 'api', $apiKey1->getRoles());
         $this->users['viewer'] = new UsernamePasswordToken($apiKey2, 'password', 'api', $apiKey2->getRoles());
 
-        $m = static::$container->get('unite.cms.graphql.schema_type_manager');
-        $this->schema = $m->createSchema($this->domain, 'Query', 'Mutation');
-
         $d = new ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
         $d->setValue(static::$container->get('unite.cms.manager'),$this->domain);
     }
 
     public function testGraphQLSchemaGenerationForEditor() {
-        $m = static::$container->get('unite.cms.graphql.schema_type_manager');
         static::$container->get('security.token_storage')->setToken($this->users['editor']);
+        $m = static::$container->get('unite.cms.graphql.schema_type_manager');
+        $schema = $m->createSchema($this->domain, 'Query', 'Mutation');
         $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated', 'deleted', 'f1', 'f2', 'f3', 'f5'], array_keys($m->getSchemaType('CtContent', $this->domain)->getFields()));
         $this->assertEquals(['f1', 'f2', 'f3', 'f5'], array_keys($m->getSchemaType('CtContentInput', $this->domain)->getFields()));
 
         $result = GraphQL::executeQuery(
-            $this->schema,
+            $schema,
             'mutation { 
                 createCt(
                     persist: true,
@@ -217,7 +213,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         $result = GraphQL::executeQuery(
-            $this->schema,
+            $schema,
             'mutation { 
                 updateCt(
                     id: "'. $getFullContent->getId() .'"
@@ -259,7 +255,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         $result = GraphQL::executeQuery(
-            $this->schema,
+            $schema,
             'query { 
                 StSetting { f1 }
                 findEditorMember { result { f1 } },
@@ -279,7 +275,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         $result = GraphQL::executeQuery(
-            $this->schema,
+            $schema,
             'query { 
                 StSetting { f1 }
                 findEditorMember { result { f1 } },
@@ -296,8 +292,9 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
     }
 
     public function testGraphQLSchemaGenerationForViewer() {
-        $m = static::$container->get('unite.cms.graphql.schema_type_manager');
         static::$container->get('security.token_storage')->setToken($this->users['viewer']);
+        $m = static::$container->get('unite.cms.graphql.schema_type_manager');
+        $schema = $m->createSchema($this->domain, 'Query', 'Mutation');
         $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated', 'deleted', 'f1', 'f2', 'f3'], array_keys($m->getSchemaType('CtContent', $this->domain)->getFields()));
         $this->assertEquals(['f1', 'f2', 'f3'], array_keys($m->getSchemaType('CtContentInput', $this->domain)->getFields()));
 
@@ -305,7 +302,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated'], array_keys($m->getSchemaType('StSetting', $this->domain)->getFields()));
 
         $result = GraphQL::executeQuery(
-            $this->schema,
+            $schema,
             'mutation { 
                 createCt(
                     persist: true,
@@ -346,7 +343,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->em->flush();
 
         $result = GraphQL::executeQuery(
-            $this->schema,
+            $schema,
             'mutation { 
                 updateCt(
                     id: "'. $getFullContent->getId() .'"

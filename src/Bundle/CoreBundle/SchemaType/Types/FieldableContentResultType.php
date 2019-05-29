@@ -79,35 +79,29 @@ class FieldableContentResultType extends AbstractType
 
         // Create or get permissions type for this content type.
         $this->permissionTypeName = null;
-        $bundlePermissions = [];
 
-        if($this->fieldable instanceof ContentType) {
-            $this->permissionTypeName = 'ContentResultPermissions';
-            $bundlePermissions = ContentVoter::BUNDLE_PERMISSIONS;
-        }
+        if($this->fieldable) {
+            $bundlePermissions = [];
 
-        else if($this->fieldable instanceof DomainMemberType) {
-            $this->permissionTypeName = 'MemberResultPermissions';
-            $bundlePermissions = DomainMemberVoter::BUNDLE_PERMISSIONS;
-        }
+            if ($this->fieldable instanceof ContentType) {
+                $this->permissionTypeName = 'ContentResultPermissions';
+                $bundlePermissions = ContentVoter::BUNDLE_PERMISSIONS;
+            } else {
+                if ($this->fieldable instanceof DomainMemberType) {
+                    $this->permissionTypeName = 'MemberResultPermissions';
+                    $bundlePermissions = DomainMemberVoter::BUNDLE_PERMISSIONS;
+                }
+            }
 
-        $this->permissionTypeName = IdentifierNormalizer::graphQLType($this->fieldable, $this->permissionTypeName);
-        if (!$this->schemaTypeManager->hasSchemaType($this->permissionTypeName)) {
-            $this->schemaTypeManager->registerSchemaType(
-                new PermissionsType($bundlePermissions, $this->permissionTypeName)
-            );
+            $this->permissionTypeName = IdentifierNormalizer::graphQLType($this->fieldable, $this->permissionTypeName);
+            if (!$this->schemaTypeManager->hasSchemaType($this->permissionTypeName)) {
+                $this->schemaTypeManager->registerSchemaType(
+                    new PermissionsType($bundlePermissions, $this->permissionTypeName)
+                );
+            }
         }
 
         parent::__construct();
-    }
-
-    /**
-     * Define all interfaces, this type implements.
-     *
-     * @return array
-     */
-    protected function interfaces() {
-        return [ $this->schemaTypeManager->getSchemaType('ContentResultInterface') ];
     }
 
     /**
@@ -117,12 +111,13 @@ class FieldableContentResultType extends AbstractType
      */
     protected function fields()
     {
-        return [
+        return array_merge([
             'result' => Type::listOf($this->schemaTypeManager->getSchemaType($this->contentSchemaType, $this->domain, $this->nestingLevel)),
             'total' => Type::int(),
             'page' => Type::int(),
+        ], $this->permissionTypeName ? [
             '_permissions' => $this->schemaTypeManager->getSchemaType($this->permissionTypeName),
-        ];
+        ] : []);
     }
 
     /**

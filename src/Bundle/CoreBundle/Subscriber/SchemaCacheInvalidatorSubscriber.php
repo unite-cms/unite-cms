@@ -1,17 +1,17 @@
 <?php
 
-
 namespace UniteCMS\CoreBundle\Subscriber;
 
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Doctrine\ORM\Events;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
-use UniteCMS\CoreBundle\Entity\Organization;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Event\DomainConfigFileEvent;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
-class SchemaCacheInvalidatorSubscriber
+class SchemaCacheInvalidatorSubscriber implements EventSubscriberInterface
 {
     /**
      * @var TagAwareCacheInterface $cache
@@ -23,31 +23,50 @@ class SchemaCacheInvalidatorSubscriber
         $this->cache = $cache;
     }
 
-    public function preUpdate(PreUpdateEventArgs $args) {
-        $entity = $args->getObject();
+    public function flushDomainCache(DomainConfigFileEvent $event) {
+        $this->cache->invalidateTags([join('.', [
+            SchemaTypeManager::CACHE_PREFIX,
+            $event->getDomain()->getOrganization()->getIdentifier(),
+            $event->getDomain()->getIdentifier(),
+        ])]);
+    }
 
-        if($entity instanceof Domain) {
-            $this->cache->invalidateTags([SchemaTypeManager::CACHE_PREFIX . '.' . $entity->getOrganization()->getIdentifier() . '.' . $entity->getIdentifier()]);
+    public function flushUserCache($entity) {
+        if($entity instanceof DomainMember) {
+            $this->cache->invalidateTags([join('.', [
+                SchemaTypeManager::CACHE_PREFIX . '_user',
+                $entity->getAccessor()->getId(),
+            ])]);
         }
 
         if($entity instanceof DomainAccessor) {
-            $this->cache->invalidateTags([SchemaTypeManager::CACHE_PREFIX . '_user.' . $entity->getId()]);
+            $this->cache->invalidateTags([join('.', [
+                SchemaTypeManager::CACHE_PREFIX . '_user',
+                $entity->getId(),
+            ])]);
         }
     }
 
     public function preRemove(LifecycleEventArgs $args) {
-        $entity = $args->getObject();
+        $this->flushUserCache($args->getEntity());
+    }
 
-        if($entity instanceof Organization) {
-            $this->cache->invalidateTags([SchemaTypeManager::CACHE_PREFIX . '.' . $entity->getIdentifier()]);
-        }
+    public function postPersist(LifecycleEventArgs $args) {
+        $this->flushUserCache($args->getEntity());
+    }
 
-        if($entity instanceof Domain) {
-            $this->cache->invalidateTags([SchemaTypeManager::CACHE_PREFIX . '.' . $entity->getOrganization()->getIdentifier() . '.' . $entity->getIdentifier()]);
-        }
+    public function postUpdate(LifecycleEventArgs $args) {
+        $this->flushUserCache($args->getEntity());
+    }
 
-        if($entity instanceof DomainAccessor) {
-            $this->cache->invalidateTags([SchemaTypeManager::CACHE_PREFIX . '_user.' . $entity->getId()]);
-        }
+    /**
+     * {@inheritDoc}
+     */
+    public static function getSubscribedEvents()
+    {
+        return [
+            DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE => 'flushDomainCache',
+            DomainConfigFileEvent::DOMAIN_CONFIG_FILE_DELETE => 'flushDomainCache',
+        ];
     }
 }
