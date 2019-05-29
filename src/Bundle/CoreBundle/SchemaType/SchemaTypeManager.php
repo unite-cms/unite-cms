@@ -182,6 +182,12 @@ class SchemaTypeManager
                 $typeConfig['resolveType'] = $fullType->config['resolveType'];
             }
 
+            if($fullType instanceof EnumType) {
+                foreach($typeConfig['values'] as $key => $value) {
+                    $typeConfig['values'][$key]['value'] = $fullType->getValue($key)->value;
+                }
+            }
+
             return $typeConfig;
         });
     }
