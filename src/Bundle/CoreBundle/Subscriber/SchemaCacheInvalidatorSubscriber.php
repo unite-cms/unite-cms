@@ -32,14 +32,14 @@ class SchemaCacheInvalidatorSubscriber implements EventSubscriberInterface
     }
 
     public function flushUserCache($entity) {
-        if($entity instanceof DomainMember) {
+        if($entity instanceof DomainMember && !empty($entity->getAccessor()) && !empty($entity->getAccessor()->getId())) {
             $this->cache->invalidateTags([join('.', [
                 SchemaTypeManager::CACHE_PREFIX . '_user',
                 $entity->getAccessor()->getId(),
             ])]);
         }
 
-        if($entity instanceof DomainAccessor) {
+        if($entity instanceof DomainAccessor && !empty($entity->getId())) {
             $this->cache->invalidateTags([join('.', [
                 SchemaTypeManager::CACHE_PREFIX . '_user',
                 $entity->getId(),

@@ -11,6 +11,7 @@ use Knp\Component\Pager\Pagination\AbstractPagination;
 use Knp\Component\Pager\Paginator;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
@@ -333,11 +334,13 @@ class QueryType extends AbstractType
         $args['deleted'] = $args['deleted'] ?? false;
 
         // Get all requested contentTypes, the user can access.
+        $contentTypesFilter = ['domain' => $this->uniteCMSManager->getDomain()];
+        if(!empty($args['types'])) {
+            $contentTypesFilter['identifier'] = $args['types'];
+        }
+
         $contentTypes = [];
-        foreach($this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findBy([
-            'identifier' => $args['types'],
-            'domain' => $this->uniteCMSManager->getDomain(),
-        ]) as $contentType) {
+        foreach($this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findBy($contentTypesFilter) as $contentType) {
             if ($this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
                 $contentTypes[] = $contentType;
             }
