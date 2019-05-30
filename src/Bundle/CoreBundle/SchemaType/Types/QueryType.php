@@ -334,13 +334,11 @@ class QueryType extends AbstractType
         $args['deleted'] = $args['deleted'] ?? false;
 
         // Get all requested contentTypes, the user can access.
-        $contentTypesFilter = ['domain' => $this->uniteCMSManager->getDomain()];
-        if(!empty($args['types'])) {
-            $contentTypesFilter['identifier'] = $args['types'];
-        }
-
         $contentTypes = [];
-        foreach($this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findBy($contentTypesFilter) as $contentType) {
+        foreach($this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findBy([
+            'identifier' => $args['types'],
+            'domain' => $this->uniteCMSManager->getDomain(),
+        ]) as $contentType) {
             if ($this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
                 $contentTypes[] = $contentType;
             }

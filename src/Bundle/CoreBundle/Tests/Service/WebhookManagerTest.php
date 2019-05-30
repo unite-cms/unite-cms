@@ -215,6 +215,10 @@ class WebhookManagerTest extends DatabaseAwareTestCase
         $user = new User();
         $user->setRoles([User::ROLE_PLATFORM_ADMIN]);
         static::$container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, '', 'main', $user->getRoles()));
+
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.manager'), $this->domain);
     }
 
     /**

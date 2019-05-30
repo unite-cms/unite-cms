@@ -152,12 +152,12 @@ class SchemaTypeManager
             function() use ($query, $mutation, $manager, $domain) {
 
                 $query = is_string($query) ? $this->getSchemaType($query, $domain) : $query;
-                $mutation = $mutation ? (is_string($mutation) ? $this->getSchemaType($mutation, $domain) : $mutation) : null;
+                $mutation = ($domain->getContentTypes()->count() > 0 && $mutation) ? (is_string($mutation) ? $this->getSchemaType($mutation, $domain) : $mutation) : null;
 
                 $schema = new Schema([
                     'query' => $query,
                     // At the moment only content (and not setting) can be mutated.
-                    'mutation' => $domain->getContentTypes()->count() > 0 ? $mutation : null,
+                    'mutation' => $mutation,
 
                     'typeLoader' => function ($name) use ($manager, $domain) {
                         return $manager->getSchemaType($name, $domain);
@@ -167,7 +167,16 @@ class SchemaTypeManager
                     }
                 ]);
 
-                $types = AST::toArray(Parser::parse(SchemaPrinter::doPrint($schema)));
+                $schemaDefinition = SchemaPrinter::doPrint($schema);
+
+                // If we have an empty mutation type, remove it to avoid parsing problems.
+                $schemaDefinition = str_replace('type Mutation {
+
+}
+
+', '', $schemaDefinition);
+
+                $types = AST::toArray(Parser::parse($schemaDefinition));
 
                 return [
                     'domainMapping' => $this->domainMapping,

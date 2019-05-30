@@ -19,9 +19,11 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Event\DomainConfigFileEvent;
 use UniteCMS\CoreBundle\Field\Types\ReferenceFieldType;
 use UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
 // Mocked database repository.
@@ -440,6 +442,10 @@ abstract class APITestCase extends ContainerAwareTestCase
         ));
 
         static::$container->get('router.request_context')->fromRequest($request);
+
+        // Force schema cache rebuild.
+        static::$container->get('cache.app.taggable')->invalidateTags([SchemaTypeManager::CACHE_PREFIX]);
+
 
         $response = $this->controller->indexAction(
             $domain->getOrganization(),
