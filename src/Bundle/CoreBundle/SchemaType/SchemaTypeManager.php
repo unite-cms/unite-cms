@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType;
 
+use GraphQL\Language\AST\NodeKind;
 use GraphQL\Language\Parser;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\InputObjectType;
@@ -186,6 +187,15 @@ class SchemaTypeManager
 
         // Build the schema from cached array.
         return BuildSchema::build(AST::fromArray($astArray), function($typeConfig, $typeDefinitionNode) use ($manager, $domain, $domainMapping) {
+
+            // We need to enrich object enum and interface types.
+            if(!in_array($typeDefinitionNode->kind, [
+                NodeKind::OBJECT_TYPE_DEFINITION,
+                NodeKind::ENUM_TYPE_DEFINITION,
+                NodeKind::INTERFACE_TYPE_DEFINITION,
+            ])) {
+                return $typeConfig;
+            }
 
             $nameParts = preg_split('/(?=[A-Z])/', $typeConfig['name'], -1, PREG_SPLIT_NO_EMPTY);
             $lastPart = array_pop($nameParts);

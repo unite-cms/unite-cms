@@ -22,7 +22,8 @@ services:
   # A basic implementation of VariantsFieldInterface just with a type field.
   UniteCMS\VariantsFieldBundle\SchemaType\Types\VariantsFieldBaseVariant:
     public: false
-    tags: [unite_cms.graphql.schema_type]
+    tags:
+      - { name: unite_cms.graphql.schema_type, detectable: false }
     arguments: ['@unite.cms.graphql.schema_type_manager']
 
   # Creates a concrete variant for variants field types.

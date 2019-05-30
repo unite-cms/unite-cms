@@ -31,7 +31,12 @@ class SchemaTypeCompilerPass implements CompilerPassInterface
         }
 
         foreach ($taggedServices as $id => $tags) {
-            $definition->addMethodCall('registerSchemaType', array(new Reference($id)));
+            foreach($tags as $arguments) {
+                $definition->addMethodCall('registerSchemaType', array(
+                    new Reference($id),
+                    isset($arguments['detectable']) ? $arguments['detectable'] : null,
+                ));
+            }
         }
 
         foreach ($taggedFactoryServices as $id => $tags) {
