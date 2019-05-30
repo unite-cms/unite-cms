@@ -114,7 +114,7 @@ class FieldableResultTypeFactory implements SchemaTypeFactoryInterface
         // If we have a fieldable, create a type specific result type.
         $name = IdentifierNormalizer::graphQLType($fieldable, $entityType . 'Result' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''));
         if($schemaTypeManager->hasSchemaType($name)) {
-            return $schemaTypeManager->getSchemaType($name, $domain);
+            return $schemaTypeManager->getSchemaType($name, $domain, $nestingLevel);
         }
         $type = new FieldableContentResultType(
             $schemaTypeManager,

@@ -234,7 +234,7 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
             IdentifierNormalizer::graphQLType($identifier, $entityType).($nestingLevel > 0 ? 'Level'.$nestingLevel : '');
 
         if($schemaTypeManager->hasSchemaType($name)) {
-            return $schemaTypeManager->getSchemaType($name, $domain);
+            return $schemaTypeManager->getSchemaType($name, $domain, ($nestingLevel + 1));
         }
 
         if ($isInputType) {

@@ -60,6 +60,11 @@ class SchemaTypeManager
      */
     protected $security;
 
+    /**
+     * @var array $domainMapping
+     */
+    protected $domainMapping = [];
+
     public function __construct(int $maximumNestingLevel = 8, CacheInterface $cache, Security $security)
     {
         $this->maximumNestingLevel = $maximumNestingLevel;
@@ -140,7 +145,7 @@ class SchemaTypeManager
             ],
         ];
 
-        $astArray = $this->cache->get($cacheKey,
+        $cachedTypes = $this->cache->get($cacheKey,
 
             // Create a fresh schema and save it to cache.
             function() use ($query, $mutation, $manager, $domain) {
@@ -160,8 +165,13 @@ class SchemaTypeManager
                         return $manager->getNonDetectableSchemaTypes();
                     }
                 ]);
-                return AST::toArray(Parser::parse(SchemaPrinter::doPrint($schema)));
 
+                $types = AST::toArray(Parser::parse(SchemaPrinter::doPrint($schema)));
+
+                return [
+                    'domainMapping' => $this->domainMapping,
+                    'types' => $types,
+                ];
             },
 
             // If $forceFreshGeneration = true, expire cache, else use default beta (1.0).
@@ -171,9 +181,27 @@ class SchemaTypeManager
             $cacheMetadata
         );
 
+        $astArray = $cachedTypes['types'];
+        $domainMapping = $cachedTypes['domainMapping'];
+
         // Build the schema from cached array.
-        return BuildSchema::build(AST::fromArray($astArray), function($typeConfig, $typeDefinitionNode) use ($manager, $domain) {
-            $fullType = $manager->getSchemaType($typeConfig['name'], $domain);
+        return BuildSchema::build(AST::fromArray($astArray), function($typeConfig, $typeDefinitionNode) use ($manager, $domain, $domainMapping) {
+
+            $nameParts = preg_split('/(?=[A-Z])/', $typeConfig['name'], -1, PREG_SPLIT_NO_EMPTY);
+            $lastPart = array_pop($nameParts);
+            $nestingLevel = substr($lastPart, 0, 5) === 'Level' ? substr($lastPart, 5) : 0;
+
+            if(array_key_exists($typeConfig['name'], $domainMapping)) {
+                if($domainMapping[$typeConfig['name']] !== $domain->getIdentifier()) {
+                    $domainIdentifier = $domainMapping[$typeConfig['name']];
+                    $domain = $domain->getOrganization()->getDomains()->filter(function(Domain $d) use ($domainIdentifier) {
+                        return $d->getIdentifier() === $domainIdentifier;
+                    })->first();
+                }
+            }
+
+            $fullType = $manager->getSchemaType($typeConfig['name'], $domain, $nestingLevel);
+
             if($fullType instanceof ObjectType) {
                 $typeConfig['resolveField'] = $fullType->config['resolveField'];
             }
@@ -205,6 +233,10 @@ class SchemaTypeManager
      */
     public function getSchemaType($key, Domain $domain = null, $nestingLevel = 0)
     {
+        if($domain) {
+            $this->domainMapping[$key] = $domain->getIdentifier();
+        }
+
         if ($nestingLevel >= $this->getMaximumNestingLevel()) {
             $key = 'MaximumNestingLevel';
         }
