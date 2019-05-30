@@ -443,10 +443,6 @@ abstract class APITestCase extends ContainerAwareTestCase
 
         static::$container->get('router.request_context')->fromRequest($request);
 
-        // Force schema cache rebuild.
-        static::$container->get('cache.app.taggable')->invalidateTags([SchemaTypeManager::CACHE_PREFIX]);
-
-
         $response = $this->controller->indexAction(
             $domain->getOrganization(),
             $domain,
