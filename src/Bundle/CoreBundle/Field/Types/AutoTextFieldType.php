@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\ORM\EntityManagerInterface;
+use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -129,7 +130,7 @@ class AutoTextFieldType extends TextFieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         if(!$content instanceof Content && $content->getRootFieldableContent() instanceof Content) {
             $use_content = $content->getRootFieldableContent();

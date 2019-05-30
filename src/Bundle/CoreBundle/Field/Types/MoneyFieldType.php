@@ -8,6 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
@@ -64,7 +65,7 @@ class MoneyFieldType extends TextFieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         return (array) $value;
     }

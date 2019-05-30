@@ -392,7 +392,10 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                                 return $fieldTypes[$info->fieldName]->resolveGraphQLData(
                                     $fieldable->getFields()->get($info->fieldName),
                                     $fieldData,
-                                    $value
+                                    $value,
+                                    $args,
+                                    $context,
+                                    $info
                                 );
                         }
                     },

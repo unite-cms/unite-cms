@@ -3,6 +3,7 @@
 namespace UniteCMS\StorageBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
+use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -113,7 +114,7 @@ class FileFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         if(empty($value['id']) || empty($value['name'])) {
             return null;

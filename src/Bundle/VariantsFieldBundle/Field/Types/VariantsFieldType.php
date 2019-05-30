@@ -9,6 +9,7 @@
 namespace UniteCMS\VariantsFieldBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
+use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\Fieldable;
@@ -101,7 +102,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         if(empty($value['type'])) {
             return new Variant($content);

@@ -8,6 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use GraphQL\Type\Definition\ResolveInfo;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldType;
@@ -89,7 +90,7 @@ class LocationFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         return (array) $value;
     }

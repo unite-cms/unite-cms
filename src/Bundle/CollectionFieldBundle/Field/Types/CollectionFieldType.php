@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
+use GraphQL\Type\Definition\ResolveInfo;
 use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Config\Definition\Processor;
@@ -132,7 +133,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         return array_map(function($row) use($content) {
             return [
