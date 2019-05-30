@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use GraphQL\Type\Definition\InterfaceType;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
@@ -24,7 +25,7 @@ class FieldableContentInterface extends InterfaceType
                         'updated' => Type::int(),
                     ];
                 },
-                'resolveType' => function ($value) use ($schemaTypeManager) {
+                'resolveType' => function ($value, $context, ResolveInfo $info) use ($schemaTypeManager) {
                     if (!$value instanceof FieldableContent) {
                         throw new \InvalidArgumentException(
                             'Value must be instance of '.FieldableContent::class.'.'
@@ -32,8 +33,8 @@ class FieldableContentInterface extends InterfaceType
                     }
 
                     $type = IdentifierNormalizer::graphQLType($value->getEntity());
-
-                    return $schemaTypeManager->getSchemaType($type);
+                    return $info->schema->hasType($type) ?
+                        $info->schema->getType($type) : $schemaTypeManager->getSchemaType($type);
                 },
             ]
         );
