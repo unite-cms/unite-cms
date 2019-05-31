@@ -159,13 +159,13 @@ class ReferenceOfFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
         $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
 
         return [
-            'type' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel), $domain, $nestingLevel),
+            'type' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResult'), $domain),
             'args' => [
                 'limit' => [
                     'type' => Type::int(),
@@ -194,10 +194,6 @@ class ReferenceOfFieldType extends FieldType
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
-        $nameParts = preg_split('/(?=[A-Z])/', $info->fieldName, -1, PREG_SPLIT_NO_EMPTY);
-        $lastPart = array_pop($nameParts);
-        $nestingLevel = substr($lastPart, 0, 5) === 'Level' ? substr($lastPart, 5) : 0;
-
         // Reference of fields does only work for content and domain member entities.
         if(!$content instanceof Content && !$content instanceof DomainMember) {
             return null;
@@ -258,14 +254,14 @@ class ReferenceOfFieldType extends FieldType
 
         // Get all content in one request for all contentTypes.
         return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], [
-            'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel)
+            'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResult')
         ]);
     }
 
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         // This field does not save any data it only is an accessor to fields that are referencing this content.
         // Therefore there is no input for this field.

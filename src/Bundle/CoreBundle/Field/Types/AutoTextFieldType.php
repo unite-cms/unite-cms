@@ -114,7 +114,7 @@ class AutoTextFieldType extends TextFieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return $schemaTypeManager->getSchemaType('AutoTextField');
     }
@@ -122,7 +122,7 @@ class AutoTextFieldType extends TextFieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return $schemaTypeManager->getSchemaType('AutoTextFieldInput');
     }

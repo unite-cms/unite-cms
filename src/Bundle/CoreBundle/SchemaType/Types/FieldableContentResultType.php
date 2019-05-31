@@ -56,26 +56,19 @@ class FieldableContentResultType extends AbstractType
      */
     private $permissionTypeName;
 
-    /**
-     * @var int $nestingLevel
-     */
-    private $nestingLevel;
-
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
         AuthorizationChecker $authorizationChecker,
         UniteCMSManager $uniteCMSManager = null,
         Domain $domain = null,
         Fieldable $fieldable = null,
-        $contentSchemaType = 'FieldableContentInterface',
-        $nestingLevel = 0
+        $contentSchemaType = 'FieldableContentInterface'
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->domain = $domain ? $domain : $uniteCMSManager->getDomain();
         $this->fieldable = $fieldable;
         $this->contentSchemaType = $contentSchemaType;
-        $this->nestingLevel = $nestingLevel;
 
         // Create or get permissions type for this content type.
         $this->permissionTypeName = null;
@@ -112,7 +105,7 @@ class FieldableContentResultType extends AbstractType
     protected function fields()
     {
         return array_merge([
-            'result' => Type::listOf($this->schemaTypeManager->getSchemaType($this->contentSchemaType, $this->domain, $this->nestingLevel)),
+            'result' => Type::listOf($this->schemaTypeManager->getSchemaType($this->contentSchemaType, $this->domain)),
             'total' => Type::int(),
             'page' => Type::int(),
         ], $this->permissionTypeName ? [

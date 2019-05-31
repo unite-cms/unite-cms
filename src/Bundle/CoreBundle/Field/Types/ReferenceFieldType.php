@@ -238,7 +238,7 @@ class ReferenceFieldType extends FieldType
      * @throws DomainAccessDeniedException
      * @throws MissingOrganizationException
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         /**
          * @var Fieldable $fieldable
@@ -258,12 +258,8 @@ class ReferenceFieldType extends FieldType
 
         $name = IdentifierNormalizer::graphQLType($fieldable);
 
-        if ($nestingLevel > 0) {
-            $name .= 'Level'.$nestingLevel;
-        }
-
         // We use the default content factory to build the type.
-        return $schemaTypeManager->getSchemaType($name, $fieldable->getDomain(), $nestingLevel);
+        return $schemaTypeManager->getSchemaType($name, $fieldable->getDomain());
     }
 
     /**
@@ -272,7 +268,7 @@ class ReferenceFieldType extends FieldType
      * @throws DomainAccessDeniedException
      * @throws MissingOrganizationException
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         /**
          * @var Fieldable $fieldable
@@ -290,7 +286,7 @@ class ReferenceFieldType extends FieldType
             return null;
         }
 
-        return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $fieldable->getDomain(), $nestingLevel);
+        return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $fieldable->getDomain());
     }
 
     /**

@@ -22,14 +22,13 @@ interface FieldTypeInterface
      *   return GraphQL\Type\Definition\Type::string();
      *
      * Example 2:
-     *   return $schemaTypeManager->getSchemaType('ReferenceFieldType', $this->uniteCMSManager->getDomain(), $nestingLevel);
+     *   return $schemaTypeManager->getSchemaType('ReferenceFieldType', $this->uniteCMSManager->getDomain());
      *
      * @param FieldableField $field
      * @param SchemaTypeManager $schemaTypeManager
-     * @param int $nestingLevel
      * @return Type|null|array
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0);
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager);
 
     /**
      * Returns the graphQL schema type for mutation inputs. This method must either return a ScalarType or a registered
@@ -39,14 +38,13 @@ interface FieldTypeInterface
      *   return GraphQL\Type\Definition\Type::string();
      *
      * Example 2:
-     *   return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $this->uniteCMSManager->getDomain(), $nestingLevel);
+     *   return $schemaTypeManager->getSchemaType('ReferenceFieldTypeInput', $this->uniteCMSManager->getDomain());
      *
      * @param FieldableField $field
      * @param SchemaTypeManager $schemaTypeManager
-     * @param int $nestingLevel
      * @return Type|null
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0);
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager);
 
     /**
      * Returns the class name of the form, used to process data during graphQL mutations and for admin form rendering.

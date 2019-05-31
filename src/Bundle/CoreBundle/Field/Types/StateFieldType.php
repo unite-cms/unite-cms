@@ -47,7 +47,7 @@ class StateFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager) {
         return $schemaTypeManager->getSchemaType('StateFieldInput');
     }
 
