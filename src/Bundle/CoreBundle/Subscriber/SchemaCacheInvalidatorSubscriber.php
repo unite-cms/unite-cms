@@ -24,11 +24,12 @@ class SchemaCacheInvalidatorSubscriber implements EventSubscriberInterface
     }
 
     public function flushDomainCache(DomainConfigFileEvent $event) {
-        $this->cache->invalidateTags([join('.', [
+        $tag = [join('.', [
             SchemaTypeManager::CACHE_PREFIX,
             $event->getDomain()->getOrganization()->getIdentifier(),
             $event->getDomain()->getIdentifier(),
-        ])]);
+        ])];
+        $this->cache->invalidateTags($tag);
     }
 
     public function flushUserCache($entity) {

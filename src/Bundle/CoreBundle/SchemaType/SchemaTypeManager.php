@@ -129,27 +129,25 @@ class SchemaTypeManager
     public function createSchema(Domain $domain, $query, $mutation = null, $forceFreshGeneration = false) : Schema {
 
         $manager = $this;
-        $user = $this->security->getUser();
+        $userId = $this->security->getUser() ? $this->security->getUser()->getId() : 'anon';
         $cacheKey = implode('.', [
             static::CACHE_PREFIX,
             $domain->getOrganization()->getIdentifier(),
             $domain->getIdentifier(),
-            ($user ? $user->getId() : 'anon'),
+            $userId,
         ]);
-
-        $cacheMetadata = [
-            ItemInterface::METADATA_TAGS => [
-                static::CACHE_PREFIX,
-                implode('.', [static::CACHE_PREFIX, $domain->getOrganization()->getIdentifier()]),
-                implode('.', [static::CACHE_PREFIX, $domain->getOrganization()->getIdentifier(), $domain->getIdentifier()]),
-                implode('.', [static::CACHE_PREFIX . '_user' . ($user ? $user->getId() : 'anon')]),
-            ],
-        ];
 
         $cachedTypes = $this->cache->get($cacheKey,
 
             // Create a fresh schema and save it to cache.
-            function() use ($query, $mutation, $manager, $domain) {
+            function(ItemInterface $item) use ($query, $mutation, $manager, $domain, $userId) {
+
+                $item->tag([
+                    static::CACHE_PREFIX,
+                    implode('.', [static::CACHE_PREFIX, $domain->getOrganization()->getIdentifier()]),
+                    implode('.', [static::CACHE_PREFIX, $domain->getOrganization()->getIdentifier(), $domain->getIdentifier()]),
+                    implode('.', [static::CACHE_PREFIX . '_user' . $userId])
+                ]);
 
                 $this->domainMapping = [];
                 $query = is_string($query) ? $this->getSchemaType($query, $domain) : $query;
@@ -186,10 +184,7 @@ class SchemaTypeManager
             },
 
             // If $forceFreshGeneration = true, expire cache, else use default beta (1.0).
-            ($forceFreshGeneration ? INF : 1.0),
-
-            // Set cache tags
-            $cacheMetadata
+            ($forceFreshGeneration ? INF : 1.0)
         );
 
         $astArray = $cachedTypes['types'];
