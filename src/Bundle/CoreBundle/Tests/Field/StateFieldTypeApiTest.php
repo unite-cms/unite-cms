@@ -8,7 +8,6 @@
 
 namespace UniteCMS\CoreBundle\Tests\Field;
 
-use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\Tests\APITestCase;
 use UniteCMS\CoreBundle\Entity\Content;
 
