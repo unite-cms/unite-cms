@@ -100,12 +100,22 @@ class FieldableResultTypeFactory implements SchemaTypeFactoryInterface
             $fieldable = $domain->getDomainMemberTypes()->get($identifier);
         }
 
+        // If no fieldable is found return a generic fieldable content result type.
         if (!$fieldable) {
-            throw new \InvalidArgumentException(
-                "No '$entityType' type with identifier '$identifier' found for in the given domain."
+            return $schemaTypeManager->hasSchemaType('FieldableContentResult') ?
+                $schemaTypeManager->getSchemaType('FieldableContentResult', $domain) : new FieldableContentResultType(
+                $schemaTypeManager,
+                $this->authorizationChecker,
+                null,
+                $domain
             );
         }
 
+        // If we have a fieldable, create a type specific result type.
+        $name = IdentifierNormalizer::graphQLType($fieldable, $entityType . 'Result' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''));
+        if($schemaTypeManager->hasSchemaType($name)) {
+            return $schemaTypeManager->getSchemaType($name, $domain, $nestingLevel);
+        }
         $type = new FieldableContentResultType(
             $schemaTypeManager,
             $this->authorizationChecker,
@@ -115,7 +125,7 @@ class FieldableResultTypeFactory implements SchemaTypeFactoryInterface
             IdentifierNormalizer::graphQLType($fieldable, $entityType . ($nestingLevel > 0 ? 'Level' . $nestingLevel : '')),
             $nestingLevel
         );
-        $type->name = IdentifierNormalizer::graphQLType($fieldable, $entityType . 'Result' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''));
+        $type->name = $name;
         return $type;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -47,7 +48,7 @@ class CheckboxFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         return (boolean)$value;
     }

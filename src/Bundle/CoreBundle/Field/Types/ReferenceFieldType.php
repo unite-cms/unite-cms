@@ -3,6 +3,9 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Exception;
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Schema;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Routing\Router;
 use UniteCMS\CoreBundle\Entity\ContentType;
@@ -296,16 +299,19 @@ class ReferenceFieldType extends FieldType
      * @param FieldableField $field
      * @param array $value
      * @param FieldableContent $content
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
      * @return null|Content
      *
      * @throws ContentAccessDeniedException
      * @throws DomainAccessDeniedException
      * @throws MissingContentTypeException
      * @throws MissingDomainException
-     * @throws MissingOrganizationException
      * @throws MissingDomainMemberTypeException
+     * @throws MissingOrganizationException
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         if (empty($value)) {
             return null;
@@ -375,7 +381,8 @@ class ReferenceFieldType extends FieldType
         } // Try to resolve the data to check if the current user is allowed to access it.
         else {
             try {
-                $this->resolveGraphQLData($field, $data, new Content());
+                $placeholderResolveInfo = new ResolveInfo($field->getIdentifier(), [], null, new ObjectType(['name' => '']), [], new Schema([]), [], null, null, []);
+                $this->resolveGraphQLData($field, $data, new Content(), [], [], $placeholderResolveInfo);
             } catch (Exception $e) {
                 $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }

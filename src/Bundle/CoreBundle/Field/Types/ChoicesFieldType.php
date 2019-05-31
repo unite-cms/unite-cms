@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RequestContext;
@@ -89,7 +90,7 @@ class ChoicesFieldType extends ChoiceFieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         return (array)$value;
     }

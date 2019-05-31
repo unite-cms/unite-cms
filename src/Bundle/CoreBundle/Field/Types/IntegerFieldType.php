@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -45,7 +46,7 @@ class IntegerFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         return (int)$value;
     }

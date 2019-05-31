@@ -48,6 +48,16 @@ services:
       public: false
       arguments: ['@unite.cms.domain_config_manager']
       tags:
-      - { name: doctrine.event_listener, event: postPersist }
-      - { name: doctrine.event_listener, event: preUpdate }
-      - { name: doctrine.event_listener, event: postRemove }
+        - { name: doctrine.event_listener, event: postPersist }
+        - { name: doctrine.event_listener, event: preUpdate }
+        - { name: doctrine.event_listener, event: postRemove }
+
+  # Invalidate schema cache, if domain org or domain accessor changed
+  UniteCMS\CoreBundle\Subscriber\SchemaCacheInvalidatorSubscriber:
+        public: false
+        arguments: ['@cache.app.taggable']
+        tags:
+          - { name: kernel.event_subscriber }
+          - { name: doctrine.event_listener, event: postPersist }
+          - { name: doctrine.event_listener, event: postPersist }
+          - { name: doctrine.event_listener, event: preRemove }

@@ -186,81 +186,80 @@ class ReferenceOfFieldType extends FieldType
                     'description' => 'Set one optional filter condition.',
                 ],
             ],
-            'resolve' => function ($value, array $args, $context, ResolveInfo $info) use ($field, $nestingLevel) {
-
-                // Reference of fields does only work for content and domain member entities.
-                if(!$value instanceof Content && !$value instanceof DomainMember) {
-                    return null;
-                }
-
-                $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
-                $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
-                $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
-
-                // Resolve content type and field.
-                $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
-                $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
-                $field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
-
-                // Create filter by reference field + optional filter args
-                $referenceFilter = ['field' => $field->getIdentifier().'.content', 'operator' => '=', 'value' => $value->getId()];
-
-                // If args have a content filter already set, remove it first.
-                if(!empty($args['filter']['field']) && $args['filter']['field'] === $field->getIdentifier().'.content') {
-                    $args['filter'] = [];
-                }
-
-                $args['filter'] = empty($args['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $args['filter']]];
-
-                // Get content for the resolved content type.
-                $contentEntityFields = $this->entityManager->getClassMetadata(Content::class)->getFieldNames();
-                $contentQuery = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
-                    ->select('c')
-                    ->where('c.contentType = :contentType')
-                    ->setParameter(':contentType', $contentType);
-
-                // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
-                if (!empty($args['sort'])) {
-                    foreach ($args['sort'] as $sort) {
-
-                        $key = $sort['field'];
-                        $order = $sort['order'];
-
-                        // if we sort by a content field.
-                        if (in_array($key, $contentEntityFields)) {
-                            $contentQuery->addOrderBy('c.'.$key, $order);
-
-                            // if we sort by a nested content data field.
-                        } else {
-                            $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
-                        }
-                    }
-                }
-
-                // Adding where filter to the query.
-                // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
-                // TODO: Replace field names with nested field selectors.
-                $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
-                $contentQuery->andWhere($a->getFilter());
-                foreach($a->getParameters() as $parameter => $value) {
-                    $contentQuery->setParameter($parameter, $value);
-                }
-
-                // Get all content in one request for all contentTypes.
-                return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], [
-                    'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel)
-                ]);
-            },
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
-        // We resolve content for this field directly in the returned type of getGraphQLType.
-        return null;
+        $nameParts = preg_split('/(?=[A-Z])/', $info->fieldName, -1, PREG_SPLIT_NO_EMPTY);
+        $lastPart = array_pop($nameParts);
+        $nestingLevel = substr($lastPart, 0, 5) === 'Level' ? substr($lastPart, 5) : 0;
+
+        // Reference of fields does only work for content and domain member entities.
+        if(!$content instanceof Content && !$content instanceof DomainMember) {
+            return null;
+        }
+
+        $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
+        $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
+        $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
+
+        // Resolve content type and field.
+        $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
+        $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
+        $field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
+
+        // Create filter by reference field + optional filter args
+        $referenceFilter = ['field' => $field->getIdentifier().'.content', 'operator' => '=', 'value' => $content->getId()];
+
+        // If args have a content filter already set, remove it first.
+        if(!empty($args['filter']['field']) && $args['filter']['field'] === $field->getIdentifier().'.content') {
+            $args['filter'] = [];
+        }
+
+        $args['filter'] = empty($args['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $args['filter']]];
+
+        // Get content for the resolved content type.
+        $contentEntityFields = $this->entityManager->getClassMetadata(Content::class)->getFieldNames();
+        $contentQuery = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
+            ->select('c')
+            ->where('c.contentType = :contentType')
+            ->setParameter(':contentType', $contentType);
+
+        // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
+        if (!empty($args['sort'])) {
+            foreach ($args['sort'] as $sort) {
+
+                $key = $sort['field'];
+                $order = $sort['order'];
+
+                // if we sort by a content field.
+                if (in_array($key, $contentEntityFields)) {
+                    $contentQuery->addOrderBy('c.'.$key, $order);
+
+                    // if we sort by a nested content data field.
+                } else {
+                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                }
+            }
+        }
+
+        // Adding where filter to the query.
+        // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
+        // TODO: Replace field names with nested field selectors.
+        $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
+        $contentQuery->andWhere($a->getFilter());
+        foreach($a->getParameters() as $parameter => $value) {
+            $contentQuery->setParameter($parameter, $value);
+        }
+
+        // Get all content in one request for all contentTypes.
+        return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], [
+            'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel)
+        ]);
     }
 
     /**

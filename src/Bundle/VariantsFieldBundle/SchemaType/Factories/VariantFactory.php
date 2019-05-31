@@ -127,7 +127,14 @@ class VariantFactory
 
                     $return_value = null;
                     $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                    $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value->getData()[$info->fieldName], $variantContent);
+                    $return_value = $fieldType->resolveGraphQLData(
+                        $fields[$info->fieldName],
+                        $value->getData()[$info->fieldName],
+                        $variantContent,
+                        $args,
+                        $context,
+                        $info
+                    );
                     return $return_value;
                 }
             ]), false);

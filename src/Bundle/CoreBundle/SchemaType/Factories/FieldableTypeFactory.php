@@ -229,13 +229,18 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
             $schemaTypeManager->registerSchemaType(new PermissionsType($entityPermissions, $permissionsTypeName));
         }
 
+        $name = $isInputType ?
+            IdentifierNormalizer::graphQLType($identifier, $entityType . 'Input').($nestingLevel > 0 ? 'Level'.$nestingLevel : '') :
+            IdentifierNormalizer::graphQLType($identifier, $entityType).($nestingLevel > 0 ? 'Level'.$nestingLevel : '');
+
+        if($schemaTypeManager->hasSchemaType($name)) {
+            return $schemaTypeManager->getSchemaType($name, $domain, ($nestingLevel + 1));
+        }
+
         if ($isInputType) {
             return new InputObjectType(
                 [
-                    'name' => IdentifierNormalizer::graphQLType(
-                            $identifier,
-                        $entityType . 'Input'
-                        ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
+                    'name' => $name,
                     'fields' => $fields,
                 ]
             );
@@ -243,10 +248,7 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
 
             return new ObjectType(
                 [
-                    'name' => IdentifierNormalizer::graphQLType(
-                            $identifier,
-                            $entityType
-                        ).($nestingLevel > 0 ? 'Level'.$nestingLevel : ''),
+                    'name' => $name,
                     'fields' => array_merge(
                         [
                             'id' => Type::id(),
@@ -390,7 +392,10 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                                 return $fieldTypes[$info->fieldName]->resolveGraphQLData(
                                     $fieldable->getFields()->get($info->fieldName),
                                     $fieldData,
-                                    $value
+                                    $value,
+                                    $args,
+                                    $context,
+                                    $info
                                 );
                         }
                     },

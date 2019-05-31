@@ -102,6 +102,10 @@ class CollectionFieldTypeFactory
                     }
                 }
 
+                if(empty($fieldsSchemaTypes)) {
+                    return null;
+                }
+
                 if($isInputType) {
                   $schemaTypeManager->registerSchemaType(new InputObjectType([
                     'name' => $schemaTypeRowName,
@@ -136,7 +140,14 @@ class CollectionFieldTypeFactory
 
                       $return_value = null;
                       $fieldType = $this->fieldTypeManager->getFieldType($fieldTypes[$info->fieldName]->getType());
-                      $return_value = $fieldType->resolveGraphQLData($fields[$info->fieldName], $value[$info->fieldName], $collectionRow);
+                      $return_value = $fieldType->resolveGraphQLData(
+                          $fields[$info->fieldName],
+                          $value[$info->fieldName],
+                          $collectionRow,
+                          $args,
+                          $context,
+                          $info
+                      );
                       return $return_value;
                     }
                   ]));

@@ -52,6 +52,11 @@ class FieldableContentResultType extends AbstractType
     private $contentSchemaType;
 
     /**
+     * @var string $permissionTypeName
+     */
+    private $permissionTypeName;
+
+    /**
      * @var int $nestingLevel
      */
     private $nestingLevel;
@@ -71,16 +76,32 @@ class FieldableContentResultType extends AbstractType
         $this->fieldable = $fieldable;
         $this->contentSchemaType = $contentSchemaType;
         $this->nestingLevel = $nestingLevel;
-        parent::__construct();
-    }
 
-    /**
-     * Define all interfaces, this type implements.
-     *
-     * @return array
-     */
-    protected function interfaces() {
-        return [ $this->schemaTypeManager->getSchemaType('ContentResultInterface') ];
+        // Create or get permissions type for this content type.
+        $this->permissionTypeName = null;
+
+        if($this->fieldable) {
+            $bundlePermissions = [];
+
+            if ($this->fieldable instanceof ContentType) {
+                $this->permissionTypeName = 'ContentResultPermissions';
+                $bundlePermissions = ContentVoter::BUNDLE_PERMISSIONS;
+            } else {
+                if ($this->fieldable instanceof DomainMemberType) {
+                    $this->permissionTypeName = 'MemberResultPermissions';
+                    $bundlePermissions = DomainMemberVoter::BUNDLE_PERMISSIONS;
+                }
+            }
+
+            $this->permissionTypeName = IdentifierNormalizer::graphQLType($this->fieldable, $this->permissionTypeName);
+            if (!$this->schemaTypeManager->hasSchemaType($this->permissionTypeName)) {
+                $this->schemaTypeManager->registerSchemaType(
+                    new PermissionsType($bundlePermissions, $this->permissionTypeName)
+                );
+            }
+        }
+
+        parent::__construct();
     }
 
     /**
@@ -90,39 +111,13 @@ class FieldableContentResultType extends AbstractType
      */
     protected function fields()
     {
-        $fields = [
+        return array_merge([
             'result' => Type::listOf($this->schemaTypeManager->getSchemaType($this->contentSchemaType, $this->domain, $this->nestingLevel)),
             'total' => Type::int(),
             'page' => Type::int(),
-        ];
-
-        // Create or get permissions type for this content type.
-        if($this->fieldable) {
-
-            $permissionsTypeName = null;
-            $bundlePermissions = [];
-
-            if($this->fieldable instanceof ContentType) {
-                $permissionsTypeName = 'ContentResultPermissions';
-                $bundlePermissions = ContentVoter::BUNDLE_PERMISSIONS;
-            }
-
-            else if($this->fieldable instanceof DomainMemberType) {
-                $permissionsTypeName = 'MemberResultPermissions';
-                $bundlePermissions = DomainMemberVoter::BUNDLE_PERMISSIONS;
-            }
-
-            $permissionsTypeName = IdentifierNormalizer::graphQLType($this->fieldable, $permissionsTypeName);
-            if (!$this->schemaTypeManager->hasSchemaType($permissionsTypeName)) {
-                $this->schemaTypeManager->registerSchemaType(
-                    new PermissionsType($bundlePermissions, $permissionsTypeName)
-                );
-            }
-
-            $fields['_permissions'] = $this->schemaTypeManager->getSchemaType($permissionsTypeName);
-        }
-
-        return $fields;
+        ], $this->permissionTypeName ? [
+            '_permissions' => $this->schemaTypeManager->getSchemaType($this->permissionTypeName),
+        ] : []);
     }
 
     /**

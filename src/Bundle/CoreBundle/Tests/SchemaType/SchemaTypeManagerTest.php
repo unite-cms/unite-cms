@@ -6,7 +6,9 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
+use Symfony\Contracts\Cache\CacheInterface;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
@@ -22,10 +24,7 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
 
         // Check that core schemaTypes and factories are already registered via compiler pass.
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('Query'));
-        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FieldableContentResult'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FieldableContentInterface'));
-        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('ContentResultInterface'));
-        $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FieldableContentResult'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('FilterInput'));
         $this->assertTrue(static::$container->get('unite.cms.graphql.schema_type_manager')->hasSchemaType('SortInput'));
 
@@ -74,7 +73,7 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
      * @expectedExceptionMessage The schema type: 'any_unknown' was not found.
      */
     public function testGetUnknownSchemaType() {
-        $schemaTypeManager = new SchemaTypeManager();
+        $schemaTypeManager = new SchemaTypeManager(8, $this->createMock(CacheInterface::class), $this->createMock(Security::class));
         $schemaTypeManager->getSchemaType('any_unknown');
     }
 
@@ -87,7 +86,7 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
             new PostAuthenticationGuardToken($admin, 'api', [])
         );
 
-        $schemaTypeManager = new SchemaTypeManager();
+        $schemaTypeManager = new SchemaTypeManager(8, $this->createMock(CacheInterface::class), $this->createMock(Security::class));
 
         $schemaTypeManager->registerSchemaTypeAlteration(new SchemaTypeAlterationMock('Test1'));
 
@@ -137,14 +136,14 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
      * @expectedExceptionMessage Schema type must be of type GraphQL\Type\Definition\ObjectType or GraphQL\Type\Definition\InputObjectType or GraphQL\Type\Definition\InterfaceType or GraphQL\Type\Definition\UnionType or GraphQL\Type\Definition\ListOfType
      */
     public function testRegisterInvalidSchemaType() {
-        $schemaTypeManager = new SchemaTypeManager();
+        $schemaTypeManager = new SchemaTypeManager(8, $this->createMock(CacheInterface::class), $this->createMock(Security::class));
         $unsupportedType = new class extends Type {};
         $schemaTypeManager->registerSchemaType($unsupportedType);
     }
 
     public function testGettingKnownSchemaType() {
 
-        $schemaTypeManager = new SchemaTypeManager();
+        $schemaTypeManager = new SchemaTypeManager(8, $this->createMock(CacheInterface::class), $this->createMock(Security::class));
 
         // Test registering schemaTypes and schemaTypeFactories.
         $schemaType = new class extends ObjectType {

@@ -18,6 +18,8 @@ use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Event\DomainConfigFileEvent;
+use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\Tests\DatabaseAwareTestCase;
 
 /**
@@ -188,11 +190,13 @@ class WebhookManagerTest extends DatabaseAwareTestCase
     {
         parent::setUp();
 
-        $this->mockHandler = new MockHandler([
-            new Response(200, []),
-            new Response(200, []),
-            new Response(200, [])
-        ]);
+        $this->mockHandler = new MockHandler(
+            [
+                new Response(200, []),
+                new Response(200, []),
+                new Response(200, [])
+            ]
+        );
 
         $handler = HandlerStack::create($this->mockHandler);
         $this->client = new Client(['handler' => $handler, 'verify' => false]);
@@ -205,7 +209,9 @@ class WebhookManagerTest extends DatabaseAwareTestCase
         $this->organization = new Organization();
         $this->organization->setTitle('Test wekhooks')->setIdentifier('webhook_test');
 
-        $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse($this->domainConfiguration);
+        $this->domain = static::$container->get('unite.cms.domain_definition_parser')->parse(
+            $this->domainConfiguration
+        );
         $this->domain->setOrganization($this->organization);
 
         $this->em->persist($this->organization);
@@ -214,7 +220,15 @@ class WebhookManagerTest extends DatabaseAwareTestCase
 
         $user = new User();
         $user->setRoles([User::ROLE_PLATFORM_ADMIN]);
-        static::$container->get('security.token_storage')->setToken(new UsernamePasswordToken($user, '', 'main', $user->getRoles()));
+        static::$container->get('security.token_storage')->setToken(
+            new UsernamePasswordToken($user, '', 'main', $user->getRoles())
+        );
+
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.manager'), $this->domain);
+
+        static::$container->get('event_dispatcher')->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($this->domain));
     }
 
     /**

@@ -420,6 +420,11 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                                             'update field' => 'true',
                                         ],
                                     ],
+                                    [
+                                        'title' => '2nd',
+                                        'identifier' => 'f_2nd',
+                                        'type' => 'text',
+                                    ]
                                 ],
                             ],
                         ],
