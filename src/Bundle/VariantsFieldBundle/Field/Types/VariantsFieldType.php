@@ -73,13 +73,13 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         $variants = self::getNestableFieldable($field);
         foreach($variants->getVariantsMetadata() as $meta) {
 
             // Creates a new schema type object for this variant and register it to schema type manager.
-            $this->variantFactory->createVariantType($schemaTypeManager, $nestingLevel, new Variant(
+            $this->variantFactory->createVariantType($schemaTypeManager, new Variant(
                 null,
                 $variants->getFieldsForVariant($meta['identifier']),
                 $meta['identifier'],
@@ -88,15 +88,15 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             ));
         }
 
-        return $schemaTypeManager->getSchemaType('VariantsFieldInterface', $field->getEntity()->getRootEntity()->getDomain(), $nestingLevel);
+        return $schemaTypeManager->getSchemaType('VariantsFieldInterface', $field->getEntity()->getRootEntity()->getDomain());
     }
 
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
-        return $this->variantFactory->createVariantsInputType($schemaTypeManager, $nestingLevel, self::getNestableFieldable($field));
+        return $this->variantFactory->createVariantsInputType($schemaTypeManager, self::getNestableFieldable($field));
     }
 
     /**

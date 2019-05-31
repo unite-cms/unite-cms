@@ -81,7 +81,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return Type::string();
     }
@@ -89,7 +89,7 @@ abstract class FieldType implements FieldTypeInterface
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return Type::string();
     }

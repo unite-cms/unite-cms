@@ -11,7 +11,6 @@ use GraphQL\Type\Definition\Type;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
 use UniteCMS\CollectionFieldBundle\Model\CollectionRow;
-use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
@@ -41,13 +40,12 @@ class CollectionFieldTypeFactory
      * Creates a new collectionField schema type.
      *
      * @param SchemaTypeManager $schemaTypeManager
-     * @param int $nestingLevel
      * @param FieldableField $field
      * @param Collection $collection
      * @param boolean $isInputType
      * @return ObjectType
      */
-    public function createCollectionFieldType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, FieldableField $field, Collection $collection, $isInputType = false)
+    public function createCollectionFieldType(SchemaTypeManager $schemaTypeManager, FieldableField $field, Collection $collection, $isInputType = false)
     {
         $schemaTypeName = IdentifierNormalizer::graphQLType(str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')), 'CollectionField');
         $schemaTypeRowName = $schemaTypeName . 'Row';
@@ -55,13 +53,6 @@ class CollectionFieldTypeFactory
         if($isInputType) {
           $schemaTypeName .= 'Input';
           $schemaTypeRowName .= 'Input';
-        }
-
-        else {
-            if ($nestingLevel > 0) {
-                $schemaTypeName .= 'Level'.$nestingLevel;
-                $schemaTypeRowName .= 'Level'.$nestingLevel;
-            }
         }
 
         if(!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
@@ -91,9 +82,9 @@ class CollectionFieldTypeFactory
                     }
 
                     if($isInputType) {
-                      $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel + 1);
+                      $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLInputType($field, $schemaTypeManager);
                     } else {
-                      $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType($field, $schemaTypeManager, $nestingLevel + 1);
+                      $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType($field, $schemaTypeManager);
                     }
 
                     // field type can also return null, if no input / output is defined for this field.

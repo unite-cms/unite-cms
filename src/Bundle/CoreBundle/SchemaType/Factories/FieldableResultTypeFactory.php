@@ -66,12 +66,11 @@ class FieldableResultTypeFactory implements SchemaTypeFactoryInterface
     /**
      * Returns the new created schema type object for the given name.
      * @param SchemaTypeManager $schemaTypeManager
-     * @param int $nestingLevel
      * @param Domain $domain
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(SchemaTypeManager $schemaTypeManager, int $nestingLevel, Domain $domain = null, string $schemaTypeName): Type
+    public function createSchemaType(SchemaTypeManager $schemaTypeManager, Domain $domain = null, string $schemaTypeName): Type
     {
         if(!$domain) {
             throw new \InvalidArgumentException('UniteCMS\CoreBundle\SchemaType\Factories\FieldableResultTypeFactory::createSchemaType needs an domain as second argument');
@@ -112,9 +111,9 @@ class FieldableResultTypeFactory implements SchemaTypeFactoryInterface
         }
 
         // If we have a fieldable, create a type specific result type.
-        $name = IdentifierNormalizer::graphQLType($fieldable, $entityType . 'Result' . ($nestingLevel > 0 ? 'Level' . $nestingLevel : ''));
+        $name = IdentifierNormalizer::graphQLType($fieldable, $entityType . 'Result');
         if($schemaTypeManager->hasSchemaType($name)) {
-            return $schemaTypeManager->getSchemaType($name, $domain, $nestingLevel);
+            return $schemaTypeManager->getSchemaType($name, $domain);
         }
         $type = new FieldableContentResultType(
             $schemaTypeManager,
@@ -122,8 +121,7 @@ class FieldableResultTypeFactory implements SchemaTypeFactoryInterface
             null,
             $domain,
             $fieldable,
-            IdentifierNormalizer::graphQLType($fieldable, $entityType . ($nestingLevel > 0 ? 'Level' . $nestingLevel : '')),
-            $nestingLevel
+            IdentifierNormalizer::graphQLType($fieldable, $entityType)
         );
         $type->name = $name;
         return $type;

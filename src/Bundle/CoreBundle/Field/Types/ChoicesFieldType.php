@@ -74,7 +74,7 @@ class ChoicesFieldType extends ChoiceFieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return Type::listOf(Type::string());
     }
@@ -82,7 +82,7 @@ class ChoicesFieldType extends ChoiceFieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return Type::listOf(Type::string());
     }

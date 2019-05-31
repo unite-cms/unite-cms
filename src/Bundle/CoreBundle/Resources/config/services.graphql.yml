@@ -4,7 +4,7 @@ services:
   # Schema Type Manager, that holds all schema types during one request
   unite.cms.graphql.schema_type_manager:
     class: UniteCMS\CoreBundle\SchemaType\SchemaTypeManager
-    arguments: [8, '@cache.app.taggable', '@security.helper']
+    arguments: ['@cache.app.taggable', '@security.helper']
     public: true
 
   UniteCMS\CoreBundle\SchemaType\SchemaTypeManager: "@unite.cms.graphql.schema_type_manager"
@@ -35,10 +35,6 @@ services:
   UniteCMS\CoreBundle\SchemaType\Types\FieldableContentInterface:
     tags: [unite_cms.graphql.schema_type]
     arguments: ['@unite.cms.graphql.schema_type_manager']
-
-  UniteCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType:
-    tags: [unite_cms.graphql.schema_type]
-    arguments: [8]
 
   UniteCMS\CoreBundle\SchemaType\Types\DeletedContentResultType:
     tags: [unite_cms.graphql.schema_type]

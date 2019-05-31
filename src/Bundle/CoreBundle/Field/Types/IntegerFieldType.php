@@ -30,7 +30,7 @@ class IntegerFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return Type::int();
     }
@@ -38,7 +38,7 @@ class IntegerFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return Type::int();
     }

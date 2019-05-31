@@ -31,9 +31,8 @@ class UniteCMSCoreExtension extends Extension
         // Set domain_config_parameters to domain config manager.
         $container->getDefinition('unite.cms.domain_config_manager')->setArgument(4, $config['domain_config_parameters']);
 
-        // Set maximum nesting level as first argument to schema type manager and maximum nesting type object type.
-        $container->getDefinition('unite.cms.graphql.schema_type_manager')->setArgument(0, $config['maximum_nesting_level']);
-        $container->getDefinition('UniteCMS\CoreBundle\SchemaType\Types\MaximumNestingLevelType')->setArgument(0, $config['maximum_nesting_level']);
+        // Set maximum nesting level as 3rd argument to schema type manager.
+        $container->getDefinition('unite.cms.graphql.schema_type_manager')->setArgument(2, $config['maximum_nesting_level']);
 
         // Set maximum query limit as sixth argument to query type and maximum reference of field type, and
         // as second argument to table/tree/grid view config factory classes.

@@ -16,6 +16,8 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\AST;
 use GraphQL\Utils\BuildSchema;
 use GraphQL\Utils\SchemaPrinter;
+use GraphQL\Validator\DocumentValidator;
+use GraphQL\Validator\Rules\QueryDepth;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -66,7 +68,7 @@ class SchemaTypeManager
      */
     protected $domainMapping = [];
 
-    public function __construct(int $maximumNestingLevel = 8, CacheInterface $cache, Security $security)
+    public function __construct(CacheInterface $cache, Security $security, int $maximumNestingLevel = 8)
     {
         $this->maximumNestingLevel = $maximumNestingLevel;
         $this->cache = $cache;
@@ -127,6 +129,9 @@ class SchemaTypeManager
      * @throws \Psr\Cache\CacheException
      */
     public function createSchema(Domain $domain, $query, $mutation = null, $forceFreshGeneration = false) : Schema {
+
+        // Set query depth rule globally.
+        DocumentValidator::addRule(new QueryDepth($this->getMaximumNestingLevel()));
 
         $manager = $this;
         $userId = $this->security->getUser() ? $this->security->getUser()->getId() : 'anon';
@@ -202,10 +207,6 @@ class SchemaTypeManager
                 return $typeConfig;
             }
 
-            $nameParts = preg_split('/(?=[A-Z])/', $typeConfig['name'], -1, PREG_SPLIT_NO_EMPTY);
-            $lastPart = array_pop($nameParts);
-            $nestingLevel = substr($lastPart, 0, 5) === 'Level' ? substr($lastPart, 5) : 0;
-
             if(array_key_exists($typeConfig['name'], $domainMapping)) {
                 if($domainMapping[$typeConfig['name']] !== $domain->getIdentifier()) {
                     $domainIdentifier = $domainMapping[$typeConfig['name']];
@@ -215,7 +216,7 @@ class SchemaTypeManager
                 }
             }
 
-            $fullType = $manager->getSchemaType($typeConfig['name'], $domain, $nestingLevel);
+            $fullType = $manager->getSchemaType($typeConfig['name'], $domain);
 
             if($fullType instanceof ObjectType) {
                 $typeConfig['resolveField'] = $fullType->config['resolveField'];
@@ -242,25 +243,20 @@ class SchemaTypeManager
      *
      * @param $key
      * @param Domain $domain
-     * @param int $nestingLevel
      *
      * @return ObjectType|InputObjectType|InterfaceType|UnionType
      */
-    public function getSchemaType($key, Domain $domain = null, $nestingLevel = 0)
+    public function getSchemaType($key, Domain $domain = null)
     {
         if($domain) {
             $this->domainMapping[$key] = $domain->getIdentifier();
-        }
-
-        if ($nestingLevel >= $this->getMaximumNestingLevel()) {
-            $key = 'MaximumNestingLevel';
         }
 
         if (!$this->hasSchemaType($key)) {
             foreach ($this->schemaTypeFactories as $schemaTypeFactory) {
                 if ($schemaTypeFactory->supports($key)) {
                     $this->registerSchemaType(
-                        $schemaTypeFactory->createSchemaType($this, $nestingLevel, $domain, $key)
+                        $schemaTypeFactory->createSchemaType($this, $domain, $key)
                     );
                     break;
                 }

@@ -41,7 +41,7 @@ class RecaptchaFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return null; // We only allow input, but no output for this field.
     }

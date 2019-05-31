@@ -106,11 +106,10 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return $this->collectionFieldTypeFactory->createCollectionFieldType(
             $schemaTypeManager,
-            $nestingLevel,
             $field,
             self::getNestableFieldable($field)
         );
@@ -119,11 +118,10 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return $this->collectionFieldTypeFactory->createCollectionFieldType(
             $schemaTypeManager,
-            $nestingLevel,
             $field,
             self::getNestableFieldable($field),
             true

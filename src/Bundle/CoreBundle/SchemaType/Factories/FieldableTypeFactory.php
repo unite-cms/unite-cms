@@ -21,7 +21,6 @@ use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
-use UniteCMS\CoreBundle\Field\FieldType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -104,19 +103,98 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
     }
 
     /**
+     * @param Fieldable $fieldable
+     * @param SchemaTypeManager $schemaTypeManager
+     * @return array
+     */
+    protected function getFieldTypesForFieldable(Fieldable $fieldable, SchemaTypeManager $schemaTypeManager) : array {
+
+        $fieldTypes = [];
+
+        /**
+         * @var FieldableField $field
+         */
+        foreach ($fieldable->getFields() as $field) {
+
+            $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
+
+            if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)) {
+                continue;
+            }
+
+            try {
+                $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
+
+                // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
+            } catch (AccessDeniedException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+
+                // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
+            } catch (InvalidFieldConfigurationException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+            }
+        }
+
+        return $fieldTypes;
+    }
+
+    /**
+     * @param Fieldable $fieldable
+     * @param SchemaTypeManager $schemaTypeManager
+     * @param bool $isInputType
+     * @return array
+     */
+    protected function getFieldsForFieldable(Fieldable $fieldable, SchemaTypeManager $schemaTypeManager, bool $isInputType) : array {
+
+        $fields = [];
+
+        /**
+         * @var FieldableField $field
+         */
+        foreach ($fieldable->getFields() as $field) {
+
+            $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
+
+            if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)) {
+                continue;
+            }
+
+            try {
+                $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
+
+                // If we want to create an InputObjectType, get GraphQLInputType.
+                if ($isInputType) {
+                    $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLInputType($field, $schemaTypeManager);
+                } else {
+                    $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType($field, $schemaTypeManager);
+                }
+
+                // field type can also return null, if no input / output is defined for this field.
+                if(!$fields[$fieldIdentifier]) {
+                    unset($fields[$fieldIdentifier]);
+                }
+
+                // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
+            } catch (AccessDeniedException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+
+                // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
+            } catch (InvalidFieldConfigurationException $accessDeniedException) {
+                // TODO: We should log this here and show it to the user somewhere.
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
      * Returns the new created schema type object for the given name.
      * @param SchemaTypeManager $schemaTypeManager
-     * @param int $nestingLevel
      * @param Domain $domain
      * @param string $schemaTypeName
      * @return Type
      */
-    public function createSchemaType(
-        SchemaTypeManager $schemaTypeManager,
-        int $nestingLevel,
-        Domain $domain = null,
-        string $schemaTypeName
-    ): Type {
+    public function createSchemaType(SchemaTypeManager $schemaTypeManager, Domain $domain = null, string $schemaTypeName): Type {
         if (!$domain) {
             throw new \InvalidArgumentException(
                 'UniteCMS\CoreBundle\SchemaType\Factories\FieldableTypeFactory::createSchemaType needs an domain as second argument'
@@ -169,60 +247,6 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
             );
         }
 
-        /**
-         * @var Type[] $fields
-         */
-        $fields = [];
-
-        /**
-         * @var FieldType[] $fieldTypes
-         */
-        $fieldTypes = [];
-
-        /**
-         * @var FieldableField $field
-         */
-        foreach ($fieldable->getFields() as $field) {
-
-            $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
-
-            if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)) {
-                continue;
-            }
-
-            try {
-                $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
-
-                // If we want to create an InputObjectType, get GraphQLInputType.
-                if ($isInputType) {
-                    $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLInputType(
-                        $field,
-                        $schemaTypeManager,
-                        $nestingLevel + 1
-                    );
-                } else {
-                    $fields[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType(
-                        $field,
-                        $schemaTypeManager,
-                        $nestingLevel + 1
-                    );
-                }
-
-                // field type can also return null, if no input / output is defined for this field.
-                if(!$fields[$fieldIdentifier]) {
-                    unset($fields[$fieldIdentifier]);
-                }
-
-                // During schema creation, a field can throw an access denied exception. If this happens, we just skip this field.
-            } catch (AccessDeniedException $accessDeniedException) {
-                // TODO: We should log this here and show it to the user somewhere.
-
-                // During schema creation, a field can throw an invalid field configuration exception. If this happens, we just skip this field.
-            } catch (InvalidFieldConfigurationException $accessDeniedException) {
-                // TODO: We should log this here and show it to the user somewhere.
-            }
-        }
-
         // Create or get permissions type for this fieldable type.
         $permissionsTypeName = IdentifierNormalizer::graphQLType($identifier, $entityType . 'Permissions');
         if(!$schemaTypeManager->hasSchemaType($permissionsTypeName)) {
@@ -230,18 +254,20 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
         }
 
         $name = $isInputType ?
-            IdentifierNormalizer::graphQLType($identifier, $entityType . 'Input').($nestingLevel > 0 ? 'Level'.$nestingLevel : '') :
-            IdentifierNormalizer::graphQLType($identifier, $entityType).($nestingLevel > 0 ? 'Level'.$nestingLevel : '');
+            IdentifierNormalizer::graphQLType($identifier, $entityType . 'Input') :
+            IdentifierNormalizer::graphQLType($identifier, $entityType);
 
         if($schemaTypeManager->hasSchemaType($name)) {
-            return $schemaTypeManager->getSchemaType($name, $domain, ($nestingLevel + 1));
+            return $schemaTypeManager->getSchemaType($name, $domain);
         }
 
         if ($isInputType) {
             return new InputObjectType(
                 [
                     'name' => $name,
-                    'fields' => $fields,
+                    'fields' => function() use ($fieldable, $schemaTypeManager) {
+                        return $this->getFieldsForFieldable($fieldable, $schemaTypeManager, true);
+                    },
                 ]
             );
         } else {
@@ -249,47 +275,45 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
             return new ObjectType(
                 [
                     'name' => $name,
-                    'fields' => array_merge(
-                        [
-                            'id' => Type::id(),
-                            'type' => Type::string(),
-                            '_permissions' => $schemaTypeManager->getSchemaType($permissionsTypeName, $domain),
-                        ],
-                        empty($fieldable->getLocales()) ? [] : [
-                            'locale' => Type::string(),
-                            'translations' => [
-                                'type' => Type::listOf(
-                                    $schemaTypeManager->getSchemaType(
-                                        IdentifierNormalizer::graphQLType($identifier, $entityType).'Level'.($nestingLevel + 1),
-                                        $domain,
-                                        $nestingLevel + 1
-                                    )
-                                ),
-                                'args' => [
-                                    'locales' => [
-                                        'type' => Type::listOf(Type::string()),
-                                        'description' => 'List of Locales for Example: all translations ($locales = null), one locale ($locales = ["de"]), or multiple ($locales = ["de", "en"]',
-                                        'defaultValue' => null,
+                    'fields' => function() use ($schemaTypeManager, $fieldable, $permissionsTypeName, $domain, $name) {
+                        return array_merge(
+                            [
+                                'id' => Type::id(),
+                                'type' => Type::string(),
+                                '_permissions' => $schemaTypeManager->getSchemaType($permissionsTypeName, $domain),
+                            ],
+                            empty($fieldable->getLocales()) ? [] : [
+                                'locale' => Type::string(),
+                                'translations' => [
+                                    'type' => Type::listOf(
+                                        $schemaTypeManager->getSchemaType($name, $domain)
+                                    ),
+                                    'args' => [
+                                        'locales' => [
+                                            'type' => Type::listOf(Type::string()),
+                                            'description' => 'List of Locales for Example: all translations ($locales = null), one locale ($locales = ["de"]), or multiple ($locales = ["de", "en"]',
+                                            'defaultValue' => null,
+                                        ],
                                     ],
                                 ],
                             ],
-                        ],
-                        [
-                            'created' => Type::int(),
-                            'updated' => Type::int(),
-                        ],
-                        ($fieldable instanceof ContentType) ? [
-                            'deleted' => Type::int(),
-                        ] : [],
-                        ($fieldable instanceof DomainMemberType) ? [
-                            '_name' => Type::string(),
-                        ] : [],
-                        $fields
-                    ),
+                            [
+                                'created' => Type::int(),
+                                'updated' => Type::int(),
+                            ],
+                            ($fieldable instanceof ContentType) ? [
+                                'deleted' => Type::int(),
+                            ] : [],
+                            ($fieldable instanceof DomainMemberType) ? [
+                                '_name' => Type::string(),
+                            ] : [],
+                            $this->getFieldsForFieldable($fieldable, $schemaTypeManager, false)
+                        );
+                    },
                     'resolveField' => function ($value, array $args, $context, ResolveInfo $info) use (
                         $fieldable,
                         $entityPermissions,
-                        $fieldTypes
+                        $schemaTypeManager
                     ) {
 
                         if (!$value instanceof FieldableContent) {
@@ -377,6 +401,8 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                                 return $value instanceof DomainMember ? (string)$value : null;
 
                             default:
+
+                                $fieldTypes = $this->getFieldTypesForFieldable($fieldable, $schemaTypeManager);
 
                                 if (!array_key_exists($info->fieldName, $fieldTypes)) {
                                     return null;

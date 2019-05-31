@@ -62,7 +62,7 @@ class VariantFactory
         return $identifierName;
     }
 
-    public function createVariantType(SchemaTypeManager $schemaTypeManager, $nestingLevel = 0, Variant $variant) : Type {
+    public function createVariantType(SchemaTypeManager $schemaTypeManager, Variant $variant) : Type {
 
         $schemaTypeName = self::schemaTypeNameForVariant($variant);
 
@@ -91,7 +91,7 @@ class VariantFactory
                 $fieldIdentifier = IdentifierNormalizer::graphQLIdentifier($field);
                 $fields[$fieldIdentifier] = $field;
                 $fieldTypes[$fieldIdentifier] = $this->fieldTypeManager->getFieldType($field->getType());
-                $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType($field, $schemaTypeManager, $nestingLevel);
+                $fieldsSchemaTypes[$fieldIdentifier] = $fieldTypes[$fieldIdentifier]->getGraphQLType($field, $schemaTypeManager);
             }
 
             $schemaTypeManager->registerSchemaType(new ObjectType([
@@ -142,7 +142,7 @@ class VariantFactory
         return $schemaTypeManager->getSchemaType($schemaTypeName);
     }
 
-    public function createVariantsInputType(SchemaTypeManager $schemaTypeManager, $nestingLevel = 0, Variants $variants) {
+    public function createVariantsInputType(SchemaTypeManager $schemaTypeManager, Variants $variants) {
 
         $schemaTypeName = self::schemaTypeNameForVariant($variants, true);
 
@@ -166,7 +166,7 @@ class VariantFactory
                 $variantFieldsSchemaTypes = [];
 
                 foreach($variant->getFields() as $field) {
-                    $variantFieldsSchemaTypes[IdentifierNormalizer::graphQLIdentifier($field)] = $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $schemaTypeManager, $nestingLevel);
+                    $variantFieldsSchemaTypes[IdentifierNormalizer::graphQLIdentifier($field)] = $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $schemaTypeManager);
 
                     // field type can also return null, if no input / output is defined for this field.
                     if(!$variantFieldsSchemaTypes[IdentifierNormalizer::graphQLIdentifier($field)]) {
