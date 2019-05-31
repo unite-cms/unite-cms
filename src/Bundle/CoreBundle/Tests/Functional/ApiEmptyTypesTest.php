@@ -33,7 +33,7 @@ class ApiEmptyTypesTest extends APITestCase
         }, { "title": "Other ST", "identifier": "other_st" } ] }',
     ];
 
-    public function testIntrospectionQuery() {
+    public function testIntrospectionQueryForEmpty() {
 
         $query = 'query {
             __schema {
@@ -62,8 +62,24 @@ class ApiEmptyTypesTest extends APITestCase
                 $this->assertNotEmpty($type->fields);
             }
         }
+    }
 
+    public function testIntrospectionQueryForContentType() {
 
+        $query = 'query {
+            __schema {
+                queryType { name }
+                mutationType { name }
+                subscriptionType { name }
+                types {
+                  kind,
+                  name,
+                  fields {
+                    name
+                  }
+                }
+            }
+        }';
 
         $response = $this->api($query, $this->domains['content_type']);
 
@@ -77,7 +93,24 @@ class ApiEmptyTypesTest extends APITestCase
                 $this->assertNotEmpty($type->fields);
             }
         }
+    }
 
+    public function testIntrospectionQueryForSettingType() {
+
+        $query = 'query {
+            __schema {
+                queryType { name }
+                mutationType { name }
+                subscriptionType { name }
+                types {
+                  kind,
+                  name,
+                  fields {
+                    name
+                  }
+                }
+            }
+        }';
 
         $response = $this->api($query, $this->domains['setting_type']);
 
@@ -91,7 +124,24 @@ class ApiEmptyTypesTest extends APITestCase
                 $this->assertNotEmpty($type->fields);
             }
         }
+    }
 
+    public function testIntrospectionQueryForBothTypes() {
+
+        $query = 'query {
+            __schema {
+                queryType { name }
+                mutationType { name }
+                subscriptionType { name }
+                types {
+                  kind,
+                  name,
+                  fields {
+                    name
+                  }
+                }
+            }
+        }';
 
         $response = $this->api($query, $this->domains['both_types']);
 

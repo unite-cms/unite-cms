@@ -151,6 +151,7 @@ class SchemaTypeManager
             // Create a fresh schema and save it to cache.
             function() use ($query, $mutation, $manager, $domain) {
 
+                $this->domainMapping = [];
                 $query = is_string($query) ? $this->getSchemaType($query, $domain) : $query;
                 $mutation = ($domain->getContentTypes()->count() > 0 && $mutation) ? (is_string($mutation) ? $this->getSchemaType($mutation, $domain) : $mutation) : null;
 
