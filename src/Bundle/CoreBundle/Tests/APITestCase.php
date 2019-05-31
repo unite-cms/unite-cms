@@ -23,7 +23,6 @@ use UniteCMS\CoreBundle\Event\DomainConfigFileEvent;
 use UniteCMS\CoreBundle\Field\Types\ReferenceFieldType;
 use UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
-use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
 // Mocked database repository.
@@ -378,6 +377,11 @@ abstract class APITestCase extends ContainerAwareTestCase
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'initialized');
         $reflector->setAccessible(true);
         $reflector->setValue(static::$container->get('unite.cms.manager'), true);
+
+        // After setting up domains, clear cache for them
+        foreach($this->domains as $domain) {
+            static::$container->get('event_dispatcher')->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($domain));
+        }
     }
 
     public function tearDown()

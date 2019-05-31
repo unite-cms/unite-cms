@@ -13,7 +13,7 @@ use UniteCMS\CoreBundle\Entity\Content;
 
 class StateFieldTypeApiTest extends APITestCase
 {
-    protected $domainConfig = ['ct_state' => '{
+    protected $domainConfig = ['ct' => '{
         "content_types": [
             {
                 "title": "CT",
@@ -86,7 +86,7 @@ class StateFieldTypeApiTest extends APITestCase
     public function testStateFieldTypeGraphQLRead()
     {
         $content = new Content();
-        $content->setContentType($this->domains['ct_state']->getContentTypes()->get('ct'));
+        $content->setContentType($this->domains['ct']->getContentTypes()->get('ct'));
         $this->repositoryFactory->add($content);
 
         // test empty read
@@ -117,7 +117,7 @@ class StateFieldTypeApiTest extends APITestCase
     public function testStateFieldTypeGraphQLUpdate() {
 
         $content = new Content();
-        $content->setContentType($this->domains['ct_state']->getContentTypes()->get('ct'));
+        $content->setContentType($this->domains['ct']->getContentTypes()->get('ct'));
         $this->repositoryFactory->add($content);
 
         // When creating content, form will save the initial_state to the content.
@@ -130,7 +130,7 @@ class StateFieldTypeApiTest extends APITestCase
             }
         }';
 
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertTrue(empty($response->errors));
         $this->assertEquals('draft', $response->data->updateCt->state);
 
@@ -141,7 +141,7 @@ class StateFieldTypeApiTest extends APITestCase
             }
         }';
 
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertFalse(empty($response->errors));
         $this->assertEquals('The given transition is not allowed for the current state.', $response->errors[0]->message);
 
@@ -152,7 +152,7 @@ class StateFieldTypeApiTest extends APITestCase
             }
         }';
 
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertTrue(empty($response->errors));
         $this->assertTrue(empty($response->errors));
         $this->assertEquals("review", $response->data->updateCt->state);
@@ -168,7 +168,7 @@ class StateFieldTypeApiTest extends APITestCase
                 state
             }
         }';
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertTrue(empty($response->errors));
         $this->assertEquals('draft', $response->data->createCt->state);
 
@@ -178,7 +178,7 @@ class StateFieldTypeApiTest extends APITestCase
                 state
             }
         }';
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertTrue(empty($response->errors));
         $this->assertEquals('draft', $response->data->createCt->state);
 
@@ -189,7 +189,7 @@ class StateFieldTypeApiTest extends APITestCase
                 state
             }
         }';
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertFalse(empty($response->errors));
         $this->assertEquals('This value is not valid.', $response->errors[0]->message);
 
@@ -199,7 +199,7 @@ class StateFieldTypeApiTest extends APITestCase
                 state
             }
         }';
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertFalse(empty($response->errors));
         $this->assertContains('Field "xxx" is not defined by type StateFieldInput.', $response->errors[0]->message);
 
@@ -210,7 +210,7 @@ class StateFieldTypeApiTest extends APITestCase
                 state
             }
         }';
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertFalse(empty($response->errors));
         $this->assertEquals('The given transition is not allowed for the current state.', $response->errors[0]->message);
 
@@ -220,7 +220,7 @@ class StateFieldTypeApiTest extends APITestCase
                 state
             }
         }';
-        $response = $this->api($query, $this->domains['ct_state']);
+        $response = $this->api($query, $this->domains['ct']);
         $this->assertTrue(empty($response->errors));
         $this->assertEquals("review", $response->data->createCt->state);
 
