@@ -103,7 +103,7 @@ class CollectionFieldTypeFactory
                     'fields' => function() use($fieldsSchemaTypes){
                       return $fieldsSchemaTypes;
                     }
-                  ]));
+                  ]), false);
                 } else {
                   $schemaTypeManager->registerSchemaType(new ObjectType([
                     'name' => $schemaTypeRowName,
@@ -141,7 +141,7 @@ class CollectionFieldTypeFactory
                       );
                       return $return_value;
                     }
-                  ]));
+                  ]), false);
                 }
             }
             $newSchemaType = new ListOfType($schemaTypeManager->getSchemaType($schemaTypeRowName));
