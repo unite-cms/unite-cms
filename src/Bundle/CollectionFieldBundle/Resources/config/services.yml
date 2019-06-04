@@ -8,4 +8,5 @@ services:
 
   unite.cms.collection_field.collection_field_type_factory:
     class: UniteCMS\CollectionFieldBundle\SchemaType\Factories\CollectionFieldTypeFactory
+    tags: [unite_cms.graphql.schema_type_factory]
     arguments: ['@unite.cms.field_type_manager', '@security.authorization_checker']

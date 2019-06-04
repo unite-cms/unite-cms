@@ -359,7 +359,9 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         // It can happen, that an index of data was deleted. However, when we store the data to the database, we want
         // to make sure, that there is no missing index for the rows array. Otherwise it would be treated as object
         // with numeric keys instead of an array.
-        $data[$field->getIdentifier()] = array_values($data[$field->getIdentifier()]);
+        if(array_key_exists($field->getIdentifier(), $data)) {
+            $data[$field->getIdentifier()] = array_values($data[$field->getIdentifier()]);
+        }
     }
 
     /**
