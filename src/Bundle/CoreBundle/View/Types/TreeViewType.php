@@ -9,7 +9,7 @@ class TreeViewType extends TableViewType
     const TYPE = "tree";
     const TEMPLATE = "UniteCMSCoreBundle:Views:Tree/index.html.twig";
 
-    protected function addRecursiveChildrenFields($fields, $children_field, $sort, $level = 6) {
+    protected function addRecursiveChildrenFields($fields, $children_field, $sort, $level = 2) {
         return array_merge($fields, [
             $children_field => [
                 'type' => 'tree_view_children',
