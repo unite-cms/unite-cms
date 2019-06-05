@@ -266,7 +266,14 @@ class CollectionFieldTypeFactory implements SchemaTypeFactoryInterface
         }
 
         if(!$schemaTypeManager->hasSchemaType($schemaTypeName)) {
-            $newSchemaType = new ListOfType($this->createCollectionRowType($schemaTypeManager, $collection, $isInputType, $schemaTypeRowName));
+
+            $innerType = $this->createCollectionRowType($schemaTypeManager, $collection, $isInputType, $schemaTypeRowName);
+
+            if(!$innerType) {
+                return null;
+            }
+
+            $newSchemaType = new ListOfType($innerType);
             $newSchemaType->name = $schemaTypeName;
             $schemaTypeManager->registerSchemaType($newSchemaType);
         }
