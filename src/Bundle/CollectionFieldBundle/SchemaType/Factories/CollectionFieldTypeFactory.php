@@ -123,7 +123,7 @@ class CollectionFieldTypeFactory implements SchemaTypeFactoryInterface
      * @param string $schemaTypeRowName
      * @return Type
      */
-    protected function createCollectionRowType(SchemaTypeManager $schemaTypeManager, Collection $collection, bool $isInputType, string $schemaTypeRowName) : Type {
+    protected function createCollectionRowType(SchemaTypeManager $schemaTypeManager, Collection $collection, bool $isInputType, string $schemaTypeRowName) : ?Type {
         if(!$schemaTypeManager->hasSchemaType($schemaTypeRowName)) {
 
             /**
