@@ -179,7 +179,6 @@
                     data: data,
                     headers: { "Authentication-Fallback": true }
                 }).then((result) => {
-
                     // Temporary save the parameter of this file. If upload is successful, we save them to the component.
                     let preSignedUrl = JSON.parse(result.responseText);
                     this.url = preSignedUrl.pre_signed_url;
@@ -189,12 +188,19 @@
                     tmpFileName = preSignedUrl.filename;
                     tmpChecksum = preSignedUrl.checksum;
 
+                    let headers = {};
+
+                    if (t.acl) {
+                        headers['x-amz-acl'] = t.acl;
+                    }
+
                     UIkit.util.trigger(this.$el, 'upload', [files]);
                     this.beforeAll(this);
 
                     UIkit.util.ajax(this.url, {
                         data: tmpFile,
                         method: this.type,
+                        headers,
                         beforeSend: env => {
                             const {xhr} = env;
                             xhr.upload && UIkit.util.on(xhr.upload, 'progress', this.progress);
@@ -225,7 +231,8 @@
             'uploadSignUrl',
             'uploadSignCsrfToken',
             'thumbnailUrl',
-            'endpoint'
+            'endpoint',
+            'acl'
         ],
         methods: {
             hasThumbnailUrl : function() {
