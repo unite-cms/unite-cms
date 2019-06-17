@@ -50,6 +50,6 @@ class CheckboxFieldType extends FieldType
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
-        return (boolean)$value;
+        return ($value === null) ? null : (boolean)$value;
     }
 }

@@ -99,7 +99,7 @@ abstract class FieldType implements FieldTypeInterface
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
-        return (string)$value;
+        return ($value === null) ? null : (string)$value;
     }
 
     /**
