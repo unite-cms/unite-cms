@@ -361,14 +361,14 @@ class QueryType extends AbstractType
                 $key = $sort['field'];
                 $order = $sort['order'];
 
-                // if we sort by a content field.
-                if (in_array($key, $contentEntityFields)) {
-                    $contentQuery->addOrderBy('c.'.$key, $order);
+                // We can sort by a entity field or a nested data field.
+                $sortField = in_array($key, $contentEntityFields) ? 'c.'.$key : "JSON_EXTRACT(c.data, '$.$key')";
 
-                // if we sort by a nested content data field.
-                } else {
-                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                if(!empty($sort['ignore_case'])) {
+                    $sortField = 'LOWER(' . $sortField . ')';
                 }
+
+                $contentQuery->addOrderBy($sortField, $order);
             }
         }
 
@@ -453,10 +453,11 @@ class QueryType extends AbstractType
 
                 $key = $sort['field'];
                 $order = $sort['order'];
+                $sortFields = [];
 
                 // if we sort by a content field.
                 if (in_array($key, $domainMemberEntityFields)) {
-                    $contentQuery->addOrderBy('m.'.$key, $order);
+                    $sortFields[] = 'm.' . $key;
 
                     // if we sort by special _name field
                 } elseif($key === '_name') {
@@ -466,12 +467,19 @@ class QueryType extends AbstractType
                             $contentQuery->leftJoin($class, $key, 'WITH', $key.'.id = m.accessor');
                             $usedJoins[] = $key;
                         }
-                        $contentQuery->addOrderBy($key . '.' . $class::getNameField(), $order);
+                        $sortFields[] = $key . '.' . $class::getNameField();
                     }
 
                     // if we sort by a nested content data field.
                 } else {
-                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                    $sortFields[] = "JSON_EXTRACT(c.data, '$.$key')";
+                }
+
+                foreach($sortFields as $sortField) {
+                    if(!empty($sort['ignore_case'])) {
+                        $sortField = 'LOWER(' . $sortField . ')';
+                    }
+                    $contentQuery->addOrderBy($sortField, $order);
                 }
             }
         }

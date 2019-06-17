@@ -2115,4 +2115,88 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertStringStartsWith('Cannot query field "findEditorMember" on type "Query".', $response->errors[0]->message);
         $this->assertFalse(isset($response->data));
     }
+
+    public function testIgnoreCaseSortFlag() {
+
+        foreach($this->em->getRepository(Content::class)->findAll() as $content) {
+            $this->em->remove($content);
+        }
+
+        $c1 = new Content();
+        $c1->setContentType($this->domains['marketing']->getContentTypes()->get('lang'));
+        $c1->setData(['title' => 'BBB']);
+        $c2 = new Content();
+        $c2->setContentType($this->domains['marketing']->getContentTypes()->get('lang'));
+        $c2->setData(['title' => 'bbbb']);
+        $c3 = new Content();
+        $c3->setContentType($this->domains['marketing']->getContentTypes()->get('lang'));
+        $c3->setData(['title' => 'aaa']);
+        $c4 = new Content();
+        $c4->setContentType($this->domains['marketing']->getContentTypes()->get('lang'));
+        $c4->setData(['title' => 'baba']);
+        $c5 = new Content();
+        $c5->setContentType($this->domains['marketing']->getContentTypes()->get('lang'));
+        $c5->setData(['title' => 'AbAb']);
+
+        $this->em->persist($c1);
+        $this->em->persist($c2);
+        $this->em->persist($c3);
+        $this->em->persist($c4);
+        $this->em->persist($c5);
+        $this->em->flush();
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            findLang(sort: { field: "title", order: "ASC" }) {
+                result {
+                    title
+                }
+            }
+        }');
+        $this->assertEquals(['AbAb', 'BBB', 'aaa', 'baba', 'bbbb'], array_map(function($r){ return $r->title; }, $response->data->findLang->result));
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            findLang(sort: { field: "title", order: "DESC" }) {
+                result {
+                    title
+                }
+            }
+        }');
+        $this->assertEquals(['bbbb', 'baba', 'aaa', 'BBB', 'AbAb'], array_map(function($r){ return $r->title; }, $response->data->findLang->result));
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            findLang(sort: { field: "title", order: "ASC", ignore_case: false }) {
+                result {
+                    title
+                }
+            }
+        }');
+        $this->assertEquals(['AbAb', 'BBB', 'aaa', 'baba', 'bbbb'], array_map(function($r){ return $r->title; }, $response->data->findLang->result));
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            findLang(sort: { field: "title", order: "DESC", ignore_case: false }) {
+                result {
+                    title
+                }
+            }
+        }');
+        $this->assertEquals(['bbbb', 'baba', 'aaa', 'BBB', 'AbAb'], array_map(function($r){ return $r->title; }, $response->data->findLang->result));
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            findLang(sort: { field: "title", order: "ASC", ignore_case: true }) {
+                result {
+                    title
+                }
+            }
+        }');
+        $this->assertEquals(['aaa', 'AbAb', 'baba', 'BBB', 'bbbb'], array_map(function($r){ return $r->title; }, $response->data->findLang->result));
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
+            findLang(sort: { field: "title", order: "DESC", ignore_case: true }) {
+                result {
+                    title
+                }
+            }
+        }');
+        $this->assertEquals(['bbbb', 'BBB', 'baba', 'AbAb', 'aaa'], array_map(function($r){ return $r->title; }, $response->data->findLang->result));
+    }
 }

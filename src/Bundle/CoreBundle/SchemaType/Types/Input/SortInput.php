@@ -21,6 +21,12 @@ class SortInput extends InputObjectType
                         'type' => Type::string(),
                         'description' => 'The sort order. Must be ASC or DESC.',
                     ],
+                    'ignore_case' => [
+                        'defaultValue' => false,
+                        'type' => Type::boolean(),
+                        'description' => 'If set to true, the field will be transformed to lowercase before sorting. 
+                        You only need this, if your database COLLATION is case sensitive and for text fields.',
+                    ]
                 ],
             ]
         );

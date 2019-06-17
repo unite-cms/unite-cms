@@ -232,14 +232,14 @@ class ReferenceOfFieldType extends FieldType
                 $key = $sort['field'];
                 $order = $sort['order'];
 
-                // if we sort by a content field.
-                if (in_array($key, $contentEntityFields)) {
-                    $contentQuery->addOrderBy('c.'.$key, $order);
+                // We can sort by a entity field or a nested data field.
+                $sortField = in_array($key, $contentEntityFields) ? 'c.'.$key : "JSON_EXTRACT(c.data, '$.$key')";
 
-                    // if we sort by a nested content data field.
-                } else {
-                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                if(!empty($sort['ignore_case'])) {
+                    $sortField = 'LOWER(' . $sortField . ')';
                 }
+
+                $contentQuery->addOrderBy($sortField, $order);
             }
         }
 
