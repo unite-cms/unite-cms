@@ -68,7 +68,7 @@ class SchemaTypeManager
      */
     protected $domainMapping = [];
 
-    public function __construct(CacheInterface $cache, Security $security, int $maximumNestingLevel = 8)
+    public function __construct(CacheInterface $cache, Security $security, int $maximumNestingLevel = 16)
     {
         $this->maximumNestingLevel = $maximumNestingLevel;
         $this->cache = $cache;
