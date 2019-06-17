@@ -48,6 +48,6 @@ class NumberFieldType extends FieldType
      */
     function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
-        return (float)$value;
+        return ($value === null) ? null : (float)$value;
     }
 }
