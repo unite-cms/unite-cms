@@ -300,7 +300,6 @@ class ReferenceFieldType extends FieldType
      * @param ResolveInfo $info
      * @return null|Content
      *
-     * @throws ContentAccessDeniedException
      * @throws DomainAccessDeniedException
      * @throws MissingContentTypeException
      * @throws MissingDomainException
@@ -378,7 +377,9 @@ class ReferenceFieldType extends FieldType
         else {
             try {
                 $placeholderResolveInfo = new ResolveInfo($field->getIdentifier(), [], null, new ObjectType(['name' => '']), [], new Schema([]), [], null, null, []);
-                $this->resolveGraphQLData($field, $data, new Content(), [], [], $placeholderResolveInfo);
+                if(null === $this->resolveGraphQLData($field, $data, new Content(), [], [], $placeholderResolveInfo)) {
+                    $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
+                }
             } catch (Exception $e) {
                 $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
