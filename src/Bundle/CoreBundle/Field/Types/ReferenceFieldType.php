@@ -339,16 +339,16 @@ class ReferenceFieldType extends FieldType
         }
 
         if (!$fieldableContent) {
-            throw new InvalidArgumentException("No content / member with id '{$value['content']}' was found.");
+            return null;
         }
 
         // Check access to view content.
         if ($fieldableContent instanceof Content && !$this->authorizationChecker->isGranted(ContentVoter::VIEW, $fieldableContent)) {
-            throw new ContentAccessDeniedException("You are not allowed to view this content.");
+            return null;
         }
 
         if ($fieldableContent instanceof DomainMember && !$this->authorizationChecker->isGranted(DomainMemberVoter::VIEW, $fieldableContent)) {
-            throw new ContentAccessDeniedException("You are not allowed to view this member.");
+            return null;
         }
 
         return $fieldableContent;
