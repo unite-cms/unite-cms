@@ -25,7 +25,7 @@ class WysiwygTypeTest extends TypeTestCase
             ->getForm();
 
         $form->submit(['wysiwyg' => $string_with_xss]);
-        $this->assertEquals('<a href="https://example.com">alert&#40;"XSS"&#41;;</a>', $data->wysiwyg);
+        $this->assertEquals('<a href="https://example.com"></a>', $data->wysiwyg);
     }
 
     public function testFormXssAllowInlineStyles() {
