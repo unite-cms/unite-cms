@@ -1,6 +1,9 @@
 
 const Encore = require('@symfony/webpack-encore');
 
+const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
+const { styles } = require( '@ckeditor/ckeditor5-dev-utils' );
+
 Encore
     // the project directory where all compiled assets will be stored
     .setOutputPath('./Resources/public')
@@ -34,16 +37,21 @@ Encore
     .disableSingleRuntimeChunk()
     .disableImagesLoader()
 
-    .addRule({
-        test: /ckeditor5-[^/]+\/theme\/icons\/[^/]+\.svg$/,
-        use: [ {
-            loader: 'raw-loader'
-        } ]
+    .addPlugin(new CKEditorWebpackPlugin({ language: 'en' }))
+    .enablePostCssLoader(function(postCssConfigOptions){
+        let options = styles.getPostCssConfig( {
+            themeImporter: {
+                themePath: require.resolve( '@ckeditor/ckeditor5-theme-lark' )
+            },
+            minify: Encore.isProduction()
+        });
+        postCssConfigOptions.plugins = options.plugins;
     })
-    // Next one is pretty much the default encore rule for handling images but excluding CKEditor
+
+
     .addRule({
         test: /\.(svg|png|jpg|jpeg|gif|ico)/,
-        exclude: /ckeditor5-[^/]+\/theme\/icons\/[^/]+\.svg$/,
+        exclude: __dirname + '/node_modules/@ckeditor',
         use: [{
             loader: 'file-loader',
             options: {
@@ -52,6 +60,13 @@ Encore
             }
         }]
     })
+
+    .addRule({
+        test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+        use: [{
+            loader: 'raw-loader'
+        }],
+    });
 
 // export the final configuration
 module.exports = Encore.getWebpackConfig();
