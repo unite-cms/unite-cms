@@ -25,7 +25,7 @@ class DependencyInjectionTest extends KernelTestCase
         );
 
         // Test default maximum nesting level is 8
-        $this->assertEquals(8, $kernel->getContainer()->get('unite.cms.graphql.schema_type_manager')->getMaximumNestingLevel());
+        $this->assertEquals(16, $kernel->getContainer()->get('unite.cms.graphql.schema_type_manager')->getMaximumNestingLevel());
 
         // Test default maximum_query_limit is 100
         $queryType = $kernel->getContainer()->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Query');

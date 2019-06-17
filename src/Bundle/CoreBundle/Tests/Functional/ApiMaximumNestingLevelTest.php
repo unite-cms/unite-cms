@@ -16,7 +16,7 @@ use UniteCMS\CoreBundle\Tests\APITestCase;
  */
 class ApiMaximumNestingLevelTest extends APITestCase
 {
-    private $allowed_level = 8;
+    private $allowed_level = 16;
 
     protected $domainConfig = ['marketing' => '{
         "content_types": [
