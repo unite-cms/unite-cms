@@ -80,9 +80,13 @@
 
         {% block content_types %}
             {% if unite.domain.contentTypes|length > 0 %}
-                <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
+                {% set content_type_header_rendered = false %}
                 {% for type in unite.domain.contentTypes %}
                     {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), type) %}
+                        {% if not content_type_header_rendered %}
+                            <li class="uk-nav-header">{% trans %}domain.menu.content_types.headline{% endtrans %}</li>
+                            {% set content_type_header_rendered = true %}
+                        {% endif %}
                         <li>
                             <div class="uk-flex">
                                 <a class="uk-flex-0 {% spaceless %}
@@ -125,9 +129,13 @@
 
         {% block setting_types %}
             {% if unite.domain.settingTypes|length > 0 %}
-                <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
+                {% set setting_type_header_rendered = false %}
                 {% for type in unite.domain.settingTypes %}
                     {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), type) %}
+                        {% if not setting_type_header_rendered %}
+                            <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
+                            {% set setting_type_header_rendered = true %}
+                        {% endif %}
                         <li><a {% spaceless %}
                                     {% if settingType is defined and settingType.identifier == type.identifier %}
                                         class="uk-active"
@@ -146,8 +154,8 @@
             {% for type in unite.domain.domainMemberTypes %}
                 {% if is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::LIST'), type) %}
                     {% if not domain_member_header_rendered %}
-                        {% set domain_member_header_rendered = true %}
                         <li class="uk-nav-header">{% trans %}domain.menu.domain_member_types.headline{% endtrans %}</li>
+                        {% set domain_member_header_rendered = true %}
                     {% endif %}
                     <li><a {% spaceless %}
                             {% if memberType is defined and memberType.identifier == type.identifier %}
