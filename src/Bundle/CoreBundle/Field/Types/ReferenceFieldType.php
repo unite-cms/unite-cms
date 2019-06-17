@@ -300,7 +300,6 @@ class ReferenceFieldType extends FieldType
      * @param ResolveInfo $info
      * @return null|Content
      *
-     * @throws ContentAccessDeniedException
      * @throws DomainAccessDeniedException
      * @throws MissingContentTypeException
      * @throws MissingDomainException
@@ -339,16 +338,16 @@ class ReferenceFieldType extends FieldType
         }
 
         if (!$fieldableContent) {
-            throw new InvalidArgumentException("No content / member with id '{$value['content']}' was found.");
+            return null;
         }
 
         // Check access to view content.
         if ($fieldableContent instanceof Content && !$this->authorizationChecker->isGranted(ContentVoter::VIEW, $fieldableContent)) {
-            throw new ContentAccessDeniedException("You are not allowed to view this content.");
+            return null;
         }
 
         if ($fieldableContent instanceof DomainMember && !$this->authorizationChecker->isGranted(DomainMemberVoter::VIEW, $fieldableContent)) {
-            throw new ContentAccessDeniedException("You are not allowed to view this member.");
+            return null;
         }
 
         return $fieldableContent;
@@ -378,7 +377,9 @@ class ReferenceFieldType extends FieldType
         else {
             try {
                 $placeholderResolveInfo = new ResolveInfo($field->getIdentifier(), [], null, new ObjectType(['name' => '']), [], new Schema([]), [], null, null, []);
-                $this->resolveGraphQLData($field, $data, new Content(), [], [], $placeholderResolveInfo);
+                if(null === $this->resolveGraphQLData($field, $data, new Content(), [], [], $placeholderResolveInfo)) {
+                    $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
+                }
             } catch (Exception $e) {
                 $context->buildViolation('invalid_reference_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
             }
