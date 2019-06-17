@@ -6,9 +6,19 @@
 </template>
 
 <script>
-    import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-    import Highlight from '@ckeditor/ckeditor5-highlight/src/highlight';
-    import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
+
+    import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
+    import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials';
+    import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold';
+    import ItalicPlugin from '@ckeditor/ckeditor5-basic-styles/src/italic';
+    import BlockQuotePlugin from '@ckeditor/ckeditor5-block-quote/src/blockquote';
+    import HeadingPlugin from '@ckeditor/ckeditor5-heading/src/heading';
+    import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
+    import ListPlugin from '@ckeditor/ckeditor5-list/src/list';
+    import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
+    import TablePlugin from '@ckeditor/ckeditor5-table/src/table';
+    import HighlightPlugin from '@ckeditor/ckeditor5-highlight/src/highlight';
+    import AlignmentPlugin from '@ckeditor/ckeditor5-alignment/src/alignment';
 
     export default {
         data: function() {
@@ -17,17 +27,19 @@
                 content: this.value,
                 editor: ClassicEditor,
                 editorConfig: {
-                    plugins: ClassicEditor.builtinPlugins.filter((plugin) => { return [
-                        'Essentials',
-                        'Bold',
-                        'Italic',
-                        'BlockQuote',
-                        'Heading',
-                        'Link',
-                        'List',
-                        'Paragraph',
-                        'Table',
-                    ].indexOf(plugin.pluginName) !== -1; }).concat([ Highlight, Alignment ]),
+                    plugins: [
+                        EssentialsPlugin,
+                        BoldPlugin,
+                        ItalicPlugin,
+                        BlockQuotePlugin,
+                        HeadingPlugin,
+                        LinkPlugin,
+                        ListPlugin,
+                        TablePlugin,
+                        ParagraphPlugin,
+                        HighlightPlugin,
+                        AlignmentPlugin,
+                    ],
                     toolbar: options.toolbar,
                     heading: { options: options.heading }
                 }
@@ -59,19 +71,6 @@
                 box-shadow: none;
                 border: 1px solid map-get($colors, grey-dark);
             }
-        }
-
-        .ck .ck-insert-table-dropdown__grid {
-            width: calc(var(--ck-insert-table-dropdown-box-width)*10 + var(--ck-insert-table-dropdown-box-margin)*20 + var(--ck-insert-table-dropdown-padding)*2);
-        }
-
-        .ck .ck-insert-table-dropdown-grid-box {
-            width: var(--ck-insert-table-dropdown-box-width);
-            height: var(--ck-insert-table-dropdown-box-height);
-        }
-        .ck.ck-icon {
-            width: var(--ck-icon-size);
-            height: var(--ck-icon-size);
         }
     }
 </style>
