@@ -8,12 +8,13 @@
                         :prototype="row.prototype"
                         :form-layout="rowFormLayout"
                         :hide-labels="rowLabelHidden"
+                        :should-show-add-row="shouldShowAddRow"
                         @remove="removeRow"
                         @add="addRow"
                 ></unite-cms-collection-field-row>
             </div>
         </div>
-        <div v-if="!maxRows || rows.length < maxRows" class="collection-add-button-wrapper uk-sortable-nodrag">
+        <div v-if="shouldShowAddRow" class="collection-add-button-wrapper uk-sortable-nodrag">
             <a href="#" class="uk-button uk-button-default" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></a>
         </div>
     </div>
@@ -56,6 +57,9 @@
         computed: {
             sortedRows() {
                 return this.rows.sort((a, b) => { return a.position - b.position; });
+            },
+            shouldShowAddRow() {
+                return !this.maxRows || this.rows.length < this.maxRows;
             }
         },
         props: [
