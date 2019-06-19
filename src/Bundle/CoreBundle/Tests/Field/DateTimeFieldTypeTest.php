@@ -27,12 +27,16 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
+                'min' => 'not a datetime string',
+                'max' => 'not a datetime string',
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
+        $this->assertCount(3, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('no_datetime_value', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('no_datetime_value', $errors->get(2)->getMessageTemplate());
 
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
@@ -43,7 +47,43 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('no_datetime_value', $errors->get(0)->getMessageTemplate());
+    }
+
+    public function testDateTimeTypeFieldTypeWithInvalidMinMaxRangeSettings()
+    {
+        // Date Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('datetime');
+
+        // test min date greater than max date
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'min' => '2019-01-01T00:00',
+                'max' => '2018-06-20T00:00'
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('min_greater_than_max', $errors->get(0)->getMessageTemplate());
+    }
+
+    public function testDateTimeTypeFieldTypeWithValidSettings()
+    {
+        $ctField = $this->createContentTypeField('datetime');
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'default' => '2018-05-24T10:10',
+                'not_empty' => true,
+                'form_group' => 'foo',
+                'min' => '2018-05-20T10:10',
+                'max' => '2018-05-28T10:10',
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(0, $errors);
     }
 
     public function testFormDataTransformers() {

@@ -28,14 +28,18 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
-                'not_empty' => 124
+                'not_empty' => 124,
+                'min' => 'not a date string',
+                'max' => 'not a date string'
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(2, $errors);
+        $this->assertCount(4, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('no_date_value', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('no_date_value', $errors->get(3)->getMessageTemplate());
 
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
@@ -49,6 +53,24 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
     }
 
+    public function testDateTypeFieldTypeWithInvalidMinMaxRangeSettings()
+    {
+        // Date Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('date');
+
+        // test min date greater than max date
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'min' => '2019-01-01',
+                'max' => '2018-06-20'
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('min_greater_than_max', $errors->get(0)->getMessageTemplate());
+    }
+
     public function testDateTypeFieldTypeWithValidSettings()
     {
         $ctField = $this->createContentTypeField('date');
@@ -58,6 +80,8 @@ class DateFieldTypeTest extends FieldTypeTestCase
                 'default' => '2018-05-24',
                 'not_empty' => true,
                 'form_group' => 'foo',
+                'min' => '2018-05-20',
+                'max' => '2018-05-28',
             ]
         ));
 
@@ -73,7 +97,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $id = new \ReflectionProperty($content, 'id');
         $id->setAccessible(true);
         $id->setValue($content, 1);
-        
+
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);
