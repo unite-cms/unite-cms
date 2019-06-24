@@ -31,10 +31,6 @@
 <script>
 
     import UIkit from 'uikit';
-    import nestable from 'uikit3-nestable/src/js/nestable';
-
-    UIkit.mixin(nestable, 'sortable');
-
     import BaseField from '../Base/BaseField.vue';
     import TableContentRow from '../TableContentRow.vue';
     import BaseViewRowActions from '../Base/BaseViewRowActions.vue';

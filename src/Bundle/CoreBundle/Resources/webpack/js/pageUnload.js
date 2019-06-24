@@ -1,4 +1,5 @@
 import * as ObjectHash from 'object-hash';
+require('formdata-polyfill');
 
 export default {
     init(message) {
@@ -12,7 +13,8 @@ export default {
 
             form.calculateData = function(){
                 let data = [];
-                for(let value of new FormData(form).entries()) { data.push(value); }
+                let formData = new FormData(form);
+                for(let value of formData.entries()) { data.push(value); }
                 return ObjectHash(data);
             };
             form.initialFormData = form.calculateData();

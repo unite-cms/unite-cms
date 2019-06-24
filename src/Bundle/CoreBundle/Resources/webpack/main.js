@@ -1,4 +1,7 @@
 
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+
 import Vue from "vue";
 import 'document-register-element';
 import vueCustomElement from 'vue-custom-element';
@@ -24,7 +27,7 @@ import Location from "./vue/field/Location.vue";
 import State from "./vue/field/State.vue";
 import AutoText from "./vue/field/AutoText.vue";
 
-import AceDiff from 'ace-diff';
+import AceDiff from 'ace-diff/dist/ace-diff.min';
 import 'ace-diff/dist/ace-diff.min.css';
 
 require("./sass/unite.scss");
@@ -49,7 +52,7 @@ Vue.use(uniteViewFieldsPlugin, {
         'sortindex': require('./vue/views/Fields/Sortindex').default,
         'selectrow': require('./vue/views/Fields/Selectrow').default,
         'reference': require('./vue/views/Fields/Reference').default,
-        'tree_view_children': require('./vue/views/Fields/TreeViewChildren').default,
+        //'tree_view_children': require('./vue/views/Fields/TreeViewChildren').default,
     }
 });
 
