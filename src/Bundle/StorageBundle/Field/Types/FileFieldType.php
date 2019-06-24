@@ -93,6 +93,7 @@ class FileFieldType extends FieldType
             'endpoint' => $this->generateEndpoint($field->getSettings()),
             'upload-sign-url' => $url,
             'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
+            'acl' => $field->getSettings()->bucket['acl'] ?? '',
           ],
         ]);
     }
