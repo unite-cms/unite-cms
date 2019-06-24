@@ -33,7 +33,18 @@ Encore
     .enableVersioning(Encore.isProduction())
 
     // We don't need a runtime.js for unite cms at the moment
-    .disableSingleRuntimeChunk();
+    .disableSingleRuntimeChunk()
+
+    // Configure babel to use core-js version 3 and browserlist.
+    .configureBabel(function (babelConfig) {
+        const preset = babelConfig.presets.find(([name]) => name === "@babel/preset-env");
+        if (preset !== undefined) {
+            preset[1].useBuiltIns = "usage";
+            preset[1].corejs = 3;
+            preset[1].debug = true;
+        }
+    })
+    ;
 
 // export the final configuration
 let config = Encore.getWebpackConfig();

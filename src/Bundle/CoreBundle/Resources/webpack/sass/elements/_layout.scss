@@ -1,7 +1,9 @@
 
 .unite-main-section {
   position: relative;
-  overflow: hidden;
+  //overflow: hidden;
+  overflow: auto;
+  align-items: stretch;
 
   > * {
     max-width: 100%;

@@ -2,9 +2,13 @@
   "name": "UniteCMSCoreBundle",
   "version": "1.0.0",
   "dependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "core-js": "3.0.1",
     "document-register-element": "github:WebReflection/document-register-element",
-    "lodash": "^4.17.11",
-    "uikit3-nestable": "^0.2.2"
+    "formdata-polyfill": "^3.0.18",
+    "lodash": "^4.17.11"
   },
   "devDependencies": {
     "@symfony/webpack-encore": "^0.22.4",
