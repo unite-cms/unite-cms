@@ -65,50 +65,16 @@ class StorageService
     }
 
     /**
-     * Pre-Signs an upload action for the given filename and field
-     * configuration.
+     * Creates a PreSigned url object from the given command, using bucket settings, uuid and filename.
      *
-     * @param string $filename
+     * @param string $command
      * @param array $bucket_settings
-     * @param string $allowed_file_types
-     *
+     * @param string $uuid
+     * @param string $filename
+     * @param string $expires
      * @return PreSignedUrl
-     * @throws \Exception
      */
-    public function createPreSignedUploadUrl(string $filename, array $bucket_settings, string $allowed_file_types = '*')
-    {
-
-        // Check if file type is allowed.
-        $filenameparts = explode('.', $filename);
-        if (count($filenameparts) < 2) {
-            throw new \InvalidArgumentException(
-                'Filename must include a file type extension.'
-            );
-        }
-
-        $filenameextension = array_pop($filenameparts);
-
-        $filenameextension_supported = false;
-
-        foreach (explode(
-                     ',',
-                     str_replace(' ', '', $allowed_file_types)
-                 ) as $extension) {
-            if ($extension === '*') {
-                $filenameextension_supported = true;
-            }
-            if ($filenameextension === strtolower($extension)) {
-                $filenameextension_supported = true;
-            }
-        }
-
-        if (!$filenameextension_supported) {
-            throw new \InvalidArgumentException(
-                'File type "'.$filenameextension.'" not supported'
-            );
-        }
-
-        $uuid = (string)Uuid::uuid1();
+    protected function generatePreSignedUrl(string $command, array $bucket_settings, string $uuid, string $filename, string $expires = '+5 minutes') {
 
         // Return pre-signed url
         $s3Config = [
@@ -146,14 +112,77 @@ class StorageService
         if (isset($bucket_settings['acl'])) {
             $putObjectParams['ACL'] = $bucket_settings['acl'];
         }
-        $command = $s3Client->getCommand('PutObject', $putObjectParams);
+        $commandObj = $s3Client->getCommand($command, $putObjectParams);
 
         return new PreSignedUrl(
-            (string)$s3Client->createPresignedRequest($command, '+5 minutes')
+            (string)$s3Client->createPresignedRequest($commandObj, $expires)
                 ->getUri(),
             $uuid,
             $filename
         );
+    }
+
+    /**
+     * Pre-Signs an upload action for the given filename and field
+     * configuration.
+     *
+     * @param string $filename
+     * @param array $bucket_settings
+     * @param string $allowed_file_types
+     *
+     * @param string $expires
+     * @return PreSignedUrl
+     * @throws \Exception
+     */
+    public function createPreSignedUploadUrl(string $filename, array $bucket_settings, string $allowed_file_types = '*', string $expires = '+5 minutes')
+    {
+
+        // Check if file type is allowed.
+        $filenameparts = explode('.', $filename);
+        if (count($filenameparts) < 2) {
+            throw new \InvalidArgumentException(
+                'Filename must include a file type extension.'
+            );
+        }
+
+        $filenameextension = array_pop($filenameparts);
+        $filenameextension_supported = false;
+
+        foreach (explode(
+                     ',',
+                     str_replace(' ', '', $allowed_file_types)
+                 ) as $extension) {
+            if ($extension === '*') {
+                $filenameextension_supported = true;
+            }
+            if ($filenameextension === strtolower($extension)) {
+                $filenameextension_supported = true;
+            }
+        }
+
+        if (!$filenameextension_supported) {
+            throw new \InvalidArgumentException(
+                'File type "'.$filenameextension.'" not supported'
+            );
+        }
+
+        return $this->generatePreSignedUrl('PutObject', $bucket_settings, (string)Uuid::uuid1(), $filename, $expires);
+    }
+
+    /**
+     * Pre-Signs an get-object action for the given filename and field configuration.
+     *
+     * @param string $uuid
+     * @param string $filename
+     * @param array $bucket_settings
+     * @param string $expires
+     *
+     * @return PreSignedUrl
+     * @throws \Exception
+     */
+    public function createPreSignedDownloadUrl(string $uuid, string $filename, array $bucket_settings, string $expires = '+5 minutes')
+    {
+        return $this->generatePreSignedUrl('GetObject', $bucket_settings, $uuid, $filename, $expires);
     }
 
     /**

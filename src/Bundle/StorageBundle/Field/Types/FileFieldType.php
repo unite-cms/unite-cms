@@ -123,6 +123,15 @@ class FileFieldType extends FieldType
 
         // Create full URL to file.
         $value['url'] = $this->generateEndpoint($field->getSettings()) . '/' . $value['id'] . '/' . $value['name'];
+
+        // Create pre_signed URL.
+        $value['presigned_url'] = $this->storageService->createPreSignedDownloadUrl(
+            $value['id'],
+            $value['name'],
+            $field->getSettings()->bucket,
+            $field->getSettings()->bucket['pre_signed_download_expiration'] ?? '+1 hours'
+        )->getPreSignedUrl();
+
         return $value;
     }
 
@@ -164,7 +173,7 @@ class FileFieldType extends FieldType
         // Validate allowed bucket configuration.
         if($context->getViolations()->count() == 0) {
             foreach($settings->bucket as $field => $value) {
-                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region', 'acl'])) {
+                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region', 'acl', 'pre_signed_download_expiration'])) {
                     $context->buildViolation('additional_data')->atPath('bucket.' . $field)->addViolation();
                 }
             }
@@ -191,6 +200,18 @@ class FileFieldType extends FieldType
             if (rtrim($settings->bucket['endpoint'], '/\\') != $settings->bucket['endpoint'])
             {
                 $context->buildViolation('storage.no_trailing_slash')->atPath('bucket.endpoint')->addViolation();
+            }
+        }
+
+        // validate expiration time
+        if($context->getViolations()->count() == 0) {
+            if(!empty($settings->bucket['pre_signed_download_expiration'])) {
+                if(strtotime($settings->bucket['pre_signed_download_expiration']) === false) {
+                    $context->buildViolation('storage.invalid_expiration_time')->atPath('bucket.pre_signed_download_expiration')->addViolation();
+                }
+                else if(strtotime($settings->bucket['pre_signed_download_expiration']) > strtotime('+1 weeks')) {
+                    $context->buildViolation('storage.invalid_expiration_time')->atPath('bucket.pre_signed_download_expiration')->addViolation();
+                }
             }
         }
     }
