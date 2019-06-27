@@ -140,6 +140,8 @@ class SchemaTypeManager
             $domain->getOrganization()->getIdentifier(),
             $domain->getIdentifier(),
             $userId,
+            is_string($query) ? $query : $query->name,
+            empty($mutation) ? '' : (is_string($mutation) ? $mutation : $mutation->name),
         ]);
 
         $cachedTypes = $this->cache->get($cacheKey,
