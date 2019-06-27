@@ -15,15 +15,15 @@ class ChoiceCardOption
 
     private $label;
 
-    private $description;
+    private $settings;
 
     private $icon;
 
-    public function __construct($value, string $label, string $description, string $icon)
+    public function __construct($value, string $label, array $settings, string $icon)
     {
         $this->value = $value;
         $this->label = $label;
-        $this->description = $description;
+        $this->settings = $settings;
         $this->icon = $icon;
     }
 
@@ -48,7 +48,7 @@ class ChoiceCardOption
      */
     public function getDescription(): string
     {
-        return $this->description;
+        return $this->settings['description'] ?? '';
     }
 
     /**

@@ -53,7 +53,7 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
             'required' => false,
             'label' => false,
             'choices' => array_map(function($variant){
-                return new ChoiceCardOption($variant['identifier'], $variant['title'], $variant['description'] ?? '', $variant['icon'] ?? '');
+                return new ChoiceCardOption($variant['identifier'], $variant['title'], $variant['settings'] ?? '', $variant['icon'] ?? '');
             }, $variants->getVariantsMetadata()),
             'compact' => true,
         ]);

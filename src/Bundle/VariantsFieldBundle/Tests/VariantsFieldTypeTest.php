@@ -95,7 +95,9 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'identifier' => 'any',
                             'fields' => 'foo',
                             'icon' => 'test',
-                            'description' => 'Foo',
+                            'settings' => [
+                                'description' => 'Foo',
+                            ],
                         ]
                     ],
                 ]
@@ -270,7 +272,9 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'identifier' => 'foo',
                             'fields' => [],
                             'icon' => 'test',
-                            'description' => 'Foo',
+                            'settings' => [
+                                'description' => 'Foo',
+                            ],
                         ]
                     ],
                     'form_group' => "Group 1",
@@ -310,7 +314,9 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                         [
                             'title' => 'Baa',
                             'identifier' => 'baa',
-                            'description' => 'Fooo',
+                            'settings' => [
+                                'description' => 'Fooo',
+                            ],
                             'icon' => 'any',
                             'fields' => [
                                 [

@@ -192,8 +192,21 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 
         // Check that only allowed settings are present.
         foreach (array_keys($variant) as $setting) {
-            if (!in_array($setting, ['title', 'identifier', 'description', 'icon', 'fields'])) {
+            if (!in_array($setting, ['title', 'identifier', 'settings', 'icon', 'fields'])) {
                 $context->buildViolation('additional_data')->atPath($path . $setting)->addViolation();
+            }
+        }
+
+        // Check that only allowed settings are present.
+        if(!empty($variant['settings'])) {
+            if(!is_array($variant['settings'])) {
+                $context->buildViolation('not_an_array')->atPath($path.'[settings]')->addViolation();
+            } else {
+                foreach (array_keys($variant['settings']) as $sub_setting) {
+                    if (!in_array($sub_setting, ['description'])) {
+                        $context->buildViolation('additional_data')->atPath($path.'[settings]'.$sub_setting)->addViolation();
+                    }
+                }
             }
         }
 
