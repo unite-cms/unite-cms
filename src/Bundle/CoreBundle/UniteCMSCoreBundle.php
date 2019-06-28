@@ -11,6 +11,8 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeCompilerPass;
 
 class UniteCMSCoreBundle extends Bundle
 {
+    const UNITE_VERSION = '0.8.2';
+
     public function build(ContainerBuilder $container)
     {
         $container->addCompilerPass(new FieldTypeCompilerPass());
