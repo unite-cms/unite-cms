@@ -2,7 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
-use Doctrine\ORM\EntityManager;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use GraphQL\GraphQL;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,14 +15,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
+use UniteCMS\CoreBundle\Entity\SoftDeleteableFieldableContent;
+use UniteCMS\CoreBundle\Exception\NotValidException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\ReferenceType;
 use UniteCMS\CoreBundle\Entity\View;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Service\FieldableContentManager;
 use UniteCMS\CoreBundle\View\ViewTypeManager;
 
 class ContentController extends AbstractController
@@ -33,6 +35,8 @@ class ContentController extends AbstractController
      * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::LIST'), view.getContentType())")
      *
      * @param View $view
+     * @param ViewTypeManager $viewTypeManager
+     * @param CsrfTokenManagerInterface $csrfTokenManager
      * @return Response
      */
     public function indexAction(View $view, ViewTypeManager $viewTypeManager, CsrfTokenManagerInterface $csrfTokenManager)
@@ -45,7 +49,7 @@ class ContentController extends AbstractController
             $parameters = $viewTypeManager->getTemplateRenderParameters($view);
             $parameters->setCsrfToken($csrfTokenManager->getToken('fieldable_form'));
         }
-        catch (\Symfony\Component\Config\Definition\Exception\Exception $e) {
+        catch (Exception $e) {
             $this->addFlash('danger', $e->getMessage());
         }
 
@@ -257,10 +261,10 @@ class ContentController extends AbstractController
      * @param View $view
      * @param Content $content
      * @param Request $request
-     * @param ValidatorInterface $validator
+     * @param FieldableContentManager $contentManager
      * @return Response
      */
-    public function deleteAction(View $view, Content $content, Request $request, ValidatorInterface $validator)
+    public function deleteAction(View $view, Content $content, Request $request, FieldableContentManager $contentManager)
     {
         // Otherwise, a user could update content, he_she has access to, from another domain.
         if($content->getContentType() !== $view->getContentType()) {
@@ -274,26 +278,15 @@ class ContentController extends AbstractController
                 ['label' => 'content.delete.submit', 'attr' => ['class' => 'uk-button-danger']]
             )
             ->getForm();
-
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
 
-            // If content errors were found, map them to the form.
-            $violations = $validator->validate($content, null, ['DELETE']);
-            if (count($violations) > 0) {
-                $violationMapper = new ViolationMapper();
-                foreach ($violations as $violation) {
-                    $violationMapper->mapViolation($violation, $form);
-                }
-
-                // If content is valid.
-            } else {
-                $this->getDoctrine()->getManager()->remove($content);
-                $this->getDoctrine()->getManager()->flush();
-
+        if($form->isSubmitted() && $form->isValid()) {
+            try {
+                $content = $contentManager->delete($content, true);
                 $this->addFlash('success', 'Content deleted.');
-
                 return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
+            } catch (NotValidException $exception) {
+                $exception->mapToForm($form);
             }
         }
 
@@ -316,41 +309,25 @@ class ContentController extends AbstractController
      * @param View $view
      * @param string $content
      * @param Request $request
-     * @param ValidatorInterface $validator
+     * @param FieldableContentManager $contentManager
      * @return Response
-     *
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function deleteDefinitelyAction(View $view, string $content, Request $request, ValidatorInterface $validator)
+    public function deleteDefinitelyAction(View $view, string $content, Request $request, FieldableContentManager $contentManager)
     {
+        /**
+         * @var SoftDeleteableFieldableContent $content
+         */
+        $content = $contentManager->find($view->getContentType(), $content, true);
 
-        $em = $this->getDoctrine()->getManager();
-
-        if ($em instanceof EntityManager) {
-            $em->getFilters()->disable('gedmo_softdeleteable');
-        }
-
-        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
-            [
-                'id' => $content,
-                'contentType' => $view->getContentType(),
-            ]
-        );
-
-        if ($em instanceof EntityManager) {
-            $em->getFilters()->enable('gedmo_softdeleteable');
-        }
-
-        if (!$content) {
+        if(!$content) {
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isGranted(ContentVoter::UPDATE, $content)) {
+        if (!$contentManager->isGranted($content, FieldableContentManager::PERMISSION_UPDATE)) {
             throw $this->createAccessDeniedException();
         }
 
-        if ($content->getDeleted() == null) {
+        if($content->getDeleted() == null) {
             throw $this->createNotFoundException();
         }
 
@@ -361,28 +338,15 @@ class ContentController extends AbstractController
                 ['label' => 'content.delete_definitely.submit', 'attr' => ['class' => 'uk-button-danger']]
             )
             ->getForm();
-
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
 
-            // If content errors were found, map them to the form.
-            $violations = $validator->validate($content, null, ['DELETE']);
-            if (count($violations) > 0) {
-                $violationMapper = new ViolationMapper();
-                foreach ($violations as $violation) {
-                    $violationMapper->mapViolation($violation, $form);
-                }
-
-                // If content is valid.
-            } else {
-
-                // Delete content item.
-                $em->remove($content);
-                $em->flush();
-
+        if($form->isSubmitted() && $form->isValid()) {
+            try {
+                $contentManager->deleteDefinitely($content, true);
                 $this->addFlash('success', 'Content deleted.');
-
                 return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
+            } catch (NotValidException $exception) {
+                $exception->mapToForm($form);
             }
         }
 
@@ -405,61 +369,40 @@ class ContentController extends AbstractController
      * @param View $view
      * @param string $content
      * @param Request $request
+     * @param FieldableContentManager $contentManager
      * @return Response
      */
-    public function recoverAction(View $view, string $content, Request $request, ValidatorInterface $validator)
+    public function recoverAction(View $view, string $content, Request $request, FieldableContentManager $contentManager)
     {
-        $em = $this->getDoctrine()->getManager();
+        /**
+         * @var SoftDeleteableFieldableContent $content
+         */
+        $content = $contentManager->find($view->getContentType(), $content, true);
 
-        if ($em instanceof EntityManager) {
-            $em->getFilters()->disable('gedmo_softdeleteable');
-        }
-
-        $content = $em->getRepository('UniteCMSCoreBundle:Content')->findOneBy(
-            [
-                'id' => $content,
-                'contentType' => $view->getContentType(),
-            ]
-        );
-
-        if ($em instanceof EntityManager) {
-            $em->getFilters()->enable('gedmo_softdeleteable');
-        }
-
-        if (!$content) {
+        if(!$content) {
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isGranted(ContentVoter::UPDATE, $content)) {
+        if (!$contentManager->isGranted($content, FieldableContentManager::PERMISSION_UPDATE)) {
             throw $this->createAccessDeniedException();
         }
 
-        if ($content->getDeleted() == null) {
+        if($content->getDeleted() == null) {
             throw $this->createNotFoundException();
         }
 
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, ['label' => 'content.recover.submit'])
             ->getForm();
-
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
 
-            // If content errors were found, map them to the form.
-            $violations = $validator->validate($content, null, ['DELETE']);
-            if (count($violations) > 0) {
-                $violationMapper = new ViolationMapper();
-                foreach ($violations as $violation) {
-                    $violationMapper->mapViolation($violation, $form);
-                }
-
-                // If content is valid.
-            } else {
-                $content->recoverDeleted();
-                $this->getDoctrine()->getManager()->flush();
+        if($form->isSubmitted() && $form->isValid()) {
+            try {
+                $contentManager->recover($content, true);
                 $this->addFlash('success', 'Deleted content was restored.');
-
                 return $this->redirect($this->generateUrl('unitecms_core_content_index', [$view]));
+            } catch (NotValidException $exception) {
+                $exception->mapToForm($form);
             }
         }
 
@@ -679,10 +622,10 @@ class ContentController extends AbstractController
      *
      * @param View $view
      * @param Content $content
-     * @param Request $request
+     * @param FieldableContentManager $contentManager
      * @return Response
      */
-    public function revisionsAction(View $view, Content $content, Request $request)
+    public function revisionsAction(View $view, Content $content, FieldableContentManager $contentManager)
     {
         // Otherwise, a user could update content, he_she has access to, from another domain.
         if($content->getContentType() !== $view->getContentType()) {
@@ -695,7 +638,7 @@ class ContentController extends AbstractController
                 'view' => $view,
                 'contentType' => $view->getContentType(),
                 'content' => $content,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class)->getLogEntries($content),
+                'revisions' => $contentManager->getRevisions($content),
             ]
         );
     }
@@ -710,9 +653,10 @@ class ContentController extends AbstractController
      * @param Content $content
      * @param int $version
      * @param Request $request
+     * @param FieldableContentManager $contentManager
      * @return Response
      */
-    public function revisionsRevertAction(View $view, Content $content, int $version, Request $request)
+    public function revisionsRevertAction(View $view, Content $content, int $version, Request $request, FieldableContentManager $contentManager)
     {
         // Otherwise, a user could update content, he_she has access to, from another domain.
         if($content->getContentType() !== $view->getContentType()) {
@@ -722,15 +666,11 @@ class ContentController extends AbstractController
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, ['label' => 'content.revisions.revert.submit'])
             ->getForm();
-
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
 
-            $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class)->revert($content, $version);
-            $this->getDoctrine()->getManager()->persist($content);
-            $this->getDoctrine()->getManager()->flush();
+        if($form->isSubmitted() && $form->isValid()) {
+            $contentManager->revert($content, $version, true);
             $this->addFlash('success', 'Content reverted.');
-
             return $this->redirect($this->generateUrl('unitecms_core_content_revisions', [$view, $content]));
         }
 

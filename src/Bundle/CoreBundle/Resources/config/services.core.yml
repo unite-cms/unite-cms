@@ -38,6 +38,11 @@ services:
     arguments:
       ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem', '@event_dispatcher', []]
 
+  unite.cms.fieldable_content_manager:
+    class: UniteCMS\CoreBundle\Service\FieldableContentManager
+    autowire: true
+    public: true
+
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
   unite.cms.fieldable_form_builder:
     class: UniteCMS\CoreBundle\Form\FieldableFormBuilder
@@ -99,3 +104,4 @@ services:
   UniteCMS\CoreBundle\View\ViewTypeManager: "@unite.cms.view_type_manager"
   UniteCMS\CoreBundle\Service\DomainConfigManager: "@unite.cms.domain_config_manager"
   UniteCMS\CoreBundle\Form\FieldableFormBuilder: "@unite.cms.fieldable_form_builder"
+  UniteCMS\CoreBundle\Service\FieldableContentManager: "@unite.cms.fieldable_content_manager"

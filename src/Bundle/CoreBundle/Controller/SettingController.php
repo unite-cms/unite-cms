@@ -19,6 +19,7 @@ use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Service\FieldableContentManager;
 
 class SettingController extends AbstractController
 {
@@ -137,10 +138,10 @@ class SettingController extends AbstractController
      *
      * @param SettingType $settingType
      * @param Setting $setting
-     * @param Request $request
+     * @param FieldableContentManager $contentManager
      * @return Response
      */
-    public function revisionsAction(SettingType $settingType, Setting $setting, Request $request)
+    public function revisionsAction(SettingType $settingType, Setting $setting, FieldableContentManager $contentManager)
     {
         // Otherwise, a user could update setting, he_she has access to, from another domain.
         if($setting->getSettingType() !== $settingType) {
@@ -152,7 +153,7 @@ class SettingController extends AbstractController
             [
                 'settingType' => $settingType,
                 'setting' => $setting,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class)->getLogEntries($setting),
+                'revisions' => $contentManager->getRevisions($setting),
             ]
         );
     }
@@ -167,9 +168,10 @@ class SettingController extends AbstractController
      * @param Setting $setting
      * @param int $version
      * @param Request $request
+     * @param FieldableContentManager $contentManager
      * @return Response
      */
-    public function revisionsRevertAction(SettingType $settingType, Setting $setting, int $version, Request $request)
+    public function revisionsRevertAction(SettingType $settingType, Setting $setting, int $version, Request $request, FieldableContentManager $contentManager)
     {
         // Otherwise, a user could update setting, he_she has access to, from another domain.
         if($setting->getSettingType() !== $settingType) {
@@ -182,12 +184,8 @@ class SettingController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class)->revert($setting, $version);
-            $this->getDoctrine()->getManager()->persist($setting);
-            $this->getDoctrine()->getManager()->flush();
+            $contentManager->revert($setting, $version, true);
             $this->addFlash('success', 'Setting reverted.');
-
             return $this->redirect($this->generateUrl('unitecms_core_setting_revisions', [$setting]));
         }
 

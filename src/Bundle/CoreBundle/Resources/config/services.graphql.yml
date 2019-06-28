@@ -30,7 +30,7 @@ services:
 
   UniteCMS\CoreBundle\SchemaType\Types\MutationType:
     tags: [unite_cms.graphql.schema_type]
-    arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@validator', '@unite.cms.fieldable_form_builder', '@form.factory', '@unite.cms.field_type_manager']
+    arguments: ['@unite.cms.graphql.schema_type_manager', '@doctrine.orm.default_entity_manager', '@unite.cms.manager', '@security.authorization_checker', '@validator', '@unite.cms.fieldable_form_builder', '@form.factory', '@unite.cms.field_type_manager', '@unite.cms.fieldable_content_manager']
 
   UniteCMS\CoreBundle\SchemaType\Types\FieldableContentInterface:
     tags: [unite_cms.graphql.schema_type]

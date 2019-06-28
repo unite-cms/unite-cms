@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -22,7 +23,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
  * @Gedmo\Loggable(logEntryClass="UniteCMS\CoreBundle\Entity\ContentLogEntry")
  * @Gedmo\SoftDeleteable(fieldName="deleted", timeAware=false)
  */
-class Content implements FieldableContent
+class Content implements FieldableContent, SoftDeleteableFieldableContent
 {
     /**
      * @var string
@@ -383,9 +384,9 @@ class Content implements FieldableContent
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTime|null
      */
-    public function getDeleted()
+    public function getDeleted() : ?DateTime
     {
         return $this->deleted;
     }
@@ -393,7 +394,7 @@ class Content implements FieldableContent
     /**
      * @return Content
      */
-    public function recoverDeleted()
+    public function recoverDeleted() : SoftDeleteableFieldableContent
     {
         $this->deleted = null;
 

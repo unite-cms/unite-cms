@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
+use UniteCMS\CoreBundle\Exception\NotValidException;
 use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Error\UserError;
@@ -20,6 +21,7 @@ use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
+use UniteCMS\CoreBundle\Service\FieldableContentManager;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 
@@ -67,6 +69,11 @@ class MutationType extends AbstractType
      */
     private $fieldTypeManager;
 
+    /**
+     * @var FieldableContentManager $contentManager
+     */
+    private $contentManager;
+
     public function __construct(
         SchemaTypeManager $schemaTypeManager,
         EntityManager $entityManager,
@@ -75,7 +82,8 @@ class MutationType extends AbstractType
         ValidatorInterface $validator,
         FieldableFormBuilder $fieldableFormBuilder,
         FormFactoryInterface $formFactory,
-        FieldTypeManager $fieldTypeManager
+        FieldTypeManager $fieldTypeManager,
+        FieldableContentManager $contentManager
     ) {
         $this->schemaTypeManager = $schemaTypeManager;
         $this->entityManager = $entityManager;
@@ -85,6 +93,7 @@ class MutationType extends AbstractType
         $this->fieldableFormBuilder = $fieldableFormBuilder;
         $this->formFactory = $formFactory;
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->contentManager = $contentManager;
         parent::__construct();
     }
 
@@ -422,27 +431,15 @@ class MutationType extends AbstractType
         $form->submit($data);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            // If content errors were found, map them to the form.
-            $violations = $this->validator->validate($content, null, ['DELETE']);
-            if (count($violations) > 0) {
-                $violationMapper = new ViolationMapper();
-                foreach ($violations as $violation) {
-                    $violationMapper->mapViolation($violation, $form);
-                }
-
-                // If content is valid.
-            } else {
-
-                if($args['persist']) {
-                    $this->entityManager->remove($content);
-                    $this->entityManager->flush();
-                }
-
+            try {
+                $this->contentManager->delete($content, $args['persist']);
                 return [
                     'id' => $args['id'],
                     'deleted' => !!$args['persist'],
                 ];
+
+            } catch (NotValidException $exception) {
+                $exception->mapToForm($form);
             }
         }
 
