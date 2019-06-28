@@ -9,9 +9,9 @@
 namespace UniteCMS\CoreBundle\EventSubscriber;
 
 use Psr\Log\LoggerInterface;
-use Symfony\Bridge\Twig\TwigEngine;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 use Twig\Error\Error;
 use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\Organization;
@@ -31,7 +31,7 @@ class InvitationAdminNotifier implements EventSubscriberInterface
     private $logger;
 
     /**
-     * @var TwigEngine $template
+     * @var Environment $template
      */
     private $template;
 
@@ -45,7 +45,7 @@ class InvitationAdminNotifier implements EventSubscriberInterface
      */
     private $mailer_sender;
 
-    public function __construct(\Swift_Mailer $mailer, TwigEngine $template, TranslatorInterface $translator, LoggerInterface $logger, string $mailer_sender)
+    public function __construct(\Swift_Mailer $mailer, Environment $template, TranslatorInterface $translator, LoggerInterface $logger, string $mailer_sender)
     {
         $this->mailer = $mailer;
         $this->template = $template;

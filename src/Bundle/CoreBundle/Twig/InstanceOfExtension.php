@@ -10,14 +10,14 @@ namespace UniteCMS\CoreBundle\Twig;
 
 use ReflectionClass;
 use Twig\Extension\AbstractExtension;
-use Twig_SimpleTest;
+use Twig\TwigTest;
 
 class InstanceOfExtension extends AbstractExtension
 {
     public function getTests()
     {
         return [
-            new Twig_SimpleTest('instanceof', [$this, 'isInstanceOf']),
+            new TwigTest('instanceof', [$this, 'isInstanceOf']),
         ];
     }
 

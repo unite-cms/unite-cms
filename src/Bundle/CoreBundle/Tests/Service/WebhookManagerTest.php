@@ -228,7 +228,7 @@ class WebhookManagerTest extends DatabaseAwareTestCase
         $d->setAccessible(true);
         $d->setValue(static::$container->get('unite.cms.manager'), $this->domain);
 
-        static::$container->get('event_dispatcher')->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($this->domain));
+        static::$container->get('event_dispatcher')->dispatch(new DomainConfigFileEvent($this->domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE);
     }
 
     /**

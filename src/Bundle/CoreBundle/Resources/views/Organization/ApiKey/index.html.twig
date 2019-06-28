@@ -49,7 +49,7 @@
 
                                 <unite-cms-core-api-token-field token="{{ apiKey.token }}" success-message="{% trans %}organization.api_key.token.copied{% endtrans %}"></unite-cms-core-api-token-field>
 
-                                <pre>{% spaceless %}
+                                <pre>
 <strong>ENDPOINT(S):</strong>
 
 {% for domain in organization.domains %}{{ domain }}: {{ url('unitecms_core_api', [domain]) }}<br /><br />{% endfor %}
@@ -58,7 +58,7 @@
 <strong>HEADER: </strong> <em>Authorization=TOKEN</em>
 = or =
 <strong>QUERY: </strong> <em>?token=TOKEN</em>
-                                    {% endspaceless %}</pre>
+                                    </pre>
 
                             </div>
                         </div>

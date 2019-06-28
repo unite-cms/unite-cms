@@ -9,7 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Currencies;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -91,7 +91,7 @@ class MoneyFieldType extends TextFieldType
             }
 
             foreach($settings->currencies as $currency) {
-                if(Intl::getCurrencyBundle()->getCurrencyName($currency) === null) {
+                if(!Currencies::exists($currency)) {
                     $context->buildViolation('invalid_currency')->atPath('currencies')
                         ->setParameter('%value%', $currency)
                         ->setInvalidValue($currency)->addViolation();

@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Locales;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use UniteCMS\CoreBundle\Entity\Setting;
@@ -44,7 +45,7 @@ class FieldableFormType extends AbstractType
             } else {
                 $choices = [];
                 foreach ($options['locales'] as $locale) {
-                    $choices[Intl::getLocaleBundle()->getLocaleName($locale)] = $locale;
+                    $choices[Locales::getName($locale)] = $locale;
                 }
                 $builder->add('locale', ChoiceType::class, ['choices' => $choices]);
             }

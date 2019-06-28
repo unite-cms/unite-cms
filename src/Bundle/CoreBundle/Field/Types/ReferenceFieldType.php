@@ -8,12 +8,12 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Routing\Router;
+use Twig\Environment;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
-use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentTypeAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\InvalidFieldConfigurationException;
@@ -22,8 +22,6 @@ use UniteCMS\CoreBundle\Exception\MissingDomainException;
 use UniteCMS\CoreBundle\Exception\MissingDomainMemberTypeException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use Doctrine\ORM\EntityManager;
-use Symfony\Bridge\Twig\TwigEngine;
-use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -77,7 +75,7 @@ class ReferenceFieldType extends FieldType
         UniteCMSManager $uniteCMSManager,
         EntityManager $entityManager,
         ViewTypeManager $viewTypeManager,
-        TwigEngine $templating,
+        Environment $templating,
         Router $router,
         CsrfTokenManager $csrfTokenManager,
         ViewConfigurationFactoryInterface $tableViewConfigurationFactory

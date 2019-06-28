@@ -49,8 +49,8 @@
     {% set field_groups = [] %}
 
     {# get all field groups #}
-    {% for child in form if not child.rendered %}
-        {% if child.vars.form_group is defined %}
+    {% for child in form %}
+        {% if not child.rendered and child.vars.form_group is defined %}
             {% if not child.vars.form_group == false and child.vars.form_group not in field_groups %}
                 {% set field_groups = field_groups|merge([child.vars.form_group]) %}
             {% endif %}
@@ -71,8 +71,8 @@
                 <div id="{{ form.vars.id }}-group" class="uk-switcher">
                     {% for delta,group in field_groups %}
                         <div class="unite-form-group-container" id="{{ form.vars.id }}-group-{{ delta }}">
-                            {% for child in form if not child.rendered %}
-                                {% if child.vars.form_group is defined and child.vars.form_group == group %}
+                            {% for child in form %}
+                                {% if not child.rendered and child.vars.form_group is defined and child.vars.form_group == group %}
                                     {{- form_row(child) -}}
                                 {% endif %}
                             {% endfor %}
@@ -84,8 +84,8 @@
     {% endif %}
 
     {# render all fields, that are not in a group #}
-    {% for child in form if not child.rendered %}
-        {% if child.vars.form_group is not defined %}
+    {% for child in form %}
+        {% if not child.rendered and child.vars.form_group is not defined %}
             {{- form_row(child) -}}
         {% else %}
             <div class="uk-hidden">{{- form_row(child) -}}</div>

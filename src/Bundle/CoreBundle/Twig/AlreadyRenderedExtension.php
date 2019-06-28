@@ -9,7 +9,7 @@
 namespace UniteCMS\CoreBundle\Twig;
 
 use Twig\Extension\AbstractExtension;
-use Twig_SimpleFunction;
+use Twig\TwigFunction;
 
 class AlreadyRenderedExtension extends AbstractExtension
 {
@@ -18,7 +18,7 @@ class AlreadyRenderedExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new Twig_SimpleFunction('alreadyRendered', [$this, 'alreadyRendered']),
+            new TwigFunction('alreadyRendered', [$this, 'alreadyRendered']),
         ];
     }
 
