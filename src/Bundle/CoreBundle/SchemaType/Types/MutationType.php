@@ -433,15 +433,13 @@ class MutationType extends AbstractType
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->contentManager->delete($content, $args['persist']);
-            } catch (NotValidException $exception) {
-                $exception->mapToForm($form);
-            }
-
-            if($args['persist']) {
                 return [
                     'id' => $args['id'],
                     'deleted' => !!$args['persist'],
                 ];
+
+            } catch (NotValidException $exception) {
+                $exception->mapToForm($form);
             }
         }
 
