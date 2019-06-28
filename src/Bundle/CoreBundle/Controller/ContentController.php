@@ -658,11 +658,10 @@ class ContentController extends AbstractController
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, ['label' => 'content.revisions.revert.submit'])
             ->getForm();
-
         $form->handleRequest($request);
-        $shouldPersist = $form->isSubmitted() && $form->isValid();
-        $contentManager->revert($content, $version, $shouldPersist);
-        if ($shouldPersist) {
+
+        if($form->isSubmitted() && $form->isValid()) {
+            $contentManager->revert($content, $version, true);
             $this->addFlash('success', 'Content reverted.');
             return $this->redirect($this->generateUrl('unitecms_core_content_revisions', [$view, $content]));
         }

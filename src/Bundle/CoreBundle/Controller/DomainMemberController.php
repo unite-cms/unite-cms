@@ -26,9 +26,11 @@ use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Exception\NotValidException;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
+use UniteCMS\CoreBundle\Service\FieldableContentManager;
 
 class DomainMemberController extends AbstractController
 {
@@ -322,9 +324,10 @@ class DomainMemberController extends AbstractController
      * @param \UniteCMS\CoreBundle\Entity\DomainMember $member
      * @param Request $request
      *
+     * @param FieldableContentManager $contentManager
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function deleteAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
+    public function deleteAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request, FieldableContentManager $contentManager)
     {
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, [
@@ -333,11 +336,14 @@ class DomainMemberController extends AbstractController
             ])->getForm();
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->remove($member);
-            $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
+        if($form->isSubmitted() && $form->isValid()) {
+            try {
+                $member = $contentManager->delete($member, true);
+                $this->addFlash('success', 'Member deleted.');
+                return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
+            } catch (NotValidException $exception) {
+                $exception->mapToForm($form);
+            }
         }
 
         return $this->render(
