@@ -8,12 +8,15 @@
 
 namespace UniteCMS\CoreBundle\Tests\Controller;
 
+use Doctrine\ORM\Id\UuidGenerator;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
@@ -506,6 +509,130 @@ class DomainControllerTest extends DatabaseAwareTestCase
         ]);
         $this->assertNotNull($domain);
         $this->assertEquals('Updated', $domain->getTitle());
+    }
 
+    public function testDomainMemberRevisionActions() {
+
+        $this->login($this->admin);
+
+        // Create a test config for the current domain.
+        $domain = new Domain();
+        $domain->setOrganization($this->organization)->setIdentifier('test_create_domain_from_config')->setTitle('Custom title');
+        static::$container->get('unite.cms.domain_config_manager')->updateConfig($domain, true);
+
+        /**
+         * @var DomainMemberType $memberType
+         */
+        $memberType = $domain->getDomainMemberTypes()->first();
+        $f1 = new DomainMemberTypeField();
+        $f1->setTitle('f1')->setIdentifier('f1')->setType('text');
+        $f2 = new DomainMemberTypeField();
+        $f2->setTitle('f2')->setIdentifier('f2')->setType('text');
+        $memberType->addField($f1)->addField($f2);
+
+        $this->em->persist($domain);
+        $this->em->flush();
+
+        // Create member.
+        $member = new DomainMember();
+        $member->setDomainMemberType($domain->getDomainMemberTypes()->first())->setData(['f1' => 'la', 'f2' => 'b']);
+        $this->em->persist($member);
+        $this->em->flush($member);
+        $this->assertCount(1, $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->findAll());
+
+        $revisions_url = static::$container->get('router')->generate('unitecms_core_domainmember_revisions', [
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+            'domain' => IdentifierNormalizer::denormalize($domain->getIdentifier()),
+            'member_type' => IdentifierNormalizer::denormalize($domain->getDomainMemberTypes()->first()->getIdentifier()),
+            'member' => $member->getId(),
+        ], Router::ABSOLUTE_URL);
+
+        // Try to get revisions page of unknown content.
+        $doctrineUUIDGenerator = new UuidGenerator();
+        $this->client->request('GET', static::$container->get('router')->generate('unitecms_core_domainmember_revisions', [
+            'organization' => IdentifierNormalizer::denormalize($this->organization->getIdentifier()),
+            'domain' => IdentifierNormalizer::denormalize($domain->getIdentifier()),
+            'member_type' => IdentifierNormalizer::denormalize($domain->getDomainMemberTypes()->first()->getIdentifier()),
+            'member' => $doctrineUUIDGenerator->generate($this->em, $member),
+        ], Router::ABSOLUTE_URL));
+
+        $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
+
+        // Try to get revisions page of known content.
+        $crawler = $this->client->request('GET', $revisions_url);
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        // Make sure, that there is one revision.
+        $this->assertCount(1, $crawler->filter('.unite-card-table table tbody tr'));
+
+        // Update member.
+        $member = $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->find($member->getId());
+        $member->setData(['f1' => 'foo', 'f2' => 'a']);
+        $this->em->flush();
+
+        // Make sure, that there are 2 revisions.
+        $crawler = $this->client->request('GET', $revisions_url);
+        $this->assertCount(2, $crawler->filter('.unite-card-table table tbody tr'));
+
+        // Revert to version 1.
+        $crawler = $this->client->click($crawler->filter('a:contains("' . static::$container->get('translator')->trans('member.revisions.revert.button') .'")')->link());
+
+        // Assert form
+        $form = $crawler->filter('form');
+        $this->assertCount(1, $form);
+
+        // Submit invalid form
+        $form = $form->form();
+        $form['form[_token]'] = 'invalid';
+        $crawler = $this->client->submit($form);
+
+        // Should stay on the same page.
+        $this->assertFalse($this->client->getResponse()->isRedirection());
+        $this->assertCount(1, $crawler->filter('.uk-alert-danger:contains(" The CSRF token is invalid. Please try to resubmit the form.")'));
+
+        // Submit valid form
+        $form = $crawler->filter('form');
+        $form = $form->form();
+        $this->client->submit($form);
+
+        // Assert redirect to index.
+        $this->assertTrue($this->client->getResponse()->isRedirect($revisions_url));
+        $crawler = $this->client->followRedirect();
+
+        // Assert message.
+        $this->assertCount(1, $crawler->filter('.uk-alert-success:contains("Member reverted.")'));
+
+        // Compare values & make sure, that there are 3 revisions.
+        $this->em->refresh($member);
+        $this->assertEquals(['f1' => 'la', 'f2' => 'b'], $member->getData());
+        $this->assertCount(3, $crawler->filter('.unite-card-table table tbody tr'));
+
+        // Delete member.
+        /*$this->em->remove($member);
+        $this->em->flush();
+        $this->em->clear();
+
+        $this->em->getFilters()->disable('gedmo_softdeleteable');
+        $member = $this->em->getRepository('UniteCMSCoreBundle:DomainMember')->findOneBy(['id' => $member->getId(), 'domainMemberType' => $member->getDomainMemberType() ]);
+        $this->em->getFilters()->enable('gedmo_softdeleteable');
+
+        // Recover member.
+        $member->recoverDeleted();
+        $this->client->reload();
+        $this->em->flush();
+        $this->em->clear();
+
+        // There should be an entry for the remove and the recover actions.
+        $crawler = $this->client->request('GET', $revisions_url);
+        $this->assertCount(5, $crawler->filter('.unite-card-table table tbody tr'));
+        $this->assertCount(1, $crawler->filter('.unite-card-table table tbody td:contains("remove")'));
+        $this->assertCount(1, $crawler->filter('.unite-card-table table tbody td:contains("recover")'));
+
+        // And delete should not have a recover action.
+        $this->assertCount(1, $crawler->filter('tr:nth-child(5) a:contains("' . static::$container->get('translator')->trans('member.revisions.revert.button') .'")'));
+        $this->assertCount(1, $crawler->filter('tr:nth-child(4) a:contains("' . static::$container->get('translator')->trans('member.revisions.revert.button') .'")'));
+        $this->assertCount(1, $crawler->filter('tr:nth-child(3) a:contains("' . static::$container->get('translator')->trans('member.revisions.revert.button') .'")'));
+        $this->assertCount(0, $crawler->filter('tr:nth-child(2) a:contains("' . static::$container->get('translator')->trans('member.revisions.revert.button') .'")'));
+        $this->assertCount(0, $crawler->filter('tr:nth-child(1) a:contains("' . static::$container->get('translator')->trans('member.revisions.revert.button') .'")'));*/
     }
 }
