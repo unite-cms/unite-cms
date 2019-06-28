@@ -89,11 +89,7 @@
                         {% endif %}
                         <li>
                             <div class="uk-flex">
-                                <a class="uk-flex-0 {% spaceless %}
-                                    {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}
-                                         uk-active
-                                    {% endif %}
-                                {% endspaceless %}" href="{{ url('unitecms_core_content_index', [type]) }}">
+                                <a class="uk-flex-0 {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == 'all' %}uk-active{% endif %}" href="{{ url('unitecms_core_content_index', [type]) }}">
                                     <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'layers' }}"></i>
                                     {{ type }}
                                 </a>
@@ -109,11 +105,7 @@
                                 <ul class="uk-nav-sub">
                                     {% for v in type.views %}
                                     {% if v.identifier != "all" %}
-                                    <li><a {% spaceless %}
-                                                {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}
-                                                    class="uk-active"
-                                                {% endif %}
-                                                {% endspaceless %}href="{{ url('unitecms_core_content_index', [v]) }}">
+                                    <li><a {% if view is defined and view.contentType.identifier == type.identifier and view.identifier == v.identifier %}class="uk-active"{% endif %} href="{{ url('unitecms_core_content_index', [v]) }}">
                                             <i class="uk-margin-small-right" data-feather="{{ v.icon ? v.icon : 'layers' }}"></i>
                                             {{ v }}
                                         </a>
@@ -136,11 +128,7 @@
                             <li class="uk-nav-header">{% trans %}domain.menu.setting_types.headline{% endtrans %}</li>
                             {% set setting_type_header_rendered = true %}
                         {% endif %}
-                        <li><a {% spaceless %}
-                                    {% if settingType is defined and settingType.identifier == type.identifier %}
-                                        class="uk-active"
-                                    {% endif %}
-                                    {% endspaceless %} href="{{ url('unitecms_core_setting_index', [type]) }}">
+                        <li><a {% if settingType is defined and settingType.identifier == type.identifier %}class="uk-active"{% endif %} href="{{ url('unitecms_core_setting_index', [type]) }}">
                                 <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'settings' }}"></i>
                                 {{ type }}
                             </a></li>
@@ -157,11 +145,7 @@
                         <li class="uk-nav-header">{% trans %}domain.menu.domain_member_types.headline{% endtrans %}</li>
                         {% set domain_member_header_rendered = true %}
                     {% endif %}
-                    <li><a {% spaceless %}
-                            {% if memberType is defined and memberType.identifier == type.identifier %}
-                                class="uk-active"
-                            {% endif %}
-                        {% endspaceless %} href="{{ url('unitecms_core_domainmember_index', [type]) }}">
+                    <li><a {% if memberType is defined and memberType.identifier == type.identifier %}class="uk-active"{% endif %} href="{{ url('unitecms_core_domainmember_index', [type]) }}">
                             <i class="uk-margin-small-right" data-feather="{{ type.icon ? type.icon : 'users' }}"></i>
                             {{ type }}
                         </a>

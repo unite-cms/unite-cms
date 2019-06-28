@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\CurrencyType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType as SymfonyMoneyType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Currencies;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class MoneyType extends AbstractType
@@ -39,7 +39,7 @@ class MoneyType extends AbstractType
             $currencyOptions['choices'] = [];
             $currencyOptions['choice_loader'] = null;
             foreach($options['currencies'] as $currency) {
-                $currencyOptions['choices'][Intl::getCurrencyBundle()->getCurrencyName($currency)] = $currency;
+                $currencyOptions['choices'][Currencies::getName($currency)] = $currency;
             }
         }
 

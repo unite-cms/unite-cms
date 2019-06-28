@@ -8,7 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use UniteCMS\CoreBundle\Entity\Invitation;
 
 class InvitationEvent extends Event

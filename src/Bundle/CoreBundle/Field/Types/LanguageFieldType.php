@@ -9,7 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\LanguageType;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Languages;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
@@ -35,7 +35,7 @@ class LanguageFieldType extends TextFieldType
             ];
 
             foreach($field->getSettings()->languages as $language) {
-                $choice_settings['choices'][Intl::getLanguageBundle()->getLanguageName($language)] = $language;
+                $choice_settings['choices'][Languages::getName($language)] = $language;
             }
         }
 
@@ -63,7 +63,7 @@ class LanguageFieldType extends TextFieldType
             }
 
             foreach($settings->languages as $language) {
-                if(Intl::getLanguageBundle()->getLanguageName($language) === null) {
+                if(Languages::getName($language) === null) {
                     $context->buildViolation('invalid_language')->atPath('languages')
                         ->setParameter('%value%', $language)
                         ->setInvalidValue($language)->addViolation();

@@ -9,7 +9,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\CountryType;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
@@ -36,7 +36,7 @@ class CountryFieldType extends TextFieldType
             ];
 
             foreach($field->getSettings()->countries as $country) {
-                $choice_settings['choices'][Intl::getRegionBundle()->getCountryName($country)] = $country;
+                $choice_settings['choices'][Countries::getName($country)] = $country;
             }
         }
 
@@ -64,7 +64,7 @@ class CountryFieldType extends TextFieldType
             }
 
             foreach($settings->countries as $country) {
-                if(Intl::getRegionBundle()->getCountryName($country) === null) {
+                if(Countries::getName($country) === null) {
                     $context->buildViolation('invalid_country')->atPath('countries')
                         ->setParameter('%value%', $country)
                         ->setInvalidValue($country)->addViolation();

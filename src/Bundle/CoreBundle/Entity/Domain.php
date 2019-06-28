@@ -110,13 +110,6 @@ class Domain
     private $permissions;
 
     /**
-     * @var array
-     * @ORM\Column(name="config_variables", type="array", nullable=true)
-     * @deprecated 0.8. Config variables are now stored as "variables" property inside domain config. Please update your domain to autosave values from this field to the filesystem.
-     */
-    private $configVariables;
-
-    /**
      * @var DomainMember[]
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="domain", cascade={"persist", "remove", "merge"}, fetch="EXTRA_LAZY", orphanRemoval=true)
@@ -680,20 +673,6 @@ class Domain
     public function addPermission($attribute, string $expression)
     {
         $this->permissions[$attribute] = $expression;
-    }
-
-    /**
-     * Get configVariables
-     * @deprecated 0.8. Config variables are now stored as "variables" property inside domain config. Please update your domain to autosave values from this field to the filesystem.
-     *
-     * @return array
-     */
-    public function getConfigVariables(): array
-    {
-        if(empty($this->configVariables)) {
-            $this->configVariables = [];
-        }
-        return $this->configVariables;
     }
 
     /**
