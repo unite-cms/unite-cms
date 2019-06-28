@@ -166,7 +166,7 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         static::$container->get('security.token_storage')->setToken($this->users['editor']);
         $m = static::$container->get('unite.cms.graphql.schema_type_manager');
         $schema = $m->createSchema($this->domain, 'Query', 'Mutation');
-        $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated', 'deleted', 'f1', 'f2', 'f3', 'f5'], array_keys($m->getSchemaType('CtContent', $this->domain)->getFields()));
+        $this->assertEquals(['id', 'type', '_permissions', '_revisions', 'created', 'updated', 'deleted', 'f1', 'f2', 'f3', 'f5'], array_keys($m->getSchemaType('CtContent', $this->domain)->getFields()));
         $this->assertEquals(['f1', 'f2', 'f3', 'f5'], array_keys($m->getSchemaType('CtContentInput', $this->domain)->getFields()));
 
         $result = GraphQL::executeQuery(
@@ -295,11 +295,11 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         static::$container->get('security.token_storage')->setToken($this->users['viewer']);
         $m = static::$container->get('unite.cms.graphql.schema_type_manager');
         $schema = $m->createSchema($this->domain, 'Query', 'Mutation');
-        $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated', 'deleted', 'f1', 'f2', 'f3'], array_keys($m->getSchemaType('CtContent', $this->domain)->getFields()));
+        $this->assertEquals(['id', 'type', '_permissions', '_revisions', 'created', 'updated', 'deleted', 'f1', 'f2', 'f3'], array_keys($m->getSchemaType('CtContent', $this->domain)->getFields()));
         $this->assertEquals(['f1', 'f2', 'f3'], array_keys($m->getSchemaType('CtContentInput', $this->domain)->getFields()));
 
-        $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated', '_name'], array_keys($m->getSchemaType('EditorMember', $this->domain)->getFields()));
-        $this->assertEquals(['id', 'type', '_permissions', 'created', 'updated'], array_keys($m->getSchemaType('StSetting', $this->domain)->getFields()));
+        $this->assertEquals(['id', 'type', '_permissions', '_revisions', 'created', 'updated', '_name'], array_keys($m->getSchemaType('EditorMember', $this->domain)->getFields()));
+        $this->assertEquals(['id', 'type', '_permissions', '_revisions', 'created', 'updated'], array_keys($m->getSchemaType('StSetting', $this->domain)->getFields()));
 
         $result = GraphQL::executeQuery(
             $schema,

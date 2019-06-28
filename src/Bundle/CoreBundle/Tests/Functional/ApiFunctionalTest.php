@@ -2256,4 +2256,47 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }
         }
     }
+
+    public function testRevertMutations() {
+
+        $contentType = $this->domains['marketing']->getContentTypes()->get('news');
+        $content = $this->em->getRepository(Content::class)->findOneBy(['contentType' => $contentType]);
+        $originalName = $content->getData()['title_title'];
+        $content->setData(['title_title' => 'updated']);
+        $this->em->flush($content);
+
+        // Try to revert content to version 1 without permissions.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'mutation($id: ID!) {
+            revertNews(id: $id, version: 1, persist: true) {
+                id, 
+                title_title
+            }
+        }', ['id' => $content->getId()]);
+        $this->assertNotEmpty($response->errors);
+        $this->assertEquals("You are not allowed to revert this content.", $response->errors[0]->message);
+
+        // Try to revert content to version 1 with but without persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+            revertNews(id: $id, version: 1, persist: false) {
+                id, 
+                title_title
+            }
+        }', ['id' => $content->getId()]);
+        $this->assertTrue(empty($response->errors));
+        $this->em->refresh($content);
+        $this->assertEquals('updated', $response->data->revertNews->title_title);
+        $this->assertEquals('updated', $content->getData()['title_title']);
+
+        // Try to revert content to version 1 with but without persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+            revertNews(id: $id, version: 1, persist: true) {
+                id, 
+                title_title
+            }
+        }', ['id' => $content->getId()]);
+        $this->assertTrue(empty($response->errors));
+        $this->em->refresh($content);
+        $this->assertEquals($originalName, $response->data->revertNews->title_title);
+        $this->assertEquals($originalName, $content->getData()['title_title']);
+    }
 }
