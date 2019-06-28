@@ -12,6 +12,7 @@ use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\SettingType;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
+use UniteCMS\CoreBundle\UniteCMSCoreBundle;
 
 class UniteCMSManager
 {
@@ -46,6 +47,14 @@ class UniteCMSManager
         $this->em = $em;
         $this->requestStack = $requestStack;
         $this->initialized = false;
+    }
+
+    /**
+     * Returns the unite cms core bundle version.
+     * @return string
+     */
+    static function VERSION() : string {
+        return UniteCMSCoreBundle::UNITE_VERSION;
     }
 
     /**

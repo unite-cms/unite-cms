@@ -25,3 +25,8 @@ services:
         arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@security.password_encoder']
         tags:
             - { name: 'console.command', command: 'unite:user:create' }
+
+    UniteCMS\CoreBundle\Command\VersionFileDumper:
+        arguments: ['@kernel', '%kernel.project_dir%']
+        tags:
+            - { name: 'console.command', command: 'unite:versionfile:dump' }

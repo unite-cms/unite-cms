@@ -37,7 +37,12 @@ of this repository is the place for all of this contributions.
 #### Releasing versions
 
 Because the code splitter we are using at the moment is only listening to code push and not to tag push, you need to 
-modify files in every bundle that needs to get updated. After that you can add a new git tag version and push the new 
+modify files in every bundle that needs to get updated. There is a command that does this for you. Just change the 
+version in src/Bundle/UniteCmsCoreBundle.php and execute to update all VERSION.md files:
+
+    bin/console unite:versionfile:dump
+
+After that you can add a new git tag version and push the new 
 tag to the repository:
 
     git commit -m "Release version 0.X.X"
