@@ -50,7 +50,9 @@ class Variants implements Fieldable
                 'title' => $variant['title'],
                 'identifier' => $variant['identifier'],
                 'icon' => $variant['icon'] ?? '',
-                'description' => $variant['description'] ?? '',
+                'settings' => $variant['settings'] ?? [
+                    'description' => '',
+                ],
             ];
 
             $variant_fields = [];

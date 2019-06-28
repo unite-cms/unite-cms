@@ -109,7 +109,9 @@ class DomainMemberController extends AbstractController
             $add_types[] = new ChoiceCardOption(
                 $type,
                 $translator->trans('domain.member.create.headline.' . $type),
-                $translator->trans('domain.member.create.text.' . $type),
+                [
+                    'description' => $translator->trans('domain.member.create.text.' . $type)
+                ],
                 $icon
             );
         }

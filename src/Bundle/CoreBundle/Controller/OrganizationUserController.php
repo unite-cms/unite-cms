@@ -75,13 +75,17 @@ class OrganizationUserController extends AbstractController
             new ChoiceCardOption(
                 Organization::ROLE_USER,
                 'User',
-                'Users can only manage content in domains, they are invited to.',
+                [
+                    'description' => 'Users can only manage content in domains, they are invited to.',
+                ],
                 'user'
             ),
             new ChoiceCardOption(
                 Organization::ROLE_ADMINISTRATOR,
                 'Administrator',
-                'Administrators have access to all domains and can manage users and api keys.',
+                [
+                    'description' => 'Administrators have access to all domains and can manage users and api keys.',
+                ],
                 'command'
             ),
         ];
