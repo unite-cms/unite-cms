@@ -380,7 +380,7 @@ abstract class APITestCase extends ContainerAwareTestCase
 
         // After setting up domains, clear cache for them
         foreach($this->domains as $domain) {
-            static::$container->get('event_dispatcher')->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($domain));
+            static::$container->get('event_dispatcher')->dispatch(new DomainConfigFileEvent($domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE);
         }
     }
 

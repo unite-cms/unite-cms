@@ -97,12 +97,12 @@ class RegistrationController extends AbstractController
                     $violationMapper->mapViolation($violation, $form->get('email'));
                 }
 
-                $eventDispatcher->dispatch(RegistrationEvent::REGISTRATION_FAILURE, new RegistrationEvent($registration, 'registration'));
+                $eventDispatcher->dispatch(new RegistrationEvent($registration, 'registration'), RegistrationEvent::REGISTRATION_FAILURE);
             }
 
             // If organization and user are valid.
             else {
-                $eventDispatcher->dispatch(RegistrationEvent::REGISTRATION_SUCCESS, new RegistrationEvent($registration, 'registration'));
+                $eventDispatcher->dispatch(new RegistrationEvent($registration, 'registration'), RegistrationEvent::REGISTRATION_SUCCESS);
 
                 $this->getDoctrine()->getManager()->persist($organization);
                 $this->getDoctrine()->getManager()->persist($user);
@@ -113,7 +113,7 @@ class RegistrationController extends AbstractController
                 $this->container->get('security.token_storage')->setToken($userToken);
                 $this->container->get('session')->set('_security_main', serialize($userToken));
 
-                $eventDispatcher->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration, 'registration'));
+                $eventDispatcher->dispatch(new RegistrationEvent($registration, 'registration'), RegistrationEvent::REGISTRATION_COMPLETE);
                 return $this->redirect($this->generateUrl('unitecms_core_domain_index', [$organization]));
             }
         }

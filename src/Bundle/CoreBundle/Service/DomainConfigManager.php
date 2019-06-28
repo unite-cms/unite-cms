@@ -198,11 +198,11 @@ class DomainConfigManager
         // dispatch domain config create/update events
         if ($domain_config_file_exists) {
             // update existing file
-            $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($domain));
+            $this->dispatcher->dispatch(new DomainConfigFileEvent($domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE);
         }
         else {
             // create fiel
-            $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_CREATE, new DomainConfigFileEvent($domain));
+            $this->dispatcher->dispatch(new DomainConfigFileEvent($domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_CREATE);
         }
 
         return true;
@@ -380,7 +380,7 @@ class DomainConfigManager
         $this->filesystem->remove($path);
 
         // dispatch delete event
-        $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_DELETE, new DomainConfigFileEvent($domain));
+        $this->dispatcher->dispatch(new DomainConfigFileEvent($domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_DELETE);
     }
 
     /**

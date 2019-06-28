@@ -64,7 +64,7 @@ class CountryFieldType extends TextFieldType
             }
 
             foreach($settings->countries as $country) {
-                if(Countries::getName($country) === null) {
+                if(!Countries::exists($country)) {
                     $context->buildViolation('invalid_country')->atPath('countries')
                         ->setParameter('%value%', $country)
                         ->setInvalidValue($country)->addViolation();

@@ -130,11 +130,11 @@ class ProfileController extends AbstractController
                     $violationMapper->mapViolation($violation, $forms['delete_account']);
                 }
 
-                $eventDispatcher->dispatch(CancellationEvent::CANCELLATION_FAILURE, new CancellationEvent($user));
+                $eventDispatcher->dispatch(new CancellationEvent($user), CancellationEvent::CANCELLATION_FAILURE);
 
             // if this member is save to delete.
             } else {
-                $eventDispatcher->dispatch(CancellationEvent::CANCELLATION_SUCCESS, new CancellationEvent($user));
+                $eventDispatcher->dispatch(new CancellationEvent($user), CancellationEvent::CANCELLATION_SUCCESS);
 
                 $this->getDoctrine()->getManager()->remove($user);
                 $this->getDoctrine()->getManager()->flush();
@@ -143,7 +143,7 @@ class ProfileController extends AbstractController
                 $this->container->get('security.token_storage')->setToken(null);
                 $this->container->get('session')->clear();
 
-                $eventDispatcher->dispatch(CancellationEvent::CANCELLATION_COMPLETE, new CancellationEvent($user));
+                $eventDispatcher->dispatch(new CancellationEvent($user), CancellationEvent::CANCELLATION_COMPLETE);
 
                 return $this->redirect($this->generateUrl('unitecms_core_index'));
             }
@@ -408,7 +408,7 @@ class ProfileController extends AbstractController
                                             $form->addError(new FormError('invitation.invalid_user'));
                                         } else {
 
-                                            $eventDispatcher->dispatch(InvitationEvent::INVITATION_ACCEPTED, new InvitationEvent($invitation));
+                                            $eventDispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::INVITATION_ACCEPTED);
 
                                             // Delete invitation.
                                             $this->getDoctrine()->getManager()->remove($invitation);
@@ -436,7 +436,7 @@ class ProfileController extends AbstractController
                                         // If the user rejects the invitation, just delete it.
                                     } elseif ($form->get('reject')->isClicked()) {
 
-                                        $eventDispatcher->dispatch(InvitationEvent::INVITATION_REJECTED, new InvitationEvent($invitation));
+                                        $eventDispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::INVITATION_REJECTED);
 
                                         // Delete invitation.
                                         $this->getDoctrine()->getManager()->remove($invitation);
@@ -511,11 +511,11 @@ class ProfileController extends AbstractController
                                 // Validate new created user.
                                 if ($violations->count() > 0) {
                                     $form->addError(new FormError('invitation.invalid_user'));
-                                    $eventDispatcher->dispatch(RegistrationEvent::REGISTRATION_FAILURE, new RegistrationEvent($registration));
+                                    $eventDispatcher->dispatch(new RegistrationEvent($registration), RegistrationEvent::REGISTRATION_FAILURE);
 
                                 } else {
 
-                                    $eventDispatcher->dispatch(RegistrationEvent::REGISTRATION_SUCCESS, new RegistrationEvent($registration));
+                                    $eventDispatcher->dispatch(new RegistrationEvent($registration), RegistrationEvent::REGISTRATION_SUCCESS);
 
                                     $this->getDoctrine()->getManager()->persist($user);
 
@@ -525,7 +525,7 @@ class ProfileController extends AbstractController
                                         $this->getDoctrine()->getManager()->persist($domainMember);
                                     }
 
-                                    $eventDispatcher->dispatch(InvitationEvent::INVITATION_ACCEPTED, new InvitationEvent($invitation));
+                                    $eventDispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::INVITATION_ACCEPTED);
 
                                     // Delete invitation.
                                     $this->getDoctrine()->getManager()->remove($invitation);
@@ -538,7 +538,7 @@ class ProfileController extends AbstractController
                                     $this->container->get('security.token_storage')->setToken($userToken);
                                     $this->container->get('session')->set('_security_main', serialize($userToken));
 
-                                    $eventDispatcher->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration));
+                                    $eventDispatcher->dispatch(new RegistrationEvent($registration), RegistrationEvent::REGISTRATION_COMPLETE);
 
                                     if($domainMember) {
                                         return $this->redirect($this->generateUrl('unitecms_core_domain_view', [$domainMember]));

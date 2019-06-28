@@ -63,7 +63,7 @@ class LanguageFieldType extends TextFieldType
             }
 
             foreach($settings->languages as $language) {
-                if(Languages::getName($language) === null) {
+                if(!Languages::exists($language)) {
                     $context->buildViolation('invalid_language')->atPath('languages')
                         ->setParameter('%value%', $language)
                         ->setInvalidValue($language)->addViolation();

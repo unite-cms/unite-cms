@@ -11,7 +11,7 @@ namespace UniteCMS\CoreBundle\Tests\Form\Extension;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Form\Extension\UniteCMSCoreTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
