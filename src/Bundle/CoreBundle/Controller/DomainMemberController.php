@@ -406,4 +406,72 @@ class DomainMemberController extends AbstractController
             ]
         );
     }
+
+    /**
+     * @Route("/{member_type}/revisions/{member}", methods={"GET"})
+     * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
+     * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
+     * @Entity("member")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::UPDATE'), member)")
+     *
+     * @param DomainMemberType $memberType
+     * @param DomainMember $member
+     * @param FieldableContentManager $contentManager
+     * @return Response
+     */
+    public function revisionsAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, FieldableContentManager $contentManager)
+    {
+        return $this->render(
+            '@UniteCMSCore/Domain/Member/revisions.html.twig',
+            [
+                'memberType' => $memberType,
+                'member' => $member,
+                'revisions' => $contentManager->getRevisions($member),
+            ]
+        );
+    }
+
+    /**
+     * @Route("/{member_type}/revisions/{member}/revert/{version}", methods={"GET", "POST"})
+     * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
+     * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
+     * @Entity("member")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::UPDATE'), member)")
+     *
+     * @param Organization $organization
+     * @param Domain $domain
+     * @param DomainMemberType $memberType
+     * @param DomainMember $member
+     * @param int $version
+     * @param Request $request
+     * @param FieldableContentManager $contentManager
+     * @return Response
+     */
+    public function revisionsRevertAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, int $version, Request $request, FieldableContentManager $contentManager)
+    {
+        $form = $this->createFormBuilder()
+            ->add('submit', SubmitType::class, ['label' => 'member.revisions.revert.submit'])
+            ->getForm();
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            $contentManager->revert($member, $version, true);
+            $this->addFlash('success', 'Member reverted.');
+            return $this->redirect($this->generateUrl('unitecms_core_domainmember_revisions', [$member]));
+        }
+
+        return $this->render(
+            '@UniteCMSCore/Domain/Member/revertRevision.html.twig',
+            [
+                'organization' => $organization,
+                'domain' => $domain,
+                'memberType' => $memberType,
+                'content' => $member,
+                'version' => $version,
+                'form' => $form->createView(),
+            ]
+        );
+    }
 }
