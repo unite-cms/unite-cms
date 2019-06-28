@@ -2199,4 +2199,104 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         }');
         $this->assertEquals(['bbbb', 'BBB', 'baba', 'AbAb', 'aaa'], array_map(function($r){ return $r->title; }, $response->data->findLang->result));
     }
+
+    public function testGetRevisions() {
+
+        $setting = $this->domains['marketing']->getSettingTypes()->get('website')->getSetting();
+        $this->em->persist($setting);
+        $this->em->flush($setting);
+
+        $this->domains['marketing']->getDomainMemberTypes()->get('editor')->setPermissions([
+            DomainMemberVoter::VIEW => 'true',
+            DomainMemberVoter::LIST => 'true',
+            DomainMemberVoter::UPDATE => 'member.type == "editor"',
+        ]);
+        $this->em->flush($this->domains['marketing']->getDomainMemberTypes()->get('editor'));
+
+        $queries = [
+            'query { findEditorMember(limit: 1) { result { _revisions { version, author, date, action, content { id, type } } } } }',
+            'query { findNews(limit: 1) { result { _revisions { version, author, date, action, content { id, type } } } } }',
+            'query { WebsiteSetting { _revisions { version, author, date, action, content { id, type } } } }',
+        ];
+
+        // Try as viewer, should not be allowed.
+        foreach($queries as $delta => $query) {
+            $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], $query);
+            $this->assertTrue(empty($response->errors));
+            switch ($delta) {
+                case 0: $this->assertEmpty($response->data->findEditorMember->result[0]->_revisions); break;
+                case 1: $this->assertEmpty($response->data->findNews->result[0]->_revisions); break;
+                case 2: $this->assertEmpty($response->data->WebsiteSetting->_revisions); break;
+            }
+        }
+
+        // Try as editor, should be allowed.
+        foreach($queries as $delta => $query) {
+            $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], $query);
+            $this->assertTrue(empty($response->errors));
+            switch ($delta) {
+                case 0:
+                    $this->assertEquals('1', $response->data->findEditorMember->result[0]->_revisions[0]->version);
+                    $this->assertNotNull($response->data->findEditorMember->result[0]->_revisions[0]->date);
+                    $this->assertNotNull($response->data->findEditorMember->result[0]->_revisions[0]->content->id);
+                    $this->assertEquals('editor', $response->data->findEditorMember->result[0]->_revisions[0]->content->type);
+                break;
+                case 1:
+                    $this->assertEquals('1', $response->data->findNews->result[0]->_revisions[0]->version);
+                    $this->assertNotNull($response->data->findNews->result[0]->_revisions[0]->date);
+                    $this->assertNotNull($response->data->findNews->result[0]->_revisions[0]->content->id);
+                    $this->assertEquals('news', $response->data->findNews->result[0]->_revisions[0]->content->type);
+                break;
+                case 2:
+                    $this->assertEquals('1', $response->data->WebsiteSetting->_revisions[0]->version);
+                    $this->assertNotNull($response->data->WebsiteSetting->_revisions[0]->date);
+                    $this->assertNotNull($response->data->WebsiteSetting->_revisions[0]->content->id);
+                    $this->assertEquals('website', $response->data->WebsiteSetting->_revisions[0]->content->type);
+                break;
+            }
+        }
+    }
+
+    public function testRevertMutations() {
+
+        $contentType = $this->domains['marketing']->getContentTypes()->get('news');
+        $content = $this->em->getRepository(Content::class)->findOneBy(['contentType' => $contentType]);
+        $originalName = $content->getData()['title_title'];
+        $content->setData(['title_title' => 'updated']);
+        $this->em->flush($content);
+
+        // Try to revert content to version 1 without permissions.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'mutation($id: ID!) {
+            revertNews(id: $id, version: 1, persist: true) {
+                id, 
+                title_title
+            }
+        }', ['id' => $content->getId()]);
+        $this->assertNotEmpty($response->errors);
+        $this->assertEquals("You are not allowed to revert this content.", $response->errors[0]->message);
+
+        // Try to revert content to version 1 with but without persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+            revertNews(id: $id, version: 1, persist: false) {
+                id, 
+                title_title
+            }
+        }', ['id' => $content->getId()]);
+        $this->assertTrue(empty($response->errors));
+        $this->em->refresh($content);
+        $this->assertEquals('updated', $response->data->revertNews->title_title);
+        $this->assertEquals('updated', $content->getData()['title_title']);
+
+        // Try to revert content to version 1 with but without persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+            revertNews(id: $id, version: 1, persist: true) {
+                id, 
+                title_title
+            }
+        }', ['id' => $content->getId()]);
+        $this->assertTrue(empty($response->errors));
+        $this->em->refresh($content);
+        $this->assertEquals($originalName, $response->data->revertNews->title_title);
+        $this->assertEquals($originalName, $content->getData()['title_title']);
+    }
 }

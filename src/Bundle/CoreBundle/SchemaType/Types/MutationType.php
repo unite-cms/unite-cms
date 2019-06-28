@@ -140,6 +140,24 @@ class MutationType extends AbstractType
                 ],
             ];
 
+            $fields['revert' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'The id of the content item to get.',
+                    ],
+                    'version' => [
+                        'type' => Type::nonNull(Type::int()),
+                        'description' => 'The version number to revert the content to.',
+                    ],
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the content will be reverted. Data will be validated anyway.',
+                    ],
+                ],
+            ];
+
             $fields['delete' . $key] = [
                 'type' => $this->schemaTypeManager->getSchemaType('DeletedContentResult', $this->uniteCMSManager->getDomain()),
                 'args' => [
@@ -215,6 +233,14 @@ class MutationType extends AbstractType
         // Resolve update content type
         elseif(substr($info->fieldName, 0, 6) == 'update') {
             return $this->resolveUpdateContent(
+                IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
+                $value, $args, $context, $info
+            );
+        }
+
+        // Resolve revert content type
+        elseif(substr($info->fieldName, 0, 6) == 'revert') {
+            return $this->resolveRevertContent(
                 IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
                 $value, $args, $context, $info
             );
@@ -392,6 +418,35 @@ class MutationType extends AbstractType
         }
 
         return null;
+    }
+
+    /**
+     * Resolve revert content.
+     *
+     * @param $identifier
+     * @param $value
+     * @param $args
+     * @param $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     *
+     * @return mixed
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function resolveRevertContent($identifier, $value, $args, $context, ResolveInfo $info) {
+
+        $id = $args['id'];
+        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id);
+
+        if(!$content) {
+            throw new UserError("Content was not found.");
+        }
+
+        if (!$this->authorizationChecker->isGranted(ContentVoter::UPDATE, $content)) {
+            throw new UserError("You are not allowed to revert this content.");
+        }
+
+        return $this->contentManager->revert($content, $args['version'], $args['persist']);
     }
 
     /**

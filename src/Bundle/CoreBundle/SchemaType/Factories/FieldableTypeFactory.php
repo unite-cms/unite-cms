@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Factories;
 
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\InputObjectType;
@@ -25,10 +26,12 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\SchemaType\Types\PermissionsType;
+use UniteCMS\CoreBundle\SchemaType\Types\RevisionType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
+use UniteCMS\CoreBundle\Service\FieldableContentManager;
 
 class FieldableTypeFactory implements SchemaTypeFactoryInterface
 {
@@ -47,11 +50,14 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
      */
     private $authorizationChecker;
 
-    public function __construct(FieldTypeManager $fieldTypeManager, EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
+    protected $contentManager;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, FieldableContentManager $contentManager, EntityManager $entityManager, AuthorizationChecker $authorizationChecker)
     {
         $this->fieldTypeManager = $fieldTypeManager;
         $this->entityManager = $entityManager;
         $this->authorizationChecker = $authorizationChecker;
+        $this->contentManager = $contentManager;
     }
 
     /**
@@ -272,15 +278,22 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
             );
         } else {
 
+            // Create or get revisions type for this fieldable type.
+            $revisionTypeName = IdentifierNormalizer::graphQLType($identifier, $entityType . 'Revision');
+            if(!$schemaTypeManager->hasSchemaType($revisionTypeName)) {
+                $schemaTypeManager->registerSchemaType(new RevisionType($schemaTypeManager, $name, $revisionTypeName));
+            }
+
             return new ObjectType(
                 [
                     'name' => $name,
-                    'fields' => function() use ($schemaTypeManager, $fieldable, $permissionsTypeName, $domain, $name) {
+                    'fields' => function() use ($schemaTypeManager, $fieldable, $permissionsTypeName, $revisionTypeName, $domain, $name) {
                         return array_merge(
                             [
                                 'id' => Type::id(),
                                 'type' => Type::string(),
                                 '_permissions' => $schemaTypeManager->getSchemaType($permissionsTypeName, $domain),
+                                '_revisions' => Type::listOf($schemaTypeManager->getSchemaType($revisionTypeName, $domain)),
                             ],
                             empty($fieldable->getLocales()) ? [] : [
                                 'locale' => Type::string(),
@@ -333,7 +346,13 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                                     $permissions[$permission] = $this->authorizationChecker->isGranted($permission, $value);
                                 }
                                 return $permissions;
-
+                            case '_revisions':
+                                if(!$this->contentManager->isGranted($value, FieldableContentManager::PERMISSION_UPDATE)) {
+                                    return [];
+                                }
+                                return array_map(function(ContentLogEntry $entry) use ($value) {
+                                    return [$entry, $value];
+                                }, $this->contentManager->getRevisions($value));
                             case 'locale':
                                 return $value->getLocale();
                             case 'created':
