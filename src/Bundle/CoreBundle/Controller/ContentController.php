@@ -319,12 +319,16 @@ class ContentController extends AbstractController
          */
         $content = $contentManager->find($view->getContentType(), $content, true);
 
-        if(!$content || !$content->getDeleted()) {
+        if(!$content) {
             throw $this->createNotFoundException();
         }
 
         if (!$contentManager->isGranted($content, FieldableContentManager::PERMISSION_UPDATE)) {
             throw $this->createAccessDeniedException();
+        }
+
+        if($content->getDeleted() == null) {
+            throw $this->createNotFoundException();
         }
 
         $form = $this->createFormBuilder()
@@ -375,12 +379,16 @@ class ContentController extends AbstractController
          */
         $content = $contentManager->find($view->getContentType(), $content, true);
 
-        if(!$content || !$content->getDeleted()) {
+        if(!$content) {
             throw $this->createNotFoundException();
         }
 
         if (!$contentManager->isGranted($content, FieldableContentManager::PERMISSION_UPDATE)) {
             throw $this->createAccessDeniedException();
+        }
+
+        if($content->getDeleted() == null) {
+            throw $this->createNotFoundException();
         }
 
         $form = $this->createFormBuilder()
