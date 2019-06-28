@@ -16,7 +16,7 @@ services:
   unite.cms.graphql.content_type_factory:
     class: UniteCMS\CoreBundle\SchemaType\Factories\FieldableTypeFactory
     tags: [unite_cms.graphql.schema_type_factory]
-    arguments: [ '@unite.cms.field_type_manager', '@doctrine.orm.entity_manager', '@security.authorization_checker']
+    arguments: [ '@unite.cms.field_type_manager', '@unite.cms.fieldable_content_manager', '@doctrine.orm.entity_manager', '@security.authorization_checker']
 
   unite.cms.graphql.content_result_type_factory:
     class: UniteCMS\CoreBundle\SchemaType\Factories\FieldableResultTypeFactory

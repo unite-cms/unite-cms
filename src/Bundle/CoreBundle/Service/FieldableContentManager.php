@@ -70,30 +70,30 @@ class FieldableContentManager
 
         if($content instanceof ContentType || $content instanceof Content) {
             switch ($attribute) {
-                case self::PERMISSION_LIST : $actual_attribute = ContentVoter::LIST;
-                case self::PERMISSION_CREATE : $actual_attribute = ContentVoter::CREATE;
-                case self::PERMISSION_VIEW : $actual_attribute = ContentVoter::VIEW;
-                case self::PERMISSION_UPDATE : $actual_attribute = ContentVoter::UPDATE;
-                case self::PERMISSION_DELETE : $actual_attribute = ContentVoter::DELETE;
+                case self::PERMISSION_LIST : $actual_attribute = ContentVoter::LIST; break;
+                case self::PERMISSION_CREATE : $actual_attribute = ContentVoter::CREATE; break;
+                case self::PERMISSION_VIEW : $actual_attribute = ContentVoter::VIEW; break;
+                case self::PERMISSION_UPDATE : $actual_attribute = ContentVoter::UPDATE; break;
+                case self::PERMISSION_DELETE : $actual_attribute = ContentVoter::DELETE; break;
                 default: $attribute = null;
             }
         }
 
         if($content instanceof SettingType || $content instanceof Setting) {
             switch ($attribute) {
-                case self::PERMISSION_VIEW : $actual_attribute = SettingVoter::VIEW;
-                case self::PERMISSION_UPDATE: $actual_attribute = SettingVoter::UPDATE;
+                case self::PERMISSION_VIEW : $actual_attribute = SettingVoter::VIEW; break;
+                case self::PERMISSION_UPDATE: $actual_attribute = SettingVoter::UPDATE; break;
                 default: $attribute = null;
             }
         }
 
         if($content instanceof DomainMemberType || $content instanceof DomainMember) {
             switch ($attribute) {
-                case self::PERMISSION_LIST : $actual_attribute = DomainMemberVoter::LIST;
-                case self::PERMISSION_CREATE : $actual_attribute = DomainMemberVoter::CREATE;
-                case self::PERMISSION_VIEW : $actual_attribute = DomainMemberVoter::VIEW;
-                case self::PERMISSION_UPDATE : $actual_attribute = DomainMemberVoter::UPDATE;
-                case self::PERMISSION_DELETE : $actual_attribute = DomainMemberVoter::DELETE;
+                case self::PERMISSION_LIST : $actual_attribute = DomainMemberVoter::LIST; break;
+                case self::PERMISSION_CREATE : $actual_attribute = DomainMemberVoter::CREATE; break;
+                case self::PERMISSION_VIEW : $actual_attribute = DomainMemberVoter::VIEW; break;
+                case self::PERMISSION_UPDATE : $actual_attribute = DomainMemberVoter::UPDATE; break;
+                case self::PERMISSION_DELETE : $actual_attribute = DomainMemberVoter::DELETE; break;
                 default: $attribute = null;
             }
         }
