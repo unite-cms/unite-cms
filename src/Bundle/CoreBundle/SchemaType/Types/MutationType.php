@@ -2,8 +2,13 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\Setting;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Entity\SettingTypeField;
 use UniteCMS\CoreBundle\Entity\SoftDeleteableFieldableContent;
 use UniteCMS\CoreBundle\Exception\NotValidException;
 use UniteCMS\CoreBundle\Model\FieldableFieldContent;
@@ -23,7 +28,9 @@ use UniteCMS\CoreBundle\Form\ContentDeleteFormType;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
+use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Service\FieldableContentManager;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -224,6 +231,132 @@ class MutationType extends AbstractType
             }
         }
 
+        // Append Setting types.
+        foreach ($this->uniteCMSManager->getDomain()->getSettingTypes() as $settingType) {
+
+            // If the current user is not allowed to access this setting type, skip adding.
+            if(!$this->authorizationChecker->isGranted(SettingVoter::UPDATE, $settingType)) {
+                continue;
+            }
+
+            $key = IdentifierNormalizer::graphQLType($settingType);
+
+            $fields['update' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the setting will be updated. Data will be validated anyway.',
+                    ],
+                    'locale' => [
+                        'type' => Type::string(),
+                        'description' => 'If this setting type have multiple locales and you want to update not the default one, set it.',
+                    ],
+                ],
+            ];
+
+            $fields['revert' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'version' => [
+                        'type' => Type::nonNull(Type::int()),
+                        'description' => 'The version number to revert the setting to.',
+                    ],
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the setting will be reverted. Data will be validated anyway.',
+                    ],
+                    'locale' => [
+                        'type' => Type::string(),
+                        'description' => 'If this setting type have multiple locales and you want to update not the default one, set it.',
+                    ],
+                ],
+            ];
+
+            // If this setting type has defined fields, we can create and update content with data.
+            $fullSettingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->find($settingType->getId());
+            $fieldsWithInput = $fullSettingType->getFields()->filter(function(SettingTypeField$field){
+                return $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
+            });
+
+            if($fieldsWithInput->count() > 0) {
+                $fields['update' . $key]['args']['data'] = [
+                    'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'Input', $this->uniteCMSManager->getDomain())),
+                    'description' => 'The setting data to save.',
+                ];
+            }
+        }
+
+        // Append Domain Member types.
+        foreach ($this->uniteCMSManager->getDomain()->getDomainMemberTypes() as $domainMemberType) {
+
+            // If the current user is not allowed to access this domain member type, skip adding.
+            if(!$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $domainMemberType)) {
+                continue;
+            }
+
+            $key = IdentifierNormalizer::graphQLType($domainMemberType);
+
+            $fields['update' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'The id of the member item to get.',
+                    ],
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the member will be updated. Data will be validated anyway.',
+                    ],
+                ],
+            ];
+
+            $fields['revert' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'The id of the member item to get.',
+                    ],
+                    'version' => [
+                        'type' => Type::nonNull(Type::int()),
+                        'description' => 'The version number to revert the member to.',
+                    ],
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the member will be reverted. Data will be validated anyway.',
+                    ],
+                ],
+            ];
+
+            $fields['delete' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType('DeletedContentResult', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'The id of the member item to delete.',
+                    ],
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the member will be delete. Data will be validated anyway.',
+                    ],
+                ],
+            ];
+
+            // If this content type has defined fields, we can create and update content with data.
+            $fullDomainMemberType = $this->entityManager->getRepository('UniteCMSCoreBundle:DomainMemberType')->find($domainMemberType->getId());
+            $fieldsWithInput = $fullDomainMemberType->getFields()->filter(function(DomainMemberTypeField $field){
+                return $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
+            });
+
+            if($fieldsWithInput->count() > 0) {
+                $fields['update' . $key]['args']['data'] = [
+                    'type' => Type::nonNull($this->schemaTypeManager->getSchemaType($key . 'Input', $this->uniteCMSManager->getDomain())),
+                    'description' => 'The member data to save.',
+                ];
+            }
+        }
+
         return $fields;
     }
 
@@ -244,10 +377,20 @@ class MutationType extends AbstractType
     {
         $args['data'] = $args['data'] ?? [];
 
+        $fieldableType = ContentType::class;
+        $parts = IdentifierNormalizer::graphQLSchemaSplitter($info->fieldName);
+        if(count($parts) == 3 && $parts[2] === 'Setting') {
+            $fieldableType = SettingType::class;
+        }
+        else if(count($parts) == 3 && $parts[2] === 'Member') {
+            $fieldableType = DomainMemberType::class;
+        }
+
         // Resolve create content type
         if(substr($info->fieldName, 0, 6) == 'create') {
             return $this->resolveCreateContent(
                 IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
+                $fieldableType,
                 $value, $args, $context, $info
             );
         }
@@ -256,6 +399,7 @@ class MutationType extends AbstractType
         elseif(substr($info->fieldName, 0, 6) == 'update') {
             return $this->resolveUpdateContent(
                 IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
+                $fieldableType,
                 $value, $args, $context, $info
             );
         }
@@ -264,6 +408,7 @@ class MutationType extends AbstractType
         elseif(substr($info->fieldName, 0, 6) == 'revert') {
             return $this->resolveRevertContent(
                 IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
+                $fieldableType,
                 $value, $args, $context, $info
             );
         }
@@ -272,6 +417,7 @@ class MutationType extends AbstractType
         elseif(substr($info->fieldName, 0, 6) == 'delete') {
             return $this->resolveDeleteContent(
                 IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
+                $fieldableType,
                 $value, $args, $context, $info
             );
         }
@@ -280,6 +426,7 @@ class MutationType extends AbstractType
         elseif(substr($info->fieldName, 0, 7) == 'recover') {
             return $this->resolveRecoverContent(
                 IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
+                $fieldableType,
                 $value, $args, $context, $info
             );
         }
@@ -287,11 +434,37 @@ class MutationType extends AbstractType
         return null;
     }
 
+    /**
+     * Finds a fieldable content element by graphql request information.
+     *
+     * @param string $fieldableType
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
+     * @return FieldableContent|null
+     */
+    protected function findContent(string $fieldableType, array $args, $context, ResolveInfo $info) : ?FieldableContent {
+        switch ($fieldableType) {
+            case ContentType::class:
+                $id = $args['id'];
+                return $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id);
+            case SettingType::class:
+                $parts = IdentifierNormalizer::graphQLSchemaSplitter($info->fieldName);
+                $settingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->findOneBy(['domain' => $this->uniteCMSManager->getDomain(), 'identifier' => strtolower($parts[1])]);
+                return $settingType ? $settingType->getSetting($args['locale'] ?? null) : null;
+            case DomainMemberType::class:
+                $id = $args['id'];
+                return $this->entityManager->getRepository('UniteCMSCoreBundle:DomainMember')->find($id);
+            default:
+                return null;
+        }
+    }
 
     /**
      * Resolve create content.
      *
      * @param $identifier
+     * @param string $fieldableType
      * @param $value
      * @param $args
      * @param $context
@@ -301,7 +474,7 @@ class MutationType extends AbstractType
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function resolveCreateContent($identifier, $value, $args, $context, ResolveInfo $info) {
+    private function resolveCreateContent($identifier, string $fieldableType, $value, $args, $context, ResolveInfo $info) {
 
         if (!$contentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->findOneBy(
             [
@@ -376,6 +549,7 @@ class MutationType extends AbstractType
      * Resolve update content.
      *
      * @param $identifier
+     * @param string $fieldableType
      * @param $value
      * @param $args
      * @param $context
@@ -385,20 +559,17 @@ class MutationType extends AbstractType
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function resolveUpdateContent($identifier, $value, $args, $context, ResolveInfo $info) {
+    private function resolveUpdateContent($identifier, string $fieldableType,  $value, $args, $context, ResolveInfo $info) {
 
-        $id = $args['id'];
-        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id);
-
-        if(!$content) {
-            throw new UserError("Content was not found.");
+        if(!$content = $this->findContent($fieldableType, $args, $context, $info)) {
+            throw new UserError("Not found.");
         }
 
-        if (!$this->authorizationChecker->isGranted(ContentVoter::UPDATE, $content)) {
-            throw new UserError("You are not allowed to update content with id '$id'.");
+        if (!$this->contentManager->isGranted($content, FieldableContentManager::PERMISSION_UPDATE)) {
+            throw new UserError("You are not allowed to update this item.");
         }
 
-        $form = $this->fieldableFormBuilder->createForm($content->getContentType(), $content);
+        $form = $this->fieldableFormBuilder->createForm($content->getEntity(), $content);
 
         // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
         if(is_array($args['data']) && !empty($context['csrf_token'])) {
@@ -406,12 +577,12 @@ class MutationType extends AbstractType
         }
 
         // Set default locale if non was set by the api.
-        if (!empty($content->getContentType()->getLocales())) {
+        if (!empty($content->getEntity()->getLocales()) && $content instanceof Content) {
             $args['data']['locale'] = $args['locale'] ?? $content->getLocale();
         }
 
         // Remove field values from field, where the user has no access.
-        foreach($content->getContentType()->getFields() as $field) {
+        foreach($content->getEntity()->getFields() as $field) {
             if(array_key_exists($field->getIdentifier(), $args['data']) && !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
                 unset($args['data'][$field->getIdentifier()]);
             }
@@ -439,7 +610,12 @@ class MutationType extends AbstractType
                     $this->entityManager->flush();
                 }
 
-                return $content;
+                // If this is a setting object, we must always return default lang.
+                if($content instanceof Setting) {
+                    return $content->getSettingType()->getSetting();
+                } else {
+                    return $content;
+                }
             }
         }
 
@@ -454,26 +630,22 @@ class MutationType extends AbstractType
      * Resolve revert content.
      *
      * @param $identifier
+     * @param string $fieldableType
      * @param $value
      * @param $args
      * @param $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      *
      * @return mixed
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function resolveRevertContent($identifier, $value, $args, $context, ResolveInfo $info) {
+    private function resolveRevertContent($identifier, string $fieldableType, $value, $args, $context, ResolveInfo $info) {
 
-        $id = $args['id'];
-        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id);
-
-        if(!$content) {
+        if(!$content = $this->findContent($fieldableType, $args, $context, $info)) {
             throw new UserError("Content was not found.");
         }
 
-        if (!$this->authorizationChecker->isGranted(ContentVoter::UPDATE, $content)) {
-            throw new UserError("You are not allowed to revert this content.");
+        if (!$this->contentManager->isGranted($content, FieldableContentManager::PERMISSION_UPDATE)) {
+            throw new UserError("You are not allowed to revert this item.");
         }
 
         $form = $this->formFactory->create(ContentDeleteFormType::class);
@@ -487,7 +659,14 @@ class MutationType extends AbstractType
         $form->submit($data);
 
         if($form->isSubmitted() && $form->isValid()) {
-            return $this->contentManager->revert($content, $args['version'], $args['persist']);
+            $content = $this->contentManager->revert($content, $args['version'], $args['persist']);
+
+            // If this is a setting object, we must always return default lang.
+            if($content instanceof Setting) {
+                return $content->getSettingType()->getSetting();
+            } else {
+                return $content;
+            }
         }
 
         return null;
@@ -497,25 +676,24 @@ class MutationType extends AbstractType
      * Resolve delete content.
      *
      * @param $identifier
+     * @param string $fieldableType
      * @param $value
      * @param $args
      * @param $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      *
      * @return mixed
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function resolveDeleteContent($identifier, $value, $args, $context, ResolveInfo $info) {
+    private function resolveDeleteContent($identifier, string $fieldableType, $value, $args, $context, ResolveInfo $info) {
 
-        $fieldable = $this->contentManager->findFieldable($this->uniteCMSManager->getDomain(), $identifier, ContentType::class);
+        $fieldable = $this->contentManager->findFieldable($this->uniteCMSManager->getDomain(), $identifier, $fieldableType);
         $content = $this->contentManager->find($fieldable, $args['id'], $args['definitely']);
 
         if(!$content || ($args['definitely'] && (!$content instanceof SoftDeleteableFieldableContent || !$content->getDeleted()))) {
             throw new UserError("Content was not found.");
         }
 
-        if (!$this->authorizationChecker->isGranted(ContentVoter::DELETE, $content)) {
+        if (!$this->contentManager->isGranted($content, FieldableContentManager::PERMISSION_DELETE)) {
             throw new UserError(sprintf("You are not allowed to delete content with id '%s'.", $args['id']));
         }
 
@@ -558,6 +736,7 @@ class MutationType extends AbstractType
      * Resolve recover content.
      *
      * @param $identifier
+     * @param string $fieldableType
      * @param $value
      * @param $args
      * @param $context
@@ -565,9 +744,9 @@ class MutationType extends AbstractType
      *
      * @return mixed
      */
-    private function resolveRecoverContent($identifier, $value, $args, $context, ResolveInfo $info) {
+    private function resolveRecoverContent($identifier, string $fieldableType, $value, $args, $context, ResolveInfo $info) {
 
-        $fieldable = $this->contentManager->findFieldable($this->uniteCMSManager->getDomain(), $identifier, ContentType::class);
+        $fieldable = $this->contentManager->findFieldable($this->uniteCMSManager->getDomain(), $identifier, $fieldableType);
         $content = $this->contentManager->find($fieldable, $args['id'], true);
 
         if(!$content || !$content instanceof SoftDeleteableFieldableContent || $content->getDeleted() == null) {
