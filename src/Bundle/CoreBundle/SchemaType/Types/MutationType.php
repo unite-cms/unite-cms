@@ -204,7 +204,9 @@ class MutationType extends AbstractType
             // If this content type has defined fields, we can create and update content with data.
             $fullContentType = $this->entityManager->getRepository('UniteCMSCoreBundle:ContentType')->find($contentType->getId());
             $fieldsWithInput = $fullContentType->getFields()->filter(function(ContentTypeField $field){
-                return $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
+                return
+                    $this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field) &&
+                    $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
             });
 
             if($fieldsWithInput->count() > 0) {
@@ -275,8 +277,10 @@ class MutationType extends AbstractType
 
             // If this setting type has defined fields, we can create and update content with data.
             $fullSettingType = $this->entityManager->getRepository('UniteCMSCoreBundle:SettingType')->find($settingType->getId());
-            $fieldsWithInput = $fullSettingType->getFields()->filter(function(SettingTypeField$field){
-                return $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
+            $fieldsWithInput = $fullSettingType->getFields()->filter(function(SettingTypeField $field){
+                return
+                    $this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field) &&
+                    $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
             });
 
             if($fieldsWithInput->count() > 0) {
@@ -346,7 +350,9 @@ class MutationType extends AbstractType
             // If this content type has defined fields, we can create and update content with data.
             $fullDomainMemberType = $this->entityManager->getRepository('UniteCMSCoreBundle:DomainMemberType')->find($domainMemberType->getId());
             $fieldsWithInput = $fullDomainMemberType->getFields()->filter(function(DomainMemberTypeField $field){
-                return $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
+                return
+                    $this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field) &&
+                    $this->fieldTypeManager->getFieldType($field->getType())->getGraphQLInputType($field, $this->schemaTypeManager) !== null;
             });
 
             if($fieldsWithInput->count() > 0) {

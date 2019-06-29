@@ -29,7 +29,7 @@ class ApiEmptyTypesTest extends APITestCase
             "title": "ST", 
             "identifier": "st",
             "fields": [{ "title": "ref", "identifier": "ref", "type": "reference", "settings": { "domain": "no_access", "content_type": "ct" } }],
-            "permissions": { "view setting": "false" } 
+            "permissions": { "view setting": "false", "update setting": "false" } 
         }, { "title": "Other ST", "identifier": "other_st" } ] }',
     ];
 
@@ -116,7 +116,7 @@ class ApiEmptyTypesTest extends APITestCase
 
         $this->assertFalse(isset($response->errors));
         $this->assertNotNull($response->data->__schema->queryType);
-        $this->assertNull($response->data->__schema->mutationType);
+        $this->assertNotNull($response->data->__schema->mutationType);
 
         // type fields most not be empty.
         foreach($response->data->__schema->types as $type) {
