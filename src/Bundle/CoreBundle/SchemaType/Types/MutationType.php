@@ -687,9 +687,9 @@ class MutationType extends AbstractType
     private function resolveDeleteContent($identifier, string $fieldableType, $value, $args, $context, ResolveInfo $info) {
 
         $fieldable = $this->contentManager->findFieldable($this->uniteCMSManager->getDomain(), $identifier, $fieldableType);
-        $content = $this->contentManager->find($fieldable, $args['id'], $args['definitely']);
+        $content = $this->contentManager->find($fieldable, $args['id'], $args['definitely'] ?? false);
 
-        if(!$content || ($args['definitely'] && (!$content instanceof SoftDeleteableFieldableContent || !$content->getDeleted()))) {
+        if(!$content || (!empty($args['definitely']) && (!$content instanceof SoftDeleteableFieldableContent || !$content->getDeleted()))) {
             throw new UserError("Content was not found.");
         }
 
@@ -709,14 +709,14 @@ class MutationType extends AbstractType
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                if($args['definitely']) {
-                    $this->contentManager->deleteDefinitely($content, $args['persist']);
+                if(!empty($args['definitely'])) {
+                    $content = $this->contentManager->deleteDefinitely($content, $args['persist']);
                 } else {
-                    $this->contentManager->delete($content, $args['persist']);
+                    $content = $this->contentManager->delete($content, $args['persist']);
                 }
                 return [
                     'id' => $args['id'],
-                    'deleted' => !empty($content->getId()) && $content->getDeleted(),
+                    'deleted' => $content instanceof SoftDeleteableFieldableContent ? (!empty($content->getId()) && !empty($content->getDeleted())) : false,
                     'definitely_deleted' => empty($content->getId()),
                 ];
 

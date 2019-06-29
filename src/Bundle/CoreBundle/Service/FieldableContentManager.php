@@ -147,7 +147,7 @@ class FieldableContentManager
 
         else if($fieldable instanceof DomainMemberType) {
             $contentClass = DomainMember::class;
-            $contentTypeName = 'memberType';
+            $contentTypeName = 'domainMemberType';
         }
 
         else if($fieldable instanceof SettingType) {

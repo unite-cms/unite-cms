@@ -40,7 +40,6 @@ class DomainMember implements FieldableContent
     /**
      * @var DomainAccessor
      * @Assert\NotBlank(message="not_blank")
-     * @Assert\Valid()
      * @ORM\ManyToOne(targetEntity="DomainAccessor", inversedBy="domains")
      */
     private $accessor;
