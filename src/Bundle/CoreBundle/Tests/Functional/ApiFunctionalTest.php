@@ -190,7 +190,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
       "locales": ["de", "en", "fr"],
       "permissions": {
         "view setting": "content.locale != \"fr\"",
-        "update setting": "true"
+        "update setting": "member.type == \"editor\""
       }
     }
   ]
@@ -459,6 +459,8 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                 $domain->getDomainMemberTypes()->get('editor')->setPermissions([
                     DomainMemberVoter::VIEW => 'member.type == "editor"',
                     DomainMemberVoter::LIST => 'member.type == "editor"',
+                    DomainMemberVoter::UPDATE => 'member.type == "editor"',
+                    DomainMemberVoter::DELETE => 'member.type == "editor"',
                 ]);
 
                 $dmtField2 = new DomainMemberTypeField();
@@ -475,12 +477,13 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
                     $domainMember = new DomainMember();
                     $domainMember->setDomain($domain)->setDomainMemberType($domain->getDomainMemberTypes()->get($mtype));
                     $domainMember->setData(['foo' => 'baa']);
-                    $this->users[$domain->getIdentifier() . '_' . $mtype] = new ApiKey();
-                    $this->users[$domain->getIdentifier() . '_' . $mtype]->setName($domain->getIdentifier() . '_' . $mtype)->setOrganization($org);
-                    $this->users[$domain->getIdentifier() . '_' . $mtype]->addDomain($domainMember);
+                    $key = $domain->getIdentifier() . '_' . $mtype;
+                    $this->users[$key] = new ApiKey();
+                    $this->users[$key]->setName($domain->getIdentifier() . '_' . $mtype)->setOrganization($org);
+                    $this->users[$key]->addDomain($domainMember);
 
-                    $this->em->persist($this->users[$domain->getIdentifier() . '_' . $mtype]);
-                    $this->em->flush($this->users[$domain->getIdentifier() . '_' . $mtype]);
+                    $this->em->persist($this->users[$key]);
+                    $this->em->flush($this->users[$key]);
                 }
 
                 // For each content type create some views and test content.
@@ -1460,7 +1463,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }', ['id' => $category->id]);
 
         $this->assertNotEmpty($response->errors);
-        $this->assertEquals("You are not allowed to update content with id '" . $category->id . "'.", $response->errors[0]->message);
+        $this->assertEquals("You are not allowed to update this item.", $response->errors[0]->message);
 
         // Update the category with right user.
         $response = $this->api(
@@ -1950,6 +1953,132 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals('de', $response->data->LangSetting->translations[0]->locale);
         $this->assertEquals('Updated title', $response->data->LangSetting->translations[1]->title);
         $this->assertEquals('en', $response->data->LangSetting->translations[1]->locale);
+
+        // Now try to update setting.
+
+
+        // Try to update setting without permission
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'mutation {
+            updateLangSetting(data: { title: "Updated" }, persist: true, locale: "en") {
+                locale,
+                title,
+                translations {
+                    locale,
+                    title
+                }
+            }
+        }');
+        $this->assertEquals('You are not allowed to update this item.', $response->errors[0]->message);
+
+        // Try to update setting with permission, without persist
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
+            updateLangSetting(data: { title: "Updated" }, persist: false) {
+                locale,
+                title,
+                translations {
+                    locale,
+                    title
+                }
+            }
+        }');
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals('en', $response->data->updateLangSetting->locale);
+        $this->assertEquals('Updated', $response->data->updateLangSetting->title);
+        $setting = $this->domains['marketing']->getSettingTypes()->get('lang')->getSetting();
+        $this->em->refresh($setting);
+        $this->assertEquals('Updated title', $setting->getData()['title']);
+
+        // Try to update setting with permission, with persist
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
+            updateLangSetting(data: { title: "Updated" }, persist: true) {
+                locale,
+                title,
+                translations {
+                    locale,
+                    title
+                }
+            }
+        }');
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals('en', $response->data->updateLangSetting->locale);
+        $this->assertEquals('Updated', $response->data->updateLangSetting->title);
+        $setting = $this->domains['marketing']->getSettingTypes()->get('lang')->getSetting();
+        $this->em->refresh($setting);
+        $this->assertEquals('Updated', $setting->getData()['title']);
+
+        // Try to update setting with other lang with permission, with persist
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
+            updateLangSetting(data: { title: "Updated DE title" }, persist: true, locale: "de") {
+                locale,
+                title,
+                translations {
+                    locale,
+                    title
+                }
+            }
+        }');
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals('en', $response->data->updateLangSetting->locale);
+        $this->assertEquals('Updated', $response->data->updateLangSetting->title);
+        $this->assertEquals('Updated DE title', $response->data->updateLangSetting->translations[0]->title);
+        $this->assertEquals('de', $response->data->updateLangSetting->translations[0]->locale);
+        $setting = $this->domains['marketing']->getSettingTypes()->get('lang')->getSetting();
+        $de_setting = $this->domains['marketing']->getSettingTypes()->get('lang')->getSetting('de');
+        $this->em->refresh($setting);
+        $this->em->refresh($de_setting);
+        $this->assertEquals('Updated', $setting->getData()['title']);
+        $this->assertEquals('Updated DE title', $de_setting->getData()['title']);
+
+
+        // Try to revert setting.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'mutation {
+            revertLangSetting(version: 1, persist: true, locale: "en") {
+                locale,
+                title,
+                translations {
+                    locale,
+                    title
+                }
+            }
+        }');
+        $this->assertEquals('You are not allowed to revert this item.', $response->errors[0]->message);
+        $this->assertNull($response->data->revertLangSetting);
+
+        // Try to update setting with permission, without persist
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
+            revertLangSetting(version: 1, persist: false, locale: "en") {
+                locale,
+                title,
+                translations {
+                    locale,
+                    title
+                }
+            }
+        }');
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals('en', $response->data->revertLangSetting->locale);
+        $this->assertEquals('Updated', $response->data->revertLangSetting->title);
+        $setting = $this->domains['marketing']->getSettingTypes()->get('lang')->getSetting();
+        $this->em->refresh($setting);
+        $this->assertEquals('Updated', $setting->getData()['title']);
+
+        // Try to update setting with permission, with persist
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation {
+            revertLangSetting(version: 1, persist: true, locale: "en") {
+                locale,
+                title,
+                translations {
+                    locale,
+                    title
+                }
+            }
+        }');
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals('en', $response->data->revertLangSetting->locale);
+        $this->assertEquals('Updated title', $response->data->revertLangSetting->title);
+        $setting = $this->domains['marketing']->getSettingTypes()->get('lang')->getSetting();
+        $this->em->refresh($setting);
+        $this->assertEquals('Updated title', $setting->getData()['title']);
     }
 
     public function testAPICRUDActionsWithCookieAuthentication() {
@@ -2115,7 +2244,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertEquals(1, $response->data->findLang->total);
     }
 
-    public function testFindDomainMemberForEditor() {
+    public function testAPICRUDForDomainMemberForEditor() {
 
         // Editors can be listed and viewed by editors.
         $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query {
@@ -2187,6 +2316,96 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertNotNull($response->errors);
         $this->assertStringStartsWith('Cannot query field "getViewerMember" on type "Query".', $response->errors[0]->message);
         $this->assertFalse(isset($response->data));
+
+
+        $domainMember = $this->users['marketing_editor']->getDomainMembers($this->domains['marketing'])[0];
+        $id = $domainMember->getId();
+
+        // Try to update editor member without persist.
+        $updateQuery = 'mutation($id: ID!, $persist: Boolean!, $data: EditorMemberInput!) {
+            updateEditorMember(id: $id, persist: $persist, data: $data) {
+                id,
+                foo
+            }
+        }';
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], $updateQuery, [
+            'id' => $id,
+            'persist' => false,
+            'data' => ['foo' => 'updated'],
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals((object)['id' => $id, 'foo' => 'updated'], $response->data->updateEditorMember);
+        $this->em->refresh($domainMember);
+        $this->assertEquals('baa', $domainMember->getData()['foo']);
+
+        // Try to update editor member with persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], $updateQuery, [
+            'id' => $id,
+            'persist' => true,
+            'data' => ['foo' => 'updated'],
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals((object)['id' => $id, 'foo' => 'updated'], $response->data->updateEditorMember);
+        $this->em->refresh($domainMember);
+        $this->assertEquals('updated', $domainMember->getData()['foo']);
+
+
+        // Try to revert domain member without persist.
+        $revertQuery = 'mutation($id: ID!, $version: Int!, $persist: Boolean!) {
+            revertEditorMember(id: $id, persist: $persist, version: $version) {
+                id,
+                foo
+            }
+        }';
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], $revertQuery, [
+            'id' => $id,
+            'persist' => false,
+            'version' => 1,
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals((object)['id' => $id, 'foo' => 'updated'], $response->data->revertEditorMember);
+        $this->em->refresh($domainMember);
+        $this->assertEquals('updated', $domainMember->getData()['foo']);
+
+        // Try to revert editor member with persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], $revertQuery, [
+            'id' => $id,
+            'persist' => true,
+            'version' => 1,
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals((object)['id' => $id, 'foo' => 'baa'], $response->data->revertEditorMember);
+        $this->em->refresh($domainMember);
+        $this->assertEquals('baa', $domainMember->getData()['foo']);
+
+
+        // Try to delete domain member without persist.
+        $deleteQuery = 'mutation($id: ID!, $persist: Boolean!) {
+            deleteEditorMember(id: $id, persist: $persist) {
+                id, deleted, definitely_deleted
+            }
+        }';
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], $deleteQuery, [
+            'id' => $id,
+            'persist' => false,
+        ]);
+
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals((object)['id' => $id, 'deleted' => false, 'definitely_deleted' => false], $response->data->deleteEditorMember);
+        $this->em->refresh($domainMember);
+        $this->assertTrue($this->em->contains($domainMember));
+
+        // Try to revert editor member with persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], $deleteQuery, [
+            'id' => $id,
+            'persist' => true,
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals((object)['id' => $id, 'deleted' => false, 'definitely_deleted' => true], $response->data->deleteEditorMember);
+        $this->assertFalse($this->em->contains($domainMember));
     }
 
     public function testFilterAndOrderDomainMember() {
@@ -2276,6 +2495,34 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
         $this->assertNotNull($response->errors);
         $this->assertStringStartsWith('Cannot query field "findEditorMember" on type "Query".', $response->errors[0]->message);
         $this->assertFalse(isset($response->data));
+
+        $updateQuery = 'mutation($id: ID!, $persist: Boolean!) {
+            updateEditorMember(id: $id, persist: $persist) {
+                id,
+                foo
+            }
+        }';
+        $revertQuery = 'mutation($id: ID!, $version: Int!, $persist: Boolean!) {
+            revertEditorMember(id: $id, persist: $persist, version: $version) {
+                id,
+                foo
+            }
+        }';
+        $deleteQuery = 'mutation($id: ID!, $persist: Boolean!) {
+            deleteEditorMember(id: $id, persist: $persist) {
+                id, deleted, deleted_definitely
+            }
+        }';
+
+        // Viewers cannot access editors at all.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], $updateQuery, ['id' => '111-xxx', 'persist' => true, 'data' => []]);
+        $this->assertStringStartsWith('Cannot query field "updateEditorMember" on type "Mutation".', $response->errors[0]->message);
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], $revertQuery, ['id' => '111-xxx', 'persist' => true, 'version' => 1]);
+        $this->assertStringStartsWith('Cannot query field "revertEditorMember" on type "Mutation".', $response->errors[0]->message);
+
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], $deleteQuery, ['id' => '111-xxx', 'persist' => true]);
+        $this->assertStringStartsWith('Cannot query field "deleteEditorMember" on type "Mutation".', $response->errors[0]->message);
     }
 
     public function testIgnoreCaseSortFlag() {
@@ -2435,7 +2682,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
             }
         }', ['id' => $content->getId()]);
         $this->assertNotEmpty($response->errors);
-        $this->assertEquals("You are not allowed to revert this content.", $response->errors[0]->message);
+        $this->assertEquals("You are not allowed to revert this item.", $response->errors[0]->message);
 
         // Try to revert content to version 1 with but without persist.
         $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {

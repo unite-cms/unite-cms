@@ -123,6 +123,7 @@ class SchemaTypeManagerTest extends ContainerAwareTestCase {
         $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
         $d->setAccessible(true);
         $d->setValue(static::$container->get('unite.cms.manager'), new Domain());
+        static::$container->get('unite.cms.manager')->getDomain()->setDomainMemberTypes([]);
 
         // In config/packages/test/services.yaml we defined the alteration.
         $this->assertArrayHasKey('altered', static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType('Query')->getFields());
