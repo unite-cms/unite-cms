@@ -2,6 +2,9 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\SoftDeleteableFieldableContent;
 use UniteCMS\CoreBundle\Exception\NotValidException;
 use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityManager;
@@ -169,6 +172,25 @@ class MutationType extends AbstractType
                         'type' => Type::nonNull(Type::boolean()),
                         'description' => 'Only if is set to true, the content will be delete. Data will be validated anyway.',
                     ],
+                    'definitely' => [
+                        'type' => Type::boolean(),
+                        'description' => 'If set to true, you can definitely delete content that was deleted before. This action cannot be undone.',
+                        'defaultValue' => false,
+                    ],
+                ],
+            ];
+
+            $fields['recover' . $key] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'The id of the deleted content item to recover.',
+                    ],
+                    'persist' => [
+                        'type' => Type::nonNull(Type::boolean()),
+                        'description' => 'Only if is set to true, the content will be recovered. Data will be validated anyway.',
+                    ],
                 ],
             ];
 
@@ -249,6 +271,14 @@ class MutationType extends AbstractType
         // Resolve delete content type
         elseif(substr($info->fieldName, 0, 6) == 'delete') {
             return $this->resolveDeleteContent(
+                IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
+                $value, $args, $context, $info
+            );
+        }
+
+        // Resolve delete content type
+        elseif(substr($info->fieldName, 0, 7) == 'recover') {
+            return $this->resolveRecoverContent(
                 IdentifierNormalizer::fromGraphQLFieldName($info->fieldName),
                 $value, $args, $context, $info
             );
@@ -446,7 +476,21 @@ class MutationType extends AbstractType
             throw new UserError("You are not allowed to revert this content.");
         }
 
-        return $this->contentManager->revert($content, $args['version'], $args['persist']);
+        $form = $this->formFactory->create(ContentDeleteFormType::class);
+
+        // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
+        $data = [];
+        if(!empty($context['csrf_token'])) {
+            $data['_token'] = $context['csrf_token'];
+        }
+
+        $form->submit($data);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            return $this->contentManager->revert($content, $args['version'], $args['persist']);
+        }
+
+        return null;
     }
 
     /**
@@ -464,15 +508,15 @@ class MutationType extends AbstractType
      */
     private function resolveDeleteContent($identifier, $value, $args, $context, ResolveInfo $info) {
 
-        $id = $args['id'];
-        $content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id);
+        $fieldable = $this->contentManager->findFieldable($this->uniteCMSManager->getDomain(), $identifier, ContentType::class);
+        $content = $this->contentManager->find($fieldable, $args['id'], $args['definitely']);
 
-        if(!$content) {
+        if(!$content || ($args['definitely'] && (!$content instanceof SoftDeleteableFieldableContent || !$content->getDeleted()))) {
             throw new UserError("Content was not found.");
         }
 
         if (!$this->authorizationChecker->isGranted(ContentVoter::DELETE, $content)) {
-            throw new UserError("You are not allowed to delete content with id '$id'.");
+            throw new UserError(sprintf("You are not allowed to delete content with id '%s'.", $args['id']));
         }
 
         $form = $this->formFactory->create(ContentDeleteFormType::class);
@@ -487,12 +531,66 @@ class MutationType extends AbstractType
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->contentManager->delete($content, $args['persist']);
+                if($args['definitely']) {
+                    $this->contentManager->deleteDefinitely($content, $args['persist']);
+                } else {
+                    $this->contentManager->delete($content, $args['persist']);
+                }
                 return [
                     'id' => $args['id'],
-                    'deleted' => !!$args['persist'],
+                    'deleted' => !empty($content->getId()) && $content->getDeleted(),
+                    'definitely_deleted' => empty($content->getId()),
                 ];
 
+            } catch (NotValidException $exception) {
+                $exception->mapToForm($form);
+            }
+        }
+
+        foreach($form->getErrors(true, true) as $error) {
+            throw UserErrorAtPath::createFromFormError($error);
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve recover content.
+     *
+     * @param $identifier
+     * @param $value
+     * @param $args
+     * @param $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     *
+     * @return mixed
+     */
+    private function resolveRecoverContent($identifier, $value, $args, $context, ResolveInfo $info) {
+
+        $fieldable = $this->contentManager->findFieldable($this->uniteCMSManager->getDomain(), $identifier, ContentType::class);
+        $content = $this->contentManager->find($fieldable, $args['id'], true);
+
+        if(!$content || !$content instanceof SoftDeleteableFieldableContent || $content->getDeleted() == null) {
+            throw new UserError("Content was not found.");
+        }
+
+        if (!$this->contentManager->isGranted($content, FieldableContentManager::PERMISSION_UPDATE)) {
+            throw new UserError("You are not allowed to recover this content.");
+        }
+
+        $form = $this->formFactory->create(ContentDeleteFormType::class);
+
+        // If mutations are performed via the main firewall instead of the api firewall, a csrf token must be passed to the form.
+        $data = [];
+        if(!empty($context['csrf_token'])) {
+            $data['_token'] = $context['csrf_token'];
+        }
+
+        $form->submit($data);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                return $this->contentManager->recover($content, $args['persist']);
             } catch (NotValidException $exception) {
                 $exception->mapToForm($form);
             }

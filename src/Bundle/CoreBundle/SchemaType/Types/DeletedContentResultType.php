@@ -17,6 +17,7 @@ class DeletedContentResultType extends AbstractType
         return [
             'id' => Type::id(),
             'deleted' => Type::boolean(),
+            'definitely_deleted' => Type::boolean(),
         ];
     }
 
@@ -36,6 +37,7 @@ class DeletedContentResultType extends AbstractType
         switch ($info->fieldName) {
             case 'id': return $value['id'];
             case 'deleted': return $value['deleted'];
+            case 'definitely_deleted': return $value['definitely_deleted'];
             default: return null;
         }
     }

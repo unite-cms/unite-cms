@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Fieldable;
@@ -103,6 +104,27 @@ class FieldableContentManager
         }
 
         return $this->authorizationChecker->isGranted($actual_attribute, $content);
+    }
+
+    /**
+     * Returns a fieldable of the given domain with the given identifier of the given type.
+     *
+     * @param Domain $domain
+     * @param string $identifier
+     * @param string $fieldableType
+     * @return Fieldable|null
+     */
+    public function findFieldable(Domain $domain, string $identifier, string $fieldableType) : ?Fieldable {
+        switch ($fieldableType) {
+            case ContentType::class:
+                return $domain->getContentTypes()->get($identifier);
+            case SettingType::class:
+                return $domain->getSettingTypes()->get($identifier);
+            case DomainMemberType::class:
+                return $domain->getDomainMemberTypes()->get($identifier);
+            default:
+                throw new InvalidArgumentException(sprintf('Invalid fieldable type "%s".', $fieldableType));
+        }
     }
 
     /**
