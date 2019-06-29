@@ -1589,7 +1589,7 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals($news->id, $response->data->deleteNews->id);
-        $this->assertEquals(false, $response->data->deleteNews->deleted);
+        $this->assertFalse($response->data->deleteNews->deleted);
         $this->assertEquals($originalCountNews, $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query { findNews { total } }')->data->findNews->total);
 
         // delete content with permission, with persist = true
@@ -1607,8 +1607,170 @@ class ApiFunctionalTestCase extends DatabaseAwareTestCase
 
         $this->assertTrue(empty($response->errors));
         $this->assertEquals($news->id, $response->data->deleteNews->id);
-        $this->assertEquals(true, $response->data->deleteNews->deleted);
+        $this->assertTrue($response->data->deleteNews->deleted);
         $this->assertEquals($originalCountNews -1, $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query { findNews { total } }')->data->findNews->total);
+
+        // Now try to get the deleted content without permission.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'query($id: String) {
+                findNews(deleted: true, filter: { field: "id", value: $id, operator: "=" }) {
+                    result {
+                        id,
+                        deleted
+                    }
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEmpty($response->data->findNews->result);
+
+        // Now try to get the deleted content with permission.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'query($id: String) {
+                findNews(deleted: true, filter: { field: "id", value: $id, operator: "=" }) {
+                    result {
+                        id,
+                        deleted
+                    }
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals($news->id, $response->data->findNews->result[0]->id);
+        $this->assertNotNull($response->data->findNews->result[0]->deleted);
+
+        // Now try to recover the deleted content without permission.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'mutation($id: ID!) {
+                recoverNews(id: $id, persist: true) {
+                    id,
+                    deleted
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertNotEmpty($response->errors);
+        $this->assertEquals("You are not allowed to recover this content.", $response->errors[0]->message);
+
+        // Now try to recover the deleted content with permission but not persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+                recoverNews(id: $id, persist: false) {
+                    id,
+                    deleted
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals($news->id, $response->data->recoverNews->id);
+        $this->assertNotNull($response->data->recoverNews->deleted);
+
+        // Now try to recover the deleted content with permission and persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+                recoverNews(id: $id, persist: true) {
+                    id,
+                    deleted
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals($news->id, $response->data->recoverNews->id);
+        $this->assertNull($response->data->recoverNews->deleted);
+
+
+
+
+
+
+        // Now try to delete definitely the non-deleted content without permission.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: true, definitely: true) {
+                    id,
+                    deleted,
+                    definitely_deleted
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertNotEmpty($response->errors);
+        $this->assertEquals("Content was not found.", $response->errors[0]->message);
+
+        // Now try to delete definitely the deleted content with permission but not persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: false, definitely: true) {
+                    id,
+                    deleted,
+                    definitely_deleted
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertNotEmpty($response->errors);
+        $this->assertEquals("Content was not found.", $response->errors[0]->message);
+
+
+
+
+
+        // Delete news.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: true) {
+                    id,
+                    deleted,
+                    definitely_deleted
+                }
+            }', [
+            'id' => $news->id,
+            'category' => null
+        ]);
+
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals($news->id, $response->data->deleteNews->id);
+        $this->assertTrue($response->data->deleteNews->deleted);
+
+
+        // Now try to delete definitely the deleted content without permission.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_viewer'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: true, definitely: true) {
+                    id,
+                    deleted,
+                    definitely_deleted
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertNotEmpty($response->errors);
+        $this->assertEquals("You are not allowed to delete content with id '$news->id'.", $response->errors[0]->message);
+
+        // Now try to delete definitely the deleted content with permission but not persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: false, definitely: true) {
+                    id,
+                    deleted,
+                    definitely_deleted
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals($news->id, $response->data->deleteNews->id);
+        $this->assertTrue($response->data->deleteNews->deleted);
+        $this->assertFalse($response->data->deleteNews->definitely_deleted);
+
+        // Now try to recover the deleted content with permission and persist.
+        $response = $this->api($this->domains['marketing'], $this->users['marketing_editor'], 'mutation($id: ID!) {
+                deleteNews(id: $id, persist: true, definitely: true) {
+                    id,
+                    deleted,
+                    definitely_deleted
+                }
+            }', [
+            'id' => $news->id
+        ]);
+        $this->assertTrue(empty($response->errors));
+        $this->assertEquals($news->id, $response->data->deleteNews->id);
+        $this->assertFalse($response->data->deleteNews->deleted);
+        $this->assertTrue($response->data->deleteNews->definitely_deleted);
     }
 
     public function testAPICRUDForCTWithLang() {
