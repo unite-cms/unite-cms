@@ -190,7 +190,8 @@ class DomainDefinitionParserTest extends DatabaseAwareTestCase
                         "list content": "true",
                         "create content": "member.type == \"editor\"",
                         "update content": "member.type == \"editor\"",
-                        "delete content": "false"
+                        "delete content": "false",
+                        "translate content": "member.type == \"editor\""
                     },
                     "webhooks": [
                         {
@@ -220,7 +221,8 @@ class DomainDefinitionParserTest extends DatabaseAwareTestCase
                         "list content": "true",
                         "create content": "member.type == \"editor\"",
                         "update content": "member.type == \"editor\"",
-                        "delete content": "member.type == \"editor\""
+                        "delete content": "member.type == \"editor\"",
+                        "translate content": "member.type == \"editor\""
                     }
                 }
             ],

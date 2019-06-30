@@ -8,8 +8,6 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainMember;
-use UniteCMS\CoreBundle\Entity\Organization;
-use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Tests\SecurityVoterTestCase;
 
@@ -80,8 +78,11 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $this->contentType3 = new ContentType();
         $this->contentType3->setDomain($this->domain2);
         $p3 = $this->contentType3->getPermissions();
+        $p3[ContentVoter::CREATE] = 'member.type == "viewer"';
         $p3[ContentVoter::TRANSLATE] = 'member.type == "viewer"';
+        $p3[ContentVoter::UPDATE] = 'member.type == "editor" || (member.type == "viewer" && content.locale == "de")';
         $this->contentType3->setPermissions($p3);
+        $this->contentType3->setLocales(['en', 'de']);
 
         $this->content1 = new Content();
         $this->content1->setContentType($this->contentType1);
@@ -90,7 +91,7 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $this->content2->setContentType($this->contentType2);
 
         $this->content3 = new Content();
-        $this->content3->setContentType($this->contentType3);
+        $this->content3->setContentType($this->contentType3)->setLocale('en');
 
         $admin = new ApiKey();
         $admin->setOrganization($this->org1)->setName('Admin');
@@ -153,7 +154,7 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType3));
         $this->assertTrue($dm->isGranted([ContentVoter::CREATE], $this->contentType3));
         $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content3));
-        $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content3));
+        $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content3));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content3));
         $this->assertTrue($dm->isGranted([ContentVoter::TRANSLATE], $this->content3));
     }
@@ -167,6 +168,7 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         $reflector->setAccessible(true);
         $reflector->setValue($this->content1, new \DateTime());
         $reflector->setValue($this->content2, new \DateTime());
+        $reflector->setValue($this->content3, new \DateTime());
 
         static::$container->get('security.token_storage')->setToken($this->u['domain_admin']);
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType1));
@@ -198,9 +200,9 @@ class ContentVoterApiClientTest extends SecurityVoterTestCase
         static::$container->get('security.token_storage')->setToken($this->u['domain_translator']);
         $this->assertTrue($dm->isGranted([ContentVoter::LIST], $this->contentType3));
         $this->assertTrue($dm->isGranted([ContentVoter::CREATE], $this->contentType3));
-        $this->assertTrue($dm->isGranted([ContentVoter::VIEW], $this->content3));
-        $this->assertTrue($dm->isGranted([ContentVoter::UPDATE], $this->content3));
+        $this->assertFalse($dm->isGranted([ContentVoter::VIEW], $this->content3));
+        $this->assertFalse($dm->isGranted([ContentVoter::UPDATE], $this->content3));
         $this->assertFalse($dm->isGranted([ContentVoter::DELETE], $this->content3));
-        $this->assertTrue($dm->isGranted([ContentVoter::TRANSLATE], $this->content3));
+        $this->assertFalse($dm->isGranted([ContentVoter::TRANSLATE], $this->content3));
     }
 }
