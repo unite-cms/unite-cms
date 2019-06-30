@@ -16,9 +16,10 @@ class ContentVoter extends Voter
     const VIEW = 'view content';
     const UPDATE = 'update content';
     const DELETE = 'delete content';
+    const TRANSLATE = 'translate content';
 
     const BUNDLE_PERMISSIONS = [self::LIST, self::CREATE];
-    const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE, self::DELETE];
+    const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE, self::DELETE, self::TRANSLATE];
 
     /**
      * @var UniteExpressionChecker $accessExpressionChecker
