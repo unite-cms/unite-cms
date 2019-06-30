@@ -1,24 +1,25 @@
 <template>
     <footer v-if="pages.length > 1">
-        <ul class="uk-pagination uk-flex-center" uk-margin>
+        <ul class="uk-pagination uk-flex-center uk-margin-small-bottom">
             <li class="first uk-visible@s" v-if="showArrows && current > 1">
                 <a v-on:click="change(1)" v-html="feather.icons['chevrons-left'].toSvg({ width: 16, height: 16 })"></a>
+            </li>
+            <li v-if="showArrows && current > 1">
+                <a v-on:click="change(current-1)" v-html="feather.icons['chevron-left'].toSvg({ width: 16, height: 16 })"></a>
             </li>
             <template v-for="p in pages">
                 <li v-if="!showArrows || p.page > lowerCutLeft && p.page <= lowerCutRight" v-bind:class="{'uk-active': p.page === current }">
                     <a v-on:click="change(p.page)">{{p.page}}</a>
                 </li>
-                <li v-if="showArrows && p.page === lowerCutLeft">
-                    <a v-on:click="change(current-1)" v-html="feather.icons['chevron-left'].toSvg({ width: 16, height: 16 })"></a>
-                </li>
-                <li v-if="showArrows && p.page === lowerCutRight + 1">
-                    <a v-on:click="change(current+1)" v-html="feather.icons['chevron-right'].toSvg({ width: 16, height: 16 })"></a>
-                </li>
             </template>
+            <li v-if="showArrows && current < pages.length">
+                <a v-on:click="change(current+1)" v-html="feather.icons['chevron-right'].toSvg({ width: 16, height: 16 })"></a>
+            </li>
             <li class="last uk-visible@s" v-if="showArrows && current < pages.length">
                 <a v-on:click="change(pages.length)" v-html="feather.icons['chevrons-right'].toSvg({ width: 16, height: 16 })"></a>
             </li>
         </ul>
+        <div class="uk-text-center"><small>{{fromItem}} - {{toItem}} of {{total}}</small></div>
     </footer>
 </template>
 
@@ -72,6 +73,19 @@
                 }
 
                 return pages;
+            },
+            fromItem() {
+                let pageFromZero = this.current - 1;
+
+                return pageFromZero * this.limit + 1;
+            },
+            toItem() {
+                let endItem = this.current * this.limit;
+                if (endItem > this.total) {
+                    endItem = this.total;
+                }
+
+                return endItem;
             },
         },
         methods: {

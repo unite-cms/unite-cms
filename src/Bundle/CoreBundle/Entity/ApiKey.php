@@ -19,6 +19,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class ApiKey extends DomainAccessor implements UserInterface, \Serializable
 {
+    static function getType() : string { return 'api_key'; }
+    static function getNameField() : string { return 'name'; }
+
     /**
      * @var string
      * @Assert\NotBlank(message="not_blank")
@@ -32,7 +35,7 @@ class ApiKey extends DomainAccessor implements UserInterface, \Serializable
      * @Assert\NotBlank(message="not_blank")
      * @Assert\Length(max="180", maxMessage="too_long")
      * @Assert\Regex(pattern="/^[a-z0-9A-Z\-_]+$/", message="invalid_characters")
-     * @ORM\Column(name="token", type="string", length=180, unique=true, nullable=true)
+     * @ORM\Column(name="token", type="string", length=180, nullable=true)
      */
     protected $token;
 

@@ -127,17 +127,12 @@ class DomainEntityPersistentTest extends DatabaseAwareTestCase
         $this->assertGreaterThanOrEqual(1, $errors->count());
         $this->assertStringStartsWith('domainMemberTypes', $errors->get(0)->getPropertyPath());
 
-        // Try to test invalid users.
-        $domain1->getDomainMemberTypes()->first()->setIcon('');
-        $errors = static::$container->get('validator')->validate($domain1);
-        $this->assertGreaterThanOrEqual(1, $errors->count());
-        $this->assertStringStartsWith('members', $errors->get(0)->getPropertyPath());
-
         // Test valid Domain.
         $user = new User();
         $org = new Organization();
         $organizationMember = new OrganizationMember();
         $organizationMember->setOrganization($org);
+        $domain1->getDomainMemberTypes()->first()->setIcon('');
         $org->setIdentifier('org1')->setTitle('Org1');
         $user->setName('User 1')->setEmail('user1@example.com')->setPassword(
             'password'

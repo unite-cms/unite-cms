@@ -2,30 +2,32 @@
 
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
+use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
-use UniteCMS\CoreBundle\Security\ValidationExpressionChecker;
 
 class ValidFieldableContentDataValidator extends ConstraintValidator
 {
-    /**
-     * @var ValidationExpressionChecker $expressionChecker
-     */
-    private $expressionChecker;
-
     /**
      * @var FieldTypeManager
      */
     private $fieldTypeManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager)
+    /**
+     * @var EntityManager $entityManager
+     */
+    private $entityManager;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, EntityManager $entityManager)
     {
         $this->fieldTypeManager = $fieldTypeManager;
-        $this->expressionChecker = new ValidationExpressionChecker();
+        $this->entityManager = $entityManager;
     }
 
     public function validate($value, Constraint $constraint)
@@ -78,8 +80,20 @@ class ValidFieldableContentDataValidator extends ConstraintValidator
             $group = (method_exists($content, 'getId') && $content->getId()) ? 'UPDATE' : 'CREATE';
         }
 
+        $expressionChecker = new UniteExpressionChecker();
+
+        // If we are validating a fieldable content object or setting object, we can enable fieldable content functions
+        if($content instanceof FieldableContent) {
+            $expressionChecker->registerFieldableContent($content);
+        }
+
+        // If we are validating a content object, we can enable doctrine content functions.
+        if($content instanceof Content) {
+            $expressionChecker->registerDoctrineContentFunctionsProvider($this->entityManager, $content->getContentType());
+        }
+
         foreach ($content->getEntity()->getValidations() as $validation) {
-            if(in_array($group, $validation->getGroups()) && !$this->expressionChecker->evaluate($validation->getExpression(), $content)) {
+            if(in_array($group, $validation->getGroups()) && !$expressionChecker->evaluateToBool($validation->getExpression())) {
                 $path = join('][', explode('.', $validation->getPath()));
                 $message = empty($validation->getMessage()) ? 'Invalid value' : $validation->getMessage();
 

@@ -4,14 +4,14 @@ services:
   UniteCMS\VariantsFieldBundle\Field\Types\VariantsFieldType:
     tags: [unite_cms.field_type]
     arguments:
-      ['@unite.cms.field_type_manager', '@unite.cms.graphql.variants_field_variant_factory']
+      ['@unite.cms.field_type_manager', '@unite.cms.graphql.variants_field_variant_factory', '@unite.cms.field_type.config_factory.table_view']
 
   # A form type that renders a variant choice field and all variants.
   UniteCMS\VariantsFieldBundle\Form\VariantsFormType:
     public: false
     tags: [form.type]
     arguments:
-      ['@unite.cms.field_type_manager']
+      ['@unite.cms.field_type_manager', '@security.authorization_checker']
 
   # A GraphQL interface type for all variants.
   UniteCMS\VariantsFieldBundle\SchemaType\Types\VariantsFieldInterface:
@@ -22,7 +22,8 @@ services:
   # A basic implementation of VariantsFieldInterface just with a type field.
   UniteCMS\VariantsFieldBundle\SchemaType\Types\VariantsFieldBaseVariant:
     public: false
-    tags: [unite_cms.graphql.schema_type]
+    tags:
+      - { name: unite_cms.graphql.schema_type, detectable: false }
     arguments: ['@unite.cms.graphql.schema_type_manager']
 
   # Creates a concrete variant for variants field types.
@@ -30,4 +31,4 @@ services:
     class: UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory
     public: false
     arguments:
-      ['@unite.cms.field_type_manager']
+      ['@unite.cms.field_type_manager', '@security.authorization_checker']

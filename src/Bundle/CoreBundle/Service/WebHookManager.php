@@ -13,19 +13,15 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\SettingType;
-use UniteCMS\CoreBundle\Security\WebhookExpressionChecker;
+use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use UniteCMS\CoreBundle\Entity\Webhook;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 
 class WebHookManager
 {
-    /**
-     * @var WebhookExpressionChecker webhookExpressionChecker
-     */
-    private $webhookExpressionChecker;
-
     /**
      * @var ContainerInterface $container
      */
@@ -45,7 +41,6 @@ class WebHookManager
     {
         $this->container = $container;
         $this->logger = $logger;
-        $this->webhookExpressionChecker = new WebhookExpressionChecker();
         $this->client = new Client();
     }
 
@@ -73,10 +68,20 @@ class WebHookManager
 
         $schema = $this->container->get('unite.cms.graphql.schema_type_manager')->createSchema($entity->getDomain(), ucfirst($entity->getIdentifier()) . $type);
 
+        $expressionChecker = new UniteExpressionChecker();
+        $expressionChecker
+            ->clearVariables()
+            ->registerFieldableContent($content)
+            ->registerVariable('event', $event_name);
+
+        if($content instanceof Content) {
+            $expressionChecker->registerDoctrineContentFunctionsProvider($this->container->get('doctrine.orm.entity_manager'), $content->getContentType());
+        }
+
         foreach ($entity->getWebHooks() as $webhook) {
 
             // in case of SettingType always fire update event
-            if (!$this->webhookExpressionChecker->evaluate($webhook->getCondition(), $event_name, $content)) {
+            if (!$expressionChecker->evaluateToBool($webhook->getCondition())) {
                 continue;
             }
 

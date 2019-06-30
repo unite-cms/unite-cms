@@ -50,12 +50,21 @@ class Variants implements Fieldable
                 'title' => $variant['title'],
                 'identifier' => $variant['identifier'],
                 'icon' => $variant['icon'] ?? '',
-                'description' => $variant['description'] ?? '',
+                'settings' => $variant['settings'] ?? [
+                    'description' => '',
+                ],
             ];
 
+            $variant_fields = [];
+            $variant_instance = new Variant(null, [], $variant['identifier'], $variant['title'], $this);
+
             foreach($variant['fields'] as $field) {
-                $this->addField(new VariantsField($this, $variant['identifier'], $field['identifier'] ?? "", $field['title'] ?? "", $field['type'] ?? "", new FieldableFieldSettings($field['settings'] ?? [])));
+                $field_instance = new VariantsField($variant_instance, $variant['identifier'], $field['identifier'] ?? "", $field['title'] ?? "", $field['type'] ?? "", $field['permissions'] ?? [], new FieldableFieldSettings($field['settings'] ?? []));
+                $variant_fields[] = $field_instance;
+                $this->addField($field_instance);
             }
+
+            $variant_instance->setFields($variant_fields);
 
             $this->variantMetadata[] = $metaData;
         }

@@ -9,6 +9,7 @@
 namespace UniteCMS\CoreBundle\SchemaType;
 
 use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\SettingType;
 
 /**
@@ -24,14 +25,7 @@ class IdentifierNormalizer
      * @return array
      */
     static function graphQLSchemaSplitter(string $schemaName) : array {
-        $nameParts = preg_split('/(?=[A-Z])/', $schemaName, -1, PREG_SPLIT_NO_EMPTY);
-
-        // If this has an Level Suffix, we need to remove it first.
-        if(substr($nameParts[count($nameParts) - 1], 0, strlen('Level')) == 'Level') {
-            array_pop($nameParts);
-        }
-
-        return $nameParts;
+        return preg_split('/(?=[A-Z])/', $schemaName, -1, PREG_SPLIT_NO_EMPTY);
     }
 
     /**
@@ -85,7 +79,7 @@ class IdentifierNormalizer
             $identifier = $resource->getIdentifier();
         }
 
-        return $identifier;
+        return (string)$identifier;
     }
 
     /**
@@ -104,6 +98,10 @@ class IdentifierNormalizer
 
             if($resource instanceof SettingType) {
                 $suffix = 'Setting';
+            }
+
+            if($resource instanceof DomainMemberType) {
+                $suffix = 'Member';
             }
         }
 

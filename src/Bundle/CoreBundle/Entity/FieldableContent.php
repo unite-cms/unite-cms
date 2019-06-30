@@ -30,6 +30,12 @@ interface FieldableContent
     public function getLocale();
 
     /**
+     * @param string|null $locale
+     * @return Fieldable
+     */
+    public function setLocale($locale);
+
+    /**
      * @return Fieldable
      */
     public function getEntity();
@@ -45,4 +51,14 @@ interface FieldableContent
      * @return boolean
      */
     public function isNew(): bool;
+
+    /**
+     * @return FieldableContent
+     */
+    public function getRootFieldableContent(): FieldableContent;
+
+    /**
+     * @return mixed
+     */
+    public function getId();
 }

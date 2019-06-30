@@ -4,8 +4,8 @@ namespace UniteCMS\CoreBundle\Subscriber;
 
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use UniteCMS\CoreBundle\Entity\ApiKey;
@@ -28,7 +28,7 @@ class CorsListener
         $this->firewallMap = $firewallMap;
     }
 
-    public function onKernelRequest(GetResponseEvent $event) {
+    public function onKernelRequest(RequestEvent $event) {
 
         // Only handle master requests.
         if(!$event->isMasterRequest()) {
@@ -46,7 +46,7 @@ class CorsListener
         }
     }
 
-    public function onKernelResponse(FilterResponseEvent $event) {
+    public function onKernelResponse(ResponseEvent $event) {
 
         // Only handle master requests.
         if (!$event->isMasterRequest()) {

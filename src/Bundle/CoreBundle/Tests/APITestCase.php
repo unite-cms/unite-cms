@@ -4,10 +4,8 @@ namespace UniteCMS\CoreBundle\Tests;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\ObjectRepository;
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Repository\RepositoryFactory;
 use Symfony\Component\Form\Util\StringUtil;
@@ -21,6 +19,7 @@ use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Entity\User;
+use UniteCMS\CoreBundle\Event\DomainConfigFileEvent;
 use UniteCMS\CoreBundle\Field\Types\ReferenceFieldType;
 use UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
@@ -203,7 +202,7 @@ class MockedRepositoryFactory implements RepositoryFactory {
             try {
                 $reflector = new \ReflectionProperty(get_class($object), 'id');
                 $reflector->setAccessible(true);
-                $reflector->setValue($object, count($this->repositories[$entityName]->objects) + 1);
+                $reflector->setValue($object, (count($this->repositories[$entityName]->objects) + 1) . '-1');
             } catch (\ReflectionException $e) {
                 throw new \InvalidArgumentException('We can only handle objects with an id property');
             }
@@ -220,6 +219,12 @@ class MockedRepositoryFactory implements RepositoryFactory {
      */
     public function getRepository(EntityManagerInterface $entityManager, $entityName)
     {
+        if(strpos($entityName, '\\') !== false) {
+            $classParts = explode('\\', $entityName);
+            $className = array_pop($classParts);
+            $entityName = 'UniteCMSCoreBundle:'.$className;
+        }
+
         if(!isset($this->repositories[$entityName])) {
             $this->repositories[$entityName] = new MockedObjectRepository($entityName);
         }
@@ -372,6 +377,11 @@ abstract class APITestCase extends ContainerAwareTestCase
         $reflector = new \ReflectionProperty(UniteCMSManager::class, 'initialized');
         $reflector->setAccessible(true);
         $reflector->setValue(static::$container->get('unite.cms.manager'), true);
+
+        // After setting up domains, clear cache for them
+        foreach($this->domains as $domain) {
+            static::$container->get('event_dispatcher')->dispatch(new DomainConfigFileEvent($domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE);
+        }
     }
 
     public function tearDown()
@@ -410,13 +420,10 @@ abstract class APITestCase extends ContainerAwareTestCase
         }
 
         // Fake a real HTTP request.
-        $request = new Request([], [], [
+        $request = Request::create('http://example.com/foo/baa/api', 'POST', [
             'organization' => $domain->getOrganization(),
             'domain' => $domain,
-        ], [], [], [
-            'REQUEST_METHOD' => 'POST',
-        ], json_encode(['query' => $query, 'variables' => $variables]));
-
+        ], [], [], [], json_encode(['query' => $query, 'variables' => $variables]));
 
         // Inject domain into unite.cms.manager.
         try {
@@ -438,7 +445,16 @@ abstract class APITestCase extends ContainerAwareTestCase
             []
         ));
 
-        $response = $this->controller->indexAction($domain->getOrganization(), $domain, $request, static::$container->get('logger'));
+        static::$container->get('router.request_context')->fromRequest($request);
+
+        $response = $this->controller->indexAction(
+            $domain->getOrganization(),
+            $domain,
+            $request,
+            static::$container->get('logger'),
+            static::$container->get('unite.cms.graphql.schema_type_manager'),
+            true
+        );
         return json_decode($response->getContent());
     }
 

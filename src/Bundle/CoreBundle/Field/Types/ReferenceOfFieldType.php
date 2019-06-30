@@ -18,7 +18,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
-use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
+use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Exception\DomainAccessDeniedException;
@@ -40,7 +42,7 @@ class ReferenceOfFieldType extends FieldType
     const TYPE = "reference_of";
     const FORM_TYPE = ReferenceOfType::class;
 
-    const SETTINGS = ['domain', 'content_type', 'reference_field'];
+    const SETTINGS = ['domain', 'content_type', 'reference_field', 'form_group'];
     const REQUIRED_SETTINGS = ['domain', 'content_type', 'reference_field'];
 
     /**
@@ -89,11 +91,11 @@ class ReferenceOfFieldType extends FieldType
     function getFormOptions(FieldableField $field): array
     {
         $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
-        $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
-        $reference_field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
+        $fieldable = $this->referenceResolver->resolveFieldable($domain, $field->getSettings());
+        $reference_field = $this->referenceResolver->resolveField($fieldable, $field->getSettings()->reference_field, ReferenceFieldType::getType());
 
         return array_merge(parent::getFormOptions($field), [
-            'view' => $contentType->getView('all'),
+            'view' => $fieldable instanceof ContentType ? $fieldable->getView('all') : null,
             'reference_field' => $reference_field,
         ]);
     }
@@ -103,7 +105,7 @@ class ReferenceOfFieldType extends FieldType
      */
     function validateSettings(FieldableFieldSettings $settings, ExecutionContextInterface $context)
     {
-        if(!$context->getObject() instanceof ContentTypeField) {
+        if(!$context->getObject() instanceof ContentTypeField && !$context->getObject() instanceof DomainMemberTypeField) {
             $context->buildViolation('invalid_entity_type')->addViolation();
         }
 
@@ -124,14 +126,20 @@ class ReferenceOfFieldType extends FieldType
             $domain = $this->referenceResolver->resolveDomain($settings->domain);
             $contentType = $this->referenceResolver->resolveContentType($domain, $settings->content_type);
             $field = $this->referenceResolver->resolveField($contentType, $settings->reference_field, ReferenceFieldType::getType());
+            $ref_field_ct_setting = $field->getSettings()->content_type ?? $field->getSettings()->domain_member_type ?? null;
 
             /**
-             * @var ContentType $thisContentType
+             * @var Fieldable $thisFieldable
              */
-            $thisContentType = $context->getObject()->getContentType();
+            $thisFieldable = $context->getObject()->getEntity();
 
             // Check if field references the current content type.
-            if(($field->getSettings()->domain !== $thisContentType->getDomain()->getIdentifier() && $field->getSettings()->domain !== $thisContentType->getDomain()->getPreviousIdentifier()) || $field->getSettings()->content_type !== $thisContentType->getIdentifier()) {
+            if(
+                (
+                    $field->getSettings()->domain !== $thisFieldable->getDomain()->getIdentifier()
+                    && $field->getSettings()->domain !== $thisFieldable->getDomain()->getPreviousIdentifier()
+                ) || $ref_field_ct_setting !== $thisFieldable->getIdentifier()
+            ) {
                 $context->buildViolation('invalid_field_reference')->atPath('reference_field')->addViolation();
             }
 
@@ -151,12 +159,13 @@ class ReferenceOfFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
         $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
+
         return [
-            'type' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel), $domain, $nestingLevel),
+            'type' => $schemaTypeManager->getSchemaType(IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResult'), $domain),
             'args' => [
                 'limit' => [
                     'type' => Type::int(),
@@ -177,87 +186,82 @@ class ReferenceOfFieldType extends FieldType
                     'description' => 'Set one optional filter condition.',
                 ],
             ],
-            'resolve' => function ($value, array $args, $context, ResolveInfo $info) use ($field, $nestingLevel) {
-
-                // Reference of fields does only work for content entities.
-                if(!$value instanceof Content) {
-                    return null;
-                }
-
-                $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
-                $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
-                $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
-
-                // Resolve content type and field.
-                $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
-                $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
-                $field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
-
-                // Create filter by reference field + optional filter args
-                $referenceFilter = ['field' => $field->getIdentifier().'.content', 'operator' => '=', 'value' => $value->getId()];
-
-                // If args have a content filter already set, remove it first.
-                if(!empty($args['filter']['field']) && $args['filter']['field'] === $field->getIdentifier().'.content') {
-                    $args['filter'] = [];
-                }
-
-                $args['filter'] = empty($args['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $args['filter']]];
-
-                // Get content for the resolved content type.
-                $contentEntityFields = $this->entityManager->getClassMetadata(Content::class)->getFieldNames();
-                $contentQuery = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
-                    ->select('c')
-                    ->where('c.contentType = :contentType')
-                    ->setParameter(':contentType', $contentType);
-
-                // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
-                if (!empty($args['sort'])) {
-                    foreach ($args['sort'] as $sort) {
-
-                        $key = $sort['field'];
-                        $order = $sort['order'];
-
-                        // if we sort by a content field.
-                        if (in_array($key, $contentEntityFields)) {
-                            $contentQuery->addOrderBy('c.'.$key, $order);
-
-                            // if we sort by a nested content data field.
-                        } else {
-                            $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
-                        }
-                    }
-                }
-
-                // Adding where filter to the query.
-                // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
-                // TODO: Replace field names with nested field selectors.
-                $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
-                $contentQuery->andWhere($a->getFilter());
-                foreach($a->getParameters() as $parameter => $value) {
-                    $contentQuery->setParameter($parameter, $value);
-                }
-
-                // Get all content in one request for all contentTypes.
-                return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], [
-                    'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResultLevel' . $nestingLevel)
-                ]);
-            },
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
-        // We resolve content for this field directly in the returned type of getGraphQLType.
-        return null;
+        // Reference of fields does only work for content and domain member entities.
+        if(!$content instanceof Content && !$content instanceof DomainMember) {
+            return null;
+        }
+
+        $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
+        $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
+        $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
+
+        // Resolve content type and field.
+        $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
+        $contentType = $this->referenceResolver->resolveContentType($domain, $field->getSettings()->content_type);
+        $field = $this->referenceResolver->resolveField($contentType, $field->getSettings()->reference_field, ReferenceFieldType::getType());
+
+        // Create filter by reference field + optional filter args
+        $referenceFilter = ['field' => $field->getIdentifier().'.content', 'operator' => '=', 'value' => $content->getId()];
+
+        // If args have a content filter already set, remove it first.
+        if(!empty($args['filter']['field']) && $args['filter']['field'] === $field->getIdentifier().'.content') {
+            $args['filter'] = [];
+        }
+
+        $args['filter'] = empty($args['filter']) ? $referenceFilter : ['AND' => [$referenceFilter, $args['filter']]];
+
+        // Get content for the resolved content type.
+        $contentEntityFields = $this->entityManager->getClassMetadata(Content::class)->getFieldNames();
+        $contentQuery = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->createQueryBuilder('c')
+            ->select('c')
+            ->where('c.contentType = :contentType')
+            ->setParameter(':contentType', $contentType);
+
+        // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
+        if (!empty($args['sort'])) {
+            foreach ($args['sort'] as $sort) {
+
+                $key = $sort['field'];
+                $order = $sort['order'];
+
+                // We can sort by a entity field or a nested data field.
+                $sortField = in_array($key, $contentEntityFields) ? 'c.'.$key : "JSON_EXTRACT(c.data, '$.$key')";
+
+                if(!empty($sort['ignore_case'])) {
+                    $sortField = 'LOWER(' . $sortField . ')';
+                }
+
+                $contentQuery->addOrderBy($sortField, $order);
+            }
+        }
+
+        // Adding where filter to the query.
+        // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
+        // TODO: Replace field names with nested field selectors.
+        $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $contentEntityFields, 'c');
+        $contentQuery->andWhere($a->getFilter());
+        foreach($a->getParameters() as $parameter => $value) {
+            $contentQuery->setParameter($parameter, $value);
+        }
+
+        // Get all content in one request for all contentTypes.
+        return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], [
+            'alias' => IdentifierNormalizer::graphQLType($contentType->getIdentifier(), 'ContentResult')
+        ]);
     }
 
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         // This field does not save any data it only is an accessor to fields that are referencing this content.
         // Therefore there is no input for this field.

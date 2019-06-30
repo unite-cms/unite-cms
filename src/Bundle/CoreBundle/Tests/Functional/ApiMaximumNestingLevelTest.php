@@ -16,7 +16,7 @@ use UniteCMS\CoreBundle\Tests\APITestCase;
  */
 class ApiMaximumNestingLevelTest extends APITestCase
 {
-    private $allowed_level = 8;
+    private $allowed_level = 16;
 
     protected $domainConfig = ['marketing' => '{
         "content_types": [
@@ -149,7 +149,7 @@ class ApiMaximumNestingLevelTest extends APITestCase
                             news {
                               category {
                                 news {
-                                  message
+                                  id
                                 }
                               }
                             }
@@ -161,23 +161,12 @@ class ApiMaximumNestingLevelTest extends APITestCase
             }')), true);
 
         $this->assertEquals([
-            'data' => [
-                'findNews' => [
-                    'result' => [[
-                        'category' => [
-                            'news' => [
-                                'category' => [
-                                    'news' => [
-                                        'category' => [
-                                            'news' => [
-                                                'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
-                                            ]
-                                        ],
-                                    ]
-                                ],
-                            ],
-                        ],
-                    ]],
+            'errors' => [
+                [
+                    'message' => 'Max query depth should be ' . $this->allowed_level . ' but got ' . ($this->allowed_level + 1) . '.',
+                    'extensions' => [
+                        'category' => 'graphql',
+                    ],
                 ]
             ]
         ], $result);
@@ -199,14 +188,16 @@ class ApiMaximumNestingLevelTest extends APITestCase
         $sibling->setData(['sibling' => ['domain' => $this->domains['marketing']->getIdentifier(), 'content_type' => 'self', 'content' => $self->getId()]]);
 
         $result = json_decode(json_encode($this->api('query {
-                getSelf(id: '.$self->getId().') {
+                getSelf(id: "'.$self->getId().'") {
                     sibling {
                         sibling {
                           sibling {
                             sibling {
                               sibling {
                                 sibling {
-                                    message
+                                  sibling {
+                                    id
+                                  }  
                                 }
                               }
                             }
@@ -217,20 +208,11 @@ class ApiMaximumNestingLevelTest extends APITestCase
             }')), true);
 
         $this->assertEquals([
-            'data' => [
-                'getSelf' => [
-                    'sibling' => [
-                        'sibling' => [
-                            'sibling' => [
-                                'sibling' => [
-                                    'sibling' => [
-                                        'sibling' => [
-                                            'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
-                                        ],
-                                    ],
-                                ]
-                            ],
-                        ],
+            'errors' => [
+                [
+                    'message' => 'Max query depth should be ' . $this->allowed_level . ' but got ' . ($this->allowed_level + 1) . '.',
+                    'extensions' => [
+                        'category' => 'graphql',
                     ],
                 ]
             ]
@@ -266,14 +248,16 @@ class ApiMaximumNestingLevelTest extends APITestCase
 
 
         $result = json_decode(json_encode($this->api('query {
-            getSelf(id: '.$self->getId().') {
+            getSelf(id: "'.$self->getId().'") {
                 collection {
                     sibling {
                         collection {
                             sibling {
                                 collection {
                                     sibling {
-                                        message
+                                        sibling {
+                                            id
+                                        }
                                     }
                                 }
                             }
@@ -284,23 +268,14 @@ class ApiMaximumNestingLevelTest extends APITestCase
         }')), true);
 
         $this->assertEquals([
-            'data' => [
-                'getSelf' => [
-                    'collection' => [
-                        [ 'sibling' => [
-                            'collection' => [
-                                [ 'sibling' => [
-                                    'collection' => [
-                                        [ 'sibling' => [
-                                            'message' => 'Maximum nesting level of ' . $this->allowed_level . ' reached.',
-                                        ]],
-                                    ],
-                                ]],
-                            ],
-                        ]],
+            'errors' => [
+                [
+                    'message' => 'Max query depth should be ' . $this->allowed_level . ' but got ' . ($this->allowed_level + 1) . '.',
+                    'extensions' => [
+                        'category' => 'graphql',
                     ],
-                ],
-            ],
+                ]
+            ]
         ], $result);
     }
 }

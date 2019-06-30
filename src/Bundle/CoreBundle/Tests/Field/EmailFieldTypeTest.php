@@ -37,7 +37,8 @@ class EmailFieldTypeTest extends FieldTypeTestCase
             [
                 'not_empty' => true,
                 'description' => 'my description',
-                'default' => 'admin@unite.co.at'
+                'default' => 'admin@unite.co.at',
+                'form_group' => 'foo',
             ]
         ));
 

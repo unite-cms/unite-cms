@@ -7,17 +7,21 @@ use GraphQL\Type\Schema;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\Setting;
 use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Service\FieldableContentManager;
 
-class SettingController extends Controller
+class SettingController extends AbstractController
 {
     /**
      * @Route("/{setting_type}/{locale}", defaults={"locale"=null}, methods={"GET", "POST"})
@@ -30,7 +34,7 @@ class SettingController extends Controller
      *
      * @return Response
      */
-    public function indexAction(SettingType $settingType, $locale, Request $request)
+    public function indexAction(SettingType $settingType, $locale, Request $request, FieldableFormBuilder $fieldableFormBuilder, ValidatorInterface $validator)
     {
         if (!$locale && !empty($settingType->getLocales())) {
             $locale = $settingType->getLocales()[0];
@@ -48,30 +52,22 @@ class SettingController extends Controller
             $this->getDoctrine()->getManager()->flush();
         }
 
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = $fieldableFormBuilder->createForm(
             $settingType,
             $setting,
             ['attr' => ['class' => 'uk-form-vertical']]
         );
         $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            if (isset($data['locale'])) {
-                $setting->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            // Only set data if it has changed
-            if ($data != $setting->getData()) {
-                $setting->setData($data);
-            }
+            // Assign data to content object.
+            $fieldableFormBuilder->assignDataToFieldableContent($setting, $form->getData());
 
             // If content errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($setting);
+            $violations = $validator->validate($setting);
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -83,7 +79,7 @@ class SettingController extends Controller
                 $this->getDoctrine()->getManager()->flush();
 
                 // On form submit, reload the current page so setting gets reloaded from db.
-                return $this->redirectToRoute('unitecms_core_setting_index', [$setting]);
+                return $this->redirectToRoute('unitecms_core_setting_index', ['setting' => $setting, 'locale' => $setting->getLocale()]);
             }
         }
 
@@ -108,25 +104,19 @@ class SettingController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function previewAction(SettingType $settingType, Request $request)
+    public function previewAction(SettingType $settingType, Request $request, FieldableFormBuilder $fieldableFormBuilder)
     {
         $setting = $settingType->getSetting();
         $response = null;
 
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm($settingType, $setting);
+        $form = $fieldableFormBuilder->createForm($settingType, $setting);
         $form->add('submit', SubmitType::class, ['label' => 'setting.update.submit']);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted()) {
 
-            $data = $form->getData();
-
-            if (isset($data['locale'])) {
-                $setting->setLocale($data['locale']);
-                unset($data['locale']);
-            }
-
-            $setting->setData($data);
+            // Assign data to content object.
+            $fieldableFormBuilder->assignDataToFieldableContent($setting, $form->getData());
 
             // Create GraphQL Schema
             $domain = $settingType->getDomain();
@@ -141,33 +131,6 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/{setting_type}/translations/{setting}", methods={"GET"})
-     * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
-     * @Entity("setting")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\SettingVoter::UPDATE'), setting)")
-     *
-     * @param SettingType $settingType
-     * @param Setting $setting
-     * @param Request $request
-     * @return Response
-     */
-    public function translationsAction(SettingType $settingType, Setting $setting, Request $request)
-    {
-        // Otherwise, a user could update setting, he_she has access to, from another domain.
-        if($setting->getSettingType() !== $settingType) {
-            throw $this->createNotFoundException();
-        }
-
-        return $this->render(
-            '@UniteCMSCore/Setting/translations.html.twig',
-            [
-                'settingType' => $settingType,
-                'setting' => $setting,
-            ]
-        );
-    }
-
-    /**
      * @Route("/{setting_type}/revisions/{setting}", methods={"GET"})
      * @Entity("settingType", expr="repository.findByIdentifiers(organization, domain, setting_type)")
      * @Entity("setting")
@@ -175,10 +138,10 @@ class SettingController extends Controller
      *
      * @param SettingType $settingType
      * @param Setting $setting
-     * @param Request $request
+     * @param FieldableContentManager $contentManager
      * @return Response
      */
-    public function revisionsAction(SettingType $settingType, Setting $setting, Request $request)
+    public function revisionsAction(SettingType $settingType, Setting $setting, FieldableContentManager $contentManager)
     {
         // Otherwise, a user could update setting, he_she has access to, from another domain.
         if($setting->getSettingType() !== $settingType) {
@@ -190,9 +153,7 @@ class SettingController extends Controller
             [
                 'settingType' => $settingType,
                 'setting' => $setting,
-                'revisions' => $this->getDoctrine()->getManager()->getRepository(
-                    'GedmoLoggable:LogEntry'
-                )->getLogEntries($setting),
+                'revisions' => $contentManager->getRevisions($setting),
             ]
         );
     }
@@ -207,9 +168,10 @@ class SettingController extends Controller
      * @param Setting $setting
      * @param int $version
      * @param Request $request
+     * @param FieldableContentManager $contentManager
      * @return Response
      */
-    public function revisionsRevertAction(SettingType $settingType, Setting $setting, int $version, Request $request)
+    public function revisionsRevertAction(SettingType $settingType, Setting $setting, int $version, Request $request, FieldableContentManager $contentManager)
     {
         // Otherwise, a user could update setting, he_she has access to, from another domain.
         if($setting->getSettingType() !== $settingType) {
@@ -222,12 +184,8 @@ class SettingController extends Controller
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $this->getDoctrine()->getManager()->getRepository('GedmoLoggable:LogEntry')->revert($setting, $version);
-            $this->getDoctrine()->getManager()->persist($setting);
-            $this->getDoctrine()->getManager()->flush();
+            $contentManager->revert($setting, $version, true);
             $this->addFlash('success', 'Setting reverted.');
-
             return $this->redirect($this->generateUrl('unitecms_core_setting_revisions', [$setting]));
         }
 

@@ -2,10 +2,10 @@
 
 namespace UniteCMS\CoreBundle\Security;
 
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -17,12 +17,12 @@ class ApiKeyUserProvider implements UserProviderInterface
     /**
      * @var RequestStack $requestStack
      */
-    private $requestStack;
+    protected $requestStack;
 
     /**
      * @var EntityManager $entityManager
      */
-    private $entityManager;
+    protected $entityManager;
 
     public function __construct(RequestStack $requestStack, EntityManager $entityManager)
     {
@@ -40,7 +40,7 @@ class ApiKeyUserProvider implements UserProviderInterface
      *
      * @return UserInterface|ApiKey
      *
-     * @throws TokenNotFoundException if the token is not found
+     * @throws UsernameNotFoundException if the token is not found
      * @throws MissingOrganizationException
      */
     public function loadUserByUsername($username)
@@ -63,7 +63,7 @@ class ApiKeyUserProvider implements UserProviderInterface
             return $token;
         }
 
-        throw new TokenNotFoundException("An API Key with token $username was not found for the current organization");
+        throw new UsernameNotFoundException("An API Key with token $username was not found for the current organization");
     }
 
     /**
@@ -79,6 +79,7 @@ class ApiKeyUserProvider implements UserProviderInterface
      * @return UserInterface
      *
      * @throws UnsupportedUserException if the user is not supported
+     * @throws MissingOrganizationException
      */
     public function refreshUser(UserInterface $user)
     {

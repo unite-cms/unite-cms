@@ -5,7 +5,7 @@
         <input type="hidden" :name="name + '[content_type]'" :value="contentType" />
         <input type="hidden" :name="name + '[content]'" :value="content" />
 
-        <div class="uk-modal-container" :id="modalId" uk-modal>
+        <div v-if="modalHtml && modalHtml.length > 0" class="uk-modal-container" :id="modalId" uk-modal>
             <div class="uk-modal-dialog" uk-overflow-auto>
                 <button class="uk-modal-close-default" type="button" uk-close></button>
                 <div v-html="modalHtml"></div>
@@ -60,7 +60,8 @@
             'value',
             'modalHtml',
             'apiUrl',
-            'contentLabel'
+            'contentLabel',
+            'fieldableType'
         ],
         created() {
 
@@ -77,7 +78,15 @@
             }
         },
         mounted() {
-            this.modal = UIkit.modal(this.$el.querySelector('#' + this.modalId));
+            if(this.modalHtml && this.modalHtml.length > 0) {
+                let $modalEl = this.$el.querySelector('#' + this.modalId);
+                this.modal = UIkit.modal($modalEl);
+
+                // When closing a modal, we stop listening to contentSelected events.
+                UIkit.util.on($modalEl, 'beforehide', () => {
+                    window.UniteCMSEventBus.$off('contentSelected');
+                });
+            }
         },
         computed: {
             modalId() {
@@ -86,26 +95,21 @@
         },
         methods: {
             openModal() {
+                if(this.modalHtml && this.modalHtml.length > 0) {
 
-                // When opening a modal, we start listen to contentSelected events.
-                window.UniteCMSEventBus.$on('contentSelected', (data) => {
-                    // For the moment, we can only handle single selections
-                    if(data.length > 0) {
-                        this.content = data[0].row.id;
-                        this.contentType = data[0].contentType;
-                        this.findHumanReadableName();
-                        this.closeModal();
-                    }
-                });
+                    // When opening a modal, we start listen to contentSelected events.
+                    window.UniteCMSEventBus.$on('contentSelected', (data) => {
+                        // For the moment, we can only handle single selections
+                        if (data.length > 0) {
+                            this.content = data[0].row.id;
+                            this.contentType = data[0].contentType;
+                            this.findHumanReadableName();
+                            this.modal.hide();
+                        }
+                    });
 
-                this.modal.show();
-            },
-            closeModal() {
-
-                // When closing a modal, we stop listen to contentSelected events.
-                window.UniteCMSEventBus.$off('contentSelected');
-
-                this.modal.hide();
+                    this.modal.show();
+                }
             },
             clearSelection() {
                 this.content = null;
@@ -118,6 +122,10 @@
                     let schemaType = this.contentType.charAt(0).toUpperCase() + this.contentType.slice(1);
                     let queryMethod = 'get' + schemaType;
                     let label = this.contentLabel;
+
+                    if(this.fieldableType === 'member' && !(queryMethod.endsWith('Member'))) {
+                        queryMethod += 'Member';
+                    }
 
                     this.client.request(`
                             query($id : ID!) {` + queryMethod + `(id: $id) {

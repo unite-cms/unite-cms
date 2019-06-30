@@ -33,24 +33,11 @@ class WebComponentTypeTest extends TestCase
         );
 
         $this->assertEquals('undefined-tag', $formView->vars['tag']);
-        $this->assertEquals(
-            json_encode(
-                [
-                    'foo' => 'baa',
-                    'foo2' => ['baa'],
-                ]
-            ),
+        $this->assertEquals([
+                'foo' => 'baa',
+                'foo2' => ['baa'],
+            ],
             $formView->vars['value']
         );
     }
-
-    public function testDataTransformer()
-    {
-        $formType = new WebComponentType();
-        $this->assertEquals(json_encode(['foo' => 'baa']), $formType->transform(['foo' => 'baa']));
-        $this->assertEquals(null, $formType->reverseTransform(''));
-        $this->assertEquals('1', $formType->reverseTransform(1));
-        $this->assertEquals('any', $formType->reverseTransform('any'));
-    }
-
 }

@@ -57,7 +57,7 @@ class CreateDomainCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('unite:domain:create')
+            ->setName('unite:domain:list')
             ->setDescription('Creates a new domain for an organization and saves it to the database and to the filesystem.');
     }
 

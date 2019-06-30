@@ -3,8 +3,6 @@
 </template>
 <script>
 
-    import feather from 'feather-icons';
-
     export default {
         data() {
             return {
@@ -44,6 +42,10 @@
                 if(input.checked) {
                     setTimeout(()=>{
                         this.variant = input.value;
+
+                        setTimeout(() => {
+                            window.UniteCMSEventBus.$emit('variantsShouldCollapse', {parent: this.$el.parentElement.parentElement});
+                        }, 2);
                     }, 2);
                 }
             });

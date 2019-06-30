@@ -9,6 +9,8 @@
 namespace UniteCMS\CoreBundle\Form;
 
 use Symfony\Component\Form\DataTransformerInterface;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -34,6 +36,19 @@ class ReferenceType extends WebComponentType implements DataTransformerInterface
     /**
      * {@inheritdoc}
      */
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        parent::buildForm($builder, $options);
+        $builder->add('domain', HiddenType::class);
+        $builder->add('content_type', HiddenType::class);
+        $builder->add('content', HiddenType::class);
+
+        $builder->addModelTransformer($this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
@@ -47,14 +62,25 @@ class ReferenceType extends WebComponentType implements DataTransformerInterface
         parent::configureOptions($resolver);
         $resolver->setDefaults(
             [
+                'compound' => true,
+                'error_bubbling' => false,
                 'tag' => 'unite-cms-core-reference-field',
                 'assets' => [],
                 'empty_data' => [
                     'domain' => null,
                     'content_type' => null,
+                    'content' => null,
                 ],
             ]
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transform($value)
+    {
+        return $value;
     }
 
     /**

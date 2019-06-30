@@ -9,14 +9,22 @@
 namespace UniteCMS\CoreBundle\Subscriber;
 
 use Doctrine\Common\EventArgs;
-use Gedmo\Loggable\Entity\LogEntry;
 use Gedmo\Loggable\LoggableListener as BaseLoggableListener;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
+use UniteCMS\CoreBundle\Entity\DomainAccessor;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 
 class LoggableListener extends BaseLoggableListener
 {
 
     const ACTION_RECOVER = 'recover';
+
+    /**
+     * @var DomainAccessor $user
+     */
+    protected $user;
 
     /**
      * {@inheritdoc}
@@ -55,6 +63,18 @@ class LoggableListener extends BaseLoggableListener
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function setUsername($username)
+    {
+        if(is_object($username) && $username instanceof TokenInterface) {
+            $this->user = $username->getUser();
+        }
+
+        parent::setUsername($username);
+    }
+
+    /**
      * Handle any custom LogEntry functionality that needs to be performed
      * before persisting it
      *
@@ -66,6 +86,16 @@ class LoggableListener extends BaseLoggableListener
         // Set original data from before delete an recover action.
         if ($logEntry->getAction() === self::ACTION_RECOVER && $object instanceof Content) {
            $logEntry->setData(['data' => $object->getData()]);
+        }
+
+        if($logEntry instanceof ContentLogEntry && $this->user instanceof DomainAccessor) {
+
+            // Avoid a circle reference problem when creating new domain members.
+            if(!$object instanceof DomainMember || !$logEntry->getAction() === self::ACTION_CREATE) {
+                $logEntry->setAccessor($this->user);
+            }
+
+
         }
     }
 

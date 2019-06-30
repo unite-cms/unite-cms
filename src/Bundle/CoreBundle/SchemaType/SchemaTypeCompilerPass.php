@@ -24,9 +24,19 @@ class SchemaTypeCompilerPass implements CompilerPassInterface
         $definition = $container->findDefinition('unite.cms.graphql.schema_type_manager');
         $taggedServices = $container->findTaggedServiceIds('unite_cms.graphql.schema_type');
         $taggedFactoryServices = $container->findTaggedServiceIds('unite_cms.graphql.schema_type_factory');
+        $taggedAlterationServices = $container->findTaggedServiceIds('unite_cms.graphql.schema_type_alteration');
+
+        foreach ($taggedAlterationServices as $id => $tags) {
+            $definition->addMethodCall('registerSchemaTypeAlteration', array(new Reference($id)));
+        }
 
         foreach ($taggedServices as $id => $tags) {
-            $definition->addMethodCall('registerSchemaType', array(new Reference($id)));
+            foreach($tags as $arguments) {
+                $definition->addMethodCall('registerSchemaType', array(
+                    new Reference($id),
+                    isset($arguments['detectable']) ? $arguments['detectable'] : null,
+                ));
+            }
         }
 
         foreach ($taggedFactoryServices as $id => $tags) {

@@ -30,21 +30,28 @@
         {% do form.submit.setRendered %}
 
         <header class="uk-card-header uk-flex">
+            <button class="back-button" type="submit" name="{{ form.back.vars.full_name }}">
+                <i data-feather="arrow-left"></i>
+            </button>
             <h2 class="uk-flex-1">{% trans with { '%domain%': unite.domain|escape } %}domain.update.confirm.headline{% endtrans %}</h2>
+            {{ form_widget(form.confirm) }}
+            {% do form.back.setRendered %}
         </header>
 
-        <div class="uk-alert-warning" uk-alert>
-            <p>
-                <i data-feather="alert-triangle" width="24" height="24"></i> {% trans %}domain.update.confirmation{% endtrans %}
-            </p>
-        </div>
-
-        {{ include('@UniteCMSCore/Domain/_change_visualization.html.twig', { original: originalDomain, updated: updatedDomain}) }}
-
-        <p class="uk-text-center">
-            {{ form_widget(form.back, {attr: {class: 'uk-button', style: 'margin: 10px;'}}) }}
-            {{ form_widget(form.confirm, {attr: {style: 'margin: 10px;'}}) }}
-        </p>
+        {% if originalDomainSerialized == updatedDomainSerialized %}
+            <div class="uk-alert-success" uk-alert>
+                <p>
+                    <i data-feather="check-circle" width="24" height="24"></i> {% trans %}domain.update.unchanged{% endtrans %}
+                </p>
+            </div>
+        {% else %}
+            <div class="unite-domain-change-visualization-alert uk-alert-warning" uk-alert>
+                <p>
+                    <i data-feather="alert-triangle" width="24" height="24"></i> {% trans %}domain.update.confirmation{% endtrans %}
+                </p>
+            </div>
+            {{ include('@UniteCMSCore/Domain/_change_visualization.html.twig', { original: originalDomainSerialized, updated: updatedDomainSerialized}) }}
+        {% endif %}
 
     {% endif %}
 

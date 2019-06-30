@@ -6,7 +6,7 @@ os: linux
 
 cache:
   directories:
-    - vendor
+#    - vendor
     - coverage
     - $HOME/.composer/cache/files
 
@@ -19,6 +19,10 @@ addons:
 
 services:
   - mysql
+
+env:
+  global:
+    - SYMFONY_DEPRECATIONS_HELPER=weak
 
 jobs:
   include:
@@ -93,9 +97,9 @@ before_script:
 script:
   - |
     if [[ $COVERAGE_FILTER ]]; then
-      phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER $CMD_APPEND
+      ./vendor/phpunit/phpunit/phpunit --configuration $PHPUNIT_CONF --coverage-clover clover.xml --filter $COVERAGE_FILTER $CMD_APPEND
     else
-      phpunit --configuration $PHPUNIT_CONF
+      ./vendor/phpunit/phpunit/phpunit --configuration $PHPUNIT_CONF
     fi
 
 after_success:

@@ -21,10 +21,10 @@ class GraphQLDoctrineFilterQueryBuilderTest extends TestCase
 
         $builder = new GraphQLDoctrineFilterQueryBuilder(['field' => 'id', 'operator' => '=', 'value' => 123], ['id', 'locale'], 'c');
 
-        $this->assertEquals(['graphql_filter_builder_parameter1' => 123], $builder->getParameters());
+        $this->assertEquals(['graphql_filter_builder_parameter_'.spl_object_id($builder).'_1' => 123], $builder->getParameters());
         $filter = $builder->getFilter();
         $this->assertInstanceOf(Comparison::class, $filter);
-        $this->assertEquals("c.id = :graphql_filter_builder_parameter1", (string)$filter);
+        $this->assertEquals("c.id = :graphql_filter_builder_parameter_".spl_object_id($builder)."_1", (string)$filter);
 
         $builder = new GraphQLDoctrineFilterQueryBuilder([
             'OR' => [
@@ -33,10 +33,10 @@ class GraphQLDoctrineFilterQueryBuilderTest extends TestCase
             ]
         ], ['id', 'locale'], 'c');
 
-        $this->assertEquals(['graphql_filter_builder_parameter1' => 123, 'graphql_filter_builder_parameter2' => '%value%'], $builder->getParameters());
+        $this->assertEquals(['graphql_filter_builder_parameter_'.spl_object_id($builder).'_1' => 123, 'graphql_filter_builder_parameter_'.spl_object_id($builder).'_2' => '%value%'], $builder->getParameters());
         $filter = $builder->getFilter();
         $this->assertInstanceOf(Orx::class, $filter);
-        $this->assertEquals("c.id = :graphql_filter_builder_parameter1 OR JSON_EXTRACT(c.data, '$.any_field') LIKE :graphql_filter_builder_parameter2", (string)$filter);
+        $this->assertEquals("c.id = :graphql_filter_builder_parameter_".spl_object_id($builder)."_1 OR JSON_EXTRACT(c.data, '$.any_field') LIKE :graphql_filter_builder_parameter_".spl_object_id($builder)."_2", (string)$filter);
 
 
         $builder = new GraphQLDoctrineFilterQueryBuilder([
@@ -46,10 +46,35 @@ class GraphQLDoctrineFilterQueryBuilderTest extends TestCase
             ]
         ], ['id', 'locale'], 'c');
 
-        $this->assertEquals(['graphql_filter_builder_parameter1' => 123, 'graphql_filter_builder_parameter2' => '%value%'], $builder->getParameters());
+        $this->assertEquals(['graphql_filter_builder_parameter_'.spl_object_id($builder).'_1' => 123, 'graphql_filter_builder_parameter_'.spl_object_id($builder).'_2' => '%value%'], $builder->getParameters());
         $filter = $builder->getFilter();
         $this->assertInstanceOf(Andx::class, $filter);
-        $this->assertEquals("c.id = :graphql_filter_builder_parameter1 AND JSON_EXTRACT(c.data, '$.any_field') LIKE :graphql_filter_builder_parameter2", (string)$filter);
+        $this->assertEquals("c.id = :graphql_filter_builder_parameter_".spl_object_id($builder)."_1 AND JSON_EXTRACT(c.data, '$.any_field') LIKE :graphql_filter_builder_parameter_".spl_object_id($builder)."_2", (string)$filter);
+
+        $builder = new GraphQLDoctrineFilterQueryBuilder([
+            'OR' => [
+                ['field' => 'id', 'operator' => '=', 'value' => 123],
+                ['field' => 'any_field', 'operator' => 'ILIKE', 'value' => '%value%']
+            ]
+        ], ['id', 'locale'], 'c');
+
+        $this->assertEquals(['graphql_filter_builder_parameter_'.spl_object_id($builder).'_1' => 123, 'graphql_filter_builder_parameter_'.spl_object_id($builder).'_2' => '%value%'], $builder->getParameters());
+        $filter = $builder->getFilter();
+        $this->assertInstanceOf(Orx::class, $filter);
+        $this->assertEquals("c.id = :graphql_filter_builder_parameter_".spl_object_id($builder)."_1 OR LOWER(JSON_EXTRACT(c.data, '$.any_field')) LIKE LOWER(:graphql_filter_builder_parameter_".spl_object_id($builder)."_2)", (string)$filter);
+
+
+        $builder = new GraphQLDoctrineFilterQueryBuilder([
+            'AND' => [
+                ['field' => 'id', 'operator' => '=', 'value' => 123],
+                ['field' => 'any_field', 'operator' => 'ILIKE', 'value' => '%value%']
+            ]
+        ], ['id', 'locale'], 'c');
+
+        $this->assertEquals(['graphql_filter_builder_parameter_'.spl_object_id($builder).'_1' => 123, 'graphql_filter_builder_parameter_'.spl_object_id($builder).'_2' => '%value%'], $builder->getParameters());
+        $filter = $builder->getFilter();
+        $this->assertInstanceOf(Andx::class, $filter);
+        $this->assertEquals("c.id = :graphql_filter_builder_parameter_".spl_object_id($builder)."_1 AND LOWER(JSON_EXTRACT(c.data, '$.any_field')) LIKE LOWER(:graphql_filter_builder_parameter_".spl_object_id($builder)."_2)", (string)$filter);
     }
 
     public function testBuildingComplexNestedFilter() {
@@ -59,24 +84,24 @@ class GraphQLDoctrineFilterQueryBuilderTest extends TestCase
                 ['field' => 'id', 'operator' => '=', 'value' => 123],
                 ['OR' => [
                     ['field' => 'locale', 'operator' => 'LIKE', 'value' => '%foo%'],
-                    ['field' => 'locale', 'operator' => 'LIKE', 'value' => '%baa%'],
+                    ['field' => 'locale', 'operator' => 'ILIKE', 'value' => '%baa%'],
                     ['AND' => [
                         ['field' => 'locale', 'operator' => 'LIKE', 'value' => '%foo2%'],
-                        ['field' => 'locale', 'operator' => 'LIKE', 'value' => '%baa2%'],
+                        ['field' => 'locale', 'operator' => 'ILIKE', 'value' => '%baa2%'],
                     ]]
                 ]]
             ]
         ], ['id', 'locale'], 'c');
 
         $this->assertEquals([
-            'graphql_filter_builder_parameter1' => 123,
-            'graphql_filter_builder_parameter2' => '%foo%',
-            'graphql_filter_builder_parameter3' => '%baa%',
-            'graphql_filter_builder_parameter4' => '%foo2%',
-            'graphql_filter_builder_parameter5' => '%baa2%',
+            'graphql_filter_builder_parameter_'.spl_object_id($builder).'_1' => 123,
+            'graphql_filter_builder_parameter_'.spl_object_id($builder).'_2' => '%foo%',
+            'graphql_filter_builder_parameter_'.spl_object_id($builder).'_3' => '%baa%',
+            'graphql_filter_builder_parameter_'.spl_object_id($builder).'_4' => '%foo2%',
+            'graphql_filter_builder_parameter_'.spl_object_id($builder).'_5' => '%baa2%',
         ], $builder->getParameters());
         $filter = $builder->getFilter();
         $this->assertInstanceOf(Andx::class, $filter);
-        $this->assertEquals("c.id = :graphql_filter_builder_parameter1 AND (c.locale LIKE :graphql_filter_builder_parameter2 OR c.locale LIKE :graphql_filter_builder_parameter3 OR (c.locale LIKE :graphql_filter_builder_parameter4 AND c.locale LIKE :graphql_filter_builder_parameter5))", (string)$filter);
+        $this->assertEquals("c.id = :graphql_filter_builder_parameter_".spl_object_id($builder)."_1 AND (c.locale LIKE :graphql_filter_builder_parameter_".spl_object_id($builder)."_2 OR LOWER(c.locale) LIKE LOWER(:graphql_filter_builder_parameter_".spl_object_id($builder)."_3) OR (c.locale LIKE :graphql_filter_builder_parameter_".spl_object_id($builder)."_4 AND LOWER(c.locale) LIKE LOWER(:graphql_filter_builder_parameter_".spl_object_id($builder)."_5)))", (string)$filter);
     }
 }

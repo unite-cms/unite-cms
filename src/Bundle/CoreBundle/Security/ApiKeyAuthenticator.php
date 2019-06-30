@@ -24,7 +24,15 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        return $request->headers->has('Authorization') || $request->query->has('token');
+        if(!$request->headers->has('Authorization') && !$request->query->has('token')) {
+            return false;
+        }
+
+        if(!empty($this->getCredentials($request))) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -40,8 +48,10 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
                 return substr($authentication, strlen($prefix));
             }
 
-            // If token do not start with Bearer, just return the whole string.
-            return $authentication;
+            // If token do not start with Bearer and also has no other prefix, just return the token.
+            if(count(explode(' ', $authentication)) === 1) {
+                return $authentication;
+            }
         }
 
         // Try to get the token from query get parameter.

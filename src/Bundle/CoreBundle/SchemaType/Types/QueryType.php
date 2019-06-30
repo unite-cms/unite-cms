@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query\Expr\Join;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -10,8 +11,12 @@ use Knp\Component\Pager\Pagination\AbstractPagination;
 use Knp\Component\Pager\Paginator;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Entity\DomainAccessor;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
 use UniteCMS\CoreBundle\Security\Voter\SettingVoter;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
@@ -77,7 +82,7 @@ class QueryType extends AbstractType
     {
         $fields = [];
         $fields['find'] = [
-            'type' => $this->schemaTypeManager->getSchemaType('ContentResultInterface'),
+            'type' => $this->schemaTypeManager->getSchemaType('FieldableContentResult', $this->uniteCMSManager->getDomain()),
             'args' => [
                 'limit' => [
                     'type' => Type::int(),
@@ -111,6 +116,12 @@ class QueryType extends AbstractType
 
         // Append Content types.
         foreach ($this->uniteCMSManager->getDomain()->getContentTypes() as $contentType) {
+
+            // If the current user is not allowed to access this content type, skip adding a get and find action.
+            if(!$this->authorizationChecker->isGranted(ContentVoter::LIST, $contentType)) {
+                continue;
+            }
+
             $key = IdentifierNormalizer::graphQLType($contentType, '');
             $fields['get' . $key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key . 'Content', $this->uniteCMSManager->getDomain()),
@@ -152,8 +163,58 @@ class QueryType extends AbstractType
             ];
         }
 
+        // Append Domain Member types.
+        foreach ($this->uniteCMSManager->getDomain()->getDomainMemberTypes() as $domainMemberType) {
+
+            // If the current user is not allowed to access this content type, skip adding a get and find action.
+            if(!$this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $domainMemberType)) {
+                continue;
+            }
+
+            $key = IdentifierNormalizer::graphQLType($domainMemberType, '');
+            $fields['get' . $key . 'Member'] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'Member', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'id' => [
+                        'type' => Type::nonNull(Type::id()),
+                        'description' => 'The id of the domain member item to get.',
+                    ],
+                ],
+            ];
+
+            $fields['find' . $key . 'Member'] = [
+                'type' => $this->schemaTypeManager->getSchemaType($key . 'MemberResult', $this->uniteCMSManager->getDomain()),
+                'args' => [
+                    'limit' => [
+                        'type' => Type::int(),
+                        'description' => 'Set maximal number of domain member items to return.',
+                        'defaultValue' => 20,
+                    ],
+                    'page' => [
+                        'type' => Type::int(),
+                        'description' => 'Set the pagination page to get the domain member from.',
+                        'defaultValue' => 1,
+                    ],
+                    'sort' => [
+                        'type' => Type::listOf($this->schemaTypeManager->getSchemaType('SortInput')),
+                        'description' => 'Set one or many fields to sort by.',
+                    ],
+                    'filter' => [
+                        'type' => $this->schemaTypeManager->getSchemaType('FilterInput'),
+                        'description' => 'Set one optional filter condition.',
+                    ],
+                ],
+            ];
+        }
+
         // Append Setting types.
         foreach ($this->uniteCMSManager->getDomain()->getSettingTypes() as $settingType) {
+
+            // If the current user is not allowed to access this setting, skip adding a get action.
+            if(!$this->authorizationChecker->isGranted(SettingVoter::VIEW, $settingType)) {
+                continue;
+            }
+
             $key = IdentifierNormalizer::graphQLType($settingType);
             $fields[$key] = [
                 'type' => $this->schemaTypeManager->getSchemaType($key, $this->uniteCMSManager->getDomain()),
@@ -182,15 +243,31 @@ class QueryType extends AbstractType
 
             $id = $args['id'];
 
-            if(!$content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id)) {
-                throw new UserError("Content with id '$id' was not found.");
+            // Resolve get domainMember
+            if(substr($info->fieldName, -strlen('Member')) === 'Member' && $info->fieldName !== 'getMember') {
+                if(!$domainMember = $this->entityManager->getRepository('UniteCMSCoreBundle:DomainMember')->find($id)) {
+                    throw new UserError("DomainMember with id '$id' was not found.");
+                }
+
+                if ($domainMember && !$this->authorizationChecker->isGranted(DomainMemberVoter::VIEW, $domainMember)) {
+                    throw new UserError("You are not allowed to view domain member with id '$id'.");
+                }
+
+                return $domainMember;
             }
 
-            if ($content && !$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
-                throw new UserError("You are not allowed to view content with id '$id'.");
-            }
+            // Resolve get content
+            else {
+                if(!$content = $this->entityManager->getRepository('UniteCMSCoreBundle:Content')->find($id)) {
+                    throw new UserError("Content with id '$id' was not found.");
+                }
 
-            return $content;
+                if ($content && !$this->authorizationChecker->isGranted(ContentVoter::VIEW, $content)) {
+                    throw new UserError("You are not allowed to view content with id '$id'.");
+                }
+
+                return $content;
+            }
         }
 
         // Resolve single setting type.
@@ -212,14 +289,24 @@ class QueryType extends AbstractType
 
         // Resolve list content type.
         elseif(substr($info->fieldName, 0, 4) == 'find' && strlen($info->fieldName) > 4) {
+
             $identifier = IdentifierNormalizer::fromGraphQLFieldName($info->fieldName);
             $args['types'] = [$identifier];
-            return $this->resolveFindContent(IdentifierNormalizer::graphQLType($identifier, 'ContentResult'),  $value, $args, $context, $info);
+
+            // Resolve get domainMember
+            if(substr($info->fieldName, -strlen('Member')) === 'Member' && $info->fieldName !== 'findMember') {
+                return $this->resolveFindDomainMember(IdentifierNormalizer::graphQLType($identifier, 'MemberResult'),  $value, $args, $context, $info);
+            }
+
+            // Resolve get content type
+            else {
+                return $this->resolveFindContent(IdentifierNormalizer::graphQLType($identifier, 'ContentResult'),  $value, $args, $context, $info);
+            }
         }
 
         // Resolve generic find type
         elseif(substr($info->fieldName, 0, 4) == 'find' && strlen($info->fieldName) == 4) {
-            return $this->resolveFindContent('ContentResult', $value, $args, $context, $info);
+            return $this->resolveFindContent('FieldableContentResult', $value, $args, $context, $info);
         }
 
         return null;
@@ -274,14 +361,14 @@ class QueryType extends AbstractType
                 $key = $sort['field'];
                 $order = $sort['order'];
 
-                // if we sort by a content field.
-                if (in_array($key, $contentEntityFields)) {
-                    $contentQuery->addOrderBy('c.'.$key, $order);
+                // We can sort by a entity field or a nested data field.
+                $sortField = in_array($key, $contentEntityFields) ? 'c.'.$key : "JSON_EXTRACT(c.data, '$.$key')";
 
-                // if we sort by a nested content data field.
-                } else {
-                    $contentQuery->addOrderBy("JSON_EXTRACT(c.data, '$.$key')", $order);
+                if(!empty($sort['ignore_case'])) {
+                    $sortField = 'LOWER(' . $sortField . ')';
                 }
+
+                $contentQuery->addOrderBy($sortField, $order);
             }
         }
 
@@ -315,5 +402,131 @@ class QueryType extends AbstractType
         }
 
         return $pagination;
+    }
+
+    /**
+     * Resolve the domain member results.
+     *
+     * @param $resultType
+     * @param $value
+     * @param array $args
+     * @param $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     *
+     * @return mixed
+     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
+     * @throws \Doctrine\ORM\Query\QueryException
+     */
+    private function resolveFindDomainMember($resultType, $value, array $args, $context, ResolveInfo $info) : AbstractPagination
+    {
+        $args['types'] = $args['types'] ?? [];
+        $args['limit'] = $args['limit'] < 0 ? 0 : $args['limit'];
+        $args['limit'] = $args['limit'] > $this->maximumQueryLimit ? $this->maximumQueryLimit : $args['limit'];
+        $args['page'] = $args['page'] < 1 ? 1 : $args['page'];
+
+        // Get all requested contentTypes, the user can access.
+        $domainMemberTypes = [];
+        foreach($this->entityManager->getRepository('UniteCMSCoreBundle:DomainMemberType')->findBy([
+            'identifier' => $args['types'],
+            'domain' => $this->uniteCMSManager->getDomain(),
+        ]) as $domainMemberType) {
+            if ($this->authorizationChecker->isGranted(DomainMemberVoter::LIST, $domainMemberType)) {
+                $domainMemberTypes[] = $domainMemberType;
+            }
+        }
+
+
+        // Get content from all domainMemberTypes
+        $domainMemberEntityFields = $this->entityManager->getClassMetadata(DomainMember::class)->getFieldNames();
+        $contentQuery = $this->entityManager->getRepository(
+            'UniteCMSCoreBundle:DomainMember'
+        )->createQueryBuilder('m')
+            ->select('m')
+            ->where('m.domainMemberType IN (:domainMemberTypes)')
+            ->setParameter(':domainMemberTypes', $domainMemberTypes);
+
+        $usedJoins = [];
+
+        // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
+        if (!empty($args['sort'])) {
+            foreach ($args['sort'] as $sort) {
+
+                $key = $sort['field'];
+                $order = $sort['order'];
+                $sortFields = [];
+
+                // if we sort by a content field.
+                if (in_array($key, $domainMemberEntityFields)) {
+                    $sortFields[] = 'm.' . $key;
+
+                    // if we sort by special _name field
+                } elseif($key === '_name') {
+
+                    foreach($this->entityManager->getClassMetadata(DomainAccessor::class)->discriminatorMap as $key => $class) {
+                        if(!in_array($key, $usedJoins)) {
+                            $contentQuery->leftJoin($class, $key, 'WITH', $key.'.id = m.accessor');
+                            $usedJoins[] = $key;
+                        }
+                        $sortFields[] = $key . '.' . $class::getNameField();
+                    }
+
+                    // if we sort by a nested content data field.
+                } else {
+                    $sortFields[] = "JSON_EXTRACT(c.data, '$.$key')";
+                }
+
+                foreach($sortFields as $sortField) {
+                    if(!empty($sort['ignore_case'])) {
+                        $sortField = 'LOWER(' . $sortField . ')';
+                    }
+                    $contentQuery->addOrderBy($sortField, $order);
+                }
+            }
+        }
+
+        // Adding where filter to the query.
+        if (!empty($args['filter'])) {
+
+            // Domain members have a reference to domain accessors, that is an abstract entity and implemented by different entities.
+            // In order to allow to filter by name, we need to do different joins.
+            $accessorJoins = [];
+            $accessorNameFields = [];
+            foreach($this->entityManager->getClassMetadata(DomainAccessor::class)->discriminatorMap as $key => $class) {
+                $accessorJoins[] = new Join(Join::LEFT_JOIN, $class, $key, 'WITH', $key . '.id = m.accessor');
+                $accessorNameFields[] = $key . '.' . $class::getNameField();
+            }
+
+
+            // The filter array can contain a direct filter or multiple nested AND or OR filters. But only one of this cases.
+            $a = new GraphQLDoctrineFilterQueryBuilder($args['filter'], $domainMemberEntityFields, 'm', $accessorJoins, function(array $filterInput) use ($accessorNameFields) {
+                if(!empty($filterInput['field']) && $filterInput['field'] === '_name') {
+                    $filter = ['OR' => []];
+                    foreach($accessorNameFields as $field) {
+                        $filter['OR'][] = [
+                            'field' => $field,
+                            'operator' => $filterInput['operator'],
+                            'value' => $filterInput['value'],
+                        ];
+                    }
+                    return $filter;
+                }
+                return $filterInput;
+            });
+            $contentQuery->andWhere($a->getFilter());
+
+            foreach($a->getParameters() as $parameter => $value) {
+                $contentQuery->setParameter($parameter, $value);
+            }
+
+            foreach($a->getJoins() as $join) {
+                if(!in_array($join->getAlias(), $usedJoins)) {
+                    $contentQuery->leftJoin($join->getJoin(), $join->getAlias(), $join->getConditionType(), $join->getCondition(), $join->getIndexBy());
+                    $usedJoins[] = $join->getAlias();
+                }
+            }
+        }
+
+        // Get all content in one request for all contentTypes.
+        return $this->paginator->paginate($contentQuery, $args['page'], $args['limit'], ['alias' => $resultType]);
     }
 }

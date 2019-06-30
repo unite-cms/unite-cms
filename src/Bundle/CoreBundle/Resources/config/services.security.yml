@@ -38,7 +38,15 @@ services:
     public: false
     tags: [security.voter]
 
+  UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter:
+    public: false
+    tags: [security.voter]
+
   UniteCMS\CoreBundle\Security\Voter\SettingVoter:
+    public: false
+    tags: [security.voter]
+
+  UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter:
     public: false
     tags: [security.voter]
 

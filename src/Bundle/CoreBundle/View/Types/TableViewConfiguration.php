@@ -36,10 +36,16 @@ class TableViewConfiguration implements ConfigurationInterface
      */
     protected $fieldTypeManager;
 
-    public function __construct(Fieldable $fieldable, FieldTypeManager $fieldTypeManager)
+    /**
+     * @var int $maxQueryLimit
+     */
+    protected $maxQueryLimit;
+
+    public function __construct(Fieldable $fieldable, FieldTypeManager $fieldTypeManager, int $maxQueryLimit = 100)
     {
         $this->fieldable = $fieldable;
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->maxQueryLimit = $maxQueryLimit;
     }
 
     /**
@@ -49,8 +55,8 @@ class TableViewConfiguration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $treeBuilder->root('settings')
+        $treeBuilder = new TreeBuilder('settings');
+        $treeBuilder->getRootNode()
 
             ->beforeNormalization()->always(\Closure::fromCallable([$this, 'handleDeprecatedConfig']))->end()
             ->beforeNormalization()->always(\Closure::fromCallable([$this, 'normalizeConfig']))->end()
@@ -58,7 +64,9 @@ class TableViewConfiguration implements ConfigurationInterface
             ->children()
                 ->append($this->appendFieldsNode())
                 ->append($this->appendFilterNode())
+                ->append($this->appendRowsPerPageNode())
                 ->append($this->appendSortNode())
+                ->append($this->appendActionsNode())
                 ->variableNode('sort_field')->setDeprecated()->end()
                 ->variableNode('sort_asc')->setDeprecated()->end()
                 ->variableNode('columns')->setDeprecated()->end()
@@ -68,8 +76,8 @@ class TableViewConfiguration implements ConfigurationInterface
     }
 
     protected function appendFieldsNode() : ArrayNodeDefinition {
-        $treeBuilder = new TreeBuilder();
-        return $treeBuilder->root('fields')
+        $treeBuilder = new TreeBuilder('fields');
+        return $treeBuilder->getRootNode()
             ->beforeNormalization()
                 ->ifArray()->then(\Closure::fromCallable([$this, 'normalizeFields']))
             ->end()
@@ -83,9 +91,10 @@ class TableViewConfiguration implements ConfigurationInterface
                 ->end()
             ->end();
     }
+
     protected function appendFilterNode() : VariableNodeDefinition {
-        $treeBuilder = new TreeBuilder();
-        return $treeBuilder->root('filter', 'variable')
+        $treeBuilder = new TreeBuilder('filter', 'variable');
+        return $treeBuilder->getRootNode()
             ->validate()
                 ->always(
                     function ($v) {
@@ -116,13 +125,56 @@ class TableViewConfiguration implements ConfigurationInterface
                 )
             ->end();
     }
+
+    protected function appendRowsPerPageNode() : VariableNodeDefinition {
+        $treeBuilder = new TreeBuilder('rows_per_page', 'scalar');
+        return $treeBuilder->getRootNode()
+            ->validate()
+                ->always(
+                    function ($v) {
+                        if (!is_int($v)) {
+                            $exception = new InvalidConfigurationException('Invalid rows_per_page configuration - must be an integer');
+                            $exception->setPath('rows_per_page');
+                            throw $exception;
+                        }
+
+                        if ($v > $this->maxQueryLimit) {
+                            $exception = new InvalidConfigurationException(
+                                "Invalid rows_per_page configuration - must be within max_query_limit of {$this->maxQueryLimit}"
+                            );
+                            $exception->setPath('rows_per_page');
+                            throw $exception;
+                        }
+
+                        return $v;
+                    }
+                )
+            ->end();
+    }
+
     protected function appendSortNode() : ArrayNodeDefinition {
-        $treeBuilder = new TreeBuilder();
-        return $treeBuilder->root('sort')
+        $treeBuilder = new TreeBuilder('sort');
+        return $treeBuilder->getRootNode()
             ->children()
                 ->scalarNode('field')->isRequired()->end()
                 ->booleanNode('asc')->treatNullLike(false)->end()
                 ->booleanNode('sortable')->end()
+            ->end();
+    }
+
+    protected function appendActionsNode() : ArrayNodeDefinition {
+        $treeBuilder = new TreeBuilder('actions');
+        return $treeBuilder->getRootNode()
+            ->beforeNormalization()
+                ->ifArray()->then(\Closure::fromCallable([$this, 'normalizeActions']))
+            ->end()
+            ->arrayPrototype()
+                ->children()
+                    ->scalarNode('url')->isRequired()->end()
+                    ->scalarNode('label')->defaultValue('')->end()
+                    ->scalarNode('target')->defaultValue('_self')->end()
+                    ->scalarNode('icon')->defaultValue('file')->end()
+                ->end()
             ->end();
     }
 
@@ -244,6 +296,46 @@ class TableViewConfiguration implements ConfigurationInterface
         return $transformed;
     }
 
+    protected function normalizeActions(array $actions) : array {
+        $transformed = [];
+        foreach ($actions as $index => $action) {
+
+            if (!isset($action['url'])) {
+                $exception = new InvalidConfigurationException('No Action Url given!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            if (!filter_var($action['url'], FILTER_VALIDATE_URL) or strlen($action['url']) > 255) {
+                $exception = new InvalidConfigurationException('Invalid Action Url given!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            if (isset($action['label']) && (!is_string($action['label']) or strlen($action['label']) > 255)) {
+                $exception = new InvalidConfigurationException('Invalid Action Label given!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            if (isset($action['target']) && (!in_array($action['target'], ['_self', '_blank']))) {
+                $exception = new InvalidConfigurationException('Invalid Action Target given, the allowed options are "_self" and "_target"!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            if (isset($action['icon']) && (!is_string($action['icon']) or strlen($action['icon']) > 255)) {
+                $exception = new InvalidConfigurationException('Invalid Action Icon given!');
+                $exception->setPath($index);
+                throw $exception;
+            }
+
+            $transformed[$index] = $action;
+        }
+
+        return $transformed;
+    }
+
     private function defaultFieldConfig(array $config, string $field) : array
     {
         // Handle content type properties.
@@ -265,7 +357,9 @@ class TableViewConfiguration implements ConfigurationInterface
         }
 
         $type = $config['type'] ?? $fieldEntity->getType();
-        $this->fieldTypeManager->getFieldType($type)->alterViewFieldSettings($config, $this->fieldTypeManager, $fieldEntity);
+        if($this->fieldTypeManager->hasFieldType($type)) {
+            $this->fieldTypeManager->getFieldType($type)->alterViewFieldSettings($config, $this->fieldTypeManager, $fieldEntity);
+        }
         return $config;
     }
 }

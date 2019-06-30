@@ -2,20 +2,22 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use Knp\Component\Pager\PaginatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\Router;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
@@ -24,34 +26,37 @@ use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
+use UniteCMS\CoreBundle\Exception\NotValidException;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
+use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
-use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
+use UniteCMS\CoreBundle\Service\FieldableContentManager;
 
-class DomainMemberController extends Controller
+class DomainMemberController extends AbstractController
 {
     /**
      * @Route("/{member_type}", methods={"GET"})
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::LIST'), memberType)")
      *
      * @param Organization $organization
      * @param Domain $domain
      * @param DomainMemberType $memberType
      * @param Request $request
+     * @param PaginatorInterface $paginator
      * @return Response
      */
-    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request)
+    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request, PaginatorInterface $paginator)
     {
-        $members = $this->get('knp_paginator')->paginate($memberType->getDomainMembers(),
+        $members = $paginator->paginate($memberType->getDomainMembers(),
             $request->query->getInt('page_members', 1),
             10,
             ['pageParameterName' => 'page_members', 'sortDirectionParameterName' => 'sort_members']
         );
 
-        $invites = $this->get('knp_paginator')->paginate($memberType->getInvites(),
+        $invites = $paginator->paginate($memberType->getInvites(),
             $request->query->getInt('page_invites', 1),
             10,
             ['pageParameterName' => 'page_invites', 'sortDirectionParameterName' => 'sort_invites']
@@ -74,15 +79,21 @@ class DomainMemberController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::CREATE'), memberType)")
      *
      * @param Organization $organization
      * @param Domain $domain
      * @param DomainMemberType $memberType
      * @param Request $request
+     * @param TranslatorInterface $translator
+     * @param FormFactoryInterface $formFactory
+     * @param ValidatorInterface $validator
+     * @param \Swift_Mailer $mailer
+     * @param string $mailerSender
      * @return Response
+     * @throws \Exception
      */
-    public function createAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request)
+    public function createAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request, TranslatorInterface $translator, FormFactoryInterface $formFactory, ValidatorInterface $validator, \Swift_Mailer $mailer, string $mailerSender)
     {
         // Get a list of ids of all accessors, that are already member of this domain.
         $domain_member_type_members = [];
@@ -99,14 +110,16 @@ class DomainMemberController extends Controller
         ] as $type => $icon) {
             $add_types[] = new ChoiceCardOption(
                 $type,
-                $this->get('translator')->trans('domain.member.create.headline.' . $type),
-                $this->get('translator')->trans('domain.member.create.text.' . $type),
+                $translator->trans('domain.member.create.headline.' . $type),
+                [
+                    'description' => $translator->trans('domain.member.create.text.' . $type)
+                ],
                 $icon
             );
         }
 
         // Create the two-step create form.
-        $form = $this->get('form.factory')->createNamedBuilder(
+        $form = $formFactory->createNamedBuilder(
                 'create_domain_user',
                 FormType::class,
                 null,
@@ -172,7 +185,7 @@ class DomainMemberController extends Controller
                     $member->setAccessor($data['existing_api_key']);
                 }
 
-                $violations = $this->get('validator')->validate($member);
+                $violations = $validator->validate($member);
                 if($violations->count() > 0) {
                     $violationMapper = new ViolationMapper();
                     foreach ($violations as $violation) {
@@ -194,7 +207,7 @@ class DomainMemberController extends Controller
                 $invitation->setDomainMemberType($memberType);
                 $invitation->setEmail($data['invite_user']);
 
-                $violations = $this->get('validator')->validate($invitation);
+                $violations = $validator->validate($invitation);
                 if($violations->count() > 0) {
                     $violationMapper = new ViolationMapper();
                     foreach ($violations as $violation) {
@@ -205,8 +218,8 @@ class DomainMemberController extends Controller
                     $this->getDoctrine()->getManager()->flush();
 
                     // Send out email using the default mailer.
-                    $message = (new \Swift_Message($this->get('translator')->trans('email.invitation.headline', ['%invitor%' => $this->getUser()])))
-                        ->setFrom($this->getParameter('mailer_sender'))
+                    $message = (new \Swift_Message($translator->trans('email.invitation.headline', ['%invitor%' => $this->getUser()])))
+                        ->setFrom($mailerSender)
                         ->setTo($invitation->getEmail())
                         ->setBody(
                             $this->renderView(
@@ -218,7 +231,7 @@ class DomainMemberController extends Controller
                             ),
                             'text/html'
                         );
-                    $this->get('mailer')->send($message);
+                    $mailer->send($message);
 
                     return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
                 }
@@ -241,8 +254,8 @@ class DomainMemberController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
-     * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
+     * @Entity("member")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::UPDATE'), member)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -250,11 +263,13 @@ class DomainMemberController extends Controller
      * @param \UniteCMS\CoreBundle\Entity\DomainMember $member
      * @param Request $request
      *
+     * @param FieldableFormBuilder $fieldableFormBuilder
+     * @param ValidatorInterface $validator
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function updateAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
+    public function updateAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request, FieldableFormBuilder $fieldableFormBuilder, ValidatorInterface $validator)
     {
-        $form = $this->get('unite.cms.fieldable_form_builder')->createForm(
+        $form = $fieldableFormBuilder->createForm(
             $memberType,
             $member,
             ['attr' => ['class' => 'uk-form-vertical']]
@@ -264,10 +279,11 @@ class DomainMemberController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $member->setData($form->getData());
+            // Assign data to content object.
+            $fieldableFormBuilder->assignDataToFieldableContent($member, $form->getData());
 
             // If member field errors were found, map them to the form.
-            $violations = $this->get('validator')->validate($member);
+            $violations = $validator->validate($member);
 
             if (count($violations) > 0) {
                 $violationMapper = new ViolationMapper();
@@ -299,8 +315,8 @@ class DomainMemberController extends Controller
      * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
-     * @ParamConverter("member")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
+     * @Entity("member")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::DELETE'), member)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -308,9 +324,10 @@ class DomainMemberController extends Controller
      * @param \UniteCMS\CoreBundle\Entity\DomainMember $member
      * @param Request $request
      *
+     * @param FieldableContentManager $contentManager
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function deleteAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request)
+    public function deleteAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, Request $request, FieldableContentManager $contentManager)
     {
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, [
@@ -319,11 +336,14 @@ class DomainMemberController extends Controller
             ])->getForm();
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->remove($member);
-            $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
+        if($form->isSubmitted() && $form->isValid()) {
+            try {
+                $member = $contentManager->delete($member, true);
+                $this->addFlash('success', 'Member deleted.');
+                return $this->redirect($this->generateUrl('unitecms_core_domainmember_index', [$memberType]));
+            } catch (NotValidException $exception) {
+                $exception->mapToForm($form);
+            }
         }
 
         return $this->render(
@@ -344,7 +364,7 @@ class DomainMemberController extends Controller
      * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
      * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
      * @ParamConverter("invite")
-     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainVoter::UPDATE'), domain)")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::CREATE'), memberType)")
      *
      * @param Organization $organization
      * @param Domain $domain
@@ -383,6 +403,74 @@ class DomainMemberController extends Controller
                 'memberType' => $memberType,
                 'form' => $form->createView(),
                 'invite' => $invite,
+            ]
+        );
+    }
+
+    /**
+     * @Route("/{member_type}/revisions/{member}", methods={"GET"})
+     * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
+     * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
+     * @Entity("member")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::UPDATE'), member)")
+     *
+     * @param DomainMemberType $memberType
+     * @param DomainMember $member
+     * @param FieldableContentManager $contentManager
+     * @return Response
+     */
+    public function revisionsAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, FieldableContentManager $contentManager)
+    {
+        return $this->render(
+            '@UniteCMSCore/Domain/Member/revisions.html.twig',
+            [
+                'memberType' => $memberType,
+                'member' => $member,
+                'revisions' => $contentManager->getRevisions($member),
+            ]
+        );
+    }
+
+    /**
+     * @Route("/{member_type}/revisions/{member}/revert/{version}", methods={"GET", "POST"})
+     * @ParamConverter("organization", options={"mapping": {"organization": "identifier"}})
+     * @ParamConverter("domain", options={"mapping": {"organization": "organization", "domain": "identifier"}})
+     * @Entity("memberType", expr="repository.findByIdentifiers(organization.getIdentifier(), domain.getIdentifier(), member_type)")
+     * @Entity("member")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\DomainMemberVoter::UPDATE'), member)")
+     *
+     * @param Organization $organization
+     * @param Domain $domain
+     * @param DomainMemberType $memberType
+     * @param DomainMember $member
+     * @param int $version
+     * @param Request $request
+     * @param FieldableContentManager $contentManager
+     * @return Response
+     */
+    public function revisionsRevertAction(Organization $organization, Domain $domain, DomainMemberType $memberType, DomainMember $member, int $version, Request $request, FieldableContentManager $contentManager)
+    {
+        $form = $this->createFormBuilder()
+            ->add('submit', SubmitType::class, ['label' => 'member.revisions.revert.submit'])
+            ->getForm();
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            $contentManager->revert($member, $version, true);
+            $this->addFlash('success', 'Member reverted.');
+            return $this->redirect($this->generateUrl('unitecms_core_domainmember_revisions', [$member]));
+        }
+
+        return $this->render(
+            '@UniteCMSCore/Domain/Member/revertRevision.html.twig',
+            [
+                'organization' => $organization,
+                'domain' => $domain,
+                'memberType' => $memberType,
+                'content' => $member,
+                'version' => $version,
+                'form' => $form->createView(),
             ]
         );
     }

@@ -4,6 +4,7 @@ namespace UniteCMS\VariantsFieldBundle\Tests;
 
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UniteCMS\CoreBundle\Entity\Content;
+use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\User;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Tests\Field\FieldTypeTestCase;
@@ -94,7 +95,9 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'identifier' => 'any',
                             'fields' => 'foo',
                             'icon' => 'test',
-                            'description' => 'Foo',
+                            'settings' => [
+                                'description' => 'Foo',
+                            ],
                         ]
                     ],
                 ]
@@ -223,14 +226,14 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'title' => 'Foo',
                             'identifier' => 'foo',
                             'fields' => [
-                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'text'],
+                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'text', 'permissions' => ['list field' => 'false', 'view field' => 'false', 'update field' => 'false']],
                             ],
                         ],
                         [
                             'title' => 'Baa',
                             'identifier' => 'baa',
                             'fields' => [
-                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'text'],
+                                ['title' => 'Foo', 'identifier' => 'foo', 'type' => 'text', 'permissions' => ['list field' => 'false', 'view field' => 'false', 'update field' => 'false']],
                             ],
                         ]
                     ],
@@ -269,9 +272,12 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                             'identifier' => 'foo',
                             'fields' => [],
                             'icon' => 'test',
-                            'description' => 'Foo',
+                            'settings' => [
+                                'description' => 'Foo',
+                            ],
                         ]
                     ],
+                    'form_group' => "Group 1",
                 ]
             )
         );
@@ -292,13 +298,25 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                                     'title' => 'Text',
                                     'identifier' => 'text',
                                     'type' => 'text',
-                                ]
+                                ],
+                                [
+                                    'title' => 'Hidden',
+                                    'identifier' => 'hidden',
+                                    'type' => 'text',
+                                    'permissions' => [
+                                        'list field' => 'false',
+                                        'view field' => 'false',
+                                        'update field' => 'false',
+                                    ]
+                                ],
                             ],
                         ],
                         [
                             'title' => 'Baa',
                             'identifier' => 'baa',
-                            'description' => 'Fooo',
+                            'settings' => [
+                                'description' => 'Fooo',
+                            ],
                             'icon' => 'any',
                             'fields' => [
                                 [
@@ -339,7 +357,10 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
 
         // Fake user
         $user = new User();
-        $user->setRoles([User::ROLE_PLATFORM_ADMIN]);
+        $domainMember = new DomainMember();
+        $domainMember->setDomain($field->getContentType()->getDomain())->setDomainMemberType($field->getContentType()->getDomain()->getDomainMemberTypes()->first());
+        $user->addDomain($domainMember);
+        $user->setRoles([User::ROLE_USER]);
         static::$container->get('security.token_storage')->setToken(
             new UsernamePasswordToken($user, null, 'main', $user->getRoles())
         );
@@ -364,8 +385,11 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('Baa', $root->children['type']->vars['choices'][1]->label);
         $this->assertEquals('baa', $root->children['type']->vars['choices'][1]->value);
         $this->assertEquals(['icon' => 'any', 'description' => 'Fooo'], $root->children['type']->vars['choices'][1]->attr);
-        $this->assertEquals(['data-variant-title' => 'Foo'], $root->children['foo']->vars['attr']);
-        $this->assertEquals(['data-variant-title' => 'Baa'], $root->children['baa']->vars['attr']);
+        $this->assertEquals(['data-variant-title', 'data-variant-icon', 'data-graphql-query-mapper'], array_keys($root->children['foo']->vars['attr']));
+        $this->assertEquals('Foo', $root->children['foo']->vars['attr']['data-variant-title']);
+        $this->assertEquals(['data-variant-title', 'data-variant-icon', 'data-graphql-query-mapper'], array_keys($root->children['baa']->vars['attr']));
+        $this->assertEquals('Baa', $root->children['baa']->vars['attr']['data-variant-title']);
+        $this->assertEquals('any', $root->children['baa']->vars['attr']['data-variant-icon']);
 
         // Check, that child form fields get rendered.
         $this->assertCount(1, $root->children['foo']->children);
@@ -413,7 +437,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($content);
         $this->assertCount(1, $errors);
         $this->assertEquals('data[' . $field->getIdentifier() . '][baa][ref]', $errors->get(0)->getPropertyPath());
-        $this->assertEquals('missing_reference_definition', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
 
         // Try to submit valid data and check, that content was updated correctly.
 

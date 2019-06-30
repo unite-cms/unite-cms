@@ -12,7 +12,7 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentLocale;
  * Setting
  *
  * @ORM\Table(name="setting")
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="UniteCMS\CoreBundle\Entity\ContentLogEntry")
  * @ORM\Entity
  */
 class Setting implements FieldableContent
@@ -153,5 +153,12 @@ class Setting implements FieldableContent
     public function isNew(): bool {
         return empty($this->getId());
     }
-}
 
+    /**
+     * @return FieldableContent
+     */
+    public function getRootFieldableContent(): FieldableContent
+    {
+        return $this;
+    }
+}

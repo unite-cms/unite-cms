@@ -1,6 +1,9 @@
 
 const Encore = require('@symfony/webpack-encore');
 
+const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
+const { styles } = require( '@ckeditor/ckeditor5-dev-utils' );
+
 Encore
     // the project directory where all compiled assets will be stored
     .setOutputPath('./Resources/public')
@@ -31,7 +34,39 @@ Encore
     .enableVersioning(Encore.isProduction())
 
     // We don't need a runtime.js for unite cms at the moment
-    .disableSingleRuntimeChunk();
+    .disableSingleRuntimeChunk()
+    .disableImagesLoader()
+
+    .addPlugin(new CKEditorWebpackPlugin({ language: 'en' }))
+    .enablePostCssLoader(function(postCssConfigOptions){
+        let options = styles.getPostCssConfig( {
+            themeImporter: {
+                themePath: require.resolve( '@ckeditor/ckeditor5-theme-lark' )
+            },
+            minify: Encore.isProduction()
+        });
+        postCssConfigOptions.plugins = options.plugins;
+    })
+
+
+    .addRule({
+        test: /\.(svg|png|jpg|jpeg|gif|ico)/,
+        exclude: __dirname + '/node_modules/@ckeditor',
+        use: [{
+            loader: 'file-loader',
+            options: {
+                filename: 'images/[name].[hash:8].[ext]',
+                publicPath: '/build/'
+            }
+        }]
+    })
+
+    .addRule({
+        test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+        use: [{
+            loader: 'raw-loader'
+        }],
+    });
 
 // export the final configuration
 module.exports = Encore.getWebpackConfig();

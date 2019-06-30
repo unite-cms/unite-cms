@@ -17,23 +17,7 @@
                                         <tbody>
                                         <tr>
                                                 <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: {{ color_primary }}; border-radius: 2px; text-align: center;">
-                                                        <a href="{{ url('unitecms_core_organizationuser_index', {organization: organization_identifier|replace({'_':'-'})}) }}" target="_blank" style="{% spaceless %}
-                                                                display: inline-block;
-                                                                box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-                                                                color: #ffffff;
-                                                                background-color: {{ color_primary }};
-                                                                border: solid 1px {{ color_primary }};
-                                                                border-radius: 2px;
-                                                                box-sizing: border-box;
-                                                                cursor: pointer;
-                                                                text-decoration: none;
-                                                                font-size: 14px;
-                                                                font-weight: bold;
-                                                                margin: 0;
-                                                                padding: 7px 20px;
-                                                                text-transform: capitalize;
-                                                                border-color: {{ color_primary }};{% endspaceless %}
-                                                                ">
+                                                        <a href="{{ url('unitecms_core_organizationuser_index', {organization: organization_identifier|replace({'_':'-'})}) }}" target="_blank" style="display: inline-block; box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06); color: #ffffff; background-color: {{ color_primary }}; border: solid 1px {{ color_primary }}; border-radius: 2px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 7px 20px; text-transform: capitalize; border-color: {{ color_primary }};">
                                                             {{ button }}
                                                         </a>
                                                 </td>

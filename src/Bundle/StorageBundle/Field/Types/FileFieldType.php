@@ -3,10 +3,10 @@
 namespace UniteCMS\StorageBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
+use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -24,7 +24,7 @@ class FileFieldType extends FieldType
 {
     const TYPE                      = "file";
     const FORM_TYPE                 = StorageFileType::class;
-    const SETTINGS                  = ['not_empty', 'description', 'file_types', 'bucket'];
+    const SETTINGS                  = ['not_empty', 'description', 'file_types', 'bucket', 'form_group'];
     const REQUIRED_SETTINGS         = ['bucket'];
 
     private $router;
@@ -93,6 +93,7 @@ class FileFieldType extends FieldType
             'endpoint' => $this->generateEndpoint($field->getSettings()),
             'upload-sign-url' => $url,
             'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
+            'acl' => $field->getSettings()->bucket['acl'] ?? '',
           ],
         ]);
     }
@@ -100,21 +101,21 @@ class FileFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager) {
         return $schemaTypeManager->getSchemaType('StorageFile');
     }
 
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0) {
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager) {
         return $schemaTypeManager->getSchemaType('StorageFileInput');
     }
 
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         if(empty($value['id']) || empty($value['name'])) {
             return null;
@@ -122,6 +123,15 @@ class FileFieldType extends FieldType
 
         // Create full URL to file.
         $value['url'] = $this->generateEndpoint($field->getSettings()) . '/' . $value['id'] . '/' . $value['name'];
+
+        // Create pre_signed URL.
+        $value['presigned_url'] = $this->storageService->createPreSignedDownloadUrl(
+            $value['id'],
+            $value['name'],
+            $field->getSettings()->bucket,
+            $field->getSettings()->bucket['pre_signed_download_expiration'] ?? '+1 hours'
+        )->getPreSignedUrl();
+
         return $value;
     }
 
@@ -141,6 +151,7 @@ class FileFieldType extends FieldType
 
         if(empty($data['size']) || empty($data['id']) || empty($data['name']) || empty($data['checksum'])) {
             $context->buildViolation('storage.missing_file_definition')->atPath('['.$field->getIdentifier().']')->addViolation();
+            return;
         }
 
         if(empty($violations)) {
@@ -162,7 +173,7 @@ class FileFieldType extends FieldType
         // Validate allowed bucket configuration.
         if($context->getViolations()->count() == 0) {
             foreach($settings->bucket as $field => $value) {
-                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region'])) {
+                if(!in_array($field, ['endpoint', 'key', 'secret', 'bucket', 'path', 'region', 'acl', 'pre_signed_download_expiration'])) {
                     $context->buildViolation('additional_data')->atPath('bucket.' . $field)->addViolation();
                 }
             }
@@ -170,7 +181,7 @@ class FileFieldType extends FieldType
 
         // Validate required bucket configuration.
         if($context->getViolations()->count() == 0) {
-            foreach(['endpoint', 'key', 'secret', 'bucket'] as $required_field) {
+            foreach(['endpoint', 'bucket'] as $required_field) {
                 if(!isset($settings->bucket[$required_field])) {
                     $context->buildViolation('required')->atPath('bucket.' . $required_field)->addViolation();
                 }
@@ -189,6 +200,18 @@ class FileFieldType extends FieldType
             if (rtrim($settings->bucket['endpoint'], '/\\') != $settings->bucket['endpoint'])
             {
                 $context->buildViolation('storage.no_trailing_slash')->atPath('bucket.endpoint')->addViolation();
+            }
+        }
+
+        // validate expiration time
+        if($context->getViolations()->count() == 0) {
+            if(!empty($settings->bucket['pre_signed_download_expiration'])) {
+                if(strtotime($settings->bucket['pre_signed_download_expiration']) === false) {
+                    $context->buildViolation('storage.invalid_expiration_time')->atPath('bucket.pre_signed_download_expiration')->addViolation();
+                }
+                else if(strtotime($settings->bucket['pre_signed_download_expiration']) > strtotime('+1 weeks')) {
+                    $context->buildViolation('storage.invalid_expiration_time')->atPath('bucket.pre_signed_download_expiration')->addViolation();
+                }
             }
         }
     }

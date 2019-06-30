@@ -18,9 +18,17 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UniteCMSCoreTypeExtension extends AbstractTypeExtension
 {
+    private $translator;
+
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
 
     /**
      * {@inheritdoc}
@@ -31,7 +39,15 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
         if (isset($options['not_empty']) && $options['not_empty']) {
             $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
                 if($event->getForm()->isEmpty()) {
-                    $event->getForm()->addError(new FormError('This value should not be blank.'));
+                    $error = new FormError($this->translator->trans('not_blank', [], 'validators'), null, [], null, new ConstraintViolation(
+                        $this->translator->trans('not_blank', [], 'validators'),
+                        null,
+                        [],
+                        null,
+                        'data'.$event->getForm()->getPropertyPath(),
+                        ''
+                    ));
+                    $event->getForm()->addError($error);
                 }
             });
         }
@@ -48,6 +64,15 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
             $view->vars['description'] = $options['description'];
         }
 
+        if (isset($options['form_group']) && $options['form_group'] !== null) {
+            if(filter_var($options['form_group'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === false) {
+                $view->vars['form_group'] = false;
+            } elseif(is_string($options['form_group'])) {
+                $view->vars['form_group'] = $options['form_group'];
+            } else {
+                unset($view->vars['form_group']);
+            }
+        }
     }
 
     /**
@@ -58,6 +83,7 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
         $resolver->setDefined('description');
         $resolver->setDefined('default');
         $resolver->setDefined('not_empty');
+        $resolver->setDefined('form_group');
 
         // If not_empty is set, also set the required option to true
         $resolver->setNormalizer('required', function(Options $options, $value){
@@ -68,9 +94,9 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
     /**
      * {@inheritdoc}
      */
-    public function getExtendedType()
+    static public function getExtendedTypes()
     {
-        return FormType::class;
+        return [ FormType::class ];
     }
 
 }

@@ -11,7 +11,7 @@ namespace UniteCMS\CoreBundle\Tests\Twig;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use UniteCMS\CoreBundle\Twig\InstanceOfExtension;
 
 class InstanceOfExtensionTest extends TestCase
@@ -23,7 +23,7 @@ class InstanceOfExtensionTest extends TestCase
 
         $this->assertTrue($extension->isInstanceOf($object, Type::class));
         $this->assertTrue($extension->isInstanceOf($object, ObjectType::class));
-        $this->assertFalse($extension->isInstanceOf($object, Controller::class));
+        $this->assertFalse($extension->isInstanceOf($object, AbstractController::class));
         $this->assertFalse($extension->isInstanceOf(new \stdClass(), Type::class));
     }
 

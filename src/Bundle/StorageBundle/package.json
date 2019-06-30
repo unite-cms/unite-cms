@@ -2,18 +2,18 @@
   "name": "UniteCMSStorageBundle",
   "version": "1.0.0",
   "dependencies": {
-    "uikit": "^3.0.0-rc.17"
+    "uikit": "^3.0.2"
   },
   "devDependencies": {
-    "@symfony/webpack-encore": "^0.21.0",
-    "feather-icons": "^4.7.3",
-    "node-sass": "^4.9.3",
-    "npm": "^6.4.1",
+    "@symfony/webpack-encore": "^0.22.4",
+    "feather-icons": "^4.10.0",
+    "node-sass": "^4.11.0",
+    "npm": "^6.5.0",
     "sass-loader": "^7.1.0",
-    "vue": "^2.5.17",
-    "vue-custom-element": "^3.2.5",
-    "vue-loader": "^15.4.2",
-    "vue-template-compiler": "^2.5.17"
+    "vue": "^2.5.22",
+    "vue-custom-element": "^3.2.6",
+    "vue-loader": "^15.5.1",
+    "vue-template-compiler": "^2.5.22"
   },
   "scripts": {
     "dev": "./node_modules/.bin/encore dev --watch",

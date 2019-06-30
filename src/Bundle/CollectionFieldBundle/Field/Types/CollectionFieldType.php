@@ -2,8 +2,11 @@
 
 namespace UniteCMS\CollectionFieldBundle\Field\Types;
 
+use GraphQL\Type\Definition\ResolveInfo;
+use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CollectionFieldBundle\Form\CollectionFormType;
 use UniteCMS\CollectionFieldBundle\Model\Collection;
@@ -19,22 +22,27 @@ use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
-use UniteCMS\CoreBundle\View\Types\TableViewConfiguration;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
+use UniteCMS\CoreBundle\View\Types\Factories\ViewConfigurationFactoryInterface;
 
 class CollectionFieldType extends FieldType implements NestableFieldTypeInterface
 {
     const TYPE                      = "collection";
     const FORM_TYPE                 = CollectionFormType::class;
-    const SETTINGS                  = ['description', 'fields', 'min_rows', 'max_rows'];
+    const SETTINGS                  = ['description', 'fields', 'min_rows', 'max_rows', 'form_group'];
     const REQUIRED_SETTINGS         = ['fields'];
 
     private $collectionFieldTypeFactory;
     private $fieldTypeManager;
+    private $tableViewConfigurationFactory;
+    private $authorizationChecker;
 
-    function __construct(CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager)
+    function __construct(CollectionFieldTypeFactory $collectionFieldTypeFactory, FieldTypeManager $fieldTypeManager, ViewConfigurationFactoryInterface $tableViewConfigurationFactory, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->collectionFieldTypeFactory = $collectionFieldTypeFactory;
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -49,16 +57,28 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
 
         $options = [
             'label' => false,
-            'content' => new CollectionRow($collection, []),
+            'content' => new CollectionRow($collection, [], null),
+            'hide_labels' => count($collection->getFields()) < 2,
         ];
         $options['fields'] = [];
 
+        $prototype_data = [];
+
         // Add the definition of the all collection fields to the options.
         foreach ($collection->getFields() as $fieldDefinition) {
+
+            // Only render field, if we are allowed to list and update it.
+            if(
+                !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $fieldDefinition)
+                || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $options['content']))) {
+                continue;
+            }
+
             $options['fields'][] = new FieldableFormField(
                 $this->fieldTypeManager->getFieldType($fieldDefinition->getType()),
                 $fieldDefinition
             );
+            $prototype_data[$fieldDefinition->getIdentifier()] = $this->fieldTypeManager->getFieldType($fieldDefinition->getType())->getDefaultValue($fieldDefinition);
         }
 
         // Configure the collection from type.
@@ -71,6 +91,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 'delete_empty' => true,
                 'error_bubbling' => false,
                 'prototype_name' => '__'.str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')).'Name__',
+                'prototype_data' => $prototype_data,
                 'attr' => [
                     'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
                     'min-rows' => $settings->min_rows ?? 0,
@@ -85,11 +106,10 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return $this->collectionFieldTypeFactory->createCollectionFieldType(
             $schemaTypeManager,
-            $nestingLevel,
             $field,
             self::getNestableFieldable($field)
         );
@@ -98,11 +118,10 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return $this->collectionFieldTypeFactory->createCollectionFieldType(
             $schemaTypeManager,
-            $nestingLevel,
             $field,
             self::getNestableFieldable($field),
             true
@@ -112,9 +131,14 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
-        return (array)$value;
+        return array_map(function($row) use($content) {
+            return [
+                'value' => $row,
+                'content' => $content,
+            ];
+        }, (array)$value);
     }
 
     /**
@@ -170,6 +194,40 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
     }
 
     /**
+     * {@inheritdoc}
+     */
+    function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData)
+    {
+        if(empty($data[$field->getIdentifier()])) {
+            return;
+        }
+
+        $collection = self::getNestableFieldable($field);
+
+        // Alter data for each row.
+        foreach($data[$field->getIdentifier()] as $delta => $row) {
+            if(is_array($row)) {
+                $row_data = $row;
+
+                foreach ($collection->getFields() as $row_field) {
+
+                    // Only alter field, if we are allowed to list and update it.
+                    if(!$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)
+                        || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
+                        continue;
+                    }
+
+                    $this->fieldTypeManager->alterFieldData($row_field, $row_data, new CollectionRow($collection, $data[$field->getIdentifier()], $content, $delta), $rootData);
+                }
+
+                if($row_data != $row) {
+                    $data[$field->getIdentifier()][$delta] = $row_data;
+                }
+            }
+        }
+    }
+
+    /**
      * Recursively validate all fields in this collection.
      *
      * @param FieldableField $field
@@ -186,7 +244,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         // Make sure, that there is no additional data in content that is not in settings.
         foreach($data as $delta => $row) {
 
-            $context->setNode($context->getValue(), new CollectionRow($collection, $data), $context->getMetadata(), $path . '['.$delta.']');
+            $context->setNode($context->getValue(), new CollectionRow($collection, $data, $current_object, $delta), $context->getMetadata(), $path . '['.$delta.']');
 
             foreach (array_keys($row) as $data_key) {
 
@@ -301,7 +359,9 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         // It can happen, that an index of data was deleted. However, when we store the data to the database, we want
         // to make sure, that there is no missing index for the rows array. Otherwise it would be treated as object
         // with numeric keys instead of an array.
-        $data[$field->getIdentifier()] = array_values($data[$field->getIdentifier()]);
+        if(array_key_exists($field->getIdentifier(), $data)) {
+            $data[$field->getIdentifier()] = array_values($data[$field->getIdentifier()]);
+        }
     }
 
     /**
@@ -372,7 +432,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             // normalize settings for nested fields.
             if(!empty($settings['settings']['fields'])) {
                 $processor = new Processor();
-                $config = $processor->processConfiguration(new TableViewConfiguration(self::getNestableFieldable($field), $fieldTypeManager), ['settings' => ['fields' => $settings['settings']['fields']]]);
+                $config = $processor->processConfiguration($this->tableViewConfigurationFactory->create(self::getNestableFieldable($field)), ['settings' => ['fields' => $settings['settings']['fields']]]);
                 $settings['settings']['fields'] = $config['fields'];
 
                 // Template will only include assets from root fields, so we need to add any child templates to the root field.

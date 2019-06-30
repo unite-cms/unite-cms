@@ -24,6 +24,7 @@ services:
   # A simple choices input field that allows to select multiple values
   UniteCMS\CoreBundle\Field\Types\ChoicesFieldType:
     public: false
+    arguments: ['@router.request_context']
     tags: [unite_cms.field_type]
 
   # A simple range input field
@@ -35,7 +36,7 @@ services:
   UniteCMS\CoreBundle\Field\Types\ReferenceFieldType:
     public: false
     tags: [unite_cms.field_type]
-    arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@unite.cms.view_type_manager', '@templating.engine.twig', '@router', '@security.csrf.token_manager']
+    arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@unite.cms.view_type_manager', '@twig', '@router', '@security.csrf.token_manager', '@unite.cms.field_type.config_factory.table_view']
 
   # A reference input field that allows to add a reference to a content item in any domain in the same organization.
   UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType:
@@ -93,4 +94,24 @@ services:
     public: false
     tags: [unite_cms.field_type]
     arguments:
-      ['@router']
+      ['@router', '@doctrine.orm.entity_manager']
+
+  # Money Field Type
+  UniteCMS\CoreBundle\Field\Types\MoneyFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
+  # Language Field Type
+  UniteCMS\CoreBundle\Field\Types\LanguageFieldType:
+      public: false
+      tags: [unite_cms.field_type]
+
+  # Language Field Type
+  UniteCMS\CoreBundle\Field\Types\CountryFieldType:
+      public: false
+      tags: [unite_cms.field_type]
+
+  # Location Field Type
+  UniteCMS\CoreBundle\Field\Types\LocationFieldType:
+    public: false
+    tags: [unite_cms.field_type]

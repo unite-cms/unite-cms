@@ -1,10 +1,11 @@
 {%- block unite_cms_variants_widget -%}
+    {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: form }) }}
     {% set input_selector = form.type.vars.full_name %}
-    {% for key, child in form.children %}
+    {% for key, child in form %}
         {% if key == 'type' %}
             <unite-cms-core-variants-select input="{{ input_selector }}" content="{{ form_row(child)|escape }}"></unite-cms-core-variants-select>
         {% else %}
-            <unite-cms-core-variants-variant input="{{ input_selector }}" value="{{ key }}" title="{{ child.vars.attr['data-variant-title'] }}" content="{{ form_row(child)|escape }}"></unite-cms-core-variants-variant>
+            <unite-cms-core-variants-variant input="{{ input_selector }}" value="{{ key }}" title="{{ child.vars.attr['data-variant-title'] }}" icon="{{ child.vars.attr['data-variant-icon'] }}" content="{{ form_row(child)|escape }}"></unite-cms-core-variants-variant>
         {% endif %}
     {% endfor %}
 {%- endblock unite_cms_variants_widget -%}

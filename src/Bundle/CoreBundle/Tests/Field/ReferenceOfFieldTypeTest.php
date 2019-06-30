@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMemberTypeField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
 
@@ -232,6 +233,31 @@ class ReferenceOfFieldTypeTest extends FieldTypeTestCase
         // Referenced field exists on another domain
         $ref_field->getContentType()->setDomain($otherDomain);
         $ctField->getSettings()->domain = 'other';
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
+
+
+        // Now add a reference field to member type.
+        $contentType = $domain->getContentTypes()->first();
+        $memberType = $domain->getDomainMemberTypes()->first();
+        $user_ref_field = new ContentTypeField();
+        $user_ref_field->setType('reference')->setTitle('user_ref')->setIdentifier('user_ref')
+            ->setSettings(new FieldableFieldSettings([
+                'domain' => $domain->getIdentifier(),
+                'domain_member_type' => $memberType->getIdentifier(),
+            ]));
+        $contentType->addField($user_ref_field);
+        $this->assertCount(0, static::$container->get('validator')->validate($domain));
+
+        $user_ref_of_field = new DomainMemberTypeField();
+        $user_ref_of_field->setType('reference_of')->setTitle('user_ref_of')->setIdentifier('user_ref_of')
+            ->setSettings(new FieldableFieldSettings([
+                'domain' => $domain->getIdentifier(),
+                'content_type' => $contentType->getIdentifier(),
+                'reference_field' => 'user_ref',
+            ]));
+        $memberType->addField($user_ref_of_field);
+
+        echo static::$container->get('validator')->validate($domain);
         $this->assertCount(0, static::$container->get('validator')->validate($domain));
 
     }

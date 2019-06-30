@@ -49,7 +49,7 @@ class VariantContent implements FieldableContent
      */
     public function getData(): array
     {
-        return $this->getData();
+        return $this->data;
     }
 
     /**
@@ -58,6 +58,15 @@ class VariantContent implements FieldableContent
     public function getLocale()
     {
         return null;
+    }
+
+    /**
+     * @param $locale string|null
+     * @return FieldableContent
+     */
+    public function setLocale($locale)
+    {
+        return $this;
     }
 
     /**
@@ -87,5 +96,21 @@ class VariantContent implements FieldableContent
      */
     public function isNew(): bool {
         return false;
+    }
+
+    /**
+     * @return FieldableContent
+     */
+    public function getRootFieldableContent(): FieldableContent
+    {
+        return $this->variant->getRootContent();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->variant->getIdentifier();
     }
 }

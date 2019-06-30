@@ -9,6 +9,7 @@
 namespace UniteCMS\VariantsFieldBundle\SchemaType\Types;
 
 use GraphQL\Type\Definition\InterfaceType;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
@@ -32,7 +33,7 @@ class VariantsFieldInterface extends InterfaceType
                         'type' => Type::string(),
                     ];
                 },
-                'resolveType' => function ($value) use ($schemaTypeManager) {
+                'resolveType' => function ($value, $context, ResolveInfo $info) use ($schemaTypeManager) {
 
                     if(!$value instanceof Variant) {
                         throw new \InvalidArgumentException(
@@ -41,12 +42,13 @@ class VariantsFieldInterface extends InterfaceType
                     }
 
                     // For empty data we can resolve to a generic fallback type.
-                    if(!$value->getIdentifier()) {
-                        return $schemaTypeManager->getSchemaType('VariantsFieldBaseVariant');
-                    }
-
                     // For real types, we can return the schema object that was generated before by VariantsFieldType.
-                    return $schemaTypeManager->getSchemaType(VariantFactory::schemaTypeNameForVariant($value), $value->getRootEntity()->getDomain());
+                    $type = $value->getIdentifier() ?
+                        VariantFactory::schemaTypeNameForVariant($value) : 'VariantsFieldBaseVariant';
+
+                    return $info->schema->hasType($type) ?
+                        $info->schema->getType($type) :
+                        $schemaTypeManager->getSchemaType($type, $value->getRootEntity()->getDomain());
                 },
             ]
         );

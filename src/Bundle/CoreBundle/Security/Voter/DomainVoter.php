@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\Domain;
-use UniteCMS\CoreBundle\Security\AccessExpressionChecker;
+use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 
 class DomainVoter extends Voter
 {
@@ -26,13 +26,13 @@ class DomainVoter extends Voter
     const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE];
 
     /**
-     * @var AccessExpressionChecker $accessExpressionChecker
+     * @var UniteExpressionChecker $accessExpressionChecker
      */
     private $accessExpressionChecker;
 
     public function __construct()
     {
-        $this->accessExpressionChecker = new AccessExpressionChecker();
+        $this->accessExpressionChecker = new UniteExpressionChecker();
     }
 
     /**
@@ -97,7 +97,12 @@ class DomainVoter extends Voter
 
             // If the expression evaluates to true, we grant access.
             foreach ($domainMembers as $domainMember) {
-                if($this->accessExpressionChecker->evaluate($subject->getPermissions()[$attribute], $domainMember)) {
+
+                $this->accessExpressionChecker
+                    ->clearVariables()
+                    ->registerDomainMember($domainMember);
+
+                if($this->accessExpressionChecker->evaluateToBool($subject->getPermissions()[$attribute])) {
                     return self::ACCESS_GRANTED;
                 }
             }

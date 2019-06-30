@@ -267,6 +267,27 @@ class DomainConfigManagerTest extends KernelTestCase
     }
 
     /**
+     * @expectedException \UniteCMS\CoreBundle\Exception\InvalidOrganizationConfigurationException
+     * @expectedExceptionMessage An organization folder with this identifier already exists! Please delete the folder first, to create an organization with this identifier.
+     */
+    public function testCreatingOrgWithExistingFolderAndNotAllowed() {
+        $organization = new Organization();
+        $organization->setIdentifier('existing');
+        $fileContent = '{ "title": "Existing D", "identifier": "existing_d" }';
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/existing_d.json', $fileContent);
+        $this->manager->createOrganizationFolder($organization);
+    }
+
+    public function testCreatingOrgWithExistingFolderAndAllowed() {
+        $organization = new Organization();
+        $organization->setIdentifier('existing')->setAllowCreateWithExistingConfigFolder(true);
+        $fileContent = '{ "title": "Existing D", "identifier": "existing_d" }';
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/existing_d.json', $fileContent);
+        $this->manager->createOrganizationFolder($organization);
+        $this->assertStringEqualsFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/existing_d.json', $fileContent);
+    }
+
+    /**
      * @expectedException \UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException
      * @expectedExceptionMessage The domain configuration identifier "foo" does not match with the filename "my_test_domain.json".
      */
@@ -308,6 +329,58 @@ class DomainConfigManagerTest extends KernelTestCase
         $this->assertEquals('my_test_domain', $domain->getIdentifier());
         $this->assertEquals(["view domain" => "true", "update domain" => "true"], $domain->getPermissions());
         $this->assertEquals($this->exampleConfig, $domain->getConfig());
+
+        $this->assertCount(2, $domain->getContentTypes());
+
+        /**
+         * @var ContentType $ct
+         */
+        $ct = $domain->getContentTypes()->first();
+        $this->assertEquals('First Content Type', $ct->getTitle());
+        $this->assertEquals('first_ct', $ct->getIdentifier());
+        $this->assertEquals(new FieldablePreview("https://example.com", "query { type }"), $ct->getPreview());
+        $this->assertCount(3, $ct->getFields());
+        $this->assertCount(2, $domain->getSettingTypes());
+        $this->assertCount(1, $domain->getDomainMemberTypes());
+    }
+
+    public function testParsingDomainWithDomainConfigParameters() {
+
+        $organization = new Organization();
+        $organization->setIdentifier('my_test_organization');
+        $domain = new Domain();
+        $domain
+            ->setOrganization($organization)
+            ->setIdentifier('my_test_domain');
+
+        $domainConfig = $this->exampleConfig;
+        $domainConfig = str_replace('My test Domain', '%title%', $domainConfig);
+        $domainConfig = str_replace('{
+            "view domain": "true",
+            "update domain": "true"
+        }', '%permissions%', $domainConfig);
+
+        // First create a domain config .json file in the correct location
+        $this->fileSystem->dumpFile($this->manager->getDomainConfigDir() . $organization->getIdentifier() . '/' . $domain->getIdentifier() . '.json', $domainConfig);
+
+        $accessor = new \ReflectionProperty($this->manager, 'domainConfigParameters');
+        $accessor->setAccessible(true);
+        $accessor->setValue($this->manager, [
+            'title' => 'Updated domain title',
+            'permissions' => '{
+                "view domain": "false",
+                "update domain": "false"
+            }'
+        ]);
+
+        // Then update domain from config.
+        $this->manager->loadConfig($domain, true);
+
+        // Make sure, that domain now reflects the config .json file
+        $this->assertEquals('Updated domain title', $domain->getTitle());
+        $this->assertEquals('my_test_domain', $domain->getIdentifier());
+        $this->assertEquals(["view domain" => "true", "update domain" => "true"], $domain->getPermissions());
+        $this->assertEquals($domainConfig, $domain->getConfig());
 
         $this->assertCount(2, $domain->getContentTypes());
 

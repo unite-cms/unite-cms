@@ -1,16 +1,16 @@
 <template>
     <div>
         <div class="collection-wrapper">
-            <unite-cms-collection-field-row
-                    v-for="row in sortedRows"
-                    :key="row.delta"
-                    :delta="row.delta"
-                    :prototype="row.prototype"
-                    :form-layout="rowFormLayout"
-                    :hide-labels="rowLabelHidden"
-                    @remove="removeRow"
-                    @add="addRow"
-            ></unite-cms-collection-field-row>
+            <div class="collection-wrapper-row" v-for="row in sortedRows" :key="row.delta" :delta="row.delta">
+                <unite-cms-collection-field-row
+                        :delta="row.delta"
+                        :prototype="row.prototype"
+                        :form-layout="rowFormLayout"
+                        :hide-labels="rowLabelHidden"
+                        @remove="removeRow"
+                        @add="addRow"
+                ></unite-cms-collection-field-row>
+            </div>
         </div>
         <div v-if="!maxRows || rows.length < maxRows" class="collection-add-button-wrapper uk-sortable-nodrag">
             <button  class="uk-button uk-button-default" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></button>
@@ -76,6 +76,11 @@
                 }, 100);
             });
 
+            // When dragging starts, collapse all children.
+            this.$el.addEventListener('start', (e) => {
+                window.UniteCMSEventBus.$emit('variantsShouldCollapse', { parent: e.target });
+            });
+
             // After an element was moved, update all sort positions.
             this.$el.addEventListener('moved', () => {
                 this.calculatePositions();
@@ -90,7 +95,6 @@
                 return null;
             },
             calculatePositions() {
-                console.log(this.$el.childNodes[0].childNodes);
                 this.$el.childNodes[0].childNodes.forEach((element, index) => {
                     let row = this.getRow(element.attributes.delta.value);
                     if(row) {
@@ -122,6 +126,9 @@
                     });
 
                     this.counter++;
+
+                    // Tell variants fields to collapse.
+                    window.UniteCMSEventBus.$emit('variantsShouldCollapse', { parent: this.$el });
                 }
             },
             removeRow(event) {
@@ -184,8 +191,8 @@
         }
     }
 
-    unite-cms-collection-field-row + unite-cms-collection-field-row {
-        > div > .collection-add-button-wrapper {
+    .collection-wrapper-row + .collection-wrapper-row {
+        > unite-cms-collection-field-row > div > .collection-add-button-wrapper {
             padding: 5px auto;
 
             button.uk-button:not(.uk-button-text):not(.uk-button-link) {
@@ -211,6 +218,28 @@
             }
         }
     }*/
+    .collection-wrapper-row {
+        &.uk-sortable-item {
+            &, &:hover {
+                opacity: 1;
+                max-height: 120px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            &:after {
+                display: block;
+                content: "";
+                position: absolute;
+                top: 80px;
+                bottom: auto;
+                height: 40px;
+                left: 0;
+                right: 0;
+                background: linear-gradient(0deg, rgba(255,255,255,1), rgba(255,255,255,0));
+            }
+        }
+    }
 
     unite-cms-collection-field-row {
         position: relative;
@@ -222,23 +251,6 @@
                 display: none;
             }
         }
-
-        &.uk-sortable-placeholder {
-            &, &:hover {
-                opacity: 0;
-            }
-        }
-
-        &.uk-sortable-drag {
-            > div {
-                > .uk-placeholder {
-                    > .uk-sortable-handle { display: block; }
-                    > .close-button { display: none; }
-                }
-                > .collection-add-button-wrapper { opacity: 0; }
-            }
-        }
-
 
         > div {
             > .uk-placeholder {
@@ -302,6 +314,9 @@
             .collection-add-button-wrapper {
                 opacity: 0;
             }
+        }
+        .collection-wrapper-row.uk-sortable-drag {
+            display: none;
         }
     }
 </style>

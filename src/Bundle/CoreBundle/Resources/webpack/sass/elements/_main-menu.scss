@@ -181,6 +181,14 @@
         &:hover {
           opacity: 1;
         }
+
+        &.create-content-button {
+          opacity: 0.25;
+          &:hover {
+            opacity: 1;
+            color: $unite-color;
+          }
+        }
       }
     }
 
@@ -371,6 +379,7 @@
       display: block !important;
       position: static;
       width: auto !important;
+      overflow: visible;
     }
 
     #unite-main-menu-main {

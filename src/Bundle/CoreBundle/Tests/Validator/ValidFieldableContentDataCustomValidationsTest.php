@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Tests\Validator;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Validator\ConstraintViolationList;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
@@ -49,7 +50,10 @@ class ValidFieldableContentDataCustomValidationsTest extends ConstraintValidator
     {
         parent::setUp();
 
-        $this->constraintValidator = new ValidFieldableContentDataValidator($this->createMock(FieldTypeManager::class));
+        $this->constraintValidator = new ValidFieldableContentDataValidator(
+            $this->createMock(FieldTypeManager::class),
+            $this->createMock(EntityManager::class)
+        );
 
         $this->contentType = new ContentType();
         $this->contentType->setTitle('Content Type 1')->setIdentifier('ct1');
@@ -103,7 +107,7 @@ class ValidFieldableContentDataCustomValidationsTest extends ConstraintValidator
         //All other tests are only targeting the content type.
         //
         $validations = [
-            new FieldableValidation("data.title != ''", 'This field is required.', 'title'),
+            new FieldableValidation("content.data.title != ''", 'This field is required.', 'title'),
         ];
 
         $this->settingType->setValidations($validations);
@@ -121,7 +125,7 @@ class ValidFieldableContentDataCustomValidationsTest extends ConstraintValidator
     public function testSimpleValidation() {
 
         $validations = [
-            new FieldableValidation("data.title != ''", 'This field is required.', 'title'),
+            new FieldableValidation("content.data.title != ''", 'This field is required.', 'title'),
         ];
 
         $violations = $this->validateValidations([], $validations);
@@ -135,7 +139,7 @@ class ValidFieldableContentDataCustomValidationsTest extends ConstraintValidator
     public function testLocaleValidation() {
 
         $validations = [
-            new FieldableValidation("locale != 'en'"),
+            new FieldableValidation("content.locale != 'en'"),
         ];
 
         $this->assertCount(0, $this->validateValidations([], $validations));
@@ -149,7 +153,7 @@ class ValidFieldableContentDataCustomValidationsTest extends ConstraintValidator
     public function testNestedAttributeValidation() {
 
         $validations = [
-            new FieldableValidation("data.reference.id == 'a'", 'Id must start with char.', 'reference.id'),
+            new FieldableValidation("content.data.reference.id == 'a'", 'Id must start with char.', 'reference.id'),
         ];
 
         $violations = $this->validateValidations([], $validations);
@@ -164,9 +168,9 @@ class ValidFieldableContentDataCustomValidationsTest extends ConstraintValidator
     public function testValidationGroupValidation() {
 
         $validations = [
-            new FieldableValidation("data.title == 'create'", '', '', ['CREATE']),
-            new FieldableValidation("data.title == 'update'", '', '', ['UPDATE']),
-            new FieldableValidation("data.title == 'delete'", '', '', ['DELETE']),
+            new FieldableValidation("content.data.title == 'create'", '', '', ['CREATE']),
+            new FieldableValidation("content.data.title == 'update'", '', '', ['UPDATE']),
+            new FieldableValidation("content.data.title == 'delete'", '', '', ['DELETE']),
         ];
 
         $this->assertCount(0, $this->validateValidations(['title' => 'create'], $validations));
@@ -182,7 +186,7 @@ class ValidFieldableContentDataCustomValidationsTest extends ConstraintValidator
     public function testRegExValidation() {
 
         $validations = [
-            new FieldableValidation("data.title matches '/^[a-z]+/'"),
+            new FieldableValidation("content.data.title matches '/^[a-z]+/'"),
         ];
 
         $this->assertCount(1, $this->validateValidations(['title' => '0abc'], $validations));

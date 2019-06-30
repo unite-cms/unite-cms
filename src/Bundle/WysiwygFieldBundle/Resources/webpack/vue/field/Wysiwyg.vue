@@ -1,18 +1,48 @@
 <template>
     <div>
-        <textarea :id="id" :name="name" v-model="content"></textarea>
+        <textarea class="placeholder_textarea" :id="id" :name="name" v-model="content"></textarea>
+        <ckeditor :editor="editor" v-model="content" :config="editorConfig"></ckeditor>
     </div>
 </template>
 
 <script>
-    import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-    import AutoSave from '@ckeditor/ckeditor5-autosave/src/autosave';
+
+    import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
+    import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials';
+    import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold';
+    import ItalicPlugin from '@ckeditor/ckeditor5-basic-styles/src/italic';
+    import BlockQuotePlugin from '@ckeditor/ckeditor5-block-quote/src/blockquote';
+    import HeadingPlugin from '@ckeditor/ckeditor5-heading/src/heading';
+    import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
+    import ListPlugin from '@ckeditor/ckeditor5-list/src/list';
+    import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
+    import TablePlugin from '@ckeditor/ckeditor5-table/src/table';
+    import HighlightPlugin from '@ckeditor/ckeditor5-highlight/src/highlight';
+    import AlignmentPlugin from '@ckeditor/ckeditor5-alignment/src/alignment';
 
     export default {
         data: function() {
+            let options = JSON.parse(this.dataOptions);
             return {
-                'options': JSON.parse(this.dataOptions),
-                'content': this.value
+                content: this.value,
+                editor: ClassicEditor,
+                editorConfig: {
+                    plugins: [
+                        EssentialsPlugin,
+                        BoldPlugin,
+                        ItalicPlugin,
+                        BlockQuotePlugin,
+                        HeadingPlugin,
+                        LinkPlugin,
+                        ListPlugin,
+                        TablePlugin,
+                        ParagraphPlugin,
+                        HighlightPlugin,
+                        AlignmentPlugin,
+                    ],
+                    toolbar: options.toolbar,
+                    heading: { options: options.heading }
+                }
             }
         },
         props: [
@@ -20,37 +50,7 @@
             'dataOptions',
             'id',
             'name'
-        ],
-        mounted () {
-
-            let textarea = this.$el.childNodes[0];
-
-            let plugins = ClassicEditor.builtinPlugins.filter((plugin) => { return [
-                'Essentials',
-                //'Autoformat',
-                'Bold',
-                'Italic',
-                'BlockQuote',
-                'Heading',
-                'Link',
-                'List',
-                'Paragraph',
-            ].indexOf(plugin.pluginName) !== -1; }).concat([ AutoSave ]);
-
-            // Create CK Editor.
-            ClassicEditor
-                .create(textarea, {
-                    plugins: plugins,
-                    toolbar: this.options.toolbar,
-                    heading: { options: this.options.heading },
-                    autosave: {
-                        save: ( editor ) => {
-                            textarea.value = editor.getData();
-                            textarea.dispatchEvent(new Event('change'));
-                        }
-                    }
-                }).then(editor => {}).catch(error => { console.error(error); })
-        }
+        ]
     };
 </script>
 
@@ -60,6 +60,10 @@
     unite-cms-wysiwyg-field {
         display: block;
         margin: 5px 0;
+
+        .placeholder_textarea {
+            display: none;
+        }
 
         .ck.ck-editor__editable:not(.ck-editor__nested-editable) {
             padding: 0 15px;

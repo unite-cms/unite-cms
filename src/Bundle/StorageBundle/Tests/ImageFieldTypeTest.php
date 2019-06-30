@@ -44,15 +44,11 @@ class ImageFieldTypeTest extends FieldTypeTestCase
         );
 
         $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(4, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.key', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('settings.bucket.bucket', $errors->get(1)->getPropertyPath());
         $this->assertEquals('required', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.secret', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(2)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.bucket', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(3)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -83,6 +79,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
                         "region" => "east",
                         "path" => "/any",
                     ],
+                    'form_group' => false,
                 ]
             )
         );
@@ -353,7 +350,7 @@ class ImageFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('unite-cms-storage-file-field', $root->vars['tag']);
 
         // Assert values
-        $this->assertEquals(json_encode($content->getData()['f1']), $root->vars['value']);
+        $this->assertEquals($content->getData()['f1'], $root->vars['value']);
 
         // Assert attribute passing
         $this->assertEquals('https://thumbnail.com/{endpoint}/{id}/{name}', $root->vars['attr']['thumbnail-url']);

@@ -1,5 +1,91 @@
 # Changelog
 
+## 0.8.2 (2019-05-14)
+- Added #313: A recaptcha field to secure graphql mutations
+- Added #407, #419: A field_group settings to allow to group or hide fields from the form
+- Added #383: A country field type
+- Added #556: A new geolocation field type
+- Added #554: A new language field type
+- Added #555: Allow to pass env variable to domain config json
+- Added #526: Added a rows_per_page option to view settings
+- Added #565: Added a new service tag unite_cms.graphql.schema_type_alteration to alter existing schemas
+- Added #498: Introduce a new ILIKE operator for case-insensitive comparing + use it for table view search
+- Improved #365: Collection and variant form widgets
+- Improved #506: You can now use any custom kind of view field to render a field, not only field types
+- Improved #501: Improve sidebar view
+- Improved #484: Settings translation now include all languages
+- Improved #572: Refactored settings translation admin view
+- Improved #563: Make it more easy to override core templates
+- Fixed #573: Only add graphql types for types if the user is allowed to ContentVoter::LIST and SettingVoter::View 
+- Fixed #577: Allow inline styles in wysiwyg editor (needed for alignment feature)
+- Fixed #575: Fixed a css bug for big screens
+- Fixed #504: Fix a rendering bug with multiple reference fields
+- Fixed #567: Fixed a bug, where deleting choices values via api won't work
+- Fixed #561: Default data for fields in a collection was not working
+- Fixed #552: Fixed a bug in domain config import script
+- Fixed #550: Fixed a bug with incorrect identifiers of fieldable content inside variants
+
+## 0.8.1 (2019-03-30)
+- Fixed #505: A problem where images could not be removed
+- Fixed #475: A bug with multiple reference and reference_of fields on the same form
+- Fixed #287: Missing validation of fields in variant settings
+- Fixed #497: Variables in domain configuration now work as designed
+- Fixed #492: Now org and domains can be created from existing config files
+- Fixed #496: Fixed a problem with collection fields inside variant fields
+- Fixed #522: Auto text field could not generate values, if the form was not valid 
+- Fixed: Fixed a bug where sorting table rows to lower levels did not work
+- Improved #502: content_unique and content_uniquify now accept an array with ids to exclude (for example the current content itself) 
+- Improved #341: domain update visualization is now a config diff
+- Improved #520: GraphQL filter import now has an cast parameter to compare integer, float, boolean, date and datetime values
+- Improved: GraphQL filter now have a ILIKE operator to compare case insensitive values. Default table search now uses ILIKE
+- Improved #511: Show a better message to the user, if he_she does not have access to an (reference field)
+- Improved #540: Added a experimental feature to allow auto_text fields as variant and collection fields
+- Improved #539: Added more toolbar options (table, alginment, highlight) to wysiwyg field and fixed a bug with custom headings
+
+- Added #292: Added more CLI commands (domain config import, list domains)
+- Added #542: Added a new money field (that stores a float value and a currency)
+
+
+## 0.8.0 (2019-01-24)
+- Added #429: Provide export options for content type data
+- Fixed #479: API Key Authenticator should check detailed token structure in supports method
+- Fixed #478: API Key User Provider should throw UsernameNotFoundException instead of TokenNotFoundException
+- Fixed #477: 500 error if empty AUTHORIZATION for API calls
+- Fixed #476: core needs GuzzleHttp but does not require guzzle
+- Fixed #379: Error Access the Graphql Api Definition
+- Improved #327: Allow to display fields of a variants field on a view (table)
+- Improved #245: Variables Same variable content
+- Improved #471: Update npm dependencies
+- Improved #468: Allow other bundles to provide api users
+- Improved #458: Allow fields to alter data after form submit but before validation
+- Improved #454: Replace validation and access expression language classes
+- Improved #433: UI improvement: Hide Content Actions if user has no permission
+- Improved #404: Symfony 4.2 compatible
+
+## 0.7.7 (2019-01-15)
+- Fixed #455: Searching views should reset paging to page 1
+- Improved #121: Users only see view row actions they have permissions for
+
+## 0.7.6 (2019-01-09)
+- Fixed #463: expression language doctrine content functions are not available when validating validatons
+
+## 0.7.5 (2019-01-09)
+- Fixed #459: API: not_empty error messages don't have correct path
+- Fixed #440: Missing required label marker (*) when setting not_empty inside a collection
+- Fixed #448: Followup for 440: Variants field variant required not_empty get checked when not selected
+- Fixed #444: Collection sorting and deleting Variation Fields which contains another Collection cause strange sorting and duplicate Fields
+- Fixed #439: Content Type / Setting Type additional settings not validated
+- Fixed #422: Numbertype returns Type String in Graphql
+- Fixed #420: Checkboxtype returns Type String in Graphql
+- Fixed #415: Can't paginate the users list
+- Added #428: Fix Test Splitting Code Climate in travis.yml
+- Added #436: Configure GraphQL Query Limit
+- Added #441: Travis Split core bundle Tests for faster coverage runs
+- Added #457: unique expression language function
+- Added #445: Unify different expression language classes + provide more functions
+- Added #340: Trigger events on domain config file actions
+- Added #218: field data processors or tokens
+
 ## 0.7.4 (2018-12-07)
 - Added #412: Update phpunit dist due to latest changes
 - Fixed #409: Cant select cross domain content type for reference_of field

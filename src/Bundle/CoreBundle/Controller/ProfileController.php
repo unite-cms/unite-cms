@@ -2,10 +2,12 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -15,10 +17,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Constraints\EqualTo;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
@@ -29,9 +32,8 @@ use UniteCMS\CoreBundle\Event\RegistrationEvent;
 use UniteCMS\CoreBundle\Form\InvitationRegistrationType;
 use UniteCMS\CoreBundle\Form\Model\ChangePassword;
 use UniteCMS\CoreBundle\Form\Model\InvitationRegistrationModel;
-use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
-class ProfileController extends Controller
+class ProfileController extends AbstractController
 {
 
     /**
@@ -39,16 +41,21 @@ class ProfileController extends Controller
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
      *
      * @param Request $request
+     * @param FormFactoryInterface $formFactory
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @param TranslatorInterface $translator
+     * @param ValidatorInterface $validator
+     * @param EventDispatcherInterface $eventDispatcher
      * @return Response
      */
-    public function updateAction(Request $request)
+    public function updateAction(Request $request, FormFactoryInterface $formFactory, UserPasswordEncoderInterface $passwordEncoder, TranslatorInterface $translator, ValidatorInterface $validator, EventDispatcherInterface $eventDispatcher)
     {
         $forms = [];
         $user = $this->getUser();
         $changePassword = new ChangePassword();
 
         // Personal settings form.
-        $forms['personal'] = $this->get('form.factory')->createNamedBuilder('user', FormType::class, $user)
+        $forms['personal'] = $formFactory->createNamedBuilder('user', FormType::class, $user)
             ->add('name', TextType::class, ['label' => 'profile.personal.form.name', 'required' => true])
             ->add('email', EmailType::class, ['label' => 'profile.personal.form.email', 'required' => true])
             ->add('submit', SubmitType::class, ['label' => 'profile.personal.form.submit'])
@@ -63,7 +70,7 @@ class ProfileController extends Controller
 
 
         // Change password form.
-        $forms['change_password'] = $this->get('form.factory')->createNamedBuilder('change_password',FormType::class, $changePassword, ['validation_groups' => 'UPDATE'])
+        $forms['change_password'] = $formFactory->createNamedBuilder('change_password',FormType::class, $changePassword, ['validation_groups' => 'UPDATE'])
             ->add('currentPassword',PasswordType::class, [
                 'label' => 'profile.change_password.form.current_password',
                 'required' => true,
@@ -82,7 +89,7 @@ class ProfileController extends Controller
 
         if ($forms['change_password']->isSubmitted() && $forms['change_password']->isValid()) {
             $this->getUser()->setPassword(
-                $this->get('security.password_encoder')->encodePassword($this->getUser(), $changePassword->getNewPassword())
+                $passwordEncoder->encodePassword($this->getUser(), $changePassword->getNewPassword())
             );
 
             // Clear plaintext password, so it can't be accessed later in this request.
@@ -94,13 +101,13 @@ class ProfileController extends Controller
 
 
         // Delete account.
-        $forms['delete_account'] = $this->get('form.factory')->createNamedBuilder('delete_account',FormType::class, null)
+        $forms['delete_account'] = $formFactory->createNamedBuilder('delete_account',FormType::class, null)
             ->add('type_email', EmailType::class, [
                 'label' => 'profile.delete_account.form.type_email',
                 'required' => true,
                 'attr' => ['autocomplete' => 'off'],
                 'constraints' => [
-                    new EqualTo(['value' => $user->getEmail(), 'message' => $this->get('translator')->trans('profile.delete_account.form.type_email.not_equal')]),
+                    new EqualTo(['value' => $user->getEmail(), 'message' => $translator->trans('profile.delete_account.form.type_email.not_equal')]),
                 ],
             ])
             ->add('submit', SubmitType::class, [
@@ -113,7 +120,7 @@ class ProfileController extends Controller
 
         if ($forms['delete_account']->isSubmitted() && $forms['delete_account']->isValid()) {
 
-            $violations = $this->get('validator')->validate($user, null, ['DELETE']);
+            $violations = $validator->validate($user, null, ['DELETE']);
 
             // If there where violation problems.
             if($violations->count() > 0) {
@@ -123,11 +130,11 @@ class ProfileController extends Controller
                     $violationMapper->mapViolation($violation, $forms['delete_account']);
                 }
 
-                $this->get('event_dispatcher')->dispatch(CancellationEvent::CANCELLATION_FAILURE, new CancellationEvent($user));
+                $eventDispatcher->dispatch(new CancellationEvent($user), CancellationEvent::CANCELLATION_FAILURE);
 
             // if this member is save to delete.
             } else {
-                $this->get('event_dispatcher')->dispatch(CancellationEvent::CANCELLATION_SUCCESS, new CancellationEvent($user));
+                $eventDispatcher->dispatch(new CancellationEvent($user), CancellationEvent::CANCELLATION_SUCCESS);
 
                 $this->getDoctrine()->getManager()->remove($user);
                 $this->getDoctrine()->getManager()->flush();
@@ -136,7 +143,7 @@ class ProfileController extends Controller
                 $this->container->get('security.token_storage')->setToken(null);
                 $this->container->get('session')->clear();
 
-                $this->get('event_dispatcher')->dispatch(CancellationEvent::CANCELLATION_COMPLETE, new CancellationEvent($user));
+                $eventDispatcher->dispatch(new CancellationEvent($user), CancellationEvent::CANCELLATION_COMPLETE);
 
                 return $this->redirect($this->generateUrl('unitecms_core_index'));
             }
@@ -153,9 +160,13 @@ class ProfileController extends Controller
      * @Route("/reset-password", methods={"GET", "POST"})
      *
      * @param Request $request
+     * @param TranslatorInterface $translator
+     * @param \Swift_Mailer $mailer
+     * @param string $mailerSender
      * @return Response
+     * @throws \Exception
      */
-    public function resetPasswordAction(Request $request)
+    public function resetPasswordAction(Request $request, TranslatorInterface $translator, \Swift_Mailer $mailer, string $mailerSender)
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -190,8 +201,8 @@ class ProfileController extends Controller
                     $user->setResetRequestedAt(new \DateTime());
 
                     // Create message.
-                    $message = (new \Swift_Message($this->get('translator')->trans('email.reset_password.headline')))
-                        ->setFrom($this->getParameter('mailer_sender'))
+                    $message = (new \Swift_Message($translator->trans('email.reset_password.headline')))
+                        ->setFrom($mailerSender)
                         ->setTo($user->getEmail())
                         ->setBody(
                             $this->renderView(
@@ -207,7 +218,7 @@ class ProfileController extends Controller
                     $this->getDoctrine()->getManager()->flush();
 
                     // Send out message.
-                    $this->get('mailer')->send($message);
+                    $mailer->send($message);
                 }
             }
         }
@@ -224,9 +235,11 @@ class ProfileController extends Controller
      * @Route("/reset-password-confirm", methods={"GET", "POST"})
      *
      * @param Request $request
+     * @param FormFactoryInterface $formFactory
+     * @param UserPasswordEncoderInterface $passwordEncoder
      * @return Response
      */
-    public function resetPasswordConfirmAction(Request $request)
+    public function resetPasswordConfirmAction(Request $request, FormFactoryInterface $formFactory, UserPasswordEncoderInterface $passwordEncoder)
     {
         // Redirect the user to / if already authenticated.
         if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -249,7 +262,7 @@ class ProfileController extends Controller
                 $tokenExpired = false;
 
                 $changePassword = new ChangePassword();
-                $changePasswordForm = $this->get('form.factory')->createNamedBuilder(
+                $changePasswordForm = $formFactory->createNamedBuilder(
                     'change_password',
                     FormType::class,
                     $changePassword,
@@ -274,7 +287,7 @@ class ProfileController extends Controller
                 if ($changePasswordForm->isSubmitted() && $changePasswordForm->isValid()) {
 
                     $user->setPassword(
-                        $this->get('security.password_encoder')->encodePassword(
+                        $passwordEncoder->encodePassword(
                             $user,
                             $changePassword->getNewPassword()
                         )
@@ -302,9 +315,13 @@ class ProfileController extends Controller
      * @Route("/accept-invitation", methods={"GET", "POST"})
      *
      * @param Request $request
+     * @param TranslatorInterface $translator
+     * @param ValidatorInterface $validator
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param UserPasswordEncoderInterface $passwordEncoder
      * @return Response
      */
-    public function acceptInvitationAction(Request $request)
+    public function acceptInvitationAction(Request $request, TranslatorInterface $translator, ValidatorInterface $validator, EventDispatcherInterface $eventDispatcher, UserPasswordEncoderInterface $passwordEncoder)
     {
         $tokenPresent = false;
         $tokenFound = false;
@@ -345,7 +362,7 @@ class ProfileController extends Controller
 
                             $this->addFlash(
                                 'success',
-                                $this->get('translator')->trans('profile.accept_invitation.please_login')
+                                $translator->trans('profile.accept_invitation.please_login')
                             );
 
                             throw $this->createAccessDeniedException();
@@ -387,11 +404,11 @@ class ProfileController extends Controller
                                         }
 
                                         // Validate user.
-                                        if (!$this->get('validator')->validate($existingUser)) {
+                                        if (!$validator->validate($existingUser)) {
                                             $form->addError(new FormError('invitation.invalid_user'));
                                         } else {
 
-                                            $this->get('event_dispatcher')->dispatch(InvitationEvent::INVITATION_ACCEPTED, new InvitationEvent($invitation));
+                                            $eventDispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::INVITATION_ACCEPTED);
 
                                             // Delete invitation.
                                             $this->getDoctrine()->getManager()->remove($invitation);
@@ -419,7 +436,7 @@ class ProfileController extends Controller
                                         // If the user rejects the invitation, just delete it.
                                     } elseif ($form->get('reject')->isClicked()) {
 
-                                        $this->get('event_dispatcher')->dispatch(InvitationEvent::INVITATION_REJECTED, new InvitationEvent($invitation));
+                                        $eventDispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::INVITATION_REJECTED);
 
                                         // Delete invitation.
                                         $this->getDoctrine()->getManager()->remove($invitation);
@@ -464,7 +481,7 @@ class ProfileController extends Controller
                                     ->setEmail($invitation->getEmail())
                                     ->setName($registration->getName())
                                     ->setPassword(
-                                        $this->get('security.password_encoder')->encodePassword(
+                                        $passwordEncoder->encodePassword(
                                             $user,
                                             $registration->getPassword()
                                         )
@@ -489,16 +506,16 @@ class ProfileController extends Controller
                                 // Clear plaintext password, so it can't be accessed later in this request.
                                 $registration->eraseCredentials();
 
-                                $violations = $this->get('validator')->validate($user);
+                                $violations = $validator->validate($user);
 
                                 // Validate new created user.
                                 if ($violations->count() > 0) {
                                     $form->addError(new FormError('invitation.invalid_user'));
-                                    $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_FAILURE, new RegistrationEvent($registration));
+                                    $eventDispatcher->dispatch(new RegistrationEvent($registration), RegistrationEvent::REGISTRATION_FAILURE);
 
                                 } else {
 
-                                    $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_SUCCESS, new RegistrationEvent($registration));
+                                    $eventDispatcher->dispatch(new RegistrationEvent($registration), RegistrationEvent::REGISTRATION_SUCCESS);
 
                                     $this->getDoctrine()->getManager()->persist($user);
 
@@ -508,7 +525,7 @@ class ProfileController extends Controller
                                         $this->getDoctrine()->getManager()->persist($domainMember);
                                     }
 
-                                    $this->get('event_dispatcher')->dispatch(InvitationEvent::INVITATION_ACCEPTED, new InvitationEvent($invitation));
+                                    $eventDispatcher->dispatch(new InvitationEvent($invitation), InvitationEvent::INVITATION_ACCEPTED);
 
                                     // Delete invitation.
                                     $this->getDoctrine()->getManager()->remove($invitation);
@@ -521,7 +538,7 @@ class ProfileController extends Controller
                                     $this->container->get('security.token_storage')->setToken($userToken);
                                     $this->container->get('session')->set('_security_main', serialize($userToken));
 
-                                    $this->get('event_dispatcher')->dispatch(RegistrationEvent::REGISTRATION_COMPLETE, new RegistrationEvent($registration));
+                                    $eventDispatcher->dispatch(new RegistrationEvent($registration), RegistrationEvent::REGISTRATION_COMPLETE);
 
                                     if($domainMember) {
                                         return $this->redirect($this->generateUrl('unitecms_core_domain_view', [$domainMember]));

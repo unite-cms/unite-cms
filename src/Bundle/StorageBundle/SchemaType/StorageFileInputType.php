@@ -19,23 +19,23 @@ class StorageFileInputType extends InputObjectType
             [
                 'fields' => [
                     'name' => [
-                        'type' => Type::nonNull(Type::string()),
+                        'type' => Type::string(),
                         'description' => 'The filename (with filetype suffix)',
                     ],
                     'size' => [
-                        'type' => Type::nonNull(Type::int()),
+                        'type' => Type::int(),
                         'description' => 'The filesize in bytes',
                     ],
                     'type' => [
-                        'type' => Type::nonNull(Type::string()),
+                        'type' => Type::string(),
                         'description' => 'The MIME type',
                     ],
                     'id' => [
-                        'type' => Type::nonNull(Type::id()),
+                        'type' => Type::id(),
                         'description' => 'An UUID identifier for this file',
                     ],
                     'checksum' => [
-                        'type' => Type::nonNull(Type::string()),
+                        'type' => Type::string(),
                         'description' => 'A checksum for uuid and filename, created by unite CMS.',
                     ],
                 ],

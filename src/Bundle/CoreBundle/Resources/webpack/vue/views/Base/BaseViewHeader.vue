@@ -1,4 +1,5 @@
 <template>
+
     <header class="uk-card-header">
         <div class="uk-flex uk-flex-middle unite-div-table-header">
             <div class="unite-div-table-headline uk-flex uk-flex-1 uk-flex-middle">
@@ -16,12 +17,25 @@
                 <a v-on:click.prevent="onSearch" href="" class="uk-search-icon-flip" uk-search-icon></a>
                 <input v-model="searchTerm" class="uk-search-input" type="search" placeholder="Search..." v-on:keyup="onDebouncedSearch">
             </form>
-            <a v-if="!selectable" :target="embedded ? '_blank' : '_self'" :href="createUrl" class="uk-button uk-button-primary">
+            <a v-if="allowCreate && !selectable" :target="embedded ? '_blank' : '_self'" :href="createUrl" class="uk-button uk-button-primary">
                 <span v-html="feather.icons['plus'].toSvg()"></span>
                 {{ createLabel }}
             </a>
         </div>
+
+         <div v-if="actions && actions.length > 0" class="uk-flex uk-flex-right uk-margin">
+            <button class="uk-button uk-button-default" type="button">Action Links</button>
+            <div uk-dropdown>
+                <ul class="uk-nav uk-dropdown-nav">
+                    <li v-for="v in actions">
+                        <a :href="v.url" :target="v.target"><span v-html="feather.icons[v.icon].toSvg()"></span> {{ v.label }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
     </header>
+
 </template>
 
 <script>
@@ -46,7 +60,9 @@
             'createUrl',
             'selectable',
             'sortable',
-            'embedded'
+            'embedded',
+            'actions',
+            'allowCreate'
         ],
         methods: {
             onDebouncedSearch(e) {

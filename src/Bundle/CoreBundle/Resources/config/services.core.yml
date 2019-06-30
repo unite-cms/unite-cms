@@ -36,21 +36,23 @@ services:
     autowire: true
     public: true
     arguments:
-      ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem', '@event_dispatcher']
+      ['%kernel.project_dir%/config/unite/', '@unite.cms.domain_definition_parser', '@filesystem', '@event_dispatcher', []]
 
-  # In order to autowire DomainConfigManager, we need to alis the full class path
-  UniteCMS\CoreBundle\Service\DomainConfigManager: "@unite.cms.domain_config_manager"
+  unite.cms.fieldable_content_manager:
+    class: UniteCMS\CoreBundle\Service\FieldableContentManager
+    autowire: true
+    public: true
 
   # The fieldable form builder allows you to build content and setting forms based on the defined contentType / settingType fields.
   unite.cms.fieldable_form_builder:
     class: UniteCMS\CoreBundle\Form\FieldableFormBuilder
-    arguments: ['@form.factory', '@unite.cms.field_type_manager']
+    arguments: ['@form.factory', '@unite.cms.field_type_manager', '@security.authorization_checker']
     public: true
 
   # Provide FieldableFormType form as a service, pass tokenstorage as an argument, auto wire not working in forms
   unite.cms.fieldable_form_type:
     class: UniteCMS\CoreBundle\Form\FieldableFormType
-    arguments: ['@security.token_storage']
+    arguments: ['@security.token_storage', '@monolog.logger.security']
     tags: [form.type]
 
   # Provide ContentDeleteFormType form as a service, pass tokenstorage as an argument, auto wire not working in forms
@@ -91,5 +93,15 @@ services:
   # register unite core field type extension
   unite.cms.core_type_extension:
     class: UniteCMS\CoreBundle\Form\Extension\UniteCMSCoreTypeExtension
+    arguments: ['@translator']
     tags:
     - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
+
+
+  # In order to autowire services, we need to alis the full class path
+  UniteCMS\CoreBundle\Service\UniteCMSManager: "@unite.cms.manager"
+  UniteCMS\CoreBundle\Field\FieldTypeManager: "@unite.cms.field_type_manager"
+  UniteCMS\CoreBundle\View\ViewTypeManager: "@unite.cms.view_type_manager"
+  UniteCMS\CoreBundle\Service\DomainConfigManager: "@unite.cms.domain_config_manager"
+  UniteCMS\CoreBundle\Form\FieldableFormBuilder: "@unite.cms.fieldable_form_builder"
+  UniteCMS\CoreBundle\Service\FieldableContentManager: "@unite.cms.fieldable_content_manager"

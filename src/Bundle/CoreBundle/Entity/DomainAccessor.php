@@ -10,7 +10,6 @@ namespace UniteCMS\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -36,6 +35,20 @@ abstract class DomainAccessor
      * @ORM\OneToMany(targetEntity="UniteCMS\CoreBundle\Entity\DomainMember", mappedBy="accessor", cascade={"persist", "remove", "merge"})
      */
     protected $domains;
+
+    /**
+     * Returns the unique type of this accessor.
+     *
+     * @return string
+     */
+    abstract static function getType() : string;
+
+    /**
+     * Returns one sql field that will be used for filtering anf sorting.
+     *
+     * @return string
+     */
+    abstract static function getNameField() : string;
 
     public function __construct()
     {

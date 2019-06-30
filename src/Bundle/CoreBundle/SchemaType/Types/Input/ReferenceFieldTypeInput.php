@@ -13,15 +13,15 @@ class ReferenceFieldTypeInput extends InputObjectType
             [
                 'fields' => [
                     'domain' => [
-                        'type' => Type::nonNull(Type::string()),
+                        'type' => Type::string(),
                         'description' => 'The domain of the content to reference.',
                     ],
                     'content_type' => [
-                        'type' => Type::nonNull(Type::string()),
+                        'type' => Type::string(),
                         'description' => 'The content type of the content to reference.',
                     ],
                     'content' => [
-                        'type' => Type::nonNull(Type::id()),
+                        'type' => Type::id(),
                         'description' => 'The content to reference.',
                     ]
                 ]

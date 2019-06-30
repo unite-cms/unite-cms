@@ -1,6 +1,6 @@
 <template>
     <div :style="style" class="view-field view-field-collection">
-        <div class="view-field-collection-row" v-for="(c_row,index) in value">
+        <div class="view-field-collection-row" v-for="(c_row,index) in value" :key="index" v-if="limitCollectionRows(index, settings)">
             <component v-for="(v,identifier) in settings.fields"
                        :key="identifier + index"
                        :is="$uniteCMSViewFields.resolve(v.type)"
@@ -34,6 +34,9 @@
             },
         },
         computed: {
+            limitCollectionRows() {
+                return (i, s) => ("max_display_rows" in s) ? i < s.max_display_rows : true;
+            },
         },
     }
 </script>

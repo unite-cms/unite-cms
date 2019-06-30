@@ -1,0 +1,5 @@
+
+.uk-alert.uk-alert-plain {
+  border: 1px solid map-get($colors, grey);
+  color: map-get($colors, grey-dark);
+}

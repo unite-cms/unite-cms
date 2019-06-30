@@ -6,13 +6,14 @@ use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Entity\Domain;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Exception\InvalidDomainConfigurationException;
@@ -20,7 +21,7 @@ use UniteCMS\CoreBundle\Form\WebComponentType;
 use UniteCMS\CoreBundle\Security\Voter\OrganizationVoter;
 use UniteCMS\CoreBundle\Service\DomainConfigManager;
 
-class DomainController extends Controller
+class DomainController extends AbstractController
 {
     /**
      * @Route("/", methods={"GET"})
@@ -65,9 +66,10 @@ class DomainController extends Controller
      * @param Request $request
      * @param DomainConfigManager $domainConfigManager
      * @param LoggerInterface $logger
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function createAction(Organization $organization, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
+    public function createAction(Organization $organization, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger, ValidatorInterface $validator)
     {
         $domain = new Domain();
         $import_config = $request->query->has('import');
@@ -90,7 +92,7 @@ class DomainController extends Controller
         $form = $this->createFormBuilder([
             'domain' => $domain->getConfig(),
         ])
-            ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor'])
+            ->add('domain', WebComponentType::class, ['tag' => 'unite-cms-core-domaineditor', 'compound' => false])
             ->add('submit', SubmitType::class, ['label' => 'domain.create.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->getForm();
 
@@ -104,8 +106,7 @@ class DomainController extends Controller
 
             try {
                 $domain = $domainConfigManager->parse($form->getData()['domain']);
-                $domainSerialized = $domainConfigManager->serialize($domain);
-                $domain->setConfig($domainSerialized);
+                $domain->setConfig($form->getData()['domain']);
 
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
@@ -114,7 +115,7 @@ class DomainController extends Controller
             if ($domain) {
                 $domain->setOrganization($organization);
 
-                $errors = $this->get('validator')->validate($domain);
+                $errors = $validator->validate($domain);
 
                 if ($errors->count() == 0) {
                     $this->getDoctrine()->getManager()->persist($domain);
@@ -174,62 +175,36 @@ class DomainController extends Controller
      * @param Request $request
      * @param DomainConfigManager $domainConfigManager
      * @param LoggerInterface $logger
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function updateAction(Organization $organization, Domain $domain, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger)
+    public function updateAction(Organization $organization, Domain $domain, Request $request, DomainConfigManager $domainConfigManager, LoggerInterface $logger, ValidatorInterface $validator)
     {
         $outOfSyncPersistedConfig = null;
         $configNotInFilesystem = false;
 
+        // First check if the config file exists in the filesystem.
         try {
             if ($domainConfigManager->configExists($domain)) {
+
+                // Check if filesystem config is equal to database config.
+                $originalDomainConfig = $domainConfigManager->serialize($domain);
                 $domainConfigManager->loadConfig($domain);
+                $fileSystemDomainConfig = $domainConfigManager->serialize($domain);
 
-                // Check if config (once parsed) is different from domain entity.
-                $outOfSyncPersistedConfig = $domainConfigManager->serialize($domain);
-                if ($outOfSyncPersistedConfig === $domainConfigManager->serialize(
-                        $domainConfigManager->parse($domain->getConfig())
-                    )) {
-                    $outOfSyncPersistedConfig = null;
+                // Check if config is different from domain entity.
+                if ($originalDomainConfig !== $fileSystemDomainConfig) {
+                    $outOfSyncPersistedConfig = $originalDomainConfig;
                 }
 
-                // If the file does not exist, serialize the current domain instead and save the file.
+            // If the file does not exist, we use the config from database.
             } else {
-                $domain->setConfig($domainConfigManager->serialize($domain));
-
-                /**
-                 * @deprecated 0.8 Before Version 0.7, variables could be saved to $domain->configVariables. They where
-                 * auto-replaced by the domain config parser. To be backward compatible we need to to this here. This block can
-                 * be deleted, once we reach version 0.8.
-                 */
-                if (!empty($domain->getConfigVariables())) {
-
-                    $JSON = $domain->getConfig();
-                    foreach ($domain->getConfigVariables() as $variable => $value) {
-                        $value = json_encode($value);
-                        $JSON = str_replace($value, '"'.$variable.'"', $JSON);
-                    }
-
-                    $JSON_ARRAY = json_decode($JSON, true);
-                    $JSON_ARRAY['variables'] = $domain->getConfigVariables();
-                    uksort(
-                        $JSON_ARRAY,
-                        function ($a, $b) {
-                            if (in_array($a, ['title', 'identifier', 'variables'])) {
-                                return -1;
-                            }
-                            if (in_array($b, ['title', 'identifier', 'variables'])) {
-                                return +1;
-                            }
-
-                            return 0;
-                        }
-                    );
-                    $JSON = json_encode($JSON_ARRAY);
-                    $domain->setConfig($JSON);
-                }
 
                 // Force update of the domain config.
+                if(empty($domain->getConfig())) {
+                    $domain->setConfig($domainConfigManager->serialize($domain));
+                }
+
                 $domain->setConfigChanged();
                 $configNotInFilesystem = true;
             }
@@ -247,13 +222,11 @@ class DomainController extends Controller
         $originalDomain = null;
         $updatedDomain = null;
 
-        $form = $this->createFormBuilder([
-            'domain' => $outOfSyncPersistedConfig ? $outOfSyncPersistedConfig : $domain->getConfig(),
-        ])
+        $form = $this->createFormBuilder(['domain' => $domain->getConfig()])
         ->add('domain', WebComponentType::class, [
+            'compound' => false,
             'tag' => 'unite-cms-core-domaineditor',
             'error_bubbling' => true,
-            'attr' => $outOfSyncPersistedConfig ? ['diff-value' => json_encode(json_decode($domain->getConfig()))] : [],
         ])
         ->add('submit', SubmitType::class, ['label' => 'domain.update.form.submit', 'attr' => ['class' => 'uk-button uk-button-primary']])
         ->add('back', SubmitType::class, ['label' => 'domain.update.form.back', 'attr' => ['class' => 'uk-button']])
@@ -267,8 +240,7 @@ class DomainController extends Controller
 
             try {
                 $updatedDomain = $domainConfigManager->parse($form->getData()['domain']);
-                $domainSerialized = $domainConfigManager->serialize($updatedDomain);
-                $updatedDomain->setConfig($domainSerialized);
+                $updatedDomain->setConfig($form->getData()['domain']);
             } catch (\Exception $e) {
                 $form->get('domain')->addError(new FormError('Could not parse domain definition JSON.'));
                 $formView = $form->createView();
@@ -279,7 +251,7 @@ class DomainController extends Controller
                 // In order to avoid persistence conflicts, we create a new domain from serialized domain.
                 $originalDomain = $domainConfigManager->parse($domainConfigManager->serialize($domain));
                 $domain->setFromEntity($updatedDomain);
-                $violations = $this->get('validator')->validate($domain);
+                $violations = $validator->validate($domain);
 
                 // If this config is valid and could be saved.
                 if ($violations->count() == 0) {
@@ -331,7 +303,7 @@ class DomainController extends Controller
         }
         else {
             if($outOfSyncPersistedConfig) {
-                $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. You can use the diff tool to update the config.');
+                $this->addFlash('warning', 'The filesystem config of this domain is different from the current config. If you click "validate" and "Save changes", the updated domain config will be persisted to the database.');
             }
 
             if($configNotInFilesystem) {
@@ -342,7 +314,9 @@ class DomainController extends Controller
         return $this->render('@UniteCMSCore/Domain/update.html.twig', [
             'form' => $formView,
             'originalDomain' => $originalDomain,
-            'updatedDomain' => $updatedDomain
+            'updatedDomain' => $updatedDomain,
+            'originalDomainSerialized' => $originalDomain ? $domainConfigManager->serialize($originalDomain) : '',
+            'updatedDomainSerialized' => $updatedDomain ? $domainConfigManager->serialize($updatedDomain) : '',
         ]);
     }
 
@@ -355,9 +329,10 @@ class DomainController extends Controller
      * @param Organization $organization
      * @param Domain $domain
      * @param Request $request
+     * @param ValidatorInterface $validator
      * @return Response
      */
-    public function deleteAction(Organization $organization, Domain $domain, Request $request)
+    public function deleteAction(Organization $organization, Domain $domain, Request $request, ValidatorInterface $validator)
     {
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, [
@@ -368,7 +343,7 @@ class DomainController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $violations = $this->get('validator')->validate($domain, null, ['DELETE']);
+            $violations = $validator->validate($domain, null, ['DELETE']);
 
             // If there where violation problems.
             if($violations->count() > 0) {

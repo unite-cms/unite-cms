@@ -65,6 +65,64 @@ class StorageService
     }
 
     /**
+     * Creates a PreSigned url object from the given command, using bucket settings, uuid and filename.
+     *
+     * @param string $command
+     * @param array $bucket_settings
+     * @param string $uuid
+     * @param string $filename
+     * @param string $expires
+     * @return PreSignedUrl
+     */
+    protected function generatePreSignedUrl(string $command, array $bucket_settings, string $uuid, string $filename, string $expires = '+5 minutes') {
+
+        // Return pre-signed url
+        $s3Config = [
+            'version' => 'latest',
+            'region' => $bucket_settings['region'] ?? 'us-east-1',
+            'endpoint' => $bucket_settings['endpoint'],
+            'use_path_style_endpoint' => true,
+        ];
+        // The key and secret are optional - if they're not specified, the S3 client
+        // object will attempt to fetch them from the EC2 instance metadata server.
+        if (isset($bucket_settings['key']) && isset($bucket_settings['secret'])) {
+            $s3Config['credentials'] = [
+                'key' => $bucket_settings['key'],
+                'secret' => $bucket_settings['secret'],
+            ];
+        }
+
+        $s3Client = new S3Client($s3Config);
+
+        // Set the upload file path to an optional path + uuid + filename.
+        $filePath = $uuid.'/'.$filename;
+
+        if (!empty($bucket_settings['path'])) {
+            $path = trim($bucket_settings['path'], "/ \t\n\r\0\x0B");
+
+            if (!empty($path)) {
+                $filePath = $path.'/'.$filePath;
+            }
+        }
+
+        $putObjectParams = [
+            'Bucket' => $bucket_settings['bucket'],
+            'Key' => $filePath,
+        ];
+        if (isset($bucket_settings['acl'])) {
+            $putObjectParams['ACL'] = $bucket_settings['acl'];
+        }
+        $commandObj = $s3Client->getCommand($command, $putObjectParams);
+
+        return new PreSignedUrl(
+            (string)$s3Client->createPresignedRequest($commandObj, $expires)
+                ->getUri(),
+            $uuid,
+            $filename
+        );
+    }
+
+    /**
      * Pre-Signs an upload action for the given filename and field
      * configuration.
      *
@@ -72,10 +130,11 @@ class StorageService
      * @param array $bucket_settings
      * @param string $allowed_file_types
      *
+     * @param string $expires
      * @return PreSignedUrl
      * @throws \Exception
      */
-    public function createPreSignedUploadUrl(string $filename, array $bucket_settings, string $allowed_file_types = '*')
+    public function createPreSignedUploadUrl(string $filename, array $bucket_settings, string $allowed_file_types = '*', string $expires = '+5 minutes')
     {
 
         // Check if file type is allowed.
@@ -87,7 +146,6 @@ class StorageService
         }
 
         $filenameextension = array_pop($filenameparts);
-
         $filenameextension_supported = false;
 
         foreach (explode(
@@ -108,47 +166,23 @@ class StorageService
             );
         }
 
-        $uuid = (string)Uuid::uuid1();
+        return $this->generatePreSignedUrl('PutObject', $bucket_settings, (string)Uuid::uuid1(), $filename, $expires);
+    }
 
-        // Return pre-signed url
-        $s3Client = new S3Client(
-            [
-                'version' => 'latest',
-                'region' => $bucket_settings['region'] ?? 'us-east-1',
-                'endpoint' => $bucket_settings['endpoint'],
-                'use_path_style_endpoint' => true,
-                'credentials' => [
-                    'key' => $bucket_settings['key'],
-                    'secret' => $bucket_settings['secret'],
-                ],
-            ]
-        );
-
-        // Set the upload file path to an optional path + uuid + filename.
-        $filePath = $uuid.'/'.$filename;
-
-        if (!empty($bucket_settings['path'])) {
-            $path = trim($bucket_settings['path'], "/ \t\n\r\0\x0B");
-
-            if (!empty($path)) {
-                $filePath = $path.'/'.$filePath;
-            }
-        }
-
-        $command = $s3Client->getCommand(
-            'PutObject',
-            [
-                'Bucket' => $bucket_settings['bucket'],
-                'Key' => $filePath,
-            ]
-        );
-
-        return new PreSignedUrl(
-            (string)$s3Client->createPresignedRequest($command, '+5 minutes')
-                ->getUri(),
-            $uuid,
-            $filename
-        );
+    /**
+     * Pre-Signs an get-object action for the given filename and field configuration.
+     *
+     * @param string $uuid
+     * @param string $filename
+     * @param array $bucket_settings
+     * @param string $expires
+     *
+     * @return PreSignedUrl
+     * @throws \Exception
+     */
+    public function createPreSignedDownloadUrl(string $uuid, string $filename, array $bucket_settings, string $expires = '+5 minutes')
+    {
+        return $this->generatePreSignedUrl('GetObject', $bucket_settings, $uuid, $filename, $expires);
     }
 
     /**
@@ -206,18 +240,22 @@ class StorageService
      */
     public function deleteObject(string $uuid, string $filename, array $bucket_settings)
     {
-        $s3Client = new S3Client(
-            [
-                'version' => 'latest',
-                'region' => 'us-east-1',
-                'endpoint' => $bucket_settings['endpoint'],
-                'use_path_style_endpoint' => true,
-                'credentials' => [
-                    'key' => $bucket_settings['key'],
-                    'secret' => $bucket_settings['secret'],
-                ],
-            ]
-        );
+        $s3Config = [
+            'version' => 'latest',
+            'region' => $bucket_settings['region'] ?? 'us-east-1',
+            'endpoint' => $bucket_settings['endpoint'],
+            'use_path_style_endpoint' => true
+        ];
+        // The key and secret are optional - if they're not specified, the S3 client
+        // object will attempt to fetch them from the EC2 instance metadata server.
+        if (isset($bucket_settings['key']) && isset($bucket_settings['secret'])) {
+            $s3Config['credentials'] = [
+                'key' => $bucket_settings['key'],
+                'secret' => $bucket_settings['secret'],
+            ];
+        }
+
+        $s3Client = new S3Client($s3Config);
 
         // Set the upload file path to an optional path + uuid + filename.
         $filePath = $uuid.'/'.$filename;

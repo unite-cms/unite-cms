@@ -6,11 +6,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\CoreBundle\Validator\Constraints\FieldType;
 use UniteCMS\CoreBundle\Validator\Constraints\ReservedWords;
 use UniteCMS\CoreBundle\Validator\Constraints\UniqueFieldableField;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldSettings;
 use UniteCMS\CoreBundle\Validator\Constraints\ValidIdentifier;
+use UniteCMS\CoreBundle\Validator\Constraints\ValidPermissions;
 
 /**
  * We use this model only for validation!
@@ -57,6 +59,12 @@ class CollectionField implements FieldableField
      */
     private $collection;
 
+    /**
+     * @var array
+     * @ValidPermissions(callbackAttributes="allowedPermissionKeys", message="invalid_selection")
+     */
+    private $permissions;
+
     public function __construct($field)
     {
         if (isset($field['title'])) {
@@ -72,6 +80,25 @@ class CollectionField implements FieldableField
         }
 
         $this->setSettings(new FieldableFieldSettings(isset($field['settings']) ? $field['settings'] : []));
+
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        if(isset($field['permissions'])) {
+            $this->setPermissions($field['permissions']);
+        }
+    }
+
+    private function addDefaultPermissions()
+    {
+        $this->permissions[FieldableFieldVoter::LIST] = 'true';
+        $this->permissions[FieldableFieldVoter::VIEW] = 'true';
+        $this->permissions[FieldableFieldVoter::UPDATE] = 'true';
+    }
+
+    public function allowedPermissionKeys(): array
+    {
+        return array_merge(FieldableFieldVoter::ENTITY_PERMISSIONS, FieldableFieldVoter::BUNDLE_PERMISSIONS);
     }
 
     public function __toString()
@@ -221,5 +248,40 @@ class CollectionField implements FieldableField
     public function getJsonExtractIdentifier()
     {
         return '$.'.$this->getIdentifierPath('[*].', false);
+    }
+
+    /**
+     * @return array
+     */
+    public function getPermissions() : array
+    {
+        // Prevent null values. We always need an array response.
+        if(empty($this->permissions)) {
+            $this->addDefaultPermissions();
+        }
+        return $this->permissions;
+    }
+
+
+    /**
+     * @param array $permissions
+     *
+     * @return CollectionField
+     */
+    public function setPermissions($permissions)
+    {
+        $this->permissions = [];
+        $this->addDefaultPermissions();
+
+        foreach ($permissions as $attribute => $expression) {
+            $this->addPermission($attribute, $expression);
+        }
+
+        return $this;
+    }
+
+    public function addPermission($attribute, string $expression)
+    {
+        $this->permissions[$attribute] = $expression;
     }
 }

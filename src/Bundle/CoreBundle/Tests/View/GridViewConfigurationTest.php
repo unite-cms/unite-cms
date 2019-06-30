@@ -52,6 +52,10 @@ class GridViewConfigurationTest extends TestCase
             ['text', new TextFieldType()],
             ['textarea', new TextAreaFieldType()],
         ]));
+        $this->fieldTypeManager->expects($this->any())->method('hasFieldType')->will($this->returnValueMap([
+            ['text', true],
+            ['textarea', true],
+        ]));
 
         $this->configuration = new GridViewConfiguration($this->view->getContentType(), $this->fieldTypeManager);
         $this->processor = new Processor();
@@ -76,6 +80,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
 
         $this->view->getContentType()->getFields()->removeElement($this->view->getContentType()->getFields()->first());
@@ -97,6 +102,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
     }
 
@@ -125,6 +131,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
 
         $config = $this->processor->processConfiguration($this->configuration, ['settings' => [
@@ -149,6 +156,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
 
         $config = $this->processor->processConfiguration($this->configuration, ['settings' => [
@@ -186,6 +194,7 @@ class GridViewConfigurationTest extends TestCase
                 'field' => 'updated',
                 'asc' => false,
             ],
+            'actions' => []
         ], $config);
     }
 }

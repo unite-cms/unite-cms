@@ -8,7 +8,9 @@
                    :embedded="embedded"
                    :createLabel="labels.create"
                    :sortable="sort.sortable && !selectable && !deleted.showDeleted"
+                   :actions="actions"
                    :createUrl="urls.create"
+                   :allowCreate="allowCreate"
                    @search="onSearch"></component>
 
         <div v-if="error" class="unite-table-error uk-alert-danger uk-flex uk-flex-middle">
@@ -48,6 +50,7 @@
     import BaseViewContent from './BaseViewContent.vue';
 
     import uniteViewDataFetcher from '../../../js/uniteViewDataFechter.js';
+    import uniteMemberViewDataFechter from '../../../js/uniteMemberViewDataFetcher.js';
 
     import feather from 'feather-icons';
 
@@ -56,8 +59,10 @@
             let bag = JSON.parse(this.parameters);
             let fields = bag.settings.fields;
             let error = null;
+            let limit = bag.settings.rows_per_page ? bag.settings.rows_per_page : 10;
             let fieldQuery = [];
             let filterQuery = [];
+            let actions = bag.settings.actions;
             let sort = bag.settings.sort || {
                 field: null,
                 asc: true
@@ -87,21 +92,26 @@
                 }, fields);
             }
 
+            let dataFetcherArguments = {
+                endpoint: bag.urls.api,
+                csrf_token: bag.csrf_token,
+                settings: bag.settings
+            };
+
             return {
                 headerComponent: typeof this.$options.headerComponent !== 'undefined' ? this.$options.headerComponent : BaseViewHeader,
                 footerComponent: typeof this.$options.footerComponent !== 'undefined' ? this.$options.footerComponent : BaseViewFooter,
                 contentComponent: typeof this.$options.contentComponent !== 'undefined' ? this.$options.contentComponent : BaseViewContent,
-                dataFetcher: uniteViewDataFetcher.create({
-                    endpoint: bag.urls.api,
-                    csrf_token: bag.csrf_token,
-                    settings: bag.settings
-                }, fieldQuery, filterQuery),
+                dataFetcher: (bag.settings.contentType.endsWith('Member')) ?
+                    uniteMemberViewDataFechter.create(dataFetcherArguments, fieldQuery, filterQuery) :
+                    uniteViewDataFetcher.create(dataFetcherArguments, fieldQuery, filterQuery),
                 loading: false,
                 error: error,
                 rows: [],
                 sort: sort,
+                actions: actions,
                 initialSort: Object.assign({}, sort),
-                limit: 10,
+                limit: limit,
                 page: 1,
                 total: 0,
                 autoUpdateFields: [],
@@ -109,6 +119,7 @@
                 selectable: selectable,
                 urls: bag.urls,
                 hasTranslations: bag.settings.hasTranslations,
+                allowCreate: false,
                 deleted: {
                     hasDeleted: false,
                     showDeleted: false
@@ -184,25 +195,32 @@
                 this.dataFetcher.sort(this.sort).fetch(page)
                     .then(
                         (data) => {
-
-                            // In the future, allowed actions will be returned by the api, allowing to display action
-                            // buttons based on content and not only content type. At the moment, we fake this here.
                             this.rows = data.result.result.map((row) => {
                                 let deleted = !(row.deleted == null);
-                                row._actions = {
-                                    delete: !deleted,
-                                    delete_definitely: deleted,
-                                    recover: deleted,
-                                    translations: !deleted && this.hasTranslations,
-                                    revisions: !deleted,
-                                    update: !deleted
-                                };
+                                if(row._permissions) {
+                                    row._actions = {
+                                        delete: row._permissions.DELETE_CONTENT && !deleted,
+                                        delete_definitely: row._permissions.DELETE_CONTENT && deleted,
+                                        recover: row._permissions.UPDATE_CONTENT && deleted,
+                                        translations: row._permissions.UPDATE_CONTENT && !deleted && this.hasTranslations,
+                                        revisions: row._permissions.UPDATE_CONTENT && !deleted,
+                                        update: row._permissions.UPDATE_CONTENT && !deleted
+                                    };
+                                    this.allowCreate = data.result._permissions.CREATE_CONTENT;
+                                } else {
+                                    row._actions = {};
+                                    this.allowCreate = false;
+                                }
                                 return row;
                             });
 
                             this.page = data.result.page;
                             this.total = data.result.total;
-                            this.deleted.hasDeleted = data.deleted.total > 0;
+
+                            if(data.deleted) {
+                                this.deleted.hasDeleted = data.deleted.total > 0;
+                            }
+
                             this.$refs.footer.$emit('goto', this.page);
                         },
                         (error) => { this.error = 'API Error: ' + error; })
@@ -211,7 +229,7 @@
             },
             onSearch(term) {
                 this.dataFetcher.search(term);
-                this.load();
+                this.load(1);
             },
             onUpdateSort(sort) {
                 this.sort = sort;

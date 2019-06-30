@@ -1,4 +1,3 @@
-{% spaceless %}
 {% if form is defined %}
     {% if form.vars is defined and form.vars.assets is defined and form.vars.assets is not empty %}
         {% for asset in form.vars.assets %}
@@ -14,10 +13,7 @@
             {% endif %}
         {% endfor %}
     {% endif %}
-    {% if form.children is defined and form.children is not empty %}
-        {% for child in form.children %}
-            {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: child }) }}
-        {% endfor %}
-    {% endif %}
+    {% for child in form %}
+        {{ include('@UniteCMSCore/Form/_recursive_asset_dumper.html.twig', { form: child }) }}
+    {% endfor %}
 {% endif %}
-{% endspaceless %}

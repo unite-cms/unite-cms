@@ -4,12 +4,10 @@ namespace UniteCMS\CollectionFieldBundle\Tests;
 
 use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Schema;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use Symfony\Component\Validator\Context\ExecutionContext;
-use UniteCMS\CollectionFieldBundle\Field\Types\CollectionFieldType;
 use UniteCMS\CoreBundle\Entity\ApiKey;
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\DomainMember;
@@ -21,9 +19,29 @@ use UniteCMS\CoreBundle\Validator\Constraints\ValidFieldableContentData;
 
 class CollectionFieldTypeTest extends FieldTypeTestCase
 {
+    /**
+     * @var User
+     */
+    protected $user;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->user = new User();
+        $this->user->setRoles([User::ROLE_USER]);
+
+        $domainMember = new DomainMember();
+        $this->user->addDomain($domainMember);
+
+        static::$container->get('security.token_storage')->setToken(new UsernamePasswordToken($this->user, '', 'main', $this->user->getRoles()));
+    }
+
     public function testAllowedFieldSettings()
     {
         $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
         $errors = static::$container->get('validator')->validate($field);
         $this->assertCount(1, $errors);
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
@@ -48,6 +66,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
                     'fields' => [],
                     'min_rows' => 0,
                     'max_rows' => 100,
+                    'form_group' => "Group 1",
                 ]
             )
         );
@@ -60,6 +79,8 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
     {
 
         $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
 
         $content = new Content();
         $content->setContentType($field->getContentType());
@@ -114,6 +135,9 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
     public function testAddingCollectionFieldTypeWithFields()
     {
         $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
         $field->setSettings(
             new FieldableFieldSettings(
                 [
@@ -151,10 +175,99 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals([$field->getIdentifier() => [['f1' => 'value']]], $form->getData());
     }
 
+    public function testAddingCollectionFieldTypeWithFieldAndPermission()
+    {
+        $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'fields' => [
+                        [
+                            'title' => 'Sub Field 1',
+                            'identifier' => 'f1',
+                            'type' => 'text',
+                            'permissions' => [
+                                'list field' => 'false',
+                                'view field' => 'true',
+                                'update field' => 'true',
+                            ],
+                        ],
+                    ],
+                ]
+            )
+        );
+
+        $content = new Content();
+        $content->setContentType($field->getContentType());
+
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $field->getContentType(),
+            $content
+        );
+        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
+        $form->submit(
+            [
+                '_token' => $csrf_token->getValue(),
+                $field->getIdentifier() => [['f1' => 'value']],
+            ]
+        );
+
+        $this->assertEquals([$field->getIdentifier() => []], $form->getData());
+
+        $field->getSettings()->fields[0]['permissions'] = [
+            'list field' => 'true',
+            'view field' => 'true',
+            'update field' => 'false',
+        ];
+
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $field->getContentType(),
+            $content
+        );
+        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
+        $form->submit(
+            [
+                '_token' => $csrf_token->getValue(),
+                $field->getIdentifier() => [['f1' => 'value']],
+            ]
+        );
+
+        $this->assertEquals([$field->getIdentifier() => []], $form->getData());
+
+        $field->getSettings()->fields[0]['permissions'] = [
+            'list field' => 'true',
+            'view field' => 'false',
+            'update field' => 'true',
+        ];
+
+        $this->assertCount(0, static::$container->get('validator')->validate($field));
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm(
+            $field->getContentType(),
+            $content
+        );
+        $csrf_token = static::$container->get('security.csrf.token_manager')->getToken($form->getName());
+        $form->submit(
+            [
+                '_token' => $csrf_token->getValue(),
+                $field->getIdentifier() => [['f1' => 'value']],
+            ]
+        );
+
+        $this->assertEquals([$field->getIdentifier() => [['f1' => 'value']]], $form->getData());
+    }
+
     public function testGettingGraphQLData()
     {
 
         $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
         $field->setIdentifier('f1');
         $field->getContentType()->setIdentifier('ct1');
         $field->setSettings(
@@ -229,24 +342,24 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             )->getType()->getWrappedType()->getFields()
         );
 
-        $this->assertEquals('Ct1F1CollectionFieldLevel1', $type->getField('f1')->getType()->name);
-        $this->assertEquals('Ct1F1CollectionFieldRowLevel1', $type->getField('f1')->getType()->getWrappedType()->name);
+        $this->assertEquals('Ct1F1CollectionField', $type->getField('f1')->getType()->name);
+        $this->assertEquals('Ct1F1CollectionFieldRow', $type->getField('f1')->getType()->getWrappedType()->name);
         $this->assertEquals(
-            'Ct1F1N1CollectionFieldLevel2',
+            'Ct1F1N1CollectionField',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->name
         );
         $this->assertEquals(
-            'Ct1F1N1CollectionFieldRowLevel2',
+            'Ct1F1N1CollectionFieldRow',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->name
         );
         $this->assertEquals(
-            'Ct1F1N1Nested_2CollectionFieldLevel3',
+            'Ct1F1N1Nested_2CollectionField',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getField(
                 'nested_2'
             )->getType()->name
         );
         $this->assertEquals(
-            'Ct1F1N1Nested_2CollectionFieldRowLevel3',
+            'Ct1F1N1Nested_2CollectionFieldRow',
             $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getField(
                 'nested_2'
             )->getType()->getWrappedType()->name
@@ -259,10 +372,183 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         );
     }
 
+    public function testGettingGraphQLDataWithoutPermissions()
+    {
+
+        $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
+        $field->setIdentifier('f1');
+        $field->getContentType()->setIdentifier('ct1');
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'fields' => [
+                        [
+                            'title' => 'Sub Field 1',
+                            'identifier' => 'f1',
+                            'type' => 'text',
+                            'permissions' => [
+                                'list field' => 'false',
+                                'view field' => 'true',
+                                'update field' => 'true',
+                            ],
+                        ],
+                        [
+                            'title' => 'Nested Field 1',
+                            'identifier' => 'n1',
+                            'type' => 'collection',
+                            'settings' => [
+                                'fields' => [
+                                    [
+                                        'title' => 'Nested Field 2',
+                                        'identifier' => 'nested_2',
+                                        'type' => 'collection',
+                                        'settings' => [
+                                            'fields' => [
+                                                [
+                                                    'title' => 'Sub Field 2',
+                                                    'identifier' => 'f2',
+                                                    'type' => 'text',
+                                                ],
+                                            ],
+                                        ],
+                                        'permissions' => [
+                                            'list field' => 'false',
+                                            'view field' => 'true',
+                                            'update field' => 'true',
+                                        ],
+                                    ],
+                                    [
+                                        'title' => '2nd',
+                                        'identifier' => 'f_2nd',
+                                        'type' => 'text',
+                                    ]
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'Sub Field 3',
+                            'identifier' => 'f3',
+                            'type' => 'text',
+                            'permissions' => [
+                                'list field' => 'true',
+                                'view field' => 'content.data.f1 == "X"',
+                                'update field' => 'true',
+                            ],
+                        ],
+                    ],
+                ]
+            )
+        );
+        $this->em->persist($field->getContentType()->getDomain()->getOrganization());
+        $this->em->persist($field->getContentType()->getDomain());
+        $this->em->persist($field->getContentType());
+        $this->em->flush();
+
+        $this->em->refresh($field->getContentType()->getDomain());
+        $this->em->refresh($field->getContentType());
+        $this->em->refresh($field);
+
+        // Inject created domain into untied.cms.manager.
+        $d = new \ReflectionProperty(static::$container->get('unite.cms.manager'), 'domain');
+        $d->setAccessible(true);
+        $d->setValue(static::$container->get('unite.cms.manager'), $field->getContentType()->getDomain());
+
+        $key = ucfirst($field->getContentType()->getIdentifier()).'Content';
+        $type = static::$container->get('unite.cms.graphql.schema_type_manager')->getSchemaType(
+            $key,
+            $field->getContentType()->getDomain()
+        );
+        $this->assertInstanceOf(ObjectType::class, $type);
+
+        // Check nested collection field structure.
+        $this->assertArrayHasKey('f1', $type->getFields());
+        $this->assertArrayNotHasKey('f1', $type->getField('f1')->getType()->getWrappedType()->getFields());
+        $this->assertArrayHasKey('n1', $type->getField('f1')->getType()->getWrappedType()->getFields());
+        $this->assertArrayNotHasKey(
+            'nested_2',
+            $type->getField('f1')->getType()->getWrappedType()->getField('n1')->getType()->getWrappedType()->getFields()
+        );
+
+        // In this test, we don't care about access checking.
+        $admin = new ApiKey();
+        $admin->setName('admin_key')->setOrganization($field->getContentType()->getDomain()->getOrganization());
+        $domainMember = new DomainMember();
+        $domainMember->setDomain($field->getContentType()->getDomain())->setDomainMemberType($field->getContentType()->getDomain()->getDomainMemberTypes()->get('editor'));
+        $admin->addDomain($domainMember);
+        static::$container->get('security.token_storage')->setToken(
+            new PostAuthenticationGuardToken($admin, 'api', [])
+        );
+
+        $c1 = new Content();
+        $c1->setContentType($field->getContentType());
+        $c1->setData([
+            'f1' => [
+                [
+                    'f1' => 'Foo',
+                    'f3' => 'Baa',
+                ]
+            ],
+        ]);
+        $this->em->persist($c1);
+        $this->em->flush();
+
+        $schema = static::$container->get('unite.cms.graphql.schema_type_manager')->createSchema($field->getContentType()->getDomain(), 'Query', 'Mutation');
+        $result = GraphQL::executeQuery(
+            $schema,
+            'query { 
+                findCt1 {
+                    result {
+                        f1 {
+                            f3
+                        }
+                    }
+                }
+            }'
+        );
+        $result = json_decode(json_encode($result->toArray()));
+        $this->assertNull($result->data->findCt1->result[0]->f1[0]->f3);
+
+        $c2 = new Content();
+        $c2->setContentType($field->getContentType());
+        $c2->setData([
+            'f1' => [
+                [
+                    'f1' => 'X',
+                    'f3' => 'Baa2',
+                ]
+            ],
+        ]);
+        $this->em->persist($c2);
+        $this->em->flush();
+
+        $schema = static::$container->get('unite.cms.graphql.schema_type_manager')->createSchema($field->getContentType()->getDomain(), 'Query', 'Mutation');
+        $result = GraphQL::executeQuery(
+            $schema,
+            'query { 
+                findCt1 {
+                    result {
+                        f1 {
+                            f3
+                        }
+                    }
+                }
+            }'
+        );
+        $result = json_decode(json_encode($result->toArray()));
+        $this->assertNull($result->data->findCt1->result[0]->f1[0]->f3);
+        $this->assertEquals('Baa2', $result->data->findCt1->result[1]->f1[0]->f3);
+    }
+
     public function testWritingGraphQLData()
     {
 
         $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
         $field->setIdentifier('f1');
         $field->getContentType()->setIdentifier('ct1');
         $field->setSettings(
@@ -381,12 +667,60 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
             $result->data->createCt1->f1[1]->n1[0]->nested_2[0]->f2
         );
         $this->assertEquals('Foo', $content->getData()['f1'][1]['f1']);
+
+
+        $field->getSettings()->fields[0]['permissions'] = [
+            'list field' => 'true',
+            'view field' => 'true',
+            'update field' => 'false',
+        ];
+        $this->em->flush();
+        $schema = static::$container->get('unite.cms.graphql.schema_type_manager')->createSchema($domain, 'Query', 'Mutation');
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            'mutation { 
+                createCt1(
+                persist: true,
+                data: {
+                    f1: [
+                        {},
+                        {
+                            n1: [
+                                {
+                                    nested_2: [
+                                        { f2: "Baa" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ) {
+                id,
+                f1 {
+                    f1,
+                    n1 {
+                        nested_2 {
+                            f2
+                        }
+                    }
+                }
+            }
+        }');
+        $result = json_decode(json_encode($result->toArray()));
+        $this->assertNotEmpty($result->data->createCt1->id);
+        $this->assertEmpty($result->data->createCt1->f1[0]->f1);
+        $this->assertEmpty($result->data->createCt1->f1[1]->f1);
     }
 
     public function testWritingGraphQLDataViaMainFirewallWithCSRFProtection()
     {
 
         $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
         $field->setIdentifier('f1');
         $field->getContentType()->setIdentifier('ct1');
         $field->setSettings(
@@ -513,6 +847,9 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
     public function testValidatingContent()
     {
         $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
         $field->setSettings(
             new FieldableFieldSettings(
                 [
@@ -665,7 +1002,7 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('['.$field->getIdentifier().'][2][n1][0][n2][0][f2]', $violations[1]->getPropertyPath());
         $this->assertEquals('invalid_reference_definition', $violations[1]->getMessageTemplate());
         $this->assertEquals('['.$field->getIdentifier().'][3][n1][0][n2][0][f2]', $violations[2]->getPropertyPath());
-        $this->assertEquals('missing_reference_definition', $violations[2]->getMessageTemplate());
+        $this->assertEquals('required', $violations[2]->getMessageTemplate());
         $this->assertEquals('['.$field->getIdentifier().'][3][n1][0][n2][0][foo]',
             $violations[3]->getPropertyPath()
         );
@@ -684,6 +1021,9 @@ class CollectionFieldTypeTest extends FieldTypeTestCase
     {
 
         $field = $this->createContentTypeField('collection');
+        $this->user->getDomains()->first()->setDomain($field->getContentType()->getDomain());
+        $this->user->getDomains()->first()->getDomain()->setId(1);
+
         $field->setSettings(
             new FieldableFieldSettings(
                 [

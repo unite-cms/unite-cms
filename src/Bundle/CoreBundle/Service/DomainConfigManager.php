@@ -28,6 +28,11 @@ class DomainConfigManager
     private $domainConfigDir;
 
     /**
+     * @var array $domainConfigParameters
+     */
+    private $domainConfigParameters;
+
+    /**
      * @var DomainDefinitionParser $domainDefinitionParser
      */
     private $domainDefinitionParser;
@@ -42,9 +47,10 @@ class DomainConfigManager
      */
     private $dispatcher;
 
-    public function __construct(string $domainConfigDir, DomainDefinitionParser $definitionParser, Filesystem $filesystem, EventDispatcherInterface $dispatcher)
+    public function __construct(string $domainConfigDir, DomainDefinitionParser $definitionParser, Filesystem $filesystem, EventDispatcherInterface $dispatcher, array $domainConfigParameters)
     {
         $this->domainConfigDir = $domainConfigDir;
+        $this->domainConfigParameters = $domainConfigParameters;
         $this->domainDefinitionParser = $definitionParser;
         $this->filesystem = $filesystem;
         $this->dispatcher = $dispatcher;
@@ -114,6 +120,12 @@ class DomainConfigManager
      * @return Domain
      */
     public function parse(string $config) : Domain {
+
+        // Replace all defined config parameters via str_replace.
+        foreach($this->domainConfigParameters as $key => $value) {
+            $config = str_replace('%' . $key . '%', $value, $config);
+        }
+
         return $this->domainDefinitionParser->parse($config);
     }
 
@@ -186,11 +198,11 @@ class DomainConfigManager
         // dispatch domain config create/update events
         if ($domain_config_file_exists) {
             // update existing file
-            $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE, new DomainConfigFileEvent($domain));
+            $this->dispatcher->dispatch(new DomainConfigFileEvent($domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_UPDATE);
         }
         else {
             // create fiel
-            $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_CREATE, new DomainConfigFileEvent($domain));
+            $this->dispatcher->dispatch(new DomainConfigFileEvent($domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_CREATE);
         }
 
         return true;
@@ -209,10 +221,16 @@ class DomainConfigManager
         $path = $this->getOrganizationConfigPath($organization);
 
         if($this->filesystem->exists($path)) {
-            throw new InvalidOrganizationConfigurationException('An organization folder with this identifier already exists! Please delete the folder first, to create an organization with this identifier.');
-        }
 
-        $this->filesystem->mkdir($path);
+            // If org is not allowed to be creating with existing config folder, throw an exception.
+            if(!$organization->isAllowCreateWithExistingConfigFolder()) {
+                throw new InvalidOrganizationConfigurationException(
+                    'An organization folder with this identifier already exists! Please delete the folder first, to create an organization with this identifier.'
+                );
+            }
+        } else {
+            $this->filesystem->mkdir($path);
+        }
     }
 
     /**
@@ -362,7 +380,7 @@ class DomainConfigManager
         $this->filesystem->remove($path);
 
         // dispatch delete event
-        $this->dispatcher->dispatch(DomainConfigFileEvent::DOMAIN_CONFIG_FILE_DELETE, new DomainConfigFileEvent($domain));
+        $this->dispatcher->dispatch(new DomainConfigFileEvent($domain), DomainConfigFileEvent::DOMAIN_CONFIG_FILE_DELETE);
     }
 
     /**

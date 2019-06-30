@@ -44,6 +44,56 @@
 
 {%- endblock form_row -%}
 
+{%- block form_rows -%}
+
+    {% set field_groups = [] %}
+
+    {# get all field groups #}
+    {% for child in form %}
+        {% if not child.rendered and child.vars.form_group is defined %}
+            {% if not child.vars.form_group == false and child.vars.form_group not in field_groups %}
+                {% set field_groups = field_groups|merge([child.vars.form_group]) %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {# render field group fields in groups #}
+    {% if field_groups|length > 0 %}
+        <div uk-grid>
+            <div class="uk-width-auto@m">
+                <ul class="uk-tab-left" uk-tab="connect: #{{ form.vars.id }}-group; animation: uk-animation-fade">
+                    {% for delta,group in field_groups %}
+                        <li><a href="#{{ form.vars.id }}-group-{{ delta }}">{{ group|capitalize }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="uk-width-expand@m">
+                <div id="{{ form.vars.id }}-group" class="uk-switcher">
+                    {% for delta,group in field_groups %}
+                        <div class="unite-form-group-container" id="{{ form.vars.id }}-group-{{ delta }}">
+                            {% for child in form %}
+                                {% if not child.rendered and child.vars.form_group is defined and child.vars.form_group == group %}
+                                    {{- form_row(child) -}}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# render all fields, that are not in a group #}
+    {% for child in form %}
+        {% if not child.rendered and child.vars.form_group is not defined %}
+            {{- form_row(child) -}}
+        {% else %}
+            <div class="uk-hidden">{{- form_row(child) -}}</div>
+        {% endif %}
+    {% endfor %}
+
+{%- endblock form_rows -%}
+
 {%- block button_row -%}
     <div class="uk-text-right" uk-margin>
         {{- form_widget(form) -}}
@@ -150,19 +200,19 @@
 
 
 {%- block unite_cms_web_component_widget -%}
-    <{{ tag }} {{ block('widget_attributes') }} value="{{ value }}"></{{ tag }}>
+    <{{ tag }} {{ block('widget_attributes') }} value="{{ value is iterable ? value|json_encode : value }}"></{{ tag }}>
 {%- endblock unite_cms_web_component_widget -%}
 
 {%- block unite_cms_choice_cards_widget -%}
-    {% set attr = attr|merge({class: (attr.class|default('') ~ ' choice-cards-type uk-grid-small uk-grid-match uk-flex-center')|trim}) %}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' choice-cards-type uk-grid-small uk-grid-match uk-flex-center uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l')|trim}) %}
     <div {{ block('widget_container_attributes') }} uk-grid>
         {%- for child in form %}
             {% if child.vars.value is not empty %}
-                <div class="uk-flex-1">
+                <div>
                     <label class="uk-card uk-card-hover choice-card uk-card-default" for="{{ child.vars.id }}"{% if child.vars.attr.description and compact %} uk-tooltip="{{ child.vars.attr.description }}"{% endif %}>
                         <div class="uk-card-body"{% if 'compact' in attr.class %}{% endif %}>
                             {% if child.vars.attr.icon is defined and child.vars.attr.icon is not empty %}
-                                <i data-feather="{{ child.vars.attr.icon }}" width="50" height="50"></i><br />
+                                <i data-feather="{{ child.vars.attr.icon }}" width="50" height="50"></i>
                             {% endif %}
                             <h3>{{ child.vars.label }}</h3>
                             {% if child.vars.attr.description is defined and not compact %}
@@ -237,5 +287,26 @@
 {%- endblock unite_cms_core_state_widget -%}
 
 {%- block unite_cms_core_field_exception_widget %}
-    <div class="uk-alert-danger" uk-alert>There was a problem rendering this field. Please check the domain configuration or ask an administrator.</div>
+    {% if exception is defined and exception is instanceof('UniteCMS\\CoreBundle\\Exception\\AccessDeniedException') %}
+        <div class="uk-alert-plain" uk-alert>You are not allowed to update this field.</div>
+    {% else %}
+        <div class="uk-alert-danger" uk-alert>There was a problem rendering this field. Please check the domain configuration or ask an administrator.</div>
+    {% endif %}
 {%- endblock unite_cms_core_field_exception_widget -%}
+
+{%- block unite_cms_core_money_widget -%}
+    <div class="uk-flex uk-flex-wrap unite-core-form-field-money">
+        <div class="uk-width-1-1 uk-width-auto@s">
+            {{ form_widget(form.children.value) }}
+        </div>
+        <div class="uk-width-1-1 uk-width-auto@s">
+            {{ form_widget(form.children.currency) }}
+        </div>
+    </div>
+{%- endblock -%}
+
+{%- block unite_cms_core_location_widget -%}
+    <unite-cms-core-location-field
+            name="{{ form.vars.full_name }}"
+            value="{{ form.vars.value|json_encode }}"></unite-cms-core-location-field>
+{%- endblock -%}

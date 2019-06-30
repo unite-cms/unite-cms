@@ -2,22 +2,23 @@
 
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
+use Doctrine\ORM\EntityManagerInterface;
+use UniteCMS\CoreBundle\Entity\ContentType;
+use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
 use UniteCMS\CoreBundle\Field\FieldableValidation;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use UniteCMS\CoreBundle\Security\ValidationExpressionChecker;
 
 class ValidValidationsValidator extends ConstraintValidator
 {
-
     /**
-     * @var ValidationExpressionChecker $expressionChecker
+     * @var EntityManagerInterface $entityManager
      */
-    private $expressionChecker;
+    private $entityManager;
 
-    public function __construct()
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->expressionChecker = new ValidationExpressionChecker();
+        $this->entityManager = $entityManager;
     }
 
     public function validate($value, Constraint $constraint)
@@ -44,7 +45,12 @@ class ValidValidationsValidator extends ConstraintValidator
                 return;
             }
 
-            if(!$this->expressionChecker->validate($validation->getExpression())) {
+            $expressionChecker = new UniteExpressionChecker();
+            $expressionChecker
+                ->registerDoctrineContentFunctionsProvider($this->entityManager, new ContentType())
+                ->registerFieldableContent(null);
+
+            if(!$expressionChecker->validate($validation->getExpression())) {
                 $this->context->buildViolation($constraint->message)->atPath("[$index][expression]")->addViolation();
                 return;
             }

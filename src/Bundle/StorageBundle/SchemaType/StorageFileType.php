@@ -27,6 +27,8 @@ class StorageFileType extends AbstractType
             'type' => Type::string(),
             'id' => Type::id(),
             'url' => Type::string(),
+            'presigned_url' => Type::string(),
+            'checksum' => Type::string(),
         ];
     }
 

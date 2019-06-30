@@ -2,6 +2,7 @@
 
 namespace UniteCMS\VariantsFieldBundle\Form;
 
+use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -10,13 +11,17 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\FieldableFormField;
 use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
-use UniteCMS\VariantsFieldBundle\Model\VariantsField;
+use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
+use UniteCMS\VariantsFieldBundle\Model\Variant;
+use UniteCMS\VariantsFieldBundle\Model\VariantContent;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
+use UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory;
 
 class VariantsFormType extends AbstractType implements DataTransformerInterface
 {
@@ -25,9 +30,12 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
      */
     private $fieldTypeManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager)
+    protected $authorizationChecker;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -45,21 +53,32 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
             'required' => false,
             'label' => false,
             'choices' => array_map(function($variant){
-                return new ChoiceCardOption($variant['identifier'], $variant['title'], $variant['description'] ?? '', $variant['icon'] ?? '');
+                return new ChoiceCardOption($variant['identifier'], $variant['title'], $variant['settings'] ?? '', $variant['icon'] ?? '');
             }, $variants->getVariantsMetadata()),
             'compact' => true,
         ]);
 
         // Add fieldable form types for each type.
         foreach($variants->getVariantsMetadata() as $variant) {
+
+            $fields = [];
+
+            foreach($variants->getFieldsForVariant($variant['identifier']) as $field) {
+                if($this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field))) {
+                   $fields[] = new FieldableFormField($this->fieldTypeManager->getFieldType($field->getType()), $field);
+                }
+            }
+
             $builder->add($variant['identifier'], FieldableFormType::class, [
                 'label' => false,
                 'attr' => [
                     'data-variant-title' => $variant['title'],
+                    'data-variant-icon' => $variant['icon'],
+                    'data-graphql-query-mapper' => $variant['identifier'] . '=... on ' .VariantFactory::schemaTypeNameForVariant(
+                        new Variant(null, $variants->getFieldsForVariant($variant['identifier']), $variant['identifier'], $variant['title'], $variants)
+                    ),
                 ],
-                'fields' => array_map(function(VariantsField $variant){
-                    return new FieldableFormField($this->fieldTypeManager->getFieldType($variant->getType()), $variant);
-                }, $variants->getFieldsForVariant($variant['identifier'])),
+                'fields' => $fields,
             ]);
         }
 

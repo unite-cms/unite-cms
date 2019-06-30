@@ -4,7 +4,6 @@ namespace UniteCMS\CollectionFieldBundle\Tests;
 
 use GraphQL\Error\Error;
 use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
 use GraphQL\Type\Definition\ObjectType;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
@@ -48,15 +47,11 @@ class FileFieldTypeTest extends FieldTypeTestCase
         );
 
         $errors = static::$container->get('validator')->validate($field);
-        $this->assertCount(4, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('settings.bucket.endpoint', $errors->get(0)->getPropertyPath());
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.key', $errors->get(1)->getPropertyPath());
+        $this->assertEquals('settings.bucket.bucket', $errors->get(1)->getPropertyPath());
         $this->assertEquals('required', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.secret', $errors->get(2)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(2)->getMessageTemplate());
-        $this->assertEquals('settings.bucket.bucket', $errors->get(3)->getPropertyPath());
-        $this->assertEquals('required', $errors->get(3)->getMessageTemplate());
 
         $field->setSettings(
             new FieldableFieldSettings(
@@ -67,6 +62,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'key' => 'XXX',
                         'secret' => 'XXX',
                         'bucket' => 'foo',
+                        'acl' => 'public-read',
                     ],
                 ]
             )
@@ -87,7 +83,54 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'secret' => 'XXX',
                         'bucket' => 'foo',
                         "path" => "/any",
+                        'acl' => 'public-read',
+                        'pre_signed_download_expiration' => 'Foo',
                     ],
+                ]
+            )
+        );
+
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.bucket.pre_signed_download_expiration', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('storage.invalid_expiration_time', $errors->get(0)->getMessageTemplate());
+
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                        "path" => "/any",
+                        'acl' => 'public-read',
+                        'pre_signed_download_expiration' => '+2 weeks',
+                    ],
+                ]
+            )
+        );
+
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('settings.bucket.pre_signed_download_expiration', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('storage.invalid_expiration_time', $errors->get(0)->getMessageTemplate());
+
+        $field->setSettings(
+            new FieldableFieldSettings(
+                [
+                    'file_types' => 'txt',
+                    'bucket' => [
+                        'endpoint' => 'https://example.com',
+                        'key' => 'XXX',
+                        'secret' => 'XXX',
+                        'bucket' => 'foo',
+                        "path" => "/any",
+                        'acl' => 'public-read',
+                        'pre_signed_download_expiration' => '+1 weeks',
+                    ],
+                    'form_group' => "Group 1",
                 ]
             )
         );
@@ -106,6 +149,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'secret' => 'XXX',
                         'bucket' => 'foo',
                         "region" => "east",
+                        'acl' => 'public-read',
                     ],
                 ]
             )
@@ -126,6 +170,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         'bucket' => 'foo',
                         "region" => "east",
                         "path" => "/any",
+                        'acl' => 'public-read',
                         'foo' => 'baa',
                     ],
                 ]
@@ -298,6 +343,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
 
         // Try with valid checksum.
         $preSignedUrl = new PreSignedUrl('', "XXX-YYY-ZZZ", 'cat.jpg');
+        $checkSum = $preSignedUrl->sign(static::$container->getParameter('kernel.secret'));
 
         $result = GraphQL::executeQuery(
             $schema,
@@ -310,7 +356,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
             size: 12345,
             type: "image/jpeg",
             id: "XXX-YYY-ZZZ",
-            checksum: "'.$preSignedUrl->sign(static::$container->getParameter('kernel.secret')).'"
+            checksum: "'.$checkSum.'"
           }
         }
       ) {
@@ -353,7 +399,9 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         size,
                         type,
                         id,
-                        url
+                        url,
+                        presigned_url,
+                        checksum
                     }
                 }
             }');
@@ -376,7 +424,9 @@ class FileFieldTypeTest extends FieldTypeTestCase
                         size,
                         type,
                         id,
-                        url
+                        url,
+                        presigned_url,
+                        checksum
                     }
                 }
             }');
@@ -387,6 +437,8 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('image/jpeg', $result->data->getCt1->f1->type);
         $this->assertEquals('XXX-YYY-ZZZ', $result->data->getCt1->f1->id);
         $this->assertEquals('https://example.com/foo/XXX-YYY-ZZZ/cat.jpg', $result->data->getCt1->f1->url);
+        $this->assertEquals($checkSum, $result->data->getCt1->f1->checksum);
+        $this->assertStringStartsWith($result->data->getCt1->f1->url . '?X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=', $result->data->getCt1->f1->presigned_url);
     }
 
     public function testContentFormBuild()
@@ -435,7 +487,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('unite-cms-storage-file-field', $root->vars['tag']);
 
         // Assert values
-        $this->assertEquals(json_encode($content->getData()['f1']), $root->vars['value']);
+        $this->assertEquals($content->getData()['f1'], $root->vars['value']);
 
         // Assert correct sign url generation.
         $this->assertEquals(
@@ -494,7 +546,7 @@ class FileFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('unite-cms-storage-file-field', $root->vars['tag']);
 
         // Assert values
-        $this->assertEquals(json_encode($setting->getData()['f1']), $root->vars['value']);
+        $this->assertEquals($setting->getData()['f1'], $root->vars['value']);
 
         // Assert correct sign url generation.
         $this->assertEquals(

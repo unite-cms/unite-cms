@@ -24,8 +24,8 @@ class TreeViewConfiguration extends TableViewConfiguration
     public function getConfigTreeBuilder()
     {
         // Most of this tree builder is copied from parent::getConfigTreeBuilder().
-        $treeBuilder = new TreeBuilder();
-        $treeBuilder->root('settings')
+        $treeBuilder = new TreeBuilder('settings');
+        $treeBuilder->getRootNode()
 
             ->beforeNormalization()
                 ->always(\Closure::fromCallable([$this, 'normalizeConfig']))
@@ -35,6 +35,7 @@ class TreeViewConfiguration extends TableViewConfiguration
                 ->append($this->appendChildrenFieldNode())
                 ->append($this->appendFieldsNode())
                 ->append($this->appendFilterNode())
+                ->append($this->appendRowsPerPageNode())
                 ->append($this->appendSortNode())
             ->end();
 
@@ -51,9 +52,8 @@ class TreeViewConfiguration extends TableViewConfiguration
      * Returns the config definition for the children_field option.
      */
     protected function appendChildrenFieldNode() : NodeDefinition {
-        $treeBuilder = new TreeBuilder();
-        return $treeBuilder
-            ->root('children_field', 'scalar')
+        $treeBuilder = new TreeBuilder('children_field', 'scalar');
+        return $treeBuilder->getRootNode()
             ->isRequired()
             ->validate()->always(\Closure::fromCallable([$this, 'validateChildrenField']))->end()
         ;

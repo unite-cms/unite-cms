@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\ORM\EntityRepository;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use UniteCMS\CoreBundle\Entity\Content;
@@ -15,14 +16,14 @@ class SortIndexFieldType extends FieldType
 {
     const TYPE = "sortindex";
     const FORM_TYPE = IntegerType::class;
-    const SETTINGS = ['description'];
+    const SETTINGS = ['description', 'form_group'];
 
-    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return Type::int();
     }
 
-    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager, $nestingLevel = 0)
+    function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         return Type::int();
     }
@@ -30,7 +31,7 @@ class SortIndexFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
-    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content)
+    function resolveGraphQLData(FieldableField $field, $value, FieldableContent $content, array $args, $context, ResolveInfo $info)
     {
         return (int)$value;
     }

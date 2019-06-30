@@ -1,4 +1,23 @@
 
+/* Readonly */
+.uk-input:read-only,
+.uk-select:read-only,
+.uk-textarea:read-only,
+.uk-input.read-only,
+.uk-select.read-only,
+.uk-textarea.read-only {
+   background-color: $form-disabled-background;
+   color: $form-disabled-color;
+   @if(mixin-exists(hook-form-disabled)) {@include hook-form-disabled();}
+}
+
+.uk-input:-moz-read-only,
+.uk-select:-moz-read-only,
+.uk-textarea:-moz-read-only {
+   background-color: $form-disabled-background;
+   color: $form-disabled-color;
+   @if(mixin-exists(hook-form-disabled)) {@include hook-form-disabled();}
+}
 
 .uk-form-label {
    &.required:after {
@@ -13,7 +32,7 @@
 }
 
 .uk-textarea {
-   resize: horizontal;
+   resize: vertical;
 }
 
 .uk-form-controls-checkbox,
@@ -28,5 +47,18 @@
    label {
       display: block;
       padding: 3px 10px;
+   }
+}
+
+.unite-core-form-field-money {
+   .uk-select:not([multiple]):not([size]) {
+      padding-right: 30px;
+   }
+
+   @media (min-width: $breakpoint-small) {
+      .uk-select:not([multiple]):not([size]) {
+         border-left: none;
+         padding-right: 30px;
+      }
    }
 }

@@ -2,26 +2,27 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use Knp\Component\Pager\PaginatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\Router;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Entity\Invitation;
 use UniteCMS\CoreBundle\Entity\Organization;
 use UniteCMS\CoreBundle\Entity\OrganizationMember;
 use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
-use UniteCMS\CoreBundle\ParamConverter\IdentifierNormalizer;
 
-class OrganizationUserController extends Controller
+class OrganizationUserController extends AbstractController
 {
     /**
      * @Route("/", methods={"GET"})
@@ -32,15 +33,15 @@ class OrganizationUserController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function indexAction(Organization $organization, Request $request)
+    public function indexAction(Organization $organization, Request $request, PaginatorInterface $paginator)
     {
-        $users = $this->get('knp_paginator')->paginate($organization->getMembers(),
+        $users = $paginator->paginate($organization->getMembers(),
             $request->query->getInt('page_users', 1),
             10,
             ['pageParameterName' => 'page_users', 'sortDirectionParameterName' => 'sort_users']
         );
 
-        $invites = $this->get('knp_paginator')->paginate($organization->getInvites(),
+        $invites = $paginator->paginate($organization->getInvites(),
             $request->query->getInt('page_invites', 1),
             10,
             ['pageParameterName' => 'page_invites', 'sortDirectionParameterName' => 'sort_invites']
@@ -74,13 +75,17 @@ class OrganizationUserController extends Controller
             new ChoiceCardOption(
                 Organization::ROLE_USER,
                 'User',
-                'Users can only manage content in domains, they are invited to.',
+                [
+                    'description' => 'Users can only manage content in domains, they are invited to.',
+                ],
                 'user'
             ),
             new ChoiceCardOption(
                 Organization::ROLE_ADMINISTRATOR,
                 'Administrator',
-                'Administrators have access to all domains and can manage users and api keys.',
+                [
+                    'description' => 'Administrators have access to all domains and can manage users and api keys.',
+                ],
                 'command'
             ),
         ];
@@ -122,9 +127,10 @@ class OrganizationUserController extends Controller
      * @param OrganizationMember $member
      * @param Request $request
      *
+     * @param ValidatorInterface $validator
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function deleteAction(Organization $organization, OrganizationMember $member, Request $request)
+    public function deleteAction(Organization $organization, OrganizationMember $member, Request $request, ValidatorInterface $validator)
     {
         $form = $this->createFormBuilder()
             ->add('submit', SubmitType::class, [
@@ -135,7 +141,7 @@ class OrganizationUserController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $violations = $this->get('validator')->validate($member, null, ['DELETE']);
+            $violations = $validator->validate($member, null, ['DELETE']);
 
             // If there where violation problems.
             if($violations->count() > 0) {
@@ -170,12 +176,18 @@ class OrganizationUserController extends Controller
      *
      * @param Organization $organization
      * @param Request $request
+     * @param FormFactoryInterface $formFactory
+     * @param ValidatorInterface $validator
+     * @param TranslatorInterface $translator
+     * @param \Swift_Mailer $mailer
+     * @param string $mailerSender
      * @return Response
+     * @throws \Exception
      */
-    public function createInviteAction(Organization $organization, Request $request)
+    public function createInviteAction(Organization $organization, Request $request, FormFactoryInterface $formFactory, ValidatorInterface $validator, TranslatorInterface $translator, \Swift_Mailer $mailer, string $mailerSender)
     {
         // create invite form.
-        $form = $this->get('form.factory')->createNamedBuilder('create_organization_invite', FormType::class, null, ['attr' => ['class' => 'uk-form-vertical']])
+        $form = $formFactory->createNamedBuilder('create_organization_invite', FormType::class, null, ['attr' => ['class' => 'uk-form-vertical']])
             ->add('user_email', EmailType::class, ['label' => 'organization.user.create_invite.form.email', 'required' => true])
             ->add('submit', SubmitType::class, ['label' => 'organization.user.create_invite.form.submit'])
             ->getForm();
@@ -192,7 +204,7 @@ class OrganizationUserController extends Controller
             $invitation->setOrganization($organization);
             $invitation->setEmail($data['user_email']);
 
-            $violations = $this->get('validator')->validate($invitation);
+            $violations = $validator->validate($invitation);
             if($violations->count() > 0) {
                 $violationMapper = new ViolationMapper();
                 foreach ($violations as $violation) {
@@ -204,8 +216,8 @@ class OrganizationUserController extends Controller
                 $this->getDoctrine()->getManager()->flush();
 
                 // Send out email using the default mailer.
-                $message = (new \Swift_Message($this->get('translator')->trans('email.invitation.headline', ['%invitor%' => $this->getUser()])))
-                    ->setFrom($this->getParameter('mailer_sender'))
+                $message = (new \Swift_Message($translator->trans('email.invitation.headline', ['%invitor%' => $this->getUser()])))
+                    ->setFrom($mailerSender)
                     ->setTo($invitation->getEmail())
                     ->setBody(
                         $this->renderView(
@@ -217,7 +229,7 @@ class OrganizationUserController extends Controller
                         ),
                         'text/html'
                     );
-                $this->get('mailer')->send($message);
+                $mailer->send($message);
                 return $this->redirect($this->generateUrl('unitecms_core_organizationuser_index', [$organization]));
             }
         }
