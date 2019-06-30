@@ -221,7 +221,7 @@ class ContentType implements Fieldable
         $this->permissions[ContentVoter::CREATE] = 'member.type == "editor"';
         $this->permissions[ContentVoter::UPDATE] = 'member.type == "editor"';
         $this->permissions[ContentVoter::DELETE] = 'member.type == "editor"';
-        $this->permissions[ContentVoter::TRANSLATE] = 'member.type == "editor" && content.deleted == null';
+        $this->permissions[ContentVoter::TRANSLATE] = 'member.type == "editor"';
     }
 
     public function allowedPermissionKeys(): array
