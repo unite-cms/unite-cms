@@ -59,13 +59,18 @@ class DeletedContentVoter extends ContentVoter
             return self::ACCESS_ABSTAIN;
         }
 
+        // Cannot translate deleted content.
+        if ($attribute === self::TRANSLATE) {
+            return self::ACCESS_ABSTAIN;
+        }
+
         // If the requested permission is not defined, throw an exception.
         if (empty($contentType->getPermissions()[$attribute])) {
             throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
         }
 
         // in order to perform CRUD actions on deleted content the user must have update permissions.
-        if($attribute !== self::TRANSLATE && in_array($attribute, self::ENTITY_PERMISSIONS)) {
+        if(in_array($attribute, self::ENTITY_PERMISSIONS)) {
             $attribute = ContentVoter::UPDATE;
         }
 
