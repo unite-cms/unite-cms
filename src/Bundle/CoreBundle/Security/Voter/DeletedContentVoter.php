@@ -64,8 +64,8 @@ class DeletedContentVoter extends ContentVoter
             throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
         }
 
-        // in order to perform RUD actions on deleted content the user must have update permissions.
-        if(in_array($attribute, self::ENTITY_PERMISSIONS)) {
+        // in order to perform CRUD actions on deleted content the user must have update permissions.
+        if($attribute !== self::TRANSLATE && in_array($attribute, self::ENTITY_PERMISSIONS)) {
             $attribute = ContentVoter::UPDATE;
         }
 

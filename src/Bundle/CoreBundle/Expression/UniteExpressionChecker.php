@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainMember;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
+use UniteCMS\CoreBundle\Entity\SoftDeleteableFieldableContent;
 
 class UniteExpressionChecker
 {
@@ -85,6 +86,10 @@ class UniteExpressionChecker
                 'locale' => $fieldableContent->getLocale(),
                 'data' => json_decode(json_encode($fieldableContent->getData())),
             ];
+
+            if($fieldableContent instanceof SoftDeleteableFieldableContent) {
+                $data['deleted'] = $fieldableContent->getDeleted();
+            }
 
             if($fieldableContent instanceof Content || $fieldableContent instanceof DomainMember) {
                 $data['id'] = (string)$fieldableContent->getId();

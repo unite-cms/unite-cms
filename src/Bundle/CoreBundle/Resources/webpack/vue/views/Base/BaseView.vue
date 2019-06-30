@@ -202,7 +202,7 @@
                                         delete: row._permissions.DELETE_CONTENT && !deleted,
                                         delete_definitely: row._permissions.DELETE_CONTENT && deleted,
                                         recover: row._permissions.UPDATE_CONTENT && deleted,
-                                        translations: row._permissions.UPDATE_CONTENT && !deleted && this.hasTranslations,
+                                        translations: row._permissions.TRANSLATE_CONTENT && !deleted && this.hasTranslations,
                                         revisions: row._permissions.UPDATE_CONTENT && !deleted,
                                         update: row._permissions.UPDATE_CONTENT && !deleted
                                     };

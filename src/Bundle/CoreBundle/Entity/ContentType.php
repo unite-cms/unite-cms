@@ -221,7 +221,7 @@ class ContentType implements Fieldable
         $this->permissions[ContentVoter::CREATE] = 'member.type == "editor"';
         $this->permissions[ContentVoter::UPDATE] = 'member.type == "editor"';
         $this->permissions[ContentVoter::DELETE] = 'member.type == "editor"';
-        $this->permissions[ContentVoter::TRANSLATE] = 'member.type == "editor"';
+        $this->permissions[ContentVoter::TRANSLATE] = 'member.type == "editor" && content.deleted == null';
     }
 
     public function allowedPermissionKeys(): array
@@ -653,12 +653,6 @@ class ContentType implements Fieldable
     {
         // Prevent null values. We always need an array response.
         $this->permissions = $this->permissions ?? [];
-
-        // If translate permission is not set, set it to update.
-        if(empty($this->permissions[ContentVoter::TRANSLATE]) && !empty($this->permissions[ContentVoter::UPDATE])) {
-            $this->permissions[ContentVoter::TRANSLATE] = $this->permissions[ContentVoter::UPDATE];
-        }
-
         return $this->permissions;
     }
 

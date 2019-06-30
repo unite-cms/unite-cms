@@ -57,9 +57,6 @@
                     action.url = this.urlForAction(action, this.row);
                     return action;
                 });
-                return [
-                    {url: 'foo', icon: feather.icons['edit'].toSvg({width: 24, height: 16}), name: 'Update content'}
-                ];
             }
         },
         methods: {

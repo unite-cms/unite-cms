@@ -136,13 +136,14 @@ export default {
                     result {
                         _permissions {
                             UPDATE_CONTENT,
-                            DELETE_CONTENT
+                            DELETE_CONTENT,
+                            TRANSLATE_CONTENT
                         },
                         ` + this.fieldQuery.join(',') + `
                     }
                 },
                 deleted: ` + this.queryMethod + `(limit: 1, filter: { field: "deleted", operator: "IS NOT NULL" }, deleted: true) {
-                    total
+                 total
                 }
               }`, {
                 limit: limit,
@@ -169,7 +170,8 @@ export default {
                 ` + this.updateMethod + `(id: $id, data: $data, persist: true) {
                     _permissions {
                         UPDATE_CONTENT,
-                        DELETE_CONTENT
+                        DELETE_CONTENT,
+                        TRANSLATE_CONTENT
                     },
                     ` + this.fieldQuery.join(',') + `
                 }
