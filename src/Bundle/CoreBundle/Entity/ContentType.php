@@ -653,6 +653,12 @@ class ContentType implements Fieldable
     {
         // Prevent null values. We always need an array response.
         $this->permissions = $this->permissions ?? [];
+
+        // If translate permission is not set, set it to update.
+        if(empty($this->permissions[ContentVoter::TRANSLATE]) && !empty($this->permissions[ContentVoter::UPDATE])) {
+            $this->permissions[ContentVoter::TRANSLATE] = $this->permissions[ContentVoter::UPDATE];
+        }
+
         return $this->permissions;
     }
 
