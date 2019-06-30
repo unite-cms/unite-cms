@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.9.0 (2019-06-30)
+- Added #652, #593, #67, #4, #3: Full API support for domain member, content and setting CRUD + revisions + revert actions
+- Added #619: Content can now be pre-set on create using query parameter for controller action
+- Added #417: You can now define field permissions (view / update) per field
+- Added #252: Added a dedicate permission for content translation action
+- Added #487: version of unite cms is now shown in backend 
+- Improved #635, #624, #617: Refactor graphql implementation, schema is now cached, no more nesting level
+- Improved #642: File graphql response now includes pre-signed download url and checksum
+- Improved #631: Only show sidebar sections if user has access to at least one type
+- Improved #630: API sorting now can optional be case insensitive 
+- Improved #614, #613, : Reference and reference_of now also works with domain member types (user reference)
+- Improved #494: description config now is always located under "settings" config
+- Improved #523: log entry now saves a reference to the user object
+- Fixed #618: fix broken CKEditor link element
+- Fixed #622: All number graphql field responses now can be "null" additionally to "0"
+
 ## 0.8.2 (2019-05-14)
 - Added #313: A recaptcha field to secure graphql mutations
 - Added #407, #419: A field_group settings to allow to group or hide fields from the form

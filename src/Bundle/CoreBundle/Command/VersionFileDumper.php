@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 class VersionFileDumper extends Command
 {
     const VERSION_FILE_NAME = 'VERSION.md';
-    const VERSION_FILE_CONTENT = 'version {version}';
+    const VERSION_FILE_CONTENT = "# Version: {version}\n";
 
     /**
      * @var Kernel $kernel
