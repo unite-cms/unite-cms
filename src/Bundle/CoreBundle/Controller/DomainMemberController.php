@@ -118,6 +118,10 @@ class DomainMemberController extends AbstractController
             );
         }
 
+        $sortAscString = function($a, $b) {
+          return (string)$a > (string)$b;
+        };
+
         $existingUsers = $organization->getMembers()->filter(
             function(OrganizationMember $organizationMember) use ($domain_member_type_members) {
                 return !in_array($organizationMember->getUser()->getId(), $domain_member_type_members);
@@ -127,14 +131,14 @@ class DomainMemberController extends AbstractController
                 return $organizationMember->getUser();
             }
         )->toArray();
-        asort($existingUsers);
+        usort($existingUsers, $sortAscString);
 
         $existingApiKeys = $organization->getApiKeys()->filter(
             function(ApiKey $apiKey) use ($domain_member_type_members) {
                 return !in_array($apiKey->getId(), $domain_member_type_members);
             }
         )->toArray();
-        asort($existingApiKeys);
+        usort($existingApiKeys, $sortAscString);
 
         // Create the two-step create form.
         $form = $formFactory->createNamedBuilder(
