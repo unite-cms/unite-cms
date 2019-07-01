@@ -222,8 +222,8 @@
                     return path.match(new RegExp(`^${pattern.replace(/\//g, '\\/').replace(/\*\*/g, '(\\/[^\\/]+)*').replace(/\*/g, '[^\\/]+').replace(/((?!\\))\?/g, '$1.')}$`, 'i'));
                 }
 
-                if (this.allow && !match(uiKitUpload.allow, file.name)) {
-                    this.fail(this.msgInvalidName.replace('%s', uiKitUpload.allow));
+                if (uiKitUpload.allow && !match(uiKitUpload.allow, file.name)) {
+                    this.fail(uiKitUpload.msgInvalidName.replace('%s', uiKitUpload.allow));
                     return;
                 }
 
@@ -239,7 +239,7 @@
                 }).then((result) => {
                     // Temporary save the parameter of this file. If upload is successful, we save them to the component.
                     let preSignedUrl = JSON.parse(result.responseText);
-                    this.url = preSignedUrl.pre_signed_url;
+                    uiKitUpload.url = preSignedUrl.pre_signed_url;
                     this.tmpId = preSignedUrl.uuid;
                     this.tmpFileSize = file.size;
                     this.tmpFileType = file.type;
