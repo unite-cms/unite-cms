@@ -3,6 +3,7 @@
         <div class="collection-wrapper">
             <div class="collection-wrapper-row" v-for="row in sortedRows" :key="row.delta" :delta="row.delta">
                 <unite-cms-collection-field-row
+                        :ref="_uid + '_row_' + row.delta"
                         :delta="row.delta"
                         :prototype="row.prototype"
                         :form-layout="rowFormLayout"
@@ -119,8 +120,10 @@
                         });
                     }
 
+                    let delta = this.counter;
+
                     this.rows.push({
-                        delta: this.counter,
+                        delta: delta,
                         prototype: this.rowPrototype(this.counter),
                         position: (position !== null) ? position : this.counter,
                     });
@@ -129,6 +132,14 @@
 
                     // Tell variants fields to collapse.
                     window.UniteCMSEventBus.$emit('variantsShouldCollapse', { parent: this.$el });
+
+                    // If event registered a callback, call it.
+                    this.$nextTick(() => {
+                        if (event && event.detail && event.detail[0] && event.detail[0].cb) {
+                            let row = this.$refs[this._uid + '_row_' + delta];
+                            event.detail[0].cb(row ? row[0] : null);
+                        }
+                    });
                 }
             },
             removeRow(event) {

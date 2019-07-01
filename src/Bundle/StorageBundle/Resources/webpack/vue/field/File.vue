@@ -31,7 +31,7 @@
             <span v-html="feather.icons['upload-cloud'].toSvg({ width: 18, height: 18 })"></span>
             Add file by dropping it here or
             <div uk-form-custom>
-                <input type="file" multiple>
+                <input type="file" :multiple="multiFileCollectionRow">
                 <span class="uk-link">selecting one</span>
             </div>
 
@@ -58,9 +58,15 @@
                 fileSize: value.size,
                 fileId: value.id,
                 checksum: value.checksum,
+                multiFileCollectionRow: null,
                 error: null,
                 loading: false,
-                feather: feather
+                feather: feather,
+                tmpFileName: null,
+                tmpFileSize: null,
+                tmpFileType: null,
+                tmpChecksum: null,
+                tmpId: null,
             };
         },
         computed: {
@@ -97,17 +103,14 @@
 
         mounted() {
 
-            // Init upload element.
-            let tmpFileName = null;
-            let tmpFileSize = null;
-            let tmpFileType = null;
-            let tmpChecksum = null;
-            let tmpId = null;
-            let t = this;
+            // If this file input is inside a collection, we can allow multi-upload.
+            this.multiFileCollectionRow = this.findClosestCollectionRow(this.$el);
 
+            // Init upload element.
+            let t = this;
             let uploader = UIkit.upload(this.$el, {
 
-                multiple: false,
+                multiple: this.multiFileCollectionRow,
                 name: 'file',
                 type: 'PUT',
                 allow: '*.' + (this.fileTypes ? this.fileTypes : '*').split(',').join('|*.'),
@@ -117,33 +120,33 @@
                     this.loading = true;
                 },
                 completeAll: () => {
-                    this.fileName = tmpFileName;
-                    this.fileSize = tmpFileSize;
-                    this.fileType = tmpFileType;
-                    this.fileId = tmpId;
-                    this.checksum = tmpChecksum;
-                    tmpFileName = null;
-                    tmpFileSize = null;
-                    tmpChecksum = null;
-                    tmpId = null;
+                    this.fileName = this.tmpFileName;
+                    this.fileSize = this.tmpFileSize;
+                    this.fileType = this.tmpFileType;
+                    this.fileId = this.tmpId;
+                    this.checksum = this.tmpChecksum;
+                    this.tmpFileName = null;
+                    this.tmpFileSize = null;
+                    this.tmpChecksum = null;
+                    this.tmpId = null;
                     this.loading = false;
                 },
                 error: (error) => {
                     this.error = error;
-                    tmpFileName = null;
-                    tmpFileSize = null;
-                    tmpFileType = null;
-                    tmpChecksum = null;
-                    tmpId = null;
+                    this.tmpFileName = null;
+                    this.tmpFileSize = null;
+                    this.tmpFileType = null;
+                    this.tmpChecksum = null;
+                    this.tmpId = null;
                     this.loading = false;
                 },
                 fail: (error) => {
                     this.error = error;
-                    tmpFileName = null;
-                    tmpFileSize = null;
-                    tmpFileType = null;
-                    tmpChecksum = null;
-                    tmpId = null;
+                    this.tmpFileName = null;
+                    this.tmpFileSize = null;
+                    this.tmpFileType = null;
+                    this.tmpChecksum = null;
+                    this.tmpId = null;
                     this.loading = false;
                 }
             });
@@ -158,69 +161,23 @@
                     return;
                 }
 
-                let tmpFile = files[0];
+                if(t.multiFileCollectionRow) {
 
-                function match(pattern, path) {
-                    return path.match(new RegExp(`^${pattern.replace(/\//g, '\\/').replace(/\*\*/g, '(\\/[^\\/]+)*').replace(/\*/g, '[^\\/]+').replace(/((?!\\))\?/g, '$1.')}$`, 'i'));
-                }
-
-                if (this.allow && !match(this.allow, tmpFile.name)) {
-                    this.fail(this.msgInvalidName.replace('%s', this.allow));
-                    return;
-                }
-
-                let data = new FormData();
-                data.append('pre_sign_form[filename]', tmpFile.name);
-                data.append('pre_sign_form[field]', t.fieldPath);
-                data.append('pre_sign_form[_token]', t.uploadSignCsrfToken);
-
-                UIkit.util.ajax(t.uploadSignUrl, {
-                    method: 'POST',
-                    data: data,
-                    headers: { "Authentication-Fallback": true }
-                }).then((result) => {
-                    // Temporary save the parameter of this file. If upload is successful, we save them to the component.
-                    let preSignedUrl = JSON.parse(result.responseText);
-                    this.url = preSignedUrl.pre_signed_url;
-                    tmpId = preSignedUrl.uuid;
-                    tmpFileSize = tmpFile.size;
-                    tmpFileType = tmpFile.type;
-                    tmpFileName = preSignedUrl.filename;
-                    tmpChecksum = preSignedUrl.checksum;
-
-                    let headers = {};
-
-                    if (t.acl) {
-                        headers['x-amz-acl'] = t.acl;
-                    }
-
-                    UIkit.util.trigger(this.$el, 'upload', [files]);
-                    this.beforeAll(this);
-
-                    UIkit.util.ajax(this.url, {
-                        data: tmpFile,
-                        method: this.type,
-                        headers,
-                        beforeSend: env => {
-                            const {xhr} = env;
-                            xhr.upload && UIkit.util.on(xhr.upload, 'progress', this.progress);
-                            ['loadStart', 'load', 'loadEnd', 'abort'].forEach(type =>
-                                UIkit.util.on(xhr, type.toLowerCase(), this[type])
-                            );
-
-                            this.beforeSend(env);
+                    let rowInstance = t.multiFileCollectionRow.getVueInstance();
+                    files.forEach((file, delta) => {
+                        if (delta < (files.length - 1)) {
+                            rowInstance.$emit('add', { delta: rowInstance.delta + delta, cb: (row) => {
+                                let newFileInstance = row.querySelector('unite-cms-storage-file-field[field-path="' + t.fieldPath + '"]').getVueInstance();
+                                newFileInstance.$emit('upload', file);
+                            } });
                         }
-                    }).then(
-                        xhr => {
-                            this.complete(xhr);
-                            this.completeAll(xhr);
-                        },
-                        e => this.error(e.message)
-                    );
-                }, () => {
-                    t.error = 'Cannot sign file for uploading';
-                });
+                    });
+                }
+                t.uploadFile(files[files.length - 1], this);
             };
+
+            // Allow external components to upload files.
+            this.$on('upload', (file) => { this.uploadFile(file, uploader); });
         },
 
         props: [
@@ -247,6 +204,80 @@
                     this.fileType = null;
                     this.checksum = null;
                 }, () => {});
+            },
+            findClosestCollectionRow: function($el){
+                if($el.parentElement.tagName === 'UNITE-CMS-COLLECTION-FIELD-ROW') {
+                    return $el.parentElement;
+                }
+                else if ($el.parentElement.tagName === 'FORM' || !$el.parentElement) {
+                    return null;
+                }
+                else {
+                    return this.findClosestCollectionRow($el.parentElement);
+                }
+            },
+            uploadFile(file, uiKitUpload) {
+
+                function match(pattern, path) {
+                    return path.match(new RegExp(`^${pattern.replace(/\//g, '\\/').replace(/\*\*/g, '(\\/[^\\/]+)*').replace(/\*/g, '[^\\/]+').replace(/((?!\\))\?/g, '$1.')}$`, 'i'));
+                }
+
+                if (this.allow && !match(uiKitUpload.allow, file.name)) {
+                    this.fail(this.msgInvalidName.replace('%s', uiKitUpload.allow));
+                    return;
+                }
+
+                let data = new FormData();
+                data.append('pre_sign_form[filename]', file.name);
+                data.append('pre_sign_form[field]', this.fieldPath);
+                data.append('pre_sign_form[_token]', this.uploadSignCsrfToken);
+
+                UIkit.util.ajax(this.uploadSignUrl, {
+                    method: 'POST',
+                    data: data,
+                    headers: { "Authentication-Fallback": true }
+                }).then((result) => {
+                    // Temporary save the parameter of this file. If upload is successful, we save them to the component.
+                    let preSignedUrl = JSON.parse(result.responseText);
+                    this.url = preSignedUrl.pre_signed_url;
+                    this.tmpId = preSignedUrl.uuid;
+                    this.tmpFileSize = file.size;
+                    this.tmpFileType = file.type;
+                    this.tmpFileName = preSignedUrl.filename;
+                    this.tmpChecksum = preSignedUrl.checksum;
+
+                    let headers = {};
+
+                    if (this.acl) {
+                        headers['x-amz-acl'] = t.acl;
+                    }
+
+                    UIkit.util.trigger(this.$el, 'upload', [file]);
+                    uiKitUpload.beforeAll(uiKitUpload);
+
+                    UIkit.util.ajax(uiKitUpload.url, {
+                        data: file,
+                        method: uiKitUpload.type,
+                        headers,
+                        beforeSend: env => {
+                            const {xhr} = env;
+                            xhr.upload && UIkit.util.on(xhr.upload, 'progress', uiKitUpload.progress);
+                            ['loadStart', 'load', 'loadEnd', 'abort'].forEach(type =>
+                                UIkit.util.on(xhr, type.toLowerCase(), uiKitUpload[type])
+                            );
+
+                            uiKitUpload.beforeSend(env);
+                        }
+                    }).then(
+                        xhr => {
+                            uiKitUpload.complete(xhr);
+                            uiKitUpload.completeAll(xhr);
+                        },
+                        e => uiKitUpload.error(e.message)
+                    );
+                }, () => {
+                    this.error = 'Cannot sign file for uploading';
+                });
             }
         }
     };
