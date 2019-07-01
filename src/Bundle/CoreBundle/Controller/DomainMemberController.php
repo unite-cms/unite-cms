@@ -118,6 +118,28 @@ class DomainMemberController extends AbstractController
             );
         }
 
+        $sortAscString = function($a, $b) {
+          return (string)$a > (string)$b;
+        };
+
+        $existingUsers = $organization->getMembers()->filter(
+            function(OrganizationMember $organizationMember) use ($domain_member_type_members) {
+                return !in_array($organizationMember->getUser()->getId(), $domain_member_type_members);
+            }
+        )->map(
+            function(OrganizationMember $organizationMember){
+                return $organizationMember->getUser();
+            }
+        )->toArray();
+        usort($existingUsers, $sortAscString);
+
+        $existingApiKeys = $organization->getApiKeys()->filter(
+            function(ApiKey $apiKey) use ($domain_member_type_members) {
+                return !in_array($apiKey->getId(), $domain_member_type_members);
+            }
+        )->toArray();
+        usort($existingApiKeys, $sortAscString);
+
         // Create the two-step create form.
         $form = $formFactory->createNamedBuilder(
                 'create_domain_user',
@@ -137,15 +159,7 @@ class DomainMemberController extends AbstractController
                 [
                     'label' => 'domain.member.create.form.user',
                     'class' => DomainAccessor::class,
-                    'choices' => $organization->getMembers()->filter(
-                        function(OrganizationMember $organizationMember) use ($domain_member_type_members) {
-                            return !in_array($organizationMember->getUser()->getId(), $domain_member_type_members);
-                        }
-                    )->map(
-                        function(OrganizationMember $organizationMember){
-                            return $organizationMember->getUser();
-                        }
-                    )->toArray(),
+                    'choices' => $existingUsers,
                 ]
             )
             ->add(
@@ -154,11 +168,7 @@ class DomainMemberController extends AbstractController
                 [
                     'label' => 'domain.member.create.form.api_key',
                     'class' => DomainAccessor::class,
-                    'choices' => $organization->getApiKeys()->filter(
-                        function(ApiKey $apiKey) use ($domain_member_type_members) {
-                            return !in_array($apiKey->getId(), $domain_member_type_members);
-                        }
-                    )->toArray(),
+                    'choices' => $existingApiKeys,
                 ]
             )
             ->add('invite_user', EmailType::class, ['label' => 'domain.member.invite.form.email'])
