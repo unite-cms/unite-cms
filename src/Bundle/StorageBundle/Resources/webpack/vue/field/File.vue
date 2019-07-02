@@ -29,10 +29,10 @@
         </div>
         <div v-else class="uk-placeholder">
             <span v-html="feather.icons['upload-cloud'].toSvg({ width: 18, height: 18 })"></span>
-            Add file by dropping it here or
+            {{ tr.select }}
             <div uk-form-custom>
                 <input type="file" :multiple="multiFileCollectionRow">
-                <span class="uk-link">selecting one</span>
+                <span class="uk-link">{{ multiFileCollectionRow ? tr.select_multiple : tr.select_one }}</span>
             </div>
 
         </div>
@@ -67,6 +67,7 @@
                 tmpFileType: null,
                 tmpChecksum: null,
                 tmpId: null,
+                tr: JSON.parse(this.messages),
             };
         },
         computed: {
@@ -156,8 +157,7 @@
                 }
 
                 if(t.fileName) {
-                    t.error = 'To upload a new file, delete the current file first.';
-                    console.log(this);
+                    t.error = tr.error_delete_first;
                     return;
                 }
 
@@ -189,7 +189,8 @@
             'uploadSignCsrfToken',
             'thumbnailUrl',
             'endpoint',
-            'acl'
+            'acl',
+            'messages',
         ],
         methods: {
             hasThumbnailUrl : function() {
@@ -197,7 +198,7 @@
             },
             clearFile: function(){
                 this.error = null;
-                UIkit.modal.confirm('Do you really want to delete the selected file?').then(() => {
+                UIkit.modal.confirm(tr.confirm_delete).then(() => {
                     this.fileName = null;
                     this.fileSize = null;
                     this.fileId = null;
@@ -276,7 +277,7 @@
                         e => uiKitUpload.error(e.message)
                     );
                 }, () => {
-                    this.error = 'Cannot sign file for uploading';
+                    this.error = tr.error_sign;
                 });
             }
         }

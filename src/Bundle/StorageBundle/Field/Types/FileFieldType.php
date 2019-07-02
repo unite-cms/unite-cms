@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
@@ -27,17 +28,19 @@ class FileFieldType extends FieldType
     const SETTINGS                  = ['not_empty', 'description', 'file_types', 'bucket', 'form_group'];
     const REQUIRED_SETTINGS         = ['bucket'];
 
-    private $router;
-    private $secret;
-    private $storageService;
-    private $csrfTokenManager;
+    protected $router;
+    protected $secret;
+    protected $storageService;
+    protected $csrfTokenManager;
+    protected $translator;
 
-    public function __construct(Router $router, string $secret, StorageService $storageService, CsrfTokenManager $csrfTokenManager)
+    public function __construct(Router $router, string $secret, StorageService $storageService, CsrfTokenManager $csrfTokenManager, TranslatorInterface $translator)
     {
         $this->router = $router;
         $this->secret = $secret;
         $this->storageService = $storageService;
         $this->csrfTokenManager = $csrfTokenManager;
+        $this->translator = $translator;
     }
 
     /**
@@ -94,6 +97,14 @@ class FileFieldType extends FieldType
             'upload-sign-url' => $url,
             'upload-sign-csrf-token' => $this->csrfTokenManager->getToken('pre_sign_form'),
             'acl' => $field->getSettings()->bucket['acl'] ?? '',
+            'messages' => json_encode([
+                'select' => $this->translator->trans('storage.field.select.message'),
+                'select_one' => $this->translator->trans('storage.field.select.message.one'),
+                'select_multiple' => $this->translator->trans('storage.field.select.message.multiple'),
+                'error_delete_first' => $this->translator->trans('storage.field.error.error_delete_first'),
+                'error_sign' => $this->translator->trans('storage.field.error.sign'),
+                'confirm_delete' => $this->translator->trans('storage.field.confirm.delete'),
+            ]),
           ],
         ]);
     }
