@@ -295,6 +295,7 @@ class TreeViewTypeTest extends ContainerAwareTestCase
                                         'field' => 'updated',
                                         'asc' => false,
                                     ],
+                                    'filter' => null,
                                 ],
                             ],
                         ],
@@ -302,6 +303,7 @@ class TreeViewTypeTest extends ContainerAwareTestCase
                             'field' => 'updated',
                             'asc' => false,
                         ],
+                        'filter' => null,
                     ],
                 ],
             ],
@@ -309,5 +311,75 @@ class TreeViewTypeTest extends ContainerAwareTestCase
         );
         $this->assertEquals('child_comments', $parameters->get('children_field'));
         $this->assertEquals('parent_comment', $parameters->get('parent_field'));
+
+
+        // Test templateRenderParameters.
+        $filter = ['AND' => [['field' => 'f1', 'operator' => '=', 'value' => '1']]];
+        $this->view->setSettings(new ViewSettings(['children_field' => 'child_comments', 'rows_per_page' => 20, 'filter' => $filter]));
+        $parameters = static::$container->get('unite.cms.view_type_manager')->getTemplateRenderParameters($this->view);
+        $this->assertTrue($parameters->isSelectModeNone());
+
+        $fields = $parameters->get('fields');
+        $fields['child_comments']['settings']['fields']['child_comments']['settings']['fields'] = [];
+        $this->assertEquals(
+            [
+                'id' => [
+                    'label' => 'Id',
+                    'type' => 'id'
+                ],
+                'title' => [
+                    'label' => 'Title',
+                    'type' => 'text'
+                ],
+                'created' => [
+                    'label' => 'Created',
+                    'type' => 'date'
+                ],
+                'updated' => [
+                    'label' => 'Updated',
+                    'type' => 'date'
+                ],
+                'child_comments' => [
+                    'type' => 'tree_view_children',
+                    'settings' => [
+                        'fields' => [
+                            'id' => [
+                                'label' => 'Id',
+                                'type' => 'id'
+                            ],
+                            'title' => [
+                                'label' => 'Title',
+                                'type' => 'text'
+                            ],
+                            'created' => [
+                                'label' => 'Created',
+                                'type' => 'date'
+                            ],
+                            'updated' => [
+                                'label' => 'Updated',
+                                'type' => 'date'
+                            ],
+                            'child_comments' => [
+                                'type' => 'tree_view_children',
+                                'settings' => [
+                                    'fields' => [],
+                                    'sort' => [
+                                        'field' => 'updated',
+                                        'asc' => false,
+                                    ],
+                                    'filter' => $filter,
+                                ],
+                            ],
+                        ],
+                        'sort' => [
+                            'field' => 'updated',
+                            'asc' => false,
+                        ],
+                        'filter' => $filter,
+                    ],
+                ],
+            ],
+            $fields
+        );
     }
 }

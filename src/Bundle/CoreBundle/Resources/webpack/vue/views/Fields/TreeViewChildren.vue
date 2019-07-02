@@ -91,6 +91,11 @@
                         if(key === 'cast') {
                             return key + ': ' + object[key];
                         }
+                        else if (key === 'AND' || key === 'OR') {
+                            return key + ': ' + object[key].map((skey) => {
+                                return buildGraphQLArgument(object[key][skey]);
+                            }).join(', ');
+                        }
                         return key + ': ' + (typeof object[key] === "string" ? '"' + object[key] + '"' : buildGraphQLArgument(object[key]));
                     }).join(', ')) + ' }';
                 };
