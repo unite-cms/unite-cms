@@ -157,7 +157,7 @@
                 }
 
                 if(t.fileName) {
-                    t.error = tr.error_delete_first;
+                    t.error = t.tr.error_delete_first;
                     return;
                 }
 
@@ -198,7 +198,7 @@
             },
             clearFile: function(){
                 this.error = null;
-                UIkit.modal.confirm(tr.confirm_delete).then(() => {
+                UIkit.modal.confirm(this.tr.confirm_delete).then(() => {
                     this.fileName = null;
                     this.fileSize = null;
                     this.fileId = null;
@@ -224,7 +224,7 @@
                 }
 
                 if (uiKitUpload.allow && !match(uiKitUpload.allow, file.name)) {
-                    this.fail(uiKitUpload.msgInvalidName.replace('%s', uiKitUpload.allow));
+                    uiKitUpload.fail(uiKitUpload.msgInvalidName.replace('%s', uiKitUpload.allow));
                     return;
                 }
 
@@ -277,7 +277,7 @@
                         e => uiKitUpload.error(e.message)
                     );
                 }, () => {
-                    this.error = tr.error_sign;
+                    this.error = this.tr.error_sign;
                 });
             }
         }
