@@ -195,7 +195,7 @@
                 this.dataFetcher.sort(this.sort).fetch(page)
                     .then(
                         (data) => {
-                            this.allowCreate = data.result._permissions.CREATE_CONTENT;
+                            this.allowCreate = data.result._permissions ? data.result._permissions.CREATE_CONTENT : false;
                             this.rows = data.result.result.map((row) => {
                                 let deleted = !(row.deleted == null);
                                 if(row._permissions) {
