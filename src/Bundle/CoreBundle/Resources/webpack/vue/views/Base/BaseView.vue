@@ -195,6 +195,7 @@
                 this.dataFetcher.sort(this.sort).fetch(page)
                     .then(
                         (data) => {
+                            this.allowCreate = data.result._permissions.CREATE_CONTENT;
                             this.rows = data.result.result.map((row) => {
                                 let deleted = !(row.deleted == null);
                                 if(row._permissions) {
@@ -206,10 +207,8 @@
                                         revisions: row._permissions.UPDATE_CONTENT && !deleted,
                                         update: row._permissions.UPDATE_CONTENT && !deleted
                                     };
-                                    this.allowCreate = data.result._permissions.CREATE_CONTENT;
                                 } else {
                                     row._actions = {};
-                                    this.allowCreate = false;
                                 }
                                 return row;
                             });
