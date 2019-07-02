@@ -9,13 +9,14 @@ class TreeViewType extends TableViewType
     const TYPE = "tree";
     const TEMPLATE = "UniteCMSCoreBundle:Views:Tree/index.html.twig";
 
-    protected function addRecursiveChildrenFields($fields, $children_field, $sort, $level = 3) {
+    protected function addRecursiveChildrenFields($fields, $children_field, $sort, $filter, $level = 3) {
         return array_merge($fields, [
             $children_field => [
                 'type' => 'tree_view_children',
                 'settings' => [
-                    'fields' => $level > 0 ? $this->addRecursiveChildrenFields($fields, $children_field, $sort, $level -1) : $fields,
+                    'fields' => $level > 0 ? $this->addRecursiveChildrenFields($fields, $children_field, $sort, $filter, $level -1) : $fields,
                     'sort' => $sort,
+                    'filter' => $filter,
                 ],
             ]
         ]);
@@ -39,12 +40,14 @@ class TreeViewType extends TableViewType
             $settings['filter'] = [];
         }
 
+        $originalFilter = $settings['filter'] ?? null;
+
         // Pass root level filter to the view.
         $rootLevelFilter = ['field' => $settings['parent_field'].'.content', 'operator' => 'IS NULL'];
         $settings['filter'] = empty($settings['filter']) ? $rootLevelFilter : ['AND' => [$rootLevelFilter, $settings['filter']]];
 
         // Add a custom reference_of field to the view
-        $settings['fields'] = $this->addRecursiveChildrenFields($settings['fields'], $settings['children_field'], $settings['sort']);
+        $settings['fields'] = $this->addRecursiveChildrenFields($settings['fields'], $settings['children_field'], $settings['sort'], $originalFilter);
 
         return $settings;
     }

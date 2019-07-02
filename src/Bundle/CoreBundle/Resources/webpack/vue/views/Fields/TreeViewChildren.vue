@@ -82,7 +82,25 @@
                     fields.push('_id');
                 }
 
-                return identifier + '(sort: {field: "' + field.settings.sort.field + '", order: "' + (field.settings.sort.asc ? 'ASC' : 'DESC') + '"}, limit: 5) { total, result { ' + fields.map((identifier) => {
+                // Assign all root level filter to the child selector
+                let buildGraphQLArgument = function(object) {
+                    if(!object) {
+                        return 'null';
+                    }
+                    return '{ ' + (Object.keys(object).map((key) => {
+                        if(key === 'cast') {
+                            return key + ': ' + object[key];
+                        }
+                        else if (key === 'AND' || key === 'OR') {
+                            return key + ': ' + object[key].map((skey) => {
+                                return buildGraphQLArgument(object[key][skey]);
+                            }).join(', ');
+                        }
+                        return key + ': ' + (typeof object[key] === "string" ? '"' + object[key] + '"' : buildGraphQLArgument(object[key]));
+                    }).join(', ')) + ' }';
+                };
+
+                return identifier + '(filter: ' + buildGraphQLArgument(field.settings.filter) + ' sort: {field: "' + field.settings.sort.field + '", order: "' + (field.settings.sort.asc ? 'ASC' : 'DESC') + '"}, limit: 5) { total, result { ' + fields.map((identifier) => {
 
                     if(identifier === '_id') {
                         return 'id';
@@ -166,8 +184,14 @@
             },
 
             loadMoreChildren(row) {
-                this.childrenDataFetcher.filterArgument.operator = '=';
-                this.childrenDataFetcher.filterArgument.value = row.id;
+                if(this.childrenDataFetcher.filterArgument.AND) {
+                    this.childrenDataFetcher.filterArgument.AND[0].operator = '=';
+                    this.childrenDataFetcher.filterArgument.AND[0].value = row.id;
+                } else {
+                    this.childrenDataFetcher.filterArgument.operator = '=';
+                    this.childrenDataFetcher.filterArgument.value = row.id;
+                }
+
                 this.childrenDataFetcher.fetch(Math.ceil(row[this.childrenField].result.length / 5) + 1, 5).then((data) => {
                     row[this.childrenField].result = row[this.childrenField].result.concat(data.result.result);
                 });
