@@ -9,12 +9,12 @@ services:
     # A file upload field.
     UniteCMS\StorageBundle\Field\Types\FileFieldType:
         tags: [unite_cms.field_type]
-        arguments: ['@router.default', '%kernel.secret%', '@unite.cms.storage.service', '@security.csrf.token_manager']
+        arguments: ['@router.default', '%kernel.secret%', '@unite.cms.storage.service', '@security.csrf.token_manager', '@translator']
 
     # A image upload field.
     UniteCMS\StorageBundle\Field\Types\ImageFieldType:
         tags: [unite_cms.field_type]
-        arguments: ['@router.default', '%kernel.secret%', '@unite.cms.storage.service', '@security.csrf.token_manager']
+        arguments: ['@router.default', '%kernel.secret%', '@unite.cms.storage.service', '@security.csrf.token_manager', '@translator']
 
     # A file graphQL schema object type.
     UniteCMS\StorageBundle\SchemaType\StorageFileType:
