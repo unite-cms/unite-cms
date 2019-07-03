@@ -25,6 +25,7 @@ class MoneyType extends AbstractType
         $resolver->setDefaults([
             'currencies' => [],
             'compound' => true,
+            'error_bubbling' => false,
         ]);
     }
 
@@ -44,7 +45,12 @@ class MoneyType extends AbstractType
         }
 
         $builder
-            ->add('value', SymfonyMoneyType::class, ['label' => false, 'currency' => false ])
+            ->add('value', SymfonyMoneyType::class, [
+                'label' => false,
+                'currency' => false,
+                'not_empty' => $options['not_empty'],
+                'error_bubbling' => true,
+            ])
             ->add('currency', CurrencyType::class, $currencyOptions);
     }
 
