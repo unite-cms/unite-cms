@@ -11,6 +11,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 use Symfony\Component\Form\Extension\Core\Type\LanguageType;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\Entity\FieldableContent;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 
