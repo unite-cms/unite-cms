@@ -30,5 +30,6 @@ services:
   unite.cms.graphql.variants_field_variant_factory:
     class: UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory
     public: false
+    tags: ['unite_cms.graphql.schema_type_factory']
     arguments:
-      ['@unite.cms.field_type_manager', '@security.authorization_checker']
+      ['@unite.cms.field_type_manager', '@security.authorization_checker', '@unite.cms.fieldable_content_manager']

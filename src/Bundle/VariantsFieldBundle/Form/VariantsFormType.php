@@ -2,6 +2,7 @@
 
 namespace UniteCMS\VariantsFieldBundle\Form;
 
+use Symfony\Component\Validator\Constraints\NotBlank;
 use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;
@@ -19,7 +20,6 @@ use UniteCMS\CoreBundle\Form\FieldableFormType;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
 use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
-use UniteCMS\VariantsFieldBundle\Model\VariantContent;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
 use UniteCMS\VariantsFieldBundle\SchemaType\Factories\VariantFactory;
 
@@ -112,7 +112,7 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
         // In order to be able to have required child elements (see Symfony\Component\Form\Form::isRequired()), we
         // set the variant form type to required. Here we undo this to avoid a * in the label. At this point,
         // however the children are already built, so any required fields are already marked as required.
-        $view->vars['required'] = false;
+        $view->vars['required'] = $options['not_empty'] ?? false;
     }
 
     /**
@@ -120,7 +120,9 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setRequired('variants');
+        $resolver
+            ->setRequired('variants')
+            ->setDefault('error_bubbling', false);
     }
 
     /**
@@ -146,7 +148,9 @@ class VariantsFormType extends AbstractType implements DataTransformerInterface
     {
         // If type is not set, variants field is empty.
         if(empty($value['type'])) {
-            return null;
+            return [
+                'type' => null,
+            ];
         }
 
         // If type is set, but there is no content for this variant, return an empty array for the variant.

@@ -117,6 +117,7 @@ class VariantsGraphQLTest extends APITestCase
               "identifier": "variants",
               "type": "variants",
               "settings": {
+                "not_empty": true,
                 "variants": [
                     {
                         "title": "V1",
@@ -375,5 +376,41 @@ class VariantsGraphQLTest extends APITestCase
                     ]
                 ],
             ]], $response);
+
+        $response = json_decode(json_encode($this->api('mutation {
+            updateVariantsSetting(data: { variants: {} }, persist: true) {
+                variants {
+                    type
+                }
+            }
+        }')));
+        $this->assertEquals('This field is required.', $response->errors[0]->message);
+        $this->assertEquals(['updateVariantsSetting', 'data', 'variants'], $response->errors[0]->path);
+        $this->assertEmpty($response->data->updateVariantsSetting);
+
+        $response = json_decode(json_encode($this->api('mutation {
+            updateVariantsSetting(data: { variants: { type: null } }, persist: true) {
+                variants {
+                    type
+                }
+            }
+        }')));
+        $this->assertEquals('This field is required.', $response->errors[0]->message);
+        $this->assertEquals(['updateVariantsSetting', 'data', 'variants'], $response->errors[0]->path);
+        $this->assertEmpty($response->data->updateVariantsSetting);
+
+        $response = json_decode(json_encode($this->api('mutation {
+            updateVariantsSetting(data: { variants: { type: "v1" } }, persist: true) {
+                variants {
+                    type
+                }
+            }
+        }')));
+        $this->assertFalse(isset($response->errors));
+        $this->assertEquals((object)[
+            'variants' => (object)[
+                'type' => 'v1',
+            ],
+        ], $response->data->updateVariantsSetting);
     }
 }

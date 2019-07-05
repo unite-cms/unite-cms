@@ -83,14 +83,20 @@ class NestedFieldAlterTest extends TestCase
 
         $data = [];
         $manager->alterFieldData($field, $data, new Content(), $data);
-        $this->assertEquals([], $data);
+        $this->assertEquals([
+            'variants' => [
+                'type' => null
+            ],
+        ], $data);
 
         $data = [
             'variants' => null,
         ];
         $manager->alterFieldData($field, $data, new Content(), $data);
         $this->assertEquals([
-            'variants' => null,
+            'variants' => [
+                'type' => null
+            ],
         ], $data);
 
         $data = [

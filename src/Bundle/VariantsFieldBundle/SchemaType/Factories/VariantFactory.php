@@ -8,6 +8,10 @@
 
 namespace UniteCMS\VariantsFieldBundle\SchemaType\Factories;
 
+use UniteCMS\CoreBundle\Entity\Domain;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
+use UniteCMS\CoreBundle\Entity\SettingType;
+use UniteCMS\CoreBundle\Field\NestableFieldTypeInterface;
 use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
@@ -19,22 +23,27 @@ use UniteCMS\CoreBundle\Entity\Fieldable;
 use UniteCMS\CoreBundle\Entity\FieldableField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\SchemaType\Factories\SchemaTypeFactoryInterface;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\Security\Voter\FieldableFieldVoter;
+use UniteCMS\CoreBundle\Service\FieldableContentManager;
+use UniteCMS\VariantsFieldBundle\Field\Types\VariantsFieldType;
 use UniteCMS\VariantsFieldBundle\Model\Variant;
 use UniteCMS\VariantsFieldBundle\Model\VariantContent;
 use UniteCMS\VariantsFieldBundle\Model\Variants;
 
-class VariantFactory
+class VariantFactory implements SchemaTypeFactoryInterface
 {
     private $fieldTypeManager;
     protected $authorizationChecker;
+    protected $contentManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager, AuthorizationCheckerInterface $authorizationChecker)
+    public function __construct(FieldTypeManager $fieldTypeManager, AuthorizationCheckerInterface $authorizationChecker, FieldableContentManager $contentManager)
     {
         $this->fieldTypeManager = $fieldTypeManager;
         $this->authorizationChecker = $authorizationChecker;
+        $this->contentManager = $contentManager;
     }
 
     /**
@@ -195,5 +204,80 @@ class VariantFactory
             ]));
         }
         return $schemaTypeManager->getSchemaType($schemaTypeName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supports(string $schemaTypeName): bool
+    {
+        $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
+        if(count($nameParts) < 5) {
+            return false;
+        }
+        $lastPart = array_pop($nameParts);
+        return $lastPart === 'Variant';
+    }
+
+    protected function findVariantField(Fieldable $fieldable, array $typeNameParts = []) : FieldableField {
+        $root = strtolower(array_shift($typeNameParts));
+
+        if(!$fieldable->getFields()->containsKey($root)) {
+            throw new \InvalidArgumentException(sprintf('Fieldable %s does to contain field %s.', $fieldable->getIdentifier(), $root));
+        }
+
+        $field = $fieldable->getFields()->get($root);
+
+        if($field->getType() === VariantsFieldType::getType()) {
+            return $field;
+        }
+
+        if(!empty($typeNameParts)) {
+            $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
+
+            if ($fieldType instanceof NestableFieldTypeInterface) {
+                return $this->findVariantField($fieldType::getNestableFieldable($field), $typeNameParts);
+            }
+        }
+
+        throw new \InvalidArgumentException(sprintf('Fieldable %s does to contain field %s.', $fieldable->getIdentifier(), $root));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createSchemaType(
+        SchemaTypeManager $schemaTypeManager,
+        Domain $domain = null,
+        string $schemaTypeName
+    ): Type {
+
+        if(!$domain) {
+            throw new \InvalidArgumentException(sprintf('%s needs an domain as second argument,', self::class));
+        }
+
+        $nameParts = IdentifierNormalizer::graphQLSchemaSplitter($schemaTypeName);
+
+        array_pop($nameParts);
+        $variantName = strtolower(array_pop($nameParts));
+        $identifier = strtolower(array_shift($nameParts));
+        $type = strtolower(array_shift($nameParts));
+
+        if($type === 'setting') {
+            $type = SettingType::class;
+        }
+
+        if($type === 'content') {
+            $type = ContentType::class;
+        }
+
+        if($type === 'member') {
+            $type = DomainMemberType::class;
+        }
+
+        $fieldable = $this->contentManager->findFieldable($domain, $identifier, $type);
+        $field = $this->findVariantField($fieldable, $nameParts);
+        $variants = VariantsFieldType::getNestableFieldable($field);
+        return $this->createVariantType($schemaTypeManager, new Variant(null, $variants->getFieldsForVariant($variantName), $variantName, $variantName, $variants));
     }
 }
