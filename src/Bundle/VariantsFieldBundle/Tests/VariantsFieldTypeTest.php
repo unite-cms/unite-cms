@@ -61,6 +61,27 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertCount(1, $errors);
         $this->assertEquals('settings.variants', $errors->get(0)->getPropertyPath());
         $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+
+        // Not_empty must be a boolean value,
+        $field->setSettings(new FieldableFieldSettings([
+                    'not_empty' => 'fpp',
+                    'variants' => [
+                        [
+                            'title' => 'Foo',
+                            'identifier' => 'any',
+                            'fields' => 'foo',
+                            'icon' => 'test',
+                            'settings' => [
+                                'description' => 'Foo',
+                            ],
+                        ]
+                    ],
+                ]
+            )
+        );
+        $errors = static::$container->get('validator')->validate($field);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('noboolean_value', $errors->get(0)->getMessageTemplate());
     }
 
     public function testValidateVariantSettings()
@@ -278,6 +299,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                         ]
                     ],
                     'form_group' => "Group 1",
+                    'not_empty' => true,
                 ]
             )
         );
@@ -289,6 +311,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         // Create field and save it to the database.
         $field = $this->createContentTypeField('variants');
         $field->setSettings(new FieldableFieldSettings([
+                    'not_empty' => true,
                     'variants' => [
                         [
                             'title' => 'Foo',
@@ -444,7 +467,7 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $form = static::$container->get('unite.cms.fieldable_form_builder')
             ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
 
-        // Try to submit nested invalid data
+        // Try to submit nested valid data
         $form->submit([
             $field->getIdentifier() => [
                 'type' => 'foo',
@@ -465,5 +488,89 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                 ]
             ],
         ],$content->getData());
+
+        // Try to submit empty data
+        $content->setData([]);
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+
+        $form->submit([]);
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
+        $errors = static::$container->get('validator')->validate($content);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('data[' . $field->getIdentifier() . ']', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+        $form->submit([
+            $field->getIdentifier() => null,
+        ]);
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
+        $errors = static::$container->get('validator')->validate($content);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('data[' . $field->getIdentifier() . ']', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+        $form->submit([
+            $field->getIdentifier() => [],
+        ]);
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
+        $errors = static::$container->get('validator')->validate($content);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('data[' . $field->getIdentifier() . ']', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+        $form->submit([
+            $field->getIdentifier() => [
+                'type' => null,
+            ],
+        ]);
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
+        $errors = static::$container->get('validator')->validate($content);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('data[' . $field->getIdentifier() . ']', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+        $form->submit([
+            $field->getIdentifier() => [
+                'type' => '',
+            ],
+        ]);
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
+        $errors = static::$container->get('validator')->validate($content);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('data[' . $field->getIdentifier() . ']', $errors->get(0)->getPropertyPath());
+        $this->assertEquals('required', $errors->get(0)->getMessageTemplate());
+
+        $form = static::$container->get('unite.cms.fieldable_form_builder')
+            ->createForm($field->getContentType(), $content, ['csrf_protection' => false]);
+        $form->submit([
+            $field->getIdentifier() => [
+                'type' => 'foo',
+            ],
+        ]);
+        $this->assertTrue($form->isSubmitted());
+        $this->assertTrue($form->isValid());
+        static::$container->get('unite.cms.fieldable_form_builder')->assignDataToFieldableContent($content, $form->getData());
+        $errors = static::$container->get('validator')->validate($content);
+        $this->assertCount(0, $errors);
     }
 }

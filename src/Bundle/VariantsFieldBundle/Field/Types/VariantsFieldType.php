@@ -31,7 +31,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
 {
     const TYPE                      = "variants";
     const FORM_TYPE                 = VariantsFormType::class;
-    const SETTINGS                  = ["description", 'variants', 'form_group'];
+    const SETTINGS                  = ["description", 'variants', 'form_group', 'not_empty'];
     const REQUIRED_SETTINGS         = ['variants'];
 
     /**
@@ -63,8 +63,7 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     {
         // Configure the variants from type.
         return array_merge(parent::getFormOptions($field), [
-            // TODO: In the future, we could also add a not_empty option to the variants field type and pass it as an extra argument to  VariantsFormType->type child form element.
-            // Please see VariantsFormType::buildView() for more information.
+            'not_empty' => $field->getSettings()->not_empty ?? false,
             'required' => true,
             'variants' => self::getNestableFieldable($field),
         ]);
@@ -251,8 +250,17 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
         }
 
         // If type is not set, this field is not filled out.
-        if(empty($data['type']) || empty($data[$data['type']])) {
+        if(empty($data['type'])) {
+
+            if(!empty($field->getSettings()->not_empty)) {
+                $context->buildViolation('required')->atPath('['.$field->getIdentifier().']')->addViolation();
+            }
+
             return;
+        }
+
+        if(empty($data[$data['type']])) {
+            $data[$data['type']] = [];
         }
 
         // Validate all fields for the given type.
@@ -281,6 +289,9 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData)
     {
         if(empty($data[$field->getIdentifier()]) || empty($data[$field->getIdentifier()]['type'])) {
+            $data[$field->getIdentifier()] = [
+                'type' => null,
+            ];
             return;
         }
 
