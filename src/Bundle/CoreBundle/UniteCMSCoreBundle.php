@@ -11,7 +11,7 @@ use UniteCMS\CoreBundle\SchemaType\SchemaTypeCompilerPass;
 
 class UniteCMSCoreBundle extends Bundle
 {
-    const UNITE_VERSION = '0.9.0';
+    const UNITE_VERSION = '0.9.1';
 
     public function build(ContainerBuilder $container)
     {
