@@ -342,14 +342,14 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                 }
             }
 
-            // Case 3: row was present in old data but is not present in new data: HARD DELETE
-            if(method_exists($fieldType, 'onHardDelete')) {
+            // Case 3: row was present in old data but is not present in new data: DELETE
+            if(method_exists($fieldType, 'onSoftDelete')) {
                 if(isset($old_data[$field->getIdentifier()])) {
                     foreach ($old_data[$field->getIdentifier()] as $key => $subOldData) {
                         if (!empty($old_data[$field->getIdentifier()][$key]) && empty(
                             $data[$field->getIdentifier()][$key]
                             )) {
-                            $fieldType->onHardDelete($subField, $content, $repository, $subOldData);
+                            $fieldType->onSoftDelete($subField, $content, $repository, $subOldData);
                         }
                     }
                 }

@@ -237,7 +237,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Make sure, that delete was fired for variant 1 fields and create for variant 2 fields.
         $this->assertEquals([
-            '$.n1.v1.n2ct1'.Content::class.'hard_delete',
+            '$.n1.v1.n2ct1'.Content::class.'soft_delete',
             '$.n1.v2.n2ct1'.Content::class.'createfoo',
         ], $mock->events);
         $this->assertEquals('foo.onCreate', $content->getData()['n1']['v2']['n2']);
@@ -253,7 +253,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Make sure, that delete was fired for variant 2 and nothing was fired for variant 1.
         $this->assertEquals([
-            '$.n1.v2.n2ct1'.Content::class.'hard_delete',
+            '$.n1.v2.n2ct1'.Content::class.'soft_delete',
         ], $mock->events);
         $this->assertEquals([], $content->getData()['n1']);
 
@@ -368,7 +368,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Make sure, that delete was fired for variant 1 fields and create for variant 2 fields.
         $this->assertEquals([
-            '$.n1.v1.n2st1'.Setting::class.'hard_delete',
+            '$.n1.v1.n2st1'.Setting::class.'soft_delete',
             '$.n1.v2.n2st1'.Setting::class.'createfoo',
         ], $mock->events);
         $this->assertEquals('foo.onCreate', $setting->getData()['n1']['v2']['n2']);
@@ -384,7 +384,7 @@ class FieldEventHooksTest extends DatabaseAwareTestCase
 
         // Make sure, that delete was fired for variant 2 and nothing was fired for variant 1.
         $this->assertEquals([
-            '$.n1.v2.n2st1'.Setting::class.'hard_delete',
+            '$.n1.v2.n2st1'.Setting::class.'soft_delete',
         ], $mock->events);
         $this->assertEquals([], $setting->getData()['n1']);
     }
