@@ -386,18 +386,18 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
             return;
         }
 
-        // Case3: Old has variant, but new has not => onHardDelete
+        // Case3: Old has variant, but new has not => onSoftDelete
         if(!empty($old_data[$field->getIdentifier()]['type']) && empty($data[$field->getIdentifier()]['type'])) {
-            $this->onHardDelete($field, $content, $repository, $old_data);
+            $this->onSoftDelete($field, $content, $repository, $old_data);
             return;
         }
 
         // Case4 (A&B): variant identifier in old and new data available.
         if(!empty($old_data[$field->getIdentifier()]['type']) && !empty($data[$field->getIdentifier()]['type'])) {
 
-            // Case 4A: Old had other variant than new data => onHardDelete & onCreate
+            // Case 4A: Old had other variant than new data => onSoftDelete & onCreate
             if($old_data[$field->getIdentifier()]['type'] != $data[$field->getIdentifier()]['type']) {
-                $this->onHardDelete($field, $content, $repository, $old_data);
+                $this->onSoftDelete($field, $content, $repository, $old_data);
                 $this->onCreate($field, $content, $repository, $data);
             }
 
