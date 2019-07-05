@@ -7,22 +7,22 @@
 
         <div v-if="modalHtml && modalHtml.length > 0" class="uk-modal-container" :id="modalId" uk-modal>
             <div class="uk-modal-dialog" uk-overflow-auto>
-                <button class="uk-modal-close-default" type="button" uk-close></button>
+                <a href="#" class="uk-modal-close-default" uk-close></a>
                 <div v-html="modalHtml"></div>
             </div>
         </div>
 
-        <button v-if="!content" class="uk-placeholder" v-on:click.prevent="openModal">
+        <a href="#" v-if="!content" class="uk-placeholder" v-on:click.prevent="openModal">
             <span v-html="feather.icons['plus'].toSvg({ width: 18, height: 18 })"></span>
             Select...
-        </button>
+        </a>
         <div v-if="content" class="content-holder">
             <div v-if="loading" uk-spinner></div>
             <div  v-if="!loading">
                 <div class="meta">{{ contentType }} /</div>
                 {{ title }}
             </div>
-            <button class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearSelection"></button>
+            <a href="#" class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearSelection"></a>
         </div>
     </div>
 </template>

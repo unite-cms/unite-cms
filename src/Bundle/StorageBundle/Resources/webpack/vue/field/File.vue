@@ -19,7 +19,7 @@
                 </div>
             </a>
 
-            <button class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearFile"></button>
+            <span class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearFile"></span>
 
             <input type="hidden" :name="name + '[name]'" :value="fileName" />
             <input type="hidden" :name="name + '[type]'" :value="fileType" />
@@ -167,8 +167,11 @@
                     files.forEach((file, delta) => {
                         if (delta < (files.length - 1)) {
                             rowInstance.$emit('add', { delta: rowInstance.delta + delta, cb: (row) => {
-                                let newFileInstance = row.querySelector('unite-cms-storage-file-field[field-path="' + t.fieldPath + '"]').getVueInstance();
-                                newFileInstance.$emit('upload', file);
+                                let field = row.querySelector('unite-cms-storage-file-field[field-path="' + t.fieldPath + '"]');
+                                if(field) {
+                                    let newFileInstance = row.querySelector('unite-cms-storage-file-field[field-path="' + t.fieldPath + '"]').getVueInstance();
+                                    newFileInstance.$emit('upload', file);
+                                }
                             } });
                         }
                     });
@@ -211,6 +214,11 @@
                     return $el.parentElement;
                 }
                 else if ($el.parentElement.tagName === 'FORM' || !$el.parentElement) {
+                    return null;
+                }
+
+                // For the moment, we cannot add multiple fields if there is a variant field between this field and the collection field.
+                else if ($el.parentElement.tagName === 'UNITE-CMS-CORE-VARIANTS-VARIANT') {
                     return null;
                 }
                 else {

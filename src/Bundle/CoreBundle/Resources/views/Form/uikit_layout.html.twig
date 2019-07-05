@@ -61,7 +61,7 @@
     {% if field_groups|length > 0 %}
         <div uk-grid>
             <div class="uk-width-auto@m">
-                <ul class="uk-tab-left" uk-tab="connect: #{{ form.vars.id }}-group; animation: uk-animation-fade">
+                <ul class="uk-tab-left" uk-tab="connect: #{{ form.vars.id }}-group; animation: uk-animation-fade; swiping: false">
                     {% for delta,group in field_groups %}
                         <li><a href="#{{ form.vars.id }}-group-{{ delta }}">{{ group|capitalize }}</a></li>
                     {% endfor %}

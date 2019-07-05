@@ -14,7 +14,7 @@
             </div>
         </div>
         <div v-if="!maxRows || rows.length < maxRows" class="collection-add-button-wrapper uk-sortable-nodrag">
-            <button  class="uk-button uk-button-default" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></button>
+            <a href="#" class="uk-button uk-button-default" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></a>
         </div>
     </div>
 </template>
@@ -184,11 +184,11 @@
             position: relative;
             z-index: 5;
 
-            button.uk-button:not(.uk-button-text):not(.uk-button-link) {
+            a.uk-button:not(.uk-button-text):not(.uk-button-link) {
                 padding: 0;
                 width: 30px;
                 height: 30px;
-                line-height: 0;
+                line-height: 26px;
                 border-radius: 100%;
                 display: block;
                 margin: 0 auto;
@@ -206,7 +206,7 @@
         > unite-cms-collection-field-row > div > .collection-add-button-wrapper {
             padding: 5px auto;
 
-            button.uk-button:not(.uk-button-text):not(.uk-button-link) {
+            a.uk-button:not(.uk-button-text):not(.uk-button-link) {
                 margin: -15px auto;
                 transform: scale(0.25);
                 opacity: 0.5;
@@ -214,7 +214,7 @@
             }
 
             &:hover {
-                button.uk-button:not(.uk-button-text):not(.uk-button-link) {
+                a.uk-button:not(.uk-button-text):not(.uk-button-link) {
                     opacity: 1;
                     transform: scale(1);
                 }
@@ -224,7 +224,7 @@
 
     /*unite-cms-collection-field:hover {
         .collection-add-button-wrapper {
-            button.uk-button:not(.uk-button-text):not(.uk-button-link) {
+            a.uk-button:not(.uk-button-text):not(.uk-button-link) {
                 display: block;
             }
         }
@@ -269,11 +269,15 @@
                 display: block;
                 background: $global-muted-background;
                 opacity: 0.75;
-                padding: 15px 15px 0;
+                padding: 15px;
                 margin: 0 25px;
 
                 > div > div > .uk-margin {
                     margin-bottom: 15px;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
                 }
 
                 > .uk-sortable-handle {
@@ -299,6 +303,7 @@
                     height: 30px;
                     top: 10px;
                     right: -30px;
+                    text-align: center;
 
                     svg {
                         width: 16px;
