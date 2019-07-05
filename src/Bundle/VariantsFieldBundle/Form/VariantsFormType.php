@@ -2,7 +2,6 @@
 
 namespace UniteCMS\VariantsFieldBundle\Form;
 
-use Symfony\Component\Validator\Constraints\NotBlank;
 use UniteCMS\CoreBundle\Model\FieldableFieldContent;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;
