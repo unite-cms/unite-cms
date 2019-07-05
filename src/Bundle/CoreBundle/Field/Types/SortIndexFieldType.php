@@ -46,7 +46,14 @@ class SortIndexFieldType extends FieldType
 
     public function onCreate(FieldableField $field, Content $content, EntityRepository $repository, &$data)
     {
-        $data[$field->getIdentifier()] = $repository->count(['contentType' => $content->getContentType()]);
+        if(empty($data[$field->getIdentifier()]) || ($data[$field->getIdentifier()] === $this->getDefaultValue($field)) || !is_numeric($data[$field->getIdentifier()])) {
+            $data[$field->getIdentifier()] = $repository->count(['contentType' => $content->getContentType()]);
+        } else {
+            // Simulate shift left from the very beginning.
+            $old_data = $data;
+            $old_data[$field->getIdentifier()] = $repository->count(['contentType' => $content->getContentType()]);
+            $this->onUpdate($field, $content, $repository, $old_data, $data);
+        }
     }
 
     public function onUpdate(
