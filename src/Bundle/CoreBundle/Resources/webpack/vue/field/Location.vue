@@ -2,8 +2,8 @@
     <div class="uk-form-controls uk-form-controls-text uk-form-controls-checkbox">
 
         <div class="uk-search uk-search-default" v-on:click="showDropdown">
-            <button v-if="!searchDone" v-on:click.prevent="search" class="uk-search-icon-flip" uk-search-icon></button>
-            <button v-if="searchDone" v-on:click.prevent="clear" class="uk-search-icon-flip uk-search-icon uk-icon" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })"></button>
+            <span v-if="!searchDone" v-on:click.prevent="search" class="uk-search-icon-flip" uk-search-icon></span>
+            <span v-if="searchDone" v-on:click.prevent="clear" class="uk-search-icon-flip uk-search-icon uk-icon" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })"></span>
 
             <input @keypress.13.prevent="search" class="uk-search-input" type="search" placeholder="Search..." v-model="query">
         </div>
