@@ -106,7 +106,7 @@ class CollectionFieldTypeFactory implements SchemaTypeFactoryInterface
 
         $fieldName = strtolower(array_shift($nameParts));
         $field = $fieldable->getFields()->filter(function(FieldableField $field) use ($fieldName) {
-            return $field->getIdentifier() === $fieldName && $field->getType() === CollectionFieldType::getType();
+            return $field->getIdentifier() === $fieldName && ($this->fieldTypeManager->getFieldType($field->getType()) instanceof CollectionFieldType);
         })->first();
 
         if(empty($field)) {
