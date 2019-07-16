@@ -1,10 +1,10 @@
 <template>
     <div class="uk-margin uk-grid-small" uk-grid>
         <div :class="{ 'uk-width-1-1' : !showTitleWidget, 'uk-width-1-2@s' : showTitleWidget }">
-            <label class="uk-form-label" :for="input_id">{{ label }}</label>
+            <label class="uk-form-label" :class="{ required }" :for="input_id">{{ label }}</label>
             <div class="uk-form-controls">
                 <div class="url-control uk-inline">
-                    <input :id="input_id" type="url" class="uk-input" :name="name + '[url]'" v-model="url" />
+                    <input :required="required ? 'required' : null" :id="input_id" type="url" class="uk-input" :name="name + '[url]'" v-model="url" />
                     <a v-if="showTargetWidget" class="uk-form-icon uk-form-icon-flip" :class="{ external : (target == '_blank')}" :uk-tooltip="targetTooltip" v-on:click.prevent="toggleTarget" v-html="feather.icons['external-link'].toSvg({ width: 16, height: 16 })">
                     </a>
                 </div>
@@ -44,6 +44,7 @@
             'label',
             'name',
             'value',
+            'required',
             'titleWidget',
             'targetWidget',
         ],

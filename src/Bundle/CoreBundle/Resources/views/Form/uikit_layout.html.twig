@@ -234,6 +234,7 @@
             label="{{ form.vars.widget_label }}"
             name="{{ form.vars.full_name }}"
             value="{{ form.url.vars.value }}"
+            required="{{ form.url.vars.required }}"
             {% if form.title is defined %}
                 title-widget='{ "label": "{% trans %}form.title.vars.label{% endtrans %}", "value": "{{ form.title.vars.value }}" }'
             {% endif %}
