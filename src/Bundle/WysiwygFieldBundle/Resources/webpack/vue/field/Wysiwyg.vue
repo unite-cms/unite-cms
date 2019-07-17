@@ -19,6 +19,7 @@
     import TablePlugin from '@ckeditor/ckeditor5-table/src/table';
     import HighlightPlugin from '@ckeditor/ckeditor5-highlight/src/highlight';
     import AlignmentPlugin from '@ckeditor/ckeditor5-alignment/src/alignment';
+    import MediaEmbedPlugin from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 
     export default {
         data: function() {
@@ -39,6 +40,7 @@
                         ParagraphPlugin,
                         HighlightPlugin,
                         AlignmentPlugin,
+                        MediaEmbedPlugin,
                     ],
                     toolbar: options.toolbar,
                     heading: { options: options.heading }
