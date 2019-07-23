@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\SchemaType\Types;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use GraphQL\Error\UserError;
@@ -14,6 +15,7 @@ use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainAccessor;
 use UniteCMS\CoreBundle\Entity\DomainMember;
+use UniteCMS\CoreBundle\Entity\DomainMemberType;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use UniteCMS\CoreBundle\Security\Voter\DomainMemberVoter;
@@ -438,14 +440,26 @@ class QueryType extends AbstractType
 
         // Get content from all domainMemberTypes
         $domainMemberEntityFields = $this->entityManager->getClassMetadata(DomainMember::class)->getFieldNames();
+
         $contentQuery = $this->entityManager->getRepository(
             'UniteCMSCoreBundle:DomainMember'
         )->createQueryBuilder('m')
-            ->select('m')
+            ->select(['m'])
             ->where('m.domainMemberType IN (:domainMemberTypes)')
             ->setParameter(':domainMemberTypes', $domainMemberTypes);
 
         $usedJoins = [];
+        $nameParts = [];
+
+        foreach($this->entityManager->getClassMetadata(DomainAccessor::class)->discriminatorMap as $key => $class) {
+            if(!in_array($key, $usedJoins)) {
+                $contentQuery->leftJoin($class, $key, 'WITH', $key.'.id = m.accessor');
+                $usedJoins[] = $key;
+            }
+            $nameParts[] = sprintf('%s.%s', $key, $class::getNameField());
+        }
+
+        $contentQuery->addSelect(sprintf('COALESCE(%s) as _name', join(', ', $nameParts)));
 
         // Sorting by nested data attributes is not possible with knp paginator, so we need to do it manually.
         if (!empty($args['sort'])) {
@@ -459,18 +473,11 @@ class QueryType extends AbstractType
                 if (in_array($key, $domainMemberEntityFields)) {
                     $sortFields[] = 'm.' . $key;
 
-                    // if we sort by special _name field
+                // if we sort by special _name field
                 } elseif($key === '_name') {
+                    $sortFields[] = '_name';
 
-                    foreach($this->entityManager->getClassMetadata(DomainAccessor::class)->discriminatorMap as $key => $class) {
-                        if(!in_array($key, $usedJoins)) {
-                            $contentQuery->leftJoin($class, $key, 'WITH', $key.'.id = m.accessor');
-                            $usedJoins[] = $key;
-                        }
-                        $sortFields[] = $key . '.' . $class::getNameField();
-                    }
-
-                    // if we sort by a nested content data field.
+                // if we sort by a nested content data field.
                 } else {
                     $sortFields[] = "JSON_EXTRACT(c.data, '$.$key')";
                 }

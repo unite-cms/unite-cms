@@ -196,20 +196,12 @@ class PaginationOrgAndDomainListControllerTest extends DatabaseAwareTestCase {
 
         // Assert empty user table
         $crawler = $this->client->request('GET', $route);
-        $this->assertCount(1, $crawler->filter('table'));
+        $this->assertCount(0, $crawler->filter('table'));
         $this->assertCount(0, $crawler->filter('tbody tr'));
 
 
         // Create 20 users and 20 invites
         for($i = 1; $i <= 21; $i++) {
-            $user = new User();
-            $user->setEmail('u'.$i.'@example.com')->setName('U' . $i.'x')->setPassword('password');
-            $domainMember = new DomainMember();
-            $domainMember->setAccessor($user)->setDomainMemberType($domain->getDomainMemberTypes()->first());
-            $domain->addMember($domainMember);
-            $this->em->persist($user);
-            $this->em->persist($domainMember);
-
             $invite = new Invitation();
             $invite->setEmail('i'.$i.'@example.com')->setOrganization($this->organization)->setToken('X'.$i)
                 ->setDomainMemberType($domain->getDomainMemberTypes()->first());
@@ -219,34 +211,9 @@ class PaginationOrgAndDomainListControllerTest extends DatabaseAwareTestCase {
 
         // Assert paginated user table
         $crawler = $this->client->request('GET', $route);
-        $this->assertCount(2, $crawler->filter('table'));
+        $this->assertCount(1, $crawler->filter('table'));
 
-        $userTable = $crawler->filter('table')->first();
-        $this->assertCount(10, $userTable->filter('tbody tr'));
-        $this->assertCount(1, $userTable->filter('tbody tr td:contains("U1x")'));
-        $this->assertCount(1, $userTable->filter('tbody tr td:contains("U10x")'));
-        $this->assertCount(0, $userTable->filter('tbody tr td:contains("U11x")'));
-
-        $inviteTable = $crawler->filter('table')->last();
-        $this->assertCount(10, $inviteTable->filter('tbody tr'));
-        $this->assertCount(1, $inviteTable->filter('tbody tr td:contains("i1@example.com")'));
-        $this->assertCount(1, $inviteTable->filter('tbody tr td:contains("i10@example.com")'));
-        $this->assertCount(0, $inviteTable->filter('tbody tr td:contains("i11@example.com")'));
-
-
-        // Go to next user page
-        $nextPaginationLink = $crawler->filter('article.full-content-card')->first()->filter('.navigation li a')->first();
-        $crawler = $this->client->click($nextPaginationLink->link());
-        $this->assertCount(2, $crawler->filter('table'));
-
-        $userTable = $crawler->filter('table')->first();
-        $this->assertCount(10, $userTable->filter('tbody tr'));
-        $this->assertCount(1, $userTable->filter('tbody tr td:contains("U11x")'));
-        $this->assertCount(1, $userTable->filter('tbody tr td:contains("U20x")'));
-        $this->assertCount(0, $userTable->filter('tbody tr td:contains("U9x")'));
-        $this->assertCount(0, $userTable->filter('tbody tr td:contains("U21x")'));
-
-        $inviteTable = $crawler->filter('table')->last();
+        $inviteTable = $crawler->filter('table')->first();
         $this->assertCount(10, $inviteTable->filter('tbody tr'));
         $this->assertCount(1, $inviteTable->filter('tbody tr td:contains("i1@example.com")'));
         $this->assertCount(1, $inviteTable->filter('tbody tr td:contains("i10@example.com")'));
@@ -256,13 +223,7 @@ class PaginationOrgAndDomainListControllerTest extends DatabaseAwareTestCase {
         $crawler = $this->client->request('GET', $route);
         $nextPaginationLink = $crawler->filter('article.full-content-card')->last()->filter('.navigation li a')->first();
         $crawler = $this->client->click($nextPaginationLink->link());
-        $this->assertCount(2, $crawler->filter('table'));
-
-        $userTable = $crawler->filter('table')->first();
-        $this->assertCount(10, $userTable->filter('tbody tr'));
-        $this->assertCount(1, $userTable->filter('tbody tr td:contains("U1x")'));
-        $this->assertCount(1, $userTable->filter('tbody tr td:contains("U10x")'));
-        $this->assertCount(0, $userTable->filter('tbody tr td:contains("U11x")'));
+        $this->assertCount(1, $crawler->filter('table'));
 
         $inviteTable = $crawler->filter('table')->last();
         $this->assertCount(10, $inviteTable->filter('tbody tr'));

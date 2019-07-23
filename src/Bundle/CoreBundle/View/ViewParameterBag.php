@@ -141,6 +141,7 @@ class ViewParameterBag implements \JsonSerializable
 
         $urlParameter['member'] = '__id__';
         $bag->setUpdateUrlPattern($generator->generate('unitecms_core_domainmember_update', $urlParameter, Router::ABSOLUTE_URL));
+        $bag->setRevisionsUrlPattern($generator->generate('unitecms_core_domainmember_revisions', $urlParameter, Router::ABSOLUTE_URL));
         $bag->setDeleteUrlPattern($generator->generate('unitecms_core_domainmember_delete', $urlParameter, Router::ABSOLUTE_URL));
         $bag->setSelectMode($select_mode);
 

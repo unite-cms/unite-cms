@@ -116,8 +116,15 @@ export default {
               ) {
                 result: ` + this.queryMethod + `(limit: $limit, page: $page, sort: $sort, filter: $filter) {
                     page,
-                    total
+                    total,
+                    _permissions {
+                        CREATE_MEMBER
+                    },
                     result {
+                        _permissions {
+                            UPDATE_MEMBER,
+                            DELETE_MEMBER
+                        },
                         ` + this.fieldQuery.join(',') + `
                     }
                 }
