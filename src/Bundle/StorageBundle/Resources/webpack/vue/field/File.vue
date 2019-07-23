@@ -19,7 +19,7 @@
                 </div>
             </a>
 
-            <button class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearFile"></button>
+            <span class="close-button" v-html="feather.icons['x'].toSvg({ width: 20, height: 20 })" v-on:click.prevent="clearFile"></span>
 
             <input type="hidden" :name="name + '[name]'" :value="fileName" />
             <input type="hidden" :name="name + '[type]'" :value="fileType" />
@@ -29,10 +29,10 @@
         </div>
         <div v-else class="uk-placeholder">
             <span v-html="feather.icons['upload-cloud'].toSvg({ width: 18, height: 18 })"></span>
-            Add file by dropping it here or
+            {{ tr.select }}
             <div uk-form-custom>
                 <input type="file" :multiple="multiFileCollectionRow">
-                <span class="uk-link">selecting one</span>
+                <span class="uk-link">{{ multiFileCollectionRow ? tr.select_multiple : tr.select_one }}</span>
             </div>
 
         </div>
@@ -67,6 +67,7 @@
                 tmpFileType: null,
                 tmpChecksum: null,
                 tmpId: null,
+                tr: JSON.parse(this.messages),
             };
         },
         computed: {
@@ -156,8 +157,7 @@
                 }
 
                 if(t.fileName) {
-                    t.error = 'To upload a new file, delete the current file first.';
-                    console.log(this);
+                    t.error = t.tr.error_delete_first;
                     return;
                 }
 
@@ -167,8 +167,11 @@
                     files.forEach((file, delta) => {
                         if (delta < (files.length - 1)) {
                             rowInstance.$emit('add', { delta: rowInstance.delta + delta, cb: (row) => {
-                                let newFileInstance = row.querySelector('unite-cms-storage-file-field[field-path="' + t.fieldPath + '"]').getVueInstance();
-                                newFileInstance.$emit('upload', file);
+                                let field = row.querySelector('unite-cms-storage-file-field[field-path="' + t.fieldPath + '"]');
+                                if(field) {
+                                    let newFileInstance = row.querySelector('unite-cms-storage-file-field[field-path="' + t.fieldPath + '"]').getVueInstance();
+                                    newFileInstance.$emit('upload', file);
+                                }
                             } });
                         }
                     });
@@ -189,7 +192,8 @@
             'uploadSignCsrfToken',
             'thumbnailUrl',
             'endpoint',
-            'acl'
+            'acl',
+            'messages',
         ],
         methods: {
             hasThumbnailUrl : function() {
@@ -197,7 +201,7 @@
             },
             clearFile: function(){
                 this.error = null;
-                UIkit.modal.confirm('Do you really want to delete the selected file?').then(() => {
+                UIkit.modal.confirm(this.tr.confirm_delete).then(() => {
                     this.fileName = null;
                     this.fileSize = null;
                     this.fileId = null;
@@ -212,6 +216,11 @@
                 else if ($el.parentElement.tagName === 'FORM' || !$el.parentElement) {
                     return null;
                 }
+
+                // For the moment, we cannot add multiple fields if there is a variant field between this field and the collection field.
+                else if ($el.parentElement.tagName === 'UNITE-CMS-CORE-VARIANTS-VARIANT') {
+                    return null;
+                }
                 else {
                     return this.findClosestCollectionRow($el.parentElement);
                 }
@@ -223,7 +232,7 @@
                 }
 
                 if (uiKitUpload.allow && !match(uiKitUpload.allow, file.name)) {
-                    this.fail(uiKitUpload.msgInvalidName.replace('%s', uiKitUpload.allow));
+                    uiKitUpload.fail(uiKitUpload.msgInvalidName.replace('%s', uiKitUpload.allow));
                     return;
                 }
 
@@ -276,7 +285,7 @@
                         e => uiKitUpload.error(e.message)
                     );
                 }, () => {
-                    this.error = 'Cannot sign file for uploading';
+                    this.error = this.tr.error_sign;
                 });
             }
         }

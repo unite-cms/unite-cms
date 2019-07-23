@@ -295,8 +295,8 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         // When deleting a row, nestedFieldType->onDelete should be called
         $this->nestedFieldType->expects($this->never())->method('onCreate');
         $this->nestedFieldType->expects($this->never())->method('onUpdate');
-        $this->nestedFieldType->expects($this->never())->method('onSoftDelete');
-        $this->nestedFieldType->expects($this->exactly(2))->method('onHardDelete')->withConsecutive(
+        $this->nestedFieldType->expects($this->never())->method('onHardDelete');
+        $this->nestedFieldType->expects($this->exactly(2))->method('onSoftDelete')->withConsecutive(
             $this->hParam(['foo' => 'old_value']),
             $this->hParam(['baa' => 'old_value'])
         );
@@ -312,8 +312,8 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         // When deleting a row, nestedFieldType->onDelete should be called
         $this->nestedFieldType->expects($this->never())->method('onCreate');
         $this->nestedFieldType->expects($this->never())->method('onUpdate');
-        $this->nestedFieldType->expects($this->never())->method('onSoftDelete');
-        $this->nestedFieldType->expects($this->exactly(2))->method('onHardDelete')->withConsecutive(
+        $this->nestedFieldType->expects($this->never())->method('onHardDelete');
+        $this->nestedFieldType->expects($this->exactly(2))->method('onSoftDelete')->withConsecutive(
             $this->hParamSetting(['foo' => 'old_value']),
             $this->hParamSetting(['baa' => 'old_value'])
         );
@@ -329,8 +329,8 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         // When deleting a row from the middle of the rows array, nestedFieldType->onDelete should be called only for this one
         $this->nestedFieldType->expects($this->never())->method('onCreate');
         $this->nestedFieldType->expects($this->never())->method('onUpdate');
-        $this->nestedFieldType->expects($this->never())->method('onSoftDelete');
-        $this->nestedFieldType->expects($this->exactly(1))->method('onHardDelete')->withConsecutive(
+        $this->nestedFieldType->expects($this->never())->method('onHardDelete');
+        $this->nestedFieldType->expects($this->exactly(1))->method('onSoftDelete')->withConsecutive(
             $this->hParam(['baa' => 'old_value'])
         );
 
@@ -348,8 +348,8 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         // When deleting a row from the middle of the rows array, nestedFieldType->onDelete should be called only for this one
         $this->nestedFieldType->expects($this->never())->method('onCreate');
         $this->nestedFieldType->expects($this->never())->method('onUpdate');
-        $this->nestedFieldType->expects($this->never())->method('onSoftDelete');
-        $this->nestedFieldType->expects($this->exactly(1))->method('onHardDelete')->withConsecutive(
+        $this->nestedFieldType->expects($this->never())->method('onHardDelete');
+        $this->nestedFieldType->expects($this->exactly(1))->method('onSoftDelete')->withConsecutive(
             $this->hParamSetting(['baa' => 'old_value'])
         );
 
@@ -367,8 +367,8 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         // When deleting a row from the middle of the rows array, nestedFieldType->onDelete should be called only for this one
         $this->nestedFieldType->expects($this->exactly(1))->method('onCreate')->withConsecutive($this->hParam(['row3' => 'value']));
         $this->nestedFieldType->expects($this->exactly(1))->method('onUpdate')->withConsecutive($this->hParam(['foo' => 'baa'], ['foo' => 'new_value']));
-        $this->nestedFieldType->expects($this->never())->method('onSoftDelete');
-        $this->nestedFieldType->expects($this->exactly(1))->method('onHardDelete')->withConsecutive($this->hParam(['luu' => 'old_value']));
+        $this->nestedFieldType->expects($this->never())->method('onHardDelete');
+        $this->nestedFieldType->expects($this->exactly(1))->method('onSoftDelete')->withConsecutive($this->hParam(['luu' => 'old_value']));
 
         $old_data = ['rootCollection' => [
             0 => ['foo' => 'baa'],
@@ -393,8 +393,8 @@ class NestedCollectionFieldEventHooksTest extends TestCase {
         // When deleting a row from the middle of the rows array, nestedFieldType->onDelete should be called only for this one
         $this->nestedFieldType->expects($this->exactly(1))->method('onCreate')->withConsecutive($this->hParamSetting(['row3' => 'value']));
         $this->nestedFieldType->expects($this->exactly(1))->method('onUpdate')->withConsecutive($this->hParamSetting(['foo' => 'baa'], ['foo' => 'new_value']));
-        $this->nestedFieldType->expects($this->never())->method('onSoftDelete');
-        $this->nestedFieldType->expects($this->exactly(1))->method('onHardDelete')->withConsecutive($this->hParamSetting(['luu' => 'old_value']));
+        $this->nestedFieldType->expects($this->never())->method('onHardDelete');
+        $this->nestedFieldType->expects($this->exactly(1))->method('onSoftDelete')->withConsecutive($this->hParamSetting(['luu' => 'old_value']));
 
         $old_data = ['rootCollection' => [
             0 => ['foo' => 'baa'],

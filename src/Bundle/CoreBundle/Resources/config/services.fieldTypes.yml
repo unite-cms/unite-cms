@@ -115,3 +115,8 @@ services:
   UniteCMS\CoreBundle\Field\Types\LocationFieldType:
     public: false
     tags: [unite_cms.field_type]
+
+  # ID Field Type
+  UniteCMS\CoreBundle\Field\Types\IdFieldType:
+    public: false
+    tags: [unite_cms.field_type]

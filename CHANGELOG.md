@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.1 (2019-07-05)
+- Improved #460: not_empty setting for variant field
+- Improved #656: Allow to upload multiple files at once when in collection
+- Improved #661: Quickfix: nested pagination for tree view (will be replaced in a next version)
+- Improved #664: Allow cast variable in view filter
+- Improved #671: Allow to set value on create for sortindex field
+- Fixed #673: Fixed a bug where files in collections where deleted from s3 when reordering collection rows
+- Fixed #672: Fixed several form bugs when swiping and hitting enter. 
+
 ## 0.9.0 (2019-06-30)
 - Added #652, #593, #67, #4, #3: Full API support for domain member, content and setting CRUD + revisions + revert actions
 - Added #619: Content can now be pre-set on create using query parameter for controller action

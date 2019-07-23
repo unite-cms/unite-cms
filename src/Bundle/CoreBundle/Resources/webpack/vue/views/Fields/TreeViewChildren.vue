@@ -24,6 +24,9 @@
                                 :sort="sort"
                                 :uk-sortable="isSortable"
             ></tree-view-children>
+            <div v-if="totalChildren(row) > childRowsLength(row)" style="padding-left: 60px; margin: -10px 0 15px;">
+                <button style="padding: 0 5px;" @click="loadMoreChildren(row)" uk-tooltip title="Load more rows" class="uk-icon" v-html="feather.icons['more-horizontal'].toSvg()"></button>
+            </div>
         </div>
     </div>
 </template>
@@ -34,13 +37,17 @@
     import BaseField from '../Base/BaseField.vue';
     import TableContentRow from '../TableContentRow.vue';
     import BaseViewRowActions from '../Base/BaseViewRowActions.vue';
+    import feather from 'feather-icons';
+    import cloneDeep from 'lodash/cloneDeep';
 
     export default {
         name: 'tree-view-children',
         extends: BaseField,
         data() {
             return {
+                childrenDataFetcher: cloneDeep(this.dataFetcher),
                 sortConfig: this.sort,
+                feather: feather,
             };
         },
         props: ['isSortable', 'showActions', 'updateable', 'rows', 'fields', 'childrenField', 'contentType', 'domain', 'parentField', 'urls', 'embedded', 'dataFetcher', 'sort'],
@@ -75,7 +82,25 @@
                     fields.push('_id');
                 }
 
-                return identifier + '(sort: {field: "' + field.settings.sort.field + '", order: "' + (field.settings.sort.asc ? 'ASC' : 'DESC') + '"}) { result { ' + fields.map((identifier) => {
+                // Assign all root level filter to the child selector
+                let buildGraphQLArgument = function(object) {
+                    if(!object) {
+                        return 'null';
+                    }
+                    return '{ ' + (Object.keys(object).map((key) => {
+                        if(key === 'cast') {
+                            return key + ': ' + object[key];
+                        }
+                        else if (key === 'AND' || key === 'OR') {
+                            return key + ': ' + object[key].map((skey) => {
+                                return buildGraphQLArgument(object[key][skey]);
+                            }).join(', ');
+                        }
+                        return key + ': ' + (typeof object[key] === "string" ? '"' + object[key] + '"' : buildGraphQLArgument(object[key]));
+                    }).join(', ')) + ' }';
+                };
+
+                return identifier + '(filter: ' + buildGraphQLArgument(field.settings.filter) + ' sort: {field: "' + field.settings.sort.field + '", order: "' + (field.settings.sort.asc ? 'ASC' : 'DESC') + '"}, limit: 5) { total, result { ' + fields.map((identifier) => {
 
                     if(identifier === '_id') {
                         return 'id';
@@ -104,6 +129,12 @@
                     cRow['_actions'] = row['_actions'];
                     return cRow;
                 });
+            },
+            totalChildren(row) {
+                return row[this.childrenField].total;
+            },
+            childRowsLength(row) {
+                return row[this.childrenField].result.length;
             },
 
             moved(event) {
@@ -150,6 +181,20 @@
                     (error) => { this.error = 'API Error: ' + error; })
                     .catch(() => { this.error = "An error occurred, while trying to fetch data."; })
                     .finally(() => { this.loading = false; });
+            },
+
+            loadMoreChildren(row) {
+                if(this.childrenDataFetcher.filterArgument.AND) {
+                    this.childrenDataFetcher.filterArgument.AND[0].operator = '=';
+                    this.childrenDataFetcher.filterArgument.AND[0].value = row.id;
+                } else {
+                    this.childrenDataFetcher.filterArgument.operator = '=';
+                    this.childrenDataFetcher.filterArgument.value = row.id;
+                }
+
+                this.childrenDataFetcher.fetch(Math.ceil(row[this.childrenField].result.length / 5) + 1, 5).then((data) => {
+                    row[this.childrenField].result = row[this.childrenField].result.concat(data.result.result);
+                });
             }
         },
         components: {

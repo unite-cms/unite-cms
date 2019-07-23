@@ -2,7 +2,7 @@
 unite-cms-core-reference-field {
   padding: 5px 0;
 
-  button.uk-placeholder {
+  a.uk-placeholder {
     padding: 10px;
     height: 46px;
     display: block;
@@ -13,6 +13,8 @@ unite-cms-core-reference-field {
     cursor: pointer;
     border-radius: 2px;
     margin: 0;
+    box-sizing: border-box;
+    text-align: center;
 
     svg.feather {
       margin-top: -3px;
@@ -43,6 +45,8 @@ unite-cms-core-reference-field {
       right: 5px;
       top: 50%;
       margin-top: -20px;
+      text-align: center;
+      line-height: 36px;
     }
 
     &:hover {

@@ -1,0 +1,6 @@
+storage.field.select.message: Drop files here or
+storage.field.select.message.one: select one
+storage.field.select.message.multiple: select multiple files
+storage.field.error.error_delete_first: To upload a new file, delete the current file first.
+storage.field.error.sign: Cannot sign file for uploading.
+storage.field.confirm.delete: Do you really want to delete the selected file?

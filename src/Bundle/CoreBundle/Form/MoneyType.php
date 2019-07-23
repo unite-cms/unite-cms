@@ -8,6 +8,7 @@
 
 namespace UniteCMS\CoreBundle\Form;
 
+use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\Type\CurrencyType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType as SymfonyMoneyType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -15,7 +16,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Intl\Currencies;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class MoneyType extends AbstractType
+class MoneyType extends AbstractType implements DataTransformerInterface
 {
     /**
      * {@inheritdoc}
@@ -25,6 +26,7 @@ class MoneyType extends AbstractType
         $resolver->setDefaults([
             'currencies' => [],
             'compound' => true,
+            'error_bubbling' => false,
         ]);
     }
 
@@ -44,8 +46,35 @@ class MoneyType extends AbstractType
         }
 
         $builder
-            ->add('value', SymfonyMoneyType::class, ['label' => false, 'currency' => false ])
+            ->add('value', SymfonyMoneyType::class, [
+                'label' => false,
+                'currency' => false,
+                'not_empty' => $options['not_empty'],
+                'error_bubbling' => true,
+            ])
             ->add('currency', CurrencyType::class, $currencyOptions);
+
+        $builder->addModelTransformer($this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transform($value)
+    {
+        return $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reverseTransform($value)
+    {
+        if (empty($value) || $value['value'] === null) {
+            return null;
+        }
+
+        return $value;
     }
 
     /**

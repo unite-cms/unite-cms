@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button class="current-state uk-button uk-button-default" type="button">
+        <a href="#" class="current-state uk-button uk-button-default" type="button">
             <span class="text">
                 <span class="meta">{{ currentLabel }}:</span>
                 <span class="uk-label" :class='"uk-label-" + state_category'>{{ state_label }}</span>
@@ -11,7 +11,7 @@
                 </span>
             </span>
             <span class="chevron" v-html="feather.icons['chevron-down'].toSvg()"></span>
-        </button>
+        </a>
         <div class="transitions-dropdown">
             <ul class="uk-nav uk-dropdown-nav">
                 <li>
@@ -113,11 +113,9 @@
         display: block;
         padding: 5px 0;
 
-        button.current-state.uk-button.uk-button-default {
+        a.current-state.uk-button.uk-button-default {
             padding: 0 10px;
             background: white;
-            border: 1px solid #D8D8D8;
-            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
 
             .text {
                 display: inline-block;

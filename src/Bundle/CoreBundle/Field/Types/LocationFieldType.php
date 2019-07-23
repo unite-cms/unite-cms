@@ -23,7 +23,7 @@ class LocationFieldType extends FieldType
     /**
      * All settings of this field type by key with optional default value.
      */
-    const SETTINGS = ['description', 'form_group'];
+    const SETTINGS = ['description', 'form_group', 'not_empty'];
 
     /**
      * {@inheritdoc}
@@ -55,8 +55,7 @@ class LocationFieldType extends FieldType
      * {@inheritdoc}
      */
     function alterData(FieldableField $field, &$data, FieldableContent $content, $rootData) {
-        $fieldData = $data[$field->getIdentifier()];
-
+        $fieldData = array_merge($this->getDefaultValue($field), $data[$field->getIdentifier()]);
         $fieldData['latitude'] = (float)$fieldData['latitude'];
         $fieldData['longitude'] = (float)$fieldData['longitude'];
         $fieldData['bound_south'] = (float)$fieldData['bound_south'];

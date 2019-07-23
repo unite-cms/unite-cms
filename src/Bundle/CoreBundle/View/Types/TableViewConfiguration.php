@@ -106,7 +106,7 @@ class TableViewConfiguration implements ConfigurationInterface
                             throw $exception;
                         }
 
-                        if (!empty(array_diff(array_keys($v), ['AND', 'OR', 'field', 'value', 'operator']))) {
+                        if (!empty(array_diff(array_keys($v), ['AND', 'OR', 'field', 'value', 'operator', 'cast']))) {
                             throw $exception;
                         }
 

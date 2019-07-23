@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class LocationType extends AbstractType
 {
@@ -23,7 +24,10 @@ class LocationType extends AbstractType
         $builder
             ->add('provided_by', HiddenType::class)
             ->add('id', HiddenType::class)
-            ->add('category', HiddenType::class)
+            ->add('category', HiddenType::class, [
+                'not_empty' => $options['not_empty'],
+                'error_bubbling' => true,
+            ])
             ->add('display_name', HiddenType::class)
             ->add('latitude', HiddenType::class)
             ->add('longitude', HiddenType::class)
@@ -43,6 +47,14 @@ class LocationType extends AbstractType
                 'delete_empty' => true,
             ])
             ->add('country_code', HiddenType::class);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefault('error_bubbling', false);
     }
 
     /**

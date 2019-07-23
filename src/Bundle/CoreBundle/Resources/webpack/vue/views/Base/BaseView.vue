@@ -207,10 +207,8 @@
                                         revisions: (row._permissions.UPDATE_CONTENT || row._permissions.UPDATE_MEMBER) && !deleted,
                                         update: (row._permissions.UPDATE_CONTENT || row._permissions.UPDATE_MEMBER) && !deleted
                                     };
-                                    this.allowCreate = data.result._permissions.CREATE_CONTENT;
                                 } else {
                                     row._actions = {};
-                                    this.allowCreate = false;
                                 }
                                 return row;
                             });

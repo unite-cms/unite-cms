@@ -1,8 +1,8 @@
 
 /* Readonly */
-.uk-input:read-only,
-.uk-select:read-only,
-.uk-textarea:read-only,
+.uk-input[read-only],
+.uk-select[read-only],
+.uk-textarea[read-only],
 .uk-input.read-only,
 .uk-select.read-only,
 .uk-textarea.read-only {
@@ -61,4 +61,8 @@
          padding-right: 30px;
       }
    }
+}
+
+.uk-select {
+   background-color: white;
 }

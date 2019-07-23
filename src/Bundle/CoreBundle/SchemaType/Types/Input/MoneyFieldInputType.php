@@ -19,11 +19,11 @@ class MoneyFieldInputType extends InputObjectType
             [
                 'fields' => [
                     'value' => [
-                        'type' => Type::nonNull(Type::float()),
+                        'type' => Type::float(),
                         'description' => 'The money value as a float number.',
                     ],
                     'currency' => [
-                        'type' => Type::nonNull(Type::string()),
+                        'type' => Type::string(),
                         'description' => 'The money currency as ISO 4217 code.',
                     ]
                 ],

@@ -44,7 +44,7 @@ class LinkType extends AbstractType
         $resolver->setDefaults([
             'label_prefix' => 'link_type',
             'compound' => true,
-            'error_bubbling' => true,
+            'error_bubbling' => false,
             'title_widget' => false,
             'target_widget' => false,
         ]);
@@ -60,7 +60,9 @@ class LinkType extends AbstractType
         $builder->add('url', UrlType::class,
             [
                 'label' => $options['label_prefix'].'.url.label',
-                'default_protocol' => 'https'
+                'default_protocol' => 'https',
+                'not_empty' => $options['not_empty'] ?? false,
+                'error_bubbling' => true,
             ]
         );
 
@@ -70,6 +72,7 @@ class LinkType extends AbstractType
             $builder->add('title', TextType::class,
                 [
                     'label' => $options['label_prefix'].'.title.label',
+                    'error_bubbling' => true,
                 ]
             );
 
@@ -87,7 +90,8 @@ class LinkType extends AbstractType
                 [
                     'label' => $options['label_prefix'].'.target.label',
                     'choices' => $this->url_targets,
-                    'attr' => ['class' => 'unite-choice-form-icon-toggle']
+                    'attr' => ['class' => 'unite-choice-form-icon-toggle'],
+                    'error_bubbling' => true,
                 ]
             );
 
