@@ -228,36 +228,6 @@ class FileFieldType extends FieldType
     }
 
     /**
-     * On update delete old file from s3 bucket.
-     *
-     * @param FieldableField $field
-     * @param FieldableContent $content
-     * @param EntityRepository $repository
-     * @param $old_data
-     * @param $data
-     */
-    public function onUpdate(FieldableField $field, FieldableContent $content, EntityRepository $repository, $old_data, &$data) {
-
-        if(isset($old_data[$field->getIdentifier()])) {
-
-            $old_file = $old_data[$field->getIdentifier()];
-            $new_file = isset($data[$field->getIdentifier()]) ? $data[$field->getIdentifier()] : null;
-
-            // the fields in the file array can be in any order, so we need to sort them for checking differences.
-            asort($old_file);
-
-            if(is_array($new_file)) {
-                asort($new_file);
-            }
-
-            // If we have a new file, delete the old one.
-            if($old_file != $new_file) {
-                $this->storageService->deleteObject($old_file['id'], $old_file['name'], $field->getSettings()->bucket);
-            }
-        }
-    }
-
-    /**
      * On content hard delete, delete the file from s3 bucket.
      *
      * @param FieldableField $field
