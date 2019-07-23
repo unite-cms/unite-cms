@@ -195,16 +195,17 @@
                 this.dataFetcher.sort(this.sort).fetch(page)
                     .then(
                         (data) => {
+                            this.allowCreate = data.result._permissions ? (data.result._permissions.CREATE_CONTENT || data.result._permissions.CREATE_MEMBER) : false;
                             this.rows = data.result.result.map((row) => {
                                 let deleted = !(row.deleted == null);
                                 if(row._permissions) {
                                     row._actions = {
-                                        delete: row._permissions.DELETE_CONTENT && !deleted,
+                                        delete: (row._permissions.DELETE_CONTENT || row._permissions.DELETE_MEMBER) && !deleted,
                                         delete_definitely: row._permissions.DELETE_CONTENT && deleted,
                                         recover: row._permissions.UPDATE_CONTENT && deleted,
                                         translations: row._permissions.TRANSLATE_CONTENT && !deleted && this.hasTranslations,
-                                        revisions: row._permissions.UPDATE_CONTENT && !deleted,
-                                        update: row._permissions.UPDATE_CONTENT && !deleted
+                                        revisions: (row._permissions.UPDATE_CONTENT || row._permissions.UPDATE_MEMBER) && !deleted,
+                                        update: (row._permissions.UPDATE_CONTENT || row._permissions.UPDATE_MEMBER) && !deleted
                                     };
                                     this.allowCreate = data.result._permissions.CREATE_CONTENT;
                                 } else {

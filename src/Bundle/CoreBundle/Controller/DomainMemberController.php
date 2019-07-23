@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Controller;
 use Knp\Component\Pager\PaginatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -31,6 +32,9 @@ use UniteCMS\CoreBundle\Form\ChoiceCardsType;
 use UniteCMS\CoreBundle\Form\FieldableFormBuilder;
 use UniteCMS\CoreBundle\Form\Model\ChoiceCardOption;
 use UniteCMS\CoreBundle\Service\FieldableContentManager;
+use UniteCMS\CoreBundle\View\Types\TableViewType;
+use UniteCMS\CoreBundle\View\ViewTypeInterface;
+use UniteCMS\CoreBundle\View\ViewTypeManager;
 
 class DomainMemberController extends AbstractController
 {
@@ -44,17 +48,35 @@ class DomainMemberController extends AbstractController
      * @param Organization $organization
      * @param Domain $domain
      * @param DomainMemberType $memberType
+     * @param ViewTypeManager $viewTypeManager
      * @param Request $request
      * @param PaginatorInterface $paginator
      * @return Response
      */
-    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType, Request $request, PaginatorInterface $paginator)
+    public function indexAction(Organization $organization, Domain $domain, DomainMemberType $memberType, ViewTypeManager $viewTypeManager, Request $request, PaginatorInterface $paginator)
     {
-        $members = $paginator->paginate($memberType->getDomainMembers(),
-            $request->query->getInt('page_members', 1),
-            10,
-            ['pageParameterName' => 'page_members', 'sortDirectionParameterName' => 'sort_members']
-        );
+        $viewParameters = $viewTypeManager->getTemplateRenderParametersForDomainMemberType($memberType, ViewTypeInterface::SELECT_MODE_NONE, [
+                'fields' => [
+                    'id' => [
+                        'label' => 'ID',
+                        'type' => 'id',
+                    ],
+                    '_name' => [
+                        'label' => 'Name',
+                        'type' => 'text',
+                    ],
+                    'created' => [
+                        'label' => 'Created',
+                        'type' => 'date',
+                    ],
+                ],
+                'sort' => [
+                    'field' => '_name',
+                    'asc' => true,
+                ],
+                'contentType' => $memberType->getIdentifier() . 'Member',
+                'hasTranslations' => false,
+            ]);
 
         $invites = $paginator->paginate($memberType->getInvites(),
             $request->query->getInt('page_invites', 1),
@@ -68,7 +90,8 @@ class DomainMemberController extends AbstractController
                 'organization' => $organization,
                 'domain' => $domain,
                 'memberType' => $memberType,
-                'members' => $members,
+                'template' => TableViewType::getTemplate(),
+                'templateParameters' => $viewParameters,
                 'invites' => $invites,
             ]
         );

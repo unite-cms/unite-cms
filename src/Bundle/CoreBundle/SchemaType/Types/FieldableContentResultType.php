@@ -142,15 +142,18 @@ class FieldableContentResultType extends AbstractType
             case 'result':
                 $items = [];
 
-                /**
-                 * @var FieldableContent $item
-                 */
                 foreach ($value->getItems() as $item) {
-                    if ($this->authorizationChecker->isGranted($viewPermission, $item)) {
+
+                    $val = $item;
+                    if(is_array($val)) {
+                        $val = $val[0];
+                    }
+
+                    if ($this->authorizationChecker->isGranted($viewPermission, $val)) {
                         $items[] = $item;
 
                         // Create content schema type for current domain.
-                        $type = IdentifierNormalizer::graphQLType($item->getEntity());
+                        $type = IdentifierNormalizer::graphQLType($val->getEntity());
                         $this->schemaTypeManager->getSchemaType($type, $this->domain);
                     }
                 }
@@ -162,7 +165,13 @@ class FieldableContentResultType extends AbstractType
                 // Reduce the total number of items by the number of items we don't have access to. This will only be
                 // correct, if we have not more than $limit items, but it is better than nothing.
                 foreach ($value->getItems() as $item) {
-                    if (!$this->authorizationChecker->isGranted($viewPermission, $item)) {
+
+                    $val = $item;
+                    if(is_array($val)) {
+                        $val = $val[0];
+                    }
+
+                    if (!$this->authorizationChecker->isGranted($viewPermission, $val)) {
                         $total--;
                     }
                 }

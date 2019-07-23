@@ -329,6 +329,12 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                         $schemaTypeManager
                     ) {
 
+                        $_name = null;
+                        if(is_array($value)) {
+                            $_name = $value['_name'] ?? null;
+                            $value = $value[0];
+                        }
+
                         if (!$value instanceof FieldableContent) {
                             throw new \InvalidArgumentException(
                                 'Value must be instance of '.FieldableContent::class.'.'
@@ -417,7 +423,7 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                                 return $translations;
 
                             case '_name':
-                                return $value instanceof DomainMember ? (string)$value : null;
+                                return $_name;
 
                             default:
 
