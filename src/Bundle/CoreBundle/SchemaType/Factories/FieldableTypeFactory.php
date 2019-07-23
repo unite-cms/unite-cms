@@ -423,7 +423,7 @@ class FieldableTypeFactory implements SchemaTypeFactoryInterface
                                 return $translations;
 
                             case '_name':
-                                return $_name;
+                                return $_name ?? ($value instanceof DomainMember ? (string)$value : null);
 
                             default:
 
