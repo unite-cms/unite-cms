@@ -62,7 +62,7 @@ class FieldableFormBuilder
              * Add any value found for the current field to the data array. If we just pass the data array to the
              * form, we could have problems with old data for deleted fields.
              */
-            if ($content && array_key_exists($fieldDefinition->getIdentifier(), $content->getData())) {
+            if ($content && !$content->isNew() && array_key_exists($fieldDefinition->getIdentifier(), $content->getData())) {
                 $data[$fieldDefinition->getIdentifier()] = $content->getData()[$fieldDefinition->getIdentifier()];
             }
 
