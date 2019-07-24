@@ -201,6 +201,10 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->assertEquals([
             'f1' => 'F1 Created',
             'f3' => 'F3 Created',
+            'f2' => null,
+            'f4' => null,
+            'f5' => null,
+            'f6' => null,
         ], $getFullContent->getData());
 
         $getFullContent->setData([
@@ -331,6 +335,10 @@ class FieldableFieldVoterGraphQLTest extends DatabaseAwareTestCase
         $this->assertEquals([
             'f1' => 'F1 Created',
             'f3' => 'F3 Created',
+            'f2' => null,
+            'f4' => null,
+            'f5' => null,
+            'f6' => null,
         ], $getFullContent->getData());
 
         $getFullContent->setData([

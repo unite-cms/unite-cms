@@ -41,6 +41,13 @@ class FieldableFormBuilder
 
         foreach ($fieldable->getFields() as $fieldDefinition) {
 
+            $fieldType = $this->fieldTypeManager->getFieldType($fieldDefinition->getType());
+
+            // If this fieldable content is new, allow field types to set default values.
+            if(!$content || $content->isNew()) {
+                $data[$fieldDefinition->getIdentifier()] = $fieldType->getDefaultValue($fieldDefinition);
+            }
+
             // Only render field, if we are allowed to list and update it.
             if(
                 !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $fieldDefinition)
@@ -48,21 +55,14 @@ class FieldableFormBuilder
                 continue;
             }
 
-            $fieldType = $this->fieldTypeManager->getFieldType($fieldDefinition->getType());
-
             // Add the definition of the current field to the options.
             $options['fields'][] = new FieldableFormField($fieldType, $fieldDefinition);
-
-            // If this fieldable content is new, allow field types to set default values.
-            if(!$content || $content->isNew()) {
-                $data[$fieldDefinition->getIdentifier()] = $fieldType->getDefaultValue($fieldDefinition);
-            }
 
             /**
              * Add any value found for the current field to the data array. If we just pass the data array to the
              * form, we could have problems with old data for deleted fields.
              */
-            else if ($content && array_key_exists($fieldDefinition->getIdentifier(), $content->getData())) {
+            if ($content && !$content->isNew() && array_key_exists($fieldDefinition->getIdentifier(), $content->getData())) {
                 $data[$fieldDefinition->getIdentifier()] = $content->getData()[$fieldDefinition->getIdentifier()];
             }
 
@@ -98,16 +98,16 @@ class FieldableFormBuilder
         if(!empty($content->getEntity()) && $content->getEntity() instanceof Fieldable) {
             foreach ($content->getEntity()->getFields() as $field) {
 
-                // Only alter field, if we are allowed to list and update it.
+                // Reset value to original value if we are not allowed to list or update it.
                 if(
                     !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $field)
                     || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($field, $content))) {
                     if(isset($originalData[$field->getIdentifier()])) {
                         $data[$field->getIdentifier()] = $originalData[$field->getIdentifier()];
                     }
-                } else {
-                    $this->fieldTypeManager->alterFieldData($field, $data, $content, $data);
                 }
+
+                $this->fieldTypeManager->alterFieldData($field, $data, $content, $data);
             }
         }
 

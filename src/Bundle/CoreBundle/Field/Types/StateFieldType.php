@@ -47,6 +47,14 @@ class StateFieldType extends FieldType
     /**
      * {@inheritdoc}
      */
+    function getDefaultValue(FieldableField $field)
+    {
+        return $field->getSettings()->initial_place ?? null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     function getGraphQLInputType(FieldableField $field, SchemaTypeManager $schemaTypeManager) {
         return $schemaTypeManager->getSchemaType('StateFieldInput');
     }
