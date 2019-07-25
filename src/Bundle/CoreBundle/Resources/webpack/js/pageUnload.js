@@ -1,5 +1,5 @@
 import * as ObjectHash from 'object-hash';
-require('formdata-polyfill');
+//require('formdata-polyfill');
 
 export default {
     init(message) {

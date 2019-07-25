@@ -1,9 +1,9 @@
 
-import "core-js/stable";
-import "regenerator-runtime/runtime";
+//import "core-js/stable";
+//import "regenerator-runtime/runtime";
 
 import Vue from "vue";
-import 'document-register-element';
+//import 'document-register-element';
 import vueCustomElement from 'vue-custom-element';
 
 import moment from 'moment';
