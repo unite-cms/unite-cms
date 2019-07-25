@@ -1,8 +1,8 @@
 {
-  "email.css": "/bundles/unitecmscore/email.cb225c0a.css",
-  "email.js": "/bundles/unitecmscore/email.02ce0253.js",
-  "main.css": "/bundles/unitecmscore/main.f8810774.css",
-  "main.js": "/bundles/unitecmscore/main.5399f7c0.js",
+  "email.css": "/bundles/unitecmscore/email.css",
+  "email.js": "/bundles/unitecmscore/email.js",
+  "main.css": "/bundles/unitecmscore/main.css",
+  "main.js": "/bundles/unitecmscore/main.js",
   "fonts/WorkSans-Bold.woff2": "/bundles/unitecmscore/fonts/WorkSans-Bold.910bcc47.woff2",
   "fonts/WorkSans-Medium.woff2": "/bundles/unitecmscore/fonts/WorkSans-Medium.62229411.woff2"
 }

@@ -1,0 +1,121 @@
+
+import cloneDeep from 'lodash/cloneDeep';
+import { createFetcher } from './ViewFetcher';
+
+export const SELECT_MODE_NONE = 'SELECT_MODE_NONE';
+
+export const ViewConfig = {
+    init: function(parameters){
+        let config = cloneDeep(this);
+        config.title = parameters.title;
+        config.subTitle = parameters.subTitle;
+        config._urlPatterns = Object.assign({}, config._urlPatterns, parameters.urls);
+        config.selectMode = parameters.select.mode || SELECT_MODE_NONE;
+        config.csrfToken = parameters.csrf_token;
+        config.contentType = parameters.settings.contentType;
+        config.translatable = parameters.settings.hasTranslations;
+        config.deletable = config.selectMode === SELECT_MODE_NONE;
+
+        if(parameters.settings.sort) {
+            config.sort = Object.assign({}, config.sort, parameters.settings.sort);
+        }
+
+        if(parameters.settings.fields) {
+            config.fields = Object.keys(parameters.settings.fields).map((identifier) => {
+                let field = parameters.settings.fields[identifier];
+                field.identifier = identifier;
+                return field;
+            });
+        }
+
+        config.fetcher = createFetcher(config);
+        return config;
+    },    
+    _translations: {},
+    _urlPatterns: {
+        api: null,
+        create: null,
+        update: null,
+        delete: null,
+        recover: null,
+        delete_definitely: null,
+        translations: null,
+        revisions: null,
+    },
+    _permissions: {
+        create: false,
+    },
+    _staticFilter: {},
+    _dynamicFilter: {},
+    page: 1,
+    limit: 20,
+    total: 0,
+    loading: false,
+    title: null,
+    subTitle: null,
+    embedded: false,
+    fetcher: null,
+    contentType: null,
+    selectMode: SELECT_MODE_NONE,
+    showOnlyDeletedContent: false,
+    hasDeletedContent: false,
+    hasTranslations: false,
+    selectable: function() {
+        return this.selectMode !== SELECT_MODE_NONE;
+    },
+    csrfToken: null,
+    sort: {
+        field: null,
+        asc: true,
+        sortable: false,
+    },
+    fields: [],
+
+
+    url(name) {
+        let url = this._urlPatterns[name] || null;
+
+        if(!url) {
+            return null;
+        }
+        return (name == 'api' || name == 'create') ? url : url.replace('__id__', id);
+    },
+
+    t(phrase) {
+        return this._translations[phrase] || phrase;
+    },
+
+    can(permission) {
+        return this._permissions[permission] || false;
+    },
+
+    loadRows() {
+        let filter = {
+            AND: [{ field: "deleted", operator: this.showOnlyDeletedContent ? "IS NOT NULL" : "IS NULL" }]
+        };
+
+        if(Object.values(this._staticFilter).length > 0) {
+            filter.AND.push(this._staticFilter);
+        }
+
+        if(Object.values(this._dynamicFilter).length > 0) {
+            filter.AND.push(this._staticFilter);
+        }
+
+        this.loading = true;
+        return this.fetcher.findContent(this.page, this.limit, filter, this.sort)
+            .then((result) => {
+                this.hasDeletedContent = result.deleted && result.deleted.total > 0;
+                this.total = result.result.total;
+                return result.result.result;
+            })
+            .finally(() => this.loading = false);
+    },
+};
+
+export const createConfig = function(parameters){
+    parameters = typeof parameters === 'object' ? parameters : JSON.parse(parameters);
+    return ViewConfig.init(parameters);
+};
+
+export default ViewConfig;

@@ -4,8 +4,7 @@
   margin: -31px -30px 0 -30px;
   border-top: 10px solid map-get($colors, white);
 
-  table > thead,
-  .unite-div-table > .unite-div-table-thead {
+  table > thead {
     background: map-get($colors, white);
 
     > * > * {
@@ -38,9 +37,9 @@
     }
   }
 
-  table > tbody,
-  .unite-div-table > .unite-div-table-tbody {
 
+
+  table > tbody  {
     > * {
       &:hover {
         background: $table-hover-row-background;
@@ -69,9 +68,7 @@
   }
 }
 
-// unite-div-table-row can also be used outside of .unite-div-table (e.g. ghost object while sorting)
-.unite-card-table tr,
-.unite-div-table-row {
+.unite-card-table tr {
   border-bottom: $table-divider-border-width solid $table-divider-border;
   background: $form-background;
 
@@ -128,6 +125,43 @@
   margin: -30px;
 }
 
+.unite-table-tabs {
+  margin: 0 20px 0 0;
+  justify-content: center;
+  flex-wrap: nowrap;
+
+  &:before {
+    display: none;
+  }
+
+  li {
+
+    padding-left: 10px;
+
+    a {
+      border: 2px solid $table-divider-border;
+      border-radius: 3px;
+      color: $table-divider-border;
+      padding: 2px 10px;
+    }
+
+    &.uk-active {
+      a {
+        color: inherit;
+        border-color: inherit;
+      }
+    }
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+}
+
+.uk-card-header + .unite-card-table {
+  margin-top: -60px;
+}
+
 @media (min-width: $breakpoint-small) {
   .unite-table-error {
     display: flex;
@@ -145,5 +179,51 @@
   .unite-table-error {
     margin: -40px -40px 40px;
     padding: 15px 30px;
+  }
+}
+
+@media (max-width: $breakpoint-small) {
+
+  .unite-table-header {
+    flex-wrap: wrap;
+
+    h2 {
+      padding-right: 0;
+    }
+
+    > .unite-table-headline {
+      justify-content: space-between;
+      min-width: 60%;
+      min-height: 40px;
+    }
+
+    .unite-table-tabs {
+      margin-right: 0;
+
+      li {
+        padding-left: 5px;
+
+        a {
+          border-width: 1px;
+          font-size: .75rem;
+        }
+      }
+    }
+
+    .unite-table-search {
+      min-width: 100px;
+    }
+
+    .uk-button:not(.uk-button-text):not(.uk-button-link) {
+      padding: 0 10px 0 5px;
+      font-size: .75rem;
+      line-height: 28px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+        margin-top: -2px;
+      }
+    }
   }
 }
