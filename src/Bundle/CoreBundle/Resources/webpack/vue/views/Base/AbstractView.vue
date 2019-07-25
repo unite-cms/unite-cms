@@ -5,13 +5,14 @@
     import ViewFooter from './ViewFooter';
     import ViewAlerts from './ViewAlerts';
     import AbstractHeaderField from './AbstractHeaderField';
+    import SortableHeaderField from './SortableHeaderField';
     import AbstractRowField from './AbstractRowField';
     import { createConfig } from './ViewConfig';
 
     export default {
         data() {
             return {
-                config: createConfig(this.parameters),
+                config: createConfig(this.parameters, this.$uniteCMSViewFields),
                 alerts: [],
                 rows: this.initialRows,
             }
@@ -34,11 +35,31 @@
         },
         computed: {
             /**
-             * Returns all currently visible fields.
+             * Returns all currently visible fields + a actions field if available.
              * @returns {Array}
              */
             visibleFields() {
-                return this.config.fields;
+                let fields = this.config.fields;
+
+                if(!this.config.selectable()) {
+                    fields.push({
+                        identifier: '_actions',
+                        label: this.config.t('Actions'),
+                        type: '_actions',
+                        virtual: true,
+                    });
+                }
+
+                if(this.config.sort.sortable) {
+                    fields.unshift({
+                        identifier: '_sort',
+                        icon: 'arrow-down',
+                        type: '_sort',
+                        virtual: true,
+                    });
+                }
+
+                return fields;
             }
         },
 
@@ -62,7 +83,11 @@
              * @param field
              */
             getHeaderFieldComponent(field) {
-                return AbstractHeaderField;
+                switch(field.type) {
+                    case '_actions': return AbstractHeaderField;
+                    case '_sort': return AbstractHeaderField;
+                    default: return SortableHeaderField;
+                }
             },
 
             /**
@@ -71,7 +96,12 @@
              * @param field
              */
             getRowFieldComponent(field) {
-                return AbstractRowField;
+                switch(field.type) {
+                    case '_actions': return AbstractRowField;
+                    case '_sort': return AbstractRowField;
+                    default: return this.$uniteCMSViewFields.resolve(field.type);
+                }
+                return this.$uniteCMSViewFields.resolve(field.type);
             },
 
             /**

@@ -54,6 +54,7 @@ export const ViewFetcher = {
     _translatable: false,
     _softdeletable: false,
     _deletable: false,
+    _fieldsQueryFields: [],
     _fieldableContentType: 'Content',
     _apiUrl: '',
     _findQuery: '',
@@ -62,7 +63,6 @@ export const ViewFetcher = {
     _deletedQueryFragment: '',
     _resultPermissions: [],
     _contentPermissions: [],
-    _queryFields: [],
 
     findContent(page = 1, limit = 20, filter = {}, sort = null) {
 
@@ -80,7 +80,7 @@ export const ViewFetcher = {
                 total
                 _permissions { ` + this._resultPermissions.join(',') + ` },
                 result {
-                    _permissions { ` + this._contentPermissions.join(',') + ` }, ` + this._queryFields.join(',') + `
+                    _permissions { ` + this._contentPermissions.join(',') + ` }, ` + this._fieldsQueryFields.join(',') + `
                 }
             },
             ` + this._deletedQueryFragment + `

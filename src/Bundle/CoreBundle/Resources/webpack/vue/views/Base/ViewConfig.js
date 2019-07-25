@@ -14,7 +14,7 @@ export const ViewConfig = {
         config.csrfToken = parameters.csrf_token;
         config.contentType = parameters.settings.contentType;
         config.translatable = parameters.settings.hasTranslations;
-        config.deletable = config.selectMode === SELECT_MODE_NONE;
+        config.deletable = !config.selectable();
 
         if(parameters.settings.sort) {
             config.sort = Object.assign({}, config.sort, parameters.settings.sort);
@@ -45,6 +45,7 @@ export const ViewConfig = {
     _permissions: {
         create: false,
     },
+    _filterQueryFields: [],
     _staticFilter: {},
     _dynamicFilter: {},
     page: 1,
@@ -113,9 +114,20 @@ export const ViewConfig = {
     },
 };
 
-export const createConfig = function(parameters){
+export const createConfig = function(parameters, $uniteCMSViewFields = null){
     parameters = typeof parameters === 'object' ? parameters : JSON.parse(parameters);
-    return ViewConfig.init(parameters);
+    let config = ViewConfig.init(parameters);
+
+    if($uniteCMSViewFields) {
+        config.fetcher._fieldsQueryFields = config.fields.map((field) => {
+            return $uniteCMSViewFields.resolveFieldQueryFunction(field.type)(field.identifier, field, $uniteCMSViewFields);
+        }).filter(f => f !== null);
+        config._filterQueryFields = config.fields.map((field) => {
+            return $uniteCMSViewFields.resolveFilterQueryFunction(field.type)(field.identifier, field, $uniteCMSViewFields);
+        }).filter(f => f !== null);
+    }
+
+    return config;
 };
 
 export default ViewConfig;
