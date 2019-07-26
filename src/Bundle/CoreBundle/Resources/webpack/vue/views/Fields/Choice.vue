@@ -1,13 +1,11 @@
 <template>
-    <div class="view-field view-field-choice fixed-width">
-        <div>
-            <span class="uk-label" v-for="v in values">{{ v }}</span>
-        </div>
-    </div>
+    <span class="field-type-choices">
+        <span class="uk-label" :key="delta" v-for="(v, delta) in values">{{ v }}</span>
+    </span>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         extends: BaseField,
@@ -26,14 +24,9 @@
 </script>
 
 <style scoped lang="scss">
-    .view-field-choice {
+    .field-type-choices {
         white-space: nowrap;
         text-align: center;
-
-        > div {
-            display: inline-block;
-            white-space: nowrap;
-        }
 
         .uk-label {
             margin-right: 5px;

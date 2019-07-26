@@ -1,6 +1,7 @@
 
 import cloneDeep from 'lodash/cloneDeep';
 import { createFetcher } from './ViewFetcher';
+import { createRow } from './ViewRow';
 
 export const SELECT_MODE_NONE = 'SELECT_MODE_NONE';
 
@@ -13,6 +14,7 @@ export const ViewConfig = {
         config.selectMode = parameters.select.mode || SELECT_MODE_NONE;
         config.csrfToken = parameters.csrf_token;
         config.contentType = parameters.settings.contentType;
+        config.fieldableContentType = config.contentType.substr(-6) === 'Member' ? 'Member' : 'Content';
         config.translatable = parameters.settings.hasTranslations;
         config.deletable = !config.selectable();
 
@@ -30,7 +32,7 @@ export const ViewConfig = {
 
         config.fetcher = createFetcher(config);
         return config;
-    },    
+    },
     _translations: {},
     _urlPatterns: {
         api: null,
@@ -57,6 +59,7 @@ export const ViewConfig = {
     embedded: false,
     fetcher: null,
     contentType: null,
+    fieldableContentType: null,
     selectMode: SELECT_MODE_NONE,
     showOnlyDeletedContent: false,
     hasDeletedContent: false,
@@ -108,7 +111,22 @@ export const ViewConfig = {
             .then((result) => {
                 this.hasDeletedContent = result.deleted && result.deleted.total > 0;
                 this.total = result.result.total;
-                return result.result.result;
+
+                // Create view row objects out of response.
+                return result.result.result.map((graphql_row) => {
+                    return createRow(graphql_row, this.fieldableContentType);
+                });
+            })
+            .finally(() => this.loading = false);
+    },
+
+    updateRow(row, data) {
+        this.loading = true;
+        return this.fetcher.updateContent(row.id, data)
+            .then((result) => {
+                console.log(result);
+                row = createRow(result);
+                return row;
             })
             .finally(() => this.loading = false);
     },

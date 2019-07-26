@@ -34,7 +34,7 @@
 <script>
 
     import UIkit from 'uikit';
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
     import TableContentRow from '../TableContentRow.vue';
     import BaseViewRowActions from '../Base/BaseViewRowActions.vue';
     import feather from 'feather-icons';

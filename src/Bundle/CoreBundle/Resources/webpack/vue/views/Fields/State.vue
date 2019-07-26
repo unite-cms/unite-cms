@@ -1,11 +1,9 @@
 <template>
-    <div class="view-field view-field-state fixed-width">
-        <span class="uk-label" :class="stateCategory">{{ stateLabel }}</span>
-    </div>
+    <span class="uk-label" :class="stateCategory">{{ stateLabel }}</span>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         extends: BaseField,
@@ -21,9 +19,7 @@
 </script>
 
 <style scoped lang="scss">
-    .view-field-state {
-        .uk-label {
-            white-space: nowrap;
-        }
+    .uk-label {
+        white-space: nowrap;
     }
 </style>

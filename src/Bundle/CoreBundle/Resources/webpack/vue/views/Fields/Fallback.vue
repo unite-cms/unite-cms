@@ -1,9 +1,9 @@
 <template>
-    <div :data-type="type" class="view-field view-field-fallback">{{ typeof value === 'undefined' ? 'Unknown' : value }}</div>
+    <span :data-type="field.type" class="view-field view-field-fallback">{{ typeof value === 'undefined' ? 'Unknown' : value }}</span>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         extends: BaseField
@@ -11,7 +11,4 @@
 </script>
 
 <style scoped>
-    .view-field-fallback {
-        white-space: nowrap;
-    }
 </style>

@@ -11,13 +11,13 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <draggable tag="tbody" handle=".uk-sortable-handle" v-model="rows" @change="onDraggableChange">
                     <tr v-for="row in rows" :key="row.id">
                         <td v-for="field in visibleFields" :key="field.identifier">
                             <component :is="getRowFieldComponent(field)" :config="config" :field="field" :row="row" />
                         </td>
                     </tr>
-                </tbody>
+                </draggable>
             </table>
         </div>
         <view-footer :config="config" />
@@ -28,8 +28,19 @@
 <script>
 
     import AbstractView from './Base/AbstractView';
+    import draggable from 'vuedraggable';
 
     export default {
-        extends: AbstractView
+        extends: AbstractView,
+        components: { draggable },
+        methods: {
+            onDraggableChange(event) {
+                if(this.config.sort.sortable) {
+                    let sortData = {};
+                    sortData[this.config.sort.field] = event.moved.newIndex;
+                    this.update(event.moved.element, sortData);
+                }
+            }
+        }
     }
 </script>

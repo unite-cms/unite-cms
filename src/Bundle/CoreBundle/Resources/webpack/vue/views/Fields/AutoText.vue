@@ -1,9 +1,9 @@
 <template>
-    <div class="view-field view-field-text"><p>{{ value }}</p></div>
+    <span>{{ value }}</span>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         extends: BaseField,
@@ -39,13 +39,3 @@
         },
     }
 </script>
-
-<style scoped lang="scss">
-    .view-field-text {
-        white-space: nowrap;
-
-        p {
-            display: inline-block;
-        }
-    }
-</style>

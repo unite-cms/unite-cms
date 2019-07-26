@@ -74,6 +74,10 @@ export const ViewFetcher = {
             }];
         }
 
+        if(this._fieldsQueryFields.indexOf('id') < 0) {
+            this._fieldsQueryFields.push('id');
+        }
+
         return this.client.request(`query($limit: Int, $page: Int, $sort: [SortInput], $filter: FilterInput) {
             result: ` + this._findQuery + `(limit: $limit, page: $page, sort: $sort, filter: $filter` + (this._softdeletable ? ', deleted: true' : '') + `) {
                 page
@@ -87,10 +91,15 @@ export const ViewFetcher = {
         }`, {limit, page, filter, sort});
     },
     updateContent(id, data = {}) {
-        return this.client.request(`mutation($id: ID!, $data: ` + this.updateDataObjectName + `!) {
-            ` + this.updateMethod + `(id: $id, data: $data, persist: true) {
+
+        if(this._fieldsQueryFields.indexOf('id') < 0) {
+            this._fieldsQueryFields.push('id');
+        }
+
+        return this.client.request(`mutation($id: ID!, $data: ` + this._inputTypeName + `!) {
+            ` + this._updateQuery + `(id: $id, data: $data, persist: true) {
                 _permissions { ` + this._contentPermissions.join(',') + ` },
-                ` + this._queryFields.join(',') + `
+                ` + this._fieldsQueryFields.join(',') + `
             }
             }`, { id, data });
     },

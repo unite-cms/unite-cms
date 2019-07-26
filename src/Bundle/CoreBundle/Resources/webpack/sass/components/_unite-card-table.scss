@@ -41,6 +41,7 @@
 
   table > tbody  {
     > * {
+
       &:hover {
         background: $table-hover-row-background;
 
@@ -63,6 +64,10 @@
         &:hover {
           background: $table-hover-row-background;
         }
+      }
+
+      &.sortable-ghost {
+        background: $global-muted-background;
       }
     }
   }

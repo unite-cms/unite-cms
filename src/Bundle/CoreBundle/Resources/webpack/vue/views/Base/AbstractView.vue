@@ -77,6 +77,14 @@
                     });
             },
 
+            update(row, data) {
+                this.config.updateRow(row, data)
+                    .catch((error) => {
+                        this.load();
+                        this.alert(error, 'danger');
+                    });
+            },
+
             /**
              * Returns the actual header component for this field.
              *
@@ -98,7 +106,7 @@
             getRowFieldComponent(field) {
                 switch(field.type) {
                     case '_actions': return AbstractRowField;
-                    case '_sort': return AbstractRowField;
+                    case '_sort': return this.$uniteCMSViewFields.resolve('sortindex');
                     default: return this.$uniteCMSViewFields.resolve(field.type);
                 }
                 return this.$uniteCMSViewFields.resolve(field.type);

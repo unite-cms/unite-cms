@@ -1,18 +1,19 @@
 <template>
-    <div class="view-field view-field-reference">
-        <component v-if="value" v-for="(v,identifier) in settings.fields"
-                   :key="identifier"
+    <span class="view-field view-field-reference">
+        <span v-for="(v,identifier) in settings.fields" :key="identifier">
+            <component v-if="value"
                    :is="$uniteCMSViewFields.resolve(v.type)"
                    :type="v.type"
                    :identifier="identifier"
                    label=""
                    :settings="v.settings"
                    :row="value"></component>
-    </div>
+        </span>
+    </span>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         extends: BaseField,

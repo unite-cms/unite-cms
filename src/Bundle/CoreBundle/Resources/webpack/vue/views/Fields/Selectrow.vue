@@ -1,12 +1,10 @@
 <template>
-    <div class="view-field view-field-selectrow fixed-width">
-        <div v-on:click="select" v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></div>
-    </div>
+    <button v-on:click.prevent="select" v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></button>
 </template>
 
 <script>
 
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
     import feather from 'feather-icons';
     import UIkit from 'uikit';
 
@@ -58,21 +56,14 @@
 </script>
 
 <style scoped lang="scss">
-    .view-field-selectrow {
-        text-align: center;
-
-        > div {
-            display: inline-block;
-            cursor: pointer;
-            opacity: 0.75;
-            width: 30px;
-        }
+    button {
+        display: inline-block;
+        cursor: pointer;
+        opacity: 0.75;
+        width: 30px;
 
         &:hover {
-            > div {
-                opacity: 1;
-            }
+            opacity: 1;
         }
     }
-
 </style>
