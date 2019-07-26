@@ -2,10 +2,10 @@
   "entrypoints": {
     "main": {
       "css": [
-        "/bundles/unitecmsstorage/main.9d09f542.css"
+        "/bundles/unitecmsstorage/main.11fccbc2.css"
       ],
       "js": [
-        "/bundles/unitecmsstorage/main.1883a3a5.js"
+        "/bundles/unitecmsstorage/main.601cb152.js"
       ]
     }
   }

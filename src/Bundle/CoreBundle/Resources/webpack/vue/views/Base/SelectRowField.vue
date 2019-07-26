@@ -1,5 +1,7 @@
 <template>
-    <span @click="select" v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></span>
+    <span @click="select">
+        <button v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></button>
+    </span>
 </template>
 
 <script>
@@ -56,17 +58,25 @@
 </script>
 <style lang="scss" scoped>
     span {
-        height: 30px;
-        width: 40px;
-        line-height: 30px;
-        display: block;
-        text-align: center;
-        margin: 0;
         cursor: pointer;
-        opacity: 0.75;
 
-        &:hover {
-            opacity: 1;
+        button {
+            padding: 0;
+            background: none;
+            border: none;
+            outline: none;
+            height: 30px;
+            width: 40px;
+            line-height: 30px;
+            display: block;
+            text-align: center;
+            margin: 0;
+            cursor: pointer;
+            opacity: 0.75;
+
+            &:hover {
+                opacity: 1;
+            }
         }
     }
 </style>

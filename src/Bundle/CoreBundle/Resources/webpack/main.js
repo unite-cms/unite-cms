@@ -12,11 +12,8 @@ import pageUnload from "./js/pageUnload";
 import formGroupErrorHandler from "./js/formGroupErrorHandler";
 import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
 
-/*import BaseView from './vue/views/Base/BaseView.vue';
-import TableContent from './vue/views/TableContent.vue';
-import GridContent from './vue/views/GridContent.vue';
-import TreeContent from './vue/views/TreeContent.vue';*/
 import TableView from './vue/views/TableView';
+import GridView from './vue/views/GridView';
 import DomainEditor from "./vue/components/DomainEditor.vue";
 import ApiTokenField from "./vue/components/ApiTokenField";
 import iFramePreview from "./vue/components/iFramePreview.vue";
@@ -68,13 +65,9 @@ Vue.customElement('unite-cms-core-auto-text-field', AutoText);
 
 // Register views.
 Vue.customElement('unite-cms-core-view-table', TableView);
+Vue.customElement('unite-cms-core-view-grid', GridView);
 
-/*Vue.customElement('unite-cms-core-view-grid', {
-    extends: BaseView,
-    contentComponent: GridContent
-});
-
-Vue.customElement('unite-cms-core-view-tree', {
+/*Vue.customElement('unite-cms-core-view-tree', {
     extends: BaseView,
     contentComponent: TreeContent
 });*/

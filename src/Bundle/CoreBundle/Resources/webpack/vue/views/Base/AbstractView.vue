@@ -45,6 +45,33 @@
                 return this.config.sort.sortable && !this.config.showOnlyDeletedContent;
             },
 
+            actionsFieldConfig() {
+                return {
+                    identifier: '_actions',
+                    label: this.config.t('Actions'),
+                    type: '_actions',
+                    virtual: true,
+                };
+            },
+
+            sortFieldConfig() {
+                return {
+                    identifier: '_sort',
+                    icon: 'arrow-up',
+                    type: '_sort',
+                    virtual: true,
+                };
+            },
+
+            selectFieldConfig() {
+                return {
+                    identifier: '_select',
+                    label: this.config.t('Select'),
+                    type: '_select',
+                    virtual: true,
+                };
+            },
+
             /**
              * Returns all currently visible fields + a actions field if available.
              * @returns {Array}
@@ -61,33 +88,17 @@
                 }));
 
                 if(!this.config.selectable()) {
-                    fields.push({
-                        identifier: '_actions',
-                        label: this.config.t('Actions'),
-                        type: '_actions',
-                        virtual: true,
-                    });
+                    fields.push(this.actionsFieldConfig);
 
                     if(this.canDrag) {
-                        fields.unshift({
-                            identifier: '_sort',
-                            icon: 'arrow-up',
-                            type: '_sort',
-                            virtual: true,
-                        });
+                        fields.unshift(this.sortFieldConfig);
                     }
                 }
 
                 else {
-                    fields.unshift({
-                        identifier: '_select',
-                        label: this.config.t('Select'),
-                        type: '_select',
-                        virtual: true,
-                    });
+                    fields.unshift(this.selectFieldConfig);
                 }
                 
-
                 return fields;
             }
         },

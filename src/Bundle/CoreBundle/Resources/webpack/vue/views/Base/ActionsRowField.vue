@@ -1,5 +1,5 @@
 <template>
-    <ul class="uk-iconnav">
+    <ul class="uk-iconnav" :class="{ 'uk-iconnav-vertical' : this.field.vertical }">
         <li v-for="action in availableActions" :key="action.key">
             <a :href="url(action)" v-html="icon(action)" :class="action.class" :title="config.t(action.name)" uk-tooltip></a>
         </li>

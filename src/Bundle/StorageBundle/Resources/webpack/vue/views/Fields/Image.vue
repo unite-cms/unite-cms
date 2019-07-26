@@ -1,8 +1,6 @@
 <template>
     <div class="view-field view-field-image">
-        <a :href="'#' + modalId" uk-toggle v-if="value" class="uk-inline-clip uk-box-shadow-small uk-box-shadow-hover-medium">
-            <img :src="thumbnail" />
-        </a>
+        <a :href="'#' + modalId" uk-toggle v-if="value" class="uk-inline-clip uk-box-shadow-small uk-box-shadow-hover-medium" :style="{ backgroundImage: `url(${thumbnail})` }"></a>
         <div class="uk-flex-top" :id="modalId" uk-modal>
             <div class="uk-modal-dialog uk-margin-auto-vertical">
                 <button class="uk-modal-close-outside" type="button" uk-close></button>
@@ -45,6 +43,12 @@
 <style scoped lang="scss">
     .uk-modal-dialog {
         width: 900px;
+        text-align: center;
+        background: black;
+
+        img {
+            max-height: 80vh;
+        }
     }
 
     .view-field-image {
@@ -65,6 +69,9 @@
             margin: -1px 0 0 -1px;
             background: #989898;
             text-align: center;
+            display: block;
+            background-size: cover;
+            background-position: center center;
 
             img {
                 height: 100%;
@@ -99,12 +106,8 @@
                     margin: 0;
                     height: 150px;
                     background: $global-secondary-background;
-
-                    img {
-                        height: 170px;
-                        transform: translateX(-50%) translateY(-50%);
-                        top: 50%;
-                    }
+                    background-size: cover;
+                    background-position: center center;
                 }
 
                 @media (max-width: $breakpoint-small) {
@@ -113,14 +116,6 @@
                     .uk-inline-clip {
                         height: auto;
                         min-height: 120px;
-
-                        img {
-                            position: static;
-                            transform: none;
-                            left: auto;
-                            width: 100%;
-                            height: auto;
-                        }
                     }
                 }
             }

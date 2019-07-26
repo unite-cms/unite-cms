@@ -4,15 +4,22 @@
 }
 
 .unite-grid-view-item {
+  padding-bottom: 1rem;
+  
   > div.uk-card.uk-card-default {
     background: map-get($colors, white);
     border-radius: 3px;
     text-align: center;
+    flex: 0 1 auto;
 
     .unite-grid-view-fields {
       border-radius: 3px;
       overflow: hidden;
       min-height: 120px;
+
+      .unite-grid-view-field {
+        padding: 10px 0;
+      }
     }
 
     .view-field {
@@ -20,12 +27,17 @@
       &:last-child { padding-bottom: 10px; }
     }
 
-    .view-field-actions {
+    .unite-grid-view-field.field-type-_actions {
       position: absolute;
-      right: 5px;
-      top: 5px;
-      opacity: 0;
-      padding: 0;
+      background: white;
+      border-radius: 2px;
+      top: auto;
+      bottom: 8px;
+      padding: 0 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0 7px 1px;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.35);
 
       .uk-button.uk-button-default {
         background: white;
@@ -35,27 +47,31 @@
       }
     }
 
-    .view-field-sortindex {
+    .unite-grid-view-field.field-type-_sort {
       position: absolute;
-      left: 5px;
-      top: 5px;
-      opacity: 0;
+      left: 8px;
+      top: 8px;
       z-index: 5;
       padding: 0;
 
       .uk-sortable-handle {
-        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-        border-radius: 2px;
+        margin: 0;
+        padding: 0;
+        border-radius: 20px;
+        width: 32px;
+        border: none;
+        height: 32px;
+        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.35);
+        border-radius: 25px;
         text-transform: none;
         font-size: 1rem;
         background: white;
         line-height: 30px;
-        border: 1px solid rgba(0, 0, 0, 0.15);
-        padding: 0 16px;
+        padding: 0;
       }
     }
 
-    .view-field-selectrow {
+    .unite-grid-view-field.field-type-_select {
       flex-basis: 10px;
       position: absolute;
       z-index: 5;
@@ -63,33 +79,34 @@
       top: 0;
       right: 0;
       bottom: 0;
-      opacity: 0.2;
-      padding: 0;
 
-      > div {
+      span {
         position: absolute;
+        left: 0;
         top: 0;
         right: 0;
         bottom: 0;
-        left: 0;
+        padding: 8px;
 
-        svg {
-          position: absolute;
-          top: 10px;
-          left: 10px;
 
-          &.feather-check-circle {
-            color: $unite-color;
+        button {
+          border-radius: 20px;
+          width: 32px;
+          border: none;
+          height: 32px;
+          font-size: 1rem;
+          background: white;
+          line-height: 0;
+          box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.35);
+          border-radius: 25px;
+          opacity: 1;
+
+          svg {
+            &.feather-check-circle {
+              color: $unite-color;
+            }
           }
         }
-      }
-    }
-
-    &:hover {
-      .view-field-actions,
-      .view-field-sortindex,
-      .view-field-selectrow {
-        opacity: 1;
       }
     }
 
@@ -97,12 +114,21 @@
       white-space: normal;
       line-height: normal;
     }
-  }
 
-  &.uk-sortable-drag {
-    > div.uk-card.uk-card-default {
-      .view-field-sortindex {
-        opacity: 1;
+    @media all and (min-width: 960px) {
+      .unite-grid-view-field.field-type-_actions,
+      .unite-grid-view-field.field-type-_sort,
+      .unite-grid-view-field.field-type-_select {
+        opacity: 0;
+        transition: all 0.2s ease-in;
+      }
+    
+      &:hover {
+        .unite-grid-view-field.field-type-_actions,
+        .unite-grid-view-field.field-type-_sort,
+        .unite-grid-view-field.field-type-_select {
+          opacity: 1;
+        }
       }
     }
   }

@@ -114,6 +114,10 @@ export const ViewConfig = {
                 this.hasDeletedContent = result.deleted && result.deleted.total > 0;
                 this.total = result.result.total;
 
+                this._permissions.create = result.result._permissions[
+                    this.fieldableContentType === 'Content' ? 'CREATE_CONTENT' : 'CREATE_MEMBER'
+                ];
+
                 // Create view row objects out of response.
                 return result.result.result.map((graphql_row) => {
                     return createRow(graphql_row, this.fieldableContentType);
