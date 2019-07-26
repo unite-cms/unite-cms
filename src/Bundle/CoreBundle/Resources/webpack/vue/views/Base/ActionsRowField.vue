@@ -21,6 +21,7 @@
     ];
 
     export default {
+        FIELD_WIDTH_COLLAPSED: true,
         extends: BaseField,
         computed: {
             availableActions() {

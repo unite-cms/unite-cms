@@ -1,5 +1,5 @@
 <template>
-    <span>{{ value }}</span>
+    <span class="uk-text-meta">{{ value }}</span>
 </template>
 
 <script>
@@ -34,7 +34,7 @@
              * {@inheritdoc}
              */
             value() {
-                return this.row[this.identifier]['text'];
+                return this.row.get(this.field.identifier, {}).text;
             },
         },
     }

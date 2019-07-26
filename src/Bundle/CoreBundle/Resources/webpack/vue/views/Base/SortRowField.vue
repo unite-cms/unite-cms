@@ -8,6 +8,7 @@
     import feather from 'feather-icons';
 
     export default {
+        FIELD_WIDTH_COLLAPSED: true,
         extends: BaseField,
         data() {
             return {

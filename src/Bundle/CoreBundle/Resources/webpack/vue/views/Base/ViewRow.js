@@ -2,13 +2,15 @@
 import cloneDeep from 'lodash/cloneDeep';
 
 export const ViewRow = {
-    init: function(id, data, permissions){
+    init: function(id, data, permissions, fieldableContentType){
         let row = cloneDeep(this);
         row.id = id;
+        row._fieldableContentType = fieldableContentType;
         row._data = data;
         row._permissions = Object.assign({}, row.permission, permissions);
         return row;
     },
+    _fieldableContentType: null,
     _permissions: {
         update: false,
         delete: false,
@@ -51,7 +53,15 @@ export const createRow = function(graphql_row, fieldableContentType){
         }
     });
 
-    return ViewRow.init(graphql_row.id, data, permissions);
+    return ViewRow.init(graphql_row.id, data, permissions, fieldableContentType);
 };
+
+export const updateRow = function(row, graphql_row) {
+    let updatedRow = createRow(graphql_row, row._fieldableContentType);
+    row._id = updatedRow._id;
+    row._data = updatedRow._data;
+    row._permissions = updatedRow._permissions;
+    return row;
+}
 
 export default ViewRow;

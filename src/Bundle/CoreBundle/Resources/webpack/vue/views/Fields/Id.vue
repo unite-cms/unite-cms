@@ -5,7 +5,8 @@
 <script>
     import BaseField from '../Base/AbstractRowField';
     export default {
-        extends: BaseField,
+        FIELD_WIDTH_COLLAPSED: true,
+        extends: BaseField
     }
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-    <button v-on:click.prevent="select" v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></button>
+    <span @click="select" v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></span>
 </template>
 
 <script>
@@ -9,6 +9,7 @@
     import UIkit from 'uikit';
 
     export default {
+        FIELD_WIDTH_COLLAPSED: true,
         extends: BaseField,
         data() {
             return {
@@ -41,8 +42,8 @@
                     this.checked = true;
 
                     window.UniteCMSEventBus.$emit('contentSelected', [ {
-                        contentType: this.settings.contentType,
-                        view: this.settings.view,
+                        contentType: this.config.contentType,
+                        view: this.config.view,
                         row: this.row
                     } ]);
                 }
@@ -51,16 +52,18 @@
                 }
             }
         }
-
     }
 </script>
-
-<style scoped lang="scss">
-    button {
-        display: inline-block;
+<style lang="scss" scoped>
+    span {
+        height: 30px;
+        width: 40px;
+        line-height: 30px;
+        display: block;
+        text-align: center;
+        margin: 0;
         cursor: pointer;
         opacity: 0.75;
-        width: 30px;
 
         &:hover {
             opacity: 1;

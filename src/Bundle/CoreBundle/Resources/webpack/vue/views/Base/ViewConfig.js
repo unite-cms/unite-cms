@@ -1,7 +1,7 @@
 
 import cloneDeep from 'lodash/cloneDeep';
 import { createFetcher } from './ViewFetcher';
-import { createRow } from './ViewRow';
+import { createRow, updateRow } from './ViewRow';
 
 export const SELECT_MODE_NONE = 'SELECT_MODE_NONE';
 
@@ -17,6 +17,7 @@ export const ViewConfig = {
         config.fieldableContentType = config.contentType.substr(-6) === 'Member' ? 'Member' : 'Content';
         config.translatable = parameters.settings.hasTranslations;
         config.deletable = !config.selectable();
+        config.view = parameters.settings.View;
 
         if(parameters.settings.sort) {
             config.sort = Object.assign({}, config.sort, parameters.settings.sort);
@@ -56,6 +57,7 @@ export const ViewConfig = {
     loading: false,
     title: null,
     subTitle: null,
+    view: null,
     embedded: false,
     fetcher: null,
     contentType: null,
@@ -124,8 +126,7 @@ export const ViewConfig = {
         this.loading = true;
         return this.fetcher.updateContent(row.id, data)
             .then((result) => {
-                console.log(result);
-                row = createRow(result);
+                updateRow(row, result[this.fetcher._updateQuery]);
                 return row;
             })
             .finally(() => this.loading = false);

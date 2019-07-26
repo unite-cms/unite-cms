@@ -50,10 +50,7 @@ Vue.use(uniteViewFieldsPlugin, {
         'state': require('./vue/views/Fields/State').default,
         'checkbox': require('./vue/views/Fields/Checkbox').default,
         'choice': require('./vue/views/Fields/Choice').default,
-        'sortindex': require('./vue/views/Fields/Sortindex').default,
-        'selectrow': require('./vue/views/Fields/Selectrow').default,
         'reference': require('./vue/views/Fields/Reference').default,
-        //'tree_view_children': require('./vue/views/Fields/TreeViewChildren').default,
     }
 });
 

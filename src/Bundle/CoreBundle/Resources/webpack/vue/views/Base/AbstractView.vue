@@ -1,14 +1,19 @@
 <template></template>
 <script>
 
+    import { createConfig } from './ViewConfig';
+
     import ViewHeader from './ViewHeader';
     import ViewFooter from './ViewFooter';
     import ViewAlerts from './ViewAlerts';
+
     import AbstractHeaderField from './AbstractHeaderField';
     import SortableHeaderField from './SortableHeaderField';
     import AbstractRowField from './AbstractRowField';
+
     import ActionsRowField from './ActionsRowField';
-    import { createConfig } from './ViewConfig';
+    import SortRowField from './SortRowField';
+    import SelectRowField from './SelectRowField';
 
     export default {
         data() {
@@ -35,12 +40,25 @@
             },
         },
         computed: {
+
+            canDrag() {
+                return this.config.sort.sortable && !this.config.showOnlyDeletedContent;
+            },
+
             /**
              * Returns all currently visible fields + a actions field if available.
              * @returns {Array}
              */
             visibleFields() {
-                let fields = this.config.fields;
+                let fields = Object.assign([] ,this.config.fields.filter((field) => {
+
+                    // Prevent duplicated sortable field.
+                    if(this.config.sort.sortable && field.identifier === this.config.sort.field) {
+                        return false;
+                    }
+
+                    return true;
+                }));
 
                 if(!this.config.selectable()) {
                     fields.push({
@@ -48,23 +66,27 @@
                         label: this.config.t('Actions'),
                         type: '_actions',
                         virtual: true,
-                        settings: {
-                            collapsed: true,
-                        },
                     });
+
+                    if(this.canDrag) {
+                        fields.unshift({
+                            identifier: '_sort',
+                            icon: 'arrow-up',
+                            type: '_sort',
+                            virtual: true,
+                        });
+                    }
                 }
 
-                if(this.config.sort.sortable) {
+                else {
                     fields.unshift({
-                        identifier: '_sort',
-                        icon: 'arrow-down',
-                        type: '_sort',
+                        identifier: '_select',
+                        label: this.config.t('Select'),
+                        type: '_select',
                         virtual: true,
-                        settings: {
-                            collapsed: true,
-                        },
                     });
                 }
+                
 
                 return fields;
             }
@@ -92,6 +114,14 @@
                     });
             },
 
+            updateSort(row, index) {
+                if(this.canDrag) {
+                    let sortData = {};
+                    sortData[this.config.sort.field] = index;
+                    this.update(row, sortData);
+                }
+            },
+
             /**
              * Returns the actual header component for this field.
              *
@@ -113,7 +143,8 @@
             getRowFieldComponent(field) {
                 switch(field.type) {
                     case '_actions': return ActionsRowField;
-                    case '_sort': return this.$uniteCMSViewFields.resolve('sortindex');
+                    case '_sort': return SortRowField;
+                    case '_select': return SelectRowField;
                     default: return this.$uniteCMSViewFields.resolve(field.type);
                 }
                 return this.$uniteCMSViewFields.resolve(field.type);

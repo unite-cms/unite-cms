@@ -11,9 +11,9 @@
                         </th>
                     </tr>
                 </thead>
-                <draggable tag="tbody" handle=".uk-sortable-handle" v-model="rows" @start="dragging = true" @end="dragging = false" @change="onDraggableChange">
+                <draggable :disabled="!canDrag" tag="tbody" handle=".uk-sortable-handle" v-model="rows" @start="dragging = true" @end="dragging = false" @change="onDraggableChange">
                     <tr v-for="row in rows" :key="row.id">
-                        <td v-for="field in visibleFields" :key="field.identifier" :class="{ 'uk-table-shrink' : field.settings && field.settings.collapsed, 'uk-table-expand' : field.settings && field.settings.expanded }">
+                        <td v-for="field in visibleFields" :key="field.identifier" :class="{ 'uk-table-shrink' : getRowFieldComponent(field).FIELD_WIDTH_COLLAPSED, 'uk-table-expand' : getRowFieldComponent(field).FIELD_WIDTH_EXPANDED }">
                             <component :is="getRowFieldComponent(field)" :config="config" :field="field" :row="row" />
                         </td>
                     </tr>
@@ -40,11 +40,7 @@
         components: { draggable },
         methods: {
             onDraggableChange(event) {
-                if(this.config.sort.sortable) {
-                    let sortData = {};
-                    sortData[this.config.sort.field] = event.moved.newIndex;
-                    this.update(event.moved.element, sortData);
-                }
+                this.updateSort(event.moved.element, event.moved.newIndex);
             }
         }
     }
