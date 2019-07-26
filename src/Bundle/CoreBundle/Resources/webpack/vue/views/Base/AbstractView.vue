@@ -7,6 +7,7 @@
     import AbstractHeaderField from './AbstractHeaderField';
     import SortableHeaderField from './SortableHeaderField';
     import AbstractRowField from './AbstractRowField';
+    import ActionsRowField from './ActionsRowField';
     import { createConfig } from './ViewConfig';
 
     export default {
@@ -47,6 +48,9 @@
                         label: this.config.t('Actions'),
                         type: '_actions',
                         virtual: true,
+                        settings: {
+                            collapsed: true,
+                        },
                     });
                 }
 
@@ -56,6 +60,9 @@
                         icon: 'arrow-down',
                         type: '_sort',
                         virtual: true,
+                        settings: {
+                            collapsed: true,
+                        },
                     });
                 }
 
@@ -105,7 +112,7 @@
              */
             getRowFieldComponent(field) {
                 switch(field.type) {
-                    case '_actions': return AbstractRowField;
+                    case '_actions': return ActionsRowField;
                     case '_sort': return this.$uniteCMSViewFields.resolve('sortindex');
                     default: return this.$uniteCMSViewFields.resolve(field.type);
                 }

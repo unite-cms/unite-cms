@@ -4,71 +4,16 @@
   margin: -31px -30px 0 -30px;
   border-top: 10px solid map-get($colors, white);
 
-  table > thead {
-    background: map-get($colors, white);
-
-    > * > * {
-      vertical-align: bottom;
-      font-size: $table-header-cell-font-size;
-      font-weight: $table-header-cell-font-weight;
-      color: $table-header-cell-color;
-      @if (mixin-exists(hook-table-header-cell)) {
-        @include hook-table-header-cell();
-      }
-
-      a, span {
-        display: inline-block;
-        text-decoration: none;
-        color: $table-header-cell-color;
-        white-space: nowrap;
-
-        > span {
-          line-height: 0;
-          font-size: 0;
-          vertical-align: middle;
-          display: inline-block;
-          margin-top: -4px;
-        }
-      }
-    }
-
+  thead {
     tr:hover {
-      background: none;
+      background: map-get($colors, white);
     }
-  }
 
-
-
-  table > tbody  {
-    > * {
-
-      &:hover {
-        background: $table-hover-row-background;
-
-        .uk-button:not(.uk-button-text):not(.uk-button-link) {
-          background: map-get($colors, white);
-          border-color: map-get($colors, grey-medium);
-          box-shadow: none;
-          opacity: 1;
-
-          &:hover, &.uk-open {
-            @extend .uk-box-shadow-medium;
-            border-color: map-get($colors, grey-dark);
-          }
-        }
-      }
-
-      &:nth-child(2n - 1) {
-        background: $global-muted-background;
-
-        &:hover {
-          background: $table-hover-row-background;
-        }
-      }
-
-      &.sortable-ghost {
-        background: $global-muted-background;
-      }
+    a, span {
+      display: inline-block;
+      text-decoration: none;
+      color: $table-header-cell-color;
+      white-space: nowrap;
     }
   }
 }
@@ -78,8 +23,7 @@
   background: $form-background;
 
   > td,
-  > th,
-  > div {
+  > th {
     padding: 16px 12px;
 
     p {
@@ -88,21 +32,27 @@
   }
 
   > td:first-child,
-  > th:first-child,
-  > div:first-child {
-    padding-left: 30px;
+  > th:first-child {
+    padding-left: 20px;
   }
 
   > td:last-child,
-  > th:last-child,
-  > div:last-child {
-    padding-right: 30px;
+  > th:last-child {
+    padding-right: 20px;
   }
 
-  &.uk-sortable-drag {
-    background: $form-background;
-    border: none;
-    @extend .uk-box-shadow-medium;
+  &.sortable-chosen {
+    & {
+      background: $table-hover-row-background;
+      border: none;
+      @extend .uk-box-shadow-medium;
+    }
+  }
+
+  &.sortable-ghost {
+    &, &:hover {
+      background: $form-background;
+    }
   }
 
   .uk-button:not(.uk-button-text):not(.uk-button-link) {
@@ -119,6 +69,12 @@
       @extend .uk-box-shadow-medium;
       border-color: map-get($colors, grey-dark);
     }
+  }
+}
+
+table.dragging {
+  tr:hover {
+    background: $form-background;
   }
 }
 

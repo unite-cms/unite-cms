@@ -3,7 +3,7 @@
         <view-header :config="config" />
         <view-alerts v-if="alerts.length > 0" :alerts="alerts" />
         <div class="unite-card-table uk-overflow-auto">
-            <table class="uk-table uk-table-divider uk-table-striped uk-table-hover uk-table-small uk-table-middle">
+            <table class="uk-table uk-table-divider uk-table-striped uk-table-hover uk-table-small uk-table-middle" :class="{ 'dragging': dragging }">
                 <thead>
                     <tr>
                         <th v-for="field in visibleFields" :key="field.identifier">
@@ -11,9 +11,9 @@
                         </th>
                     </tr>
                 </thead>
-                <draggable tag="tbody" handle=".uk-sortable-handle" v-model="rows" @change="onDraggableChange">
+                <draggable tag="tbody" handle=".uk-sortable-handle" v-model="rows" @start="dragging = true" @end="dragging = false" @change="onDraggableChange">
                     <tr v-for="row in rows" :key="row.id">
-                        <td v-for="field in visibleFields" :key="field.identifier">
+                        <td v-for="field in visibleFields" :key="field.identifier" :class="{ 'uk-table-shrink' : field.settings && field.settings.collapsed, 'uk-table-expand' : field.settings && field.settings.expanded }">
                             <component :is="getRowFieldComponent(field)" :config="config" :field="field" :row="row" />
                         </td>
                     </tr>
@@ -31,6 +31,11 @@
     import draggable from 'vuedraggable';
 
     export default {
+        data() {
+            return {
+                dragging: false,
+            }
+        },
         extends: AbstractView,
         components: { draggable },
         methods: {

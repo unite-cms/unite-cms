@@ -76,7 +76,7 @@ export const ViewConfig = {
     fields: [],
 
 
-    url(name) {
+    url(name, id = null) {
         let url = this._urlPatterns[name] || null;
 
         if(!url) {
