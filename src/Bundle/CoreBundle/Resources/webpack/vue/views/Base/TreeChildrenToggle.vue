@@ -1,5 +1,7 @@
 <template>
-    <span v-if="row.can('update')" class="uk-sortable-handle" v-html="feather.icons['move'].toSvg({ width: 16, height: 16 })"></span>
+<div>
+    <span @click="$emit('toggle', row)" v-html="icon"></span>
+</div>
 </template>
 
 <script>
@@ -10,15 +12,19 @@
     export default {
         FIELD_WIDTH_COLLAPSED: true,
         extends: BaseField,
+        props: {
+            open: Boolean,
+        },
         computed: {
-            feather() {
-                return feather;
+            icon() {
+                return feather.icons[this.open ? 'minus-square' : 'plus-square'].toSvg({width: 16, height: 16})
             }
         }
     }
 </script>
 <style lang="scss" scoped>
     span {
+        cursor: pointer;
         height: 30px;
         width: 40px;
         line-height: 30px;

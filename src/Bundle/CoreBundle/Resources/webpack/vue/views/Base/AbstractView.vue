@@ -139,6 +139,11 @@
              * @param field
              */
             getHeaderFieldComponent(field) {
+
+                if(this.alterHeaderFieldComponent(field)) {
+                    return this.alterHeaderFieldComponent(field);
+                }
+
                 switch(field.type) {
                     case '_actions': return AbstractHeaderField;
                     case '_sort': return AbstractHeaderField;
@@ -152,13 +157,17 @@
              * @param field
              */
             getRowFieldComponent(field) {
+                
+                if(this.alterRowFieldComponent(field)) {
+                    return this.alterRowFieldComponent(field);
+                }
+
                 switch(field.type) {
                     case '_actions': return ActionsRowField;
                     case '_sort': return SortRowField;
                     case '_select': return SelectRowField;
                     default: return this.$uniteCMSViewFields.resolve(field.type);
                 }
-                return this.$uniteCMSViewFields.resolve(field.type);
             },
 
             /**
@@ -174,6 +183,14 @@
                     message: message,
                     action: action || null,
                 });
+            },
+
+            alterRowFieldComponent(field) {
+                return null;
+            },
+
+            alterHeaderFieldComponent(field) {
+                return null;
             }
         },
 

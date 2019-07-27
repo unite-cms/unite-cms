@@ -13,6 +13,7 @@ export const ViewConfig = {
         config._urlPatterns = Object.assign({}, config._urlPatterns, parameters.urls);
         config.selectMode = parameters.select.mode || SELECT_MODE_NONE;
         config.csrfToken = parameters.csrf_token;
+        config.settings = parameters.settings;
         config.contentType = parameters.settings.contentType;
         config.fieldableContentType = config.contentType.substr(-6) === 'Member' ? 'Member' : 'Content';
         config.translatable = parameters.settings.hasTranslations;
@@ -51,6 +52,7 @@ export const ViewConfig = {
     _filterQueryFields: [],
     _staticFilter: {},
     _dynamicFilter: {},
+    settings: {},
     page: 1,
     limit: 20,
     total: 0,

@@ -16,6 +16,19 @@
       white-space: nowrap;
     }
   }
+
+  table.uk-table-striped {
+    > tbody {
+      tr {
+        background: $form-background;
+      }
+      &:nth-of-type(odd) {
+        tr {
+          background: $table-striped-row-background;
+        }
+      }
+    }
+  }
 }
 
 .unite-card-table tr {

@@ -1,9 +1,5 @@
 
-//import "core-js/stable";
-//import "regenerator-runtime/runtime";
-
 import Vue from "vue";
-//import 'document-register-element';
 import vueCustomElement from 'vue-custom-element';
 
 import moment from 'moment';
@@ -14,6 +10,7 @@ import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
 
 import TableView from './vue/views/TableView';
 import GridView from './vue/views/GridView';
+import TreeView from './vue/views/TreeView';
 import DomainEditor from "./vue/components/DomainEditor.vue";
 import ApiTokenField from "./vue/components/ApiTokenField";
 import iFramePreview from "./vue/components/iFramePreview.vue";
@@ -66,11 +63,7 @@ Vue.customElement('unite-cms-core-auto-text-field', AutoText);
 // Register views.
 Vue.customElement('unite-cms-core-view-table', TableView);
 Vue.customElement('unite-cms-core-view-grid', GridView);
-
-/*Vue.customElement('unite-cms-core-view-tree', {
-    extends: BaseView,
-    contentComponent: TreeContent
-});*/
+Vue.customElement('unite-cms-core-view-tree', TreeView);
 
 // Create vue moment filter.
 moment.locale(window.navigator.language);
