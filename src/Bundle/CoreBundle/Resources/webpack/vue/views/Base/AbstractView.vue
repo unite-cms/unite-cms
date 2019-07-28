@@ -20,7 +20,7 @@
             return {
                 config: createConfig(this.parameters, this.$uniteCMSViewFields),
                 alerts: [],
-                rows: this.initialRows,
+                rows: Object.assign([], this.initialRows),
             }
         },
         mounted() {
@@ -108,7 +108,7 @@
             load() {
                 this.alerts = [];
                 this.config.loadRows()
-                    .then(rows => this.rows = rows)
+                    .then(rows => this.rows = Object.assign([], rows))
                     .catch((error) => {
                         this.alert(error, 'danger', {
                             label: this.config.t('Reload'),

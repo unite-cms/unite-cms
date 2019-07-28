@@ -24,6 +24,10 @@ export const ViewConfig = {
             config.sort = Object.assign({}, config.sort, parameters.settings.sort);
         }
 
+        if(parameters.settings.filter) {
+            config._staticFilter = parameters.settings.filter;
+        }
+
         if(parameters.settings.fields) {
             config.fields = Object.keys(parameters.settings.fields).map((identifier) => {
                 let field = parameters.settings.fields[identifier];

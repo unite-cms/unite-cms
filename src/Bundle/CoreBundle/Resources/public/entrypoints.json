@@ -2,18 +2,18 @@
   "entrypoints": {
     "main": {
       "css": [
-        "/bundles/unitecmscore/main.fcd4dde1.css"
+        "/bundles/unitecmscore/main.css"
       ],
       "js": [
-        "/bundles/unitecmscore/main.76d23c97.js"
+        "/bundles/unitecmscore/main.js"
       ]
     },
     "email": {
       "css": [
-        "/bundles/unitecmscore/email.11d656b0.css"
+        "/bundles/unitecmscore/email.css"
       ],
       "js": [
-        "/bundles/unitecmscore/email.ec87de19.js"
+        "/bundles/unitecmscore/email.js"
       ]
     }
   }

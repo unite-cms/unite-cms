@@ -10,7 +10,7 @@ import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
 
 import TableView from './vue/views/TableView';
 import GridView from './vue/views/GridView';
-import TreeView from './vue/views/TreeView';
+import TreeView from './vue/views/Tree/TreeView';
 import DomainEditor from "./vue/components/DomainEditor.vue";
 import ApiTokenField from "./vue/components/ApiTokenField";
 import iFramePreview from "./vue/components/iFramePreview.vue";
