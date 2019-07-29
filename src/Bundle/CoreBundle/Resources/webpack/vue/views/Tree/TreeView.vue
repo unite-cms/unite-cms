@@ -1,39 +1,41 @@
 <template>
     <article>
         <view-header :config="config" />
-        <view-alerts v-if="alerts.length > 0" :alerts="alerts" />        
-        <tree-rows
-            :config="config"
-            :showHeader="true"
-            :headerFieldComponents="headerFieldComponents" 
-            :rowFieldComponents="rowFieldComponents" 
-            :canDrag="canDrag"
-            @updateSort="onUpdateSort" />
+        <view-alerts v-if="alerts.length > 0" :alerts="alerts" />  
+        <div class="unite-card-table uk-overflow-auto">      
+            <tree-rows
+                :config="treeConfig"
+                :level="0"
+                :headerFieldComponents="headerFieldComponents" 
+                :rowFieldComponents="rowFieldComponents" 
+                :canDrag="canDrag"
+                @updateSort="onUpdateSort"
+                @updateParent="onUpdateParent" />
+        </div>
+        <div v-if="config.loading" class="loading uk-text-center"><div uk-spinner></div></div>
     </article>
 </template>
 
 <script>
 
     import AbstractView from '../Base/AbstractView';
-
-    import TreeChildrenToggle from './TreeChildrenToggle';
     import TreeRows from './TreeRows'
 
     export default {
         extends: AbstractView,
         components: { TreeRows },
         computed: {
-            visibleTreeFields() {
-                let fields = Object.assign([], this.visibleFields);
-                fields.unshift({
-                    identifier: '_toggle_children',
-                    type: '_toggle_children',
-                    virtual: true,
-                });
-                return fields;
+
+            treeConfig() {
+                let childenField = ` ${this.config.settings.children_field} { total } `;
+                if(this.config.fetcher._fieldsQueryFields.indexOf(childenField) < 0) {
+                    this.config.fetcher._fieldsQueryFields.push(childenField);
+                }
+                return this.config;
             },
+
             headerFieldComponents() {
-                return this.visibleTreeFields.map((field) => {
+                return this.visibleFields.map((field) => {
                     return {
                         type: field.type,
                         component: this.getHeaderFieldComponent(field),
@@ -45,15 +47,16 @@
                     }
                 });
             },
+            
             rowFieldComponents() {
-                return this.visibleTreeFields.map((field) => {
+                return this.visibleFields.map((field) => {
                     let component = this.getRowFieldComponent(field);
                     return {
                         type: field.type,
                         component: component,
                         class: {
                             'uk-table-shrink' : component.FIELD_WIDTH_COLLAPSED, 
-                            'uk-table-expand' : component.FIELD_WIDTH_EXPANDED
+                            'uk-table-expand' : component.FIELD_WIDTH_EXPANDED,
                         },
                         props: {
                             config: this.config,
@@ -80,6 +83,10 @@
             onUpdateSort(event) {
                 this.updateSort(event.moved.element, event.moved.newIndex);
             },
+
+            onUpdateParent(event) {
+                console.log(event);
+            }
         }
     }
 </script>

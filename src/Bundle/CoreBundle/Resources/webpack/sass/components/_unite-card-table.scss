@@ -4,6 +4,10 @@
   margin: -31px -30px 0 -30px;
   border-top: 10px solid map-get($colors, white);
 
+  td.uk-table-shrink {
+    padding-right: 0;
+  }
+
   thead {
     tr:hover {
       background: map-get($colors, white);
@@ -25,6 +29,32 @@
       &:nth-of-type(odd) {
         tr {
           background: $table-striped-row-background;
+        }
+      }
+    }
+  }
+
+  table.uk-table {
+    tr.table-holder {
+      td {
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+
+      > td {
+        font-size: 90%;
+        padding: 2px 0 2px 39px;
+
+        table.uk-table {
+          tr {
+            border-left: 1px solid $table-divider-border;
+
+            &.table-holder {
+              border-left: none;
+              border-bottom: none;
+              background: none;
+            }
+          }
         }
       }
     }

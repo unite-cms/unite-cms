@@ -1,37 +1,37 @@
 <template>
-    <div class="unite-card-table uk-overflow-auto">
-        <draggable draggable="tbody" :componentData="{ attrs: { class: 'uk-table uk-table-divider uk-table-striped uk-table-hover uk-table-small uk-table-middle' + (dragging ? 'dragging' : '') } }" :disabled="!canDrag" tag="table" handle=".uk-sortable-handle" v-model="rows" @start="dragging = true" @end="dragging = false" @change="onDraggableChange">
+    <div>
+        <draggable group="tree" draggable="tbody" :componentData="{ attrs: { class: 'uk-table uk-table-divider uk-table-striped uk-table-hover uk-table-small uk-table-middle' + (dragging ? 'dragging' : '') } }" :disabled="!canDrag" tag="table" handle=".uk-sortable-handle" v-model="rows" @start="dragging = true" @end="dragging = false" @change="onDraggableChange">
             <tbody v-for="row in rows" :key="row.id">
                 <tr>
-                    <td v-for="field in rowFieldComponents" :key="field.identifier" :class="field.class">
-                        <component v-if="field.type !== '_toggle_children'" :is="field.component" v-bind="field.props" :row="row" />
-                        <component v-else :is="field.component" v-bind="field.props" :row="row" @toggle="onChildrenToggle" :hasChildren="!openState[row.id] || createChildrenConfig(row).total > 0" :open="openState[row.id]" />
+                    <td v-for="field in rowFieldComponents" :key="field.props.field.identifier" :class="Object.assign(field.class, { 'uk-table-expand': (field.props.field.identifier === firstNonVirtualField), 'uk-table-shrink': (field.props.field.identifier !== firstNonVirtualField) })">
+                        <tree-children-toggle v-if="field.props.field.identifier === firstNonVirtualField && hasChildren(row)" :row="row" @toggle="onChildrenToggle" :open="openState[row.id]" />
+                        <component :is="field.component" v-bind="field.props" :row="row" />
                     </td>
                 </tr>
-                <tr v-if="openState[row.id]">
-                    <td class="table-holder" :colspan="rowFieldComponents.length">
+                <tr v-if="hasChildren(row) && openState[row.id]" class="table-holder">
+                    <td :colspan="rowFieldComponents.length">
                         <tree-rows
                             :config="createChildrenConfig(row)"
-                            :showHeader="false"
+                            :level="level + 1"
                             :rowFieldComponents="rowFieldComponents" 
                             :canDrag="canDrag"
-                            @updateSort="onDraggableChange" />
+                            @updateSort="onDraggableChange"
+                            @updateParent="onDraggableChange" />
                     </td>
                 </tr>
             </tbody>
-            <thead slot="header" v-if="showHeader">
+            <thead slot="header" v-if="level === 0">
                 <tr>
-                    <th v-for="field in headerFieldComponents" :key="field.identifier" :class="field.class">
-                        <component v-if="field.type !== '_toggle_children'" :is="field.component" v-bind="field.props" />
-                        <component v-else :is="field.component" v-bind="field.props" @toggle="onHeaderToggle" :open="allOpenState()" />
+                    <th v-for="field in headerFieldComponents" :key="field.props.field.identifier" :class="field.class">
+                        <tree-children-toggle v-if="field.props.field.identifier === firstNonVirtualField" @toggle="onHeaderToggle" :open="allOpenState()" />
+                        <component :is="field.component" v-bind="field.props" />                    
                     </th>
                 </tr>
             </thead>
-            <tfoot v-if="rows.length > 0 && config.total > rows.length">
-                <button class="uk-button uk-button-default uk-button-small" @click.prevent="loadMore">Load more</button>
-            </tfoot>
         </draggable>
-        <div v-if="config.loading" class="loading uk-text-center"><div uk-spinner></div></div>
+        <footer v-if="rows.length > 0 && config.total > rows.length" class="uk-padding-small">
+            <button :title="config.t('Load more')" uk-tooltip class="uk-button uk-button-default uk-button-small" @click.prevent="loadMore" v-html="feather.icons['more-horizontal'].toSvg({ width: 16, height: 16 })"></button>
+        </footer>
     </div>
 </template>
 
@@ -41,12 +41,14 @@
     import draggable from 'vuedraggable';
     import cloneDeep from 'lodash/cloneDeep';
 
+    import TreeChildrenToggle from './TreeChildrenToggle';
+
     export default {
         name: 'treeRows',
-        components: { draggable },
+        components: { draggable, TreeChildrenToggle },
         props: {
             config: Object,
-            showHeader: Boolean,
+            level: Number,
             canDrag: Boolean,
             initialRows: Array,
             headerFieldComponents: Array,
@@ -66,7 +68,26 @@
                 .loadRows()
                 .then(rows => this.rows = Object.assign([], rows));
         },
+        computed: {
+            feather() {
+                return feather;
+            },
+            firstNonVirtualField() {
+                let field = null;
+                this.rowFieldComponents.forEach((f) => {
+                    if(!field && !f.props.field.virtual) {
+                        field = f.props.field.identifier;
+                    }
+                });
+                return field;
+            }
+        },
         methods: {
+
+            hasChildren(row) {
+                return row.get(this.config.settings.children_field, { total: 0 }).total > 0;
+            },
+
             allOpenState() {
                 let haveOpen = false;
                 let haveClose = false;
@@ -93,7 +114,12 @@
             },
 
             onDraggableChange(event) {
-                this.$emit('updateSort', event);
+                if(event.moved) {
+                    this.$emit('updateSort', event);
+                }
+                if(event.added) {
+                    this.$emit('updateParent', event);
+                }
             },
 
             onHeaderToggle() {
@@ -132,12 +158,7 @@
     }
 </script>
 <style lang="scss" scoped>
-    td.table-holder {
-        padding: 0 !important;
-
-        .unite-card-table {
-            margin: 0 0 0 50px;
-            border: none;
-        }
+    .uk-table {
+        margin-bottom: 0;
     }
 </style>

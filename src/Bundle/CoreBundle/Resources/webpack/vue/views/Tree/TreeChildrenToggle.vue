@@ -1,7 +1,5 @@
 <template>
-<div>
-    <span v-if="hasChildren" @click="$emit('toggle', row)" v-html="icon"></span>
-</div>
+    <span @click="$emit('toggle', row)" v-html="icon"></span>
 </template>
 
 <script>
@@ -13,10 +11,7 @@
         FIELD_WIDTH_COLLAPSED: true,
         extends: BaseField,
         props: {
-            hasChildren: {
-                type: Boolean,
-                default: () => { return true }
-            },
+            row: Object,
             open: Boolean,
         },
         computed: {
@@ -32,7 +27,7 @@
         height: 30px;
         width: 40px;
         line-height: 30px;
-        display: block;
+        display: inline-block;
         text-align: center;
         margin-left: -13px;
     }
