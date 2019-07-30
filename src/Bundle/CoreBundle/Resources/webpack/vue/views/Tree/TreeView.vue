@@ -1,15 +1,17 @@
 <template>
-    <article>
-        <view-header :config="config" />
+    <article class="unite-view">
+        <view-header :config="config" @search="search" />
         <view-alerts v-if="alerts.length > 0" :alerts="alerts" />  
         <div class="unite-card-table uk-overflow-auto">      
             <tree-rows
                 :config="treeConfig"
+                :loadChildren="true"
                 :parent="null"
                 :level="0"
                 :headerFieldComponents="headerFieldComponents" 
                 :rowFieldComponents="rowFieldComponents" 
                 :canDrag="canDrag"
+                :searchQuery="searchQuery"
                 ref="treeRows"
                 @updateSort="onUpdateSort"
                 @updateParent="onUpdateParent" />
@@ -109,7 +111,13 @@
                         content: event.parents.pop(),
                     };
                     parentData[this.config.sort.field] = event.added.newIndex;
-                    this.update(event.added.element, parentData);
+                    this.update(event.added.element, parentData).then((result) => {
+                        if(event.callbacks) {
+                            event.callbacks.forEach((cb) => {
+                                cb(result);
+                            });
+                        }
+                    });
                 }
             }
         }

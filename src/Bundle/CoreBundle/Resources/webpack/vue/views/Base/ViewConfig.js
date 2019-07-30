@@ -101,17 +101,34 @@ export const ViewConfig = {
         return this._permissions[permission] || false;
     },
 
+    setSearchFilter(query = '') {
+        if(query) {
+            this._dynamicFilter = {
+                OR: this._filterQueryFields.map((filter) => {
+                    return {
+                        field: filter.field,
+                        operator: filter.operator,
+                        value: filter.value(query),
+                    };
+                }),
+            };
+        } else {
+            this._dynamicFilter = {};
+        }
+    },
+
     loadRows() {
+        
         let filter = {
             AND: [{ field: "deleted", operator: this.showOnlyDeletedContent ? "IS NOT NULL" : "IS NULL" }]
         };
 
-        if(Object.values(this._staticFilter).length > 0) {
+        if(!this._disableStaticFilter && Object.values(this._staticFilter).length > 0) {
             filter.AND.push(this._staticFilter);
         }
 
         if(Object.values(this._dynamicFilter).length > 0) {
-            filter.AND.push(this._staticFilter);
+            filter.AND.push(this._dynamicFilter);
         }
 
         this.loading = true;

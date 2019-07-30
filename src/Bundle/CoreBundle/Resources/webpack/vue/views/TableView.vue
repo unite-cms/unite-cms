@@ -1,6 +1,6 @@
 <template>
-    <article>
-        <view-header :config="config" />
+    <article class="unite-view">
+        <view-header :config="config" @search="search" />
         <view-alerts v-if="alerts.length > 0" :alerts="alerts" />
         <div class="unite-card-table uk-overflow-auto">
             <draggable draggable="tbody" :componentData="{ attrs: { class: 'uk-table uk-table-divider uk-table-striped uk-table-hover uk-table-small uk-table-middle' + (dragging ? 'dragging' : '') } }" :disabled="!canDrag" tag="table" handle=".uk-sortable-handle" v-model="rows" @start="dragging = true" @end="dragging = false" @change="onDraggableChange">

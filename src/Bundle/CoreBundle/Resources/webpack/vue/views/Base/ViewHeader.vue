@@ -12,6 +12,11 @@
                     <li :class="{ 'uk-active': config.showOnlyDeletedContent }"><a href="#" v-on:click.prevent="config.showOnlyDeletedContent = true">{{ config.t('Deleted') }}</a></li>
                 </ul>
             </div>
+            <form class="uk-search uk-search-default uk-margin-right uk-flex-1" v-on:submit.prevent="onSearch">
+                <a v-if="searchTerm.length > 0" v-on:click.prevent="onClear" href="" class="uk-search-icon clear" v-html="feather.icons['x'].toSvg()"></a>
+                <a v-on:click.prevent="onSearch" href="" class="uk-search-icon-flip" uk-search-icon></a>
+                <input v-model="searchTerm" class="uk-search-input uk-form-small" type="search" placeholder="Search..." v-on:keyup="onDebouncedSearch">
+            </form>
             <a v-if="config.can('create') && !config.selectable()" :target="config.embedded ? '_blank' : '_self'" :href="config.url('create')" class="uk-button uk-button-primary">
                 <span v-html="feather.icons['plus'].toSvg()"></span>
                 {{ config.t('create') }}

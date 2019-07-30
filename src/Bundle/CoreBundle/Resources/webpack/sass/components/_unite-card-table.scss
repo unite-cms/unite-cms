@@ -166,6 +166,44 @@ table.dragging {
   margin-top: -60px;
 }
 
+.unite-table-header {
+  .uk-search {
+    max-width: 260px;
+
+    input {
+      border-radius: 30px;
+      font-size: 90%;
+      padding-left: 16px;
+
+      &.uk-form-small {
+        padding-left: 16px;
+      }
+    }
+
+    a.uk-search-icon {
+      width: 36px;
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      &.clear {
+        svg {
+          background: #989898;
+          border-radius: 100%;
+          color: #fff;
+          padding: 2px;
+          box-sizing: border-box;
+        }
+      }
+    }
+
+    &.uk-search-default .uk-search-icon:not(.uk-search-icon-flip) ~ .uk-search-input {
+      padding-left: 36px;
+    }
+  }
+}
+
 @media (min-width: $breakpoint-small) {
   .unite-table-error {
     display: flex;

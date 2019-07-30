@@ -18,6 +18,7 @@
     export default {
         data() {
             return {
+                searchQuery: '',
                 config: createConfig(this.parameters, this.$uniteCMSViewFields),
                 alerts: [],
                 rows: Object.assign([], this.initialRows),
@@ -42,7 +43,7 @@
         computed: {
 
             canDrag() {
-                return this.config.sort.sortable && !this.config.showOnlyDeletedContent;
+                return this.config.sort.sortable && !this.config.showOnlyDeletedContent && this.searchQuery.length === 0;
             },
 
             actionsFieldConfig() {
@@ -107,7 +108,7 @@
 
             load() {
                 this.alerts = [];
-                this.config.loadRows()
+                return this.config.loadRows()
                     .then(rows => this.rows = Object.assign([], rows))
                     .catch((error) => {
                         this.alert(error, 'danger', {
@@ -118,7 +119,7 @@
             },
 
             update(row, data) {
-                this.config.updateRow(row, data)
+                return this.config.updateRow(row, data)
                     .catch((error) => {
                         this.load();
                         this.alert(error, 'danger');
@@ -129,8 +130,14 @@
                 if(this.canDrag) {
                     let sortData = {};
                     sortData[this.config.sort.field] = index;
-                    this.update(row, sortData);
+                    return this.update(row, sortData);
                 }
+            },
+
+            search(term) {
+                this.searchQuery = term || '';
+                this.config.setSearchFilter(this.searchQuery);
+                return this.load();
             },
 
             /**
@@ -221,11 +228,36 @@
         background: rgba(255,255,255,0.5);
 
         > div {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 40%;
             margin-top: -15px;
             width: 20%;
+        }
+    }
+</style>
+<style lang="scss">
+    @media (min-width: 960px) {
+        .unite-main-menu + .unite-main-section {
+            .unite-view {
+                .loading {
+                    > div {
+                        margin-left: 155px;
+                    }
+                }
+            }
+        }
+    }
+
+    @media (min-width: 1600px) {
+        .unite-main-menu + .unite-main-section {
+            .unite-view {
+                .loading {
+                    > div {
+                        margin-left: 200px;
+                    }
+                }
+            }
         }
     }
 </style>

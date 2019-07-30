@@ -1,6 +1,6 @@
 <template>
-    <article>
-        <view-header :config="config" />
+    <article class="unite-view">
+        <view-header :config="config" @search="search" />
         <view-alerts v-if="alerts.length > 0" :alerts="alerts" />
         <draggable :componentData="{ attrs: { class: 'unite-grid-view uk-grid-medium uk-grid-match uk-flex-center uk-grid' } }" :disabled="!canDrag" tag="div" handle=".uk-sortable-handle" v-model="rows" @start="dragging = true" @end="dragging = false" @change="onDraggableChange">
             <div v-for="row in rows" :key="row.id" class="unite-grid-view-item uk-width-1-3@s uk-width-1-5@l uk-flex uk-flex-column">
