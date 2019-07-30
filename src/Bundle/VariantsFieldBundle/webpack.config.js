@@ -30,6 +30,11 @@ Encore
     // versioning to avoid browser cache loading old assets
     .enableVersioning(Encore.isProduction())
 
+    .configureBabel(() => {}, {
+        useBuiltIns: 'usage',
+        corejs: 3
+    })
+
     // We don't need a runtime.js for unite cms at the moment
     .disableSingleRuntimeChunk();
 

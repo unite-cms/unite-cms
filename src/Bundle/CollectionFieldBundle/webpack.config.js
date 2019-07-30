@@ -18,6 +18,11 @@ Encore
         sassConfigOptions.includePaths = ['./node_modules'];
     })
 
+    .configureBabel(() => {}, {
+        useBuiltIns: 'usage',
+        corejs: 3
+    })
+
     // load vue components
     .enableVueLoader()
 

@@ -1,24 +1,27 @@
 <template>
-    <div :style="style" class="view-field view-field-collection">
-        <div class="view-field-collection-row" v-for="(c_row,index) in value" :key="index" v-if="limitCollectionRows(index, settings)">
-            <component v-for="(v,identifier) in settings.fields"
+    <div class="view-field view-field-collection">
+        <div class="view-field-collection-row" v-for="(c_row,index) in limitCollectionRows" :key="index">
+            <component v-for="(v,identifier) in field.settings.fields"
                        :key="identifier + index"
                        :is="$uniteCMSViewFields.resolve(v.type)"
-                       :type="v.type"
-                       :identifier="identifier"
-                       label=""
-                       :settings="v.settings"
-                       :row="c_row"></component>
+                       :config="config"
+                       :field="Object.assign({}, v, { identifier: identifier, label: '' })"
+                       :row="createRow(c_row)"></component>
         </div>
     </div>
 </template>
 
 <script>
-    import BaseField from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/BaseField.vue';
+    import BaseField from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/AbstractRowField';
+    import { createRow } from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/ViewRow';
 
     export default {
         extends: BaseField,
         methods: {
+
+            createRow(row) {
+                return createRow(row, this.config.contentType);
+            },
 
             /**
              * @inheritdoc
@@ -35,7 +38,7 @@
         },
         computed: {
             limitCollectionRows() {
-                return (i, s) => ("max_display_rows" in s) ? i < s.max_display_rows : true;
+                return this.field.settings.max_display_rows ? this.value.slice(0, this.field.settings.max_display_rows) : this.value;
             },
         },
     }

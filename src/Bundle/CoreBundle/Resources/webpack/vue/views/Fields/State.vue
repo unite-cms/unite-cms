@@ -9,10 +9,10 @@
         extends: BaseField,
         computed: {
             stateCategory() {
-                return 'uk-label-' + (this.settings.places[this.value] ? this.settings.places[this.value].category : 'notice');
+                return 'uk-label-' + (this.field.settings.places[this.value] ? this.field.settings.places[this.value].category : 'notice');
             },
             stateLabel() {
-                return this.settings.places[this.value] ? this.settings.places[this.value].label : value;
+                return this.field.settings.places[this.value] ? this.field.settings.places[this.value].label : this.value;
             }
         }
     }
