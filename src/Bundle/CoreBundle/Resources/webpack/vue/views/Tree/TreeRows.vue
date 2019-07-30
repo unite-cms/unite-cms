@@ -12,6 +12,7 @@
                     <td :colspan="rowFieldComponents.length">
                         <tree-rows
                             :config="createChildrenConfig(row)"
+                            :parent="row.id"
                             :level="level + 1"
                             :rowFieldComponents="rowFieldComponents" 
                             :canDrag="canDrag"
@@ -32,6 +33,7 @@
         <footer v-if="rows.length > 0 && config.total > rows.length" class="uk-padding-small">
             <button :title="config.t('Load more')" uk-tooltip class="uk-button uk-button-default uk-button-small" @click.prevent="loadMore" v-html="feather.icons['more-horizontal'].toSvg({ width: 16, height: 16 })"></button>
         </footer>
+        <div v-if="level > 0 && reactiveConfig.loading" class="loading uk-text-center"><div uk-spinner></div></div>
     </div>
 </template>
 
@@ -47,6 +49,7 @@
         name: 'treeRows',
         components: { draggable, TreeChildrenToggle },
         props: {
+            parent: String,
             config: Object,
             level: Number,
             canDrag: Boolean,
@@ -57,6 +60,7 @@
         },
         data() {
             return {
+                reactiveConfig: this.config,
                 rows: [],
                 childrenConfig: {},
                 dragging: false,
@@ -64,9 +68,19 @@
             }
         },
         mounted() {
-            this.config
+            this.$on('reload', () => {
+                this.config
                 .loadRows()
-                .then(rows => this.rows = Object.assign([], rows));
+                .then((rows) => {
+                    let oldOpenState = this.openState;
+                    this.openState = {};
+                    this.rows = Object.assign([], rows);
+                    this.$nextTick(() => {
+                        this.openState = oldOpenState;
+                    });
+                });
+            });
+            this.$emit('reload');
         },
         computed: {
             feather() {
@@ -113,7 +127,19 @@
                 }
             },
 
+            update(row, data) {
+                this.config.updateRow(row, data)
+                    .catch((error) => {
+                        this.load();
+                        this.alert(error, 'danger');
+                    });
+            },
+
             onDraggableChange(event) {
+
+                event.parents = event.parents || [];
+                event.parents.unshift(this.parent);
+
                 if(event.moved) {
                     this.$emit('updateSort', event);
                 }
@@ -152,6 +178,10 @@
                     };
                     this.childrenConfig[row.id] = config;
                 }
+
+                // This values should always be updated
+                this.childrenConfig[row.id].sort = this.config.sort;
+
                 return this.childrenConfig[row.id];
             },
         }
@@ -160,5 +190,10 @@
 <style lang="scss" scoped>
     .uk-table {
         margin-bottom: 0;
+    }
+    .loading {
+        height: 20px;
+        width: 20px;
+        margin: 15px;
     }
 </style>

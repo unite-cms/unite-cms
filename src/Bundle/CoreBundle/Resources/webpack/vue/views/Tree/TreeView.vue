@@ -5,10 +5,12 @@
         <div class="unite-card-table uk-overflow-auto">      
             <tree-rows
                 :config="treeConfig"
+                :parent="null"
                 :level="0"
                 :headerFieldComponents="headerFieldComponents" 
                 :rowFieldComponents="rowFieldComponents" 
                 :canDrag="canDrag"
+                ref="treeRows"
                 @updateSort="onUpdateSort"
                 @updateParent="onUpdateParent" />
         </div>
@@ -67,6 +69,20 @@
                 });
             },
         },
+        watch: {
+            'config.sort': {
+                deep: true,
+                handler: function() {
+                    this.$refs.treeRows.$emit('reload')
+                }
+            },
+            'config.showOnlyDeletedContent': {
+                deep: true,
+                handler: function() {
+                    this.$refs.treeRows.$emit('reload')
+                }
+            },
+        },
         methods: {
 
             // Loading is done by TreeRows.vue
@@ -85,7 +101,16 @@
             },
 
             onUpdateParent(event) {
-                console.log(event);
+                if(this.canDrag) {
+                    let parentData = {};
+                    parentData[this.config.settings.parent_field] = {
+                        content_type: this.config.content_type,
+                        domain: this.config.domain,
+                        content: event.parents.pop(),
+                    };
+                    parentData[this.config.sort.field] = event.added.newIndex;
+                    this.update(event.added.element, parentData);
+                }
             }
         }
     }
