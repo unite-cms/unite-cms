@@ -9,7 +9,6 @@
 
     import AbstractHeaderField from './AbstractHeaderField';
     import SortableHeaderField from './SortableHeaderField';
-    import AbstractRowField from './AbstractRowField';
 
     import ActionsRowField from './ActionsRowField';
     import SortRowField from './SortRowField';

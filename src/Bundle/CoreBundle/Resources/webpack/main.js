@@ -45,6 +45,7 @@ Vue.use(uniteViewFieldsPlugin, {
         'checkbox': require('./vue/views/Fields/Checkbox').default,
         'choice': require('./vue/views/Fields/Choice').default,
         'reference': require('./vue/views/Fields/Reference').default,
+        'reference_of': require('./vue/views/Fields/ReferenceOf').default,
     }
 });
 

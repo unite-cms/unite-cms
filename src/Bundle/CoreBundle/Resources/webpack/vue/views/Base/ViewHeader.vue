@@ -17,7 +17,7 @@
                 <a v-on:click.prevent="onSearch" href="" class="uk-search-icon-flip" uk-search-icon></a>
                 <input v-model="searchTerm" class="uk-search-input uk-form-small" type="search" placeholder="Search..." v-on:keyup="onDebouncedSearch">
             </form>
-            <a v-if="config.can('create') && !config.selectable()" :target="config.embedded ? '_blank' : '_self'" :href="config.url('create')" class="uk-button uk-button-primary">
+            <a v-if="config.can('create') && !config.selectable() && !config.embedded" :target="config.embedded ? '_blank' : '_self'" :href="config.url('create')" class="uk-button uk-button-primary">
                 <span v-html="feather.icons['plus'].toSvg()"></span>
                 {{ config.t('create') }}
             </a>

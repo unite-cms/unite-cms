@@ -28,6 +28,10 @@ export const ViewConfig = {
             config._staticFilter = parameters.settings.filter;
         }
 
+        if(parameters.settings.embedded) {
+            config.embedded = parameters.settings.embedded;
+        }
+
         if(parameters.settings.fields) {
             config.fields = Object.keys(parameters.settings.fields).map((identifier) => {
                 let field = parameters.settings.fields[identifier];
