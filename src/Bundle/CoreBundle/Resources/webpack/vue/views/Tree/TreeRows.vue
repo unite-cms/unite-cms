@@ -182,6 +182,9 @@
                 // This values should always be updated
                 this.childrenConfig[row.id].sort = this.config.sort;
 
+                // If parent is showing deleted content only, all children should be shown.
+                this.childrenConfig[row.id].showOnlyDeletedContent = false;
+
                 return this.childrenConfig[row.id];
             },
         }
