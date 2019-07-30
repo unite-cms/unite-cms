@@ -248,7 +248,6 @@ class TreeViewTypeTest extends ContainerAwareTestCase
         $this->assertTrue($parameters->isSelectModeNone());
 
         $fields = $parameters->get('fields');
-        $fields['child_comments']['settings']['fields']['child_comments']['settings']['fields'] = [];
         $this->assertEquals(
             [
                 'id' => [
@@ -267,49 +266,9 @@ class TreeViewTypeTest extends ContainerAwareTestCase
                     'label' => 'Updated',
                     'type' => 'date'
                 ],
-                'child_comments' => [
-                    'type' => 'tree_view_children',
-                    'settings' => [
-                        'fields' => [
-                            'id' => [
-                                'label' => 'Id',
-                                'type' => 'id'
-                            ],
-                            'title' => [
-                                'label' => 'Title',
-                                'type' => 'text'
-                            ],
-                            'created' => [
-                                'label' => 'Created',
-                                'type' => 'date'
-                            ],
-                            'updated' => [
-                                'label' => 'Updated',
-                                'type' => 'date'
-                            ],
-                            'child_comments' => [
-                                'type' => 'tree_view_children',
-                                'settings' => [
-                                    'fields' => [],
-                                    'sort' => [
-                                        'field' => 'updated',
-                                        'asc' => false,
-                                    ],
-                                    'filter' => null,
-                                ],
-                            ],
-                        ],
-                        'sort' => [
-                            'field' => 'updated',
-                            'asc' => false,
-                        ],
-                        'filter' => null,
-                    ],
-                ],
             ],
             $fields
         );
-        $this->assertEquals('child_comments', $parameters->get('children_field'));
         $this->assertEquals('parent_comment', $parameters->get('parent_field'));
 
 
@@ -320,7 +279,6 @@ class TreeViewTypeTest extends ContainerAwareTestCase
         $this->assertTrue($parameters->isSelectModeNone());
 
         $fields = $parameters->get('fields');
-        $fields['child_comments']['settings']['fields']['child_comments']['settings']['fields'] = [];
         $this->assertEquals(
             [
                 'id' => [
@@ -338,45 +296,6 @@ class TreeViewTypeTest extends ContainerAwareTestCase
                 'updated' => [
                     'label' => 'Updated',
                     'type' => 'date'
-                ],
-                'child_comments' => [
-                    'type' => 'tree_view_children',
-                    'settings' => [
-                        'fields' => [
-                            'id' => [
-                                'label' => 'Id',
-                                'type' => 'id'
-                            ],
-                            'title' => [
-                                'label' => 'Title',
-                                'type' => 'text'
-                            ],
-                            'created' => [
-                                'label' => 'Created',
-                                'type' => 'date'
-                            ],
-                            'updated' => [
-                                'label' => 'Updated',
-                                'type' => 'date'
-                            ],
-                            'child_comments' => [
-                                'type' => 'tree_view_children',
-                                'settings' => [
-                                    'fields' => [],
-                                    'sort' => [
-                                        'field' => 'updated',
-                                        'asc' => false,
-                                    ],
-                                    'filter' => $filter,
-                                ],
-                            ],
-                        ],
-                        'sort' => [
-                            'field' => 'updated',
-                            'asc' => false,
-                        ],
-                        'filter' => $filter,
-                    ],
                 ],
             ],
             $fields
