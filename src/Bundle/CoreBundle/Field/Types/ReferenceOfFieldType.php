@@ -30,12 +30,14 @@ use UniteCMS\CoreBundle\Exception\MissingFieldException;
 use UniteCMS\CoreBundle\Exception\MissingOrganizationException;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldType;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Form\ReferenceOfType;
 use UniteCMS\CoreBundle\SchemaType\IdentifierNormalizer;
 use UniteCMS\CoreBundle\SchemaType\SchemaTypeManager;
 use UniteCMS\CoreBundle\Service\GraphQLDoctrineFilterQueryBuilder;
 use UniteCMS\CoreBundle\Service\ReferenceResolver;
 use UniteCMS\CoreBundle\Service\UniteCMSManager;
+use UniteCMS\CoreBundle\View\ViewTypeManager;
 
 class ReferenceOfFieldType extends FieldType
 {
@@ -66,9 +68,16 @@ class ReferenceOfFieldType extends FieldType
     private $paginator;
 
     /**
+     * @var ViewTypeManager $viewTypeManager
+     */
+    protected $viewTypeManager;
+
+    /**
      * @var int $maximumQueryLimit
      */
     private $maximumQueryLimit;
+
+    protected $recursiveEmbeddedViews = [];
 
     function __construct(
         ValidatorInterface $validator,
@@ -76,6 +85,7 @@ class ReferenceOfFieldType extends FieldType
         UniteCMSManager $uniteCMSManager,
         EntityManager $entityManager,
         PaginatorInterface $paginator,
+        ViewTypeManager $viewTypeManager,
         int $maximumQueryLimit = 100
     ) {
         $this->validator = $validator;
@@ -83,6 +93,7 @@ class ReferenceOfFieldType extends FieldType
         $this->entityManager = $entityManager;
         $this->paginator = $paginator;
         $this->maximumQueryLimit = $maximumQueryLimit;
+        $this->viewTypeManager = $viewTypeManager;
     }
 
     /**
@@ -266,5 +277,29 @@ class ReferenceOfFieldType extends FieldType
         // This field does not save any data it only is an accessor to fields that are referencing this content.
         // Therefore there is no input for this field.
         return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function alterViewFieldSettings(array &$settings, FieldTypeManager $fieldTypeManager, FieldableField $field = null) {
+        parent::alterViewFieldSettings($settings, $fieldTypeManager, $field);
+
+        if(isset($this->recursiveEmbeddedViews[$field->getIdentifierPath()])) {
+            return;
+        }
+        $this->recursiveEmbeddedViews[$field->getIdentifierPath()] = true;
+
+        if($field) {
+
+            $domain = $this->referenceResolver->resolveDomain($field->getSettings()->domain);
+            $fieldable = $this->referenceResolver->resolveFieldable($domain, $field->getSettings());
+            $reference_field = $this->referenceResolver->resolveField($fieldable, $field->getSettings()->reference_field, ReferenceFieldType::getType());
+
+            if($fieldable instanceof ContentType) {
+                $settings['settings']['templateParameters'] = $this->viewTypeManager->getTemplateRenderParameters($fieldable->getView('all'));
+                $settings['settings']['reference_field'] = $reference_field->getIdentifier();
+            }
+        }
     }
 }

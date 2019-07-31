@@ -360,6 +360,7 @@ class TableViewConfiguration implements ConfigurationInterface
         if($this->fieldTypeManager->hasFieldType($type)) {
             $this->fieldTypeManager->getFieldType($type)->alterViewFieldSettings($config, $this->fieldTypeManager, $fieldEntity);
         }
+
         return $config;
     }
 }

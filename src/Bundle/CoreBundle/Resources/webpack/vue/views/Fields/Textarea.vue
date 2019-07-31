@@ -1,12 +1,10 @@
 <template>
-    <div class="view-field view-field-textarea">
-        <p v-if="teaser.length > 0 && full.length > 100" class="uk-text-truncate uk-text-meta" :title="full" uk-tooltip="pos: bottom">{{ teaser }}</p>
-        <p v-if="teaser.length > 0 && full.length <= 100" class="uk-text-truncate uk-text-meta">{{ teaser }}</p>
-    </div>
+    <span v-if="teaser.length > 0 && full.length > 100" class="uk-text-truncate uk-text-meta" :title="full" uk-tooltip="pos: bottom">{{ teaser }}</span>
+    <span v-else class="uk-text-truncate uk-text-meta">{{ teaser }}</span>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         extends: BaseField,
@@ -30,7 +28,7 @@
 </script>
 
 <style scoped>
-    p[title] {
+    span[title] {
         cursor: pointer;
         max-width: 300px;
         min-width: 100px;

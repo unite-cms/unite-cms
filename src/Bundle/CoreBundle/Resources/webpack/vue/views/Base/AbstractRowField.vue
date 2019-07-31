@@ -1,11 +1,15 @@
 <template>
-    <div class="uk-alert-warning" uk-alert>Abstract base field. Please implement a custom template in your view. </div>
+    <div>Row field</div>
 </template>
 
 <script>
     export default {
+        props: {
+            config: Object,
+            field: Object,
+            row: Object,
+        },
         methods: {
-
             /**
              * Each field must implement a field Query method that gets called to alter the fetch command. The default
              * implementation just adds recursively all keys (separated by ".") to the field query.
@@ -39,9 +43,12 @@
              * The default implementation just uses the identifier to look for the data in the (possible nested) result.
              */
             value() {
-                return this.row[this.identifier];
+                return this.row.get(this.field.identifier);
             },
         },
-        props: ['identifier', 'label', 'settings', 'row', 'type', 'sortable'],
     }
 </script>
+
+<style scoped>
+
+</style>

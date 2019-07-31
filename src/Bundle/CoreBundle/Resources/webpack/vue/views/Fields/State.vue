@@ -1,29 +1,25 @@
 <template>
-    <div class="view-field view-field-state fixed-width">
-        <span class="uk-label" :class="stateCategory">{{ stateLabel }}</span>
-    </div>
+    <span class="uk-label" :class="stateCategory">{{ stateLabel }}</span>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         extends: BaseField,
         computed: {
             stateCategory() {
-                return 'uk-label-' + (this.settings.places[this.value] ? this.settings.places[this.value].category : 'notice');
+                return 'uk-label-' + (this.field.settings.places[this.value] ? this.field.settings.places[this.value].category : 'notice');
             },
             stateLabel() {
-                return this.settings.places[this.value] ? this.settings.places[this.value].label : value;
+                return this.field.settings.places[this.value] ? this.field.settings.places[this.value].label : this.value;
             }
         }
     }
 </script>
 
 <style scoped lang="scss">
-    .view-field-state {
-        .uk-label {
-            white-space: nowrap;
-        }
+    .uk-label {
+        white-space: nowrap;
     }
 </style>

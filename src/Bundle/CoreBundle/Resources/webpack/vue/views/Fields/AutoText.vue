@@ -1,9 +1,9 @@
 <template>
-    <div class="view-field view-field-text"><p>{{ value }}</p></div>
+    <span class="uk-text-meta">{{ value }}</span>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         extends: BaseField,
@@ -34,18 +34,8 @@
              * {@inheritdoc}
              */
             value() {
-                return this.row[this.identifier]['text'];
+                return this.row.get(this.field.identifier, {}).text;
             },
         },
     }
 </script>
-
-<style scoped lang="scss">
-    .view-field-text {
-        white-space: nowrap;
-
-        p {
-            display: inline-block;
-        }
-    }
-</style>

@@ -1,13 +1,11 @@
 <template>
-    <div class="view-field view-field-date fixed-width">
-        <time v-if="mode === 'date'" class="uk-text-meta">{{ value|date }}</time>
-        <time v-else-if="mode === 'datetime'" class="uk-text-meta">{{ value|dateFull }}</time>
-        <time v-else class="uk-text-meta" :title="value|dateFull" uk-tooltip>{{ value|dateFromNow }}</time>
-    </div>
+    <time v-if="mode === 'date'" class="uk-text-meta">{{ value|date }}</time>
+    <time v-else-if="mode === 'datetime'" class="uk-text-meta">{{ value|dateFull }}</time>
+    <time v-else class="uk-text-meta" :title="value|dateFull" uk-tooltip>{{ value|dateFromNow }}</time>
 </template>
 
 <script>
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
 
     export default {
         data() {
@@ -39,10 +37,8 @@
 </script>
 
 <style scoped lang="scss">
-    .view-field-date {
-        time {
-            cursor: pointer;
-            white-space: nowrap;
-        }
+    time {
+        cursor: pointer;
+        white-space: nowrap;
     }
 </style>

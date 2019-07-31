@@ -4,80 +4,69 @@
   margin: -31px -30px 0 -30px;
   border-top: 10px solid map-get($colors, white);
 
-  table > thead,
-  .unite-div-table > .unite-div-table-thead {
-    background: map-get($colors, white);
+  td.uk-table-shrink {
+    padding-right: 0;
+  }
 
-    > * > * {
-      vertical-align: bottom;
-      font-size: $table-header-cell-font-size;
-      font-weight: $table-header-cell-font-weight;
-      color: $table-header-cell-color;
-      @if (mixin-exists(hook-table-header-cell)) {
-        @include hook-table-header-cell();
-      }
-
-      a, span {
-        display: inline-block;
-        text-decoration: none;
-        color: $table-header-cell-color;
-        white-space: nowrap;
-
-        > span {
-          line-height: 0;
-          font-size: 0;
-          vertical-align: middle;
-          display: inline-block;
-          margin-top: -4px;
-        }
-      }
+  thead {
+    tr:hover {
+      background: map-get($colors, white);
     }
 
-    tr:hover {
-      background: none;
+    a, span {
+      display: inline-block;
+      text-decoration: none;
+      color: $table-header-cell-color;
+      white-space: nowrap;
     }
   }
 
-  table > tbody,
-  .unite-div-table > .unite-div-table-tbody {
-
-    > * {
-      &:hover {
-        background: $table-hover-row-background;
-
-        .uk-button:not(.uk-button-text):not(.uk-button-link) {
-          background: map-get($colors, white);
-          border-color: map-get($colors, grey-medium);
-          box-shadow: none;
-          opacity: 1;
-
-          &:hover, &.uk-open {
-            @extend .uk-box-shadow-medium;
-            border-color: map-get($colors, grey-dark);
-          }
+  table.uk-table-striped {
+    > tbody {
+      tr {
+        background: $form-background;
+      }
+      &:nth-of-type(odd) {
+        tr {
+          background: $table-striped-row-background;
         }
       }
+    }
+  }
 
-      &:nth-child(2n - 1) {
-        background: $global-muted-background;
+  table.uk-table {
+    tr.table-holder {
+      td {
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
 
-        &:hover {
-          background: $table-hover-row-background;
+      > td {
+        font-size: 90%;
+        padding: 2px 0 2px 39px;
+
+        table.uk-table {
+          tr {
+            border-left: 1px solid $table-divider-border;
+
+            &.table-holder {
+              border-left: none;
+              border-bottom: none;
+              background: none;
+            }
+          }
         }
       }
     }
   }
 }
 
-// unite-div-table-row can also be used outside of .unite-div-table (e.g. ghost object while sorting)
-.unite-card-table tr,
-.unite-div-table-row {
+.unite-card-table tr {
   border-bottom: $table-divider-border-width solid $table-divider-border;
   background: $form-background;
 
   > td,
-  > th,
-  > div {
+  > th {
     padding: 16px 12px;
 
     p {
@@ -86,21 +75,27 @@
   }
 
   > td:first-child,
-  > th:first-child,
-  > div:first-child {
-    padding-left: 30px;
+  > th:first-child {
+    padding-left: 20px;
   }
 
   > td:last-child,
-  > th:last-child,
-  > div:last-child {
-    padding-right: 30px;
+  > th:last-child {
+    padding-right: 20px;
   }
 
-  &.uk-sortable-drag {
-    background: $form-background;
-    border: none;
-    @extend .uk-box-shadow-medium;
+  &.sortable-chosen {
+    & {
+      background: $table-hover-row-background;
+      border: none;
+      @extend .uk-box-shadow-medium;
+    }
+  }
+
+  &.sortable-ghost {
+    &, &:hover {
+      background: $form-background;
+    }
   }
 
   .uk-button:not(.uk-button-text):not(.uk-button-link) {
@@ -120,12 +115,93 @@
   }
 }
 
+table.dragging {
+  tr:hover {
+    background: $form-background;
+  }
+}
+
 .unite-table-error {
   padding: 20px;
   text-align: center;
   position: relative;
   display: block;
   margin: -30px;
+}
+
+.unite-table-tabs {
+  margin: 0 20px 0 0;
+  justify-content: center;
+  flex-wrap: nowrap;
+
+  &:before {
+    display: none;
+  }
+
+  li {
+
+    padding-left: 10px;
+
+    a {
+      border: 2px solid $table-divider-border;
+      border-radius: 3px;
+      color: $table-divider-border;
+      padding: 2px 10px;
+    }
+
+    &.uk-active {
+      a {
+        color: inherit;
+        border-color: inherit;
+      }
+    }
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+}
+
+.uk-card-header + .unite-card-table {
+  margin-top: -60px;
+}
+
+.unite-table-header {
+  .uk-search {
+    max-width: 260px;
+
+    input {
+      border-radius: 30px;
+      font-size: 90%;
+      padding-left: 16px;
+
+      &.uk-form-small {
+        padding-left: 16px;
+      }
+    }
+
+    a.uk-search-icon {
+      width: 36px;
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      &.clear {
+        svg {
+          background: #989898;
+          border-radius: 100%;
+          color: #fff;
+          padding: 2px;
+          box-sizing: border-box;
+        }
+      }
+    }
+
+    &.uk-search-default .uk-search-icon:not(.uk-search-icon-flip) ~ .uk-search-input {
+      padding-left: 36px;
+    }
+  }
 }
 
 @media (min-width: $breakpoint-small) {
@@ -145,5 +221,51 @@
   .unite-table-error {
     margin: -40px -40px 40px;
     padding: 15px 30px;
+  }
+}
+
+@media (max-width: $breakpoint-small) {
+
+  .unite-table-header {
+    flex-wrap: wrap;
+
+    h2 {
+      padding-right: 0;
+    }
+
+    > .unite-table-headline {
+      justify-content: space-between;
+      min-width: 60%;
+      min-height: 40px;
+    }
+
+    .unite-table-tabs {
+      margin-right: 0;
+
+      li {
+        padding-left: 5px;
+
+        a {
+          border-width: 1px;
+          font-size: .75rem;
+        }
+      }
+    }
+
+    .unite-table-search {
+      min-width: 100px;
+    }
+
+    .uk-button:not(.uk-button-text):not(.uk-button-link) {
+      padding: 0 10px 0 5px;
+      font-size: .75rem;
+      line-height: 28px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+        margin-top: -2px;
+      }
+    }
   }
 }

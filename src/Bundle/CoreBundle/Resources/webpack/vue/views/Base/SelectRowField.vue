@@ -1,16 +1,17 @@
 <template>
-    <div class="view-field view-field-selectrow fixed-width">
-        <div v-on:click="select" v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></div>
-    </div>
+    <span @click="select">
+        <button v-html="feather.icons[checked ? 'check-circle' : 'circle'].toSvg({ width: 24, height: 24 })"></button>
+    </span>
 </template>
 
 <script>
 
-    import BaseField from '../Base/BaseField.vue';
+    import BaseField from '../Base/AbstractRowField';
     import feather from 'feather-icons';
     import UIkit from 'uikit';
 
     export default {
+        FIELD_WIDTH_COLLAPSED: true,
         extends: BaseField,
         data() {
             return {
@@ -43,8 +44,8 @@
                     this.checked = true;
 
                     window.UniteCMSEventBus.$emit('contentSelected', [ {
-                        contentType: this.settings.contentType,
-                        view: this.settings.view,
+                        contentType: this.config.contentType,
+                        view: this.config.view,
                         row: this.row
                     } ]);
                 }
@@ -53,26 +54,29 @@
                 }
             }
         }
-
     }
 </script>
+<style lang="scss" scoped>
+    span {
+        cursor: pointer;
 
-<style scoped lang="scss">
-    .view-field-selectrow {
-        text-align: center;
-
-        > div {
-            display: inline-block;
+        button {
+            padding: 0;
+            background: none;
+            border: none;
+            outline: none;
+            height: 30px;
+            width: 40px;
+            line-height: 30px;
+            display: block;
+            text-align: center;
+            margin: 0;
             cursor: pointer;
             opacity: 0.75;
-            width: 30px;
-        }
 
-        &:hover {
-            > div {
+            &:hover {
                 opacity: 1;
             }
         }
     }
-
 </style>

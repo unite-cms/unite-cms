@@ -42,7 +42,7 @@ services:
   UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType:
     public: false
     tags: [unite_cms.field_type]
-    arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@knp_paginator', 100]
+    arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@knp_paginator', '@unite.cms.view_type_manager', 100]
 
   # An integer input field that automatically handles position indexing (on INSERT, UPDATE, DELETE).
   UniteCMS\CoreBundle\Field\Types\SortIndexFieldType:

@@ -1,27 +1,20 @@
 <template>
-    <div class="view-field view-field-image fixed-width">
-        <a :href="'#' + modalId" uk-toggle v-if="value" class="uk-inline-clip uk-box-shadow-small uk-box-shadow-hover-medium">
-            <img :src="value" />
-        </a>
+    <div class="view-field view-field-image">
+        <a :href="'#' + modalId" uk-toggle v-if="value" class="uk-inline-clip uk-box-shadow-small uk-box-shadow-hover-medium" :style="{ backgroundImage: `url(${thumbnail})` }"></a>
         <div class="uk-flex-top" :id="modalId" uk-modal>
             <div class="uk-modal-dialog uk-margin-auto-vertical">
                 <button class="uk-modal-close-outside" type="button" uk-close></button>
-                <img :src="value" />
+                <img :src="fullImage" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-    import BaseField from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/BaseField.vue';
+    import BaseField from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/AbstractRowField';
 
     export default {
         extends: BaseField,
-        data(){
-            return {
-                modalId: 'modal-' + this._uid
-            }
-        },
         methods: {
 
             /**
@@ -32,13 +25,17 @@
             },
         },
         computed: {
-            /**
-             * Each field must implement a value method that gets called to get the data from the API result set.
-             * The default implementation just uses the identifier to look for the data in the (possible nested) result.
-             */
-            value() {
-                return this.row[this.identifier] ? this.row[this.identifier]['url'] : null;
+
+            modalId() {
+                return 'modal-' + this._uid;
             },
+
+            thumbnail() {
+                return this.row.get(this.field.identifier, {}).url || null;
+            },
+            fullImage() {
+                return this.row.get(this.field.identifier, {}).url || null;
+            }
         }
     }
 </script>
@@ -46,19 +43,35 @@
 <style scoped lang="scss">
     .uk-modal-dialog {
         width: 900px;
+        text-align: center;
+        background: black;
+
+        img {
+            max-height: 80vh;
+        }
     }
 
     .view-field-image {
+        margin: -10px 0;
         height: 50px;
-        width: 80px;
-        text-align: left;
+        width: 50px;
+        text-align: center;
+
+        &:last-child {
+            margin-bottom: -10px;
+        }
 
         .uk-inline-clip {
-            width: auto;
+            width: 100%;
             height: 100%;
-            border-radius: 5px;
-            border: 2px solid white;
-            margin: -2px 0 0 -2px;
+            border-radius: 3px;
+            border: 1px solid white;
+            margin: -1px 0 0 -1px;
+            background: #989898;
+            text-align: center;
+            display: block;
+            background-size: cover;
+            background-position: center center;
 
             img {
                 height: 100%;
@@ -93,12 +106,8 @@
                     margin: 0;
                     height: 150px;
                     background: $global-secondary-background;
-
-                    img {
-                        height: 170px;
-                        transform: translateX(-50%) translateY(-50%);
-                        top: 50%;
-                    }
+                    background-size: cover;
+                    background-position: center center;
                 }
 
                 @media (max-width: $breakpoint-small) {
@@ -107,14 +116,6 @@
                     .uk-inline-clip {
                         height: auto;
                         min-height: 120px;
-
-                        img {
-                            position: static;
-                            transform: none;
-                            left: auto;
-                            width: 100%;
-                            height: auto;
-                        }
                     }
                 }
             }

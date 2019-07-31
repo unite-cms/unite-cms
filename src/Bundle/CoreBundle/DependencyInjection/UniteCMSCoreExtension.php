@@ -37,7 +37,7 @@ class UniteCMSCoreExtension extends Extension
         // Set maximum query limit as sixth argument to query type and maximum reference of field type, and
         // as second argument to table/tree/grid view config factory classes.
         $container->getDefinition('UniteCMS\CoreBundle\SchemaType\Types\QueryType')->setArgument(5, $config['maximum_query_limit']);
-        $container->getDefinition('UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType')->setArgument(5, $config['maximum_query_limit']);
+        $container->getDefinition('UniteCMS\CoreBundle\Field\Types\ReferenceOfFieldType')->setArgument(6, $config['maximum_query_limit']);
         $container->getDefinition('UniteCMS\CoreBundle\View\Types\Factories\GridViewConfigurationFactory')->setArgument(1, $config['maximum_query_limit']);
         $container->getDefinition('UniteCMS\CoreBundle\View\Types\Factories\TableViewConfigurationFactory')->setArgument(1, $config['maximum_query_limit']);
         $container->getDefinition('UniteCMS\CoreBundle\View\Types\Factories\TreeViewConfigurationFactory')->setArgument(1, $config['maximum_query_limit']);

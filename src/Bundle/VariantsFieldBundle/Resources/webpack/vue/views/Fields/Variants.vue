@@ -1,22 +1,25 @@
 <template>
-    <div :style="style" class="view-field view-field-variants">
-        <div class="uk-label" v-if="settings.title">{{ settings.variant_titles[value.type] }}</div>
-        <component v-if="value" :key="identifier" v-for="(v,identifier) in settings.on[value.type]"
+    <div class="view-field view-field-variants" v-if="value">
+        <div class="uk-label" v-if="field.settings.title">{{ field.settings.variant_titles[value.type] }}</div>
+        <component :key="identifier" v-for="(v,identifier) in field.settings.on[value.type]"
                    :is="$uniteCMSViewFields.resolve(v.type)"
-                   :type="v.type"
-                   :identifier="identifier"
-                   label=""
-                   :settings="v.settings"
-                   :row="value"></component>
+                   :config="config"
+                   :field="Object.assign({}, v, { identifier: identifier, label: '' })"
+                   :row="createRow(value)"></component>
     </div>
 </template>
 
 <script>
-    import BaseField from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/BaseField.vue';
+    import BaseField from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/AbstractRowField';
+    import { createRow } from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/ViewRow';
 
     export default {
         extends: BaseField,
         methods: {
+
+            createRow(row) {
+                return createRow(row, this.config.contentType);
+            },
 
             /**
              * @inheritdoc

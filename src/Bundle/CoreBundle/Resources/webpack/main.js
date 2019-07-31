@@ -1,9 +1,5 @@
 
-import "core-js/stable";
-import "regenerator-runtime/runtime";
-
 import Vue from "vue";
-import 'document-register-element';
 import vueCustomElement from 'vue-custom-element';
 
 import moment from 'moment';
@@ -12,10 +8,9 @@ import pageUnload from "./js/pageUnload";
 import formGroupErrorHandler from "./js/formGroupErrorHandler";
 import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
 
-import BaseView from './vue/views/Base/BaseView.vue';
-import TableContent from './vue/views/TableContent.vue';
-import GridContent from './vue/views/GridContent.vue';
-import TreeContent from './vue/views/TreeContent.vue';
+import TableView from './vue/views/TableView';
+import GridView from './vue/views/GridView';
+import TreeView from './vue/views/Tree/TreeView';
 import DomainEditor from "./vue/components/DomainEditor.vue";
 import ApiTokenField from "./vue/components/ApiTokenField";
 import iFramePreview from "./vue/components/iFramePreview.vue";
@@ -49,10 +44,8 @@ Vue.use(uniteViewFieldsPlugin, {
         'state': require('./vue/views/Fields/State').default,
         'checkbox': require('./vue/views/Fields/Checkbox').default,
         'choice': require('./vue/views/Fields/Choice').default,
-        'sortindex': require('./vue/views/Fields/Sortindex').default,
-        'selectrow': require('./vue/views/Fields/Selectrow').default,
         'reference': require('./vue/views/Fields/Reference').default,
-        'tree_view_children': require('./vue/views/Fields/TreeViewChildren').default,
+        'reference_of': require('./vue/views/Fields/ReferenceOf').default,
     }
 });
 
@@ -69,20 +62,9 @@ Vue.customElement('unite-cms-core-state-field', State);
 Vue.customElement('unite-cms-core-auto-text-field', AutoText);
 
 // Register views.
-Vue.customElement('unite-cms-core-view-table', {
-    extends: BaseView,
-    contentComponent: TableContent
-});
-
-Vue.customElement('unite-cms-core-view-grid', {
-    extends: BaseView,
-    contentComponent: GridContent
-});
-
-Vue.customElement('unite-cms-core-view-tree', {
-    extends: BaseView,
-    contentComponent: TreeContent
-});
+Vue.customElement('unite-cms-core-view-table', TableView);
+Vue.customElement('unite-cms-core-view-grid', GridView);
+Vue.customElement('unite-cms-core-view-tree', TreeView);
 
 // Create vue moment filter.
 moment.locale(window.navigator.language);
