@@ -1,23 +1,26 @@
 <template>
     <span class="view-field view-field-reference">
-        <span v-for="(v,identifier) in settings.fields" :key="identifier">
+        <span v-for="(v,identifier) in field.settings.fields" :key="field.identifier">
             <component v-if="value"
                    :is="$uniteCMSViewFields.resolve(v.type)"
-                   :type="v.type"
-                   :identifier="identifier"
-                   label=""
-                   :settings="v.settings"
-                   :row="value"></component>
+                   :config="config"
+                   :field="Object.assign({}, v, { identifier: identifier, label: '' })"
+                   :row="createRow(value)"></component>
         </span>
     </span>
 </template>
 
 <script>
     import BaseField from '../Base/AbstractRowField';
+    import { createRow } from '../../../../../../CoreBundle/Resources/webpack/vue/views/Base/ViewRow';
 
     export default {
         extends: BaseField,
         methods: {
+
+            createRow(row) {
+                return createRow(row, this.config.contentType);
+            },
 
             /**
              * @inheritdoc
