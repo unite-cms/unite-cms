@@ -11,10 +11,14 @@
         extends: BaseField,
         computed: {
             values() {
+
+                if(!this.value) {
+                    return [];
+                }
                 let values = typeof this.value === 'string' ? [this.value] : this.value;
                 return values.map((value) => {
-                    if(typeof this.settings.choices[value] !== 'undefined') {
-                        return this.settings.choices[value];
+                    if(typeof this.field.settings.choices[value] !== 'undefined') {
+                        return this.field.settings.choices[value];
                     }
                     return value;
                 });
