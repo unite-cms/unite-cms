@@ -39,6 +39,9 @@
         </div>
     {% else %}
         {{- form_widget(form) -}}
+        {% if (form.vars.description is defined and form.vars.description is not empty) %}
+            <p class="uk-form-help-inline">{{ form.vars.description }}</p>
+        {% endif %}
         {{- form_errors(form) -}}
     {% endif %}
 
