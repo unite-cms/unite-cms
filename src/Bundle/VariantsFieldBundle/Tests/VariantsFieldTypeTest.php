@@ -332,6 +332,14 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
                                         'update field' => 'false',
                                     ]
                                 ],
+                                [
+                                    'title' => 'Default',
+                                    'identifier' => 'default',
+                                    'type' => 'text',
+                                    'settings' => [
+                                        'default' => 'my_default_value',
+                                    ],
+                                ],
                             ],
                         ],
                         [
@@ -415,10 +423,14 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('any', $root->children['baa']->vars['attr']['data-variant-icon']);
 
         // Check, that child form fields get rendered.
-        $this->assertCount(1, $root->children['foo']->children);
+        $this->assertCount(2, $root->children['foo']->children);
         $this->assertContains('text', $root->children['foo']->children['text']->vars['block_prefixes']);
+        $this->assertContains('text', $root->children['foo']->children['default']->vars['block_prefixes']);
         $this->assertCount(1, $root->children['baa']->children);
         $this->assertContains('unite_cms_core_reference', $root->children['baa']->children['ref']->vars['block_prefixes']);
+
+        // Check that default value get passed to the form
+        $this->assertEquals('my_default_value', $root->children['foo']->children['default']->vars['value']);
 
         // Try to submit invalid type data
         $form->submit([
@@ -484,7 +496,8 @@ class VariantsFieldTypeTest extends FieldTypeTestCase
             $field->getIdentifier() => [
                 'type' => 'foo',
                 'foo' => [
-                    'text' => 'This is my text'
+                    'text' => 'This is my text',
+                    'default' => null,
                 ]
             ],
         ],$content->getData());

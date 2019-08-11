@@ -72,6 +72,25 @@ class VariantsFieldType extends FieldType implements NestableFieldTypeInterface
     /**
      * {@inheritdoc}
      */
+    function getDefaultValue(FieldableField $field)
+    {
+        $variants = self::getNestableFieldable($field);
+        $defaults = [];
+        foreach($variants->getVariantsMetadata() as $variant) {
+            $variant_defaults = [];
+            foreach($variants->getFieldsForVariant($variant['identifier']) as $field) {
+                if(!empty($field->getSettings()->default)) {
+                    $variant_defaults[$field->getIdentifier()] = $field->getSettings()->default;
+                }
+            }
+            $defaults[$variant['identifier']] = $variant_defaults;
+        }
+        return $defaults;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     function getGraphQLType(FieldableField $field, SchemaTypeManager $schemaTypeManager)
     {
         $variants = self::getNestableFieldable($field);
