@@ -67,12 +67,21 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
         // Add the definition of the all collection fields to the options.
         foreach ($collection->getFields() as $fieldDefinition) {
 
-            // Only render field, if we are allowed to list and update it.
+            $updatedSettings = $fieldDefinition->getSettings();
+            // Render and update the field based on the field's permissions
             if(
                 !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $fieldDefinition)
-                || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $options['content']))) {
-                continue;
+                || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $options['content']))
+            ) {
+                // Field is read only when only having permission to view
+                if ($this->authorizationChecker->isGranted(FieldableFieldVoter::VIEW, new FieldableFieldContent($fieldDefinition, $options['content']))) {
+                    $updatedSettings->read_only = true;
+                } else {
+                    continue;
+                }
             }
+            $updatedSettings->read_only = $updatedSettings->read_only ?? false;
+            $fieldDefinition->setSettings($updatedSettings);
 
             $options['fields'][] = new FieldableFormField(
                 $this->fieldTypeManager->getFieldType($fieldDefinition->getType()),
@@ -86,8 +95,8 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
             parent::getFormOptions($field),
             [
                 'required' => true,         // Please see CollectionFormType::buildView() for more information.
-                'allow_add' => true,
-                'allow_delete' => true,
+                'allow_add' => !($settings->read_only ?? false),
+                'allow_delete' => !($settings->read_only ?? false),
                 'delete_empty' => true,
                 'error_bubbling' => false,
                 'prototype_name' => '__'.str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')).'Name__',
@@ -96,6 +105,7 @@ class CollectionFieldType extends FieldType implements NestableFieldTypeInterfac
                     'data-identifier' => str_replace('/', '', ucwords($collection->getIdentifierPath(), '/')),
                     'min-rows' => $settings->min_rows ?? 0,
                     'max-rows' => $settings->max_rows ?? null,
+                    'read-only' => $settings->read_only ?? false,
                 ],
                 'entry_type' => FieldableFormType::class,
                 'entry_options' => $options,

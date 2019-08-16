@@ -41,6 +41,8 @@ class FieldableFormBuilder
 
         foreach ($fieldable->getFields() as $fieldDefinition) {
 
+            $updatedSettings = $fieldDefinition->getSettings();
+            // Render and update the field based on the field's permissions
             $fieldType = $this->fieldTypeManager->getFieldType($fieldDefinition->getType());
 
             // If this fieldable content is new, allow field types to set default values.
@@ -51,9 +53,18 @@ class FieldableFormBuilder
             // Only render field, if we are allowed to list and update it.
             if(
                 !$this->authorizationChecker->isGranted(FieldableFieldVoter::LIST, $fieldDefinition)
-                || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $content))) {
-                continue;
+                || !$this->authorizationChecker->isGranted(FieldableFieldVoter::UPDATE, new FieldableFieldContent($fieldDefinition, $content))
+            ) {
+                // Field is read only when only having permission to view
+                if ($this->authorizationChecker->isGranted(FieldableFieldVoter::VIEW, new FieldableFieldContent($fieldDefinition, $content))) {
+                    $updatedSettings->read_only = true;
+                } else {
+                    continue;
+                }
             }
+            $updatedSettings->read_only = $updatedSettings->read_only ?? false;
+            $fieldDefinition->setSettings($updatedSettings);
+
 
             // Add the definition of the current field to the options.
             $options['fields'][] = new FieldableFormField($fieldType, $fieldDefinition);

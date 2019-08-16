@@ -63,11 +63,10 @@
    }
 }
 
-.uk-disabled {
-   background: #f7f7f7;
-}
-
-
 .uk-select {
    background-color: white;
+}
+
+.uk-disabled {
+   background-color: $form-disabled-background;
 }
