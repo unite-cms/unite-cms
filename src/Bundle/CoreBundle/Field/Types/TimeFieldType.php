@@ -13,6 +13,7 @@ class TimeFieldType extends FieldType
 {
     const TYPE = "time";
     const FORM_TYPE = TimeType::class;
+    const DATE_FORMAT = 'H:i:00';
 
     const SETTINGS = ['not_empty', 'description', 'default', 'form_group', 'min', 'max', 'step'];
 
@@ -33,7 +34,28 @@ class TimeFieldType extends FieldType
         );
     }
 
+    protected function transformDefaultValue($value) {
+        if(empty($value)) {
+            return null;
+        }
+
+        if(strtolower($value) === 'now') {
+            return (new \DateTime('now'))->format(static::DATE_FORMAT);
+        }
+
+        return $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function getDefaultValue(FieldableField $field)
+    {
+        return $this->transformDefaultValue($field->getSettings()->default);
+    }
+
     protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
+        $value = $this->transformDefaultValue($value);
         $context->getViolations()->addAll(
             $context->getValidator()->validate($value, new Assert\Time(['message' => 'invalid_initial_data']))
         );

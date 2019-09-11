@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\Tests\Field;
 
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
+use UniteCMS\CoreBundle\Field\Types\TimeFieldType;
 
 class TimeFieldTypeTest extends FieldTypeTestCase
 {
@@ -62,8 +63,22 @@ class TimeFieldTypeTest extends FieldTypeTestCase
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        echo $errors;
         $this->assertCount(0, $errors);
+
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'default' => 'now',
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(0, $errors);
+
+        $content = new Content();
+        $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
+            'csrf_protection' => false,
+        ]);
+        $this->assertEquals((new \DateTime('now'))->format(TimeFieldType::DATE_FORMAT), $form->getData()[$ctField->getIdentifier()]);
     }
 
     public function testFormDataTransformers() {
