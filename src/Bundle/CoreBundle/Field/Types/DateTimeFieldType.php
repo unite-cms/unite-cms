@@ -13,6 +13,7 @@ class DateTimeFieldType extends DateFieldType
 {
     const TYPE = "datetime";
     const FORM_TYPE = DateTimeType::class;
+    const DATE_FORMAT = 'Y-m-d H:i:00';
 
     /**
      * {@inheritdoc}
@@ -26,6 +27,7 @@ class DateTimeFieldType extends DateFieldType
      * {@inheritdoc}
      */
     protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
+        $value = $this->transformDefaultValue($value);
         $context->getViolations()->addAll(
             $context->getValidator()->validate($value, new Assert\DateTime(['message' => 'invalid_initial_data']))
         );
