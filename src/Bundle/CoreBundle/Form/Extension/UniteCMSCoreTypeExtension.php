@@ -5,9 +5,7 @@
  * Date: 02.11.18
  * Time: 14:36
  */
-
 namespace UniteCMS\CoreBundle\Form\Extension;
-
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -18,18 +16,15 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\ConstraintViolation;
-use Symfony\Contracts\Translation\TranslatorInterface;
-
 class UniteCMSCoreTypeExtension extends AbstractTypeExtension
 {
     private $translator;
-
     public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
-
     /**
      * {@inheritdoc}
      */
@@ -63,6 +58,10 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
         if (isset($options['description'])) {
             $view->vars['description'] = $options['description'];
         }
+        // pass read_only to template
+        if (isset($options['read_only'])) {
+            $view->vars['read_only'] = $options['read_only'];
+        }
 
         if (isset($options['form_group']) && $options['form_group'] !== null) {
             if(filter_var($options['form_group'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === false) {
@@ -83,6 +82,7 @@ class UniteCMSCoreTypeExtension extends AbstractTypeExtension
         $resolver->setDefined('description');
         $resolver->setDefined('default');
         $resolver->setDefined('not_empty');
+        $resolver->setDefined('read_only');
         $resolver->setDefined('form_group');
 
         // If not_empty is set, also set the required option to true

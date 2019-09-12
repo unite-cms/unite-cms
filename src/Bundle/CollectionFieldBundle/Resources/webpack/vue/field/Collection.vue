@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="{ 'uk-background-muted': readOnly }">
         <div class="collection-wrapper">
             <div class="collection-wrapper-row" v-for="row in sortedRows" :key="row.delta" :delta="row.delta">
                 <unite-cms-collection-field-row
@@ -8,13 +8,14 @@
                         :prototype="row.prototype"
                         :form-layout="rowFormLayout"
                         :hide-labels="rowLabelHidden"
+                        :read-only="readOnly"
                         @remove="removeRow"
                         @add="addRow"
                 ></unite-cms-collection-field-row>
             </div>
         </div>
-        <div v-if="!maxRows || rows.length < maxRows" class="collection-add-button-wrapper uk-sortable-nodrag">
-            <a href="#" class="uk-button uk-button-default" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></a>
+        <div v-if="!readOnly && (!maxRows || rows.length < maxRows)" class="collection-add-button-wrapper uk-sortable-nodrag">
+          <a href="#" class="uk-button uk-button-default" v-on:click.prevent="addRow" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></a>
         </div>
     </div>
 </template>
@@ -62,6 +63,7 @@
             'initRows',
             'minRows',
             'maxRows',
+            'readOnly',
             'labelLayout',
             'dataPrototype',
             'dataIdentifier'
@@ -107,7 +109,7 @@
                 return this.dataPrototype.replace(new RegExp('__' + this.dataIdentifier + 'Name__', 'g'), (delta));
             },
             addRow(event) {
-                if(!this.maxRows || this.rows.length < this.maxRows) {
+                if(!this.readOnly && (!this.maxRows || this.rows.length < this.maxRows)) {
 
                     let position = (event && event.detail && event.detail[0] && event.detail[0].delta !== null) ? this.getRow(event.detail[0].delta).position : null;
 

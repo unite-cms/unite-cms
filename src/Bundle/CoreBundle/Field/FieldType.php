@@ -62,6 +62,7 @@ abstract class FieldType implements FieldTypeInterface
             'not_empty' => (isset($field->getSettings()->not_empty)) ? (boolean) $field->getSettings()->not_empty : false,
             'description' => (isset($field->getSettings()->description)) ? (string) $field->getSettings()->description : '',
             'form_group' => (isset($field->getSettings()->form_group)) ? $field->getSettings()->form_group : null,
+            'read_only' => (isset($field->getSettings()->read_only)) ? (boolean) $field->getSettings()->read_only : false,
         ];
     }
 
