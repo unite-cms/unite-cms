@@ -131,7 +131,7 @@ services:
     public: false
     tags: [unite_cms.field_type]
 
-  # Colour Picker Field Type
-  UniteCMS\CoreBundle\Field\Types\ColourPickerFieldType:
+  # Color Picker Field Type
+  UniteCMS\CoreBundle\Field\Types\ColorPickerFieldType:
     public: false
     tags: [unite_cms.field_type]
