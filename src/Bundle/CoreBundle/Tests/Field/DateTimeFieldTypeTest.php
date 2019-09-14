@@ -36,8 +36,8 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(3, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
-        $this->assertEquals('no_datetime_value', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('no_datetime_value', $errors->get(2)->getMessageTemplate());
+        $this->assertEquals('This value is not a valid datetime.', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('This value is not a valid datetime.', $errors->get(2)->getMessageTemplate());
 
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
@@ -48,7 +48,7 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('no_datetime_value', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('This value is not a valid datetime.', $errors->get(0)->getMessageTemplate());
     }
 
     public function testDateTimeTypeFieldTypeWithInvalidMinMaxRangeSettings()
@@ -66,7 +66,7 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('min_greater_than_max', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('This value should be less than or equal to "2018-06-20 00:00:00".', $errors->get(0)->getMessageTemplate());
     }
 
     public function testDateTimeTypeFieldTypeWithValidSettings()
