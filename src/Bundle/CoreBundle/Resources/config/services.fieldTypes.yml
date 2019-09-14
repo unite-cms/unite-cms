@@ -36,7 +36,6 @@ services:
   UniteCMS\CoreBundle\Field\Types\ReferenceFieldType:
     public: false
     tags: [unite_cms.field_type]
-    arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@unite.cms.view_type_manager', '@twig', '@router', '@security.csrf.token_manager', '@unite.cms.field_type.config_factory.table_view']
     arguments: ['@validator', '@security.authorization_checker', '@unite.cms.manager', '@doctrine.orm.entity_manager', '@unite.cms.view_type_manager', '@twig', '@router', '@security.csrf.token_manager', '@unite.cms.field_type.config_factory.table_view', '@translator.default']
 
   # A reference input field that allows to add a reference to a content item in any domain in the same organization.
