@@ -232,4 +232,8 @@
             }
         }
     }
+    .uk-margin, .uk-form-help-inline {
+        margin-bottom: 0;
+    }
+
 </style>

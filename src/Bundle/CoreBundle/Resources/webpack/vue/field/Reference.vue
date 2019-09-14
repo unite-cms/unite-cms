@@ -14,7 +14,7 @@
 
         <a href="#" v-if="!content" class="uk-placeholder" v-on:click.prevent="openModal">
             <span v-html="feather.icons['plus'].toSvg({ width: 18, height: 18 })"></span>
-            Select...
+            {{ fieldLabels.select }}
         </a>
         <div v-if="content" class="content-holder">
             <div v-if="loading" uk-spinner></div>
@@ -53,6 +53,7 @@
                 title: '',
                 feather: feather,
                 warning: null,
+                fieldLabels: JSON.parse(this.labels),
             };
         },
         props: [
@@ -61,7 +62,8 @@
             'modalHtml',
             'apiUrl',
             'contentLabel',
-            'fieldableType'
+            'fieldableType',
+            'labels'
         ],
         created() {
 
