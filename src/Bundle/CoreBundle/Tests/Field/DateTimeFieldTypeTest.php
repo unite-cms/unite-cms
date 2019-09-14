@@ -59,32 +59,14 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         // test min date greater than max date
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'min' => '2019-01-01T00:00',
-                'max' => '2018-06-20T00:00'
+                'min' => '2019-01-01 00:00:00',
+                'max' => '2018-06-20 00:00:00'
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
         $this->assertEquals('min_greater_than_max', $errors->get(0)->getMessageTemplate());
-    }
-
-    public function testDateTimeTypeFieldTypeWithValidSettings()
-    {
-        $ctField = $this->createContentTypeField('datetime');
-
-        $ctField->setSettings(new FieldableFieldSettings(
-            [
-                'default' => '2018-05-24T10:10',
-                'not_empty' => true,
-                'form_group' => 'foo',
-                'min' => '2018-05-20T10:10',
-                'max' => '2018-05-28T10:10',
-            ]
-        ));
-
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(0, $errors);
     }
 
     public function testDateTimeTypeFieldTypeWithValidSettings()
