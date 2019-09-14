@@ -337,3 +337,5 @@ auto_text.field.manual: 'Custom'
 auto_text.field.desc.auto_update: 'The value of this field will be generated automatically based on a defined rule.'
 auto_text.field.desc.no_auto_update: 'The value of this field was generated before and will NOT be updated on save.'
 auto_text.field.desc.manual: 'Override the value of this field with a custom text.'
+
+reference.field.select: 'Select...'

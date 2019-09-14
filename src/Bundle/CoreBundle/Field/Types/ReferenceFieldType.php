@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Routing\Router;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use UniteCMS\CoreBundle\Entity\ContentType;
 use UniteCMS\CoreBundle\Entity\DomainMember;
@@ -68,6 +69,7 @@ class ReferenceFieldType extends FieldType
     private $csrfTokenManager;
     private $router;
     private $tableViewConfigurationFactory;
+    private $translator;
 
     function __construct(
         ValidatorInterface $validator,
@@ -78,7 +80,8 @@ class ReferenceFieldType extends FieldType
         Environment $templating,
         Router $router,
         CsrfTokenManager $csrfTokenManager,
-        ViewConfigurationFactoryInterface $tableViewConfigurationFactory
+        ViewConfigurationFactoryInterface $tableViewConfigurationFactory,
+        TranslatorInterface $translator
     ) {
         $this->referenceResolver = new ReferenceResolver($uniteCMSManager, $entityManager, $authorizationChecker);
         $this->validator = $validator;
@@ -89,6 +92,7 @@ class ReferenceFieldType extends FieldType
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->tableViewConfigurationFactory = $tableViewConfigurationFactory;
+        $this->translator = $translator;
     }
 
     /**
@@ -214,6 +218,9 @@ class ReferenceFieldType extends FieldType
                     'api-url' => $this->router->generate('unitecms_core_api', [$fieldable]),
                     'content-label' => $contentLabel,
                     'fieldable-type' => ($fieldable instanceof ContentType ? 'content' : 'member'),
+                    'labels' => json_encode([
+                        'select' => $this->translator->trans('reference.field.select'),
+                    ]),
                     'modal-html' => $this->templating->render(
                         ($view ?
                             $this->viewTypeManager->getViewType($view->getType())::getTemplate() :

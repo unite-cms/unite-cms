@@ -80,6 +80,10 @@
         position: relative;
         display: block;
 
+        .uk-margin {
+            margin-bottom: 0;
+        }
+
         .uk-grid-small > .uk-grid-margin {
             margin-top: 5px;
             margin-bottom: 10px;
