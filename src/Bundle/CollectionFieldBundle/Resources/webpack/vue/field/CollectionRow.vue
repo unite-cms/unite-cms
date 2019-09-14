@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="collection-add-button-wrapper">
-            <a v-if="shouldShowAddRow" href="#" class="uk-button uk-button-default" v-on:click.prevent="addRowBefore" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></a>
+            <a v-if="canAddRow" href="#" class="uk-button uk-button-default" v-on:click.prevent="addRowBefore" v-html="feather.icons['plus'].toSvg({ width: 20, height: 20 })"></a>
         </div>
         <div class="uk-placeholder uk-padding-small">
             <div class="uk-sortable-handle" v-html="feather.icons['menu'].toSvg({ width: 16, height: 16 })"></div>
@@ -28,7 +28,7 @@
             'prototype',
             'formLayout',
             'labelHidden',
-            'shouldShowAddRow', // For toggling addRowBefore button
+            'canAddRow', // For toggling addRowBefore button
         ],
         methods: {
             removeRow() {
