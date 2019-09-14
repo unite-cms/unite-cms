@@ -7,6 +7,7 @@ import feather from 'feather-icons';
 import pageUnload from "./js/pageUnload";
 import formGroupErrorHandler from "./js/formGroupErrorHandler";
 import uniteViewFieldsPlugin from "./js/uniteViewFieldsPlugin";
+import datePicker from "./js/datePicker";
 
 import TableView from './vue/views/TableView';
 import GridView from './vue/views/GridView';
@@ -95,6 +96,9 @@ window.onload = function() {
 
     // Show error indicator in form group labels for all children.
     formGroupErrorHandler.init();
+
+    // Date picker init.
+    datePicker.init();
 
     let diffVisualization = document.querySelector('.unite-domain-change-visualization');
     if(diffVisualization) {

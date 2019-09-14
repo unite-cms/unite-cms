@@ -3,17 +3,16 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Entity\FieldableField;
-use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class DateTimeFieldType extends DateFieldType
 {
     const TYPE = "datetime";
     const FORM_TYPE = DateTimeType::class;
-    const DATE_FORMAT = 'Y-m-d H:i:00';
+    const DATE_FORMAT = 'Y-m-d H:i:s';
+
+    const SETTINGS = ['not_empty', 'description', 'default', 'form_group', 'min', 'max', 'step'];
 
     /**
      * {@inheritdoc}
@@ -26,10 +25,7 @@ class DateTimeFieldType extends DateFieldType
     /**
      * {@inheritdoc}
      */
-    protected function validateDefaultValue($value, FieldableFieldSettings $settings, ExecutionContextInterface $context) {
-        $value = $this->transformDefaultValue($value);
-        $context->getViolations()->addAll(
-            $context->getValidator()->validate($value, new Assert\DateTime(['message' => 'invalid_initial_data']))
-        );
+    protected function transformMinMaxValue($value) {
+        return str_replace(' ', 'T', $value);
     }
 }

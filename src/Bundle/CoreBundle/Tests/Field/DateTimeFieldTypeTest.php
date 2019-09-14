@@ -28,12 +28,16 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
         $ctField->setSettings(new FieldableFieldSettings(
             [
                 'foo' => 'baa',
+                'min' => 'not a datetime string',
+                'max' => 'not a datetime string',
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
+        $this->assertCount(3, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('This value is not a valid datetime.', $errors->get(1)->getMessageTemplate());
+        $this->assertEquals('This value is not a valid datetime.', $errors->get(2)->getMessageTemplate());
 
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
@@ -44,7 +48,25 @@ class DateTimeFieldTypeTest extends FieldTypeTestCase
 
         $errors = static::$container->get('validator')->validate($ctField);
         $this->assertCount(1, $errors);
-        $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
+        $this->assertEquals('This value is not a valid datetime.', $errors->get(0)->getMessageTemplate());
+    }
+
+    public function testDateTimeTypeFieldTypeWithInvalidMinMaxRangeSettings()
+    {
+        // Date Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('datetime');
+
+        // test min date greater than max date
+        $ctField->setSettings(new FieldableFieldSettings(
+            [
+                'min' => '2019-01-01 00:00:00',
+                'max' => '2018-06-20 00:00:00'
+            ]
+        ));
+
+        $errors = static::$container->get('validator')->validate($ctField);
+        $this->assertCount(1, $errors);
+        $this->assertEquals('This value should be less than or equal to "2018-06-20 00:00:00".', $errors->get(0)->getMessageTemplate());
     }
 
     public function testDateTimeTypeFieldTypeWithValidSettings()
