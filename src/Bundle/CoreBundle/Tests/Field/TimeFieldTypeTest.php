@@ -4,22 +4,22 @@ namespace UniteCMS\CoreBundle\Tests\Field;
 
 use UniteCMS\CoreBundle\Entity\Content;
 use UniteCMS\CoreBundle\Field\FieldableFieldSettings;
-use UniteCMS\CoreBundle\Field\Types\DateFieldType;
+use UniteCMS\CoreBundle\Field\Types\TimeFieldType;
 
-class DateFieldTypeTest extends FieldTypeTestCase
+class TimeFieldTypeTest extends FieldTypeTestCase
 {
-    public function testDateTypeFieldTypeWithEmptySettings()
+    public function testTimeTypeFieldTypeWithEmptySettings()
     {
-        // Date Type Field with empty settings should be valid.
-        $ctField = $this->createContentTypeField('date');
+        // Time Type Field with empty settings should be valid.
+        $ctField = $this->createContentTypeField('time');
         $this->assertCount(0, static::$container->get('validator')->validate($ctField));
     }
 
-    public function testDateTypeFieldTypeWithInvalidSettings()
+    public function testTimeTypeFieldTypeWithInvalidSettings()
     {
-        // Date Type Field with invalid settings should not be valid.
-        $ctField = $this->createContentTypeField('date');
-        $ctField->setSettings(new FieldableFieldSettings(['foo' => 'baa']));
+        // Time Type Field with invalid settings should not be valid.
+        $ctField = $this->createContentTypeField('time');
+        $ctField->setSettings(new FieldableFieldSettings(['baa' => 'foo']));
         $errors = static::$container->get('validator')->validate($ctField);
 
         $this->assertCount(1, $errors);
@@ -28,19 +28,15 @@ class DateFieldTypeTest extends FieldTypeTestCase
         // test invalid settings
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'foo' => 'baa',
-                'not_empty' => 124,
-                'min' => 'not a date string',
-                'max' => 'not a date string'
+                'bar' => 'foo',
+                'not_empty' => 124
             ]
         ));
 
         $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(4, $errors);
+        $this->assertCount(2, $errors);
         $this->assertEquals('additional_data', $errors->get(0)->getMessageTemplate());
         $this->assertEquals('noboolean_value', $errors->get(1)->getMessageTemplate());
-        $this->assertEquals('no_date_value', $errors->get(2)->getMessageTemplate());
-        $this->assertEquals('no_date_value', $errors->get(3)->getMessageTemplate());
 
         // test wrong initial data
         $ctField->setSettings(new FieldableFieldSettings(
@@ -54,35 +50,15 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $this->assertEquals('invalid_initial_data', $errors->get(0)->getMessageTemplate());
     }
 
-    public function testDateTypeFieldTypeWithInvalidMinMaxRangeSettings()
+    public function testTimeTypeFieldTypeWithValidSettings()
     {
-        // Date Type Field with invalid settings should not be valid.
-        $ctField = $this->createContentTypeField('date');
-
-        // test min date greater than max date
-        $ctField->setSettings(new FieldableFieldSettings(
-            [
-                'min' => '2019-01-01',
-                'max' => '2018-06-20'
-            ]
-        ));
-
-        $errors = static::$container->get('validator')->validate($ctField);
-        $this->assertCount(1, $errors);
-        $this->assertEquals('min_greater_than_max', $errors->get(0)->getMessageTemplate());
-    }
-
-    public function testDateTypeFieldTypeWithValidSettings()
-    {
-        $ctField = $this->createContentTypeField('date');
+        $ctField = $this->createContentTypeField('time');
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'default' => '2018-05-24',
+                'default' => '08:30:15',
                 'not_empty' => true,
                 'form_group' => 'foo',
-                'min' => '2018-05-20',
-                'max' => '2018-05-28',
             ]
         ));
 
@@ -102,12 +78,12 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);
-        $this->assertEquals((new \DateTime('now'))->format(DateFieldType::DATE_FORMAT), $form->getData()[$ctField->getIdentifier()]);
+        $this->assertEquals((new \DateTime('now'))->format(TimeFieldType::DATE_FORMAT), $form->getData()[$ctField->getIdentifier()]);
     }
 
     public function testFormDataTransformers() {
 
-        $ctField = $this->createContentTypeField('date');
+        $ctField = $this->createContentTypeField('time');
 
         $content = new Content();
         $id = new \ReflectionProperty($content, 'id');
@@ -119,25 +95,25 @@ class DateFieldTypeTest extends FieldTypeTestCase
         ]);
 
         $form->submit([
-            $ctField->getIdentifier() => '2018-05-24',
+            $ctField->getIdentifier() => '08:15', // Form input value does not have seconds
         ]);
 
-        $this->assertEquals('2018-05-24', $form->getData()[$ctField->getIdentifier()]);
+        $this->assertEquals('08:15:00', $form->getData()[$ctField->getIdentifier()]);
 
         $content->setData([
-            $ctField->getIdentifier() => '2012-01-01',
+            $ctField->getIdentifier() => '09:30:45',
         ]);
 
         $form = static::$container->get('unite.cms.fieldable_form_builder')->createForm($ctField->getContentType(), $content, [
             'csrf_protection' => false,
         ]);
 
-        $this->assertEquals('2012-01-01', $form->get($ctField->getIdentifier())->getData());
+        $this->assertEquals('09:30:45', $form->get($ctField->getIdentifier())->getData());
     }
 
     public function testContentFormBuild() {
 
-        $ctField = $this->createContentTypeField('date');
+        $ctField = $this->createContentTypeField('time');
 
         $ctField->setIdentifier('f1');
 
@@ -147,7 +123,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
 
         $ctField->setSettings(new FieldableFieldSettings(
             [
-                'default' => '2012-01-01',
+                'default' => '09:30:45',
                 'description' => 'blabla'
             ]
         ));
@@ -163,7 +139,7 @@ class DateFieldTypeTest extends FieldTypeTestCase
         $formView = $form->createView();
         $root = $formView->getIterator()->current();
 
-        $this->assertEquals('2012-01-01', $root->vars['value']);
+        $this->assertEquals('09:30', $root->vars['value']); // Eliminate seconds after form build
         $this->assertEquals('blabla', $root->vars['description']);
 
     }
