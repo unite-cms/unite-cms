@@ -54,6 +54,11 @@ services:
     public: false
     tags: [unite_cms.field_type]
 
+  # A simple Time field
+  UniteCMS\CoreBundle\Field\Types\TimeFieldType:
+    public: false
+    tags: [unite_cms.field_type]
+
   # A simple DateTime field
   UniteCMS\CoreBundle\Field\Types\DateTimeFieldType:
     public: false
