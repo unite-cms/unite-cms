@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Controller;
 
+use Gedmo\Loggable\Entity\Repository\LogEntryRepository;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use GraphQL\GraphQL;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Entity\ContentLogEntry;
 use UniteCMS\CoreBundle\Entity\ContentTypeField;
 use UniteCMS\CoreBundle\Entity\SoftDeleteableFieldableContent;
 use UniteCMS\CoreBundle\Exception\NotValidException;
@@ -633,6 +635,8 @@ class ContentController extends AbstractController
             throw $this->createNotFoundException();
         }
 
+        $revisionFieldIdentifier = $this->getRevisionDescriptionIdentifier($content);
+
         return $this->render(
             '@UniteCMSCore/Content/revisions.html.twig',
             [
@@ -640,6 +644,7 @@ class ContentController extends AbstractController
                 'contentType' => $view->getContentType(),
                 'content' => $content,
                 'revisions' => $contentManager->getRevisions($content),
+                'revisionFieldIdentifier' => $revisionFieldIdentifier
             ]
         );
     }
@@ -687,5 +692,101 @@ class ContentController extends AbstractController
                 'form' => $form->createView(),
             ]
         );
+    }
+
+    /**
+     * @Route("/{content_type}/{view}/revisionsdiff/{content}", methods={"GET"})
+     * @Entity("view", expr="repository.findByIdentifiers(organization, domain, content_type, view)")
+     * @Entity("content")
+     * @Security("is_granted(constant('UniteCMS\\CoreBundle\\Security\\Voter\\ContentVoter::UPDATE'), content)")
+     *
+     * @param View $view
+     * @param Content $content
+     * @param Request $request
+     * @return Response
+     */
+    public function revisionsDiffAction(View $view, Content $content, Request $request)
+    {
+        // Verify the user is accessing Content from the correct domain.
+        if($content->getContentType() !== $view->getContentType()) {
+            throw $this->createNotFoundException();
+        }
+
+        $firstLogId = $request->query->get('first_revision');
+        $secondLogId = $request->query->get('second_revision');
+        $logRepository = $this->getDoctrine()->getManager()->getRepository(ContentLogEntry::class);
+        $firstRevision = $this->getRevision($logRepository, $firstLogId, $content);
+        if ($firstRevision === null) {
+            throw $this->createNotFoundException();
+        }
+
+        $viewParams = [
+            'view' => $view,
+            'contentType' => $view->getContentType(),
+            'content' => $content,
+            'firstRevision' => $firstRevision,
+        ];
+
+        if ($firstLogId !== $secondLogId) {
+            $secondRevision = $this->getRevision($logRepository, $secondLogId, $content);
+            if ($secondRevision === null) {
+                throw $this->createNotFoundException();
+            }
+
+            $viewParams['secondRevision'] = $secondRevision;
+        }
+
+        return $this->render(
+            '@UniteCMSCore/Content/revisionsDiff.html.twig',
+            $viewParams
+        );
+    }
+
+    private function getRevisionDescriptionIdentifier(Content $content) {
+        // Identify the first field with the revision_description setting, or null if it doesn't exist
+        $fields = $content->getContentType()->getOrderedFields();
+        $revDescriptionFields = $fields->filter(function(ContentTypeField $field) {
+            return $field->getSettings()->revision_description === true;
+        })->toArray();
+
+        return count($revDescriptionFields) > 0
+            ? array_values($revDescriptionFields)[0]->getIdentifier()
+            : null;
+    }
+
+    /**
+     * @param LogEntryRepository $logRepository
+     * @param string $logId
+     * @param Content $content
+     * @return array|null
+     */
+    private function getRevision(LogEntryRepository $logRepository, $logId, Content $content)
+    {
+        if (!$logId) {
+            return null;
+        }
+
+        $logRecord = $logRepository->find($logId);
+        if ($logRecord === null) {
+            return null;
+        }
+
+        $formContent = $logRecord->getData()['data'];
+        $revisionFieldIdentifier = $this->getRevisionDescriptionIdentifier($content);
+        $description = $revisionFieldIdentifier !== null ? $formContent[$revisionFieldIdentifier] : null;
+
+        $json = json_encode($formContent, JSON_PRETTY_PRINT);
+        $revision = [
+            'action' => $logRecord->getAction(),
+            'id' => $logRecord->getId(),
+            'timestamp' => $logRecord->getLoggedAt(),
+            'contentId' => $logRecord->getObjectId(),
+            'actor' => $logRecord->getUsername(),
+            'version' => $logRecord->getVersion(),
+            'description' => $description,
+            'contentJson' => $json,
+        ];
+
+        return $revision;
     }
 }

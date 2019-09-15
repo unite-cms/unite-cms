@@ -1,0 +1,31 @@
+#content-revision-view {
+    position: absolute;
+    top: 210px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.revision-diff-header {
+    margin-bottom: 20px;
+}
+
+.revision-diff-info-container {
+    margin-bottom: 10px;
+    margin-left: -30px;
+    margin-right: -30px;
+}
+
+.left-revision-radio {
+    background-color: #F9D0D0;
+}
+
+.right-revision-radio {
+    background-color: #D0FFD0;
+}
+
+.revisions-table.unite-card-table tr > td:last-child,
+.revisions-table.unite-card-table tr > div:last-child
+{
+    padding-right: 12px;
+}

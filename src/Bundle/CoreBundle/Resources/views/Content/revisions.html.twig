@@ -3,36 +3,44 @@
 {% block navigation %}{{ include('@UniteCMSCore/Domain/_navigation.html.twig') }}{% endblock navigation %}
 {% block content %}
 <article class="uk-card uk-card-default uk-card-body full-content-card uk-flex-1">
+    <form method="get" action="{{ url('unitecms_core_content_revisionsdiff', {'view': view, 'content': content }) }}">
     <header class="uk-card-header uk-flex">
         <a class="back-button" href="{{ url('unitecms_core_content_index', [view]) }}"><i data-feather="arrow-left"></i></a>
         <h2 class="uk-flex-1">{% trans with {'%content%': content|escape } %}content.revisions.headline{% endtrans %}</h2>
+        <input type="submit" class="uk-button uk-button-primary" value="View Diff">
     </header>
 
-    <div class="unite-card-table">
+    <div class="unite-card-table revisions-table">
         <table class="uk-table uk-table-divider uk-table-hover">
             <thead>
             <tr>
-                <th>Info</th>
-                <th>Data</th>
+                <th>Version</th>
+                {% if revisionFieldIdentifier is not null %}
+                    <th>Description</th>
+                {% endif %}
+                <th>Action</th>
+                <th>Timestamp</th>
+                <th>Actor</th>
                 <th>Actions</th>
+                <th></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
+            {% set firstRow = true %}
             {% for revision in revisions %}
                 <tr>
-                    <td>
-                        <h4>Version: #{{ revision.version }}</h4>
-                        <ul class="uk-list">
-                            <li>Action: {{ revision.action }}</li>
-                            <li>Timestamp: {{ revision.loggedAt|date }}</li>
-                            <li>Actor: {{ revision.username }}</li>
-                        </ul>
-                    </td>
-                    <td>
-                        {% if revision.data %}
-                            <pre>{{ revision.data.data|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
-                        {% endif %}
-                    </td>
+                    <td>{{ revision.version }}</td>
+                    {% if revisionFieldIdentifier is not null %}
+                        <td>
+                            {% if revision.data.data[revisionFieldIdentifier] is defined %}
+                                {{ revision.data.data[revisionFieldIdentifier] }}
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                    <td>{{ revision.action }}</td>
+                    <td>{{ revision.loggedAt|date }}</td>
+                    <td>{{ revision.username }}</td>
                     <td>
                         {% if not loop.first and revision.action != 'remove' %}
                             <button class="uk-button uk-button-default actions-dropdown" type="button"><i data-feather="more-horizontal"></i></button>
@@ -46,11 +54,14 @@
                             </div>
                         {% endif %}
                     </td>
+                    <td class="left-revision-radio"><input type="radio" name="first_revision" value="{{ revision.id }}" {% if firstRow %}checked{% endif %}></td>
+                    <td class="right-revision-radio"><input type="radio" name="second_revision" value="{{ revision.id }}" {% if firstRow %}checked{% endif %}></td>
                 </tr>
+                {% set firstRow = false %}
             {% endfor %}
             </tbody>
         </table>
     </div>
-
+    </form>
 </article>
 {% endblock content %}
