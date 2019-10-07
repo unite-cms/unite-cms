@@ -258,7 +258,7 @@
                     let headers = {};
 
                     if (this.acl) {
-                        headers['x-amz-acl'] = t.acl;
+                        headers['x-amz-acl'] = this.acl;
                     }
 
                     UIkit.util.trigger(this.$el, 'upload', [file]);
