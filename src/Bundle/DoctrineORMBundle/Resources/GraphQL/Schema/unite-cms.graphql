@@ -1,0 +1,76 @@
+
+scalar Expression
+scalar JSON
+
+directive @hide(
+    if: Expression!
+) on FIELD_DEFINITION | OBJECT
+
+directive @access(
+    # used in schema extender
+    query: Expression
+    mutation: Expression
+
+    # used in resolver
+    create: Expression
+    read: Expression
+    update: Expression
+    delete: Expression
+) on FIELD_DEFINITION | OBJECT
+
+directive @field(
+    type: String!
+    settings: JSON
+) on FIELD_DEFINITION
+
+scalar DateTime
+
+interface UniteUser {
+    id: ID!
+}
+
+interface UniteContent {
+    id: ID!
+    _deleted: DateTime
+    _version: Int!
+    _versions: [UniteContent!]!
+}
+
+interface UniteEmbeddedContent {
+    id: ID!
+}
+
+interface UniteContentResult {
+    total: Int!
+    result: [UniteContent!]
+}
+
+enum SORT {
+    ASC
+    DESC
+}
+
+input UniteReferenceInput {
+    content: ID!
+    type: String!
+}
+
+input UniteFilterInput {
+    field: String
+    value: String
+    AND: [UniteFilterInput]
+    OR: [UniteFilterInput]
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    version: String
+}
+
+type Mutation {
+    version : String
+}

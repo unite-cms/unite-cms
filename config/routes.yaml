@@ -1,0 +1,4 @@
+unite_cms_core_api:
+    path: /
+    methods: POST
+    controller: UniteCMS\CoreBundle\Controller\ApiController::api

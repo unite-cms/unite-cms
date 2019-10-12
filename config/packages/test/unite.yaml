@@ -1,0 +1,5 @@
+
+unite_cms_core:
+    domains:
+        default:
+            content_manager: UniteCMS\CoreBundle\Tests\Content\TestContentManager

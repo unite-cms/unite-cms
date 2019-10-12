@@ -1,0 +1,24 @@
+{
+  "name": "unite-cms/doctrine-orm-bundle",
+  "type": "symfony-bundle",
+  "description": "Adds doctrine orm support (MySQL, PostgreSQL, MariaDB etc.) for unite cms",
+  "require": {
+    "unite-cms/core-bundle": "0@dev",
+    "doctrine/orm": "^2.5.11",
+    "doctrine/doctrine-bundle": "^1.6.10"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": { "UniteCMS\\DoctrineORMBundle\\": "" },
+    "exclude-from-classmap": [
+      "/Tests/"
+    ]
+  },
+  "authors": [
+    {
+      "name": "Franz Wilding",
+      "email": "franz@unite.co.at"
+    }
+  ]
+}

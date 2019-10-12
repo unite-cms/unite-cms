@@ -1,0 +1,37 @@
+doctrine:
+    dbal:
+        connections:
+
+            default:
+                url: '%env(DATABASE_URL)%'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: utf8mb4
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+
+            baa:
+                url: '%env(DATABASE_BAA_URL)%'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: utf8mb4
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+    orm:
+        entity_managers:
+            auto_generate_proxy_classes: true
+            default:
+                connection: default
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+                mappings:
+                    UniteCMSDoctrineORMBundle:
+                        type: annotation
+
+            baa:
+                connection: baa
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+                mappings:
+                    UniteCMSDoctrineORMBundle:
+                        type: annotation

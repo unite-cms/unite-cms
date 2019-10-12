@@ -1,0 +1,49 @@
+enum CONTENT_BLOCK_LAYOUT {
+    LEFT,
+    CENTER,
+    RIGHT
+}
+
+type ArticleContentLayout implements UniteEmbeddedContent {
+    id: ID
+    layout: CONTENT_BLOCK_LAYOUT!       @field(type: "choice")
+    settings: String!                   @field(type: "text")
+    sidebar_content: [ArticleContent!]  @field(type: "embedded")
+}
+
+type ArticleContent implements UniteEmbeddedContent {
+    id: ID
+    layout: ArticleContentLayout!       @field(type: "embedded")
+    content: String!                    @field(type: "text")
+}
+
+type ArticleSettings implements UniteEmbeddedContent {
+    id: ID
+    category: String!       @field(type: "text")
+    tags: [String!]         @field(type: "text")
+}
+
+type Article implements UniteContent @access(mutation: "true", query: "true", read: "true", create: "true", update: "true", delete: "true") {
+    id: ID
+    _deleted: DateTime
+    _version: Int!              @hide(if: "not has_role('ROLE_ADMIN')")
+    _versions: [Article!]!
+
+    title: String!              @field(type: "text") @hide(if: "false")
+
+    mainImage: Image!           @field(type: "reference")
+    teaserImages: [Image!]!     @field(type: "reference")
+    gallery: [Image!]           @field(type: "reference")
+    content: [ArticleContent!]  @field(type: "embedded")
+    settings: ArticleSettings   @field(type: "embedded")
+}
+
+type Image implements UniteContent {
+    id: ID
+    _deleted: DateTime
+    _version: Int!
+    _versions: [Image!]!
+
+    title: String!              @field(type: "text")
+    alt: String!                @field(type: "text")
+}
