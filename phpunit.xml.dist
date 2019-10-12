@@ -12,6 +12,7 @@
         <ini name="error_reporting" value="-1" />
         <server name="KERNEL_CLASS" value="App\Kernel" />
         <server name="KERNEL_DIR" value="src" />
+        <env name="DATABASE_URL" value="mysql://root:@127.0.0.1:3306/unite_test"/>
     </php>
 
     <testsuites>

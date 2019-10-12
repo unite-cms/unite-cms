@@ -15,6 +15,10 @@ matrix:
     include:
         - php: 7.2
 
+before_install:
+    - |
+        mysql -e 'CREATE DATABASE unite_test;'
+
 install:
     - composer install
 
