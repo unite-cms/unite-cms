@@ -24,4 +24,4 @@ install:
     - composer install
 
 script:
-    - ./vendor/phpunit/phpunit/phpunit
+    - php ./bin/phpunit

@@ -28,11 +28,11 @@ class ContentType
     {
         $this->permissions = [
             ContentVoter::QUERY => 'true',
-            ContentVoter::MUTATION => 'has_role("ROLE_ADMIN")',
-            ContentVoter::CREATE => 'has_role("ROLE_ADMIN")',
+            ContentVoter::MUTATION => 'is_granted("ROLE_ADMIN")',
+            ContentVoter::CREATE => 'is_granted("ROLE_ADMIN")',
             ContentVoter::READ => 'true',
-            ContentVoter::UPDATE => 'has_role("ROLE_ADMIN")',
-            ContentVoter::DELETE => 'has_role("ROLE_ADMIN")',
+            ContentVoter::UPDATE => 'is_granted("ROLE_ADMIN")',
+            ContentVoter::DELETE => 'is_granted("ROLE_ADMIN")',
         ];
         $this->id = $id;
     }

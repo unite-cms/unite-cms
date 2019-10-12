@@ -9,9 +9,6 @@
     "symfony/security-bundle": "4.3.*",
     "webonyx/graphql-php": "^0.13.8"
   },
-  "require-dev": {
-    "symfony/phpunit-bridge": "4.3.*"
-  },
   "autoload": {
     "psr-4": { "UniteCMS\\CoreBundle\\": "" },
     "exclude-from-classmap": [

@@ -55,7 +55,7 @@ class ContentTypeField
     {
         $this->permissions = [
             ContentFieldVoter::READ => 'true',
-            ContentFieldVoter::UPDATE => 'has_role("ROLE_ADMIN")',
+            ContentFieldVoter::UPDATE => 'is_granted("ROLE_ADMIN")',
         ];
         $this->id = $id;
         $this->type = $type;
