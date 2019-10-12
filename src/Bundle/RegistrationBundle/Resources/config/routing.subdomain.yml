@@ -1,9 +1,0 @@
-
-unitecms_registration_registration:
-    resource: "@UniteCMSRegistrationBundle/Controller/RegistrationController.php"
-    type:     annotation
-    host:     'profile.{hostname}'
-    requirements:
-        hostname: '%allowed_hostname%'
-    defaults:
-        hostname: '%default_hostname%'

@@ -1,5 +1,0 @@
-storage.missing_file_definition: 'At least one required file definition field ("size", "id", "name", "checksum") is missing. The file reference could not be saved. Please try the upload again.'
-storage.invalid_checksum: 'The checksum of your file upload is not valid. Please try again.'
-storage.absolute_url: 'Please enter an absolute URL (starting with https://).'
-storage.no_trailing_slash: 'Please enter an enpoint without a trailing slash.'
-storage.invalid_expiration_time: 'Please enter a valid relative time format like "+1 hours" but less than one week. Reference: https://www.php.net/manual/de/datetime.formats.relative.php'

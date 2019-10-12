@@ -1,7 +1,0 @@
-.DS_Store
-.idea/
-composer.lock
-package-lock.json
-/node_modules/
-/vendor/
-yarn.lock

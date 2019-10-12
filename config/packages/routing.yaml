@@ -1,7 +1,0 @@
-framework:
-    router:
-        strict_requirements: ~
-
-sensio_framework_extra:
-    router:
-        annotations: false

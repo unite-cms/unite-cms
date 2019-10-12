@@ -1,3 +1,0 @@
-wysiwygfield.invalid_heading_definition: 'The heading options must follow the ckeditor heading schema: <a target="_blank" href="https://docs.ckeditor.com/ckeditor5">CKEditor docs</a>.'
-wysiwygfield.not_an_array: 'The option must be defined as array. Please see the <a target="_blank" href="https://docs.ckeditor.com/ckeditor5">CKEditor docs</a> for more information.'
-wysiwygfield.unknown_option: 'Unknown option. Please see the <a target="_blank" href="https://docs.ckeditor.com/ckeditor5">CKEditor docs</a> for more information.'
