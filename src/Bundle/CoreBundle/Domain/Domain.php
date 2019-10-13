@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Domain;
 
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
+use UniteCMS\CoreBundle\User\UserManagerInterface;
 
 class Domain
 {
@@ -17,6 +18,11 @@ class Domain
      * @var ContentManagerInterface $contentManager
      */
     protected $contentManager;
+
+    /**
+     * @var UserManagerInterface $userManager
+     */
+    protected $userManager;
 
     /**
      * @var ContentTypeManager $contentTypeManager
@@ -33,13 +39,15 @@ class Domain
      *
      * @param string $id
      * @param ContentManagerInterface $contentManager
+     * @param UserManagerInterface $userManager
      * @param string[] $schema
      * @param ContentTypeManager|null $contentTypeManager
      */
-    public function __construct(string $id, ContentManagerInterface $contentManager, array $schema, ContentTypeManager $contentTypeManager = null)
+    public function __construct(string $id, ContentManagerInterface $contentManager, UserManagerInterface $userManager, array $schema, ContentTypeManager $contentTypeManager = null)
     {
         $this->id = $id;
         $this->contentManager = $contentManager;
+        $this->userManager = $userManager;
         $this->schema = $schema;
         $this->contentTypeManager = $contentTypeManager ?? new ContentTypeManager();
     }
@@ -58,6 +66,14 @@ class Domain
     public function getContentManager(): ContentManagerInterface
     {
         return $this->contentManager;
+    }
+
+    /**
+     * @return UserManagerInterface
+     */
+    public function getUserManager(): UserManagerInterface
+    {
+        return $this->userManager;
     }
 
     /**

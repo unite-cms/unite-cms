@@ -1,7 +1,7 @@
 <?php
 
 
-namespace UniteCMS\CoreBundle\Tests\Content;
+namespace UniteCMS\CoreBundle\Tests\Mock;
 
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;

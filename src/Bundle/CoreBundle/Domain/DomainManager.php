@@ -49,6 +49,7 @@ class DomainManager
         $this->setCurrentDomain(new Domain(
             $id,
             $config['content_manager'],
+            $config['user_manager'],
             $config['schema']
         ));
 

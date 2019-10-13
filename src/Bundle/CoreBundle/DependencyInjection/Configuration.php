@@ -24,16 +24,16 @@ class Configuration implements ConfigurationInterface
     protected $defaultContentManager;
 
     /**
-     * @var string $defaultUserProvider
+     * @var string $defaultUserManager
      */
-    protected $defaultUserProvider;
+    protected $defaultUserManager;
 
-    public function __construct(string $defaultConfigDir, string $defaultBaseSchema, string $defaultContentManager = null, string $defaultUserProvider = null)
+    public function __construct(string $defaultConfigDir, string $defaultBaseSchema, string $defaultContentManager = null, string $defaultUserManager = null)
     {
         $this->defaultConfigDir = $defaultConfigDir;
         $this->defaultBaseSchema = $defaultBaseSchema;
         $this->defaultContentManager = $defaultContentManager;
-        $this->defaultUserProvider = $defaultUserProvider;
+        $this->defaultUserManager = $defaultUserManager;
     }
 
     /**
@@ -69,9 +69,9 @@ class Configuration implements ConfigurationInterface
                             ->isRequired()
                             ->defaultValue($this->defaultContentManager)
                         ->end()
-                        ->scalarNode('user_provider')
+                        ->scalarNode('user_manager')
                             ->cannotBeEmpty()
-                            ->defaultValue($this->defaultUserProvider)
+                            ->defaultValue($this->defaultUserManager)
                         ->end()
                     ->end()
                 ->end()

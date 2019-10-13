@@ -27,27 +27,30 @@ class UniteCMSCoreExtension extends Extension
         }
 
         $defaultContentManager = null;
-        $defaultUserProvider = null;
+        $defaultUserManager = null;
 
         if(class_exists('UniteCMS\DoctrineORMBundle\Content\ContentManager')) {
             $defaultContentManager = 'UniteCMS\DoctrineORMBundle\Content\ContentManager';
         }
 
-        if(class_exists('UniteCMS\DoctrineORMBundle\User\UserProvider')) {
-            $defaultUserProvider = 'UniteCMS\DoctrineORMBundle\User\UserProvider';
+        if(class_exists('UniteCMS\DoctrineORMBundle\User\UserManager')) {
+            $defaultUserManager = 'UniteCMS\DoctrineORMBundle\User\UserManager';
         }
 
         $configuration = new Configuration(
             $container->getParameter('kernel.project_dir') . '/config/unite/',
             SchemaManager::DEFAULT_BASE_SCHEMA,
             $defaultContentManager,
-            $defaultUserProvider
+            $defaultUserManager
         );
         $config = $this->processConfiguration($configuration, $configs);
 
         foreach($config['domains'] as $id => $params) {
             $params['content_manager'] = substr($params['content_manager'], 0, 1) === '@' ? substr($params['content_manager'], 1) : $params['content_manager'];
             $config['domains'][$id]['content_manager'] = new Reference($params['content_manager']);
+
+            $params['user_manager'] = substr($params['user_manager'], 0, 1) === '@' ? substr($params['user_manager'], 1) : $params['user_manager'];
+            $config['domains'][$id]['user_manager'] = new Reference($params['user_manager']);
 
             foreach($params['schema'] as $s_key => $schemaFile) {
                 $config['domains'][$id]['schema'][$s_key] = file_get_contents($schemaFile);

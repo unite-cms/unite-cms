@@ -1,13 +1,21 @@
 security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        in_memory: { memory: null }
+        unite_cms:
+            id: UniteCMS\CoreBundle\Security\DomainUserProvider
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
+
+        api:
+            pattern:   ^/
+            stateless: true
             anonymous: true
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication

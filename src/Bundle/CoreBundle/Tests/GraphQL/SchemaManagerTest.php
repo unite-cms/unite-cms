@@ -10,7 +10,6 @@ use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
-use UniteCMS\CoreBundle\Tests\Content\TestContentManager;
 
 class SchemaManagerTest extends KernelTestCase
 {
@@ -74,9 +73,11 @@ class SchemaManagerTest extends KernelTestCase
 
         $schemaManager = static::$container->get(SchemaManager::class);
         $domainManager = static::$container->get(DomainManager::class);
+        $domain = $domainManager->current();
         $domainManager->setCurrentDomain(new Domain(
             'test',
-            new TestContentManager(),
+            $domain->getContentManager(),
+            $domain->getUserManager(),
             [
                 file_get_contents(SchemaManager::DEFAULT_BASE_SCHEMA),
                 $schema,

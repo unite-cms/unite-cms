@@ -23,7 +23,7 @@ type ArticleSettings implements UniteEmbeddedContent {
     tags: [String!]         @field(type: "text")
 }
 
-type Article implements UniteContent @access(mutation: "true", query: "true", read: "true", create: "true", update: "true", delete: "true") {
+type Article implements UniteContent {
     id: ID
     _deleted: DateTime
     _version: Int!              @hide(if: "not is_granted('ROLE_ADMIN')")
