@@ -1,6 +1,5 @@
 <?php
 
-
 namespace UniteCMS\CoreBundle\Command;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -9,7 +8,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\EventSubscriber\SetCurrentDomainSubscriber;
+use UniteCMS\CoreBundle\Security\DomainUserProvider;
 
 class GenerateTokenCommand extends Command
 {
@@ -19,16 +19,16 @@ class GenerateTokenCommand extends Command
     private $tokenManager;
 
     /**
-     * @var \UniteCMS\CoreBundle\Domain\DomainManager
+     * @var DomainUserProvider $domainUserProvider
      */
-    private $domainManager;
+    private $domainUserProvider;
 
-    public function __construct(JWTTokenManagerInterface $tokenManager, DomainManager $domainManager)
+    public function __construct(DomainUserProvider $domainUserProvider, JWTTokenManagerInterface $tokenManager)
     {
         parent::__construct();
 
         $this->tokenManager  = $tokenManager;
-        $this->domainManager = $domainManager;
+        $this->domainUserProvider = $domainUserProvider;
     }
 
     /**
@@ -41,7 +41,7 @@ class GenerateTokenCommand extends Command
             ->setDescription('Generates a JWT token for a unite cms user.')
             ->addArgument('type', InputArgument::REQUIRED)
             ->addArgument('username', InputArgument::REQUIRED)
-            ->addOption('domain', 'd', InputOption::VALUE_OPTIONAL)
+            ->addOption(SetCurrentDomainSubscriber::COMMAND_OPTION, '', InputOption::VALUE_OPTIONAL, 'Specify the unite domain id to set before executing the command.')
         ;
     }
 
@@ -50,18 +50,12 @@ class GenerateTokenCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if($input->getOption('domain')) {
-            $this->domainManager->setCurrentDomainFromConfigId($input->getOption('domain'));
-        }
-
-        $domain = $this->domainManager->current();
-        $token = $this->tokenManager->create(
-            $domain->getUserManager()->find(
-                $domain,
-                $input->getArgument('type'),
-                $input->getArgument('username')
-            )
+        $user = $this->domainUserProvider->loadUserByUsernameAndPayload(
+            $input->getArgument('username'),
+            ['roles' => [sprintf('ROLE_%s', $input->getArgument('type'))]]
         );
+
+        $token = $this->tokenManager->create($user);
 
         $output->writeln([
             '',

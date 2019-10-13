@@ -3,7 +3,7 @@
 
 namespace UniteCMS\DoctrineORMBundle\User;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\User\UserInterface;
@@ -31,10 +31,10 @@ class UserManager implements UserManagerInterface
     /**
      * @param \UniteCMS\CoreBundle\Domain\Domain $domain
      *
-     * @return EntityManager
+     * @return ObjectManager
      */
-    protected function em(Domain $domain) : EntityManager {
-        return $this->registry->getEntityManager($domain->getId());
+    protected function em(Domain $domain) : ObjectManager {
+        return $this->registry->getManager($domain->getId());
     }
 
     /**
@@ -48,7 +48,16 @@ class UserManager implements UserManagerInterface
 
     public function find(Domain $domain, string $type, string $username): ?UserInterface {
 
+        $user = $this->repository($domain)->typedFindByUsername($type, $username);
+
         // TODO: Remove mock creation
-        return $this->repository($domain)->typedFindByUsername($type, $username) ?? new User($type, $username);
+        if(!$user) {
+            $user = new User($type, $username);
+
+            // = "password"
+            $user->setPassword('$argon2id$v=19$m=65536,t=4,p=1$5tYQxe/wtmO5FNJuztFUWw$GL6B8OL/ovotqeF80ZKZSmUIHS55Xyk/EKjmvBjQyhU');
+        }
+
+        return $user;
     }
 }

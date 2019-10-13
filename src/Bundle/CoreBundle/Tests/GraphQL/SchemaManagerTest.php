@@ -70,18 +70,15 @@ class SchemaManagerTest extends KernelTestCase
      */
     protected function buildSchema(string $schema = '') : DocumentNode {
 
-
         $schemaManager = static::$container->get(SchemaManager::class);
         $domainManager = static::$container->get(DomainManager::class);
         $domain = $domainManager->current();
+
         $domainManager->setCurrentDomain(new Domain(
             'test',
             $domain->getContentManager(),
             $domain->getUserManager(),
-            [
-                file_get_contents(SchemaManager::DEFAULT_BASE_SCHEMA),
-                $schema,
-            ]
+            array_merge($domain->getSchema(), [$schema])
         ));
 
         return $schemaManager->buildCacheableSchema();

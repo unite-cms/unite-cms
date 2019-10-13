@@ -20,6 +20,23 @@ class UniteResolver implements FieldResolverInterface
      * @inheritDoc
      */
     public function resolve($value, $args, $context, ResolveInfo $info) {
-        return $info->fieldName === 'version' ? UniteCMSCoreBundle::UNITE_VERSION : null;
+
+        if($info->fieldName !== 'unite') {
+            return null;
+        }
+
+        if($info->parentType->name === 'Query') {
+            return [
+                'version' => UniteCMSCoreBundle::UNITE_VERSION,
+            ];
+        }
+
+        else if($info->parentType->name === 'Mutation') {
+            return [
+                'login' => null,
+            ];
+        }
+
+        return null;
     }
 }

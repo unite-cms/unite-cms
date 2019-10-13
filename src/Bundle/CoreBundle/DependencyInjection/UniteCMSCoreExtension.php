@@ -39,7 +39,7 @@ class UniteCMSCoreExtension extends Extension
 
         $configuration = new Configuration(
             $container->getParameter('kernel.project_dir') . '/config/unite/',
-            SchemaManager::DEFAULT_BASE_SCHEMA,
+            SchemaManager::UNITE_CMS_SCHEMA_FILES,
             $defaultContentManager,
             $defaultUserManager
         );

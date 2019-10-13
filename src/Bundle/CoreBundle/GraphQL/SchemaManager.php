@@ -27,7 +27,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 class SchemaManager
 {
-    const DEFAULT_BASE_SCHEMA = __DIR__ . '/../Resources/GraphQL/Schema/unite-cms.graphql';
+    const UNITE_CMS_SCHEMA_FILES = [
+        __DIR__ . '/../Resources/GraphQL/Schema/unite-cms.graphql',
+        __DIR__ . '/../Resources/GraphQL/Schema/root-schema.graphql',
+    ];
 
     /**
      * @var DomainManager $domainManager

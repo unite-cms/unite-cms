@@ -41,7 +41,14 @@ class QueryResolver implements FieldResolverInterface
      */
     public function resolve($value, $args, $context, ResolveInfo $info) {
 
-        list($field, $type) = preg_split('/(?=[A-Z])/',$info->fieldName);
+        $fieldNameParts = preg_split('/(?=[A-Z])/',$info->fieldName);
+
+        if(count($fieldNameParts) !== 2) {
+            return null;
+        }
+
+        $field = $fieldNameParts[0];
+        $type = $fieldNameParts[1];
 
         $domain = $this->domainManager->current();
         $contentTypeManager = $domain->getContentTypeManager();

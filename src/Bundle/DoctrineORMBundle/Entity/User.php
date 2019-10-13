@@ -82,6 +82,15 @@ class User implements ContentInterface, UserInterface
     }
 
     /**
+     * @param string $password
+     * @return $this
+     */
+    public function setPassword(string $password) : self {
+        $this->password = $password;
+        return $this;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getPassword()

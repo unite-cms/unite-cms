@@ -1,5 +1,10 @@
 security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+
+    encoders:
+        UniteCMS\CoreBundle\User\UserInterface:
+            algorithm: auto
+
     providers:
         unite_cms:
             id: UniteCMS\CoreBundle\Security\DomainUserProvider

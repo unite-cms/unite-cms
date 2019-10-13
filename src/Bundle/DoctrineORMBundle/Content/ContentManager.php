@@ -2,7 +2,7 @@
 
 namespace UniteCMS\DoctrineORMBundle\Content;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\ORMException;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
@@ -33,10 +33,10 @@ class ContentManager implements ContentManagerInterface
     /**
      * @param \UniteCMS\CoreBundle\Domain\Domain $domain
      *
-     * @return EntityManager
+     * @return ObjectManager
      */
-    protected function em(Domain $domain) : EntityManager {
-        return $this->registry->getEntityManager($domain->getId());
+    protected function em(Domain $domain) : ObjectManager {
+        return $this->registry->getManager($domain->getId());
     }
 
     /**

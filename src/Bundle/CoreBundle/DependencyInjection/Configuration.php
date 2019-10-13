@@ -14,9 +14,9 @@ class Configuration implements ConfigurationInterface
     protected $defaultConfigDir;
 
     /**
-     * @var string $defaultBaseSchema
+     * @var string[] $uniteCMSSchemaFiles
      */
-    protected $defaultBaseSchema;
+    protected $uniteCMSSchemaFiles;
 
     /**
      * @var string $defaultContentManager
@@ -28,10 +28,10 @@ class Configuration implements ConfigurationInterface
      */
     protected $defaultUserManager;
 
-    public function __construct(string $defaultConfigDir, string $defaultBaseSchema, string $defaultContentManager = null, string $defaultUserManager = null)
+    public function __construct(string $defaultConfigDir, array $uniteCMSSchemaFiles = [], string $defaultContentManager = null, string $defaultUserManager = null)
     {
         $this->defaultConfigDir = $defaultConfigDir;
-        $this->defaultBaseSchema = $defaultBaseSchema;
+        $this->uniteCMSSchemaFiles = $uniteCMSSchemaFiles;
         $this->defaultContentManager = $defaultContentManager;
         $this->defaultUserManager = $defaultUserManager;
     }
@@ -47,10 +47,6 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('default_schema_config_dir')
                 ->cannotBeEmpty()
                 ->defaultValue($this->defaultConfigDir)
-            ->end()
-            ->scalarNode('base_schema')
-                ->cannotBeEmpty()
-                ->defaultValue($this->defaultBaseSchema)
             ->end()
             ->arrayNode('domains')
                 ->addDefaultChildrenIfNoneSet('default')
@@ -83,7 +79,7 @@ class Configuration implements ConfigurationInterface
                 // Set default schema file to all domain configurations.
                 foreach($v['domains'] as $key => $domain) {
                     if(empty($domain['schema'])) {
-                        $v['domains'][$key]['schema'][] = $v['base_schema'];
+                        $v['domains'][$key]['schema'] = $this->uniteCMSSchemaFiles;
                         $v['domains'][$key]['schema'][] = sprintf('%s%s.graphql', $v['default_schema_config_dir'], $key);
                     }
                 }
