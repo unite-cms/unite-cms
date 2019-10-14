@@ -19,16 +19,8 @@ class SchemaManagerTest extends KernelTestCase
     public function testBasicInValidSchemaCreation()
     {
         $this->assertValidSchema('
-            type Embedded implements UniteEmbeddedContent {
-                id: ID
-            }
-            
             type Article implements UniteContent {
-                id: ID
-            }
-            
-            type User implements UniteUser {
-                id: ID
+                foo: String
             }
         ');
         $this->addToAssertionCount(1);
@@ -37,20 +29,9 @@ class SchemaManagerTest extends KernelTestCase
     public function testBasicValidSchemaCreation()
     {
         $this->assertValidSchema('
-            type Embedded implements UniteEmbeddedContent {
-                id: ID
-            }
-            
             type Article implements UniteContent {
                 id: ID
-                _deleted: DateTime
-                _version: Int!
-                _versions: [Article!]!
                 title: String @field(type: "text")
-            }
-            
-            type User implements UniteUser {
-                id: ID
             }
         ');
         $this->addToAssertionCount(1);

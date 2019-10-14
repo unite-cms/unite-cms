@@ -3,6 +3,8 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
+use GraphQL\Language\AST\NodeKind;
+use GraphQL\Language\Visitor;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface;

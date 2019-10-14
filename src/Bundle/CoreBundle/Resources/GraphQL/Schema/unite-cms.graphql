@@ -31,9 +31,6 @@ interface UniteUser {
 
 interface UniteContent {
     id: ID
-    _deleted: DateTime
-    _version: Int!
-    _versions: [UniteContent!]!
 }
 
 interface UniteEmbeddedContent {
