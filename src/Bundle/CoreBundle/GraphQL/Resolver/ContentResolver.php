@@ -73,24 +73,9 @@ class ContentResolver implements FieldResolverInterface
         else if($value instanceof ContentInterface) {
 
             $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
+            $contentType = $contentTypeManager->getContentType($value->getType()) ?? $contentTypeManager->getEmbeddedContentType($value->getType());
 
-            if($contentType = $contentTypeManager->getContentType($value->getType())) {
-                switch ($info->fieldName) {
-                    case 'id':
-                        return $value->getId();
-                    default:
-
-                        if(!$field = $contentType->getField($info->fieldName)) {
-                            return null;
-                        }
-
-                        return $this->fieldTypeManager
-                            ->getFieldType($field->getType())
-                            ->resolveField($info->fieldName, $value, $field);
-                }
-            }
-
-            if($contentType = $contentTypeManager->getEmbeddedContentType($value->getType())) {
+            if($contentType) {
                 switch ($info->fieldName) {
                     case 'id':
                         return $value->getId();

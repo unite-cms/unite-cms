@@ -3,13 +3,13 @@
 namespace UniteCMS\DoctrineORMBundle\Content;
 
 use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\ORM\ORMException;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\DoctrineORMBundle\Entity\Content;
 use UniteCMS\DoctrineORMBundle\Repository\ContentRepository;
 
@@ -21,13 +21,20 @@ class ContentManager implements ContentManagerInterface
     protected $registry;
 
     /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    protected $fieldTypeManager;
+
+    /**
      * ContentManager constructor.
      *
      * @param \Symfony\Bridge\Doctrine\RegistryInterface $registry
+     * @param \UniteCMS\CoreBundle\Field\FieldTypeManager $fieldTypeManager
      */
-    public function __construct(RegistryInterface $registry)
+    public function __construct(RegistryInterface $registry, FieldTypeManager $fieldTypeManager)
     {
         $this->registry = $registry;
+        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -72,11 +79,11 @@ class ContentManager implements ContentManagerInterface
 
     /**
      * {@inheritDoc}
-     * @throws ORMException
      */
     public function create(Domain $domain, string $type, array $inputData = [], bool $persist = false): ContentInterface {
-        // TODO: Input Data
+
         $content = new Content($type);
+        $content->setData($inputData);
 
         if($persist) {
             $this->em($domain)->persist($content);
@@ -90,11 +97,10 @@ class ContentManager implements ContentManagerInterface
 
     /**
      * {@inheritDoc}
-     * @throws ORMException
      */
     public function update(Domain $domain, string $type, ContentInterface $content, array $inputData = [], bool $persist = false): ContentInterface {
 
-        // TODO: Update
+        $content->setData($inputData);
 
         if($persist) {
             // TODO Maybe we should not do this here, because of performance reasons.
@@ -106,7 +112,6 @@ class ContentManager implements ContentManagerInterface
 
     /**
      * {@inheritDoc}
-     * @throws ORMException
      */
     public function delete(Domain $domain, string $type, ContentInterface $content, bool $persist = false): ContentInterface {
 

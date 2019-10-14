@@ -3,7 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Security\Voter;
 
-use UniteCMS\CoreBundle\Content\ContentFieldInterface;
+use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -40,7 +40,7 @@ class ContentFieldVoter extends Voter
      */
     protected function supports($attribute, $subject)
     {
-        return in_array($attribute, self::PERMISSIONS) && $subject instanceof ContentFieldInterface;
+        return in_array($attribute, self::PERMISSIONS) && $subject instanceof FieldData;
     }
 
     /**
@@ -48,7 +48,7 @@ class ContentFieldVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token) {
 
-        if(!$subject instanceof ContentFieldInterface) {
+        if(!$subject instanceof FieldData) {
             return self::ACCESS_ABSTAIN;
         }
 

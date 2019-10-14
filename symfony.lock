@@ -62,6 +62,15 @@
     "doctrine/reflection": {
         "version": "v1.0.0"
     },
+    "dunglas/doctrine-json-odm": {
+        "version": "0.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "0.1",
+            "ref": "c2ab78f625df0c89af5908d50a28602ff8c4919f"
+        }
+    },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
@@ -97,6 +106,9 @@
     },
     "psr/log": {
         "version": "1.1.0"
+    },
+    "scienta/doctrine-json-functions": {
+        "version": "4.0.2"
     },
     "symfony/cache": {
         "version": "v4.3.5"
@@ -253,6 +265,9 @@
     "symfony/property-access": {
         "version": "v4.3.5"
     },
+    "symfony/property-info": {
+        "version": "v4.3.5"
+    },
     "symfony/routing": {
         "version": "4.2",
         "recipe": {
@@ -290,6 +305,9 @@
         "version": "v4.3.5"
     },
     "symfony/security-http": {
+        "version": "v4.3.5"
+    },
+    "symfony/serializer": {
         "version": "v4.3.5"
     },
     "symfony/service-contracts": {

@@ -3,7 +3,7 @@
 namespace UniteCMS\DoctrineORMBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use UniteCMS\CoreBundle\Content\ContentFieldInterface;
+use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 
 /**
@@ -22,6 +22,13 @@ class Content implements ContentInterface
      * @ORM\Column(type="string")
      */
     protected $type;
+
+    /**
+     * @var FieldData[]
+     *
+     * @ORM\Column(type="json_document", options={"jsonb": true})
+     */
+    protected $data;
 
     /**
      * Content constructor.
@@ -43,15 +50,31 @@ class Content implements ContentInterface
     }
 
     /**
-     * @return ContentFieldInterface[]
+     * @return FieldData[]
      */
     public function getData(): array
     {
-        return [];
+        return $this->data;
     }
 
-    public function getFieldData(string $fieldName): ?ContentFieldInterface
+    /**
+     * @param array $data
+     *
+     * @return $this
+     */
+    public function setData(array $data) : self
     {
-        return null;
+        $this->data = $data;
+        return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     *
+     * @return \UniteCMS\CoreBundle\Content\FieldData|null
+     */
+    public function getFieldData(string $fieldName): ?FieldData
+    {
+        return isset($this->data[$fieldName]) ? $this->data[$fieldName] : null;
     }
 }

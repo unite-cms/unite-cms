@@ -3,7 +3,6 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
-use GraphQL\Error\UserError;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
@@ -13,11 +12,10 @@ use InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
-use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
-use UniteCMS\DoctrineORMBundle\Entity\Content;
 
 class MutationResolver implements FieldResolverInterface
 {
@@ -32,10 +30,16 @@ class MutationResolver implements FieldResolverInterface
      */
     protected $domainManager;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager)
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    protected $fieldTypeManager;
+
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->domainManager = $domainManager;
+        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -73,11 +77,11 @@ class MutationResolver implements FieldResolverInterface
         switch ($field) {
             case 'create':
                 $this->contentOrException($domain, $type, ContentVoter::CREATE);
-                return $contentManager->create($domain, $type, $args['data'] ?? [], $args['persist']);
+                return $contentManager->create($domain, $type, $this->normalizeData($domain, $type, $args['data'] ?? []) ?? [], $args['persist']);
 
             case 'update':
                 $content = $this->contentOrException($domain, $type, ContentVoter::UPDATE);
-                return $contentManager->update($domain, $type, $content, $args['data'] ?? [], $args['persist']);
+                return $contentManager->update($domain, $type, $content, $this->normalizeData($domain, $type, $args['data'] ?? []), $args['persist']);
 
             case 'delete':
                 $content = $this->contentOrException($domain, $type, ContentVoter::DELETE);
@@ -86,6 +90,21 @@ class MutationResolver implements FieldResolverInterface
             default:
                 return null;
         }
+    }
+
+    protected function normalizeData(Domain $domain, string $type, array $data) : array {
+
+        $contentType = $domain->getContentTypeManager()->getContentType($type);
+        $normalizedData = [];
+
+        foreach($data as $id => $fieldData) {
+            $field = $contentType->getField($id);
+            $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
+            $normalizedData[$id] = $fieldType->normalizeData($field, $fieldData);
+        }
+
+        dump($normalizedData);
+        return $normalizedData;
     }
 
     protected function contentOrException(Domain $domain, string $type, string $attribute, $id = null) : ?ContentInterface {

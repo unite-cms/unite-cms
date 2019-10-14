@@ -54,7 +54,7 @@ class DomainUserProvider implements PayloadAwareUserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        dump($user);
+        // TODO ?
     }
 
     /**

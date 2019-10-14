@@ -11,9 +11,9 @@ interface ContentInterface
     public function getType() : string;
 
     /**
-     * @return ContentFieldInterface[]
+     * @return FieldData[]
      */
     public function getData() : array;
 
-    public function getFieldData(string $fieldName) : ?ContentFieldInterface;
+    public function getFieldData(string $fieldName) : ?FieldData;
 }

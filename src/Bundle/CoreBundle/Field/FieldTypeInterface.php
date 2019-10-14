@@ -3,7 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Field;
 
-
+use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 
@@ -13,4 +13,5 @@ interface FieldTypeInterface
     public function GraphQLInputType(ContentTypeField $field) : string;
 
     public function resolveField(string $fieldName, ContentInterface $content, ContentTypeField $field);
+    public function normalizeData(ContentTypeField $field, $fieldData = null) : FieldData;
 }

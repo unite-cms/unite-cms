@@ -31,11 +31,12 @@ type Article implements UniteContent {
 
     title: String!              @field(type: "text") @hide(if: "false")
 
-    mainImage: Image!           @field(type: "reference")
-    teaserImages: [Image!]!     @field(type: "reference")
-    gallery: [Image!]           @field(type: "reference")
-    content: [ArticleContent!]  @field(type: "embedded")
-    settings: ArticleSettings   @field(type: "embedded")
+    #mainImage: Image            @field(type: "reference")
+    #teaserImages: [Image!]      @field(type: "reference")
+    #gallery: [Image!]           @field(type: "reference")
+    #content: [ArticleContent!]  @field(type: "embedded")
+    #settings: ArticleSettings   @field(type: "embedded")
+    link: UniteLink!            @field(type: "link")
 }
 
 type Image implements UniteContent {

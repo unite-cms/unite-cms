@@ -3,6 +3,9 @@
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+imports:
+    - { resource: services.manual.yaml }
+
 parameters:
 
 services:
@@ -14,6 +17,10 @@ services:
     _instanceof:
         UniteCMS\CoreBundle\Field\FieldTypeInterface:
             tags: ['unite.field_type']
+
+        UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface:
+            tags:
+                - { name: 'unite.graphql.schema_provider' }
 
         UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface:
             tags:

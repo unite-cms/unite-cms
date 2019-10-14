@@ -66,3 +66,11 @@ input UniteOrderByInput {
     field: String!
     desc: Boolean!
 }
+
+type UniteQuery {
+    version: String!
+}
+
+type UniteMutation {
+    login(type: String!, username: String!, password: String!) : String!
+}

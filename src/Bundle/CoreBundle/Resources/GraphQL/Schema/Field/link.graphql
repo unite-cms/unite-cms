@@ -1,0 +1,17 @@
+
+enum UniteLinkTarget {
+    _SELF,
+    _BLANK
+}
+
+type UniteLink {
+    url: String!
+    title: String
+    target: UniteLinkTarget
+}
+
+input UniteLinkInput {
+    url: String!
+    title: String
+    target: UniteLinkTarget
+}

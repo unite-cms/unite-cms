@@ -6,22 +6,12 @@ namespace UniteCMS\CoreBundle\Field\Types;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
-use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
+use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
 
-class ReferenceType implements FieldTypeInterface
+class LinkType implements FieldTypeInterface, SchemaProviderInterface
 {
-    const TYPE = 'reference';
-
-    /**
-     * @var \UniteCMS\CoreBundle\Domain\DomainManager $domainManager
-     */
-    protected $domainManager;
-
-    public function __construct(DomainManager $domainManager)
-    {
-        $this->domainManager = $domainManager;
-    }
+    const TYPE = 'link';
 
     /**
      * {@inheritDoc}
@@ -34,22 +24,22 @@ class ReferenceType implements FieldTypeInterface
      * {@inheritDoc}
      */
     public function GraphQLInputType(ContentTypeField $field) : string {
-        return 'UniteReferenceInput';
+        return 'UniteLinkInput';
     }
 
     /**
      * {@inheritDoc}
      */
     public function resolveField(string $fieldName, ContentInterface $content, ContentTypeField $field) {
-        // TODO: Implement
-        //return $content->getFieldData($fieldName);
 
-        $domain = $this->domainManager->current();
-        $contentManager = $domain->getContentManager();
-
-        return $field->isListOf() ?
-            $contentManager->find($domain, $field->getReturnType())->getResult() :
-            $contentManager->get($domain, $field->getReturnType(), 1);
+        if(!$data = $content->getFieldData($fieldName)) {
+            return null;
+        }
+        return [
+            'url' => $data->resolveData('url', ''),
+            'title' => $data->resolveData('title', ''),
+            'target' => $data->resolveData('target', ''),
+        ];
     }
 
     /**
@@ -57,5 +47,12 @@ class ReferenceType implements FieldTypeInterface
      */
     public function normalizeData(ContentTypeField $field, $fieldData = null): FieldData {
         return new FieldData($fieldData);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function extend(): string {
+        return file_get_contents(__DIR__ . '/../../Resources/GraphQL/Schema/Field/link.graphql');
     }
 }

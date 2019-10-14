@@ -24,13 +24,11 @@ use GraphQL\Utils\BuildSchema;
 use GraphQL\Utils\SchemaExtender;
 use GraphQL\Utils\SchemaPrinter;
 use Symfony\Component\HttpFoundation\Request;
+use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
 
 class SchemaManager
 {
-    const UNITE_CMS_SCHEMA_FILES = [
-        __DIR__ . '/../Resources/GraphQL/Schema/unite-cms.graphql',
-        __DIR__ . '/../Resources/GraphQL/Schema/root-schema.graphql',
-    ];
+    const UNITE_CMS_ROOT_SCHEMA = __DIR__ . '/../Resources/GraphQL/Schema/root-schema.graphql';
 
     /**
      * @var DomainManager $domainManager
@@ -53,6 +51,11 @@ class SchemaManager
     protected $executableSchema = null;
 
     /**
+     * @var SchemaProviderInterface[]
+     */
+    protected $providers = [];
+
+    /**
      * @var SchemaExtenderInterface[]
      */
     protected $beforeTypeExtenders = [];
@@ -71,6 +74,18 @@ class SchemaManager
      * @var FieldResolverInterface[]
      */
     protected $resolvers = [];
+
+    /**
+     * @param SchemaProviderInterface $provider
+     * @return $this
+     */
+    public function registerProvider(SchemaProviderInterface $provider) : self {
+        if(!in_array($provider, $this->providers)) {
+            $this->providers[] = $provider;
+        }
+
+        return $this;
+    }
 
     /**
      * @param SchemaExtenderInterface $extender
@@ -132,7 +147,13 @@ class SchemaManager
         }
 
         // Init with graphQL schema.
-        $schema = BuildSchema::build(join("\n", $this->domainManager->current()->getSchema()));
+        $schemaDefinition = '';
+        foreach ($this->providers as $provider) {
+            $schemaDefinition .= $provider->extend() . "\n";
+        }
+
+        $schemaDefinition .= join("\n", $this->domainManager->current()->getSchema());
+        $schema = BuildSchema::build($schemaDefinition);
 
         // Execute before type extenders.
         foreach($this->beforeTypeExtenders as $extender) {

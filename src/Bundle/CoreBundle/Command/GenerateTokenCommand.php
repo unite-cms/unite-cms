@@ -41,6 +41,8 @@ class GenerateTokenCommand extends Command
             ->setDescription('Generates a JWT token for a unite cms user.')
             ->addArgument('type', InputArgument::REQUIRED)
             ->addArgument('username', InputArgument::REQUIRED)
+
+            // Will be used in SetCurrentDomainSubscriber
             ->addOption(SetCurrentDomainSubscriber::COMMAND_OPTION, '', InputOption::VALUE_OPTIONAL, 'Specify the unite domain id to set before executing the command.')
         ;
     }

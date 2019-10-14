@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use GraphQL\Type\Definition\Type;
@@ -31,5 +32,12 @@ class ChoiceType implements FieldTypeInterface
      */
     public function resolveField(string $fieldName, ContentInterface $content, ContentTypeField $field) {
         return 'LEFT';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function normalizeData(ContentTypeField $field, $fieldData = null): FieldData {
+        return new FieldData($fieldData);
     }
 }

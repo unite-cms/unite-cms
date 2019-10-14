@@ -23,6 +23,15 @@ class SchemaManagerCompilerPass implements CompilerPassInterface
 
         $definition = $container->findDefinition(SchemaManager::class);
 
+
+        // Register schema provider
+        $taggedServices = $container->findTaggedServiceIds('unite.graphql.schema_provider');
+
+        foreach ($taggedServices as $id => $tags) {
+            $definition->addMethodCall('registerProvider', [new Reference($id)]);
+        }
+
+
         // Register schema extender
         $taggedServices = $container->findTaggedServiceIds('unite.graphql.schema_extender');
 
