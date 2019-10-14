@@ -1,10 +1,15 @@
 
+type ArticleTeaser implements UniteEmbeddedContent {
+    id: ID
+    title: String!              @field(type: "text")
+    computedTitle: String
+}
+
 type Article implements UniteContent {
     id: ID
-    _deleted: DateTime
-    _version: Int!              @hide(if: "not is_granted('ROLE_ADMIN')")
-    _versions: [Article!]!
-
-    title: String!              @field(type: "text") @hide(if: "true")
-    link: UniteLink!            @field(type: "link")
+    title: String                       @field(type: "text")
+    extra_titles: [String!]             @field(type: "text")
+    link: UniteLink                     @field(type: "link")
+    teaser: ArticleTeaser               @field(type: "embedded")
+    extra_teasers: [ArticleTeaser!]     @field(type: "embedded")
 }

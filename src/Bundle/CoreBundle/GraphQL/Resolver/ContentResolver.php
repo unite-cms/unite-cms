@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
+use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
@@ -85,9 +86,24 @@ class ContentResolver implements FieldResolverInterface
                             return null;
                         }
 
-                        return $this->fieldTypeManager
-                            ->getFieldType($field->getType())
-                            ->resolveField($info->fieldName, $value, $field);
+                        // TODO: Refactor
+                        if($field->isListOf()) {
+                            $returnValue = [];
+                            foreach($value->getData()[$field->getId()] ?? [] as $id => $rowValue) {
+                                $rowContent = new EmbeddedContent($value->getId(), $value->getType(), [
+                                    $field->getId() => $rowValue,
+                                ]);
+                                $returnValue[$id] = $this->fieldTypeManager
+                                    ->getFieldType($field->getType())
+                                    ->resolveField($info->fieldName, $rowContent, $field);
+                            }
+                            return $returnValue;
+
+                        } else {
+                            return $this->fieldTypeManager
+                                ->getFieldType($field->getType())
+                                ->resolveField($info->fieldName, $value, $field);
+                        }
                 }
             }
         }

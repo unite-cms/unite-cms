@@ -73,7 +73,7 @@ class FieldTypeManager
     /**
      * @param $key
      *
-     * @return \App\Field\FieldTypeInterface
+     * @return \UniteCMS\CoreBundle\Field\FieldTypeInterface
      */
     public function getFieldType($key): FieldTypeInterface
     {

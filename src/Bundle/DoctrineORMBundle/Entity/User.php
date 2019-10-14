@@ -142,7 +142,6 @@ class User implements ContentInterface, UserInterface
      */
     public static function createFromPayload($username, array $payload)
     {
-        dump($username);
-        dump($payload);
+        // TODO: Implement eraseCredentials() method.
     }
 }
