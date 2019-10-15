@@ -12,6 +12,6 @@ interface FieldTypeInterface
     static function getType(): string;
     public function GraphQLInputType(ContentTypeField $field) : string;
 
-    public function resolveField(string $fieldName, ContentInterface $content, ContentTypeField $field);
-    public function normalizeData(ContentTypeField $field, $fieldData = null) : FieldData;
+    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData);
+    public function normalizeData(ContentTypeField $field, $inputData = null) : FieldData;
 }

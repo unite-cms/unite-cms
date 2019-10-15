@@ -5,7 +5,7 @@ namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
-use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
+use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
@@ -82,28 +82,29 @@ class ContentResolver implements FieldResolverInterface
                         return $value->getId();
                     default:
 
+                        // If field is not manage by unite cms.
                         if(!$field = $contentType->getField($info->fieldName)) {
                             return null;
                         }
 
-                        // TODO: Refactor
-                        if($field->isListOf()) {
-                            $returnValue = [];
-                            foreach($value->getData()[$field->getId()] ?? [] as $id => $rowValue) {
-                                $rowContent = new EmbeddedContent($value->getId(), $value->getType(), [
-                                    $field->getId() => $rowValue,
-                                ]);
-                                $returnValue[$id] = $this->fieldTypeManager
-                                    ->getFieldType($field->getType())
-                                    ->resolveField($info->fieldName, $rowContent, $field);
-                            }
-                            return $returnValue;
-
-                        } else {
-                            return $this->fieldTypeManager
-                                ->getFieldType($field->getType())
-                                ->resolveField($info->fieldName, $value, $field);
+                        // If field data is empty.
+                        if(!$fieldData = $value->getFieldData($field->getId())) {
+                            return $field->isListOf() ? [] : null;
                         }
+
+                        // If type is a list, but a single value comes from store, create a list on the fly.
+                        if($field->isListOf() && !$fieldData instanceof FieldDataList) {
+                            $fieldData = new FieldDataList([$fieldData]);
+                        }
+
+                        // If type is not a list, but a list is stored, get the first value.
+                        if(!$field->isListOf() && $fieldData instanceof FieldDataList) {
+                            $fieldData = $fieldData->resolveData(0);
+                        }
+
+                        return $this->fieldTypeManager
+                            ->getFieldType($field->getType())
+                            ->resolveField($value, $field, $fieldData);
                 }
             }
         }

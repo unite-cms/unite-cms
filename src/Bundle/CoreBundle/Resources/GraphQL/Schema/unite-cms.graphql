@@ -47,11 +47,6 @@ enum SORT {
     DESC
 }
 
-input UniteReferenceInput {
-    content: ID!
-    type: String!
-}
-
 input UniteFilterInput {
     field: String
     value: String

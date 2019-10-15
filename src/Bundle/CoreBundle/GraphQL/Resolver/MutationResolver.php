@@ -97,20 +97,10 @@ class MutationResolver implements FieldResolverInterface
         $contentType = $domain->getContentTypeManager()->getContentType($type);
         $normalizedData = [];
 
-        // TODO: Refector in some service.
         foreach($data as $id => $fieldData) {
             $field = $contentType->getField($id);
             $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
-
-            if($field->isListOf()) {
-                $normalizedData[$id] = [];
-                foreach(is_array($fieldData) ? $fieldData : [$fieldData] as $rowFieldData) {
-                    $normalizedData[$id][] = $fieldType->normalizeData($field, $rowFieldData);
-                }
-
-            } else {
-                $normalizedData[$id] = $fieldType->normalizeData($field, $fieldData);
-            }
+            $normalizedData[$id] = $fieldType->normalizeData($field, $fieldData);
         }
 
         return $normalizedData;

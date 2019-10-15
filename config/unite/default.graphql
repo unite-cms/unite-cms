@@ -1,4 +1,9 @@
 
+type Category implements UniteContent {
+    id: ID
+    name: String! @field(type: "text")
+}
+
 type ArticleTeaser implements UniteEmbeddedContent {
     id: ID
     title: String!              @field(type: "text")
@@ -12,4 +17,6 @@ type Article implements UniteContent {
     link: UniteLink                     @field(type: "link")
     teaser: ArticleTeaser               @field(type: "embedded")
     extra_teasers: [ArticleTeaser!]     @field(type: "embedded")
+    category: Category                  @field(type: "reference")
+    tags: [Category!]                   @field(type: "reference")
 }
