@@ -58,11 +58,4 @@ class ReferenceType extends AbstractFieldType
 
         return $contentManager->get($domain, $field->getReturnType(), $fieldData->getData());
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function normalizeRowData(ContentTypeField $field, $inputData = null): FieldData {
-        return new FieldData($inputData);
-    }
 }

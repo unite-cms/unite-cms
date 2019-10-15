@@ -54,22 +54,6 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function normalizeData(ContentTypeField $field, $inputData = null): FieldData {
-
-        if($field->isListOf()) {
-            $inputData = $inputData ? (is_array($inputData) ? $inputData : [$inputData]) : [];
-            foreach($inputData as $key => $inputRowData) {
-                $inputData[$key] = $this->normalizeRowData($field, $inputRowData);
-            }
-            return new FieldDataList($inputData);
-        }
-
-        return $this->normalizeRowData($field, $inputData);
-    }
-
-    /**
      * @param \UniteCMS\CoreBundle\Content\ContentInterface $content
      * @param \UniteCMS\CoreBundle\ContentType\ContentTypeField $field
      * @param \UniteCMS\CoreBundle\Content\FieldData $fieldData
@@ -81,12 +65,9 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\ContentType\ContentTypeField $field
-     * @param null $inputData
-     *
-     * @return \UniteCMS\CoreBundle\Content\FieldData
+     * {@inheritDoc}
      */
-    protected function normalizeRowData(ContentTypeField $field, $inputData = null) : FieldData {
+    public function normalizeData(ContentTypeField $field, $inputData = null): FieldData {
         return new FieldData($inputData);
     }
 }

@@ -3,6 +3,8 @@
 
 namespace UniteCMS\CoreBundle\ContentType;
 
+use GraphQL\Type\Definition\EnumType;
+use GraphQL\Type\Definition\UnionType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
@@ -37,6 +39,16 @@ class ContentTypeField
     protected $listOf;
 
     /**
+     * @var string[]|null
+     */
+    protected $enumValues;
+
+    /**
+     * @var string[]|null
+     */
+    protected $unionTypes;
+
+    /**
      * @var string
      */
     protected $returnType;
@@ -51,7 +63,7 @@ class ContentTypeField
      */
     protected $permissions;
 
-    public function __construct(string $id, string $type, array $settings = [], $nonNull = false, $listOf = false, $returnType = Type::STRING)
+    public function __construct(string $id, string $type, array $settings = [], $nonNull = false, $listOf = false, $enumValues = null, $unionTypes = null, $returnType = Type::STRING)
     {
         $this->permissions = [
             ContentFieldVoter::READ => 'true',
@@ -62,6 +74,8 @@ class ContentTypeField
         $this->settings = new ParameterBag($settings);
         $this->nonNull = $nonNull;
         $this->listOf = $listOf;
+        $this->enumValues = $enumValues;
+        $this->unionTypes = $unionTypes;
         $this->returnType = $returnType;
     }
 
@@ -78,6 +92,8 @@ class ContentTypeField
             $actualType = $fieldDefinition->getType();
             $nonNull = false;
             $listOf = false;
+            $enumValues = null;
+            $unionTypes = null;
 
             if($actualType instanceof NonNull) {
                 $nonNull = true;
@@ -98,12 +114,28 @@ class ContentTypeField
                 $actualType = $actualType->getWrappedType(true);
             }
 
+            if($actualType instanceof EnumType) {
+                $enumValues = [];
+                foreach($actualType->getValues() as $value) {
+                    $enumValues[] = $value->value;
+                }
+            }
+
+            if($actualType instanceof UnionType) {
+                $unionTypes = [];
+                foreach($actualType->getTypes() as $type) {
+                    $unionTypes[$type->name] = $type;
+                }
+            }
+
             $field = new self(
                 $fieldDefinition->name,
                 $args['type'],
                 $args['settings'],
                 $nonNull,
                 $listOf,
+                $enumValues,
+                $unionTypes,
                 $actualType->name
             );
 
@@ -121,8 +153,17 @@ class ContentTypeField
      * @return string
      */
     public function printInputType(FieldTypeManager $fieldTypeManager) : string {
-        $type = $fieldTypeManager->getFieldType($this->getType());
-        $inputType = $type->GraphQLInputType($this);
+
+        // Union type input will be generated somewhere else.
+        if(!empty($this->getUnionTypes())) {
+            $inputType = sprintf('%sInput', $this->getReturnType());
+        }
+
+        // Normal types input types are defined by field type manager.
+        else {
+            $type = $fieldTypeManager->getFieldType($this->getType());
+            $inputType = $type->GraphQLInputType($this);
+        }
 
         if($this->isListOf()) {
             $inputType = sprintf('[%s!]', $inputType);
@@ -168,6 +209,20 @@ class ContentTypeField
      */
     public function isListOf() : bool {
         return $this->listOf;
+    }
+
+    /**
+     * @return \UniteCMS\CoreBundle\ContentType\ContentType[]|null
+     */
+    public function getUnionTypes() : ?array {
+        return $this->unionTypes;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getEnumValues() : ?array {
+        return $this->enumValues;
     }
 
     public function getReturnType() : string {

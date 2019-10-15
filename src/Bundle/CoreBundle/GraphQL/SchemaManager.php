@@ -4,7 +4,9 @@
 namespace UniteCMS\CoreBundle\GraphQL;
 
 use GraphQL\Language\AST\NodeKind;
+use GraphQL\Language\AST\UnionTypeDefinitionNode;
 use GraphQL\Language\Visitor;
+use GraphQL\Type\Definition\UnionType;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface;
@@ -219,6 +221,13 @@ class SchemaManager
                     };
                 }
             }
+
+            else if ($typeDefinitionNode instanceof UnionTypeDefinitionNode) {
+                $typeConfig['resolveType'] = function($value) {
+                    return $this->executableSchema->getType($value->getType());
+                };
+            }
+
             return $typeConfig;
         });
 

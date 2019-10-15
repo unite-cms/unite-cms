@@ -7,6 +7,7 @@ use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use GraphQL\Type\Definition\UnionType;
 use GraphQL\Type\Definition\WrappingType;
 use GraphQL\Type\Schema;
 
@@ -38,6 +39,18 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
                         if(!in_array($interface->name, $types)) {
                             $types[] = $interface->name;
                             $this->findAllReachableTypes($types, $interface);
+                        }
+                    }
+                }
+
+                if($type instanceof UnionType) {
+                    foreach($type->getTypes() as $unionType) {
+
+                        if($unionType instanceof ObjectType) {
+                            if(!in_array($unionType->name, $types)) {
+                                $types[] = $unionType->name;
+                                $this->findAllReachableTypes($types, $unionType);
+                            }
                         }
                     }
                 }

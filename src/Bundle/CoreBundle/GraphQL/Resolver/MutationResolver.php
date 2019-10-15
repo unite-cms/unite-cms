@@ -12,6 +12,8 @@ use InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\Content\FieldDataList;
+use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
@@ -99,11 +101,33 @@ class MutationResolver implements FieldResolverInterface
 
         foreach($data as $id => $fieldData) {
             $field = $contentType->getField($id);
-            $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
-            $normalizedData[$id] = $fieldType->normalizeData($field, $fieldData);
+
+            if($field->isListOf()) {
+                $listData = [];
+                foreach($fieldData ?? [] as $rowId => $rowData) {
+                    $listData[$rowId] = $this->normalizeFieldData($field, $domain, $rowData);
+                }
+                $normalizedData[$id] = new FieldDataList($listData);
+            }
+
+            else {
+                $normalizedData[$id] = $this->normalizeFieldData($field, $domain, $fieldData);
+            }
         }
 
         return $normalizedData;
+    }
+
+    protected function normalizeFieldData(ContentTypeField $field, Domain $domain, $rowData) {
+        if(!empty($field->getUnionTypes())) {
+            $unionType = $domain->getContentTypeManager()->getUnionContentType($field->getReturnType());
+            $selectedUnionType = array_keys($rowData)[0];
+            $rowData = $rowData[$selectedUnionType];
+            $field = $unionType->getField($selectedUnionType);
+        }
+
+        $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
+        return $fieldType->normalizeData($field, $rowData);
     }
 
     protected function contentOrException(Domain $domain, string $type, string $attribute, $id = null) : ?ContentInterface {

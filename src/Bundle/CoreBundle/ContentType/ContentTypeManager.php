@@ -16,6 +16,11 @@ class ContentTypeManager
     protected $embeddedContentTypes = [];
 
     /**
+     * @var ContentType[] $unionContentTypes
+     */
+    protected $unionContentTypes = [];
+
+    /**
      * @return ContentType[]
      */
     public function getContentTypes(): array
@@ -39,6 +44,20 @@ class ContentTypeManager
     public function registerContentType(ContentType $contentType): self
     {
         $this->contentTypes[$contentType->getId()] = $contentType;
+
+        // Find and generate nested union types.
+        foreach($contentType->getFields() as $field) {
+            if(!empty($field->getUnionTypes())) {
+                $unionType = new ContentType($field->getReturnType());
+
+                foreach($field->getUnionTypes() as $type) {
+                    $unionType->registerField(new ContentTypeField($type->name, $field->getType(), [], false, false, null, null, $type->name));
+                }
+
+                $this->unionContentTypes[$unionType->getId()] = $unionType;
+            }
+        }
+
         return $this;
     }
 
@@ -67,5 +86,22 @@ class ContentTypeManager
     {
         $this->embeddedContentTypes[$contentType->getId()] = $contentType;
         return $this;
+    }
+
+    /**
+     * @return \UniteCMS\CoreBundle\ContentType\ContentType[]
+     */
+    public function getUnionContentTypes(): array
+    {
+        return $this->unionContentTypes;
+    }
+
+    /**
+     * @param string $id
+     * @return \UniteCMS\CoreBundle\ContentType\ContentType|null
+     */
+    public function getUnionContentType(string $id): ?ContentType
+    {
+        return $this->unionContentTypes[$id] ?? null;
     }
 }

@@ -65,6 +65,11 @@ class ContentTypeExtender implements SchemaExtenderInterface
             }
         }
 
+        // Generate input types for all union content types.
+        foreach($contentTypeManager->getUnionContentTypes() as $type) {
+            $extension .= $type->printInputType($this->fieldTypeManager);
+        }
+
         return $extension;
     }
 }

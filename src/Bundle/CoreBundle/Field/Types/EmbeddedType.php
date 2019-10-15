@@ -48,7 +48,7 @@ class EmbeddedType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    protected function normalizeRowData(ContentTypeField $field, $inputData = null) : FieldData {
+    public function normalizeData(ContentTypeField $field, $inputData = null) : FieldData {
 
         $domain = $this->domainManager->current();
 
