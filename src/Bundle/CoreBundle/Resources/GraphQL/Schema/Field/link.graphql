@@ -1,4 +1,6 @@
 
+directive @linkField on FIELD_DEFINITION
+
 enum UniteLinkTarget {
     _SELF,
     _BLANK

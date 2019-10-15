@@ -72,7 +72,7 @@ class ContentTypeField
     static function fromFieldDefinition(FieldDefinition $fieldDefinition) : ?self {
 
         // If this field definition has a @field directive.
-        if($args = Util::directiveArgs($fieldDefinition->astNode, 'field')) {
+        if($args = Util::fieldDirectiveArgs($fieldDefinition->astNode)) {
 
             // Find the actual inner type.
             $actualType = $fieldDefinition->getType();
@@ -101,7 +101,7 @@ class ContentTypeField
             $field = new self(
                 $fieldDefinition->name,
                 $args['type'],
-                !empty($args['settings']) ? json_decode($args['settings'], true) : [],
+                $args['settings'],
                 $nonNull,
                 $listOf,
                 $actualType->name

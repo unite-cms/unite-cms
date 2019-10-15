@@ -9,11 +9,19 @@ use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
+use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
 
-abstract class AbstractFieldType  implements FieldTypeInterface
+abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderInterface
 {
     const TYPE = null;
     const GRAPHQL_INPUT_TYPE = Type::STRING;
+
+    /**
+     * {@inheritDoc}
+     */
+    public function extend(): string {
+        return file_get_contents(__DIR__ . '/../../Resources/GraphQL/Schema/Field/' . static::getType() . '.graphql');
+    }
 
     /**
      * {@inheritDoc}

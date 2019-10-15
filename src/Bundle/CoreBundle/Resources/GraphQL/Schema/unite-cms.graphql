@@ -1,6 +1,7 @@
 
 scalar Expression
 scalar JSON
+scalar DateTime
 
 directive @hide(
     if: Expression!
@@ -17,13 +18,6 @@ directive @access(
     update: Expression
     delete: Expression
 ) on FIELD_DEFINITION | OBJECT
-
-directive @field(
-    type: String!
-    settings: JSON
-) on FIELD_DEFINITION
-
-scalar DateTime
 
 interface UniteUser {
     id: ID

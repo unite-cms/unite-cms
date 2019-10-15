@@ -1,0 +1,2 @@
+
+directive @referenceField on FIELD_DEFINITION

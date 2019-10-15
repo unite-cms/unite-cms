@@ -1,22 +1,38 @@
 
 type Category implements UniteContent {
     id: ID
-    name: String! @field(type: "text")
+    name: String! @textField
 }
 
 type ArticleTeaser implements UniteEmbeddedContent {
     id: ID
-    title: String!              @field(type: "text")
+    title: String!              @textField
     computedTitle: String
+}
+
+enum ArticleStatus {
+    DRAFT
+    MODERATION
+    PUBLISHED
 }
 
 type Article implements UniteContent {
     id: ID
-    title: String                       @field(type: "text")
-    extra_titles: [String!]             @field(type: "text")
-    link: UniteLink                     @field(type: "link")
-    teaser: ArticleTeaser               @field(type: "embedded")
-    extra_teasers: [ArticleTeaser!]     @field(type: "embedded")
-    category: Category                  @field(type: "reference")
-    tags: [Category!]                   @field(type: "reference")
+    title: String                       @textField
+
+    """Main Content"""
+    content: String                     @textField
+
+    """
+    Weitere Title
+
+    Verwende dieses Feld, um weitere Titel zu definieren.
+    """
+    extra_titles: [String!]             @textField
+    link: UniteLink                     @linkField
+    teaser: ArticleTeaser               @embeddedField
+    extra_teasers: [ArticleTeaser!]     @embeddedField
+    category: Category                  @referenceField
+    tags: [Category!]                   @referenceField
+    status: ArticleStatus!              @choiceField
 }
