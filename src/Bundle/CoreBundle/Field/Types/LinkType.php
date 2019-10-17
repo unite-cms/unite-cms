@@ -14,6 +14,13 @@ class LinkType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
+    protected function allowedReturnTypes(ContentTypeField $field) {
+        return ['UniteLink'];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
         return [
             'url' => $fieldData->resolveData('url', ''),

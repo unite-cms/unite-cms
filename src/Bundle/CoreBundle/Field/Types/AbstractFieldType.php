@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
@@ -35,6 +36,46 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
      */
     public function GraphQLInputType(ContentTypeField $field) : string {
         return static::GRAPHQL_INPUT_TYPE;
+    }
+
+    /**
+     * Used by validate method to check valid return types.
+     *
+     * @param \UniteCMS\CoreBundle\ContentType\ContentTypeField $field
+     * @return array
+     */
+    protected function allowedReturnTypes(ContentTypeField $field) {
+        return [Type::STRING];
+    }
+
+    /**
+     * Used by validate method to check valid return types.
+     *
+     * @param \UniteCMS\CoreBundle\ContentType\ContentTypeField $field
+     * @param \Symfony\Component\Validator\Context\ExecutionContextInterface $context
+     *
+     * @return void
+     */
+    protected function validateSettings(ContentTypeField $field, ExecutionContextInterface $context) : void {}
+
+    /**
+     * {@inheritDoc}
+     */
+    public function validate(ContentTypeField $field, ExecutionContextInterface $context) : void {
+
+        // Validate return type.
+        $allowedTypes = $this->allowedReturnTypes($field);
+        if(!in_array($field->getReturnType(), $allowedTypes)) {
+            $context
+                ->buildViolation('Invalid GraphQL return type "{{ return_type }}" for field of type "{{ type }}". Please use on of [{{ allowed_return_types }}].')
+                ->setParameter('{{ type }}', static::getType())
+                ->setParameter('{{ return_type }}', $field->getReturnType())
+                ->setParameter('{{ allowed_return_types }}', join(', ', $allowedTypes))
+                ->addViolation();
+        }
+
+        // Validate settings.
+        $this->validateSettings($field, $context);
     }
 
     /**

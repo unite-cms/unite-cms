@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
@@ -24,6 +25,27 @@ class ReferenceType extends AbstractFieldType
     public function __construct(DomainManager $domainManager)
     {
         $this->domainManager = $domainManager;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function validate(ContentTypeField $field, ExecutionContextInterface $context) : void {
+
+        // Validate return type.
+        $returnTypes = empty($field->getUnionTypes()) ? [$field->getReturnType()] : array_keys($field->getUnionTypes());
+        foreach($returnTypes as $returnType) {
+            if(!$this->domainManager->current()->getContentTypeManager()->getContentType($returnType)) {
+                $context
+                    ->buildViolation('Invalid GraphQL return type "{{ return_type }}" for field of type "{{ type }}". Please use a GraphQL type (or an union of types) that implements UniteContent.')
+                    ->setParameter('{{ type }}', static::getType())
+                    ->setParameter('{{ return_type }}', $field->getReturnType())
+                    ->addViolation();
+            }
+        }
+
+        // Validate settings.
+        $this->validateSettings($field, $context);
     }
 
     /**

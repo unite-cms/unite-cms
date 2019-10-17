@@ -51,10 +51,6 @@ class UniteCMSCoreExtension extends Extension
 
             $params['user_manager'] = substr($params['user_manager'], 0, 1) === '@' ? substr($params['user_manager'], 1) : $params['user_manager'];
             $config['domains'][$id]['user_manager'] = new Reference($params['user_manager']);
-
-            foreach($params['schema'] as $s_key => $schemaFile) {
-                $config['domains'][$id]['schema'][$s_key] = file_get_contents($schemaFile);
-            }
         }
 
         $container->findDefinition(DomainManager::class)->setArgument('$domainConfig', $config['domains']);

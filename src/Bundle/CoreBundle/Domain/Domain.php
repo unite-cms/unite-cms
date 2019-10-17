@@ -89,6 +89,8 @@ class Domain
      */
     public function getSchema() : array
     {
-        return $this->schema;
+        return array_map(function($fileOrString){
+            return substr($fileOrString, -8) === '.graphql' ? file_get_contents($fileOrString) : $fileOrString;
+        }, $this->schema);
     }
 }

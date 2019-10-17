@@ -3,12 +3,13 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
-use GraphQL\Language\AST\NodeKind;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
-use GraphQL\Language\Visitor;
-use GraphQL\Type\Definition\UnionType;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\ContentType\ContentType;
+use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Exception\InvalidContentTypesException;
 use UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Modifier\SchemaModifierInterface;
 use UniteCMS\CoreBundle\GraphQL\Resolver\FieldResolverInterface;
@@ -34,14 +35,23 @@ class SchemaManager
 {
     const UNITE_CMS_ROOT_SCHEMA = __DIR__ . '/../Resources/GraphQL/Schema/root-schema.graphql';
 
+    // From https://github.com/graphql/graphql-js/blob/master/src/utilities/assertValidName.js
+    const GRAPHQL_NAME_REGEX = '/^[_a-zA-Z][_a-zA-Z0-9]*$/';
+
     /**
      * @var DomainManager $domainManager
      */
     protected $domainManager;
 
-    public function __construct(DomainManager $domainManager)
+    /**
+     * @var ValidatorInterface $validator
+     */
+    protected $validator;
+
+    public function __construct(DomainManager $domainManager, ValidatorInterface $validator)
     {
         $this->domainManager = $domainManager;
+        $this->validator = $validator;
     }
 
     /**
@@ -166,8 +176,14 @@ class SchemaManager
             }
         }
 
-        // Generate content types based on types.
-        $this->generateContentTypes($schema);
+        // Generate content types based on schema and validate it.
+        $errors = $this->validator->validate(
+            $this->generateContentTypes($schema)
+        );
+
+        if(count($errors) > 0) {
+            throw new InvalidContentTypesException($errors);
+        }
 
         // Execute after type extenders.
         foreach($this->afterTypeExtenders as $extender) {
@@ -224,7 +240,14 @@ class SchemaManager
 
             else if ($typeDefinitionNode instanceof UnionTypeDefinitionNode) {
                 $typeConfig['resolveType'] = function($value) {
-                    return $this->executableSchema->getType($value->getType());
+
+                    // At the moment we can only resolve Unite Content
+                    if($value instanceof ContentInterface) {
+                        return $this->executableSchema->getType($value->getType());
+                    }
+
+                    // TODO: Allow others to resolve custom types.
+                    return null;
                 };
             }
 
@@ -278,9 +301,12 @@ class SchemaManager
     }
 
     /**
+     * Creates or updates the current domain's ContentTypeManager and returns it.
+     *
      * @param Schema $schema
+     * @return \UniteCMS\CoreBundle\ContentType\ContentTypeManager
      */
-    protected function generateContentTypes(Schema $schema) {
+    protected function generateContentTypes(Schema $schema) : ContentTypeManager {
 
         /**
          * @var InterfaceType $uniteContent
@@ -310,5 +336,6 @@ class SchemaManager
             }
         }
 
+        return $contentTypeManager;
     }
 }

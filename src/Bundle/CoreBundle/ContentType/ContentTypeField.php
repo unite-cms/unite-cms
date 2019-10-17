@@ -15,16 +15,28 @@ use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 
+use Symfony\Component\Validator\Constraints as Assert;
+use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
+
+/**
+ * @UniteAssert\ContentTypeField
+ */
 class ContentTypeField
 {
     /**
      * @var string $id
+     *
+     * @Assert\NotBlank
+     * @Assert\Regex(SchemaManager::GRAPHQL_NAME_REGEX)
      */
     protected $id;
 
     /**
      * @var string $type
+     *
+     * @Assert\NotBlank
      */
     protected $type;
 
@@ -50,6 +62,8 @@ class ContentTypeField
 
     /**
      * @var string
+     *
+     * @Assert\Regex(SchemaManager::GRAPHQL_NAME_REGEX)
      */
     protected $returnType;
 

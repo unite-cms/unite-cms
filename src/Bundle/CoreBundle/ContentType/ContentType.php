@@ -3,19 +3,26 @@
 
 namespace UniteCMS\CoreBundle\ContentType;
 
-
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\ExpressionLanguage\Expression;
+use UniteCMS\CoreBundle\GraphQL\SchemaManager;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class ContentType
 {
+    /**
+     * @Assert\NotBlank
+     * @Assert\Regex(SchemaManager::GRAPHQL_NAME_REGEX)
+     * @var string
+     */
     protected $id;
 
     /**
      * @var ContentTypeField[] $fields
+     * @Assert\Valid
      */
     protected $fields = [];
 

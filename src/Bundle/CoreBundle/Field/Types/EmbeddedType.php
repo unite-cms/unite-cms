@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedFieldData;
@@ -29,6 +30,27 @@ class EmbeddedType extends AbstractFieldType
     {
         $this->domainManager = $domainManager;
         $this->fieldTypeManager = $fieldTypeManager;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function validate(ContentTypeField $field, ExecutionContextInterface $context) : void {
+
+        // Validate return type.
+        $returnTypes = empty($field->getUnionTypes()) ? [$field->getReturnType()] : array_keys($field->getUnionTypes());
+        foreach($returnTypes as $returnType) {
+            if(!$this->domainManager->current()->getContentTypeManager()->getEmbeddedContentType($returnType)) {
+                $context
+                    ->buildViolation('Invalid GraphQL return type "{{ return_type }}" for field of type "{{ type }}". Please use a GraphQL type (or an union of types) that implements UniteEmbeddedContent.')
+                    ->setParameter('{{ type }}', static::getType())
+                    ->setParameter('{{ return_type }}', $field->getReturnType())
+                    ->addViolation();
+            }
+        }
+
+        // Validate settings.
+        $this->validateSettings($field, $context);
     }
 
     /**

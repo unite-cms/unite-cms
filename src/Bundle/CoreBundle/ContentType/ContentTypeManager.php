@@ -3,20 +3,25 @@
 
 namespace UniteCMS\CoreBundle\ContentType;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class ContentTypeManager
 {
     /**
      * @var ContentType[] $contentTypes
+     * @Assert\Valid
      */
     protected $contentTypes = [];
 
     /**
      * @var ContentType[] $embeddedContentTypes
+     * @Assert\Valid
      */
     protected $embeddedContentTypes = [];
 
     /**
      * @var ContentType[] $unionContentTypes
+     * @Assert\Valid
      */
     protected $unionContentTypes = [];
 
@@ -103,5 +108,16 @@ class ContentTypeManager
     public function getUnionContentType(string $id): ?ContentType
     {
         return $this->unionContentTypes[$id] ?? null;
+    }
+
+    public function getAnyType(string $id) : ?ContentType {
+        return $this->getContentType($id) ?? $this->getEmbeddedContentType($id) ?? $this->getUnionContentType($id);
+    }
+
+    /**
+     * @return \UniteCMS\CoreBundle\ContentType\ContentType[]
+     */
+    public function getAllTypes() : array {
+        return $this->contentTypes + $this->embeddedContentTypes + $this->unionContentTypes;
     }
 }
