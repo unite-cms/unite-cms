@@ -3,38 +3,32 @@
 namespace UniteCMS\DoctrineORMBundle\Content;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\Persistence\ObjectRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\DoctrineORMBundle\Entity\Content;
-use UniteCMS\DoctrineORMBundle\Repository\ContentRepository;
 
 class ContentManager implements ContentManagerInterface
 {
+    const ENTITY = Content::class;
+
     /**
      * @var \Symfony\Bridge\Doctrine\RegistryInterface
      */
     protected $registry;
 
     /**
-     * @var FieldTypeManager $fieldTypeManager
-     */
-    protected $fieldTypeManager;
-
-    /**
      * ContentManager constructor.
      *
      * @param \Symfony\Bridge\Doctrine\RegistryInterface $registry
-     * @param \UniteCMS\CoreBundle\Field\FieldTypeManager $fieldTypeManager
      */
-    public function __construct(RegistryInterface $registry, FieldTypeManager $fieldTypeManager)
+    public function __construct(RegistryInterface $registry)
     {
         $this->registry = $registry;
-        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -51,8 +45,8 @@ class ContentManager implements ContentManagerInterface
      *
      * @return \UniteCMS\DoctrineORMBundle\Repository\ContentRepository
      */
-    protected function repository(Domain $domain) : ContentRepository {
-        return $this->em($domain)->getRepository(Content::class);
+    protected function repository(Domain $domain) : ObjectRepository {
+        return $this->em($domain)->getRepository(static::ENTITY);
     }
 
     /**

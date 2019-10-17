@@ -2,6 +2,7 @@
 scalar Expression
 scalar JSON
 scalar DateTime
+scalar NULL
 
 directive @hide(
     if: Expression!
@@ -21,8 +22,6 @@ directive @access(
 
 interface UniteUser {
     id: ID
-    username: String!
-    password: String!
 }
 
 interface UniteContent {

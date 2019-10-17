@@ -52,9 +52,17 @@ class QueryResolver implements FieldResolverInterface
 
         $domain = $this->domainManager->current();
         $contentTypeManager = $domain->getContentTypeManager();
-        $contentManager = $domain->getContentManager();
+        $contentManager = null;
 
-        if(!$contentTypeManager->getContentType($type)) {
+        if(!empty($contentTypeManager->getContentType($type))) {
+            $contentManager = $domain->getContentManager();
+        }
+
+        else if(!empty($contentTypeManager->getUserType($type))) {
+            $contentManager = $domain->getUserManager();
+        }
+
+        else {
             return null;
         }
 

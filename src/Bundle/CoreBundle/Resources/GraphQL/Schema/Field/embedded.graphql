@@ -1,2 +1,2 @@
 
-directive @embeddedField on FIELD_DEFINITION | UNION
+directive @embeddedField on FIELD_DEFINITION

@@ -42,7 +42,7 @@ class DomainUserProvider implements PayloadAwareUserProviderInterface
         $type = substr($payload['roles'][0], strlen('ROLE_'));
 
         $domain = $this->domainManager->current();
-        if(!$user = $domain->getUserManager()->find($domain, $type, $username)) {
+        if(!$user = $domain->getUserManager()->findByUsername($domain, $type, $username)) {
             throw new UsernameNotFoundException();
         }
 

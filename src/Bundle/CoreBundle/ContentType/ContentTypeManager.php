@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\ContentType;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use UniteCMS\CoreBundle\UserType\UserType;
 
 class ContentTypeManager
 {
@@ -24,6 +25,12 @@ class ContentTypeManager
      * @Assert\Valid
      */
     protected $unionContentTypes = [];
+
+    /**
+     * @var UserType[] $userTypes;
+     * @Assert\Valid
+     */
+    protected $userTypes = [];
 
     /**
      * @return ContentType[]
@@ -93,6 +100,29 @@ class ContentTypeManager
         return $this;
     }
 
+    public function registerUserType(UserType $contentType) : self
+    {
+        $this->userTypes[$contentType->getId()] = $contentType;
+        return $this;
+    }
+
+    /**
+     * @return UserType[]
+     */
+    public function getUserTypes(): array
+    {
+        return $this->userTypes;
+    }
+
+    /**
+     * @param string $id
+     * @return UserType|null
+     */
+    public function getUserType(string $id): ?UserType
+    {
+        return $this->userTypes[$id] ?? null;
+    }
+
     /**
      * @return \UniteCMS\CoreBundle\ContentType\ContentType[]
      */
@@ -110,14 +140,15 @@ class ContentTypeManager
         return $this->unionContentTypes[$id] ?? null;
     }
 
+
     public function getAnyType(string $id) : ?ContentType {
-        return $this->getContentType($id) ?? $this->getEmbeddedContentType($id) ?? $this->getUnionContentType($id);
+        return $this->getContentType($id) ?? $this->getEmbeddedContentType($id) ?? $this->getUnionContentType($id) ?? $this->getUserType($id);
     }
 
     /**
      * @return \UniteCMS\CoreBundle\ContentType\ContentType[]
      */
     public function getAllTypes() : array {
-        return $this->contentTypes + $this->embeddedContentTypes + $this->unionContentTypes;
+        return $this->contentTypes + $this->embeddedContentTypes + $this->unionContentTypes + $this->userTypes;
     }
 }

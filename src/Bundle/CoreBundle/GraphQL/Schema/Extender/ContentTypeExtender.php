@@ -44,7 +44,7 @@ class ContentTypeExtender implements SchemaExtenderInterface
         $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
 
         // Generate input types for all content types.
-        foreach($contentTypeManager->getContentTypes() as $type) {
+        foreach(($contentTypeManager->getContentTypes() + $contentTypeManager->getUserTypes()) as $type) {
 
             if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
 

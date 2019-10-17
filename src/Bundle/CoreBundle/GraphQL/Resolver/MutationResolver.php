@@ -12,6 +12,7 @@ use InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\Domain;
@@ -67,26 +68,49 @@ class MutationResolver implements FieldResolverInterface
          */
         $contentInterface = $info->schema->getType('UniteContent');
 
-        if(!$actualType instanceof ObjectType || !$actualType->implementsInterface($contentInterface)) {
+        /**
+         * @var InterfaceType $userInterface
+         */
+        $userInterface = $info->schema->getType('UniteUser');
+
+        if(!$actualType instanceof ObjectType) {
             return null;
         }
 
-        list($field, $type) = preg_split('/(?=[A-Z])/',$info->fieldName);
+        $fieldNameParts = preg_split('/(?=[A-Z])/',$info->fieldName);
+        if(count($fieldNameParts) !== 2) {
+            return null;
+        }
+
+        $field = $fieldNameParts[0];
+        $type = $fieldNameParts[1];
 
         $domain = $this->domainManager->current();
-        $contentManager = $domain->getContentManager();
+        $contentManager = null;
+
+        if($actualType->implementsInterface($contentInterface)) {
+            $contentManager = $domain->getContentManager();
+        }
+
+        else if($actualType->implementsInterface($userInterface)) {
+            $contentManager = $domain->getUserManager();
+        }
+
+        else {
+            return null;
+        }
 
         switch ($field) {
             case 'create':
-                $this->contentOrException($domain, $type, ContentVoter::CREATE);
+                $this->contentOrException($domain, $contentManager, $type, ContentVoter::CREATE);
                 return $contentManager->create($domain, $type, $this->normalizeData($domain, $type, $args['data'] ?? []) ?? [], $args['persist']);
 
             case 'update':
-                $content = $this->contentOrException($domain, $type, ContentVoter::UPDATE);
+                $content = $this->contentOrException($domain, $contentManager, $type, ContentVoter::UPDATE);
                 return $contentManager->update($domain, $type, $content, $this->normalizeData($domain, $type, $args['data'] ?? []), $args['persist']);
 
             case 'delete':
-                $content = $this->contentOrException($domain, $type, ContentVoter::DELETE);
+                $content = $this->contentOrException($domain, $contentManager, $type, ContentVoter::DELETE);
                 return $contentManager->delete($domain, $type, $content, $args['persist']);
 
             default:
@@ -96,7 +120,7 @@ class MutationResolver implements FieldResolverInterface
 
     protected function normalizeData(Domain $domain, string $type, array $data) : array {
 
-        $contentType = $domain->getContentTypeManager()->getContentType($type);
+        $contentType = $domain->getContentTypeManager()->getAnyType($type);
         $normalizedData = [];
 
         foreach($data as $id => $fieldData) {
@@ -130,17 +154,17 @@ class MutationResolver implements FieldResolverInterface
         return $fieldType->normalizeData($field, $rowData);
     }
 
-    protected function contentOrException(Domain $domain, string $type, string $attribute, $id = null) : ?ContentInterface {
+    protected function contentOrException(Domain $domain, ContentManagerInterface $contentManager, string $type, string $attribute, $id = null) : ?ContentInterface {
 
         if($attribute === ContentVoter::CREATE) {
-            $subject = $domain->getContentTypeManager()->getContentType($type);
+            $subject = $domain->getContentTypeManager()->getAnyType($type);
 
             if(empty($subject)) {
                 throw new InvalidArgumentException(sprintf('Content type %s was not found.', $type));
             }
 
         } else {
-            $subject = $domain->getContentManager()->find($domain, $type, $id);
+            $subject = $contentManager->find($domain, $type, $id);
 
             if(empty($subject)) {
                 return null;

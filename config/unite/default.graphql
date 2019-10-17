@@ -59,8 +59,7 @@ type Article implements UniteContent {
     foo: Expression                     @hide(if: "not is_granted('ROLE_ADMIN')")
 }
 
-type Admin implements UniteContent & UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
+type Admin implements UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
     id: ID
-    username: String!
-    password: String!
+    username: String!                   @usernameField
 }

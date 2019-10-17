@@ -3,9 +3,10 @@
 
 namespace UniteCMS\CoreBundle\User;
 
+use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
 
-interface UserManagerInterface
+interface UserManagerInterface extends ContentManagerInterface
 {
-    public function find(Domain $domain, string $type, string $username) : ?UserInterface;
+    public function findByUsername(Domain $domain, string $type, string $username) : ?UserInterface;
 }

@@ -1,0 +1,2 @@
+
+directive @user_nameField on FIELD_DEFINITION

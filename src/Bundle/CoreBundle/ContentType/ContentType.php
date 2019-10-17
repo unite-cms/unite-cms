@@ -51,7 +51,7 @@ class ContentType
      * @return static
      */
     static function fromObjectType(ObjectType $type) : self {
-        $contentType = new self($type->name);
+        $contentType = new static($type->name);
 
         if($args = Util::directiveArgs($type->astNode, 'access')) {
            $contentType->setPermissions($args);

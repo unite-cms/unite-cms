@@ -74,7 +74,7 @@ class ContentVoter extends Voter
 
         $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
 
-        if(!$contentType = $contentTypeManager->getContentType($type)) {
+        if(!$contentType = $contentTypeManager->getAnyType($type)) {
             return self::ACCESS_ABSTAIN;
         }
 

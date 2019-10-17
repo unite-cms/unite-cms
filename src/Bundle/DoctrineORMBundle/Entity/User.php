@@ -4,14 +4,13 @@ namespace UniteCMS\DoctrineORMBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use UniteCMS\CoreBundle\Content\FieldData;
-use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\User\UserInterface;
 
 /**
  * @ORM\Table(name="unite_user")
  * @ORM\Entity(repositoryClass="UniteCMS\DoctrineORMBundle\Repository\UserRepository")
  */
-class User implements ContentInterface, UserInterface
+class User implements UserInterface
 {
     /**
      * @ORM\Id()

@@ -35,7 +35,7 @@ class MutationExtender implements SchemaExtenderInterface
 
         $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
 
-        foreach($contentTypeManager->getContentTypes() as $type) {
+        foreach(($contentTypeManager->getContentTypes() + $contentTypeManager->getUserTypes()) as $type) {
             if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
                 if($this->authorizationChecker->isGranted(ContentVoter::MUTATION, $type)) {
 
@@ -43,8 +43,8 @@ class MutationExtender implements SchemaExtenderInterface
                     // Only add data attribute if we have real fields
                     if(count($type->getFields()) > 0) {
                         $extension .= sprintf('
-                            create%1$s(data: %1$sInput, persist: Boolean!) : %1$s
-                            update%1$s(id: ID!, data: %1$sInput, persist: Boolean!) : %1$s
+                            create%1$s(data: %1$sInput!, persist: Boolean!) : %1$s
+                            update%1$s(id: ID!, data: %1$sInput!, persist: Boolean!) : %1$s
                             delete%1$s(persist: Boolean!) : %1$s
                         ', $type->getId());
                     }

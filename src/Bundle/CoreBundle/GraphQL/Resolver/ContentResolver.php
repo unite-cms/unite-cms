@@ -12,6 +12,8 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use UniteCMS\CoreBundle\User\UserInterface;
+use UniteCMS\CoreBundle\UserType\UserType;
 
 class ContentResolver implements FieldResolverInterface
 {
@@ -43,6 +45,10 @@ class ContentResolver implements FieldResolverInterface
     public function supports(string $typeName, ObjectTypeDefinitionNode $typeDefinitionNode): bool {
         foreach($typeDefinitionNode->interfaces as $interface) {
             if($interface->name->value === 'UniteContent') {
+                return true;
+            }
+
+            if($interface->name->value === 'UniteUser') {
                 return true;
             }
 
@@ -82,6 +88,10 @@ class ContentResolver implements FieldResolverInterface
                     case 'id':
                         return $value->getId();
                     default:
+
+                        if($value instanceof UserInterface && $contentType instanceof UserType && $info->fieldName === $contentType->getUserNameField()->getId()) {
+                            return $value->getUsername();
+                        }
 
                         // If field is not manage by unite cms.
                         if(!$field = $contentType->getField($info->fieldName)) {

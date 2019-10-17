@@ -30,6 +30,7 @@ use GraphQL\Utils\SchemaExtender;
 use GraphQL\Utils\SchemaPrinter;
 use Symfony\Component\HttpFoundation\Request;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
+use UniteCMS\CoreBundle\UserType\UserType;
 
 class SchemaManager
 {
@@ -318,6 +319,11 @@ class SchemaManager
          */
         $uniteContentEmbed = $schema->getType('UniteEmbeddedContent');
 
+        /**
+         * @var InterfaceType $uniteUser
+         */
+        $uniteUser = $schema->getType('UniteUser');
+
         $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
 
         // Fill content type manager from graphql objects.
@@ -332,6 +338,11 @@ class SchemaManager
                 // Register embedded content type in content type manager.
                 if($type->implementsInterface($uniteContentEmbed)){
                     $contentTypeManager->registerEmbeddedContentType(ContentType::fromObjectType($type));
+                }
+
+                // Register user content type in content type manager.
+                if($type->implementsInterface($uniteUser)){
+                    $contentTypeManager->registerUserType(UserType::fromObjectType($type));
                 }
             }
         }
