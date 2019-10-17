@@ -21,6 +21,8 @@ directive @access(
 
 interface UniteUser {
     id: ID
+    username: String!
+    password: String!
 }
 
 interface UniteContent {

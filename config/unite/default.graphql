@@ -2,7 +2,6 @@
 type Category implements UniteContent {
     id: ID
     name: String! @textField
-    #articles_union: [Article!] @reference_ofField(reference_field: "categoryUnionTest")
     articles_of: [Article!] @reference_ofField(reference_field: "category")
     tags_of: [Article!] @reference_ofField(reference_field: "tags")
 }
@@ -57,4 +56,11 @@ type Article implements UniteContent {
     status: ArticleStatus!              @choiceField
     contentBlocks: [ContentBlock!]      @embeddedField
     categoryUnionTest: AnyCategory      @referenceField
+    foo: Expression                     @hide(if: "not is_granted('ROLE_ADMIN')")
+}
+
+type Admin implements UniteContent & UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
+    id: ID
+    username: String!
+    password: String!
 }

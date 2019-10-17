@@ -3,6 +3,8 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Schema\Modifier;
 
+use GraphQL\Language\AST\NodeKind;
+use GraphQL\Language\Visitor;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Type\Definition\InputObjectType;
@@ -48,21 +50,29 @@ class HideDirectiveModifier implements SchemaModifierInterface
         }
 
         // Modify the schema document and remove all hidden objects and fields.
-        foreach($document->definitions as $d_key => $definition) {
+        Visitor::visit($document, [
+            'enter' => [
+                NodeKind::OBJECT_TYPE_DEFINITION => function ($node, $key, $parent, $path, $ancestors) use ($hideMap) {
 
-            if(isset($hideMap[$definition->name->value])) {
-                if ($hideMap[$definition->name->value]['hide']) {
-                    unset($document->definitions[$d_key]);
-                }
+                    // Remove hidden object types.
+                    if($hideMap[$node->name->value]['hide']) {
+                        return Visitor::removeNode();
+                    }
 
-                if (!empty($hideMap[$definition->name->value]['fields']) && isset($definition->fields)) {
-                    foreach ($definition->fields as $f_key => $field) {
-                        if(!empty($hideMap[$definition->name->value]['fields'][$field->name->value])) {
-                            unset($document->definitions[$d_key]->fields[$f_key]);
+                    // Remove hidden fields.
+                    if(isset($hideMap[$node->name->value])) {
+                        if (!empty($hideMap[$node->name->value]['fields']) && isset($node->fields)) {
+                            foreach ($node->fields as $f_key => $field) {
+                                if(!empty($hideMap[$node->name->value]['fields'][$field->name->value])) {
+                                    unset($node->fields[$f_key]);
+                                }
+                            }
                         }
                     }
-                }
-            }
-        }
+
+                    return $node;
+                },
+            ]
+        ]);
     }
 }

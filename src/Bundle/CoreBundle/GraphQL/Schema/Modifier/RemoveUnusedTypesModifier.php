@@ -4,6 +4,8 @@
 namespace UniteCMS\CoreBundle\GraphQL\Schema\Modifier;
 
 use GraphQL\Language\AST\DocumentNode;
+use GraphQL\Language\AST\NodeKind;
+use GraphQL\Language\Visitor;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -93,11 +95,16 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
             $this->findAllReachableTypes($usedTypes, $schema->getSubscriptionType());
         }
 
-        foreach($document->definitions as $d_key => $definition) {
-
-            if(!in_array($definition->name->value, $usedTypes)) {
-                unset($document->definitions[$d_key]);
-            }
-        }
+        // Modify the schema document and remove all hidden objects and fields.
+        Visitor::visit($document, [
+            'enter' => [
+                NodeKind::OBJECT_TYPE_DEFINITION => function ($node, $key, $parent, $path, $ancestors) use ($usedTypes) {
+                    if(!in_array($node->name->value, $usedTypes)) {
+                        return Visitor::removeNode();
+                    }
+                    return null;
+                },
+            ]
+        ]);
     }
 }
