@@ -9,6 +9,7 @@ use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
+use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 
@@ -30,7 +31,7 @@ class ReferenceType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function validate(ContentTypeField $field, ExecutionContextInterface $context) : void {
+    public function validateFieldDefinition(ContentType $contentType, ContentTypeField $field, ExecutionContextInterface $context) : void {
 
         // Validate return type.
         $returnTypes = empty($field->getUnionTypes()) ? [$field->getReturnType()] : array_keys($field->getUnionTypes());
@@ -43,15 +44,16 @@ class ReferenceType extends AbstractFieldType
                     ->addViolation();
             }
         }
-
-        // Validate settings.
-        $this->validateSettings($field, $context);
     }
 
     /**
      * {@inheritDoc}
      */
     public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+
+        if(empty($fieldData->getData())) {
+            return null;
+        }
 
         $domain = $this->domainManager->current();
         $contentManager = $domain->getContentManager();

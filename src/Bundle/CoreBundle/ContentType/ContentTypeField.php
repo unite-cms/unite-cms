@@ -18,11 +18,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
 
-/**
- * @UniteAssert\ContentTypeField
- */
 class ContentTypeField
 {
     /**
@@ -177,6 +173,10 @@ class ContentTypeField
         else {
             $type = $fieldTypeManager->getFieldType($this->getType());
             $inputType = $type->GraphQLInputType($this);
+        }
+
+        if(empty($inputType)) {
+            return '';
         }
 
         if($this->isListOf()) {

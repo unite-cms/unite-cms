@@ -8,6 +8,7 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedFieldData;
 use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
@@ -35,7 +36,7 @@ class EmbeddedType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function validate(ContentTypeField $field, ExecutionContextInterface $context) : void {
+    public function validateFieldDefinition(ContentType $contentType, ContentTypeField $field, ExecutionContextInterface $context) : void {
 
         // Validate return type.
         $returnTypes = empty($field->getUnionTypes()) ? [$field->getReturnType()] : array_keys($field->getUnionTypes());
@@ -48,9 +49,6 @@ class EmbeddedType extends AbstractFieldType
                     ->addViolation();
             }
         }
-
-        // Validate settings.
-        $this->validateSettings($field, $context);
     }
 
     /**

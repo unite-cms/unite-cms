@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\ExpressionLanguage\Expression;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 use Symfony\Component\Validator\Constraints as Assert;
+use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
 
 class ContentType
 {
@@ -23,6 +24,7 @@ class ContentType
     /**
      * @var ContentTypeField[] $fields
      * @Assert\Valid
+     * @UniteAssert\ContentTypeField
      */
     protected $fields = [];
 

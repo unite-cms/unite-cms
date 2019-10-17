@@ -8,6 +8,6 @@ class FieldDataList extends FieldData {
      * @return \UniteCMS\CoreBundle\Content\FieldData[]
      */
     public function rows() : array {
-        return $this->getData();
+        return $this->getData() ?? [];
     }
 }

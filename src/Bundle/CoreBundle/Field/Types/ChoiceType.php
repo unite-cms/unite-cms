@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 
 class ChoiceType extends AbstractFieldType
@@ -12,7 +13,7 @@ class ChoiceType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function validate(ContentTypeField $field, ExecutionContextInterface $context) : void {
+    public function validateFieldDefinition(ContentType $contentType, ContentTypeField $field, ExecutionContextInterface $context) : void {
 
         // Validate return type.
         if(empty($field->getEnumValues())) {
@@ -22,9 +23,6 @@ class ChoiceType extends AbstractFieldType
                 ->setParameter('{{ return_type }}', $field->getReturnType())
                 ->addViolation();
         }
-
-        // Validate settings.
-        $this->validateSettings($field, $context);
     }
 
     /**

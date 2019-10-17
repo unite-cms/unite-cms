@@ -1,0 +1,4 @@
+
+directive @reference_ofField(
+    reference_field: String!
+) on FIELD_DEFINITION

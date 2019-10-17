@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
+use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
@@ -34,7 +35,7 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     /**
      * {@inheritDoc}
      */
-    public function GraphQLInputType(ContentTypeField $field) : string {
+    public function GraphQLInputType(ContentTypeField $field) : ?string {
         return static::GRAPHQL_INPUT_TYPE;
     }
 
@@ -49,19 +50,9 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     }
 
     /**
-     * Used by validate method to check valid return types.
-     *
-     * @param \UniteCMS\CoreBundle\ContentType\ContentTypeField $field
-     * @param \Symfony\Component\Validator\Context\ExecutionContextInterface $context
-     *
-     * @return void
-     */
-    protected function validateSettings(ContentTypeField $field, ExecutionContextInterface $context) : void {}
-
-    /**
      * {@inheritDoc}
      */
-    public function validate(ContentTypeField $field, ExecutionContextInterface $context) : void {
+    public function validateFieldDefinition(ContentType $contentType, ContentTypeField $field, ExecutionContextInterface $context) : void {
 
         // Validate return type.
         $allowedTypes = $this->allowedReturnTypes($field);
@@ -72,10 +63,8 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
                 ->setParameter('{{ return_type }}', $field->getReturnType())
                 ->setParameter('{{ allowed_return_types }}', join(', ', $allowedTypes))
                 ->addViolation();
+            return;
         }
-
-        // Validate settings.
-        $this->validateSettings($field, $context);
     }
 
     /**

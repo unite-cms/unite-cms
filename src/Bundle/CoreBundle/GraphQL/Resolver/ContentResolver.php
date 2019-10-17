@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
+use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
@@ -87,9 +88,9 @@ class ContentResolver implements FieldResolverInterface
                             return null;
                         }
 
-                        // If field data is empty.
+                        // If field data is empty, create an empty one to pass to the field.
                         if(!$fieldData = $value->getFieldData($field->getId())) {
-                            return $field->isListOf() ? [] : null;
+                            $fieldData = $field->isListOf() ? new FieldDataList() : new FieldData();
                         }
 
                         // If type is a list, but a single value comes from store, create a list on the fly.

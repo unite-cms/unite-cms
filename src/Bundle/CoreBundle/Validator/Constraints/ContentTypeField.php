@@ -11,12 +11,4 @@ use Symfony\Component\Validator\Constraint;
 class ContentTypeField extends Constraint
 {
     public $invalid_type_message = 'Field Type "{{ field_type }}" was not found.';
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTargets()
-    {
-        return self::CLASS_CONSTRAINT;
-    }
 }

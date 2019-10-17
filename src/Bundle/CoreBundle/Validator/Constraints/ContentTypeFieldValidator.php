@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 
@@ -27,22 +28,32 @@ class ContentTypeFieldValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint)
     {
-        if(!$value instanceof ContentTypeField) {
+        $contentType = $this->context->getObject();
+
+        if(!$contentType instanceof ContentType) {
             return;
         }
 
-        // Validate field type.
-        if(!$this->fieldTypeManager->hasFieldType($value->getType())) {
-            $this->context
-                ->buildViolation($constraint->invalid_type_message)
-                ->setParameter('{{ field_type }}', $value->getType())
-                ->addViolation();
-            return;
-        }
+        $fields = is_array($value) ? $value : [$value];
 
-        // Allow field type to validate config.
-        $this->fieldTypeManager
-            ->getFieldType($value->getType())
-            ->validate($value, $this->context);
+        foreach($fields as $field) {
+            if(!$field instanceof ContentTypeField) {
+                continue;
+            }
+
+            // Validate field type.
+            if(!$this->fieldTypeManager->hasFieldType($field->getType())) {
+                $this->context
+                    ->buildViolation($constraint->invalid_type_message)
+                    ->setParameter('{{ field_type }}', $field->getType())
+                    ->addViolation();
+                return;
+            }
+
+            // Allow field type to validate config.
+            $this->fieldTypeManager
+                ->getFieldType($field->getType())
+                ->validateFieldDefinition($contentType, $field, $this->context);
+        }
     }
 }
