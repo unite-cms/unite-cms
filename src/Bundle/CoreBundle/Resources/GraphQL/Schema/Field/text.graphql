@@ -1,4 +1,4 @@
 
 directive @textField(
-    xss_clean: Boolean! = true
+    xss_clean: Boolean = true
 ) on FIELD_DEFINITION

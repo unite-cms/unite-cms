@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Tests\GraphQL;
 
 use GraphQL\Utils\BuildSchema;
 use GraphQL\Language\AST\DocumentNode;
+use GraphQL\Utils\SchemaPrinter;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use UniteCMS\CoreBundle\Domain\Domain;

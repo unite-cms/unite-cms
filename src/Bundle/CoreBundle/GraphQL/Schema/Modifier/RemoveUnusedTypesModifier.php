@@ -96,15 +96,21 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
         }
 
         // Modify the schema document and remove all hidden objects and fields.
-        Visitor::visit($document, [
-            'enter' => [
-                NodeKind::OBJECT_TYPE_DEFINITION => function ($node, $key, $parent, $path, $ancestors) use ($usedTypes) {
+        $document = Visitor::visit($document, [
+            'enter' => function ($node, $key, $parent, $path, $ancestors) use ($usedTypes) {
+                if(in_array($node->kind, [
+                    NodeKind::OBJECT_TYPE_DEFINITION,
+                    NodeKind::INTERFACE_TYPE_DEFINITION,
+                    NodeKind::DIRECTIVE_DEFINITION,
+                    NodeKind::INPUT_OBJECT_TYPE_DEFINITION
+                ])) {
                     if(!in_array($node->name->value, $usedTypes)) {
                         return Visitor::removeNode();
                     }
-                    return null;
-                },
-            ]
+                }
+
+                return null;
+            }
         ]);
     }
 }

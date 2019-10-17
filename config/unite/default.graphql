@@ -61,5 +61,12 @@ type Article implements UniteContent {
 
 type Admin implements UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
     id: ID
-    username: String!                   @usernameField
+    username: String!                   @textField
+}
+
+type CommunityUser implements UniteUser @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+    id: ID
+    username: String!                  @textField
+    firstname: String                  @textField
+    lastname: String                   @textField
 }

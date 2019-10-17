@@ -89,8 +89,11 @@ class ContentResolver implements FieldResolverInterface
                         return $value->getId();
                     default:
 
-                        if($value instanceof UserInterface && $contentType instanceof UserType && $info->fieldName === $contentType->getUserNameField()->getId()) {
-                            return $value->getUsername();
+                        // Special handle user content.
+                        if($value instanceof UserInterface && $contentType instanceof UserType) {
+                            if($info->fieldName === 'username') {
+                                return $value->getUsername();
+                            }
                         }
 
                         // If field is not manage by unite cms.

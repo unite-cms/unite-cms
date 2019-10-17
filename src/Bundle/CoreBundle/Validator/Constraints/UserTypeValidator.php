@@ -5,11 +5,8 @@ namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use UniteCMS\CoreBundle\Field\Types\UserNameType;
-use UniteCMS\CoreBundle\Field\Types\UserPasswordType;
 use UniteCMS\CoreBundle\UserType\UserType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
-use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 
 class UserTypeValidator extends ConstraintValidator
 {
@@ -36,15 +33,7 @@ class UserTypeValidator extends ConstraintValidator
             return;
         }
 
-        $userNameFound = false;
-
-        foreach($contentType->getFields() as $field) {
-            if($field->getType() === UserNameType::getType()) {
-                $userNameFound = true;
-            }
-        }
-
-        if(!$userNameFound) {
+        if(!array_key_exists('username', $contentType->getFields())) {
             $this->context
                 ->buildViolation($constraint->message)
                 ->addViolation();

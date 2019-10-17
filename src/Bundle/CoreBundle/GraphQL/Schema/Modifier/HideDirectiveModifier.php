@@ -50,7 +50,7 @@ class HideDirectiveModifier implements SchemaModifierInterface
         }
 
         // Modify the schema document and remove all hidden objects and fields.
-        Visitor::visit($document, [
+        $document = Visitor::visit($document, [
             'enter' => [
                 NodeKind::OBJECT_TYPE_DEFINITION => function ($node, $key, $parent, $path, $ancestors) use ($hideMap) {
 

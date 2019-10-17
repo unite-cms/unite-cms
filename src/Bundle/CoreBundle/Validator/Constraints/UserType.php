@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraint;
  */
 class UserType extends Constraint
 {
-    public $message = 'User types need an @usernameField.';
+    public $message = 'The "username" field of a unite user type must be a registered field (for example @textField or @emailField).';
 
     /**
      * {@inheritDoc}
