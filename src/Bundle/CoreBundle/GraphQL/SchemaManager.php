@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
+use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -248,7 +249,6 @@ class SchemaManager
                     }
 
                     // TODO: Allow others to resolve custom types.
-                    return null;
                 };
             }
 

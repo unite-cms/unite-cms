@@ -68,7 +68,7 @@ class EmbeddedType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function normalizeData(ContentTypeField $field, $inputData = null) : FieldData {
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
 
         $domain = $this->domainManager->current();
 
@@ -83,7 +83,7 @@ class EmbeddedType extends AbstractFieldType
         foreach($inputData as $id => $embeddedFieldData) {
             $field = $contentType->getField($id);
             $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
-            $normalizedData[$id] = $fieldType->normalizeData($field, $embeddedFieldData);
+            $normalizedData[$id] = $fieldType->normalizeInputData($content, $field, $embeddedFieldData);
         }
 
         return new EmbeddedFieldData(uniqid(), $contentType->getId(), $normalizedData);

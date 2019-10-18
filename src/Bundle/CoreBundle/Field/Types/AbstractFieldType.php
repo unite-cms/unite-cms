@@ -97,7 +97,12 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     /**
      * {@inheritDoc}
      */
-    public function normalizeData(ContentTypeField $field, $inputData = null): FieldData {
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
         return new FieldData($inputData);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, ExecutionContextInterface $context) : void {}
 }

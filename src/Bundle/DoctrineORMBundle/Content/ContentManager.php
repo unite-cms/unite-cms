@@ -74,30 +74,24 @@ class ContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function create(Domain $domain, string $type, array $inputData = [], bool $persist = false): ContentInterface {
-
-        $content = new Content($type);
-        $content->setData($inputData);
-
-        if($persist) {
-            $this->em($domain)->persist($content);
-
-            // TODO Maybe we should not do this here, because of performance reasons.
-            $this->em($domain)->flush($content);
-        }
-
-        return $content;
+    public function create(Domain $domain, string $type): ContentInterface {
+        $class = static::ENTITY;
+        return new $class($type);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function update(Domain $domain, string $type, ContentInterface $content, array $inputData = [], bool $persist = false): ContentInterface {
+    public function update(Domain $domain, ContentInterface $content, array $inputData = [], bool $persist = false): ContentInterface {
 
         $content->setData($inputData);
 
         if($persist) {
-            // TODO Maybe we should not do this here, because of performance reasons.
+
+            if(empty($content->getId())) {
+                $this->em($domain)->persist($content);
+            }
+
             $this->em($domain)->flush($content);
         }
 
@@ -108,15 +102,10 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function delete(Domain $domain, string $type, ContentInterface $content, bool $persist = false): ContentInterface {
-
         if($persist) {
-
             $this->em($domain)->remove($content);
-
-            // TODO Maybe we should not do this here, because of performance reasons.
             $this->em($domain)->flush($content);
         }
-
         return $content;
     }
 }

@@ -19,5 +19,7 @@ interface FieldTypeInterface
 
     public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData);
 
-    public function normalizeData(ContentTypeField $field, $inputData = null) : FieldData;
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData;
+
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, ExecutionContextInterface $context) : void;
 }

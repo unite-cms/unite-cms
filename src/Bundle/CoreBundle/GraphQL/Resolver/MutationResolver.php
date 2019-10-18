@@ -8,7 +8,6 @@ use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\WrappingType;
-use InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -102,15 +101,17 @@ class MutationResolver implements FieldResolverInterface
 
         switch ($field) {
             case 'create':
-                $this->contentOrException($domain, $contentManager, $type, ContentVoter::CREATE);
-                return $contentManager->create($domain, $type, $this->normalizeData($domain, $type, $args['data'] ?? []) ?? [], $args['persist']);
+                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::CREATE, $type);
+                $data = $this->normalizeData($domain, $content, $args['data'] ?? []);
+                return $contentManager->update($domain, $content, $data, $args['persist'] );
 
             case 'update':
-                $content = $this->contentOrException($domain, $contentManager, $type, ContentVoter::UPDATE);
-                return $contentManager->update($domain, $type, $content, $this->normalizeData($domain, $type, $args['data'] ?? []), $args['persist']);
+                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::CREATE, $type, $args['id']);
+                $data = $this->normalizeData($domain, $content, $args['data'] ?? []);
+                return $contentManager->update($domain, $content, $data, $args['persist'] );
 
             case 'delete':
-                $content = $this->contentOrException($domain, $contentManager, $type, ContentVoter::DELETE);
+                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::CREATE, $type, $args['id']);
                 return $contentManager->delete($domain, $type, $content, $args['persist']);
 
             default:
@@ -118,9 +119,9 @@ class MutationResolver implements FieldResolverInterface
         }
     }
 
-    protected function normalizeData(Domain $domain, string $type, array $data) : array {
+    protected function normalizeData(Domain $domain, ContentInterface $content, array $data) : array {
 
-        $contentType = $domain->getContentTypeManager()->getAnyType($type);
+        $contentType = $domain->getContentTypeManager()->getAnyType($content->getType());
         $normalizedData = [];
 
         foreach($data as $id => $fieldData) {
@@ -129,20 +130,20 @@ class MutationResolver implements FieldResolverInterface
             if($field->isListOf()) {
                 $listData = [];
                 foreach($fieldData ?? [] as $rowId => $rowData) {
-                    $listData[$rowId] = $this->normalizeFieldData($field, $domain, $rowData);
+                    $listData[$rowId] = $this->normalizeFieldData($field, $domain, $content, $rowData);
                 }
                 $normalizedData[$id] = new FieldDataList($listData);
             }
 
             else {
-                $normalizedData[$id] = $this->normalizeFieldData($field, $domain, $fieldData);
+                $normalizedData[$id] = $this->normalizeFieldData($field, $domain, $content, $fieldData);
             }
         }
 
         return $normalizedData;
     }
 
-    protected function normalizeFieldData(ContentTypeField $field, Domain $domain, $rowData) {
+    protected function normalizeFieldData(ContentTypeField $field, Domain $domain, ContentInterface $content, $rowData) {
         if(!empty($field->getUnionTypes())) {
             $unionType = $domain->getContentTypeManager()->getUnionContentType($field->getReturnType());
             $selectedUnionType = array_keys($rowData)[0];
@@ -151,30 +152,27 @@ class MutationResolver implements FieldResolverInterface
         }
 
         $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
-        return $fieldType->normalizeData($field, $rowData);
+        return $fieldType->normalizeInputData($content, $field, $rowData);
     }
 
-    protected function contentOrException(Domain $domain, ContentManagerInterface $contentManager, string $type, string $attribute, $id = null) : ?ContentInterface {
+    /**
+     * @param \UniteCMS\CoreBundle\Content\ContentManagerInterface $contentManager
+     * @param \UniteCMS\CoreBundle\Domain\Domain $domain
+     * @param string $attribute
+     * @param string $type
+     * @param string|null $id
+     *
+     * @return \UniteCMS\CoreBundle\Content\ContentInterface
+     */
+    protected function getOrCreate(ContentManagerInterface $contentManager, Domain $domain, string $attribute, string $type, string $id = null) : ContentInterface {
+        $content = empty($id) ?
+            $contentManager->create($domain, $type) :
+            $contentManager->get($domain, $type, $id);
 
-        if($attribute === ContentVoter::CREATE) {
-            $subject = $domain->getContentTypeManager()->getAnyType($type);
-
-            if(empty($subject)) {
-                throw new InvalidArgumentException(sprintf('Content type %s was not found.', $type));
-            }
-
-        } else {
-            $subject = $contentManager->find($domain, $type, $id);
-
-            if(empty($subject)) {
-                return null;
-            }
-        }
-
-        if(!$this->authorizationChecker->isGranted($attribute, $subject)) {
+        if(!$this->authorizationChecker->isGranted($attribute, $content)) {
             throw new AccessDeniedException(sprintf('You are not allowed to %s content of type %s.', $attribute, $type));
         }
 
-        return $subject instanceof ContentInterface ? $subject : null;
+        return $content;
     }
 }

@@ -42,21 +42,13 @@ class User implements UserInterface
     protected $username = '';
 
     /**
-     * @ORM\Column(type="string")
-     * @Assert\NotBlank()
-     */
-    protected $password = '';
-
-    /**
      * Content constructor.
      *
      * @param string $type
-     * @param string $username
      */
-    public function __construct(string $type, string $username)
+    public function __construct(string $type)
     {
         $this->type = $type;
-        $this->username = $username;
     }
 
     public function getId(): ?string
@@ -83,6 +75,11 @@ class User implements UserInterface
      */
     public function setData(array $data) : self
     {
+        if(isset($data['username'])) {
+            $this->username = $data['username'];
+            unset($data['username']);
+        }
+
         $this->data = $data;
         return $this;
     }
@@ -123,7 +120,7 @@ class User implements UserInterface
      */
     public function getPassword()
     {
-        return $this->password;
+        return null;
     }
 
     /**

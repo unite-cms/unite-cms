@@ -35,16 +35,13 @@ class TestUserManager implements UserManagerInterface
 
     public function create(
         Domain $domain,
-        string $type,
-        array $inputData = [],
-        bool $persist = false
+        string $type
     ): ContentInterface {
         // TODO: Implement create() method.
     }
 
     public function update(
         Domain $domain,
-        string $type,
         ContentInterface $content,
         array $inputData = [],
         bool $persist = false
