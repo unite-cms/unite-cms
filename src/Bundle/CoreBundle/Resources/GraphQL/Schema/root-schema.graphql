@@ -7,8 +7,3 @@ type Query {
 type Mutation {
     unite: UniteMutation
 }
-
-schema {
-    query: Query
-    mutation: Mutation
-}

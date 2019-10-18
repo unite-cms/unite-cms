@@ -1,15 +1,16 @@
 <?php
 
 
-namespace UniteCMS\CoreBundle\Security;
+namespace UniteCMS\CoreBundle\Security\User;
 
-use Lexik\Bundle\JWTAuthenticationBundle\Exception\InvalidPayloadException;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\User\PayloadAwareUserProviderInterface;
+use Symfony\Component\Security\Core\Exception\InvalidArgumentException;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Security\User\TypeAwareUserProvider;
 
-class DomainUserProvider implements PayloadAwareUserProviderInterface
+class DomainUserProvider implements TypeAwareUserProvider
 {
 
     /**
@@ -25,22 +26,16 @@ class DomainUserProvider implements PayloadAwareUserProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function loadUserByUsername($username, array $payload = [])
+    public function loadUserByUsername($username)
     {
-        return $this->loadUserByUsernameAndPayload($username, $payload);
+        throw new InvalidArgumentException('Please call loadUserByUsernameAndType() with a user name and unite cms user type.');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function loadUserByUsernameAndPayload($username, array $payload)
+    public function loadUserByUsernameAndType(string $username, string $type)
     {
-        if(empty($payload['roles'])) {
-            throw new InvalidPayloadException('roles');
-        }
-
-        $type = substr($payload['roles'][0], strlen('ROLE_'));
-
         $domain = $this->domainManager->current();
         if(!$user = $domain->getUserManager()->findByUsername($domain, $type, $username)) {
             throw new UsernameNotFoundException();
@@ -54,7 +49,11 @@ class DomainUserProvider implements PayloadAwareUserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        // TODO ?
+        if(!$user instanceof \UniteCMS\CoreBundle\User\UserInterface) {
+            throw new UnsupportedUserException();
+        }
+
+        return $this->loadUserByUsernameAndType($user->getUsername(), $user->getType());
     }
 
     /**

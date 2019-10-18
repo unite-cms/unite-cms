@@ -21,22 +21,15 @@ class UniteResolver implements FieldResolverInterface
      */
     public function resolve($value, $args, $context, ResolveInfo $info) {
 
-        if($info->fieldName !== 'unite') {
-            return null;
-        }
-
-        if($info->parentType->name === 'Query') {
-            return [
-                'version' => UniteCMSCoreBundle::UNITE_VERSION,
+        switch ($info->fieldName) {
+            case 'unite':
+                return $info->parentType->name === 'Query' ? [
+                '_version' => UniteCMSCoreBundle::UNITE_VERSION,
+            ] : [
+                '_version' => null,
+                'generateJWT' => null,
             ];
+            default: return null;
         }
-
-        else if($info->parentType->name === 'Mutation') {
-            return [
-                'login' => null,
-            ];
-        }
-
-        return null;
     }
 }

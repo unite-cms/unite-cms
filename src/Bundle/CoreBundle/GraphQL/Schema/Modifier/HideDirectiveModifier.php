@@ -64,7 +64,7 @@ class HideDirectiveModifier implements SchemaModifierInterface
                         if (!empty($hideMap[$node->name->value]['fields']) && isset($node->fields)) {
                             foreach ($node->fields as $f_key => $field) {
                                 if(!empty($hideMap[$node->name->value]['fields'][$field->name->value])) {
-                                    unset($node->fields[$f_key]);
+                                    $node->fields[$f_key]->mark_to_remove = true;
                                 }
                             }
                         }
@@ -72,6 +72,14 @@ class HideDirectiveModifier implements SchemaModifierInterface
 
                     return $node;
                 },
+
+                NodeKind::FIELD_DEFINITION => function ($node, $key, $parent, $path, $ancestors) use ($hideMap) {
+                    if(!empty($node->mark_to_remove)) {
+                        return Visitor::removeNode();
+                    }
+
+                    return $node;
+                }
             ]
         ]);
     }

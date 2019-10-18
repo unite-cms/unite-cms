@@ -1,0 +1,4 @@
+unite_cms_core_development_playground:
+    path: /
+    methods: GET
+    controller: UniteCMS\CoreBundle\Controller\DevelopmentController::playground

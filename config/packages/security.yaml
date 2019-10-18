@@ -7,7 +7,7 @@ security:
 
     providers:
         unite_cms:
-            id: UniteCMS\CoreBundle\Security\DomainUserProvider
+            id: UniteCMS\CoreBundle\Security\User\DomainUserProvider
 
     firewalls:
         dev:
@@ -16,11 +16,14 @@ security:
 
         api:
             pattern:   ^/
+            methods: ['POST']
             stateless: true
             anonymous: true
             guard:
                 authenticators:
-                    - lexik_jwt_authentication.jwt_token_authenticator
+                    - UniteCMS\CoreBundle\Security\Authenticator\JWTTokenAuthenticator
+                    - UniteCMS\CoreBundle\Security\Authenticator\UsernamePasswordAuthenticator
+                entry_point: UniteCMS\CoreBundle\Security\Authenticator\JWTTokenAuthenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication

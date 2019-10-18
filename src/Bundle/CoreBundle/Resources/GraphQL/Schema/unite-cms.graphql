@@ -56,9 +56,10 @@ input UniteOrderByInput {
 }
 
 type UniteQuery {
-    version: String!
+    _version: String!
 }
 
 type UniteMutation {
-    login(type: String!, username: String!, password: String!) : String!
+    _version: String!
+    generateJWT: String! @hide(if: "is_anonymous()")
 }
