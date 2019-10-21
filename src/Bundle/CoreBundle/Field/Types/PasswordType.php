@@ -29,6 +29,13 @@ class PasswordType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
+    protected function allowedReturnTypes(ContentTypeField $field) {
+        return ['NULL'];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
 
         if(!$content instanceof UserInterface) {

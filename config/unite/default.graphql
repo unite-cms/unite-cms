@@ -71,7 +71,7 @@ type CommunityUser
 
     id: ID
     username: String!                  @textField
-    password: String!                  @passwordField(min_length: 4)
+    password: NULL!                    @passwordField(min_length: 4)
 
     firstname: String                  @textField
     lastname: String                   @textField

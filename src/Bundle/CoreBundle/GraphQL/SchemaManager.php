@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
+use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -250,6 +251,17 @@ class SchemaManager
                     // TODO: Allow others to resolve custom types.
                     return null;
                 };
+            }
+
+            else if($typeDefinitionNode instanceof ScalarTypeDefinitionNode) {
+
+                if($typeDefinitionNode->name->value === 'NULL') {
+                    $typeConfig['serialize'] = function () {
+                        return '';
+                    };
+                }
+
+                // TODO: Allow others to resolve custom scalars.
             }
 
             return $typeConfig;
