@@ -76,10 +76,13 @@ class ContentType
 
             // Special handle valid directive.
             if($directive['name'] === 'valid') {
-                $contentType->addConstraint(new Assert\Expression([
+                $options = [
                     'expression' => $directive['args']['if'],
-                    'message' => $directive['args']['message'] ?? null,
-                ]));
+                ];
+                if(!empty($directive['args']['message'])) {
+                    $options['message'] = $directive['args']['message'];
+                }
+                $contentType->addConstraint(new Assert\Expression($options));
             }
         }
 

@@ -5,7 +5,6 @@ namespace UniteCMS\DoctrineORMBundle\Content;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
@@ -23,20 +22,13 @@ class ContentManager implements ContentManagerInterface
     protected $registry;
 
     /**
-     * @var ValidatorInterface $validator
-     */
-    protected $validator;
-
-    /**
      * ContentManager constructor.
      *
      * @param \Symfony\Bridge\Doctrine\RegistryInterface $registry
-     * @param \Symfony\Component\Validator\Validator\ValidatorInterface $validator
      */
-    public function __construct(RegistryInterface $registry, ValidatorInterface $validator)
+    public function __construct(RegistryInterface $registry)
     {
         $this->registry = $registry;
-        $this->validator = $validator;
     }
 
     /**
@@ -91,34 +83,32 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function update(Domain $domain, ContentInterface $content, array $inputData = [], bool $persist = false): ContentInterface {
-
         $content->setData($inputData);
-
-        dump($this->validator->validate($content));
-
-        if($persist) {
-
-            if(empty($content->getId())) {
-                $this->em($domain)->persist($content);
-            }
-
-            $this->em($domain)->flush($content);
-        }
-
         return $content;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function delete(Domain $domain, string $type, ContentInterface $content, bool $persist = false): ContentInterface {
+    public function delete(Domain $domain, ContentInterface $content, bool $persist = false): ContentInterface {
 
-        dump($this->validator->validate($content), null, ['DELETE']);
-
-        if($persist) {
-            $this->em($domain)->remove($content);
-            $this->em($domain)->flush($content);
-        }
+        // Delete will be handled in persist.
         return $content;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function persist(Domain $domain, ContentInterface $content, string $persistType) : void {
+
+        if($persistType === ContentManagerInterface::PERSIST_CREATE) {
+            $this->em($domain)->persist($content);
+        }
+
+        if($persistType === ContentManagerInterface::PERSIST_DELETE) {
+            $this->em($domain)->remove($content);
+        }
+
+        $this->em($domain)->flush($content);
     }
 }

@@ -24,36 +24,23 @@ class TestContentManager implements ContentManagerInterface
         // TODO: Implement find() method.
     }
 
-    public function get(
-        Domain $domain,
-        string $type,
-        string $id
-    ): ?ContentInterface {
+    public function get(Domain $domain, string $type, string $id): ?ContentInterface {
         // TODO: Implement get() method.
     }
 
-    public function create(
-        Domain $domain,
-        string $type
-    ): ContentInterface {
+    public function create(Domain $domain, string $type): ContentInterface {
         // TODO: Implement create() method.
     }
 
-    public function update(
-        Domain $domain,
-        ContentInterface $content,
-        array $inputData = [],
-        bool $persist = false
-    ): ContentInterface {
+    public function update(Domain $domain, ContentInterface $content, array $inputData = []): ContentInterface {
         // TODO: Implement update() method.
     }
 
-    public function delete(
-        Domain $domain,
-        string $type,
-        ContentInterface $content,
-        bool $persist = false
-    ): ContentInterface {
+    public function delete(Domain $domain, ContentInterface $content): ContentInterface {
         // TODO: Implement delete() method.
+    }
+
+    public function persist(Domain $domain, ContentInterface $content, string $persistType): void {
+        // TODO: Implement persist() method.
     }
 }

@@ -10,7 +10,7 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\Domain\DomainManager;
-use UniteCMS\CoreBundle\Exception\InvalidContentTypesException;
+use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Modifier\SchemaModifierInterface;
 use UniteCMS\CoreBundle\GraphQL\Resolver\FieldResolverInterface;
@@ -179,12 +179,12 @@ class SchemaManager
         }
 
         // Generate content types based on schema and validate it.
-        $errors = $this->validator->validate(
+        $violations = $this->validator->validate(
             $this->generateContentTypes($schema)
         );
 
-        if(count($errors) > 0) {
-            throw new InvalidContentTypesException($errors);
+        if(count($violations) > 0) {
+            throw new ConstraintViolationsException($violations);
         }
 
         // Execute after type extenders.

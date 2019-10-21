@@ -11,12 +11,14 @@ use GraphQL\Type\Definition\WrappingType;
 use InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
@@ -29,6 +31,11 @@ class MutationResolver implements FieldResolverInterface
     protected $authorizationChecker;
 
     /**
+     * @var \Symfony\Component\Validator\Validator\ValidatorInterface $validator
+     */
+    protected $validator;
+
+    /**
      * @var DomainManager $domainManager
      */
     protected $domainManager;
@@ -38,9 +45,10 @@ class MutationResolver implements FieldResolverInterface
      */
     protected $fieldTypeManager;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, ValidatorInterface $validator, DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
     {
         $this->authorizationChecker = $authorizationChecker;
+        $this->validator = $validator;
         $this->domainManager = $domainManager;
         $this->fieldTypeManager = $fieldTypeManager;
     }
@@ -103,17 +111,36 @@ class MutationResolver implements FieldResolverInterface
         switch ($field) {
             case 'create':
                 $content = $this->getOrCreate($contentManager, $domain, ContentVoter::CREATE, $type);
-                $data = $this->normalizeData($domain, $content, $args['data'] ?? []);
-                return $contentManager->update($domain, $content, $data, $args['persist'] );
+                $contentManager->update($domain, $content, $this->normalizeData($domain, $content, $args['data'] ?? []));
+                $this->validate($content);
+
+                if($args['persist']) {
+                    $contentManager->persist($domain, $content, ContentManagerInterface::PERSIST_CREATE);
+                }
+
+                return $content;
 
             case 'update':
                 $content = $this->getOrCreate($contentManager, $domain, ContentVoter::UPDATE, $type, $args['id']);
-                $data = $this->normalizeData($domain, $content, $args['data'] ?? []);
-                return $contentManager->update($domain, $content, $data, $args['persist'] );
+                $contentManager->update($domain, $content, $this->normalizeData($domain, $content, $args['data'] ?? []));
+                $this->validate($content);
+
+                if($args['persist']) {
+                    $contentManager->persist($domain, $content, ContentManagerInterface::PERSIST_UPDATE);
+                }
+
+                return $content; 
 
             case 'delete':
                 $content = $this->getOrCreate($contentManager, $domain, ContentVoter::DELETE, $type, $args['id']);
-                return $contentManager->delete($domain, $type, $content, $args['persist']);
+                $contentManager->delete($domain, $content);
+                // TODO: $this->validate($content); implement if we add group support.
+
+                if($args['persist']) {
+                    $contentManager->persist($domain, $content, ContentManagerInterface::PERSIST_DELETE);
+                }
+
+                return $content;
 
             default:
                 return null;
@@ -178,6 +205,21 @@ class MutationResolver implements FieldResolverInterface
             throw new AccessDeniedException(sprintf('You are not allowed to %s content of type %s.', $attribute, $type));
         }
 
+        return $content;
+    }
+
+    /**
+     * @param \UniteCMS\CoreBundle\Content\ContentInterface $content
+     * @return \UniteCMS\CoreBundle\Content\ContentInterface
+     */
+    protected function validate(ContentInterface $content) : ContentInterface {
+        
+        $violations = $this->validator->validate($content);
+
+        if(count($violations) > 0) {
+            throw new ConstraintViolationsException($violations);
+        }
+        
         return $content;
     }
 }
