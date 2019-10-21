@@ -40,9 +40,14 @@ class ContentType
     protected $constraints = [];
 
     /**
+     * @var ContentTypeWebhook[] $webhooks
+     */
+    protected $webhooks = [];
+
+    /**
      * @var array
      */
-    protected $permissions;
+    protected $permissions = [];
 
     public function __construct(string $id)
     {
@@ -83,6 +88,11 @@ class ContentType
                     $options['message'] = $directive['args']['message'];
                 }
                 $contentType->addConstraint(new Assert\Expression($options));
+            }
+
+            // Special handle webhook directive.
+            if($directive['name'] === 'webhook') {
+                $contentType->addWebhook(new ContentTypeWebhook($directive['args']['if'], $directive['args']['url']));
             }
         }
 
@@ -191,5 +201,21 @@ class ContentType
      */
     public function getConstraints() : array {
         return $this->constraints;
+    }
+
+    /**
+     * @param ContentTypeWebhook $webhook
+     * @return $this
+     */
+    public function addWebhook(ContentTypeWebhook $webhook) : self {
+        $this->webhooks[] = $webhook;
+        return $this;
+    }
+
+    /**
+     * @return ContentTypeWebhook[]
+     */
+    public function getWebhooks() : array {
+        return $this->webhooks;
     }
 }

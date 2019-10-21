@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\WrappingType;
 use InvalidArgumentException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -18,6 +19,7 @@ use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -29,6 +31,11 @@ class MutationResolver implements FieldResolverInterface
      * @var AuthorizationCheckerInterface $authorizationChecker
      */
     protected $authorizationChecker;
+
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+     */
+    protected $eventDispatcher;
 
     /**
      * @var \Symfony\Component\Validator\Validator\ValidatorInterface $validator
@@ -45,9 +52,10 @@ class MutationResolver implements FieldResolverInterface
      */
     protected $fieldTypeManager;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, ValidatorInterface $validator, DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, EventDispatcherInterface $eventDispatcher, ValidatorInterface $validator, DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
     {
         $this->authorizationChecker = $authorizationChecker;
+        $this->eventDispatcher = $eventDispatcher;
         $this->validator = $validator;
         $this->domainManager = $domainManager;
         $this->fieldTypeManager = $fieldTypeManager;
@@ -115,7 +123,8 @@ class MutationResolver implements FieldResolverInterface
                 $this->validate($content);
 
                 if($args['persist']) {
-                    $contentManager->persist($domain, $content, ContentManagerInterface::PERSIST_CREATE);
+                    $contentManager->persist($domain, $content, ContentEvent::CREATE);
+                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::CREATE);
                 }
 
                 return $content;
@@ -126,7 +135,8 @@ class MutationResolver implements FieldResolverInterface
                 $this->validate($content);
 
                 if($args['persist']) {
-                    $contentManager->persist($domain, $content, ContentManagerInterface::PERSIST_UPDATE);
+                    $contentManager->persist($domain, $content, ContentEvent::UPDATE);
+                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::UPDATE);
                 }
 
                 return $content; 
@@ -137,7 +147,8 @@ class MutationResolver implements FieldResolverInterface
                 // TODO: $this->validate($content); implement if we add group support.
 
                 if($args['persist']) {
-                    $contentManager->persist($domain, $content, ContentManagerInterface::PERSIST_DELETE);
+                    $contentManager->persist($domain, $content, ContentEvent::DELETE);
+                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::DELETE);
                 }
 
                 return $content;

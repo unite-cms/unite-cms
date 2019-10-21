@@ -10,6 +10,7 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
+use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\DoctrineORMBundle\Entity\Content;
 
 class ContentManager implements ContentManagerInterface
@@ -101,11 +102,11 @@ class ContentManager implements ContentManagerInterface
      */
     public function persist(Domain $domain, ContentInterface $content, string $persistType) : void {
 
-        if($persistType === ContentManagerInterface::PERSIST_CREATE) {
+        if($persistType === ContentEvent::CREATE) {
             $this->em($domain)->persist($content);
         }
 
-        if($persistType === ContentManagerInterface::PERSIST_DELETE) {
+        if($persistType === ContentEvent::UPDATE) {
             $this->em($domain)->remove($content);
         }
 
