@@ -5,7 +5,7 @@ namespace UniteCMS\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use UniteCMS\CoreBundle\UserType\UserType;
+use UniteCMS\CoreBundle\ContentType\UserType;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class UserTypeValidator extends ConstraintValidator

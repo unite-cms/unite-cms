@@ -21,5 +21,5 @@ interface FieldTypeInterface
 
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData;
 
-    public function validateFieldData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, ExecutionContextInterface $context) : void;
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void;
 }

@@ -3,7 +3,11 @@
 
 namespace UniteCMS\CoreBundle\Content;
 
+use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
 
+/**
+ * @UniteAssert\ValidContent
+ */
 interface ContentInterface
 {
     public function getId() : ?string;

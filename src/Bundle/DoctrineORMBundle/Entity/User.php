@@ -7,11 +7,13 @@ use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\SensitiveFieldData;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Table(name="unite_user")
  * @ORM\Entity(repositoryClass="UniteCMS\DoctrineORMBundle\Repository\UserRepository")
+ * @UniqueEntity("username")
  */
 class User implements UserInterface
 {
@@ -45,7 +47,6 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string")
      * @Assert\NotBlank()
-     * @Assert\Unique()
      */
     protected $username = '';
 

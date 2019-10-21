@@ -104,5 +104,5 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     /**
      * {@inheritDoc}
      */
-    public function validateFieldData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, ExecutionContextInterface $context) : void {}
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void {}
 }

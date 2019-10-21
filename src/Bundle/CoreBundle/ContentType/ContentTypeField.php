@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\ContentType;
 
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\UnionType;
+use Symfony\Component\Validator\Constraint;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
@@ -77,6 +78,11 @@ class ContentTypeField
      * @var array
      */
     protected $permissions;
+
+    /**
+     * @var Constraint[] $constraints
+     */
+    protected $constraints = [];
 
     public function __construct(string $id, string $type, array $settings = [], $nonNull = false, $listOf = false, $enumValues = null, $unionTypes = null, $returnType = Type::STRING)
     {
@@ -157,10 +163,19 @@ class ContentTypeField
             // Get all directives of this content type field.
             $field->directives = Util::getDirectives($fieldDefinition->astNode);
 
-            // Special handle access directive.
             foreach ($field->directives as $directive) {
+
+                // Special handle access directive.
                 if($directive['name'] === 'access') {
                     $field->setPermissions($directive['args']);
+                }
+
+                // Special handle valid directive.
+                if($directive['name'] === 'valid') {
+                    $field->addConstraint(new Assert\Expression([
+                        'expression' => $directive['args']['if'],
+                        'message' => $directive['args']['message'] ?? null,
+                    ]));
                 }
             }
 
@@ -278,5 +293,21 @@ class ContentTypeField
      */
     public function getPermission(string $permission) : Expression {
         return new Expression($this->permissions[$permission] ?? 'false');
+    }
+
+    /**
+     * @param Constraint $constraint
+     * @return $this
+     */
+    public function addConstraint(Constraint $constraint) : self {
+        $this->constraints[] = $constraint;
+        return $this;
+    }
+
+    /**
+     * @return Constraint[]
+     */
+    public function getConstraints() : array {
+        return $this->constraints;
     }
 }

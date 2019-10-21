@@ -5,6 +5,7 @@ namespace UniteCMS\DoctrineORMBundle\Content;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
@@ -22,13 +23,20 @@ class ContentManager implements ContentManagerInterface
     protected $registry;
 
     /**
+     * @var ValidatorInterface $validator
+     */
+    protected $validator;
+
+    /**
      * ContentManager constructor.
      *
      * @param \Symfony\Bridge\Doctrine\RegistryInterface $registry
+     * @param \Symfony\Component\Validator\Validator\ValidatorInterface $validator
      */
-    public function __construct(RegistryInterface $registry)
+    public function __construct(RegistryInterface $registry, ValidatorInterface $validator)
     {
         $this->registry = $registry;
+        $this->validator = $validator;
     }
 
     /**
@@ -86,6 +94,8 @@ class ContentManager implements ContentManagerInterface
 
         $content->setData($inputData);
 
+        dump($this->validator->validate($content));
+
         if($persist) {
 
             if(empty($content->getId())) {
@@ -102,6 +112,9 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function delete(Domain $domain, string $type, ContentInterface $content, bool $persist = false): ContentInterface {
+
+        dump($this->validator->validate($content), null, ['DELETE']);
+
         if($persist) {
             $this->em($domain)->remove($content);
             $this->em($domain)->flush($content);

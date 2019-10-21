@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\ContentType;
 
+use Symfony\Component\Validator\Constraint;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -34,6 +35,11 @@ class ContentType
     protected $fields = [];
 
     /**
+     * @var Constraint[] $constraints
+     */
+    protected $constraints = [];
+
+    /**
      * @var array
      */
     protected $permissions;
@@ -61,10 +67,19 @@ class ContentType
         // Get all directives of this content type.
         $contentType->directives = Util::getDirectives($type->astNode);
 
-        // Special handle access directive.
         foreach ($contentType->directives as $directive) {
+
+            // Special handle access directive.
             if($directive['name'] === 'access') {
                 $contentType->setPermissions($directive['args']);
+            }
+
+            // Special handle valid directive.
+            if($directive['name'] === 'valid') {
+                $contentType->addConstraint(new Assert\Expression([
+                    'expression' => $directive['args']['if'],
+                    'message' => $directive['args']['message'] ?? null,
+                ]));
             }
         }
 
@@ -157,5 +172,21 @@ class ContentType
      */
     public function getPermission(string $permission) : Expression {
         return new Expression($this->permissions[$permission] ?? 'false');
+    }
+
+    /**
+     * @param Constraint $constraint
+     * @return $this
+     */
+    public function addConstraint(Constraint $constraint) : self {
+        $this->constraints[] = $constraint;
+        return $this;
+    }
+
+    /**
+     * @return Constraint[]
+     */
+    public function getConstraints() : array {
+        return $this->constraints;
     }
 }

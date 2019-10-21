@@ -20,6 +20,16 @@ directive @access(
     delete: Expression
 ) on FIELD_DEFINITION | OBJECT
 
+directive @valid(
+    if: Expression!
+    message: String
+) on FIELD_DEFINITION | OBJECT
+
+directive @webhook(
+    if: Expression!
+    url: String!
+) on OBJECT
+
 interface UniteUser {
     id: ID
     username: String!
