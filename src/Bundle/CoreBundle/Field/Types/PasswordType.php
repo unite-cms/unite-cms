@@ -2,11 +2,13 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use InvalidArgumentException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\Content\SensitiveFieldData;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
+use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class PasswordType extends AbstractFieldType
@@ -15,11 +17,11 @@ class PasswordType extends AbstractFieldType
     const GRAPHQL_INPUT_TYPE = 'UnitePasswordInput';
 
     /**
-     * @var UserPasswordEncoderInterface $passwordEncoder
+     * @var FieldableUserPasswordEncoder $passwordEncoder
      */
     protected $passwordEncoder;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(FieldableUserPasswordEncoder $passwordEncoder)
     {
         $this->passwordEncoder = $passwordEncoder;
     }
@@ -30,16 +32,20 @@ class PasswordType extends AbstractFieldType
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
 
         if(!$content instanceof UserInterface) {
-            throw new \InvalidArgumentException('Password fields can only be added to UniteUser types.');
+            throw new InvalidArgumentException('Password fields can only be added to UniteUser types.');
         }
 
         if($content->getId()) {
-            if(!$this->passwordEncoder->isPasswordValid($content, $inputData['old_password'])) {
-                throw new BadCredentialsException('Invalid old password');
+            if(empty($inputData['oldPassword'])) {
+                throw new BadCredentialsException('In order to update a password field you need to pass the old password as well.');
+            }
+
+            if(!$this->passwordEncoder->isFieldPasswordValid($content, $field->getId(), $inputData['oldPassword'])) {
+                throw new BadCredentialsException('Old password is not valid.');
             }
         }
 
-        return new FieldData(
+        return new SensitiveFieldData(
             $this->passwordEncoder->encodePassword($content, $inputData['password'])
         );
     }
@@ -48,6 +54,7 @@ class PasswordType extends AbstractFieldType
      * {@inheritDoc}
      */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+        // We will never return any password information!
         return '';
     }
 }

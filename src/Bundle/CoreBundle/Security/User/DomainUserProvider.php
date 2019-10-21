@@ -48,7 +48,7 @@ class DomainUserProvider implements TypeAwareUserProvider
      */
     public function refreshUser(UserInterface $user)
     {
-        if(!$user instanceof \UniteCMS\CoreBundle\User\UserInterface) {
+        if(!$user instanceof \UniteCMS\CoreBundle\Security\User\UserInterface) {
             throw new UnsupportedUserException();
         }
 
@@ -60,6 +60,6 @@ class DomainUserProvider implements TypeAwareUserProvider
      */
     public function supportsClass($class)
     {
-        return in_array(\UniteCMS\CoreBundle\User\UserInterface::class, class_implements($class));
+        return in_array(\UniteCMS\CoreBundle\Security\User\UserInterface::class, class_implements($class));
     }
 }

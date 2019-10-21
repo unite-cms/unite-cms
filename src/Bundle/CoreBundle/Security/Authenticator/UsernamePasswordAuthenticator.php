@@ -2,28 +2,47 @@
 
 namespace UniteCMS\CoreBundle\Security\Authenticator;
 
+use GraphQL\Utils\BuildSchema;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
+use UniteCMS\CoreBundle\GraphQL\Util;
+use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
 use UniteCMS\CoreBundle\Security\Token\PreAuthenticationUniteUserToken;
 use UniteCMS\CoreBundle\Security\User\TypeAwareUserProvider;
 
-class UsernamePasswordAuthenticator extends AbstractGuardAuthenticator
+class UsernamePasswordAuthenticator extends AbstractGuardAuthenticator implements SchemaProviderInterface
 {
     /**
-     * @var UserPasswordEncoderInterface
+     * @var FieldableUserPasswordEncoder $passwordEncoder
      */
     protected $passwordEncoder;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    /**
+     * @var DomainManager $domainManager
+     */
+    protected $domainManager;
+
+    public function __construct(FieldableUserPasswordEncoder $passwordEncoder, DomainManager $domainManager)
     {
         $this->passwordEncoder = $passwordEncoder;
+        $this->domainManager = $domainManager;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function extend(): string
+    {
+        return file_get_contents(__DIR__ . '/../../Resources/GraphQL/Schema/Authenticator/password.graphql');
     }
 
     /**
@@ -70,13 +89,21 @@ class UsernamePasswordAuthenticator extends AbstractGuardAuthenticator
         }
 
         if ($userProvider instanceof TypeAwareUserProvider) {
-            return $userProvider->loadUserByUsernameAndType($preAuthToken->getUsername(), $preAuthToken->getType());
+            $user = $userProvider->loadUserByUsernameAndType($preAuthToken->getUsername(), $preAuthToken->getType());
+
+            if(!$user instanceof ContentInterface) {
+                throw new InvalidArgumentException(sprintf('User must be an instance of "%s" in order to work with UsernamePasswordAuthenticator.', ContentInterface::class));
+            }
+
+            return $user;
         }
 
         return null;
     }
 
     /**
+     * @param UserInterface | ContentInterface $user
+     *
      * {@inheritDoc}
      */
     public function checkCredentials($preAuthToken, UserInterface $user)
@@ -87,7 +114,25 @@ class UsernamePasswordAuthenticator extends AbstractGuardAuthenticator
             );
         }
 
-        return $this->passwordEncoder->isPasswordValid($user, $preAuthToken->getCredentials());
+        // Check if this type is enabled for password authentication and find password field.
+        $domain = $this->domainManager->current();
+        $minimalSchema = BuildSchema::build(join("\n", $domain->getSchema()));
+        $userType = $minimalSchema->getType($preAuthToken->getType());
+        $directives = Util::getDirectives($userType->astNode);
+        $passwordField = null;
+
+        foreach ($directives as $directive) {
+            if($directive['name'] === 'passwordAuthenticator') {
+                $passwordField = $directive['args']['passwordField'];
+            }
+        }
+
+        if(empty($passwordField)) {
+            return null;
+        }
+
+        // Use the custom password field for checking password.
+        return $this->passwordEncoder->isFieldPasswordValid($user, $passwordField, $preAuthToken->getCredentials());
     }
 
     /**

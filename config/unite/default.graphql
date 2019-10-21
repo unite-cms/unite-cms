@@ -64,7 +64,11 @@ type Admin implements UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
     username: String!                   @textField
 }
 
-type CommunityUser implements UniteUser @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+type CommunityUser
+    implements UniteUser
+    @passwordAuthenticator(passwordField: "password")
+    @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+
     id: ID
     username: String!                  @textField
     password: String!                  @passwordField(min_length: 4)

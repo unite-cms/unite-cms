@@ -4,6 +4,7 @@ namespace UniteCMS\DoctrineORMBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\Content\SensitiveFieldData;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 use Symfony\Component\Validator\Constraints as Assert;
@@ -32,7 +33,14 @@ class User implements UserInterface
      *
      * @ORM\Column(type="json_document", options={"jsonb": true})
      */
-    protected $data;
+    protected $data = [];
+
+    /**
+     * @var SensitiveFieldData[]
+     *
+     * @ORM\Column(type="json_document", options={"jsonb": true})
+     */
+    protected $sensitiveData = [];
 
     /**
      * @ORM\Column(type="string")
@@ -65,7 +73,15 @@ class User implements UserInterface
      */
     public function getData(): array
     {
-        return $this->data;
+        if(!is_array($this->data)) {
+            $this->data = [];
+        }
+
+        if(!is_array($this->sensitiveData)) {
+            $this->sensitiveData = [];
+        }
+
+        return ($this->data + $this->sensitiveData);
     }
 
     /**
@@ -75,12 +91,23 @@ class User implements UserInterface
      */
     public function setData(array $data) : self
     {
-        if(isset($data['username'])) {
-            $this->username = $data['username'];
-            unset($data['username']);
+        $this->data = [];
+        $this->sensitiveData = [];
+
+        foreach($data as $name => $value) {
+            if($name === 'username') {
+                $this->username = $value;
+            }
+
+            else if ($value instanceof SensitiveFieldData) {
+                $this->sensitiveData[$name] = $value;
+            }
+
+            else {
+                $this->data[$name] = $value;
+            }
         }
 
-        $this->data = $data;
         return $this;
     }
 
@@ -91,7 +118,7 @@ class User implements UserInterface
      */
     public function getFieldData(string $fieldName): ?FieldData
     {
-        return isset($this->data[$fieldName]) ? $this->data[$fieldName] : null;
+        return isset($this->getData()[$fieldName]) ? $this->getData()[$fieldName] : null;
     }
 
     public function getUsername() : string {

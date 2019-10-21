@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\WrappingType;
+use InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -106,12 +107,12 @@ class MutationResolver implements FieldResolverInterface
                 return $contentManager->update($domain, $content, $data, $args['persist'] );
 
             case 'update':
-                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::CREATE, $type, $args['id']);
+                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::UPDATE, $type, $args['id']);
                 $data = $this->normalizeData($domain, $content, $args['data'] ?? []);
                 return $contentManager->update($domain, $content, $data, $args['persist'] );
 
             case 'delete':
-                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::CREATE, $type, $args['id']);
+                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::DELETE, $type, $args['id']);
                 return $contentManager->delete($domain, $type, $content, $args['persist']);
 
             default:
@@ -168,6 +169,10 @@ class MutationResolver implements FieldResolverInterface
         $content = empty($id) ?
             $contentManager->create($domain, $type) :
             $contentManager->get($domain, $type, $id);
+
+        if(empty($content)) {
+            throw new InvalidArgumentException('Content was not found.');
+        }
 
         if(!$this->authorizationChecker->isGranted($attribute, $content)) {
             throw new AccessDeniedException(sprintf('You are not allowed to %s content of type %s.', $attribute, $type));
