@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
-use UniteCMS\CoreBundle\User\UserInterface;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class PasswordType extends AbstractFieldType
 {

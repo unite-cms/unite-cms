@@ -10,36 +10,42 @@ class Util
 {
 
     /**
-     * @param $node
-     * @param string $name
-     * @return array|null
-     */
-    static function directiveArgs($node, string $name) : ?array {
-
-        if(!is_object($node) || !property_exists($node, 'directives')) {
-            return null;
-        }
-
-        foreach($node->directives as $directive) {
-            if($directive->name->value === $name) {
-                $args = [];
-                foreach($directive->arguments as $argument) {
-                    $args[$argument->name->value] = $argument->value->value;
-                }
-                return $args;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Find a directive with a Field suffix.
+     * Get all directives of a AST node.
      *
      * @param $node
      * @return array|null
      */
-    static function fieldDirectiveArgs($node) : ?array {
+    static function getDirectives($node) : array {
+
+        if(!is_object($node) || !property_exists($node, 'directives')) {
+            return [];
+        }
+
+        $directives = [];
+
+        foreach($node->directives as $directive) {
+            $args = [];
+            foreach($directive->arguments as $argument) {
+                $args[$argument->name->value] = $argument->value->value;
+            }
+            $directives[] = [
+                'name' => $directive->name->value,
+                'args' => $args,
+            ];
+        }
+
+        return $directives;
+    }
+
+    /**
+     * Find a typed directive with a special suffix.
+     *
+     * @param $node
+     * @param string $suffix
+     *
+     * @return array|null
+     */
+    static function typedDirectiveArgs($node, string $suffix) : ?array {
 
         if(!is_object($node) || !property_exists($node, 'directives')) {
             return null;
@@ -50,9 +56,9 @@ class Util
             $directiveNameParts = preg_split('/(?=[A-Z])/',$directive->name->value);
 
             if(count($directiveNameParts) === 2) {
-                $suffix = array_pop($directiveNameParts);
+                $foundSuffix = array_pop($directiveNameParts);
 
-                if($suffix === 'Field') {
+                if($foundSuffix === $suffix) {
                     $args = [
                         'type' => $directiveNameParts[0],
                         'settings' => []
@@ -79,8 +85,10 @@ class Util
      * @return bool
      */
     static function isHidden($node, AuthorizationCheckerInterface $authorizationChecker) : bool {
-        if($args = self::directiveArgs($node, 'hide')) {
-            return $authorizationChecker->isGranted(new Expression($args['if']));
+        foreach(self::getDirectives($node) as $directive) {
+            if($directive['name'] === 'hide') {
+                return $authorizationChecker->isGranted(new Expression($directive['args']['if']));
+            }
         }
 
         return false;

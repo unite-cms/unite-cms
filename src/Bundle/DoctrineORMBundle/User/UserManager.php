@@ -5,8 +5,8 @@ namespace UniteCMS\DoctrineORMBundle\User;
 
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
-use UniteCMS\CoreBundle\User\UserInterface;
-use UniteCMS\CoreBundle\User\UserManagerInterface;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
+use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
 use UniteCMS\DoctrineORMBundle\Content\ContentManager;
 use UniteCMS\DoctrineORMBundle\Entity\User;
 

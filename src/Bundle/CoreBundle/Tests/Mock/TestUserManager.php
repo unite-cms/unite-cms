@@ -7,8 +7,8 @@ use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
-use UniteCMS\CoreBundle\User\UserInterface;
-use UniteCMS\CoreBundle\User\UserManagerInterface;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
+use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
 
 class TestUserManager implements UserManagerInterface
 {

@@ -64,6 +64,11 @@ class ContentTypeField
     protected $returnType;
 
     /**
+     * @var array $directives
+     */
+    protected $directives = [];
+
+    /**
      * @var ParameterBag $settings
      */
     protected $settings;
@@ -96,7 +101,7 @@ class ContentTypeField
     static function fromFieldDefinition(FieldDefinition $fieldDefinition) : ?self {
 
         // If this field definition has a @field directive.
-        if($args = Util::fieldDirectiveArgs($fieldDefinition->astNode)) {
+        if($args = Util::typedDirectiveArgs($fieldDefinition->astNode, 'Field')) {
 
             // Find the actual inner type.
             $actualType = $fieldDefinition->getType();
@@ -149,8 +154,14 @@ class ContentTypeField
                 $actualType->name
             );
 
-            if($args = Util::directiveArgs($fieldDefinition, 'access')) {
-                $field->setPermissions($args);
+            // Get all directives of this content type field.
+            $field->directives = Util::getDirectives($fieldDefinition->astNode);
+
+            // Special handle access directive.
+            foreach ($field->directives as $directive) {
+                if($directive['name'] === 'access') {
+                    $field->setPermissions($directive['args']);
+                }
             }
 
             return $field;
@@ -195,6 +206,15 @@ class ContentTypeField
      */
     public function getId() : string {
         return $this->id;
+    }
+
+    /**
+     * Get raw directives information.
+     *
+     * @return array
+     */
+    public function getDirectives() : array {
+        return $this->directives;
     }
 
     /**

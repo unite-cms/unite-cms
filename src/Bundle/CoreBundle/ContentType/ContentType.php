@@ -22,6 +22,11 @@ class ContentType
     protected $id;
 
     /**
+     * @var array $directives
+     */
+    protected $directives = [];
+
+    /**
      * @var ContentTypeField[] $fields
      * @Assert\Valid
      * @UniteAssert\ContentTypeField
@@ -53,8 +58,14 @@ class ContentType
     static function fromObjectType(ObjectType $type) : self {
         $contentType = new static($type->name);
 
-        if($args = Util::directiveArgs($type->astNode, 'access')) {
-           $contentType->setPermissions($args);
+        // Get all directives of this content type.
+        $contentType->directives = Util::getDirectives($type->astNode);
+
+        // Special handle access directive.
+        foreach ($contentType->directives as $directive) {
+            if($directive['name'] === 'access') {
+                $contentType->setPermissions($directive['args']);
+            }
         }
 
         foreach($type->getFields() as $field) {
@@ -95,6 +106,15 @@ class ContentType
      */
     public function getId() : string {
         return $this->id;
+    }
+
+    /**
+     * Get raw directives information.
+     *
+     * @return array
+     */
+    public function getDirectives() : array {
+        return $this->directives;
     }
 
     /**

@@ -4,7 +4,7 @@ namespace UniteCMS\DoctrineORMBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use UniteCMS\CoreBundle\Content\FieldData;
-use UniteCMS\CoreBundle\User\UserInterface;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 use Symfony\Component\Validator\Constraints as Assert;
 

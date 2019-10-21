@@ -5,7 +5,7 @@ namespace UniteCMS\CoreBundle\Domain;
 
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
-use UniteCMS\CoreBundle\User\UserManagerInterface;
+use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
 
 class Domain
 {

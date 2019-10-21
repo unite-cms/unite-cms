@@ -4,7 +4,6 @@
 namespace UniteCMS\CoreBundle\ContentType;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use UniteCMS\CoreBundle\UserType\UserType;
 
 class ContentTypeManager
 {

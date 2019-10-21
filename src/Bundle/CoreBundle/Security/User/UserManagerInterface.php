@@ -1,7 +1,7 @@
 <?php
 
 
-namespace UniteCMS\CoreBundle\User;
+namespace UniteCMS\CoreBundle\Security\User;
 
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Domain\Domain;

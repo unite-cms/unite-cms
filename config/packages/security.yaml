@@ -2,7 +2,7 @@ security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
 
     encoders:
-        UniteCMS\CoreBundle\User\UserInterface:
+        UniteCMS\CoreBundle\Security\User\UserInterface:
             algorithm: auto
 
     providers:

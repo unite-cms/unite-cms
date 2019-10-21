@@ -1,9 +1,8 @@
 <?php
 
 
-namespace UniteCMS\CoreBundle\UserType;
+namespace UniteCMS\CoreBundle\ContentType;
 
-use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
