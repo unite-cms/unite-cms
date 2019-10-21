@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\ProviderNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
@@ -19,7 +20,7 @@ use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
 use UniteCMS\CoreBundle\Security\Token\PreAuthenticationUniteUserToken;
 use UniteCMS\CoreBundle\Security\User\TypeAwareUserProvider;
 
-class UsernamePasswordAuthenticator extends AbstractGuardAuthenticator implements SchemaProviderInterface
+class PasswordAuthenticator extends AbstractGuardAuthenticator implements SchemaProviderInterface
 {
     /**
      * @var FieldableUserPasswordEncoder $passwordEncoder
@@ -57,6 +58,28 @@ class UsernamePasswordAuthenticator extends AbstractGuardAuthenticator implement
     }
 
     /**
+     * Returns directive information if defined for this type.
+     * @param string $userType
+     * @return array|null
+     */
+    protected function getAuthDirective(string $userType) : array {
+
+        $domain = $this->domainManager->current();
+        $minimalSchema = BuildSchema::build(join("\n", $domain->getSchema()));
+        $userType = $minimalSchema->getType($userType);
+        $directives = Util::getDirectives($userType->astNode);
+        $passwordField = null;
+
+        foreach ($directives as $directive) {
+            if($directive['name'] === 'passwordAuthenticator') {
+                return $directive;
+            }
+        }
+
+        throw new ProviderNotFoundException(sprintf('Password authenticator is not enabled for user type "%s".', $userType));
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function supports(Request $request)
@@ -73,7 +96,8 @@ class UsernamePasswordAuthenticator extends AbstractGuardAuthenticator implement
         return new PreAuthenticationUniteUserToken(
             $nameParts[1],
             $request->headers->get('PHP_AUTH_PW'),
-            $nameParts[0]
+            $nameParts[0],
+            $this->getAuthDirective($nameParts[0])
         );
     }
 
@@ -114,25 +138,16 @@ class UsernamePasswordAuthenticator extends AbstractGuardAuthenticator implement
             );
         }
 
-        // Check if this type is enabled for password authentication and find password field.
-        $domain = $this->domainManager->current();
-        $minimalSchema = BuildSchema::build(join("\n", $domain->getSchema()));
-        $userType = $minimalSchema->getType($preAuthToken->getType());
-        $directives = Util::getDirectives($userType->astNode);
-        $passwordField = null;
-
-        foreach ($directives as $directive) {
-            if($directive['name'] === 'passwordAuthenticator') {
-                $passwordField = $directive['args']['passwordField'];
-            }
-        }
-
-        if(empty($passwordField)) {
+        // Use the custom password field for checking password.
+        if(empty($preAuthToken->getAuthDirective()['args']['passwordField'])) {
             return null;
         }
 
-        // Use the custom password field for checking password.
-        return $this->passwordEncoder->isFieldPasswordValid($user, $passwordField, $preAuthToken->getCredentials());
+        return $this->passwordEncoder->isFieldPasswordValid(
+            $user,
+            $preAuthToken->getAuthDirective()['args']['passwordField'],
+            $preAuthToken->getCredentials()
+        );
     }
 
     /**

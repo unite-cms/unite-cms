@@ -17,11 +17,17 @@ class PreAuthenticationUniteUserToken extends PreAuthenticationGuardToken
      */
     protected $type;
 
-    public function __construct(string $username, string $credentials, string $type)
+    /**
+     * @var array $authDirective
+     */
+    protected $authDirective = [];
+
+    public function __construct(string $username, string $credentials, string $type, array $authDirective = [])
     {
         parent::__construct($credentials, '');
         $this->username = $username;
         $this->type = $type;
+        $this->authDirective = $authDirective;
     }
 
     /**
@@ -36,5 +42,9 @@ class PreAuthenticationUniteUserToken extends PreAuthenticationGuardToken
      */
     public function getType() : string {
         return $this->type;
+    }
+
+    public function getAuthDirective() : array {
+        return $this->authDirective;
     }
 }

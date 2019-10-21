@@ -22,7 +22,7 @@ security:
             guard:
                 authenticators:
                     - UniteCMS\CoreBundle\Security\Authenticator\JWTTokenAuthenticator
-                    - UniteCMS\CoreBundle\Security\Authenticator\UsernamePasswordAuthenticator
+                    - UniteCMS\CoreBundle\Security\Authenticator\PasswordAuthenticator
                 entry_point: UniteCMS\CoreBundle\Security\Authenticator\JWTTokenAuthenticator
 
             # activate different ways to authenticate
