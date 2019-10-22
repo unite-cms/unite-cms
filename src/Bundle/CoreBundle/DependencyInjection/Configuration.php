@@ -62,7 +62,6 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->scalarNode('content_manager')
                             ->cannotBeEmpty()
-                            ->isRequired()
                             ->defaultValue($this->defaultContentManager)
                         ->end()
                         ->scalarNode('user_manager')
