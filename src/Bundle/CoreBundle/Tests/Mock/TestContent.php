@@ -1,51 +1,28 @@
 <?php
 
-namespace UniteCMS\DoctrineORMBundle\Entity;
+
+namespace UniteCMS\CoreBundle\Tests\Mock;
 
 use DateTime;
-use Doctrine\ORM\Mapping as ORM;
-use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\Content\FieldData;
 
-/**
- * @ORM\Entity(repositoryClass="UniteCMS\DoctrineORMBundle\Repository\ContentRepository")
- */
-class Content implements ContentInterface
+class TestContent implements ContentInterface
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue("UUID")
-     * @ORM\Column(type="guid")
-     */
     protected $id;
-
-    /**
-     * @ORM\Column(type="string")
-     */
     protected $type;
-
-    /**
-     * @var FieldData[]
-     *
-     * @ORM\Column(type="json_document", options={"jsonb": true})
-     */
     protected $data;
+    protected $deleted;
 
-    /**
-     * @var DateTime
-     *
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    protected $deleted = null;
-
-    /**
-     * Content constructor.
-     *
-     * @param string $type
-     */
-    public function __construct(string $type)
+    public function __construct(string $type, array $data = [])
     {
         $this->type = $type;
+        $this->data = $data;
+    }
+
+    public function setId() : self {
+        $this->id = uniqid();
+        return $this;
     }
 
     public function getId(): ?string
@@ -53,7 +30,8 @@ class Content implements ContentInterface
         return $this->id;
     }
 
-    public function getType() : string {
+    public function getType(): string
+    {
         return $this->type;
     }
 

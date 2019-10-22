@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
+use GraphQL\Error\Error;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
@@ -79,15 +80,22 @@ class MutationResolver implements FieldResolverInterface
             $actualType = $actualType->getWrappedType(true);
         }
 
-        /**
-         * @var InterfaceType $contentInterface
-         */
-        $contentInterface = $info->schema->getType('UniteContent');
+        $contentInterface = null;
+        $userInterface = null;
 
-        /**
-         * @var InterfaceType $userInterface
-         */
-        $userInterface = $info->schema->getType('UniteUser');
+        try {
+            /**
+             * @var InterfaceType $contentInterface
+             */
+            $contentInterface = $info->schema->getType('UniteContent');
+
+            /**
+             * @var InterfaceType $userInterface
+             */
+            $userInterface = $info->schema->getType('UniteUser');
+        } catch (Error $e) {
+            //TODO ?
+        }
 
         if(!$actualType instanceof ObjectType) {
             return null;
@@ -104,11 +112,11 @@ class MutationResolver implements FieldResolverInterface
         $domain = $this->domainManager->current();
         $contentManager = null;
 
-        if($actualType->implementsInterface($contentInterface)) {
+        if($contentInterface && $actualType->implementsInterface($contentInterface)) {
             $contentManager = $domain->getContentManager();
         }
 
-        else if($actualType->implementsInterface($userInterface)) {
+        else if($userInterface && $actualType->implementsInterface($userInterface)) {
             $contentManager = $domain->getUserManager();
         }
 
@@ -142,7 +150,14 @@ class MutationResolver implements FieldResolverInterface
                 return $content; 
 
             case 'delete':
-                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::DELETE, $type, $args['id']);
+                if(!$content = $contentManager->get($domain, $type, $args['id'], true)) {
+                    return null;
+                }
+
+                if(!$this->authorizationChecker->isGranted(ContentVoter::DELETE, $content)) {
+                    throw new AccessDeniedException(sprintf('You are not allowed to delete content of type %s.', $type));
+                }
+
                 $contentManager->delete($domain, $content);
                 // TODO: $this->validate($content); implement if we add group support.
 
@@ -152,6 +167,26 @@ class MutationResolver implements FieldResolverInterface
                 }
 
                 return $content;
+
+            case 'recover':
+                if(!$content = $contentManager->get($domain, $type, $args['id'], true)) {
+                    return null;
+                }
+
+                if(!$this->authorizationChecker->isGranted(ContentVoter::DELETE, $content)) {
+                    throw new AccessDeniedException(sprintf('You are not allowed to recover content of type %s.', $type));
+                }
+
+                $contentManager->recover($domain, $content);
+                $this->validate($content);
+
+                if($args['persist']) {
+                    $contentManager->persist($domain, $content, ContentEvent::RECOVER);
+                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::RECOVER);
+                    return $content;
+                }
+
+                return null;
 
             default:
                 return null;

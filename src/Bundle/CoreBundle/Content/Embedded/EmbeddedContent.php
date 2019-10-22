@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Content\Embedded;
 
+use DateTime;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 
@@ -52,5 +53,11 @@ class EmbeddedContent implements ContentInterface
     public function getFieldData(string $fieldName): ?FieldData
     {
         return isset($this->data[$fieldName]) ? $this->data[$fieldName] : null;
+    }
+
+    // Will always return null
+    public function getDeleted(): ?DateTime
+    {
+        return null;
     }
 }

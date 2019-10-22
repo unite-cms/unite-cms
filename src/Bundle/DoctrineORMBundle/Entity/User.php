@@ -2,6 +2,7 @@
 
 namespace UniteCMS\DoctrineORMBundle\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\SensitiveFieldData;
@@ -49,6 +50,13 @@ class User implements UserInterface
      * @Assert\NotBlank()
      */
     protected $username = '';
+
+    /**
+     * @var DateTime
+     *
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    protected $deleted = null;
 
     /**
      * Content constructor.
@@ -124,6 +132,23 @@ class User implements UserInterface
 
     public function getUsername() : string {
         return $this->username;
+    }
+
+    /**
+     * @param DateTime|null $deleted
+     * @return $this
+     */
+    public function setDeleted(?DateTime $deleted = null) : self {
+        $this->deleted = $deleted;
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getDeleted(): ?DateTime
+    {
+        return $this->deleted;
     }
 
     /**

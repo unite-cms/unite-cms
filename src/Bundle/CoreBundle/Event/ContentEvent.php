@@ -11,6 +11,7 @@ class ContentEvent extends Event
     const CREATE = 'create';
     const UPDATE = 'update';
     const DELETE = 'delete';
+    const RECOVER = 'recover';
 
     protected $content;
 

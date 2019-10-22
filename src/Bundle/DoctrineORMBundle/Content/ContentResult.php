@@ -76,18 +76,15 @@ class ContentResult implements ContentResultInterface
     /**
      * @return int
      */
-    public function getTotal(): int
-    {
-        return $this->repository->typedCount($this->type, $this->criteria);
+    public function getTotal(): int {
+        return $this->repository->typedCount($this->type, $this->criteria, $this->includeDeleted);
     }
 
     /**
      * @return ContentInterface[]
      */
-    public function getResult(): array
-    {
-        // TODO: Deleted
-        $result = $this->repository->typedFindBy($this->type, $this->criteria, $this->orderBy, $this->limit, $this->offset);
+    public function getResult(): array {
+        $result = $this->repository->typedFindBy($this->type, $this->criteria, $this->orderBy, $this->limit, $this->offset, $this->includeDeleted);
         return $this->resultFilter ? array_filter($result, $this->resultFilter) : $result;
     }
 }

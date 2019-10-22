@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Content;
 
+use DateTime;
 use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
 
 /**
@@ -20,4 +21,6 @@ interface ContentInterface
     public function getData() : array;
 
     public function getFieldData(string $fieldName) : ?FieldData;
+
+    public function getDeleted() : ?DateTime;
 }

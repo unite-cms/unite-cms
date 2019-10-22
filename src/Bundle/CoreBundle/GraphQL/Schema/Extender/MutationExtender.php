@@ -45,7 +45,8 @@ class MutationExtender implements SchemaExtenderInterface
                         $extension .= sprintf('
                             create%1$s(data: %1$sInput!, persist: Boolean!) : %1$s
                             update%1$s(id: ID!, data: %1$sInput!, persist: Boolean!) : %1$s
-                            delete%1$s(persist: Boolean!) : %1$s
+                            delete%1$s(id: ID!, persist: Boolean!) : %1$s
+                            recover%1$s(id: ID!, persist: Boolean!) : %1$s
                         ', $type->getId());
                     }
 

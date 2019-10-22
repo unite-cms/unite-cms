@@ -2,6 +2,7 @@
 
 namespace UniteCMS\DoctrineORMBundle\Content;
 
+use DateTime;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -27,8 +28,7 @@ class ContentManager implements ContentManagerInterface
      *
      * @param \Symfony\Bridge\Doctrine\RegistryInterface $registry
      */
-    public function __construct(RegistryInterface $registry)
-    {
+    public function __construct(RegistryInterface $registry) {
         $this->registry = $registry;
     }
 
@@ -67,9 +67,8 @@ class ContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function get(Domain $domain, string $type, string $id): ?ContentInterface
-    {
-        return $this->repository($domain)->typedFind($type, $id);
+    public function get(Domain $domain, string $type, string $id, bool $includeDeleted = false): ?ContentInterface {
+        return $this->repository($domain)->typedFind($type, $id, $includeDeleted);
     }
 
     /**
@@ -84,17 +83,18 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function update(Domain $domain, ContentInterface $content, array $inputData = [], bool $persist = false): ContentInterface {
-        $content->setData($inputData);
-        return $content;
+        return $content->setData($inputData);
     }
 
     /**
      * {@inheritDoc}
      */
     public function delete(Domain $domain, ContentInterface $content, bool $persist = false): ContentInterface {
+        return $content;    // Delete will be handled in persist.
+    }
 
-        // Delete will be handled in persist.
-        return $content;
+    public function recover(Domain $domain, ContentInterface $content) : ContentInterface {
+        return $content->setDeleted(null);
     }
 
     /**
@@ -106,8 +106,16 @@ class ContentManager implements ContentManagerInterface
             $this->em($domain)->persist($content);
         }
 
-        if($persistType === ContentEvent::UPDATE) {
-            $this->em($domain)->remove($content);
+        if($persistType === ContentEvent::DELETE) {
+
+            // Hard delete content.
+            if(!empty($content->getDeleted())) {
+                $this->em($domain)->remove($content);
+
+            // Soft delete content.
+            } else {
+                $content->setDeleted(new DateTime());
+            }
         }
 
         $this->em($domain)->flush($content);
