@@ -12,7 +12,7 @@ doctrine:
                     collate: utf8mb4_unicode_ci
 
             alternative:
-                url: '%env(DATABASE_URL)%'
+                url: '%env(DATABASE_URL)%_neu'
                 driver: 'pdo_mysql'
                 server_version: '5.7'
                 charset: utf8mb4

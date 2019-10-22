@@ -89,12 +89,20 @@ class MutationResolver implements FieldResolverInterface
              * @var InterfaceType $contentInterface
              */
             $contentInterface = $info->schema->getType('UniteContent');
+        } catch (Error $e) {
+            //TODO ?
+        }
 
+        try {
             /**
              * @var InterfaceType $singleContentInterface
              */
             $singleContentInterface = $info->schema->getType('UniteSingleContent');
+        } catch (Error $e) {
+            //TODO ?
+        }
 
+        try {
             /**
              * @var InterfaceType $userInterface
              */

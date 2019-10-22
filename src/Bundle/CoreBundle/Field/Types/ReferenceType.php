@@ -35,8 +35,9 @@ class ReferenceType extends AbstractFieldType
 
         // Validate return type.
         $returnTypes = empty($field->getUnionTypes()) ? [$field->getReturnType()] : array_keys($field->getUnionTypes());
+        $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
         foreach($returnTypes as $returnType) {
-            if(!$this->domainManager->current()->getContentTypeManager()->getContentType($returnType)) {
+            if(!$contentTypeManager->getContentType($returnType) && !$contentTypeManager->getUserType($returnType)) {
                 $context
                     ->buildViolation('Invalid GraphQL return type "{{ return_type }}" for field of type "{{ type }}". Please use a GraphQL type (or an union of types) that implements UniteContent.')
                     ->setParameter('{{ type }}', static::getType())

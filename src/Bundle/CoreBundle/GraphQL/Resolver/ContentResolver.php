@@ -12,8 +12,8 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use UniteCMS\CoreBundle\User\UserInterface;
-use UniteCMS\CoreBundle\UserType\UserType;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
+use UniteCMS\CoreBundle\ContentType\UserType;
 
 class ContentResolver implements FieldResolverInterface
 {

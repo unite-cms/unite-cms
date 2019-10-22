@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
+use GraphQL\Language\AST\InterfaceTypeDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -240,7 +241,7 @@ class SchemaManager
                 }
             }
 
-            else if ($typeDefinitionNode instanceof UnionTypeDefinitionNode) {
+            else if ($typeDefinitionNode instanceof UnionTypeDefinitionNode || $typeDefinitionNode instanceof InterfaceTypeDefinitionNode) {
                 $typeConfig['resolveType'] = function($value) {
 
                     // At the moment we can only resolve Unite Content

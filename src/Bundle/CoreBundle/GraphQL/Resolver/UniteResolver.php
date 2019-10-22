@@ -5,7 +5,6 @@ namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
-use UniteCMS\CoreBundle\UniteCMSCoreBundle;
 
 class UniteResolver implements FieldResolverInterface
 {
@@ -24,7 +23,8 @@ class UniteResolver implements FieldResolverInterface
         switch ($info->fieldName) {
             case 'unite':
                 return $info->parentType->name === 'Query' ? [
-                '_version' => UniteCMSCoreBundle::UNITE_VERSION,
+                '_version' => null,
+                'me' => null,
             ] : [
                 '_version' => null,
                 'generateJWT' => null,

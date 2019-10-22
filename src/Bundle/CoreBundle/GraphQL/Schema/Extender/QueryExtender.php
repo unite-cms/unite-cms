@@ -62,6 +62,12 @@ class QueryExtender implements SchemaExtenderInterface
             }', $extension);
         }
 
+        if(!empty($contentTypeManager->getUserTypes())) {
+            $extension .= 'extend type UniteQuery {
+                me: UniteUser @hide(if: "is_anonymous()")
+            }';
+        }
+
         return $extension;
     }
 }

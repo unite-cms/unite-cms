@@ -79,7 +79,7 @@ class RevisionRepository extends ContentRepository {
      *
      * @return Revision
      */
-    public function createRevisionForContent(ContentInterface $content, string $operation, UserInterface $user) : Revision {
+    public function createRevisionForContent(ContentInterface $content, string $operation, UserInterface $user = null) : Revision {
 
         if(empty($content->getId())) {
             throw new InvalidArgumentException('Revisions can only be created for persisted content.');
@@ -95,7 +95,7 @@ class RevisionRepository extends ContentRepository {
             ->setData($content->getData())
             ->setVersion($version)
             ->setOperation($operation)
-            ->setOperatorName($user->getUsername());
+            ->setOperatorName($user ? $user->getUsername() : 'anon');
 
         if($user instanceof \UniteCMS\CoreBundle\Security\User\UserInterface) {
             $revision
