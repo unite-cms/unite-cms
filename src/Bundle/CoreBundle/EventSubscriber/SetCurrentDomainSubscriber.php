@@ -31,7 +31,7 @@ class SetCurrentDomainSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::REQUEST => 'onKernelRequest',
+            KernelEvents::REQUEST => ['onKernelRequest', 30],
             ConsoleEvents::COMMAND => 'onConsoleCommand',
         ];
     }

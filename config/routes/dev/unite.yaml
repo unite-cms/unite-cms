@@ -1,4 +1,6 @@
 unite_cms_core_development_playground:
-    path: /
+    path: /{unite_domain}
     methods: GET
     controller: UniteCMS\CoreBundle\Controller\DevelopmentController::playground
+    defaults:
+        unite_domain: 'default'
