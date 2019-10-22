@@ -59,7 +59,7 @@ class ContentTypeExtender implements SchemaExtenderInterface
         }
 
         // Generate input types for all embedded content types.
-        foreach($contentTypeManager->getEmbeddedContentTypes() as $type) {
+        foreach(($contentTypeManager->getSingleContentTypes() + $contentTypeManager->getEmbeddedContentTypes()) as $type) {
             if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
                 $extension .= $type->printInputType($this->fieldTypeManager);
             }

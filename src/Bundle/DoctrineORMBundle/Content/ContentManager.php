@@ -102,7 +102,7 @@ class ContentManager implements ContentManagerInterface
      */
     public function persist(Domain $domain, ContentInterface $content, string $persistType) : void {
 
-        if($persistType === ContentEvent::CREATE) {
+        if(empty($content->getId())) {
             $this->em($domain)->persist($content);
         }
 

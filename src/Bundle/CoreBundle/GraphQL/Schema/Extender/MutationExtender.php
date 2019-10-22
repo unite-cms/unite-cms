@@ -60,6 +60,20 @@ class MutationExtender implements SchemaExtenderInterface
             }
         }
 
+        foreach($contentTypeManager->getSingleContentTypes() as $type) {
+            if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
+                if($this->authorizationChecker->isGranted(ContentVoter::QUERY, $type)) {
+
+                    // Only add statements if we have real fields
+                    if(count($type->getFields()) > 0) {
+                        $extension .= sprintf('
+                            update%1$s(data: %1$sInput!, persist: Boolean!) : %1$s
+                        ', $type->getId());
+                    }
+                }
+            }
+        }
+
         if(!empty($extension)) {
             $extension = sprintf('extend type Mutation {
                 %s

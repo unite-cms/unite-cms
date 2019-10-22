@@ -327,6 +327,11 @@ class SchemaManager
         $uniteContent = $schema->getType('UniteContent');
 
         /**
+         * @var InterfaceType $uniteSingleContent
+         */
+        $uniteSingleContent = $schema->getType('UniteSingleContent');
+
+        /**
          * @var InterfaceType $uniteContentEmbed
          */
         $uniteContentEmbed = $schema->getType('UniteEmbeddedContent');
@@ -345,6 +350,11 @@ class SchemaManager
                 // Register content type in content type manager.
                 if($type->implementsInterface($uniteContent)){
                     $contentTypeManager->registerContentType(ContentType::fromObjectType($type));
+                }
+
+                // Register single content type in content type manager.
+                if($type->implementsInterface($uniteSingleContent)){
+                    $contentTypeManager->registerSingleContentType(ContentType::fromObjectType($type));
                 }
 
                 // Register embedded content type in content type manager.

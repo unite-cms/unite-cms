@@ -81,6 +81,7 @@ class MutationResolver implements FieldResolverInterface
         }
 
         $contentInterface = null;
+        $singleContentInterface = null;
         $userInterface = null;
 
         try {
@@ -88,6 +89,11 @@ class MutationResolver implements FieldResolverInterface
              * @var InterfaceType $contentInterface
              */
             $contentInterface = $info->schema->getType('UniteContent');
+
+            /**
+             * @var InterfaceType $singleContentInterface
+             */
+            $singleContentInterface = $info->schema->getType('UniteSingleContent');
 
             /**
              * @var InterfaceType $userInterface
@@ -114,6 +120,12 @@ class MutationResolver implements FieldResolverInterface
 
         if($contentInterface && $actualType->implementsInterface($contentInterface)) {
             $contentManager = $domain->getContentManager();
+        }
+
+        else if($singleContentInterface && $actualType->implementsInterface($singleContentInterface)) {
+            $contentManager = $domain->getContentManager();
+            $allSingleContent = $contentManager->find($domain, $type);
+            $args['id'] = $allSingleContent->getTotal() === 0 ? null : $allSingleContent->getResult()[0]->getId();
         }
 
         else if($userInterface && $actualType->implementsInterface($userInterface)) {

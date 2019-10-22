@@ -57,6 +57,12 @@ class QueryResolver implements FieldResolverInterface
             $contentManager = $domain->getContentManager();
         }
 
+        else if(!empty($contentTypeManager->getSingleContentType($type))) {
+            $contentManager = $domain->getContentManager();
+            $allSingleContent = $contentManager->find($domain, $type);
+            $args['id'] = $allSingleContent->getTotal() === 0 ? null : $allSingleContent->getResult()[0]->getId();
+        }
+
         else if(!empty($contentTypeManager->getUserType($type))) {
             $contentManager = $domain->getUserManager();
         }
@@ -67,7 +73,10 @@ class QueryResolver implements FieldResolverInterface
 
         switch ($field) {
             case 'get':
-                return $this->ifAccess($contentManager->get($domain, $type, $args['id']));
+                return $this->ifAccess(empty($args['id']) ?
+                    $contentManager->create($domain, $type) :
+                    $contentManager->get($domain, $type, $args['id'])
+                );
             case 'find':
                 return $contentManager->find(
                     $domain,

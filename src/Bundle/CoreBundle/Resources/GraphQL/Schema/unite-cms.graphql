@@ -41,6 +41,10 @@ interface UniteContent {
     id: ID
 }
 
+interface UniteSingleContent {
+    id: ID
+}
+
 interface UniteEmbeddedContent {
     id: ID
 }

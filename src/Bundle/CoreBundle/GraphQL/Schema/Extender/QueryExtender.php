@@ -46,6 +46,16 @@ class QueryExtender implements SchemaExtenderInterface
             }
         }
 
+        foreach($contentTypeManager->getSingleContentTypes() as $type) {
+            if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
+                if($this->authorizationChecker->isGranted(ContentVoter::QUERY, $type)) {
+                    $extension .= sprintf('
+                        get%1$s : %1$s
+                    ', $type->getId());
+                }
+            }
+        }
+
         if(!empty($extension)) {
             $extension = sprintf('extend type Query {
                 %s

@@ -77,3 +77,8 @@ type CommunityUser
     firstname: String                  @textField @valid(if: "value == 'foo'", message: "Wrong!!")
     lastname: String                   @textField
 }
+
+type GeneralSettings implements UniteSingleContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+    id: ID
+    title: String                       @textField
+}

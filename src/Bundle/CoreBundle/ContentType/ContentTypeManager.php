@@ -14,6 +14,12 @@ class ContentTypeManager
     protected $contentTypes = [];
 
     /**
+     * @var ContentType[] $singleContentTypes
+     * @Assert\Valid
+     */
+    protected $singleContentTypes = [];
+
+    /**
      * @var ContentType[] $embeddedContentTypes
      * @Assert\Valid
      */
@@ -69,6 +75,33 @@ class ContentTypeManager
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * @return ContentType[]
+     */
+    public function getSingleContentTypes(): array
+    {
+        return $this->singleContentTypes;
+    }
+
+    /**
+     * @param string $id
+     * @return ContentType|null
+     */
+    public function getSingleContentType(string $id): ?ContentType
+    {
+        return $this->singleContentTypes[$id] ?? null;
+    }
+
+    /**
+     * @param ContentType $contentType
+     * @return ContentTypeManager
+     */
+    public function registerSingleContentType(ContentType $contentType): self
+    {
+        $this->singleContentTypes[$contentType->getId()] = $contentType;
         return $this;
     }
 
@@ -141,13 +174,13 @@ class ContentTypeManager
 
 
     public function getAnyType(string $id) : ?ContentType {
-        return $this->getContentType($id) ?? $this->getEmbeddedContentType($id) ?? $this->getUnionContentType($id) ?? $this->getUserType($id);
+        return $this->getContentType($id) ?? $this->getSingleContentType($id) ?? $this->getEmbeddedContentType($id) ?? $this->getUnionContentType($id) ?? $this->getUserType($id);
     }
 
     /**
      * @return \UniteCMS\CoreBundle\ContentType\ContentType[]
      */
     public function getAllTypes() : array {
-        return $this->contentTypes + $this->embeddedContentTypes + $this->unionContentTypes + $this->userTypes;
+        return $this->contentTypes + $this->singleContentTypes + $this->embeddedContentTypes + $this->unionContentTypes + $this->userTypes;
     }
 }

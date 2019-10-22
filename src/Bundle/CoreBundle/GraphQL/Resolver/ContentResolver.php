@@ -48,6 +48,10 @@ class ContentResolver implements FieldResolverInterface
                 return true;
             }
 
+            if($interface->name->value === 'UniteSingleContent') {
+                return true;
+            }
+
             if($interface->name->value === 'UniteUser') {
                 return true;
             }
