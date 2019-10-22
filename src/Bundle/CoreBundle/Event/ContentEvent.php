@@ -10,6 +10,7 @@ class ContentEvent extends Event
 {
     const CREATE = 'create';
     const UPDATE = 'update';
+    const REVERT = 'revert';
     const DELETE = 'delete';
     const RECOVER = 'recover';
 

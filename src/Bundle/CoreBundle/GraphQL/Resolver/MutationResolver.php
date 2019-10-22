@@ -159,7 +159,19 @@ class MutationResolver implements FieldResolverInterface
                     $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::UPDATE);
                 }
 
-                return $content; 
+                return $content;
+
+            case 'revert':
+                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::UPDATE, $type, $args['id']);
+                $contentManager->revert($domain, $content, $args['version']);
+                $this->validate($content);
+
+                if($args['persist']) {
+                    $contentManager->persist($domain, $content, ContentEvent::REVERT);
+                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::REVERT);
+                }
+
+                return $content;
 
             case 'delete':
                 if(!$content = $contentManager->get($domain, $type, $args['id'], true)) {

@@ -8,6 +8,7 @@ use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 
 /**
+ * @ORM\Table(name="unite_content")
  * @ORM\Entity(repositoryClass="UniteCMS\DoctrineORMBundle\Repository\ContentRepository")
  */
 class Content implements ContentInterface

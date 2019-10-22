@@ -6,13 +6,16 @@ use DateTime;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
+use Symfony\Component\Security\Core\Security;
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Exception\InvalidContentVersionException;
 use UniteCMS\DoctrineORMBundle\Entity\Content;
+use UniteCMS\DoctrineORMBundle\Entity\Revision;
 
 class ContentManager implements ContentManagerInterface
 {
@@ -24,12 +27,19 @@ class ContentManager implements ContentManagerInterface
     protected $registry;
 
     /**
+     * @var Security $security
+     */
+    protected $security;
+
+    /**
      * ContentManager constructor.
      *
      * @param \Symfony\Bridge\Doctrine\RegistryInterface $registry
+     * @param \Symfony\Component\Security\Core\Security $security
      */
-    public function __construct(RegistryInterface $registry) {
+    public function __construct(RegistryInterface $registry, Security $security) {
         $this->registry = $registry;
+        $this->security = $security;
     }
 
     /**
@@ -89,6 +99,22 @@ class ContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
+    public function revert(Domain $domain, ContentInterface $content, int $version) : ContentInterface {
+
+        $revision = $this->em($domain)->getRepository(Revision::class)->findOneForContent($content, $version);
+
+        if(!$revision) {
+            throw new InvalidContentVersionException();
+        }
+
+        $content->setData($revision->getData());
+
+        return $content;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function delete(Domain $domain, ContentInterface $content, bool $persist = false): ContentInterface {
         return $content;    // Delete will be handled in persist.
     }
@@ -106,6 +132,10 @@ class ContentManager implements ContentManagerInterface
             $this->em($domain)->persist($content);
         }
 
+        $contentId = $content->getId();
+        $contentType = $content->getType();
+        $softDelete = false;
+
         if($persistType === ContentEvent::DELETE) {
 
             // Hard delete content.
@@ -115,9 +145,26 @@ class ContentManager implements ContentManagerInterface
             // Soft delete content.
             } else {
                 $content->setDeleted(new DateTime());
+                $softDelete = true;
             }
         }
 
         $this->em($domain)->flush($content);
+
+        // Create revision entry for all operations but hard delete.
+        if($persistType !== ContentEvent::DELETE || $softDelete) {
+            $revision = $this->em($domain)
+                ->getRepository(Revision::class)
+                ->createRevisionForContent($content, $persistType, $this->security->getUser());
+            $this->em($domain)->persist($revision);
+            $this->em($domain)->flush($revision);
+
+        // On hard delete, remove all revision entries.
+        } else {
+            $this->em($domain)
+                ->getRepository(Revision::class)
+                ->deleteAllForContent($contentId, $contentType);
+
+        }
     }
 }

@@ -10,9 +10,11 @@ use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Exception\InvalidContentVersionException;
 
 class TestContentManager implements ContentManagerInterface
 {
+    protected $versionedData = [];
     protected $repository = [];
 
     public function find(Domain $domain, string $type, ContentFilterInput $filter = null, array $orderBy = [], int $limit = 20, int $offset = 0, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
@@ -47,6 +49,19 @@ class TestContentManager implements ContentManagerInterface
         return $content->setData($inputData);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function revert(Domain $domain, ContentInterface $content, int $version) : ContentInterface {
+
+        if(!isset($this->versionedData[$content->getId()][$version])) {
+            throw new InvalidContentVersionException();
+        }
+
+        $content->setData($this->versionedData[$content->getId()][$version]);
+        return $content;
+    }
+
     public function delete(Domain $domain, ContentInterface $content): ContentInterface {
         return $content;
     }
@@ -75,5 +90,8 @@ class TestContentManager implements ContentManagerInterface
         else if ($persistType === ContentEvent::RECOVER) {
             $content->setDeleted(null);
         }
+
+        $this->versionedData[$content->getId()] = $this->versionedData[$content->getId()] ?? [];
+        array_unshift($this->versionedData[$content->getId()], $content->getData());
     }
 }
