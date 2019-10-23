@@ -6,7 +6,7 @@ namespace UniteCMS\CoreBundle\EventSubscriber;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use UniteCMS\CoreBundle\User\UserInterface;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class CreateJWTTokenSubscriber implements EventSubscriberInterface
 {
