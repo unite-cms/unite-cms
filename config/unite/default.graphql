@@ -1,5 +1,6 @@
 
 type Category implements UniteContent {
+    _meta: UniteContentMeta!
     id: ID
     name: String! @textField
     articles_of: [Article!] @reference_ofField(reference_field: "category")
@@ -7,6 +8,7 @@ type Category implements UniteContent {
 }
 
 type OtherCategory implements UniteContent {
+    _meta: UniteContentMeta!
     id: ID
     name: String! @textField
 }
@@ -36,7 +38,8 @@ type HeadlineBlock implements UniteEmbeddedContent {
 union ContentBlock = TextBlock | HeadlineBlock
 union AnyCategory = Category | OtherCategory
 
-type Article implements UniteContent {
+type Article implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+    _meta: UniteContentMeta!
     id: ID
     title: String                       @textField
 
@@ -60,6 +63,7 @@ type Article implements UniteContent {
 }
 
 type Admin implements UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
+    _meta: UniteContentMeta!
     id: ID
     username: String!                   @textField
 }
@@ -69,7 +73,7 @@ type CommunityUser
     @passwordAuthenticator(passwordField: "password")
     @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true")
     @valid(if: "this.getFieldData('firstname') == 'foo'") {
-
+    _meta: UniteContentMeta!
     id: ID
     username: String!                  @textField
     password: NULL!                    @passwordField(min_length: 4)
@@ -79,6 +83,6 @@ type CommunityUser
 }
 
 type GeneralSettings implements UniteSingleContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
-    id: ID
+    _meta: UniteContentMeta!
     title: String                       @textField
 }

@@ -4,13 +4,14 @@ namespace UniteCMS\DoctrineORMBundle\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use UniteCMS\CoreBundle\Content\ContentRevisionInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 
 /**
  * @ORM\Table(name="unite_revision")
  * @ORM\Entity(repositoryClass="UniteCMS\DoctrineORMBundle\Repository\RevisionRepository")
  */
-class Revision
+class Revision implements ContentRevisionInterface
 {
     /**
      * @var string
@@ -108,9 +109,9 @@ class Revision
     }
 
     /**
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function getEntityType()
+    public function getEntityType() : string
     {
         return $this->entityType;
     }
@@ -127,9 +128,9 @@ class Revision
     }
 
     /**
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function getOperation()
+    public function getOperation() : string
     {
         return $this->operation;
     }
@@ -146,7 +147,7 @@ class Revision
     }
 
     /**
-     * @return int
+     * {@inheritDoc}
      */
     public function getVersion(): int
     {
@@ -165,9 +166,9 @@ class Revision
     }
 
     /**
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function getOperationTime()
+    public function getOperationTime() : DateTime
     {
         return $this->operationTime;
     }
@@ -184,9 +185,9 @@ class Revision
     }
 
     /**
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function getOperatorName()
+    public function getOperatorName() : string
     {
         return $this->operatorName;
     }
@@ -203,9 +204,9 @@ class Revision
     }
 
     /**
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function getOperatorType()
+    public function getOperatorType() : ?string
     {
         return $this->operatorType;
     }
@@ -222,9 +223,9 @@ class Revision
     }
 
     /**
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function getOperatorId()
+    public function getOperatorId() : ?string
     {
         return $this->operatorId;
     }
@@ -241,7 +242,7 @@ class Revision
     }
 
     /**
-     * @return \UniteCMS\CoreBundle\Content\FieldData[]
+     * {@inheritDoc}
      */
     public function getData(): array
     {

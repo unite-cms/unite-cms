@@ -31,6 +31,7 @@ class SchemaManagerTest extends KernelTestCase
         $this->assertValidSchema('
             type Article implements UniteContent {
                 id: ID
+                _meta: UniteContentMeta!
                 title: String @textField(type: "text")
             }
         ');
@@ -42,6 +43,7 @@ class SchemaManagerTest extends KernelTestCase
         $this->buildSchema('
             type Article implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
                 id: ID
+                _meta: UniteContentMeta!
                 title: String @textField(type: "text")
             }
         ');

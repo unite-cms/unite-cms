@@ -91,6 +91,8 @@ class ContentResolver implements FieldResolverInterface
                 switch ($info->fieldName) {
                     case 'id':
                         return $value->getId();
+                    Case '_meta':
+                        return $value;
                     default:
 
                         // Special handle user content.

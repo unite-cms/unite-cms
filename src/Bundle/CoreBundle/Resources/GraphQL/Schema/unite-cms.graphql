@@ -4,6 +4,7 @@ scalar JSON
 scalar Date
 scalar Time
 scalar DateTime
+scalar Locale
 scalar NULL
 
 directive @hide(
@@ -32,17 +33,25 @@ directive @webhook(
     url: String!
 ) on OBJECT
 
+type UniteContentMeta {
+    version: Int!
+    deleted: DateTime
+    locale: Locale
+}
+
 interface UniteUser {
     id: ID
     username: String!
+    _meta: UniteContentMeta!
 }
 
 interface UniteContent {
     id: ID
+    _meta: UniteContentMeta!
 }
 
 interface UniteSingleContent {
-    id: ID
+    _meta: UniteContentMeta!
 }
 
 interface UniteEmbeddedContent {

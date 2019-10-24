@@ -8,6 +8,7 @@ use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
+use UniteCMS\CoreBundle\Content\ContentRevisionInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\InvalidContentVersionException;
@@ -93,5 +94,12 @@ class TestContentManager implements ContentManagerInterface
 
         $this->versionedData[$content->getId()] = $this->versionedData[$content->getId()] ?? [];
         array_unshift($this->versionedData[$content->getId()], $content->getData());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20): array {
+        return [];
     }
 }

@@ -101,7 +101,9 @@ class ContentManager implements ContentManagerInterface
      */
     public function revert(Domain $domain, ContentInterface $content, int $version) : ContentInterface {
 
-        $revision = $this->em($domain)->getRepository(Revision::class)->findOneForContent($content, $version);
+        $revision = $this->em($domain)
+            ->getRepository(Revision::class)
+            ->findOneForContent($content, $version);
 
         if(!$revision) {
             throw new InvalidContentVersionException();
@@ -110,6 +112,15 @@ class ContentManager implements ContentManagerInterface
         $content->setData($revision->getData());
 
         return $content;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20) : array {
+        return $this->em($domain)
+            ->getRepository(Revision::class)
+            ->findForContent($content, $limit);
     }
 
     /**

@@ -26,6 +26,15 @@ interface ContentManagerInterface
      */
     public function revert(Domain $domain, ContentInterface $content, int $version) : ContentInterface;
 
+    /**
+     * @param Domain $domain
+     * @param ContentInterface $content
+     * @param int $limit
+     *
+     * @return ContentRevisionInterface[]
+     */
+    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20) : array;
+
     public function delete(Domain $domain, ContentInterface $content) : ContentInterface;
     public function recover(Domain $domain, ContentInterface $content) : ContentInterface;
 
