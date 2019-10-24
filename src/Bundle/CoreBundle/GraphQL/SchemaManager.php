@@ -58,6 +58,11 @@ class SchemaManager
     }
 
     /**
+     * @var Schema
+     */
+    protected $cacheableBaseSchema = null;
+
+    /**
      * @var DocumentNode
      */
     protected $cacheableSchema = null;
@@ -149,6 +154,30 @@ class SchemaManager
     }
 
     /**
+     * @return \GraphQL\Type\Schema
+     */
+    public function buildBaseSchema() : Schema {
+
+        // TODO: Cache + load from Cache + load generateContentTypes types from cache
+        // AST::fromArray
+
+        // If the schema is already in memory, use it from there.
+        if($this->cacheableBaseSchema) {
+            return $this->cacheableBaseSchema;
+        }
+
+        // Init with graphQL schema.
+        $schemaDefinition = '';
+        foreach ($this->providers as $provider) {
+            $schemaDefinition .= $provider->extend() . "\n";
+        }
+
+        $schemaDefinition .= join("\n", $this->domainManager->current()->getSchema());
+        $this->cacheableBaseSchema = BuildSchema::build($schemaDefinition);
+        return $this->cacheableBaseSchema;
+    }
+
+    /**
      * @return DocumentNode
      * @throws \GraphQL\Error\Error
      * @throws \GraphQL\Error\SyntaxError
@@ -163,14 +192,8 @@ class SchemaManager
             return $this->cacheableSchema;
         }
 
-        // Init with graphQL schema.
-        $schemaDefinition = '';
-        foreach ($this->providers as $provider) {
-            $schemaDefinition .= $provider->extend() . "\n";
-        }
-
-        $schemaDefinition .= join("\n", $this->domainManager->current()->getSchema());
-        $schema = BuildSchema::build($schemaDefinition);
+        // Build base schema from domain and providers.
+        $schema = $this->buildBaseSchema();
 
         // Execute before type extenders.
         foreach($this->beforeTypeExtenders as $extender) {

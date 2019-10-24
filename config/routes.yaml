@@ -1,6 +1,6 @@
 unite_cms_core_api:
     path: /{unite_domain}
-    methods: POST
+    methods: [POST, OPTIONS]
     controller: UniteCMS\CoreBundle\Controller\ApiController::api
     defaults:
         unite_domain: 'default'

@@ -2,7 +2,6 @@
 
 namespace UniteCMS\CoreBundle\Security\Authenticator;
 
-use GraphQL\Utils\BuildSchema;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,8 +12,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use UniteCMS\CoreBundle\Content\ContentInterface;
-use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
+use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
 use UniteCMS\CoreBundle\Security\Token\PreAuthenticationUniteUserToken;
@@ -28,14 +27,14 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
     protected $passwordEncoder;
 
     /**
-     * @var DomainManager $domainManager
+     * @var SchemaManager $schemaManager
      */
-    protected $domainManager;
+    protected $schemaManager;
 
-    public function __construct(FieldableUserPasswordEncoder $passwordEncoder, DomainManager $domainManager)
+    public function __construct(FieldableUserPasswordEncoder $passwordEncoder, SchemaManager $schemaManager)
     {
         $this->passwordEncoder = $passwordEncoder;
-        $this->domainManager = $domainManager;
+        $this->schemaManager = $schemaManager;
     }
 
     /**
@@ -64,8 +63,12 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      */
     protected function getAuthDirective(string $userType) : array {
 
-        $domain = $this->domainManager->current();
-        $minimalSchema = BuildSchema::build(join("\n", $domain->getSchema()));
+        $minimalSchema = $this->schemaManager->buildBaseSchema();
+
+        if(!in_array($userType, array_keys($minimalSchema->getTypeMap()))) {
+            throw new ProviderNotFoundException(sprintf('The GraphQL type "%s" was not found.', $userType));
+        }
+
         $userType = $minimalSchema->getType($userType);
         $directives = Util::getDirectives($userType->astNode);
         $passwordField = null;
