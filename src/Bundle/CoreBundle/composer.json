@@ -10,7 +10,8 @@
     "symfony/security-bundle": "4.3",
     "doctrine/annotations": "1.8",
     "webonyx/graphql-php": "^0.13",
-    "lexik/jwt-authentication-bundle": "^2.6"
+    "lexik/jwt-authentication-bundle": "^2.6",
+    "symfony/monolog-bundle": "^3.4"
   },
   "autoload": {
     "psr-4": { "UniteCMS\\CoreBundle\\": "" },
