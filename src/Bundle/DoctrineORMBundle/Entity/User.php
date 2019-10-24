@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * @ORM\Table(name="unite_user")
  * @ORM\Entity(repositoryClass="UniteCMS\DoctrineORMBundle\Repository\UserRepository")
- * @UniqueEntity("username")
+ * @UniqueEntity({"type", "username"})
  */
 class User implements UserInterface
 {
