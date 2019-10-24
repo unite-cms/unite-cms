@@ -3,15 +3,9 @@
 
 namespace UniteCMS\CoreBundle\Tests\GraphQL;
 
-use GraphQL\Utils\BuildSchema;
-use GraphQL\Language\AST\DocumentNode;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
-use UniteCMS\CoreBundle\Domain\Domain;
-use UniteCMS\CoreBundle\Domain\DomainManager;
-use UniteCMS\CoreBundle\GraphQL\SchemaManager;
+use UniteCMS\CoreBundle\Tests\SchemaAwareTestCase;
 
-class SchemaManagerTest extends KernelTestCase
+class SchemaManagerTest extends SchemaAwareTestCase
 {
     /**
      * @expectedException \GraphQL\Error\InvariantViolation
@@ -44,11 +38,9 @@ class SchemaManagerTest extends KernelTestCase
             type Article implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
                 id: ID
                 _meta: UniteContentMeta!
-                title: String @textField(type: "text")
+                title: String @textField
             }
         ');
-
-        $schemaManager = static::$container->get(SchemaManager::class);
 
         $create = 'mutation($data: ArticleInput!, $persist: Boolean!) { createArticle(data: $data, persist: $persist) { id, title }}';
         $update = 'mutation($id: ID!, $data: ArticleInput!, $persist: Boolean!) { updateArticle(id: $id, data: $data, persist: $persist) { id, title }}';
@@ -58,29 +50,24 @@ class SchemaManagerTest extends KernelTestCase
         $find = 'query { findArticle { total, result { id, title }}}';
 
         // Create article without persist
-        $result = $schemaManager->execute($create, ['persist' => false, 'data' => ['title' => 'Foo']])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'createArticle' => [
                 'id' => null,
                 'title' => 'Foo'
             ],
-        ]], $result);
+        ], $create, ['persist' => false, 'data' => ['title' => 'Foo']]);
 
 
         // Create article with persist
-        $result = $schemaManager->execute($create, ['persist' => true, 'data' => ['title' => 'Foo']])->toArray(true);
-        $this->assertNotNull($result['data']['createArticle']['id']);
-        $id = $result['data']['createArticle']['id'];
-        $this->assertEquals(['data' => [
+        list($id) = $this->assertGraphQL([
             'createArticle' => [
-                'id' => $id,
+                'id' => '{id}',
                 'title' => 'Foo'
             ],
-        ]], $result);
+        ], $create, ['persist' => true, 'data' => ['title' => 'Foo']]);
 
         // Find all articles
-        $result = $schemaManager->execute($find)->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'findArticle' => [
                 'total' => 1,
                 'result' => [
@@ -90,165 +77,112 @@ class SchemaManagerTest extends KernelTestCase
                     ]
                 ]
             ],
-        ]], $result);
+        ], $find);
 
         // Get article by id
-        $result = $schemaManager->execute($get, ['id' => $id])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'getArticle' => [
                 'id' => $id,
                 'title' => 'Foo'
-            ]
-        ]], $result);
+            ],
+        ], $get, ['id' => $id]);
 
         // Update article
-        $result = $schemaManager->execute($update, ['persist' => true, 'id' => $id, 'data' => ['title' => 'Baa']])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'updateArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
-            ]
-        ]], $result);
+            ],
+        ], $update, ['persist' => true, 'id' => $id, 'data' => ['title' => 'Baa']]);
 
 
         // Get article by id
-        $result = $schemaManager->execute($get, ['id' => $id])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'getArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
-            ]
-        ]], $result);
+            ],
+        ], $get, ['id' => $id]);
 
 
         // Delete article by id without persist
-        $result = $schemaManager->execute($delete, ['id' => $id, 'persist' => false])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'deleteArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
-            ]
-        ]], $result);
+            ],
+        ], $delete, ['id' => $id, 'persist' => false]);
 
         // Get article by id
-        $result = $schemaManager->execute($get, ['id' => $id])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'getArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
-            ]
-        ]], $result);
+            ],
+        ], $get, ['id' => $id]);
 
         // Delete article by id with persist
-        $result = $schemaManager->execute($delete, ['id' => $id, 'persist' => true])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'deleteArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
-            ]
-        ]], $result);
+            ],
+        ], $delete, ['id' => $id, 'persist' => true]);
 
         // Get article by id
-        $result = $schemaManager->execute($get, ['id' => $id])->toArray(true);
-        $this->assertEquals(['data' => [
-            'getArticle' => null
-        ]], $result);
+        $this->assertGraphQL([
+            'getArticle' => null,
+        ], $get, ['id' => $id]);
 
 
         // Recover article by id without persist
-        $result = $schemaManager->execute($recover, ['id' => $id, 'persist' => false])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'recoverArticle' => null
-        ]], $result);
+        ], $recover, ['id' => $id, 'persist' => false]);
 
         // Get article by id
-        $result = $schemaManager->execute($get, ['id' => $id])->toArray(true);
-        $this->assertEquals(['data' => [
-            'getArticle' => null
-        ]], $result);
+        $this->assertGraphQL([
+            'getArticle' => null,
+        ], $get, ['id' => $id]);
 
 
 
         // Recover article by id with persist
-        $result = $schemaManager->execute($recover, ['id' => $id, 'persist' => true])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'recoverArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
             ]
-        ]], $result);
+        ], $recover, ['id' => $id, 'persist' => true]);
 
         // Get article by id
-        $result = $schemaManager->execute($get, ['id' => $id])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'getArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
             ]
-        ]], $result);
-
+        ], $get, ['id' => $id]);
 
         // Delete article by id with persist
-        $result = $schemaManager->execute($delete, ['id' => $id, 'persist' => true])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'deleteArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
-            ]
-        ]], $result);
-
+            ],
+        ], $delete, ['id' => $id, 'persist' => true]);
 
         // Permanently delete article by id with persist
-        $result = $schemaManager->execute($delete, ['id' => $id, 'persist' => true])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'deleteArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
-            ]
-        ]], $result);
+            ],
+        ], $delete, ['id' => $id, 'persist' => true]);
 
         // Recover will not change anything here.
-        $result = $schemaManager->execute($recover, ['id' => $id, 'persist' => true])->toArray(true);
-        $this->assertEquals(['data' => [
+        $this->assertGraphQL([
             'recoverArticle' => null
-        ]], $result);
+        ], $recover, ['id' => $id, 'persist' => true]);
 
-    }
-
-    public function setUp() {
-        static::bootKernel();
-        static::$container->get('security.token_storage')->setToken(new AnonymousToken('', ''));
-    }
-
-    /**
-     * @param string $schema
-     *
-     * @return \GraphQL\Language\AST\DocumentNode
-     * @throws \GraphQL\Error\Error
-     * @throws \GraphQL\Error\SyntaxError
-     */
-    protected function buildSchema(string $schema = '') : DocumentNode {
-
-        $schemaManager = static::$container->get(SchemaManager::class);
-        $domainManager = static::$container->get(DomainManager::class);
-        $domain = $domainManager->current();
-
-        $domainManager->setCurrentDomain(new Domain(
-            'test',
-            $domain->getContentManager(),
-            $domain->getUserManager(),
-            array_merge($domain->getSchema(), [$schema])
-        ));
-
-        return $schemaManager->buildCacheableSchema();
-    }
-
-    /**
-     * @param string $schema
-     * @throws \GraphQL\Error\Error
-     * @throws \GraphQL\Error\SyntaxError
-     */
-    protected function assertValidSchema(string $schema = '') : void {
-        BuildSchema::build($this->buildSchema($schema))->assertValid();
     }
 }

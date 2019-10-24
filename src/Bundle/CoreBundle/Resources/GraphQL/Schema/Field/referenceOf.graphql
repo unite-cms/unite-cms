@@ -1,4 +1,4 @@
 
-directive @reference_ofField(
+directive @referenceOfField(
     reference_field: String!
 ) on FIELD_DEFINITION

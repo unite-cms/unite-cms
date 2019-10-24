@@ -13,7 +13,7 @@ use UniteCMS\CoreBundle\Domain\DomainManager;
 
 class ReferenceOfType extends AbstractFieldType
 {
-    const TYPE = 'reference_of';
+    const TYPE = 'referenceOf';
     const GRAPHQL_INPUT_TYPE = null;
 
     /**

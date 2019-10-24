@@ -1,0 +1,2 @@
+
+directive @booleanField on FIELD_DEFINITION

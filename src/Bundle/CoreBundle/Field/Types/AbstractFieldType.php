@@ -46,7 +46,7 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
      * @return array
      */
     protected function allowedReturnTypes(ContentTypeField $field) {
-        return [Type::STRING];
+        return [$this->GraphQLInputType($field)];
     }
 
     /**

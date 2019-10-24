@@ -55,12 +55,13 @@ class Util
 
             $directiveNameParts = preg_split('/(?=[A-Z])/',$directive->name->value);
 
-            if(count($directiveNameParts) === 2) {
+            if(count($directiveNameParts) >= 2) {
                 $foundSuffix = array_pop($directiveNameParts);
+                $type = substr($directive->name->value, 0, -strlen($foundSuffix));
 
                 if($foundSuffix === $suffix) {
                     $args = [
-                        'type' => $directiveNameParts[0],
+                        'type' => $type,
                         'settings' => []
                     ];
 

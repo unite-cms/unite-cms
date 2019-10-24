@@ -1,0 +1,2 @@
+
+directive @timeField on FIELD_DEFINITION
