@@ -15,7 +15,7 @@ use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\EventSubscriber\SetCurrentDomainSubscriber;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
-use UniteCMS\CoreBundle\GraphQL\Util;
+use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
 
 class CreateUserCommand extends Command
 {
@@ -39,13 +39,19 @@ class CreateUserCommand extends Command
      */
     protected $validator;
 
-    public function __construct(SchemaManager $schemaManager, DomainManager $domainManager, TokenStorageInterface $tokenStorage, ValidatorInterface $validator)
+    /**
+     * @var FieldableUserPasswordEncoder $passwordEncoder
+     */
+    protected $passwordEncoder;
+
+    public function __construct(SchemaManager $schemaManager, DomainManager $domainManager, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, FieldableUserPasswordEncoder $passwordEncoder)
     {
         parent::__construct();
         $this->schemaManager = $schemaManager;
         $this->domainManager = $domainManager;
         $this->tokenStorage = $tokenStorage;
         $this->validator = $validator;
+        $this->passwordEncoder = $passwordEncoder;
     }
 
     /**
@@ -104,7 +110,7 @@ class CreateUserCommand extends Command
         $user = $domain->getUserManager()->create($domain, $input->getArgument('type'));
         $domain->getUserManager()->update($domain, $user, [
             'username' => new SensitiveFieldData($input->getArgument('username')),
-            $passwordField => new SensitiveFieldData($input->getArgument('password')),
+            $passwordField => new SensitiveFieldData($this->passwordEncoder->encodePassword($user, $input->getArgument('password'))),
         ]);
 
         $errors = $this->validator->validate($user);
