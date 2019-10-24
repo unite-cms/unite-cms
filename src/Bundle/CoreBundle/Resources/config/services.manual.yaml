@@ -6,3 +6,7 @@ services:
         parent: UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaFileProvider
         arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/unite-cms.graphql']
         tags: ['unite.graphql.schema_provider']
+
+    unite.cms_core.monolog.domain_stream_handler:
+        class: UniteCMS\CoreBundle\Monolog\DomainStreamHandler
+        arguments: ['%kernel.logs_dir%/unite/{domain}.log', '@UniteCMS\CoreBundle\Domain\DomainManager']

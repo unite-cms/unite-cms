@@ -17,6 +17,7 @@ services:
 
         bind:
             $uniteCMSDebug: '%unite_cms_core.debug%'
+            $uniteCMSDomainLogger: '@monolog.logger.unite_domain'
 
     _instanceof:
         UniteCMS\CoreBundle\Field\FieldTypeInterface:

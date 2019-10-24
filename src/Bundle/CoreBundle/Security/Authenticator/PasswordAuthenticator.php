@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Security\Authenticator;
 
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -31,10 +32,16 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      */
     protected $schemaManager;
 
-    public function __construct(FieldableUserPasswordEncoder $passwordEncoder, SchemaManager $schemaManager)
+    /**
+     * @var LoggerInterface $uniteCMSDomainLogger
+     */
+    protected $domainLogger;
+
+    public function __construct(FieldableUserPasswordEncoder $passwordEncoder, SchemaManager $schemaManager, LoggerInterface $uniteCMSDomainLogger)
     {
         $this->passwordEncoder = $passwordEncoder;
         $this->schemaManager = $schemaManager;
+        $this->domainLogger = $uniteCMSDomainLogger;
     }
 
     /**
@@ -66,6 +73,7 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
         $minimalSchema = $this->schemaManager->buildBaseSchema();
 
         if(!in_array($userType, array_keys($minimalSchema->getTypeMap()))) {
+            $this->domainLogger->warning(sprintf('Unknown GraphQL type "%s" used for username/password login.', $userType));
             throw new ProviderNotFoundException(sprintf('The GraphQL type "%s" was not found.', $userType));
         }
 
@@ -79,6 +87,7 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
             }
         }
 
+        $this->domainLogger->warning(sprintf('@passwordAuthenticator was not configured for GraphQL user type "%s".', $userType));
         throw new ProviderNotFoundException(sprintf('Password authenticator is not enabled for user type "%s".', $userType));
     }
 

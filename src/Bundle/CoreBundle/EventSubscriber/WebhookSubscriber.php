@@ -23,15 +23,15 @@ class WebhookSubscriber implements EventSubscriberInterface
     protected $expressionLanguage;
 
     /**
-     * @var LoggerInterface $logger
+     * @var LoggerInterface $domainLogger
      */
-    protected $logger;
+    protected $domainLogger;
 
-    public function __construct(DomainManager $domainManager, LoggerInterface $logger)
+    public function __construct(DomainManager $domainManager, LoggerInterface $uniteCMSDomainLogger)
     {
         $this->domainManager = $domainManager;
         $this->expressionLanguage = new ExpressionLanguage();
-        $this->logger = $logger;
+        $this->domainLogger = $uniteCMSDomainLogger;
     }
 
     /**
@@ -58,7 +58,7 @@ class WebhookSubscriber implements EventSubscriberInterface
         foreach($contentType->getWebhooks() as $webhook) {
             if((bool)$this->expressionLanguage->evaluate($webhook->getExpression())) {
                 // TODO: Execute $webhook->url();
-                $this->logger->info('Webhook...');
+                $this->domainLogger->info('TODO: Webhook was not really executed at the moment...');
             }
         }
     }

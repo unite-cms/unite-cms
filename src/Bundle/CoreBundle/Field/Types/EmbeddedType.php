@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
@@ -27,10 +28,16 @@ class EmbeddedType extends AbstractFieldType
      */
     protected $fieldTypeManager;
 
-    public function __construct(DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
+    /**
+     * @var LoggerInterface $uniteCMSDomainLogger
+     */
+    protected $domainLogger;
+
+    public function __construct(DomainManager $domainManager, FieldTypeManager $fieldTypeManager, LoggerInterface $uniteCMSDomainLogger)
     {
         $this->domainManager = $domainManager;
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->domainLogger = $uniteCMSDomainLogger;
     }
 
     /**
@@ -73,7 +80,7 @@ class EmbeddedType extends AbstractFieldType
         $domain = $this->domainManager->current();
 
         if(!$contentType = $domain->getContentTypeManager()->getEmbeddedContentType($field->getReturnType())) {
-            // TODO: Logging
+            $this->domainLogger->warning(sprintf('Unknown embedded content type "%s" was used as return type of field "%s".', $field->getReturnType(), $field->getId()));
             return null;
         }
 
