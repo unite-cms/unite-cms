@@ -79,7 +79,7 @@ class Configuration implements ConfigurationInterface
                 foreach($v['domains'] as $key => $domain) {
                     if(empty($domain['schema'])) {
                         $v['domains'][$key]['schema'] = $this->uniteCMSSchemaFiles;
-                        $v['domains'][$key]['schema'][] = sprintf('%s%s.graphql', $v['default_schema_config_dir'], $key);
+                        $v['domains'][$key]['schema'][] = sprintf('%s%s/', $v['default_schema_config_dir'], $key);
                     }
                 }
                 return $v;
