@@ -53,8 +53,9 @@ class SchemaAwareTestCase extends KernelTestCase
      * @param string $schema
      * @param bool $catch
      */
-    protected function assertValidSchema(string $schema = '', bool $catch = false) : void {
+    protected function assertValidSchema(string $schema = '', bool $catch = false) : bool {
         BuildSchema::build($this->buildSchema($schema, $catch))->assertValid();
+        return true;
     }
 
     protected function modifyArray($expected, $result, &$subs = []) {
