@@ -1,2 +1,4 @@
 
-directive @referenceField on FIELD_DEFINITION
+directive @referenceField(
+    default: String
+) on FIELD_DEFINITION

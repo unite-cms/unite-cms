@@ -1,2 +1,4 @@
 
-directive @timeField on FIELD_DEFINITION
+directive @timeField(
+    default: Time
+) on FIELD_DEFINITION

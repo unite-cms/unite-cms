@@ -1,2 +1,4 @@
 
-directive @choiceField on FIELD_DEFINITION
+directive @choiceField(
+    default: String
+) on FIELD_DEFINITION

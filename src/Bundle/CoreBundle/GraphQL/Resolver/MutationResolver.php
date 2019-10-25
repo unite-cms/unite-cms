@@ -230,12 +230,16 @@ class MutationResolver implements FieldResolverInterface
         $contentType = $domain->getContentTypeManager()->getAnyType($content->getType());
         $normalizedData = [];
 
-        foreach($data as $id => $fieldData) {
-            $field = $contentType->getField($id);
+        foreach($contentType->getFields() as $id => $field) {
+
+            //dump($id);
+
+            $fieldData = $data[$id] ?? null;
 
             if($field->isListOf()) {
+
                 $listData = [];
-                foreach($fieldData ?? [] as $rowId => $rowData) {
+                foreach(($fieldData ?? []) as $rowId => $rowData) {
                     $listData[$rowId] = $this->normalizeFieldData($field, $domain, $content, $rowData);
                 }
                 $normalizedData[$id] = new FieldDataList($listData);
@@ -251,6 +255,11 @@ class MutationResolver implements FieldResolverInterface
 
     protected function normalizeFieldData(ContentTypeField $field, Domain $domain, ContentInterface $content, $rowData) {
         if(!empty($field->getUnionTypes())) {
+
+            if(empty($rowData)) {
+                return null;
+            }
+
             $unionType = $domain->getContentTypeManager()->getUnionContentType($field->getReturnType());
             $selectedUnionType = array_keys($rowData)[0];
             $rowData = $rowData[$selectedUnionType];

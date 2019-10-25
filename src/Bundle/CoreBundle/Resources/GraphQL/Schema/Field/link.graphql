@@ -1,5 +1,7 @@
 
-directive @linkField on FIELD_DEFINITION
+directive @linkField(
+    default: UniteLinkInput
+) on FIELD_DEFINITION
 
 enum UniteLinkTarget {
     _SELF,

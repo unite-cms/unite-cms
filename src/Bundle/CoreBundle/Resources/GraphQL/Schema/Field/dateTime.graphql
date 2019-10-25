@@ -1,2 +1,4 @@
 
-directive @dateTimeField on FIELD_DEFINITION
+directive @dateTimeField(
+    default: DateTime
+) on FIELD_DEFINITION

@@ -1,2 +1,4 @@
 
-directive @floatField on FIELD_DEFINITION
+directive @floatField(
+    default: Float
+) on FIELD_DEFINITION

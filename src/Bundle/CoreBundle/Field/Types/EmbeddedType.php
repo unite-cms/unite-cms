@@ -78,6 +78,7 @@ class EmbeddedType extends AbstractFieldType
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
 
         $domain = $this->domainManager->current();
+        $inputData = $inputData ?? [];
 
         if(!$contentType = $domain->getContentTypeManager()->getEmbeddedContentType($field->getReturnType())) {
             $this->domainLogger->warning(sprintf('Unknown embedded content type "%s" was used as return type of field "%s".', $field->getReturnType(), $field->getId()));

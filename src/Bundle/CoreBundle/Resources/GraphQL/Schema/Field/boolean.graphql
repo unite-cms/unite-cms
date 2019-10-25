@@ -1,2 +1,4 @@
 
-directive @booleanField on FIELD_DEFINITION
+directive @booleanField(
+    default: Boolean
+) on FIELD_DEFINITION

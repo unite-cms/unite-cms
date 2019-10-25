@@ -1,2 +1,4 @@
 
-directive @integerField on FIELD_DEFINITION
+directive @integerField(
+    default: Int
+) on FIELD_DEFINITION

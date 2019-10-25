@@ -1,2 +1,4 @@
 
-directive @emailField on FIELD_DEFINITION
+directive @emailField(
+    default: String
+) on FIELD_DEFINITION

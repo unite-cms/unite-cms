@@ -1,10 +1,16 @@
 
+enum Tags {
+    FOO
+    BAA
+}
+
 type Category implements UniteContent {
     _meta: UniteContentMeta!
     id: ID
     name: String! @textField
     articles_of: [Article!] @referenceOfField(reference_field: "category")
     tags_of: [Article!] @referenceOfField(reference_field: "tags")
+    tag: Tags @choiceField(default: "FOO")
 }
 
 type OtherCategory implements UniteContent {
@@ -56,7 +62,7 @@ type Article implements UniteContent @access(query: "true", mutation: "true", cr
     extra_teasers: [ArticleTeaser!]     @embeddedField
     category: Category                  @referenceField
     tags: [Category!]                   @referenceField
-    status: ArticleStatus!              @choiceField
+    status: ArticleStatus               @choiceField(default: "DRAFT")
     contentBlocks: [ContentBlock!]      @embeddedField
     categoryUnionTest: AnyCategory      @referenceField
     foo: Expression                     @hide(if: "not is_granted('ROLE_ADMIN')")
