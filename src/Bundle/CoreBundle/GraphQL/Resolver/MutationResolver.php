@@ -10,19 +10,17 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\WrappingType;
 use InvalidArgumentException;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
-use UniteCMS\CoreBundle\Content\FieldDataList;
-use UniteCMS\CoreBundle\ContentType\ContentTypeField;
+use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class MutationResolver implements FieldResolverInterface
@@ -34,7 +32,7 @@ class MutationResolver implements FieldResolverInterface
     protected $authorizationChecker;
 
     /**
-     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+     * @var EventDispatcherInterface $eventDispatcher
      */
     protected $eventDispatcher;
 
@@ -49,17 +47,17 @@ class MutationResolver implements FieldResolverInterface
     protected $domainManager;
 
     /**
-     * @var FieldTypeManager $fieldTypeManager
+     * @var FieldDataMapper $fieldDataMapper
      */
-    protected $fieldTypeManager;
+    protected $fieldDataMapper;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, EventDispatcherInterface $eventDispatcher, ValidatorInterface $validator, DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, EventDispatcherInterface $eventDispatcher, ValidatorInterface $validator, DomainManager $domainManager, FieldDataMapper $fieldDataMapper)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->eventDispatcher = $eventDispatcher;
         $this->validator = $validator;
         $this->domainManager = $domainManager;
-        $this->fieldTypeManager = $fieldTypeManager;
+        $this->fieldDataMapper = $fieldDataMapper;
     }
 
     /**
@@ -74,47 +72,10 @@ class MutationResolver implements FieldResolverInterface
      */
     public function resolve($value, $args, $context, ResolveInfo $info) {
 
-        $actualType = $info->returnType;
+        // Get current domain.
+        $domain = $this->domainManager->current();
 
-        if($actualType instanceof WrappingType) {
-            $actualType = $actualType->getWrappedType(true);
-        }
-
-        $contentInterface = null;
-        $singleContentInterface = null;
-        $userInterface = null;
-
-        try {
-            /**
-             * @var InterfaceType $contentInterface
-             */
-            $contentInterface = $info->schema->getType('UniteContent');
-        } catch (Error $e) {
-            //TODO ?
-        }
-
-        try {
-            /**
-             * @var InterfaceType $singleContentInterface
-             */
-            $singleContentInterface = $info->schema->getType('UniteSingleContent');
-        } catch (Error $e) {
-            //TODO ?
-        }
-
-        try {
-            /**
-             * @var InterfaceType $userInterface
-             */
-            $userInterface = $info->schema->getType('UniteUser');
-        } catch (Error $e) {
-            //TODO ?
-        }
-
-        if(!$actualType instanceof ObjectType) {
-            return null;
-        }
-
+        // Get action and content type name parts from field name.
         $fieldNameParts = preg_split('/(?=[A-Z])/',$info->fieldName);
         if(count($fieldNameParts) < 2) {
             return null;
@@ -123,190 +84,185 @@ class MutationResolver implements FieldResolverInterface
         $field = array_shift($fieldNameParts);
         $type = substr($info->fieldName, strlen($field));
 
-        $domain = $this->domainManager->current();
-        $contentManager = null;
-
-        if($contentInterface && $actualType->implementsInterface($contentInterface)) {
-            $contentManager = $domain->getContentManager();
+        // If not one of the defined fields
+        if(!in_array($field, ['create', 'update', 'delete', 'revert', 'recover'])) {
+            return null;
         }
 
-        else if($singleContentInterface && $actualType->implementsInterface($singleContentInterface)) {
-            $contentManager = $domain->getContentManager();
+        // If no content manager could be found for this field, return null.
+        if(!$contentManager = $this->contentManagerForField($domain, $info)) {
+            return null;
+        }
+
+        // If this is a single content type, get id from repository.
+        if($domain->getContentTypeManager()->getSingleContentType($type)) {
             $allSingleContent = $contentManager->find($domain, $type);
             $args['id'] = $allSingleContent->getTotal() === 0 ? null : $allSingleContent->getResult()[0]->getId();
         }
 
-        else if($userInterface && $actualType->implementsInterface($userInterface)) {
-            $contentManager = $domain->getUserManager();
-        }
+        // Get or create content. Throws an exception, if something goes wrong.
+        $content = $this->getContent($contentManager, $domain, $type, $args, $field);
 
-        else {
-            return null;
-        }
-
+        // Handle all fields
         switch ($field) {
             case 'create':
-                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::CREATE, $type);
-                $contentManager->update($domain, $content, $this->normalizeData($domain, $content, $args['data'] ?? []));
-                $this->validate($content);
-
-                if($args['persist']) {
-                    $contentManager->persist($domain, $content, ContentEvent::CREATE);
-                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::CREATE);
-                }
-
-                return $content;
+                $this->contentAccess(ContentVoter::CREATE, $content);
+                $this->contentUpdate($contentManager, $domain, $content, $args['data']);
+                return $this->contentPersist($contentManager, $domain, $content, ContentEvent::CREATE, $args['persist']);
 
             case 'update':
-                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::UPDATE, $type, $args['id']);
-                $contentManager->update($domain, $content, $this->normalizeData($domain, $content, $args['data'] ?? []));
-                $this->validate($content);
-
-                if($args['persist']) {
-                    $contentManager->persist($domain, $content, ContentEvent::UPDATE);
-                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::UPDATE);
-                }
-
-                return $content;
+                $this->contentAccess(ContentVoter::UPDATE, $content);
+                $this->contentUpdate($contentManager, $domain, $content, $args['data']);
+                return $this->contentPersist($contentManager, $domain, $content, ContentEvent::UPDATE, $args['persist']);
 
             case 'revert':
-                $content = $this->getOrCreate($contentManager, $domain, ContentVoter::UPDATE, $type, $args['id']);
+                $this->contentAccess(ContentVoter::UPDATE, $content);
                 $contentManager->revert($domain, $content, $args['version']);
-                $this->validate($content);
-
-                if($args['persist']) {
-                    $contentManager->persist($domain, $content, ContentEvent::REVERT);
-                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::REVERT);
-                }
-
-                return $content;
+                return $this->contentPersist($contentManager, $domain, $content, ContentEvent::REVERT, $args['persist']);
 
             case 'delete':
-                if(!$content = $contentManager->get($domain, $type, $args['id'], true)) {
-                    return null;
-                }
-
-                if(!$this->authorizationChecker->isGranted(ContentVoter::DELETE, $content)) {
-                    throw new AccessDeniedException(sprintf('You are not allowed to delete content of type %s.', $type));
-                }
-
+                $this->contentAccess(ContentVoter::DELETE, $content);
                 $contentManager->delete($domain, $content);
-                // TODO: $this->validate($content); implement if we add group support.
-
-                if($args['persist']) {
-                    $contentManager->persist($domain, $content, ContentEvent::DELETE);
-                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::DELETE);
-                }
-
-                return $content;
+                return $this->contentPersist($contentManager, $domain, $content, ContentEvent::DELETE, $args['persist']);
 
             case 'recover':
-                if(!$content = $contentManager->get($domain, $type, $args['id'], true)) {
-                    return null;
-                }
-
-                if(!$this->authorizationChecker->isGranted(ContentVoter::DELETE, $content)) {
-                    throw new AccessDeniedException(sprintf('You are not allowed to recover content of type %s.', $type));
-                }
-
+                $this->contentAccess(ContentVoter::DELETE, $content);
                 $contentManager->recover($domain, $content);
-                $this->validate($content);
+                $this->contentPersist($contentManager, $domain, $content, ContentEvent::RECOVER, $args['persist']);
 
-                if($args['persist']) {
-                    $contentManager->persist($domain, $content, ContentEvent::RECOVER);
-                    $this->eventDispatcher->dispatch(new ContentEvent($content), ContentEvent::RECOVER);
-                    return $content;
-                }
-
-                return null;
+                // On recover: only return content if we really persist the change
+                return $args['persist'] ? $content: null;
 
             default:
                 return null;
         }
     }
 
-    protected function normalizeData(Domain $domain, ContentInterface $content, array $data) : array {
+    /**
+     * @param Domain $domain
+     * @param ResolveInfo $info
+     *
+     * @return ContentManagerInterface|null
+     */
+    protected function contentManagerForField(Domain $domain, ResolveInfo $info) : ?ContentManagerInterface {
 
-        $contentType = $domain->getContentTypeManager()->getAnyType($content->getType());
-        $normalizedData = [];
+        // Actual return type of this field.
+        $actualType = $info->returnType;
 
-        foreach($contentType->getFields() as $id => $field) {
-
-            //dump($id);
-
-            $fieldData = $data[$id] ?? null;
-
-            if($field->isListOf()) {
-
-                $listData = [];
-                foreach(($fieldData ?? []) as $rowId => $rowData) {
-                    $listData[$rowId] = $this->normalizeFieldData($field, $domain, $content, $rowData);
-                }
-                $normalizedData[$id] = new FieldDataList($listData);
-            }
-
-            else {
-                $normalizedData[$id] = $this->normalizeFieldData($field, $domain, $content, $fieldData);
-            }
+        if($actualType instanceof WrappingType) {
+            $actualType = $actualType->getWrappedType(true);
         }
 
-        return $normalizedData;
-    }
-
-    protected function normalizeFieldData(ContentTypeField $field, Domain $domain, ContentInterface $content, $rowData) {
-        if(!empty($field->getUnionTypes())) {
-
-            if(empty($rowData)) {
-                return null;
-            }
-
-            $unionType = $domain->getContentTypeManager()->getUnionContentType($field->getReturnType());
-            $selectedUnionType = array_keys($rowData)[0];
-            $rowData = $rowData[$selectedUnionType];
-            $field = $unionType->getField($selectedUnionType);
+        if(!$actualType instanceof ObjectType) {
+            return null;
         }
 
-        $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
-        return $fieldType->normalizeInputData($content, $field, $rowData);
+        /**
+         * @var InterfaceType $contentInterface
+         * @var InterfaceType $singleContentInterface
+         * @var InterfaceType $userInterface
+         */
+        $contentInterface = null;
+        $singleContentInterface = null;
+        $userInterface = null;
+
+        // Silently check which interfaces are available.
+        try { $contentInterface = $info->schema->getType('UniteContent'); } catch (Error $e) {}
+        try { $singleContentInterface = $info->schema->getType('UniteSingleContent'); } catch (Error $e) {}
+        try { $userInterface = $info->schema->getType('UniteUser'); } catch (Error $e) {}
+
+        if($contentInterface && $actualType->implementsInterface($contentInterface)) {
+            return $domain->getContentManager();
+        }
+
+        else if($singleContentInterface && $actualType->implementsInterface($singleContentInterface)) {
+            return $domain->getContentManager();
+        }
+
+        else if($userInterface && $actualType->implementsInterface($userInterface)) {
+            return $domain->getUserManager();
+        }
+
+        return null;
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\Content\ContentManagerInterface $contentManager
-     * @param \UniteCMS\CoreBundle\Domain\Domain $domain
-     * @param string $attribute
+     * @param ContentManagerInterface $contentManager
+     * @param Domain $domain
      * @param string $type
-     * @param string|null $id
+     * @param array $args
+     * @param $field
      *
-     * @return \UniteCMS\CoreBundle\Content\ContentInterface
+     * @return ContentInterface
      */
-    protected function getOrCreate(ContentManagerInterface $contentManager, Domain $domain, string $attribute, string $type, string $id = null) : ContentInterface {
-        $content = empty($id) ?
+    protected function getContent(ContentManagerInterface $contentManager, Domain $domain, string $type, array $args, $field) : ContentInterface {
+
+        // Should we also include deleted content?
+        $includeDeleted = in_array($field, ['recover', 'delete']);
+
+
+        // Get or create content.
+        $content = empty($args['id']) ?
             $contentManager->create($domain, $type) :
-            $contentManager->get($domain, $type, $id);
+            $contentManager->get($domain, $type, $args['id'], $includeDeleted);
 
         if(empty($content)) {
             throw new InvalidArgumentException('Content was not found.');
-        }
-
-        if(!$this->authorizationChecker->isGranted($attribute, $content)) {
-            throw new AccessDeniedException(sprintf('You are not allowed to %s content of type %s.', $attribute, $type));
         }
 
         return $content;
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\Content\ContentInterface $content
-     * @return \UniteCMS\CoreBundle\Content\ContentInterface
+     * @param ContentInterface $content
+     * @param string $attribute
+     *
+     * @return ContentInterface
      */
-    protected function validate(ContentInterface $content) : ContentInterface {
-        
-        $violations = $this->validator->validate($content);
+    protected function contentAccess(string $attribute, ContentInterface $content) : ContentInterface {
 
-        if(count($violations) > 0) {
+        if(!$this->authorizationChecker->isGranted($attribute, $content)) {
+            throw new AccessDeniedException(sprintf('You are not allowed to %s content of type %s.', $attribute, $content->getType()));
+        }
+
+        return $content;
+    }
+
+    /**
+     * @param ContentManagerInterface $contentManager
+     * @param Domain $domain
+     * @param ContentInterface $content
+     * @param $data
+     *
+     * @return ContentInterface
+     */
+    protected function contentUpdate(ContentManagerInterface $contentManager, Domain $domain, ContentInterface $content, $data) : ContentInterface {
+        $contentManager->update($domain, $content, $this->fieldDataMapper->mapToFieldData($domain, $content, $data));
+        return $content;
+    }
+
+    /**
+     * @param ContentManagerInterface $contentManager
+     * @param Domain $domain
+     * @param ContentInterface $content
+     * @param string $eventName
+     * @param bool $persist
+     *
+     * @return ContentInterface
+     */
+    protected function contentPersist(ContentManagerInterface $contentManager, Domain $domain, ContentInterface $content, string $eventName, bool $persist = false) : ContentInterface {
+
+        // Validate content for given event.
+        if(count($violations = $this->validator->validate($content, null, [$eventName])) > 0) {
             throw new ConstraintViolationsException($violations);
         }
-        
+
+        // Persist content.
+        if($persist) {
+            $contentManager->persist($domain, $content, $eventName);
+            $this->eventDispatcher->dispatch(new ContentEvent($content), $eventName);
+        }
+
         return $content;
     }
 }

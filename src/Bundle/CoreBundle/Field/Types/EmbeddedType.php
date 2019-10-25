@@ -9,10 +9,10 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedFieldData;
 use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class EmbeddedType extends AbstractFieldType
 {
@@ -24,19 +24,19 @@ class EmbeddedType extends AbstractFieldType
     protected $domainManager;
 
     /**
-     * @var FieldTypeManager $fieldTypeManager
+     * @var FieldDataMapper $fieldDataMapper
      */
-    protected $fieldTypeManager;
+    protected $fieldDataMapper;
 
     /**
      * @var LoggerInterface $uniteCMSDomainLogger
      */
     protected $domainLogger;
 
-    public function __construct(DomainManager $domainManager, FieldTypeManager $fieldTypeManager, LoggerInterface $uniteCMSDomainLogger)
+    public function __construct(DomainManager $domainManager, FieldDataMapper $fieldDataMapper, LoggerInterface $uniteCMSDomainLogger)
     {
         $this->domainManager = $domainManager;
-        $this->fieldTypeManager = $fieldTypeManager;
+        $this->fieldDataMapper = $fieldDataMapper;
         $this->domainLogger = $uniteCMSDomainLogger;
     }
 
@@ -78,22 +78,18 @@ class EmbeddedType extends AbstractFieldType
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
 
         $domain = $this->domainManager->current();
-        $inputData = $inputData ?? [];
 
+        // If this is not a known embedded type.
         if(!$contentType = $domain->getContentTypeManager()->getEmbeddedContentType($field->getReturnType())) {
             $this->domainLogger->warning(sprintf('Unknown embedded content type "%s" was used as return type of field "%s".', $field->getReturnType(), $field->getId()));
             return null;
         }
 
-        // TODO: Duplicate with MutationResolver
-        $normalizedData = [];
-
-        foreach($inputData as $id => $embeddedFieldData) {
-            $field = $contentType->getField($id);
-            $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
-            $normalizedData[$id] = $fieldType->normalizeInputData($content, $field, $embeddedFieldData);
-        }
-
-        return new EmbeddedFieldData(uniqid(), $contentType->getId(), $normalizedData);
+        // Create new embedded content with input data.
+        return new EmbeddedFieldData(
+            uniqid(),
+            $contentType->getId(),
+            $this->fieldDataMapper->mapToFieldData($domain, $content, $inputData, $contentType)
+        );
     }
 }
