@@ -8,7 +8,6 @@ use GraphQL\Error\Error;
 use GraphQL\Error\SyntaxError;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Utils\BuildSchema;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use UniteCMS\CoreBundle\Domain\Domain;

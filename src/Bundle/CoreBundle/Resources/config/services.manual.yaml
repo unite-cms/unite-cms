@@ -17,3 +17,7 @@ services:
         arguments: [null, '@UniteCMS\CoreBundle\Expression\ExpressionLanguage']
         tags:
             - { name: 'validator.constraint_validator', alias: 'validator.expression' }
+
+    # Override the core security expression language.
+    security.expression_language:
+        class: UniteCMS\CoreBundle\Expression\AuthorizationExpressionLanguage

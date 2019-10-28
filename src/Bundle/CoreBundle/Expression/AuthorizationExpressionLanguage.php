@@ -4,13 +4,13 @@
 namespace UniteCMS\CoreBundle\Expression;
 
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage as BaseExpressionLanguage;
+use Symfony\Component\Security\Core\Authorization\ExpressionLanguage as BaseExpressionLanguage;
 
 /**
  * This expression language doesn't provide any functions that would expose
  * sensitive information to the user.
  */
-class ExpressionLanguage extends BaseExpressionLanguage
+class AuthorizationExpressionLanguage extends BaseExpressionLanguage
 {
     public function __construct(CacheItemPoolInterface $cache = null, $providers = array())
     {
