@@ -3,11 +3,23 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
+use GraphQL\Language\AST\ListValueNode;
+use GraphQL\Language\AST\ValueNode;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class Util
 {
+    static function getNodeValue(ValueNode $node) {
+        if($node instanceof ListValueNode) {
+            $values = [];
+            foreach($node->values as $listItem) {
+                $values[] = static::getNodeValue($listItem);
+            }
+            return $values;
+        }
+        return $node->value;
+    }
 
     /**
      * Get all directives of a AST node.
@@ -26,7 +38,7 @@ class Util
         foreach($node->directives as $directive) {
             $args = [];
             foreach($directive->arguments as $argument) {
-                $args[$argument->name->value] = $argument->value->value;
+                $args[$argument->name->value] = static::getNodeValue($argument->value);
             }
             $directives[] = [
                 'name' => $directive->name->value,
@@ -66,7 +78,7 @@ class Util
                     ];
 
                     foreach($directive->arguments as $argument) {
-                        $args['settings'][$argument->name->value] = $argument->value->value;
+                        $args['settings'][$argument->name->value] = static::getNodeValue($argument->value);
                     }
 
                     return $args;

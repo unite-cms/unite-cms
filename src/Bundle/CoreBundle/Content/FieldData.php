@@ -7,6 +7,15 @@ class FieldData
     protected $data;
 
     /**
+     * FieldData constructor.
+     * @param mixed $data
+     */
+    public function __construct($data = null)
+    {
+        $this->data = $data;
+    }
+
+    /**
      * @return string
      */
     public function __toString(): string
@@ -15,12 +24,11 @@ class FieldData
     }
 
     /**
-     * FieldData constructor.
-     * @param mixed $data
+     * @return bool
      */
-    public function __construct($data = null)
+    public function empty(): bool
     {
-        $this->data = $data;
+        return empty($this->data);
     }
 
     /**

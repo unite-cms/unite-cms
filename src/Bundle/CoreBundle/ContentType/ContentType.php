@@ -87,12 +87,15 @@ class ContentType
                 if(!empty($directive['args']['message'])) {
                     $options['message'] = $directive['args']['message'];
                 }
+                if(!empty($directive['args']['groups'])) {
+                    $options['groups'] = $directive['args']['groups'];
+                }
                 $contentType->addConstraint(new Assert\Expression($options));
             }
 
             // Special handle webhook directive.
             if($directive['name'] === 'webhook') {
-                $contentType->addWebhook(new ContentTypeWebhook($directive['args']['if'], $directive['args']['url']));
+                $contentType->addWebhook(new ContentTypeWebhook($directive['args']['if'], $directive['args']['url'], $directive['args']['groups']));
             }
         }
 

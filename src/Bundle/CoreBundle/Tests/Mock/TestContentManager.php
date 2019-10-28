@@ -93,7 +93,7 @@ class TestContentManager implements ContentManagerInterface
         }
 
         $this->versionedData[$content->getId()] = $this->versionedData[$content->getId()] ?? [];
-        array_unshift($this->versionedData[$content->getId()], $content->getData());
+        $this->versionedData[$content->getId()][] = $content->getData();
     }
 
     /**

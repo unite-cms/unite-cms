@@ -8,6 +8,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Expression\ExpressionLanguage;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 
 class UniteCMSCoreExtension extends Extension

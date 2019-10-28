@@ -8,6 +8,7 @@ use GraphQL\Error\Error;
 use GraphQL\Error\SyntaxError;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Utils\BuildSchema;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use UniteCMS\CoreBundle\Domain\Domain;
@@ -24,6 +25,10 @@ class SchemaAwareTestCase extends KernelTestCase
     /**
      * @param string $schema
      * @param bool $catch
+     *
+     * @return \GraphQL\Language\AST\DocumentNode
+     * @throws \GraphQL\Error\Error
+     * @throws \GraphQL\Error\SyntaxError
      */
     protected function buildSchema(string $schema = '', bool $catch = false) : DocumentNode {
 
@@ -75,7 +80,9 @@ class SchemaAwareTestCase extends KernelTestCase
                     }
                 }
             }
-            $result[$key] = $this->modifyArray($expected[$key], $value, $subs);
+            if(!empty($expected[$key])) {
+                $result[$key] = $this->modifyArray($expected[$key], $value, $subs);
+            }
         }
 
         return $result;
@@ -119,6 +126,15 @@ class SchemaAwareTestCase extends KernelTestCase
                 $this->fail('GraphQL result does not contain errors.');
                 return [];
             }
+
+            $result['errors'] = array_map(function($error){
+                return [
+                    'message' => $error['message'],
+                    'path' => $error['path'] ?? null,
+                    'extensions' => $error['extensions'],
+                ];
+            }, $result['errors']);
+
             $this->assertEquals($expected, $this->modifyArray($expected, $result['errors'], $subs));
         }
 

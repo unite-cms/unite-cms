@@ -7,6 +7,19 @@ scalar DateTime
 scalar Locale
 scalar NULL
 
+enum CONTENT_EVENT {
+    CREATE
+    UPDATE
+    DELETE
+    RECOVER
+    REVERT
+}
+
+enum SORT {
+    ASC
+    DESC
+}
+
 directive @hide(
     if: Expression!
 ) on FIELD_DEFINITION | OBJECT
@@ -26,11 +39,13 @@ directive @access(
 directive @valid(
     if: Expression!
     message: String
+    groups: [CONTENT_EVENT!]
 ) on FIELD_DEFINITION | OBJECT
 
 directive @webhook(
     if: Expression!
     url: String!
+    groups: [CONTENT_EVENT!]
 ) on OBJECT
 
 type UniteContentMeta {
@@ -61,11 +76,6 @@ interface UniteEmbeddedContent {
 interface UniteContentResult {
     total: Int!
     result: [UniteContent!]
-}
-
-enum SORT {
-    ASC
-    DESC
 }
 
 input UniteFilterInput {

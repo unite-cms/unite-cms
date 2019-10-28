@@ -8,11 +8,11 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 
 class ContentEvent extends Event
 {
-    const CREATE = 'create';
-    const UPDATE = 'update';
-    const REVERT = 'revert';
-    const DELETE = 'delete';
-    const RECOVER = 'recover';
+    const CREATE = 'CREATE';
+    const UPDATE = 'UPDATE';
+    const REVERT = 'REVERT';
+    const DELETE = 'DELETE';
+    const RECOVER = 'RECOVER';
 
     protected $content;
 

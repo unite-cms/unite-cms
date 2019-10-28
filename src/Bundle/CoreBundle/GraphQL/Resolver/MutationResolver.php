@@ -252,8 +252,15 @@ class MutationResolver implements FieldResolverInterface
      */
     protected function contentPersist(ContentManagerInterface $contentManager, Domain $domain, ContentInterface $content, string $eventName, bool $persist = false) : ContentInterface {
 
-        // Validate content for given event.
-        if(count($violations = $this->validator->validate($content, null, [$eventName])) > 0) {
+
+        // Validate content for default group.
+        $violations = $this->validator->validate($content);
+
+        // Validate content for given event group.
+        $violations->addAll($this->validator->validate($content, null, [$eventName]));
+
+        // Throw exception, if there where constraint violations.
+        if(count($violations) > 0) {
             throw new ConstraintViolationsException($violations);
         }
 

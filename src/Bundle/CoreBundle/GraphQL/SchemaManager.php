@@ -3,6 +3,8 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
+use GraphQL\Error\Error;
+use GraphQL\Error\FormattedError;
 use GraphQL\Language\AST\InterfaceTypeDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
@@ -305,7 +307,8 @@ class SchemaManager
      */
     public function execute(string $query, array $args = [], $context = null) : ExecutionResult {
         $schema = $this->buildExecutableSchema();
-        return GraphQL::executeQuery($schema, $query, null, $context, $args);
+        return GraphQL::executeQuery($schema, $query, null, $context, $args)
+            ->setErrorFormatter([ErrorFormatter::class, 'createFromException']);
     }
 
     /**

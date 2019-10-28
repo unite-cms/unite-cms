@@ -3,7 +3,6 @@
 
 namespace UniteCMS\CoreBundle\Validator\Constraints;
 
-
 use Symfony\Component\Validator\Constraint;
 
 /**

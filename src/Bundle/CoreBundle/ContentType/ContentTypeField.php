@@ -178,6 +178,9 @@ class ContentTypeField
                     if(!empty($directive['args']['message'])) {
                         $options['message'] = $directive['args']['message'];
                     }
+                    if(!empty($directive['args']['groups'])) {
+                        $options['groups'] = $directive['args']['groups'];
+                    }
                     $field->addConstraint(new Assert\Expression($options));
                 }
             }

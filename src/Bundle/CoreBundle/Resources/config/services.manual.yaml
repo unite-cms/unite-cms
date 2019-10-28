@@ -10,3 +10,10 @@ services:
     unite.cms_core.monolog.domain_stream_handler:
         class: UniteCMS\CoreBundle\Monolog\DomainStreamHandler
         arguments: ['%kernel.logs_dir%/unite/{domain}.log', '@UniteCMS\CoreBundle\Domain\DomainManager']
+
+    # Override the core validator expression language
+    validator.expression:
+        class: Symfony\Component\Validator\Constraints\ExpressionValidator
+        arguments: [null, '@UniteCMS\CoreBundle\Expression\ExpressionLanguage']
+        tags:
+            - { name: 'validator.constraint_validator', alias: 'validator.expression' }
