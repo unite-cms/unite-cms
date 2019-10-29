@@ -14,9 +14,15 @@ class TestContentResult implements ContentResultInterface
      */
     protected $content;
 
-    public function __construct(array $content = [])
+    /**
+     * @var null|callable $resultFilter
+     */
+    protected $resultFilter;
+
+    public function __construct(array $content = [], ?callable $resultFilter = null)
     {
         $this->content = $content;
+        $this->resultFilter = $resultFilter;
     }
 
     /**
@@ -32,6 +38,6 @@ class TestContentResult implements ContentResultInterface
      */
     public function getResult(): array
     {
-        return $this->content;
+        return $this->resultFilter ? array_filter($this->content, $this->resultFilter) : $this->content;
     }
 }

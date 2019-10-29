@@ -11,7 +11,6 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\WrappingType;
 use InvalidArgumentException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -21,6 +20,7 @@ use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
+use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class MutationResolver implements FieldResolverInterface
@@ -126,7 +126,7 @@ class MutationResolver implements FieldResolverInterface
                 return $this->contentPersist($contentManager, $domain, $content, ContentEvent::DELETE, $args['persist']);
 
             case 'recover':
-                $this->contentAccess(ContentVoter::DELETE, $content);
+                $this->contentAccess(ContentVoter::UPDATE, $content);
                 $contentManager->recover($domain, $content);
                 $this->contentPersist($contentManager, $domain, $content, ContentEvent::RECOVER, $args['persist']);
 
@@ -222,7 +222,7 @@ class MutationResolver implements FieldResolverInterface
     protected function contentAccess(string $attribute, ContentInterface $content) : ContentInterface {
 
         if(!$this->authorizationChecker->isGranted($attribute, $content)) {
-            throw new AccessDeniedException(sprintf('You are not allowed to %s content of type %s.', $attribute, $content->getType()));
+            throw new ContentAccessDeniedException(sprintf('You are not allowed to %s content of type "%s".', $attribute, $content->getType()));
         }
 
         return $content;

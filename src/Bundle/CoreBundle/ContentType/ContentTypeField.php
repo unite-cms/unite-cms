@@ -76,6 +76,11 @@ class ContentTypeField
 
     /**
      * @var array
+     * @Assert\Collection(fields={
+     *   ContentFieldVoter::MUTATION = @Assert\NotBlank(),
+     *   ContentFieldVoter::READ = @Assert\NotBlank(),
+     *   ContentFieldVoter::UPDATE = @Assert\NotBlank()
+     * })
      */
     protected $permissions;
 
@@ -87,8 +92,9 @@ class ContentTypeField
     public function __construct(string $id, string $type, array $settings = [], $nonNull = false, $listOf = false, $enumValues = null, $unionTypes = null, $returnType = Type::STRING)
     {
         $this->permissions = [
+            ContentFieldVoter::MUTATION => 'true',
             ContentFieldVoter::READ => 'true',
-            ContentFieldVoter::UPDATE => 'is_granted("ROLE_ADMIN")',
+            ContentFieldVoter::UPDATE => 'true',
         ];
         $this->id = $id;
         $this->type = $type;

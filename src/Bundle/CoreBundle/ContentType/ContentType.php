@@ -3,9 +3,11 @@
 
 namespace UniteCMS\CoreBundle\ContentType;
 
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraint;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
+use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use GraphQL\Type\Definition\ObjectType;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -46,6 +48,14 @@ class ContentType
 
     /**
      * @var array
+     * @Assert\Collection(fields={
+     *   ContentVoter::QUERY = @Assert\NotBlank(),
+     *   ContentVoter::MUTATION = @Assert\NotBlank(),
+     *   ContentVoter::CREATE = @Assert\NotBlank(),
+     *   ContentVoter::READ = @Assert\NotBlank(),
+     *   ContentVoter::UPDATE = @Assert\NotBlank(),
+     *   ContentVoter::DELETE = @Assert\NotBlank()
+     * })
      */
     protected $permissions = [];
 
@@ -120,13 +130,17 @@ class ContentType
 
     /**
      * @param FieldTypeManager $fieldTypeManager
+     * @param AuthorizationCheckerInterface $checker
+     *
      * @return string
      */
-    public function printInputType(FieldTypeManager $fieldTypeManager) : string {
+    public function printInputType(FieldTypeManager $fieldTypeManager, AuthorizationCheckerInterface $checker) : string {
         $inputFields = '';
 
         foreach($this->getFields() as $field) {
-            $inputFields .= $field->printInputType($fieldTypeManager) . "\n";
+            if($checker->isGranted(ContentFieldVoter::MUTATION, $field)) {
+                $inputFields .= $field->printInputType($fieldTypeManager)."\n";
+            }
         }
 
         return $inputFields ? sprintf('input %sInput { %s }', $this->getId(), $inputFields) : '';

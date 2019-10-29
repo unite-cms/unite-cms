@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
+use UniteCMS\CoreBundle\Content\ContentField;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
@@ -14,6 +15,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 use UniteCMS\CoreBundle\ContentType\UserType;
+use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
 
 class ContentResolver implements FieldResolverInterface
 {
@@ -104,6 +106,11 @@ class ContentResolver implements FieldResolverInterface
 
                         // If field is not manage by unite cms.
                         if(!$field = $contentType->getField($info->fieldName)) {
+                            return null;
+                        }
+
+                        // If we don't have read access for this field.
+                        if(!$this->authorizationChecker->isGranted(ContentFieldVoter::READ, new ContentField($value, $info->fieldName))) {
                             return null;
                         }
 

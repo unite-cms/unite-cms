@@ -59,9 +59,11 @@ class ContentVoter extends Voter
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token) {
 
         $type = null;
+        $data = null;
 
         if($subject instanceof ContentInterface) {
             $type = $subject->getType();
+            $data = $subject;
         }
 
         else if ($subject instanceof ContentType) {
@@ -80,7 +82,7 @@ class ContentVoter extends Voter
 
         return $this->authorizationChecker->isGranted(
             $contentType->getPermission($attribute),
-            $subject
+            $data
         );
     }
 }

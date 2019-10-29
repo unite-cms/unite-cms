@@ -8,7 +8,6 @@ use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
-use UniteCMS\CoreBundle\Content\ContentRevisionInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\InvalidContentVersionException;
@@ -24,9 +23,11 @@ class TestContentManager implements ContentManagerInterface
             return null;
         }
 
+
+
         return new TestContentResult(array_slice(array_filter($this->repository[$type], function(TestContent $content) use ($includeDeleted) {
             return $includeDeleted || empty($content->getDeleted());
-        }), $offset, $limit));
+        }), $offset, $limit), $resultFilter);
     }
 
     public function get(Domain $domain, string $type, string $id, bool $includeDeleted = false): ?ContentInterface {

@@ -49,7 +49,7 @@ class ContentTypeExtender implements SchemaExtenderInterface
             if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
 
                 if($this->authorizationChecker->isGranted(ContentVoter::MUTATION, $type)) {
-                    $extension .= $type->printInputType($this->fieldTypeManager);
+                    $extension .= $type->printInputType($this->fieldTypeManager, $this->authorizationChecker);
                 }
 
                 if($this->authorizationChecker->isGranted(ContentVoter::QUERY, $type)) {
@@ -61,13 +61,13 @@ class ContentTypeExtender implements SchemaExtenderInterface
         // Generate input types for all embedded content types.
         foreach(($contentTypeManager->getSingleContentTypes() + $contentTypeManager->getEmbeddedContentTypes()) as $type) {
             if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
-                $extension .= $type->printInputType($this->fieldTypeManager);
+                $extension .= $type->printInputType($this->fieldTypeManager, $this->authorizationChecker);
             }
         }
 
         // Generate input types for all union content types.
         foreach($contentTypeManager->getUnionContentTypes() as $type) {
-            $extension .= $type->printInputType($this->fieldTypeManager);
+            $extension .= $type->printInputType($this->fieldTypeManager, $this->authorizationChecker);
         }
 
         return $extension;

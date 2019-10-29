@@ -4,18 +4,30 @@
 namespace UniteCMS\CoreBundle\Content;
 
 use InvalidArgumentException;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
 
 class FieldDataMapper
 {
+
+    /**
+     * @var FieldTypeManager
+     */
     protected $fieldTypeManager;
 
-    public function __construct(FieldTypeManager $fieldTypeManager)
+    /**
+     * @var AuthorizationCheckerInterface
+     */
+    protected $authorizationChecker;
+
+    public function __construct(FieldTypeManager $fieldTypeManager, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->fieldTypeManager = $fieldTypeManager;
+        $this->authorizationChecker = $authorizationChecker;
     }
 
     /**
@@ -31,7 +43,7 @@ class FieldDataMapper
     public function mapToFieldData(Domain $domain, ContentInterface $content, $inputData, ContentType $contentType = null) : array {
 
         $inputData = empty($inputData) || !is_array($inputData) ? [] : $inputData;
-        $normalizedData = [];
+        $normalizedData = $content->getData();
 
         if(empty($contentType)) {
             $contentType = $domain->getContentTypeManager()->getAnyType($content->getType());;
@@ -44,7 +56,20 @@ class FieldDataMapper
         // Ask all defined fields on this content type for field data based on inputData.
         foreach($contentType->getFields() as $id => $field) {
 
-            $fieldData = $inputData[$id] ?? null;
+            // Use present field data or null as input
+            $fieldData = null;
+
+            // If we are allowed to update this field AND it is present, map it!
+            if($this->authorizationChecker->isGranted(ContentFieldVoter::UPDATE, new ContentField($content, $id))) {
+                if(!empty($inputData[$id])) {
+                    $fieldData = $inputData[$id];
+                }
+            }
+
+            // If field data is empty AND we already have a value set, skip this field.
+            if(empty($fieldData) && !empty($normalizedData[$id]) && !empty($normalizedData[$id]->resolveData())) {
+                continue;
+            }
 
             if($field->isListOf()) {
 

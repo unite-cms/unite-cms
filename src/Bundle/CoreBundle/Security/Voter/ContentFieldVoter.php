@@ -3,7 +3,8 @@
 
 namespace UniteCMS\CoreBundle\Security\Voter;
 
-use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\Content\ContentField;
+use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -11,10 +12,12 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class ContentFieldVoter extends Voter
 {
+    const MUTATION = 'mutation';
     const READ = 'read';
     const UPDATE = 'update';
 
     const PERMISSIONS = [
+        self::MUTATION,
         self::READ,
         self::UPDATE,
     ];
@@ -40,7 +43,8 @@ class ContentFieldVoter extends Voter
      */
     protected function supports($attribute, $subject)
     {
-        return in_array($attribute, self::PERMISSIONS) && $subject instanceof FieldData;
+        return in_array($attribute, self::PERMISSIONS)
+            && ($subject instanceof ContentField || $subject instanceof ContentTypeField);
     }
 
     /**
@@ -48,23 +52,23 @@ class ContentFieldVoter extends Voter
      */
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token) {
 
-        if(!$subject instanceof FieldData) {
+        $fieldType = null;
+        $fieldData = null;
+
+        if($subject instanceof ContentField) {
+            $contentType = $this->domainManager->current()->getContentTypeManager()->getContentType($subject->getContent()->getType());
+            $fieldType = $contentType->getField($subject->getFieldId());
+            $fieldData = $subject->getContent();
+        }
+
+        else if ($subject instanceof ContentTypeField) {
+            $fieldType = $subject;
+        }
+
+        if(empty($fieldType)) {
             return self::ACCESS_ABSTAIN;
         }
 
-        $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
-
-        if(!$contentType = $contentTypeManager->getContentType($subject->getContentType())) {
-            return self::ACCESS_ABSTAIN;
-        }
-
-        if(!$contentTypeField = $contentType->getField($subject->getId())) {
-            return self::ACCESS_ABSTAIN;
-        }
-
-        return $this->authorizationChecker->isGranted(
-            $contentTypeField->getPermission($attribute),
-            $subject
-        );
+        return $this->authorizationChecker->isGranted($fieldType->getPermission($attribute), $fieldData);
     }
 }
