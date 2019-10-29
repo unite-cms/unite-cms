@@ -91,7 +91,7 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
      * @return mixed
      */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
-        return (string)$fieldData;
+        return $fieldData->resolveData('', $field->isNonNull() ? '' : null);
     }
 
     /**
@@ -104,5 +104,12 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     /**
      * {@inheritDoc}
      */
-    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void {}
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
+        if($field->isNonNull() && (empty($fieldData) || empty($fieldData->resolveData()))) {
+            $context
+                ->buildViolation('This value should not be null.')
+                ->atPath('['.$field->getId().']')
+                ->addViolation();
+        }
+    }
 }

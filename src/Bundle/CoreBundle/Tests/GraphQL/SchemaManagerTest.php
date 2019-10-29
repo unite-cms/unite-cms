@@ -179,10 +179,18 @@ class SchemaManagerTest extends SchemaAwareTestCase
             ],
         ], $delete, ['id' => $id, 'persist' => true]);
 
-        // Recover will not change anything here.
+        // Recover will produce content not found error.
         $this->assertGraphQL([
-            'recoverArticle' => null
-        ], $recover, ['id' => $id, 'persist' => true]);
+            [
+                'message' => sprintf('Content with id "%s" was not found.', $id),
+                'path' => [
+                    'recoverArticle'
+                ],
+                'extensions' => [
+                    'category' => 'content',
+                ],
+            ]
+        ], $recover, ['id' => $id, 'persist' => true], false);
 
     }
 }

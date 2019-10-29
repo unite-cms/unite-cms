@@ -21,6 +21,7 @@ use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
+use UniteCMS\CoreBundle\Exception\ContentNotFoundException;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class MutationResolver implements FieldResolverInterface
@@ -194,6 +195,7 @@ class MutationResolver implements FieldResolverInterface
      * @param $field
      *
      * @return ContentInterface
+     * @throws \UniteCMS\CoreBundle\Exception\ContentNotFoundException
      */
     protected function getContent(ContentManagerInterface $contentManager, Domain $domain, string $type, array $args, $field) : ContentInterface {
 
@@ -207,7 +209,11 @@ class MutationResolver implements FieldResolverInterface
             $contentManager->get($domain, $type, $args['id'], $includeDeleted);
 
         if(empty($content)) {
-            throw new InvalidArgumentException('Content was not found.');
+            throw new ContentNotFoundException(
+                empty($args['id']) ?
+                    'Content was not found.' :
+                    sprintf('Content with id "%s" was not found.', $args['id'])
+            );
         }
 
         return $content;

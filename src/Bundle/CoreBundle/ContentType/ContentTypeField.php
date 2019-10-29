@@ -221,10 +221,6 @@ class ContentTypeField
             $inputType = sprintf('[%s!]', $inputType);
         }
 
-        if($this->isNonNull()) {
-            $inputType .= '!';
-        }
-
         return sprintf('%s: %s', $this->getId(), $inputType);
     }
 

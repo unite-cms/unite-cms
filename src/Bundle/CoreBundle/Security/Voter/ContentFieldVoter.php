@@ -56,7 +56,12 @@ class ContentFieldVoter extends Voter
         $fieldData = null;
 
         if($subject instanceof ContentField) {
-            $contentType = $this->domainManager->current()->getContentTypeManager()->getContentType($subject->getContent()->getType());
+            $contentType = $this->domainManager->current()->getContentTypeManager()->getAnyType($subject->getContent()->getType());
+
+            if(!$contentType) {
+                return self::ACCESS_ABSTAIN;
+            }
+
             $fieldType = $contentType->getField($subject->getFieldId());
             $fieldData = $subject->getContent();
         }

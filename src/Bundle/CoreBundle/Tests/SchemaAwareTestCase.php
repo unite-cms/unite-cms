@@ -118,6 +118,12 @@ class SchemaAwareTestCase extends KernelTestCase
                 $this->fail(sprintf('GraphQL result does not contain data, but the following errors: %s', json_encode($result['errors'])));
                 return [];
             }
+
+            if(!empty($result['errors'])) {
+                $this->fail(sprintf('GraphQL result contain the following errors: %s', json_encode($result['errors'])));
+                return [];
+            }
+
             $this->assertEquals($expected, $this->modifyArray($expected, $result['data'], $subs));
         } else {
 

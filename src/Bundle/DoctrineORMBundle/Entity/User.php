@@ -90,7 +90,7 @@ class User implements UserInterface
             $this->sensitiveData = [];
         }
 
-        return ($this->data + $this->sensitiveData);
+        return ($this->data + $this->sensitiveData + ['username' => new FieldData($this->getUsername())]);
     }
 
     /**
@@ -122,12 +122,13 @@ class User implements UserInterface
 
     /**
      * @param string $fieldName
-     *
-     * @return \UniteCMS\CoreBundle\Content\FieldData|null
+     * @return FieldData|null
      */
     public function getFieldData(string $fieldName): ?FieldData
     {
-        return isset($this->getData()[$fieldName]) ? $this->getData()[$fieldName] : null;
+        return $fieldName === 'username' ?
+            new FieldData($this->getUsername()) :
+            isset($this->getData()[$fieldName]) ? $this->getData()[$fieldName] : null;
     }
 
     public function getUsername() : string {
