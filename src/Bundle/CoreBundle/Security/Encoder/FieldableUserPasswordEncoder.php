@@ -21,11 +21,10 @@ class FieldableUserPasswordEncoder implements UserPasswordEncoderInterface
     /**
      * {@inheritdoc}
      */
-    public function encodePassword(UserInterface $user, $plainPassword)
+    public function encodePassword(UserInterface $user, $plainPassword, string $salt = '')
     {
         $encoder = $this->encoderFactory->getEncoder($user);
-
-        return $encoder->encodePassword($plainPassword, $user->getSalt());
+        return $encoder->encodePassword($plainPassword, $salt);
     }
 
     /**
@@ -42,6 +41,6 @@ class FieldableUserPasswordEncoder implements UserPasswordEncoderInterface
     public function isFieldPasswordValid(ContentInterface $user, string $fieldName, $raw, string $salt = '')
     {
         $encoder = $this->encoderFactory->getEncoder($user);
-        return $encoder->isPasswordValid($user->getFieldData($fieldName), $raw, $salt);
+        return $encoder->isPasswordValid($user->getFieldData($fieldName)->resolveData(), $raw, $salt);
     }
 }

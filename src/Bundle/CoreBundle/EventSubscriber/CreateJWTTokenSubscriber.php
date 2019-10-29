@@ -30,9 +30,11 @@ class CreateJWTTokenSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $event->setData([
-            'username' => $user->getUsername(),
-            'type' => $user->getType()
-        ]);
+        $data = $event->getData();
+        unset($data['roles']);
+        $data['username'] = $user->getUsername();
+        $data['type'] = $user->getType();
+
+        $event->setData($data);
     }
 }
