@@ -77,14 +77,13 @@ type Admin implements UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
 type CommunityUser
     implements UniteUser
     @passwordAuthenticator(passwordField: "password")
-    @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true")
-    @valid(if: "this.getFieldData('firstname') == 'foo'") {
+    @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
     _meta: UniteContentMeta!
     id: ID
     username: String!                  @textField
-    password: NULL!                    @passwordField(min_length: 4)
+    password: NULL!                    @passwordField
 
-    firstname: String                  @textField @valid(if: "value == 'foo'", message: "Wrong!!")
+    firstname: String                  @textField
     lastname: String                   @textField
 }
 

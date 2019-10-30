@@ -19,6 +19,7 @@ security:
             methods: ['POST']
             stateless: true
             anonymous: true
+            user_checker: UniteCMS\CoreBundle\Security\User\UserChecker
             guard:
                 authenticators:
                     - UniteCMS\CoreBundle\Security\Authenticator\JWTTokenAuthenticator

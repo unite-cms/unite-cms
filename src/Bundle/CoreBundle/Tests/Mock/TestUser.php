@@ -3,26 +3,12 @@
 
 namespace UniteCMS\CoreBundle\Tests\Mock;
 
-use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class TestUser extends TestContent implements UserInterface
 {
-    protected $username;
-
-    /**
-     * Creates a new instance from a given JWT payload.
-     *
-     * @param string $username
-     * @param array $payload
-     *
-     * @return JWTUserInterface
-     */
-    public static function createFromPayload($username, array $payload)
-    {
-        return new self($payload['type']);
-    }
+    public $username;
 
     /**
      * {@inheritDoc}

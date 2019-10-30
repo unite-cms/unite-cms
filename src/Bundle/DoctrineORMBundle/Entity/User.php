@@ -161,15 +161,6 @@ class User implements UserInterface
     }
 
     /**
-     * @param string $password
-     * @return $this
-     */
-    public function setPassword(string $password) : self {
-        $this->password = $password;
-        return $this;
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function getPassword()
@@ -188,16 +179,5 @@ class User implements UserInterface
     /**
      * {@inheritDoc}
      */
-    public function eraseCredentials()
-    {
-        // TODO: Implement eraseCredentials() method.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public static function createFromPayload($username, array $payload)
-    {
-        // TODO: Implement eraseCredentials() method.
-    }
+    public function eraseCredentials() {}
 }
