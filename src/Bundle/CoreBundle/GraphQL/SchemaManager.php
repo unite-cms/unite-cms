@@ -3,8 +3,6 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
-use GraphQL\Error\Error;
-use GraphQL\Error\FormattedError;
 use GraphQL\Language\AST\InterfaceTypeDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
@@ -257,7 +255,8 @@ class SchemaManager
                 } elseif(count($supportedResolvers) > 1) {
                     $typeConfig['resolveField'] = function($value, $args, $context, ResolveInfo $info) use ($supportedResolvers) {
                         foreach($supportedResolvers as $resolver) {
-                            if($result = $resolver->resolve($value, $args, $context, $info)) {
+                            $result = $resolver->resolve($value, $args, $context, $info);
+                            if($result !== null) {
                                 return $result;
                             }
                         }

@@ -9,6 +9,7 @@ use UniteCMS\CoreBundle\Security\User\UserInterface;
 class TestUser extends TestContent implements UserInterface
 {
     public $username;
+    public $resetToken;
 
     /**
      * {@inheritDoc}
@@ -83,5 +84,21 @@ class TestUser extends TestContent implements UserInterface
         return $fieldName === 'username' ?
             new FieldData($this->getUsername()) :
             parent::getFieldData($fieldName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPasswordResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setPasswordResetToken(?string $token = null): void
+    {
+        $this->resetToken = $token;
     }
 }

@@ -52,8 +52,18 @@ class PasswordType extends AbstractFieldType
             }
         }
 
+        return $this->normalizePassword($content, $inputData['password']);
+    }
+
+    /**
+     * @param ContentInterface $content
+     * @param string $password
+     *
+     * @return SensitiveFieldData
+     */
+    public function normalizePassword(ContentInterface $content, string $password) : SensitiveFieldData {
         return new SensitiveFieldData(
-            $this->passwordEncoder->encodePassword($content, $inputData['password'])
+            $this->passwordEncoder->encodePassword($content, $password)
         );
     }
 

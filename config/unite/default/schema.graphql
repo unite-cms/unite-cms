@@ -77,14 +77,23 @@ type Admin implements UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
 type CommunityUser
     implements UniteUser
     @passwordAuthenticator(passwordField: "password")
+    @emailPasswordReset(emailField: "email", passwordField: "password")
     @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
     _meta: UniteContentMeta!
     id: ID
     username: String!                  @textField
     password: NULL!                    @passwordField
+    email: String!                     @emailField
 
     firstname: String                  @textField
     lastname: String                   @textField
+}
+
+type Token implements UniteUser @passwordAuthenticator(passwordField: "secret") {
+    _meta: UniteContentMeta!
+    id: ID
+    username: String! @textField
+    secret: NULL! @passwordField
 }
 
 type GeneralSettings implements UniteSingleContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {

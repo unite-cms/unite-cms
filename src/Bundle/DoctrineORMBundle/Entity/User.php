@@ -59,6 +59,13 @@ class User implements UserInterface
     protected $deleted = null;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $passwordResetToken;
+
+    /**
      * Content constructor.
      *
      * @param string $type
@@ -180,4 +187,20 @@ class User implements UserInterface
      * {@inheritDoc}
      */
     public function eraseCredentials() {}
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPasswordResetToken(): ?string
+    {
+        return $this->passwordResetToken;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setPasswordResetToken(?string $token = null): void
+    {
+        $this->passwordResetToken = $token;
+    }
 }
