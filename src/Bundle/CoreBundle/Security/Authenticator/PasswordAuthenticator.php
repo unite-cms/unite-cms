@@ -7,7 +7,10 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Exception\AccountStatusException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\DisabledException;
+use Symfony\Component\Security\Core\Exception\LockedException;
 use Symfony\Component\Security\Core\Exception\ProviderNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -166,10 +169,25 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      * {@inheritDoc}
      */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {
-        return new JsonResponse([
-            'code' => 401,
-            'message' => 'Username not found',
-        ], 401);
+
+        $status = 401;
+        $message = 'Username not found';
+
+        if($exception instanceof AccountStatusException) {
+            $status = 403;
+            $message = 'Account is not allowed to login.';
+
+            if($exception instanceof DisabledException) {
+                $message = 'Account is disabled.';
+            }
+
+            if($exception instanceof LockedException) {
+                $status = 423;
+                $message = 'Account is locked.';
+            }
+        }
+
+        return new JsonResponse(['code' => $status, 'message' => $message], $status);
     }
 
     /**
