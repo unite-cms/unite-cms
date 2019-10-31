@@ -7,6 +7,12 @@ services:
         arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/unite-cms.graphql']
         tags: ['unite.graphql.schema_provider']
 
+    unite.cms_core.graphql.extender.email_password_reset:
+        parent: UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaFileExtender
+        arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/email-password-reset.graphql']
+        tags:
+            - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }
+
     unite.cms_core.monolog.domain_stream_handler:
         class: UniteCMS\CoreBundle\Monolog\DomainStreamHandler
         arguments: ['%kernel.logs_dir%/unite/{domain}.log', '@UniteCMS\CoreBundle\Domain\DomainManager']

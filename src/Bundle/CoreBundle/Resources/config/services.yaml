@@ -8,6 +8,7 @@ imports:
 
 parameters:
     unite_cms_core.debug: '%kernel.debug%'
+    unite_cms_core.default_mailer_from: '%env(MAILER_FROM)%'
 
 services:
     # default configuration for services in *this* file
@@ -18,6 +19,7 @@ services:
         bind:
             $uniteCMSDebug: '%unite_cms_core.debug%'
             $uniteCMSDomainLogger: '@monolog.logger.unite_domain'
+            $defaultMailerFrom: '%unite_cms_core.default_mailer_from%'
 
     _instanceof:
         UniteCMS\CoreBundle\Field\FieldTypeInterface:

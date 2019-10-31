@@ -77,7 +77,7 @@ type Admin implements UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
 type CommunityUser
     implements UniteUser
     @passwordAuthenticator(passwordField: "password")
-    @emailPasswordReset(emailField: "email", passwordField: "password")
+    @emailPasswordReset(emailField: "email", passwordField: "password", resetUrl: "https://unitecms.io/password-reset/{token}")
     @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
     _meta: UniteContentMeta!
     id: ID
