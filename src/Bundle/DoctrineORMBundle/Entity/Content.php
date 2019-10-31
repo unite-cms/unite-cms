@@ -30,7 +30,7 @@ class Content implements ContentInterface
      *
      * @ORM\Column(type="json_document", options={"jsonb": true})
      */
-    protected $data;
+    protected $data = [];
 
     /**
      * @var DateTime

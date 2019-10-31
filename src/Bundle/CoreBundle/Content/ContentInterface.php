@@ -8,7 +8,7 @@ use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 
 /**
- * @UniteAssert\ValidContent(groups={ "Default", ContentEvent::CREATE, ContentEvent::UPDATE, ContentEvent::DELETE, ContentEvent::REVERT, ContentEvent::RECOVER })
+ * @UniteAssert\ValidContent
  */
 interface ContentInterface
 {
