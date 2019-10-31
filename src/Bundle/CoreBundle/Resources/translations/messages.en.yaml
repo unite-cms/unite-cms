@@ -7,3 +7,11 @@ email:
         text_button: Reset your password
         text_after_button: If you did not request a password reset, please ignore this email.
         footer: This is a one-time email sent to you by unite cms.
+
+    account_activate:
+        subject: Account activation
+        headline: Thank you for your registration!
+        text_before_button: In order to confirm your registration please confirm your email address by clicking on the following link
+        text_button: Confirm registration
+        text_after_button: If you did not created an account recently, please ignore this email.
+        footer: This is a one-time email sent to you by unite cms.

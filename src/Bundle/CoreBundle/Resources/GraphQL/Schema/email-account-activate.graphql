@@ -1,0 +1,12 @@
+
+directive @emailAccountActivate(
+    activateUrl: String!
+    emailField: String!
+    stateField: String!
+    activeValue: String!
+) on OBJECT
+
+extend type UniteMutation {
+    emailAccountActivateRequest(type: String!, username: String!) : Boolean!
+    emailAccountActivateConfirm(type: String!, username: String!, token: String!) : Boolean!
+}
