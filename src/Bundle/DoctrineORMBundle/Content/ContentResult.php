@@ -2,6 +2,7 @@
 
 namespace UniteCMS\DoctrineORMBundle\Content;
 
+use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\DoctrineORMBundle\Repository\ContentRepository;
@@ -20,9 +21,9 @@ class ContentResult implements ContentResultInterface
     protected $type;
 
     /**
-     * @var array
+     * @var ContentFilterInput
      */
-    protected $criteria;
+    protected $filter;
 
     /**
      * @var array
@@ -54,18 +55,18 @@ class ContentResult implements ContentResultInterface
      *
      * @param ContentRepository $repository
      * @param string $type
-     * @param array $criteria
+     * @param ContentFilterInput $filter
      * @param array $orderBy
      * @param int $limit
      * @param int $offset
      * @param bool $includeDeleted
      * @param callable|null $resultFilter
      */
-    public function __construct(ContentRepository $repository, string $type, array $criteria, array $orderBy, int $limit = 20, int $offset = 0, bool $includeDeleted = false, ?callable $resultFilter = null)
+    public function __construct(ContentRepository $repository, string $type, ContentFilterInput $filter = null, array $orderBy = null, int $limit = 20, int $offset = 0, bool $includeDeleted = false, ?callable $resultFilter = null)
     {
         $this->repository = $repository;
         $this->type = $type;
-        $this->criteria = $criteria;
+        $this->filter = $filter;
         $this->orderBy = $orderBy;
         $this->limit = $limit;
         $this->offset = $offset;
@@ -77,14 +78,14 @@ class ContentResult implements ContentResultInterface
      * @return int
      */
     public function getTotal(): int {
-        return $this->repository->typedCount($this->type, $this->criteria, $this->includeDeleted);
+        return $this->repository->typedCount($this->type, $this->filter, $this->includeDeleted);
     }
 
     /**
      * @return ContentInterface[]
      */
     public function getResult(): array {
-        $result = $this->repository->typedFindBy($this->type, $this->criteria, $this->orderBy, $this->limit, $this->offset, $this->includeDeleted);
+        $result = $this->repository->typedFindBy($this->type, $this->filter, $this->orderBy, $this->limit, $this->offset, $this->includeDeleted);
         return $this->resultFilter ? array_filter($result, $this->resultFilter) : $result;
     }
 }

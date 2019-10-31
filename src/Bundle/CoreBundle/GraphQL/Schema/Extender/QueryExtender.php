@@ -40,7 +40,7 @@ class QueryExtender implements SchemaExtenderInterface
                 if($this->authorizationChecker->isGranted(ContentVoter::QUERY, $type)) {
                     $extension .= sprintf('
                         get%1$s(id: ID!) : %1$s
-                        find%1$s(filter: UniteFilterInput, orderBy: [UniteOrderByInput!] = { field: "updated", desc: true }, limit: Int = 20, offset: Int = 0, includeDeleted: Boolean = false) : %1$sResult!
+                        find%1$s(filter: UniteFilterInput, orderBy: [UniteOrderByInput!], limit: Int = 20, offset: Int = 0, includeDeleted: Boolean = false) : %1$sResult!
                     ', $type->getId());
                 }
             }

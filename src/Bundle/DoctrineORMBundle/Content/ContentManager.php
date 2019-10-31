@@ -64,14 +64,7 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function find(Domain $domain, string $type, ContentFilterInput $filter = null, array $orderBy = [], int $limit = 20, int $offset = 0, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
-
-        // TODO: Criteria
-        $criteria = [];
-
-        // TODO: Criteria
-        $orderBy = [];
-
-        return new ContentResult($this->repository($domain), $type, $criteria, $orderBy, $limit, $offset, $includeDeleted, $resultFilter);
+        return new ContentResult($this->repository($domain), $type, $filter, $orderBy, $limit, $offset, $includeDeleted, $resultFilter);
     }
 
     /**

@@ -82,7 +82,7 @@ class QueryResolver implements FieldResolverInterface
                     $domain,
                     $type,
                     ContentFilterInput::fromInput($args['filter'] ?? []),
-                    $args['orderBy'],
+                    $args['orderBy'] ?? [],
                     $args['limit'],
                     $args['offset'],
                     $args['includeDeleted'],
