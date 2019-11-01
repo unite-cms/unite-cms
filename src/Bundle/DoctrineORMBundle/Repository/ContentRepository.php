@@ -36,15 +36,16 @@ class ContentRepository extends EntityRepository
      * @param ORMContentCriteria $criteria
      *
      * @return array
-     * @throws \Doctrine\ORM\Query\QueryException
      */
     public function typedFindBy(ORMContentCriteria $criteria) : array {
 
         $builder = $this->createQueryBuilder('c')
             ->select('c')
-            ->addCriteria($criteria);
+            ->setFirstResult($criteria->getFirstResult())
+            ->setMaxResults($criteria->getMaxResults());
 
         $criteria->appendOrderBy($builder);
+        $criteria->appendWhere($builder);
 
         $query = $builder->getQuery();
         return $query->execute();
@@ -54,17 +55,16 @@ class ContentRepository extends EntityRepository
      * @param ORMContentCriteria $criteria
      *
      * @return int
-     * @throws \Doctrine\ORM\Query\QueryException
      */
     public function typedCount(ORMContentCriteria $criteria) : int {
 
         $builder = $this->createQueryBuilder('c')
             ->select('COUNT(c)')
-            ->addCriteria($criteria)
             ->setFirstResult(0)
             ->setMaxResults(1);
 
         $criteria->appendOrderBy($builder);
+        $criteria->appendWhere($builder);
         $query = $builder->getQuery();
 
         try {

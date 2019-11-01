@@ -20,6 +20,22 @@ enum ORDER {
     DESC
 }
 
+enum OPERATOR {
+    EQ
+    NEQ
+    LT
+    LTE
+    GT
+    GTE
+    IS
+    IN
+    NIN
+    CONTAINS
+    MEMBER_OF
+    STARTS_WITH
+    ENDS_WITH
+}
+
 directive @hide(
     if: Expression!
 ) on FIELD_DEFINITION | OBJECT
@@ -80,6 +96,7 @@ interface UniteContentResult {
 
 input UniteFilterInput {
     field: String
+    operator: OPERATOR
     value: String
     AND: [UniteFilterInput]
     OR: [UniteFilterInput]

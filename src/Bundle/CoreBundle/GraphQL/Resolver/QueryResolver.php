@@ -83,6 +83,7 @@ class QueryResolver implements FieldResolverInterface
                 $criteria
                     ->setFirstResult($args['offset'])
                     ->setMaxResults($args['limit'])
+                    ->contentWhere($args['filter'] ?? null)
                     ->contentOrderBy($args['orderBy'] ?? []);
 
                 return $contentManager->find(
