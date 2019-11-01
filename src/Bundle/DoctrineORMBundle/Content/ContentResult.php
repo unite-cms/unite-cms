@@ -2,7 +2,6 @@
 
 namespace UniteCMS\DoctrineORMBundle\Content;
 
-use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\DoctrineORMBundle\Repository\ContentRepository;
@@ -16,34 +15,9 @@ class ContentResult implements ContentResultInterface
     protected $repository;
 
     /**
-     * @var string $type
+     * @var ORMContentCriteria
      */
-    protected $type;
-
-    /**
-     * @var ContentFilterInput
-     */
-    protected $filter;
-
-    /**
-     * @var array
-     */
-    protected $orderBy;
-
-    /**
-     * @var int
-     */
-    protected $limit;
-
-    /**
-     * @var int
-     */
-    protected $offset;
-
-    /**
-     * @var bool
-     */
-    protected $includeDeleted;
+    protected $criteria;
 
     /**
      * @var callable|null
@@ -54,23 +28,13 @@ class ContentResult implements ContentResultInterface
      * ContentResult constructor.
      *
      * @param ContentRepository $repository
-     * @param string $type
-     * @param ContentFilterInput $filter
-     * @param array $orderBy
-     * @param int $limit
-     * @param int $offset
-     * @param bool $includeDeleted
+     * @param ORMContentCriteria $criteria
      * @param callable|null $resultFilter
      */
-    public function __construct(ContentRepository $repository, string $type, ContentFilterInput $filter = null, array $orderBy = null, int $limit = 20, int $offset = 0, bool $includeDeleted = false, ?callable $resultFilter = null)
+    public function __construct(ContentRepository $repository, ORMContentCriteria $criteria, ?callable $resultFilter = null)
     {
         $this->repository = $repository;
-        $this->type = $type;
-        $this->filter = $filter;
-        $this->orderBy = $orderBy;
-        $this->limit = $limit;
-        $this->offset = $offset;
-        $this->includeDeleted = $includeDeleted;
+        $this->criteria = $criteria;
         $this->resultFilter = $resultFilter;
     }
 
@@ -78,14 +42,14 @@ class ContentResult implements ContentResultInterface
      * @return int
      */
     public function getTotal(): int {
-        return $this->repository->typedCount($this->type, $this->filter, $this->includeDeleted);
+        return $this->repository->typedCount($this->criteria);
     }
 
     /**
      * @return ContentInterface[]
      */
     public function getResult(): array {
-        $result = $this->repository->typedFindBy($this->type, $this->filter, $this->orderBy, $this->limit, $this->offset, $this->includeDeleted);
+        $result = $this->repository->typedFindBy($this->criteria);
         return $this->resultFilter ? array_filter($result, $this->resultFilter) : $result;
     }
 }

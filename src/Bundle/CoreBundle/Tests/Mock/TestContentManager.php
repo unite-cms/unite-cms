@@ -4,7 +4,7 @@
 namespace UniteCMS\CoreBundle\Tests\Mock;
 
 use DateTime;
-use UniteCMS\CoreBundle\Content\ContentFilterInput;
+use UniteCMS\CoreBundle\Content\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
@@ -17,7 +17,7 @@ class TestContentManager implements ContentManagerInterface
     protected $versionedData = [];
     protected $repository = [];
 
-    public function find(Domain $domain, string $type, ContentFilterInput $filter = null, array $orderBy = [], int $limit = 20, int $offset = 0, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
+    public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
 
         if(!isset($this->repository[$type])) {
             return null;
@@ -27,7 +27,7 @@ class TestContentManager implements ContentManagerInterface
 
         return new TestContentResult(array_slice(array_filter($this->repository[$type], function(TestContent $content) use ($includeDeleted) {
             return $includeDeleted || empty($content->getDeleted());
-        }), $offset, $limit), $resultFilter);
+        }), $criteria->getFirstResult(), $criteria->getMaxResults()), $resultFilter);
     }
 
     public function get(Domain $domain, string $type, string $id, bool $includeDeleted = false): ?ContentInterface {

@@ -15,7 +15,7 @@ enum CONTENT_EVENT {
     REVERT
 }
 
-enum SORT {
+enum ORDER {
     ASC
     DESC
 }
@@ -87,7 +87,7 @@ input UniteFilterInput {
 
 input UniteOrderByInput {
     field: String!
-    desc: Boolean!
+    order: ORDER!
 }
 
 type UniteQuery {

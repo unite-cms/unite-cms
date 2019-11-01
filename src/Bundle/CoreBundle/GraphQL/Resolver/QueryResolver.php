@@ -3,7 +3,7 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
-use UniteCMS\CoreBundle\Content\ContentFilterInput;
+use UniteCMS\CoreBundle\Content\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -59,7 +59,7 @@ class QueryResolver implements FieldResolverInterface
 
         else if(!empty($contentTypeManager->getSingleContentType($type))) {
             $contentManager = $domain->getContentManager();
-            $allSingleContent = $contentManager->find($domain, $type);
+            $allSingleContent = $contentManager->find($domain, $type, new ContentCriteria());
             $args['id'] = $allSingleContent->getTotal() === 0 ? null : $allSingleContent->getResult()[0]->getId();
         }
 
@@ -78,13 +78,17 @@ class QueryResolver implements FieldResolverInterface
                     $contentManager->get($domain, $type, $args['id'])
                 );
             case 'find':
+
+                $criteria = new ContentCriteria();
+                $criteria
+                    ->setFirstResult($args['offset'])
+                    ->setMaxResults($args['limit'])
+                    ->contentOrderBy($args['orderBy'] ?? []);
+
                 return $contentManager->find(
                     $domain,
                     $type,
-                    ContentFilterInput::fromInput($args['filter'] ?? []),
-                    $args['orderBy'] ?? [],
-                    $args['limit'],
-                    $args['offset'],
+                    $criteria,
                     $args['includeDeleted'],
                     [$this, 'ifAccess']
                 );

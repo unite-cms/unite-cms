@@ -20,19 +20,19 @@ doctrine:
                     charset: utf8mb4
                     collate: utf8mb4_unicode_ci
     orm:
-
-        dql:
-            string_functions:
-                JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
-                JSON_SET:       Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
-                JSON_REMOVE:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
-                JSON_UNQUOTE:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
-
         entity_managers:
             auto_generate_proxy_classes: true
             default:
                 connection: default
                 naming_strategy: doctrine.orm.naming_strategy.underscore
+
+                dql:
+                    string_functions:
+                        JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
+                        JSON_SET:       Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
+                        JSON_REMOVE:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
+                        JSON_UNQUOTE:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
+
                 mappings:
                     UniteCMSDoctrineORMBundle:
                         type: annotation
@@ -40,6 +40,14 @@ doctrine:
             alternative:
                 connection: alternative
                 naming_strategy: doctrine.orm.naming_strategy.underscore
+
+                dql:
+                    string_functions:
+                        JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
+                        JSON_SET:       Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
+                        JSON_REMOVE:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
+                        JSON_UNQUOTE:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
+
                 mappings:
                     UniteCMSDoctrineORMBundle:
                         type: annotation
