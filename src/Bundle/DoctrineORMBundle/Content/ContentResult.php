@@ -15,7 +15,7 @@ class ContentResult implements ContentResultInterface
     protected $repository;
 
     /**
-     * @var ORMContentCriteria
+     * @var ORMQueryCriteria
      */
     protected $criteria;
 
@@ -28,10 +28,10 @@ class ContentResult implements ContentResultInterface
      * ContentResult constructor.
      *
      * @param ContentRepository $repository
-     * @param ORMContentCriteria $criteria
+     * @param ORMQueryCriteria $criteria
      * @param callable|null $resultFilter
      */
-    public function __construct(ContentRepository $repository, ORMContentCriteria $criteria, ?callable $resultFilter = null)
+    public function __construct(ContentRepository $repository, ORMQueryCriteria $criteria, ?callable $resultFilter = null)
     {
         $this->repository = $repository;
         $this->criteria = $criteria;

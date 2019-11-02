@@ -12,6 +12,9 @@ use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
+use UniteCMS\CoreBundle\Query\QueryComparison;
+use UniteCMS\CoreBundle\Query\QueryCriteria;
+use UniteCMS\CoreBundle\Query\QueryOrderBy;
 
 abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderInterface
 {
@@ -111,5 +114,19 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
                 ->atPath('['.$field->getId().']')
                 ->addViolation();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function queryOrderBy(ContentTypeField $field, array $sortInput) : ?QueryOrderBy {
+        return new QueryOrderBy($field->getId(), $sortInput['order']);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function queryComparison(ContentTypeField $field, array $whereInput) : ?QueryComparison {
+        return new QueryComparison($field->getId(), QueryCriteria::mapOperator($whereInput['operator']), $whereInput['value']);
     }
 }

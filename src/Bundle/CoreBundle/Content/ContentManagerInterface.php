@@ -5,10 +5,11 @@ namespace UniteCMS\CoreBundle\Content;
 
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Exception\InvalidContentVersionException;
+use UniteCMS\CoreBundle\Query\QueryCriteria;
 
 interface ContentManagerInterface
 {
-    public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null) : ContentResultInterface;
+    public function find(Domain $domain, string $type, QueryCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null) : ContentResultInterface;
     public function get(Domain $domain, string $type, string $id, bool $includeDeleted = false) : ?ContentInterface;
 
     public function create(Domain $domain, string $type) : ContentInterface;

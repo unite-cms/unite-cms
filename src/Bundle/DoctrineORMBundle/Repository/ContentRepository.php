@@ -5,7 +5,7 @@ namespace UniteCMS\DoctrineORMBundle\Repository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
-use UniteCMS\DoctrineORMBundle\Content\ORMContentCriteria;
+use UniteCMS\DoctrineORMBundle\Content\ORMQueryCriteria;
 
 class ContentRepository extends EntityRepository
 {
@@ -33,39 +33,43 @@ class ContentRepository extends EntityRepository
     }
 
     /**
-     * @param ORMContentCriteria $criteria
+     * @param ORMQueryCriteria $criteria
      *
      * @return array
+     * @throws \Doctrine\ORM\Query\QueryException
      */
-    public function typedFindBy(ORMContentCriteria $criteria) : array {
+    public function typedFindBy(ORMQueryCriteria $criteria) : array {
 
         $builder = $this->createQueryBuilder('c')
             ->select('c')
             ->setFirstResult($criteria->getFirstResult())
             ->setMaxResults($criteria->getMaxResults());
 
-        $criteria->appendOrderBy($builder);
-        $criteria->appendWhere($builder);
+        $query = $criteria
+            ->applyToQueryBuilder($builder)
+            ->getQuery();
 
-        $query = $builder->getQuery();
         return $query->execute();
     }
 
     /**
-     * @param ORMContentCriteria $criteria
+     * @param ORMQueryCriteria $criteria
      *
      * @return int
+     * @throws \Doctrine\ORM\Query\QueryException
      */
-    public function typedCount(ORMContentCriteria $criteria) : int {
+    public function typedCount(ORMQueryCriteria $criteria) : int {
 
         $builder = $this->createQueryBuilder('c')
             ->select('COUNT(c)')
             ->setFirstResult(0)
             ->setMaxResults(1);
 
-        $criteria->appendOrderBy($builder);
-        $criteria->appendWhere($builder);
-        $query = $builder->getQuery();
+        $query = $criteria
+            ->applyToQueryBuilder($builder)
+            ->getQuery();
+
+        dump($query);
 
         try {
             return $query->getSingleScalarResult();

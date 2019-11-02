@@ -3,9 +3,10 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
-use UniteCMS\CoreBundle\Content\ContentCriteria;
+use UniteCMS\CoreBundle\Query\QueryCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -23,10 +24,16 @@ class QueryResolver implements FieldResolverInterface
      */
     protected $domainManager;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager)
+    /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    protected $fieldTypeManager;
+
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->domainManager = $domainManager;
+        $this->fieldTypeManager = $fieldTypeManager;
     }
 
     /**
@@ -59,7 +66,7 @@ class QueryResolver implements FieldResolverInterface
 
         else if(!empty($contentTypeManager->getSingleContentType($type))) {
             $contentManager = $domain->getContentManager();
-            $allSingleContent = $contentManager->find($domain, $type, new ContentCriteria());
+            $allSingleContent = $contentManager->find($domain, $type, new QueryCriteria());
             $args['id'] = $allSingleContent->getTotal() === 0 ? null : $allSingleContent->getResult()[0]->getId();
         }
 
@@ -79,12 +86,12 @@ class QueryResolver implements FieldResolverInterface
                 );
             case 'find':
 
-                $criteria = new ContentCriteria();
+                $criteria = new QueryCriteria();
                 $criteria
                     ->setFirstResult($args['offset'])
                     ->setMaxResults($args['limit'])
-                    ->contentWhere($args['filter'] ?? null)
-                    ->contentOrderBy($args['orderBy'] ?? []);
+                    ->contentWhere($this->fieldTypeManager, $contentTypeManager->getAnyType($type), $args['filter'] ?? null)
+                    ->contentOrderBy($this->fieldTypeManager, $contentTypeManager->getAnyType($type), $args['orderBy'] ?? []);
 
                 return $contentManager->find(
                     $domain,
