@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4a2d8d31183cc28f16ae1da3b8ea3f84",
+    "content-hash": "17fec7a28baea8e9096314d1a48df96d",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -304,16 +304,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "v2.9.2",
+            "version": "v2.9.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "22800bd651c1d8d2a9719e2a3dc46d5108ebfcc9"
+                "reference": "7345cd59edfa2036eb0fa4264b77ae2576842035"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/22800bd651c1d8d2a9719e2a3dc46d5108ebfcc9",
-                "reference": "22800bd651c1d8d2a9719e2a3dc46d5108ebfcc9",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/7345cd59edfa2036eb0fa4264b77ae2576842035",
+                "reference": "7345cd59edfa2036eb0fa4264b77ae2576842035",
                 "shasum": ""
             },
             "require": {
@@ -354,16 +354,16 @@
             ],
             "authors": [
                 {
+                    "name": "Guilherme Blanco",
+                    "email": "guilhermeblanco@gmail.com"
+                },
+                {
                     "name": "Roman Borschel",
                     "email": "roman@code-factory.org"
                 },
                 {
                     "name": "Benjamin Eberlei",
                     "email": "kontakt@beberlei.de"
-                },
-                {
-                    "name": "Guilherme Blanco",
-                    "email": "guilhermeblanco@gmail.com"
                 },
                 {
                     "name": "Jonathan Wage",
@@ -382,7 +382,7 @@
                 "php",
                 "queryobject"
             ],
-            "time": "2018-12-31T03:27:51+00:00"
+            "time": "2019-11-02T22:19:34+00:00"
         },
         {
             "name": "doctrine/doctrine-bundle",
@@ -1063,32 +1063,33 @@
         },
         {
             "name": "dunglas/doctrine-json-odm",
-            "version": "0.1.3",
+            "version": "1.0.0-rc2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dunglas/doctrine-json-odm.git",
-                "reference": "8cb9b078fece8fada641d89295126c55e88f3b88"
+                "reference": "aecbaae6119b04115fbdc2463d01f35600f5cd8d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dunglas/doctrine-json-odm/zipball/8cb9b078fece8fada641d89295126c55e88f3b88",
-                "reference": "8cb9b078fece8fada641d89295126c55e88f3b88",
+                "url": "https://api.github.com/repos/dunglas/doctrine-json-odm/zipball/aecbaae6119b04115fbdc2463d01f35600f5cd8d",
+                "reference": "aecbaae6119b04115fbdc2463d01f35600f5cd8d",
                 "shasum": ""
             },
             "require": {
-                "doctrine/orm": "^2.5",
-                "php": "^5.5.9 || ^7.0",
-                "symfony/property-access": "^2.8 || ^3.0 || ^4.0",
-                "symfony/property-info": "^2.8 || ^3.0 || ^4.0",
-                "symfony/serializer": "^2.8 || ^3.0 || ^4.0"
+                "doctrine/orm": "^2.6.3",
+                "php": "^7.1",
+                "symfony/property-access": "^3.4 || ^4.1",
+                "symfony/property-info": "^3.4 || ^4.1",
+                "symfony/serializer": "^3.4 || ^4.1"
             },
             "require-dev": {
-                "doctrine/doctrine-bundle": "^1.6",
-                "symfony/finder": "^2.8 || ^3.0 || ^4.0",
-                "symfony/framework-bundle": "^2.8 || ^3.0 || ^4.0",
-                "symfony/phpunit-bridge": "^3.3 || ^4.0"
+                "doctrine/doctrine-bundle": "^1.8",
+                "symfony/finder": "^3.4 || ^4.1",
+                "symfony/framework-bundle": "^3.4 || ^4.1",
+                "symfony/phpunit-bridge": "^4.3"
             },
             "suggest": {
+                "scienta/doctrine-json-functions": "To add support for JSON functions in DQL.",
                 "symfony/framework-bundle": "To use the provided bundle."
             },
             "type": "library",
@@ -1124,7 +1125,7 @@
                 "postgresql",
                 "rdbms"
             ],
-            "time": "2018-11-16T10:07:37+00:00"
+            "time": "2019-10-24T16:17:49+00:00"
         },
         {
             "name": "egulias/email-validator",
@@ -4731,12 +4732,12 @@
             "dist": {
                 "type": "path",
                 "url": "./src/Bundle/DoctrineORMBundle",
-                "reference": "8e82087d6dd980306c3481c35aeb7b09033bf07e"
+                "reference": "a215ddad0d382ecbfa6af918dec08e2d7f1b9cb3"
             },
             "require": {
                 "doctrine/doctrine-bundle": "^1.6",
                 "doctrine/orm": "^2.5",
-                "dunglas/doctrine-json-odm": "^0.1",
+                "dunglas/doctrine-json-odm": "^1.0",
                 "scienta/doctrine-json-functions": "^4.0",
                 "unite-cms/core-bundle": "0@dev"
             },
@@ -4868,16 +4869,16 @@
         },
         {
             "name": "symfony/maker-bundle",
-            "version": "v1.14.0",
+            "version": "v1.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/maker-bundle.git",
-                "reference": "31a7597a99d8315bfa8eb0bfd2247ab880cb0c1b"
+                "reference": "f7dd84691dbf399137a5caafc90f419801d09e5f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/31a7597a99d8315bfa8eb0bfd2247ab880cb0c1b",
-                "reference": "31a7597a99d8315bfa8eb0bfd2247ab880cb0c1b",
+                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/f7dd84691dbf399137a5caafc90f419801d09e5f",
+                "reference": "f7dd84691dbf399137a5caafc90f419801d09e5f",
                 "shasum": ""
             },
             "require": {
@@ -4932,7 +4933,7 @@
                 "scaffold",
                 "scaffolding"
             ],
-            "time": "2019-10-21T12:43:48+00:00"
+            "time": "2019-11-01T19:39:59+00:00"
         },
         {
             "name": "symfony/phpunit-bridge",
@@ -5406,7 +5407,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "RC",
     "stability-flags": {
         "unite-cms/core-bundle": 20,
         "unite-cms/doctrine-orm-bundle": 20

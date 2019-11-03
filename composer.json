@@ -1,6 +1,7 @@
 {
     "name": "unite-cms/unite-cms",
     "type": "project",
+    "minimum-stability": "RC",
     "autoload": {
         "psr-4": {
             "App\\": "src/"

@@ -3,6 +3,7 @@
 namespace UniteCMS\DoctrineORMBundle\Query;
 
 use Doctrine\Common\Collections\Expr\Comparison;
+use Doctrine\Common\Collections\Expr\CompositeExpression;
 use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\QueryException;
@@ -150,6 +151,6 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
         $alias = array_shift($parts);
         $field = join('.', $parts);
 
-        return sprintf("JSON_EXTRACT(%s.data, '$.%s')", $alias, $field);
+        return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.data, '$.%s'))", $alias, $field);
     }
 }
