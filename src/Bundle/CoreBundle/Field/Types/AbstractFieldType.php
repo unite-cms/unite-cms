@@ -12,9 +12,11 @@ use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
-use UniteCMS\CoreBundle\Query\QueryComparison;
-use UniteCMS\CoreBundle\Query\QueryCriteria;
-use UniteCMS\CoreBundle\Query\QueryOrderBy;
+use UniteCMS\CoreBundle\Query\BaseFieldComparison;
+use UniteCMS\CoreBundle\Query\ContentCriteria;
+use UniteCMS\CoreBundle\Query\BaseFieldOrderBy;
+use UniteCMS\CoreBundle\Query\DataFieldComparison;
+use UniteCMS\CoreBundle\Query\DataFieldOrderBy;
 
 abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderInterface
 {
@@ -119,14 +121,18 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     /**
      * {@inheritDoc}
      */
-    public function queryOrderBy(ContentTypeField $field, array $sortInput) : ?QueryOrderBy {
-        return new QueryOrderBy($field->getId(), $sortInput['order']);
+    public function queryOrderBy(ContentTypeField $field, array $sortInput) : ?BaseFieldOrderBy {
+        return new DataFieldOrderBy($field->getId(), $sortInput['order']);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function queryComparison(ContentTypeField $field, array $whereInput) : ?QueryComparison {
-        return new QueryComparison($field->getId(), QueryCriteria::mapOperator($whereInput['operator']), $whereInput['value']);
+    public function queryComparison(ContentTypeField $field, array $whereInput) : ?BaseFieldComparison {
+        return new DataFieldComparison(
+            $field->getId(),
+            ContentCriteria::OPERATOR_MAP[$whereInput['operator']],
+            $whereInput['value']
+        );
     }
 }

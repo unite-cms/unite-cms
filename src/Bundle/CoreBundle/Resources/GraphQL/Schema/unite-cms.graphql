@@ -97,7 +97,10 @@ interface UniteContentResult {
 input UniteFilterInput {
     field: String
     operator: OPERATOR
-    value: String
+    value: [String]
+    value_int: [Int]
+    value_float: [Float]
+    value_boolean: [Boolean]
     AND: [UniteFilterInput]
     OR: [UniteFilterInput]
 }

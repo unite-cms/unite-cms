@@ -3,10 +3,10 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver;
 
-use UniteCMS\CoreBundle\Query\QueryCriteria;
+use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Query\ContentCriteriaBuilder;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -25,15 +25,15 @@ class QueryResolver implements FieldResolverInterface
     protected $domainManager;
 
     /**
-     * @var FieldTypeManager $fieldTypeManager
+     * @var ContentCriteriaBuilder $criteriaBuilder
      */
-    protected $fieldTypeManager;
+    protected $criteriaBuilder;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager, FieldTypeManager $fieldTypeManager)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager, ContentCriteriaBuilder $criteriaBuilder)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->domainManager = $domainManager;
-        $this->fieldTypeManager = $fieldTypeManager;
+        $this->criteriaBuilder = $criteriaBuilder;
     }
 
     /**
@@ -66,7 +66,7 @@ class QueryResolver implements FieldResolverInterface
 
         else if(!empty($contentTypeManager->getSingleContentType($type))) {
             $contentManager = $domain->getContentManager();
-            $allSingleContent = $contentManager->find($domain, $type, new QueryCriteria());
+            $allSingleContent = $contentManager->find($domain, $type, new ContentCriteria());
             $args['id'] = $allSingleContent->getTotal() === 0 ? null : $allSingleContent->getResult()[0]->getId();
         }
 
@@ -85,18 +85,10 @@ class QueryResolver implements FieldResolverInterface
                     $contentManager->get($domain, $type, $args['id'])
                 );
             case 'find':
-
-                $criteria = new QueryCriteria();
-                $criteria
-                    ->setFirstResult($args['offset'])
-                    ->setMaxResults($args['limit'])
-                    ->contentWhere($this->fieldTypeManager, $contentTypeManager->getAnyType($type), $args['filter'] ?? null)
-                    ->contentOrderBy($this->fieldTypeManager, $contentTypeManager->getAnyType($type), $args['orderBy'] ?? []);
-
                 return $contentManager->find(
                     $domain,
                     $type,
-                    $criteria,
+                    $this->criteriaBuilder->build($args, $contentTypeManager->getAnyType($type)),
                     $args['includeDeleted'],
                     [$this, 'ifAccess']
                 );

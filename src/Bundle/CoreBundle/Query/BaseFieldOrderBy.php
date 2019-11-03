@@ -4,9 +4,8 @@
 namespace UniteCMS\CoreBundle\Query;
 
 
-class QueryOrderBy
+class BaseFieldOrderBy
 {
-
     /**
      * @var string $field
      */
@@ -24,13 +23,11 @@ class QueryOrderBy
     }
 
     /**
-     * @param string $alias
-     *
      * @return string
      */
-    public function getField(string $alias): string
+    public function getField(): string
     {
-        return sprintf('%s.%s', $alias, $this->field);
+        return $this->field;
     }
 
     /**

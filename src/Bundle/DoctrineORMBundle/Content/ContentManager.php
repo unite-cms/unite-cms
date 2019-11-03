@@ -7,7 +7,7 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Security\Core\Security;
-use UniteCMS\CoreBundle\Query\QueryCriteria;
+use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
@@ -63,10 +63,12 @@ class ContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function find(Domain $domain, string $type, QueryCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
+    public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
         return new ContentResult(
             $this->repository($domain),
-            ORMQueryCriteria::fromContentCriteria($criteria, $type, $includeDeleted),
+            $type,
+            $criteria,
+            $includeDeleted,
             $resultFilter
         );
     }

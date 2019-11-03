@@ -4,7 +4,7 @@
 namespace UniteCMS\CoreBundle\Tests\Mock;
 
 use DateTime;
-use UniteCMS\CoreBundle\Query\QueryCriteria;
+use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
@@ -17,7 +17,7 @@ class TestContentManager implements ContentManagerInterface
     protected $versionedData = [];
     protected $repository = [];
 
-    public function find(Domain $domain, string $type, QueryCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
+    public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
 
         if(!isset($this->repository[$type])) {
             return null;

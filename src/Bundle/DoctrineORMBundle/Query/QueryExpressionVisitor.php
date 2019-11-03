@@ -1,242 +1,155 @@
 <?php
 
-
 namespace UniteCMS\DoctrineORMBundle\Query;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Expr\Comparison;
-use Doctrine\Common\Collections\Expr\CompositeExpression;
-use Doctrine\Common\Collections\Expr\ExpressionVisitor;
-use Doctrine\Common\Collections\Expr\Value;
-use Doctrine\ORM\Query\Expr;
+use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\QueryException;
+use Doctrine\ORM\Query\QueryExpressionVisitor as BaseQueryExpressionVisitor;
+use Doctrine\ORM\QueryBuilder;
+use UniteCMS\CoreBundle\Query\ContentCriteria;
+use UniteCMS\CoreBundle\Query\DataFieldComparison;
+use UniteCMS\CoreBundle\Query\DataFieldOrderBy;
 
-/**
- * This is a very close copy of Doctrine\Common\Collections\Expr\QueryExpressionVisitor
- * with support for JSON fields.
- */
-class QueryExpressionVisitor extends ExpressionVisitor
+class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 {
 
     /**
-     * @var array
-     */
-    private static $operatorMap = [
-        Comparison::GT => Expr\Comparison::GT,
-        Comparison::GTE => Expr\Comparison::GTE,
-        Comparison::LT  => Expr\Comparison::LT,
-        Comparison::LTE => Expr\Comparison::LTE
-    ];
-
-    /**
-     * @var array
-     */
-    private $queryAliases;
-
-    /**
-     * @var Expr
-     */
-    private $expr;
-
-    /**
-     * @var array
-     */
-    private $parameters = [];
-
-    /**
-     * Constructor
+     * This method is a custom version of QueryBuilder::setCriteria.
      *
-     * @param array $queryAliases
+     * @param QueryBuilder $queryBuilder
+     * @param ContentCriteria $criteria
+     *
+     * @return QueryExpressionVisitor|null
+     * @throws \Doctrine\ORM\Query\QueryException
      */
-    public function __construct($queryAliases)
-    {
-        $this->queryAliases = $queryAliases;
-        $this->expr = new Expr();
-    }
+    static function apply(QueryBuilder $queryBuilder, ContentCriteria $criteria) : ?QueryExpressionVisitor {
 
-    /**
-     * Gets bound parameters.
-     * Filled after {@link dispach()}.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getParameters()
-    {
-        return new ArrayCollection($this->parameters);
-    }
+        if(empty($criteria->getOrderings()) && empty($criteria->getWhereExpression())) {
+            return null;
+        }
 
-    /**
-     * Clears parameters.
-     *
-     * @return void
-     */
-    public function clearParameters()
-    {
-        $this->parameters = [];
-    }
+        $allAliases = $queryBuilder->getAllAliases();
+        if ( ! isset($allAliases[0])) {
+            throw new QueryException('No aliases are set before invoking addCriteria().');
+        }
 
-    /**
-     * Converts Criteria expression to Query one based on static map.
-     *
-     * @param string $criteriaOperator
-     *
-     * @return string|null
-     */
-    private static function convertComparisonOperator($criteriaOperator)
-    {
-        return isset(self::$operatorMap[$criteriaOperator]) ? self::$operatorMap[$criteriaOperator] : null;
+
+        $visitor = new self($allAliases);
+
+        // Set order by to query builder.
+        if ($criteria->getOrderings()) {
+            foreach ($criteria->getOrderings() as $orderBy) {
+
+                $sort = $orderBy->getField();
+                $order = $orderBy->getOrder();
+
+                $hasValidAlias = false;
+                foreach($allAliases as $alias) {
+                    if(strpos($sort . '.', $alias . '.') === 0) {
+                        $hasValidAlias = true;
+                        break;
+                    }
+                }
+
+                if(!$hasValidAlias) {
+                    $sort = $allAliases[0] . '.' . $sort;
+                }
+
+                if($orderBy instanceof DataFieldOrderBy) {
+                    $sort = static::wrapJSONField($sort);
+                }
+
+                $queryBuilder->addOrderBy($sort, $order);
+            }
+        }
+
+        // Set where to query builder.
+        if($criteria->getWhereExpression()) {
+            $queryBuilder->andWhere($visitor->dispatch($criteria->getWhereExpression()));
+
+            /**
+             * @var Parameter $parameter
+             */
+            foreach ($visitor->getParameters() as $parameter) {
+                $queryBuilder->setParameter(
+                    $parameter->getName(),
+                    $parameter->getValue(),
+                    $parameter->getType()
+                );
+            }
+        }
+
+        return $visitor;
     }
 
     /**
      * {@inheritDoc}
-     */
-    public function walkCompositeExpression(CompositeExpression $expr)
-    {
-        $expressionList = [];
-
-        foreach ($expr->getExpressionList() as $child) {
-            $expressionList[] = $this->dispatch($child);
-        }
-
-        switch($expr->getType()) {
-            case CompositeExpression::TYPE_AND:
-                return new Expr\Andx($expressionList);
-
-            case CompositeExpression::TYPE_OR:
-                return new Expr\Orx($expressionList);
-
-            default:
-                throw new \RuntimeException("Unknown composite " . $expr->getType());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
+     * @throws \Doctrine\ORM\Query\QueryException
      */
     public function walkComparison(Comparison $comparison)
     {
+        $expression = parent::walkComparison($comparison);
 
-        if ( ! isset($this->queryAliases[0])) {
-            throw new QueryException('No aliases are set before invoking walkComparison().');
-        }
+        if($comparison instanceof DataFieldComparison) {
 
-        $field = $this->transformField($comparison->getField(), $this->queryAliases[0]);
+            // Replace a field in a string (e.g. "c.title IS NULL)"
+            if(is_string($expression)) {
+                $pattern = '/[a-z].' . $comparison->getField() . '/';
 
-        foreach($this->queryAliases as $alias) {
-            if(strpos($comparison->getField() . '.', $alias . '.') === 0) {
-                $field = $comparison->getField();
-                break;
-            }
-        }
-
-        $parameterName = str_replace('.', '_', $comparison->getField());
-
-        foreach ($this->parameters as $parameter) {
-            if ($parameter->getName() === $parameterName) {
-                $parameterName .= '_' . count($this->parameters);
-                break;
-            }
-        }
-
-        $parameter = new Parameter($parameterName, $this->walkValue($comparison->getValue()));
-        $placeholder = ':' . $parameterName;
-
-        switch ($comparison->getOperator()) {
-            case Comparison::IN:
-                $this->parameters[] = $parameter;
-
-                return $this->expr->in($field, $placeholder);
-            case Comparison::NIN:
-                $this->parameters[] = $parameter;
-
-                return $this->expr->notIn($field, $placeholder);
-            case Comparison::EQ:
-            case Comparison::IS:
-                if ($this->walkValue($comparison->getValue()) === null) {
-                    return $this->expr->isNull($field);
+                if(preg_match($pattern, $expression, $matches) !== false) {
+                    $parts = preg_split($pattern, $expression);
+                    return $parts[0] . static::wrapJSONField($matches[0]) . $parts[1];
                 }
-                $this->parameters[] = $parameter;
 
-                return $this->expr->eq($field, $placeholder);
-            case Comparison::NEQ:
-                if ($this->walkValue($comparison->getValue()) === null) {
-                    return $this->expr->isNotNull($field);
-                }
-                $this->parameters[] = $parameter;
+                throw new QueryException(sprintf('Could not replace JSON field in expression "%s".', $expression));
+            }
 
-                return $this->expr->neq($field, $placeholder);
-            case Comparison::CONTAINS:
-                $parameter->setValue('%' . $parameter->getValue() . '%', $parameter->getType());
-                $this->parameters[] = $parameter;
+            // Replace a field in a func string (e.g. "c.title IS NULL)"
+            else if ($expression instanceof Func) {
+                $pattern = '/[a-z].' . $comparison->getField() . '/';
 
-                return $this->expr->like($field, $placeholder);
-            case Comparison::MEMBER_OF:
-                return $this->expr->isMemberOf($comparison->getField(), $comparison->getValue()->getValue());
-            case Comparison::STARTS_WITH:
-                $parameter->setValue($parameter->getValue() . '%', $parameter->getType());
-                $this->parameters[] = $parameter;
-
-                return $this->expr->like($field, $placeholder);
-            case Comparison::ENDS_WITH:
-                $parameter->setValue('%' . $parameter->getValue(), $parameter->getType());
-                $this->parameters[] = $parameter;
-
-                return $this->expr->like($field, $placeholder);
-            default:
-                $operator = self::convertComparisonOperator($comparison->getOperator());
-                if ($operator) {
-                    $this->parameters[] = $parameter;
-
-                    return new Expr\Comparison(
-                        $field,
-                        $operator,
-                        $placeholder
+                if(preg_match($pattern, $expression->getName(), $matches) !== false) {
+                    $parts = preg_split($pattern, $expression->getName());
+                    return new Func(
+                        $parts[0] . static::wrapJSONField($matches[0]) . $parts[1],
+                        $expression->getArguments()
                     );
                 }
 
-                throw new \RuntimeException("Unknown comparison operator: " . $comparison->getOperator());
-        }
-    }
+                throw new QueryException(sprintf('Could not replace JSON field in func "%s".', $expression));
+            }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function walkValue(Value $value)
-    {
-        return $value->getValue();
+            // Replace a field in a comparison
+            else if ($expression instanceof \Doctrine\ORM\Query\Expr\Comparison) {
+                return new \Doctrine\ORM\Query\Expr\Comparison(
+                    static::wrapJSONField($expression->getLeftExpr()),
+                    $expression->getOperator(),
+                    $expression->getRightExpr()
+                );
+            }
+        }
+
+        return $expression;
     }
 
     /**
      * @param string $field
-     * @param string $alias
-     *
      * @return string
+     *
      * @throws \Doctrine\ORM\Query\QueryException
      */
-    public function transformField(string $field, string $alias) : string {
-        switch ($field) {
-            case 'id':
-            case 'type':
-            case 'deleted':
-            case 'username':
-                return join('.', [$alias, $field]);
+    static function wrapJSONField(string $field) : string {
+        $parts = explode('.', $field);
 
-            case 'sensitive_data':
-            case 'password_reset_token':
-                throw new QueryException();
-
-            default: return $this->transformJSONField($field, $alias);
+        if(count($parts) < 2) {
+            throw new QueryException('Field must contain an alias and a JSON path.');
         }
-    }
 
-    /**
-     * @param string $field
-     * @param string $alias
-     *
-     * @return string
-     */
-    protected function transformJSONField(string $field, string $alias) : string {
+        $alias = array_shift($parts);
+        $field = join('.', $parts);
+
         return sprintf("JSON_EXTRACT(%s.data, '$.%s')", $alias, $field);
     }
 }

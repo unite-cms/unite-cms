@@ -7,8 +7,8 @@ use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
-use UniteCMS\CoreBundle\Query\QueryComparison;
-use UniteCMS\CoreBundle\Query\QueryOrderBy;
+use UniteCMS\CoreBundle\Query\BaseFieldComparison;
+use UniteCMS\CoreBundle\Query\BaseFieldOrderBy;
 
 interface FieldTypeInterface
 {
@@ -24,7 +24,7 @@ interface FieldTypeInterface
 
     public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void;
 
-    public function queryOrderBy(ContentTypeField $field, array $sortInput) : ?QueryOrderBy;
+    public function queryOrderBy(ContentTypeField $field, array $sortInput) : ?BaseFieldOrderBy;
 
-    public function queryComparison(ContentTypeField $field, array $whereInput) : ?QueryComparison;
+    public function queryComparison(ContentTypeField $field, array $whereInput) : ?BaseFieldComparison;
 }
