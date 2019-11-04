@@ -129,10 +129,26 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
      * {@inheritDoc}
      */
     public function queryComparison(ContentTypeField $field, array $whereInput) : ?BaseFieldComparison {
+
+        switch ($this->GraphQLInputType($field)) {
+            case Type::INT:
+                $whereInput['value'] = array_map(function($value){ return (int)$value; }, $whereInput['value']);
+                break;
+
+            case Type::FLOAT:
+                $whereInput['value'] = array_map(function($value){ return (float)$value; }, $whereInput['value']);
+                break;
+
+            case Type::BOOLEAN:
+                $whereInput['value'] = array_map(function($value){ return filter_var($value, FILTER_VALIDATE_BOOLEAN); }, $whereInput['value']);
+                break;
+        }
+
         return new DataFieldComparison(
             $field->getId(),
             ContentCriteria::OPERATOR_MAP[$whereInput['operator']],
-            $whereInput['value']
+            $whereInput['value'],
+            $whereInput['path'] ?? ['data']
         );
     }
 }

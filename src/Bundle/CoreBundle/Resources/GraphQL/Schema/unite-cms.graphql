@@ -94,6 +94,7 @@ interface UniteContentResult {
 
 input UniteFilterInput {
     field: String
+    path: [String]
     operator: OPERATOR
     value: [String]
     AND: [UniteFilterInput]

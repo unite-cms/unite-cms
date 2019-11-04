@@ -3,7 +3,10 @@
 namespace UniteCMS\DoctrineORMBundle\Query;
 
 use Doctrine\Common\Collections\Expr\Comparison;
+use Doctrine\Common\Collections\Expr\CompositeExpression;
+use Doctrine\Common\Collections\Expr\Expression;
 use Doctrine\ORM\Query\Expr\Func;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Query\QueryExpressionVisitor as BaseQueryExpressionVisitor;
@@ -11,10 +14,11 @@ use Doctrine\ORM\QueryBuilder;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Query\DataFieldComparison;
 use UniteCMS\CoreBundle\Query\DataFieldOrderBy;
+use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
+use UniteCMS\DoctrineORMBundle\Entity\Content;
 
 class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 {
-
     /**
      * This method is a custom version of QueryBuilder::setCriteria.
      *
@@ -31,10 +35,24 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
         }
 
         $allAliases = $queryBuilder->getAllAliases();
+
         if ( ! isset($allAliases[0])) {
             throw new QueryException('No aliases are set before invoking addCriteria().');
         }
 
+        // First of all find all joins
+        foreach(static::findJoins($criteria->getWhereExpression(), $allAliases[0]) as $join) {
+            $queryBuilder->leftJoin(
+                $join->getJoin(),
+                $join->getAlias(),
+                $join->getConditionType(),
+                $join->getCondition(),
+                $join->getIndexBy()
+            );
+        }
+
+        // Get aliases again, because joined tables could have added some aliases.
+        $allAliases = $queryBuilder->getAllAliases();
 
         $visitor = new self($allAliases);
 
@@ -85,12 +103,62 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
     }
 
     /**
+     * @param Expression $comparison
+     * @param string $rootAlias
+     *
+     * @return Join[]
+     * @throws \Doctrine\ORM\Query\QueryException
+     */
+    static function findJoins(Expression $comparison, string $rootAlias) {
+
+        $joins = [];
+
+        // Add joins for reference data field comparison
+        if($comparison instanceof ReferenceDataFieldComparison) {
+
+            // Add a join to the query.
+            $joined_table = 'c_' . $comparison->getRootField();
+
+            $joins[$joined_table] = new Join(
+                Join::LEFT_JOIN,
+                Content::class,
+                $joined_table,
+                Join::WITH,
+                sprintf('%s = %s.id', self::wrapJSONField(join('.', [$rootAlias, $comparison->getField()])), $joined_table)
+            );
+        }
+
+        if($comparison instanceof CompositeExpression) {
+            $joins = array_merge($joins, array_map(function(Expression $expression) use ($rootAlias) {
+                return static::findJoins($expression, $rootAlias);
+            }, $comparison->getExpressionList()));
+        }
+
+        return $joins;
+    }
+
+    /**
      * {@inheritDoc}
      * @throws \Doctrine\ORM\Query\QueryException
      */
     public function walkComparison(Comparison $comparison)
     {
         $op = $comparison->getOperator();
+
+        // Add joins for reference data field comparison
+        if($comparison instanceof ReferenceDataFieldComparison) {
+
+            // Add a join to the query.
+            $joined_table = 'c_' . $comparison->getRootField();
+
+            // Replace comparison with joined comparison.
+            $comparison = new DataFieldComparison(
+                $joined_table,
+                $comparison->getOperator(),
+                $comparison->getValue(),
+                $comparison->getReferencedPath()
+            );
+        }
 
         // CONTAINS
         if($comparison instanceof DataFieldComparison && in_array($op, [Comparison::CONTAINS, ContentCriteria::NCONTAINS])) {

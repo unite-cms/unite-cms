@@ -3,15 +3,18 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Doctrine\Common\Collections\Expr\Comparison;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Query\BaseFieldComparison;
+use UniteCMS\CoreBundle\Query\ContentCriteria;
+use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
 
 class ReferenceType extends AbstractFieldType
 {
@@ -66,7 +69,12 @@ class ReferenceType extends AbstractFieldType
             }
 
             // Find all content objects by id.
-            $result = $contentManager->find($domain, $field->getReturnType(), ContentFilterInput::fromInput(['id' => array_unique($rowIds)]));
+            $criteria = new ContentCriteria();
+            $criteria->andWhere(
+                new Comparison('id', Comparison::EQ, array_unique($rowIds))
+            );
+
+            $result = $contentManager->find($domain, $field->getReturnType(), $criteria);
             $resultById = [];
 
             // The result will not include duplicates. We need to transform it for an exact result.
@@ -82,5 +90,26 @@ class ReferenceType extends AbstractFieldType
         }
 
         return $contentManager->get($domain, $field->getReturnType(), $fieldData->getData());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function queryComparison(ContentTypeField $field, array $whereInput) : ?BaseFieldComparison {
+
+        $comparison = parent::queryComparison($field, $whereInput);
+
+        if(empty($whereInput['path'])) {
+            return $comparison;
+        }
+
+        return new ReferenceDataFieldComparison(
+            $field->getId(),
+            $comparison->getOperator(),
+            $comparison->getValue(),
+            ['data'],
+            $field->getReturnType(),
+            $whereInput['path']
+        );
     }
 }

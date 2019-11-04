@@ -23,4 +23,12 @@ class DataFieldComparison extends BaseFieldComparison {
     {
         return join('.', array_merge([parent::getField()], $this->path));
     }
+
+    /**
+     * @return string
+     */
+    public function getRootField()
+    {
+        return parent::getField();
+    }
 }

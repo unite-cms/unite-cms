@@ -4,7 +4,7 @@ enum Tags {
     BAA
 }
 
-type Category implements UniteContent {
+type Category implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
     _meta: UniteContentMeta!
     id: ID
     name: String! @textField
