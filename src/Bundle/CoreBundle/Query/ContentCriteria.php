@@ -9,6 +9,8 @@ class ContentCriteria extends Criteria
 {
     const BASE_FIELDS = ['id'];
 
+    const NCONTAINS = 'NCONTAINS';
+
     const OPERATOR_MAP = [
         'EQ' => Comparison::EQ,
         'NEQ' => Comparison::NEQ,
@@ -20,6 +22,7 @@ class ContentCriteria extends Criteria
         'IN' => Comparison::IN,
         'NIN' => Comparison::NIN,
         'CONTAINS' => Comparison::CONTAINS,
+        'NCONTAINS' => self::NCONTAINS,
         'MEMBER_OF' => Comparison::MEMBER_OF,
         'STARTS_WITH' => Comparison::STARTS_WITH,
         'ENDS_WITH' => Comparison::ENDS_WITH,

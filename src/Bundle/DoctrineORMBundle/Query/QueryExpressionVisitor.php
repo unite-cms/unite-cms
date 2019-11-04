@@ -3,7 +3,6 @@
 namespace UniteCMS\DoctrineORMBundle\Query;
 
 use Doctrine\Common\Collections\Expr\Comparison;
-use Doctrine\Common\Collections\Expr\CompositeExpression;
 use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\QueryException;
@@ -91,35 +90,60 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
      */
     public function walkComparison(Comparison $comparison)
     {
+        $op = $comparison->getOperator();
+
+        // CONTAINS
+        if($comparison instanceof DataFieldComparison && in_array($op, [Comparison::CONTAINS, ContentCriteria::NCONTAINS])) {
+            $value = $this->walkValue($comparison->getValue());
+            if(is_array($value)) {
+                $value = $value[0];
+            }
+            $comparison = new Comparison($comparison->getField(), Comparison::EQ, $value);
+            $expression = parent::walkComparison($comparison);
+
+            return static::wrapJSONSearch(
+                $expression->getLeftExpr(),
+                $expression->getRightExpr()
+            ) . ($op === Comparison::CONTAINS ? ' IS NOT NULL' : ' IS NULL');
+        }
+
         $expression = parent::walkComparison($comparison);
 
         if($comparison instanceof DataFieldComparison) {
 
-            // Replace a field in a string (e.g. "c.title IS NULL)"
-            if(is_string($expression)) {
+            // IS NULL and IS NOT NULL
+            if (in_array($op, [Comparison::EQ, Comparison::IS, Comparison::NEQ]) && $this->walkValue($comparison->getValue()) === null) {
+
                 $pattern = '/[a-z].' . $comparison->getField() . '/';
 
                 if(preg_match($pattern, $expression, $matches) !== false) {
-                    $parts = preg_split($pattern, $expression);
-                    return $parts[0] . static::wrapJSONField($matches[0]) . $parts[1];
-                }
 
-                throw new QueryException(sprintf('Could not replace JSON field in expression "%s".', $expression));
+                    $field = static::wrapJSONField($matches[0]);
+
+                    // IS NOT NULL
+                    if($op === Comparison::NEQ) {
+                        return sprintf('%1$s IS NOT NULL AND %1$s != \'null\'', $field);
+                    }
+
+                    // IS NULL
+                    if($op === Comparison::EQ || $op === Comparison::IS) {
+                        return sprintf('%1$s IS NULL OR %1$s = \'null\'', $field);
+                    }
+
+                    throw new QueryException('Null value can only be used with NEQ, EQ or IS operator.');
+                }
             }
 
-            // Replace a field in a func string (e.g. "c.title IS NULL)"
-            else if ($expression instanceof Func) {
+            // IN, NOT IN
+            else if(in_array($op, [Comparison::IN, Comparison::NIN])) {
+
                 $pattern = '/[a-z].' . $comparison->getField() . '/';
 
-                if(preg_match($pattern, $expression->getName(), $matches) !== false) {
-                    $parts = preg_split($pattern, $expression->getName());
-                    return new Func(
-                        $parts[0] . static::wrapJSONField($matches[0]) . $parts[1],
-                        $expression->getArguments()
-                    );
+                if(preg_match($pattern, $expression, $matches) !== false) {
+                    $field = static::wrapJSONField($matches[0]);
+                    $field .= ' ' . ($op === Comparison::IN ? 'IN' : 'NOT IN');
+                    return new Func($field, $expression->getArguments());
                 }
-
-                throw new QueryException(sprintf('Could not replace JSON field in func "%s".', $expression));
             }
 
             // Replace a field in a comparison
@@ -152,5 +176,25 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
         $field = join('.', $parts);
 
         return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.data, '$.%s'))", $alias, $field);
+    }
+
+    /**
+     * @param string $field
+     * @param string $value
+     * @return string
+     *
+     * @throws \Doctrine\ORM\Query\QueryException
+     */
+    static function wrapJSONSearch(string $field, string $value) : string {
+        $parts = explode('.', $field);
+
+        if(count($parts) < 2) {
+            throw new QueryException('Field must contain an alias and a JSON path.');
+        }
+
+        $alias = array_shift($parts);
+        $field = join('.', $parts);
+
+        return sprintf("JSON_SEARCH(%s.data, 'one', %s, NULL, '$.%s')", $alias, $value, $field);
     }
 }

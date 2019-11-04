@@ -29,6 +29,7 @@ doctrine:
                 dql:
                     string_functions:
                         JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
+                        JSON_SEARCH:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSearch
                         JSON_SET:       Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
                         JSON_REMOVE:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
                         JSON_UNQUOTE:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
@@ -44,6 +45,7 @@ doctrine:
                 dql:
                     string_functions:
                         JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
+                        JSON_SEARCH:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSearch
                         JSON_SET:       Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
                         JSON_REMOVE:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
                         JSON_UNQUOTE:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote

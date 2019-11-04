@@ -22,18 +22,16 @@ enum ORDER {
 
 enum OPERATOR {
     EQ
+    IS
     NEQ
     LT
     LTE
     GT
     GTE
-    IS
     IN
     NIN
     CONTAINS
-    MEMBER_OF
-    STARTS_WITH
-    ENDS_WITH
+    NCONTAINS
 }
 
 directive @hide(
@@ -98,9 +96,6 @@ input UniteFilterInput {
     field: String
     operator: OPERATOR
     value: [String]
-    value_int: [Int]
-    value_float: [Float]
-    value_boolean: [Boolean]
     AND: [UniteFilterInput]
     OR: [UniteFilterInput]
 }
