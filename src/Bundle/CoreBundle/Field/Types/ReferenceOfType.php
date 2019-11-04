@@ -5,7 +5,6 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\Common\Collections\Expr\Comparison;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\ContentType\ContentType;
