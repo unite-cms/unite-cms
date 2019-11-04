@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Doctrine\Common\Collections\Expr\Comparison;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentFilterInput;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -10,6 +11,8 @@ use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Query\ContentCriteria;
+use UniteCMS\CoreBundle\Query\DataFieldComparison;
 
 class ReferenceOfType extends AbstractFieldType
 {
@@ -87,10 +90,13 @@ class ReferenceOfType extends AbstractFieldType
         $reference_field = $referencedContentType->getField($field->getSettings()->get('reference_field'));
 
         // Find all content that is referencing this objects.
-        return $contentManager->find($domain, $field->getReturnType(), ContentFilterInput::fromInput([
+        $criteria = new ContentCriteria();
+        $criteria->where(new DataFieldComparison(
+            $reference_field->getId(),
+            Comparison::EQ,
+            $content->getId()
+        ));
 
-            // TODO: This isn't really working right now.
-            $reference_field->getId() => $reference_field->isListOf() ? ['IN' => $content->getId()] : $content->getId(),
-        ]))->getResult();
+        return $contentManager->find($domain, $field->getReturnType(), $criteria)->getResult();
     }
 }

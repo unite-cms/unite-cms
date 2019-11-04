@@ -129,9 +129,9 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
         }
 
         if($comparison instanceof CompositeExpression) {
-            $joins = array_merge($joins, array_map(function(Expression $expression) use ($rootAlias) {
-                return static::findJoins($expression, $rootAlias);
-            }, $comparison->getExpressionList()));
+            foreach($comparison->getExpressionList() as $expression) {
+                $joins = array_merge($joins, static::findJoins($expression, $rootAlias));
+            }
         }
 
         return $joins;
