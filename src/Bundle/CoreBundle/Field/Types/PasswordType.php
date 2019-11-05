@@ -8,6 +8,8 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\SensitiveFieldData;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
+use UniteCMS\CoreBundle\Query\BaseFieldComparison;
+use UniteCMS\CoreBundle\Query\BaseFieldOrderBy;
 use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
@@ -62,6 +64,11 @@ class PasswordType extends AbstractFieldType
      * @return SensitiveFieldData
      */
     public function normalizePassword(ContentInterface $content, string $password) : SensitiveFieldData {
+
+        if(!$content instanceof UserInterface) {
+            throw new InvalidArgumentException('Password fields can only be added to UniteUser types.');
+        }
+
         return new SensitiveFieldData(
             $this->passwordEncoder->encodePassword($content, $password)
         );
@@ -73,5 +80,21 @@ class PasswordType extends AbstractFieldType
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
         // We will never return any password information!
         return '';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function queryOrderBy(ContentTypeField $field, array $sortInput) : ?BaseFieldOrderBy {
+        // We do not allow to oder by password fields.
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function queryComparison(ContentTypeField $field, array $whereInput) : ?BaseFieldComparison {
+        // We do not allow to compare password fields.
+        return null;
     }
 }

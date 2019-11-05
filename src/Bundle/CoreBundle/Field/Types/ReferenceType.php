@@ -5,10 +5,12 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\Common\Collections\Expr\Comparison;
 use GraphQL\Type\Definition\Type;
+use InvalidArgumentException;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
+use UniteCMS\CoreBundle\Content\ReferenceFieldData;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
@@ -60,7 +62,19 @@ class ReferenceType extends AbstractFieldType
         }
 
         $domain = $this->domainManager->current();
-        $contentManager = $domain->getContentManager();
+        $contentManager = null;
+
+        if($domain->getContentTypeManager()->getContentType($field->getReturnType())) {
+            $contentManager = $domain->getContentManager();
+        }
+
+        else if($domain->getContentTypeManager()->getUserType($field->getReturnType())) {
+            $contentManager = $domain->getUserManager();
+        }
+
+        if(empty($contentManager)) {
+            throw new InvalidArgumentException(sprintf('User or Content type "%s" was not found!', $field->getReturnType()));
+        }
 
         if($fieldData instanceof FieldDataList) {
             $rowIds = [];
@@ -90,6 +104,32 @@ class ReferenceType extends AbstractFieldType
         }
 
         return $contentManager->get($domain, $field->getReturnType(), $fieldData->getData());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
+        return new ReferenceFieldData($inputData ?? $field->getSettings()->get('default'));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
+        parent::validateFieldData($content, $field, $context, $fieldData);
+
+        if($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        // Check that referenced content can be resolved.
+        if(!empty($fieldData) && !$this->resolveField($content, $field, $fieldData)) {
+            $context
+                ->buildViolation(sprintf('Referenced content not found.'))
+                ->atPath('['.$field->getId().']')
+                ->addViolation();
+        }
     }
 
     /**

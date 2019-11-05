@@ -9,6 +9,7 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedFieldData;
 use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
@@ -75,6 +76,54 @@ class EmbeddedType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
+        parent::validateFieldData($content, $field, $context, $fieldData);
+
+        if($context->getViolations()->count() > 0) {
+            return;
+        }
+
+        // Allow all embedded field types to validate their content.
+        if(!empty($fieldData)) {
+
+            $rows = $fieldData instanceof FieldDataList ? $fieldData->rows() : [$fieldData];
+            foreach($rows as $delta => $row) {
+
+                // Only validate embedded fields if field data is not empty.
+                // This allows to set embedded sub-fields required but not the
+                // embedded field self.
+                if($row->empty()) {
+                    continue;
+                }
+
+                $violations = $context->getValidator()->validate(
+                    $this->resolveRowData($content, $field, $row),
+                    null,
+                    [$context->getGroup()]
+                );
+
+                foreach($violations as $violation) {
+
+                    $propertyPath = '['.$field->getId().']';
+
+                    if($fieldData instanceof FieldDataList) {
+                        $propertyPath .= '['. $delta . ']';
+                    }
+
+                    $propertyPath .= $violation->getPropertyPath();
+
+                    $context->buildViolation(
+                        $violation->getMessage(),
+                        $violation->getParameters()
+                    )->atPath($propertyPath)->addViolation();
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
 
         $domain = $this->domainManager->current();
@@ -85,11 +134,21 @@ class EmbeddedType extends AbstractFieldType
             return null;
         }
 
+        // Create embedded field data if not already set.
+        $fieldData = $content->getFieldData($field->getId()) ?? new EmbeddedFieldData(uniqid(), $contentType->getId());
+
+        // If we have no input data and the field can be null, just return the empty field.
+        if(empty($inputData) && !$field->isNonNull()) {
+            return $fieldData;
+        }
+
+        $tmpEmbeddedContent = $this->resolveRowData($content, $field, $fieldData);
+
         // Create new embedded content with input data.
         return new EmbeddedFieldData(
-            uniqid(),
-            $contentType->getId(),
-            $this->fieldDataMapper->mapToFieldData($domain, $content, $inputData, $contentType)
+            $fieldData->getId(),
+            $fieldData->getType(),
+            $this->fieldDataMapper->mapToFieldData($domain, $tmpEmbeddedContent, $inputData, $contentType)
         );
     }
 }
