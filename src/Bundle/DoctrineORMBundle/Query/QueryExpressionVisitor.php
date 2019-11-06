@@ -109,9 +109,13 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
      * @return Join[]
      * @throws \Doctrine\ORM\Query\QueryException
      */
-    static function findJoins(Expression $comparison, string $rootAlias) {
+    static function findJoins(?Expression $comparison, string $rootAlias) {
 
         $joins = [];
+
+        if(empty($comparison)) {
+            return $joins;
+        }
 
         // Add joins for reference data field comparison
         if($comparison instanceof ReferenceDataFieldComparison) {

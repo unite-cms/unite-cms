@@ -4,6 +4,9 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use DateTime;
 use GraphQL\Error\Error;
+use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 
 class DateTimeType extends AbstractFieldType
 {
@@ -42,5 +45,23 @@ class DateTimeType extends AbstractFieldType
      */
     protected function normalizeDefaultValue($data) {
         return static::parseValue($data);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
+        $fieldData = parent::normalizeInputData($content, $field, $inputData);
+        return $fieldData->empty() ? $fieldData : new FieldData($fieldData->getData()->getTimestamp());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+        $timestamp = $fieldData->resolveData('', $field->isNonNull() ? 0 : null);
+        $date = new DateTime();
+        $date->setTimestamp($timestamp);
+        return $date;
     }
 }

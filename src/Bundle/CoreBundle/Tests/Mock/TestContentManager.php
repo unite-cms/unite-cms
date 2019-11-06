@@ -27,10 +27,8 @@ class TestContentManager implements ContentManagerInterface
     public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
 
         if(!isset($this->repository[$type])) {
-            return null;
+            return new TestContentResult();
         }
-
-
 
         return new TestContentResult(array_slice(array_filter($this->repository[$type], function(TestContent $content) use ($includeDeleted) {
             return $includeDeleted || empty($content->getDeleted());

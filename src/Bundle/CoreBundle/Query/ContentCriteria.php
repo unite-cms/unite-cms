@@ -34,11 +34,11 @@ class ContentCriteria extends Criteria
     protected $orderBy = [];
 
     /**
-     * @param BaseFieldOrderBy[] $orderings
+     * @param BaseFieldOrderBy|BaseFieldOrderBy[] $orderings
      * @return ContentCriteria
      */
-    public function orderBy(array $orderings) : ContentCriteria {
-        $this->orderBy = $orderings;
+    public function orderBy($orderings) : ContentCriteria {
+        $this->orderBy = is_array($orderings) ? $orderings : [$orderings];
         return $this;
     }
 

@@ -55,6 +55,7 @@ class ContentResult implements ContentResultInterface
 
     /**
      * @return int
+     * @throws \Doctrine\ORM\Query\QueryException
      */
     public function getTotal(): int {
         return $this->repository->typedCount($this->type, $this->criteria, $this->includeDeleted);
@@ -62,6 +63,7 @@ class ContentResult implements ContentResultInterface
 
     /**
      * @return ContentInterface[]
+     * @throws \Doctrine\ORM\Query\QueryException
      */
     public function getResult(): array {
         $result = $this->repository->typedFindBy($this->type, $this->criteria, $this->includeDeleted);
