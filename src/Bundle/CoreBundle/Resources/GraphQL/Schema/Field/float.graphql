@@ -1,4 +1,5 @@
 
 directive @floatField(
     default: Float
+    defaultExpression: Expression
 ) on FIELD_DEFINITION

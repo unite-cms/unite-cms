@@ -1,4 +1,5 @@
 
 directive @integerField(
     default: Int
+    defaultExpression: Expression
 ) on FIELD_DEFINITION

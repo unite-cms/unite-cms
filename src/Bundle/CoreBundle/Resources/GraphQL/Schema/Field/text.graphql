@@ -1,5 +1,6 @@
 
 directive @textField(
     default: String
+    defaultExpression: Expression
     xss_clean: Boolean = true
 ) on FIELD_DEFINITION

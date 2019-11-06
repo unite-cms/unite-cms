@@ -1,4 +1,5 @@
 
 directive @booleanField(
     default: Boolean
+    defaultExpression: Expression
 ) on FIELD_DEFINITION

@@ -1,4 +1,5 @@
 
 directive @dateField(
     default: Date
+    defaultExpression: Expression
 ) on FIELD_DEFINITION
