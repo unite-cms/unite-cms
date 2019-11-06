@@ -10,6 +10,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\WrappingType;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -257,12 +258,8 @@ class MutationResolver implements FieldResolverInterface
      */
     protected function contentPersist(ContentManagerInterface $contentManager, Domain $domain, ContentInterface $content, string $eventName, bool $persist = false) : ContentInterface {
 
-
-        // Validate content for default group.
-        $violations = $this->validator->validate($content);
-
         // Validate content for given event group.
-        $violations->addAll($this->validator->validate($content, null, [$eventName]));
+        $violations = $this->validator->validate($content, null, [Constraint::DEFAULT_GROUP, $eventName]);
 
         // Throw exception, if there where constraint violations.
         if(count($violations) > 0) {

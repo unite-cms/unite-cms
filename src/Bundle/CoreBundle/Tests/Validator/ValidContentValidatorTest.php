@@ -19,23 +19,23 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
             '
             type Article implements UniteContent 
                 @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true")
-                @valid(if: "this.getFieldData(\'firstname\') == \'CREATE\'", groups: [ CREATE ], message: "Invalid CREATE!")
-                @valid(if: "this.getFieldData(\'firstname\') == \'UPDATE\'", groups: [ UPDATE ], message: "Invalid UPDATE!")
-                @valid(if: "this.getFieldData(\'firstname\') == \'DELETE\'", groups: [ DELETE ], message: "Invalid DELETE!")
-                @valid(if: "this.getFieldData(\'firstname\') == \'RECOVER\'", groups: [ RECOVER ], message: "Invalid RECOVER!")
-                @valid(if: "this.getFieldData(\'firstname\') == \'REVERT\'", groups: [ REVERT ], message: "Invalid REVERT!")
-                @valid(if: "this.getFieldData(\'lastname\') and not this.getFieldData(\'lastname\').empty()", message: "Invalid ALL GROUPS!")
+                @valid(if: "this.getFieldData(\'firstname\') == \'CREATE\'", groups: [ CREATE ], message: "INVALID CREATE!")
+                @valid(if: "this.getFieldData(\'firstname\') == \'UPDATE\'", groups: [ UPDATE ], message: "INVALID UPDATE!")
+                @valid(if: "this.getFieldData(\'firstname\') == \'DELETE\'", groups: [ DELETE ], message: "INVALID DELETE!")
+                @valid(if: "this.getFieldData(\'firstname\') == \'RECOVER\'", groups: [ RECOVER ], message: "INVALID RECOVER!")
+                @valid(if: "this.getFieldData(\'firstname\') == \'REVERT\'", groups: [ REVERT ], message: "INVALID REVERT!")
+                @valid(if: "this.getFieldData(\'lastname\') and not this.getFieldData(\'lastname\').empty()", message: "INVALID ALL GROUPS!")
             {
                 id: ID
                 _meta: UniteContentMeta!
                 firstname: String @textField
+                    @valid(if: "value and not value.empty()", message: "INVALID FIELD ALL GROUPS!")
                 lastname: String @textField
                     @valid(if: "value == \'CREATE\'", groups: [ CREATE ])
                     @valid(if: "value == \'UPDATE\'", groups: [ UPDATE ])
                     @valid(if: "value == \'DELETE\'", groups: [ DELETE ])
                     @valid(if: "value == \'RECOVER\'", groups: [ RECOVER ])
                     @valid(if: "value == \'REVERT\'", groups: [ REVERT ])
-                    @valid(if: "value and not value.empty()")
             }
         ');
     }
@@ -52,20 +52,42 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID ALL GROUPS!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid ALL GROUPS!',
+                            'message' => 'INVALID FIELD ALL GROUPS!',
+                            'path' => '[firstname]',
+                        ],
+                        [
+                            'message' => 'INVALID CREATE!',
                             'path' => '',
                         ],
                         [
                             'message' => 'This value is not valid.',
                             'path' => '[lastname]',
                         ],
+                    ],
+                ],
+            ]
+        ], $query, [
+            'data' => [],
+        ], false);
+
+        $this->assertGraphQL([
+            [
+                'message' => ErrorFormatter::VALIDATION_MESSAGE,
+                'path' => ['createArticle'],
+                'extensions' => [
+                    'category' => ErrorFormatter::VALIDATION_CATEGORY,
+                    'violations' => [
                         [
-                            'message' => 'Invalid CREATE!',
+                            'message' => 'INVALID CREATE!',
                             'path' => '',
+                        ],
+                        [
+                            'message' => 'This value is not valid.',
+                            'path' => '[lastname]',
                         ],
                     ],
                 ],
@@ -73,6 +95,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
         ], $query, [
             'data' => [
                 'firstname' => 'foo',
+                'lastname' => 'foo',
             ],
         ], false);
 
@@ -87,16 +110,12 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                             'message' => 'This value is not valid.',
                             'path' => '[lastname]',
                         ],
-                        [
-                            'message' => 'Invalid CREATE!',
-                            'path' => '',
-                        ],
                     ],
                 ],
             ]
         ], $query, [
             'data' => [
-                'firstname' => 'foo',
+                'firstname' => 'CREATE',
                 'lastname' => 'foo',
             ],
         ], false);
@@ -133,29 +152,27 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID ALL GROUPS!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid ALL GROUPS!',
+                            'message' => 'INVALID FIELD ALL GROUPS!',
+                            'path' => '[firstname]',
+                        ],
+                        [
+                            'message' => 'INVALID UPDATE!',
                             'path' => '',
                         ],
                         [
                             'message' => 'This value is not valid.',
                             'path' => '[lastname]',
-                        ],
-                        [
-                            'message' => 'Invalid UPDATE!',
-                            'path' => '',
                         ],
                     ],
                 ],
             ]
         ], $query, [
             'id' => $content->getId(),
-            'data' => [
-                'firstname' => 'foo',
-            ],
+            'data' => [],
         ], false);
 
         $this->assertGraphQL([
@@ -166,12 +183,12 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID UPDATE!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid UPDATE!',
-                            'path' => '',
+                            'message' => 'This value is not valid.',
+                            'path' => '[lastname]',
                         ],
                     ],
                 ],
@@ -211,9 +228,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
 
         $dataMapper = static::$container->get(FieldDataMapper::class);
 
-        $content->setData($dataMapper->mapToFieldData($domain, $content, [
-            'firstname' => 'foo',
-        ]));
+        $content->setData($dataMapper->mapToFieldData($domain, $content, []));
 
         $this->assertGraphQL([
             [
@@ -223,20 +238,20 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID ALL GROUPS!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid ALL GROUPS!',
+                            'message' => 'INVALID FIELD ALL GROUPS!',
+                            'path' => '[firstname]',
+                        ],
+                        [
+                            'message' => 'INVALID DELETE!',
                             'path' => '',
                         ],
                         [
                             'message' => 'This value is not valid.',
                             'path' => '[lastname]',
-                        ],
-                        [
-                            'message' => 'Invalid DELETE!',
-                            'path' => '',
                         ],
                     ],
                 ],
@@ -256,12 +271,12 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID DELETE!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid DELETE!',
-                            'path' => '',
+                            'message' => 'This value is not valid.',
+                            'path' => '[lastname]',
                         ],
                     ],
                 ],
@@ -295,9 +310,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
 
         $dataMapper = static::$container->get(FieldDataMapper::class);
 
-        $content->setData($dataMapper->mapToFieldData($domain, $content, [
-            'firstname' => 'foo',
-        ]));
+        $content->setData($dataMapper->mapToFieldData($domain, $content, []));
 
         $this->assertGraphQL([
             [
@@ -307,20 +320,20 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID ALL GROUPS!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid ALL GROUPS!',
+                            'message' => 'INVALID FIELD ALL GROUPS!',
+                            'path' => '[firstname]',
+                        ],
+                        [
+                            'message' => 'INVALID RECOVER!',
                             'path' => '',
                         ],
                         [
                             'message' => 'This value is not valid.',
                             'path' => '[lastname]',
-                        ],
-                        [
-                            'message' => 'Invalid RECOVER!',
-                            'path' => '',
                         ],
                     ],
                 ],
@@ -340,12 +353,12 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID RECOVER!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid RECOVER!',
-                            'path' => '',
+                            'message' => 'This value is not valid.',
+                            'path' => '[lastname]',
                         ],
                     ],
                 ],
@@ -377,9 +390,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
 
         $dataMapper = static::$container->get(FieldDataMapper::class);
 
-        $content->setData($dataMapper->mapToFieldData($domain, $content, [
-            'firstname' => 'foo',
-        ]));
+        $content->setData($dataMapper->mapToFieldData($domain, $content, []));
         $contentManager->persist($domain, $content, ContentEvent::UPDATE);
 
         $this->assertGraphQL([
@@ -390,20 +401,20 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID ALL GROUPS!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid ALL GROUPS!',
+                            'message' => 'INVALID FIELD ALL GROUPS!',
+                            'path' => '[firstname]',
+                        ],
+                        [
+                            'message' => 'INVALID REVERT!',
                             'path' => '',
                         ],
                         [
                             'message' => 'This value is not valid.',
                             'path' => '[lastname]',
-                        ],
-                        [
-                            'message' => 'Invalid REVERT!',
-                            'path' => '',
                         ],
                     ],
                 ],
@@ -424,12 +435,12 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                     'category' => ErrorFormatter::VALIDATION_CATEGORY,
                     'violations' => [
                         [
-                            'message' => 'This value is not valid.',
-                            'path' => '[lastname]',
+                            'message' => 'INVALID REVERT!',
+                            'path' => '',
                         ],
                         [
-                            'message' => 'Invalid REVERT!',
-                            'path' => '',
+                            'message' => 'This value is not valid.',
+                            'path' => '[lastname]',
                         ],
                     ],
                 ],

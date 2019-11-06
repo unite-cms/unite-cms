@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Field;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\ContentType\ContentType;
@@ -22,7 +23,7 @@ interface FieldTypeInterface
 
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData;
 
-    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void;
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ContextualValidatorInterface $validator, ExecutionContextInterface $context, FieldData $fieldData = null) : void;
 
     public function queryOrderBy(ContentTypeField $field, array $sortInput) : ?BaseFieldOrderBy;
 

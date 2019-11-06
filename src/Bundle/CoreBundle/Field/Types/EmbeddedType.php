@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedFieldData;
@@ -76,10 +77,10 @@ class EmbeddedType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
-        parent::validateFieldData($content, $field, $context, $fieldData);
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ContextualValidatorInterface $validator, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
+        parent::validateFieldData($content, $field, $validator, $context, $fieldData);
 
-        if($context->getViolations()->count() > 0) {
+        if($validator->getViolations()->count() > 0) {
             return;
         }
 
@@ -87,6 +88,8 @@ class EmbeddedType extends AbstractFieldType
         if(!empty($fieldData)) {
 
             $rows = $fieldData instanceof FieldDataList ? $fieldData->rows() : [$fieldData];
+            $embeddedContent = [];
+
             foreach($rows as $delta => $row) {
 
                 // Only validate embedded fields if field data is not empty.
@@ -96,28 +99,10 @@ class EmbeddedType extends AbstractFieldType
                     continue;
                 }
 
-                $violations = $context->getValidator()->validate(
-                    $this->resolveRowData($content, $field, $row),
-                    null,
-                    [$context->getGroup()]
-                );
-
-                foreach($violations as $violation) {
-
-                    $propertyPath = '['.$field->getId().']';
-
-                    if($fieldData instanceof FieldDataList) {
-                        $propertyPath .= '['. $delta . ']';
-                    }
-
-                    $propertyPath .= $violation->getPropertyPath();
-
-                    $context->buildViolation(
-                        $violation->getMessage(),
-                        $violation->getParameters()
-                    )->atPath($propertyPath)->addViolation();
-                }
+                $embeddedContent[] = $this->resolveRowData($content, $field, $row);
             }
+
+            $validator->validate($embeddedContent, null, [$context->getGroup()]);
         }
     }
 

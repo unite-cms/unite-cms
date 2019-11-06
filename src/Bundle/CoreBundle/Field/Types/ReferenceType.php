@@ -6,7 +6,10 @@ namespace UniteCMS\CoreBundle\Field\Types;
 use Doctrine\Common\Collections\Expr\Comparison;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
@@ -116,20 +119,20 @@ class ReferenceType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
-        parent::validateFieldData($content, $field, $context, $fieldData);
+    public function validateFieldData(ContentInterface $content, ContentTypeField $field, ContextualValidatorInterface $validator, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
 
-        if($context->getViolations()->count() > 0) {
+        parent::validateFieldData($content, $field, $validator, $context, $fieldData);
+
+        if($validator->getViolations()->count() > 0) {
             return;
         }
 
         // Check that referenced content can be resolved.
-        if(!empty($fieldData) && !$this->resolveField($content, $field, $fieldData)) {
-            $context
-                ->buildViolation(sprintf('Referenced content not found.'))
-                ->atPath('['.$field->getId().']')
-                ->addViolation();
-        }
+        $validator->validate(
+            $this->resolveField($content, $field, $fieldData),
+            new NotNull(),
+            [$context->getGroup()]
+        );
     }
 
     /**

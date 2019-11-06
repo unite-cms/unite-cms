@@ -39,22 +39,29 @@ class ValidContentValidator extends ConstraintValidator
         $domain = $this->domainManager->current();
         $contentType = $domain->getContentTypeManager()->getAnyType($value->getType());
 
-        // Allow all field types to validate field data.
-        foreach($contentType->getFields() as $id => $field) {
-            $fieldData = $value->getFieldData($id);
-            $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
-            $fieldType->validateFieldData($value, $field, $this->context, $fieldData);
-
-            // Check all defined constraints for this field type.
-            $this->context->getValidator()
-                ->inContext($this->context)
-                ->atPath('['.$id.']')
-                ->validate($fieldData, $field->getConstraints());
-        }
+        $context = $this->context;
 
         // Check all defined constraints for this content type.
-        $this->context->getValidator()
-            ->inContext($this->context)
-            ->validate($value, $contentType->getConstraints());
+        $context
+            ->getValidator()
+            ->inContext($context)
+            ->validate($value, $contentType->getConstraints(), [$context->getGroup()]);
+
+        // Check all defined constraints for all fields + allow field types to validate
+        foreach($contentType->getFields() as $id => $field) {
+
+            $fieldData = $value->getFieldData($id);
+            $fieldContext = $context->getValidator()->startContext()->atPath($context->getPropertyPath('['.$id.']'));
+
+            // Check all defined constraints for this field type.
+            $fieldContext->validate($fieldData, $field->getConstraints(), [$context->getGroup()]);
+
+            // Allow all field types to validate field data.
+            $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
+            $fieldType->validateFieldData($value, $field, $fieldContext, $context, $fieldData);
+
+            // Add field violations to general validator.
+            $context->getViolations()->addAll($fieldContext->getViolations());
+        }
     }
 }
