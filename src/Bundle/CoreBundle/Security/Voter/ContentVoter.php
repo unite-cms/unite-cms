@@ -7,8 +7,8 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 
 class ContentVoter extends Voter
 {
@@ -29,18 +29,18 @@ class ContentVoter extends Voter
     ];
 
     /**
-     * @var AuthorizationCheckerInterface $authorizationChecker
+     * @var SaveExpressionLanguage $expressionLanguage
      */
-    protected $authorizationChecker;
+    protected $expressionLanguage;
 
     /**
      * @var DomainManager $domainManager
      */
     protected $domainManager;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager)
+    public function __construct(SaveExpressionLanguage $expressionLanguage, DomainManager $domainManager)
     {
-        $this->authorizationChecker = $authorizationChecker;
+        $this->expressionLanguage = $expressionLanguage;
         $this->domainManager = $domainManager;
     }
 
@@ -80,9 +80,8 @@ class ContentVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        return $this->authorizationChecker->isGranted(
-            $contentType->getPermission($attribute),
-            $data
-        );
+        return (bool)$this->expressionLanguage->evaluate($contentType->getPermission($attribute), [
+            'content' => $data,
+        ]);
     }
 }

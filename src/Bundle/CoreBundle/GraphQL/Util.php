@@ -6,7 +6,7 @@ namespace UniteCMS\CoreBundle\GraphQL;
 use GraphQL\Language\AST\ListValueNode;
 use GraphQL\Language\AST\ValueNode;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 
 class Util
 {
@@ -93,14 +93,14 @@ class Util
      * Returns true, this the given node is hidden.
      *
      * @param $node
-     * @param AuthorizationCheckerInterface $authorizationChecker
+     * @param SaveExpressionLanguage $expressionLanguage
      *
      * @return bool
      */
-    static function isHidden($node, AuthorizationCheckerInterface $authorizationChecker) : bool {
+    static function isHidden($node, SaveExpressionLanguage $expressionLanguage) : bool {
         foreach(self::getDirectives($node) as $directive) {
             if($directive['name'] === 'hide') {
-                return $authorizationChecker->isGranted(new Expression($directive['args']['if']));
+                return (bool)$expressionLanguage->evaluate(new Expression($directive['args']['if']));
             }
         }
 

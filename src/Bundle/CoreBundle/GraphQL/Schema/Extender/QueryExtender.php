@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\GraphQL\Schema\Extender;
 
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use GraphQL\Type\Schema;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -16,13 +17,19 @@ class QueryExtender implements SchemaExtenderInterface
     protected $authorizationChecker;
 
     /**
+     * @var  SaveExpressionLanguage $expressionLanguage
+     */
+    protected $expressionLanguage;
+
+    /**
      * @var DomainManager $domainManager
      */
     protected $domainManager;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, SaveExpressionLanguage $expressionLanguage, DomainManager $domainManager)
     {
         $this->authorizationChecker = $authorizationChecker;
+        $this->expressionLanguage = $expressionLanguage;
         $this->domainManager = $domainManager;
     }
 
@@ -36,7 +43,7 @@ class QueryExtender implements SchemaExtenderInterface
         $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
 
         foreach($contentTypeManager->getContentTypes() as $type) {
-            if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
+            if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->expressionLanguage)) {
                 if($this->authorizationChecker->isGranted(ContentVoter::QUERY, $type)) {
                     $extension .= sprintf('
                         get%1$s(id: ID!) : %1$s
@@ -47,7 +54,7 @@ class QueryExtender implements SchemaExtenderInterface
         }
 
         foreach($contentTypeManager->getSingleContentTypes() as $type) {
-            if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->authorizationChecker)) {
+            if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->expressionLanguage)) {
                 if($this->authorizationChecker->isGranted(ContentVoter::QUERY, $type)) {
                     $extension .= sprintf('
                         get%1$s : %1$s
@@ -64,7 +71,7 @@ class QueryExtender implements SchemaExtenderInterface
 
         if(!empty($contentTypeManager->getUserTypes())) {
             $extension .= 'extend type UniteQuery {
-                me: UniteUser @hide(if: "is_anonymous()")
+                me: UniteUser @hide(if: "user.isAnonymous()")
             }';
         }
 

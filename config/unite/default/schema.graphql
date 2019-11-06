@@ -65,10 +65,10 @@ type Article implements UniteContent @access(query: "true", mutation: "true", cr
     status: ArticleStatus               @choiceField(default: "DRAFT")
     contentBlocks: [ContentBlock!]      @embeddedField
     categoryUnionTest: AnyCategory      @referenceField
-    foo: Expression                     @hide(if: "not is_granted('ROLE_ADMIN')")
+    foo: Expression                     @hide(if: "not has_role('ROLE_ADMIN')")
 }
 
-type Admin implements UniteUser @hide(if: "not is_granted('ROLE_ADMIN')") {
+type Admin implements UniteUser @hide(if: "not has_role('ROLE_ADMIN')") {
     _meta: UniteContentMeta!
     id: ID
     username: String!                   @textField

@@ -112,5 +112,5 @@ type UniteQuery {
 
 type UniteMutation {
     _version: String!
-    generateJWT: String! @hide(if: "is_anonymous()")
+    generateJWT: String! @hide(if: "user.isAnonymous()")
 }

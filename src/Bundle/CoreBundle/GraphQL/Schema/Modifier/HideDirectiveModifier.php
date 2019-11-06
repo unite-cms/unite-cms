@@ -5,24 +5,24 @@ namespace UniteCMS\CoreBundle\GraphQL\Schema\Modifier;
 
 use GraphQL\Language\AST\NodeKind;
 use GraphQL\Language\Visitor;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class HideDirectiveModifier implements SchemaModifierInterface
 {
 
     /**
-     * @var AuthorizationCheckerInterface $authorizationChecker
+     * @var SaveExpressionLanguage $expressionLanguage
      */
-    protected $authorizationChecker;
+    protected $expressionLanguage;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker)
+    public function __construct(SaveExpressionLanguage $expressionLanguage)
     {
-        $this->authorizationChecker = $authorizationChecker;
+        $this->expressionLanguage = $expressionLanguage;
     }
 
     /**
@@ -35,14 +35,14 @@ class HideDirectiveModifier implements SchemaModifierInterface
         foreach($schema->getTypeMap() as $type) {
 
             $hideMap[$type->name] = [
-                'hide' => Util::isHidden($type->astNode, $this->authorizationChecker),
+                'hide' => Util::isHidden($type->astNode, $this->expressionLanguage),
                 'fields' => [],
             ];
 
             // Check @hide directive on fields.
             if($type instanceof ObjectType || $type instanceof InputObjectType) {
                 foreach ($type->getFields() as $field) {
-                    if(Util::isHidden($field->astNode, $this->authorizationChecker)) {
+                    if(Util::isHidden($field->astNode, $this->expressionLanguage)) {
                         $hideMap[$type->name]['fields'][$field->name] = true;
                     }
                 }

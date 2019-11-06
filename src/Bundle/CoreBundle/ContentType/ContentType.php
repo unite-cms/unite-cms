@@ -63,11 +63,11 @@ class ContentType
     {
         $this->permissions = [
             ContentVoter::QUERY => 'true',
-            ContentVoter::MUTATION => 'is_granted("ROLE_ADMIN")',
-            ContentVoter::CREATE => 'is_granted("ROLE_ADMIN")',
+            ContentVoter::MUTATION => 'has_role("ROLE_ADMIN")',
+            ContentVoter::CREATE => 'has_role("ROLE_ADMIN")',
             ContentVoter::READ => 'true',
-            ContentVoter::UPDATE => 'is_granted("ROLE_ADMIN")',
-            ContentVoter::DELETE => 'is_granted("ROLE_ADMIN")',
+            ContentVoter::UPDATE => 'has_role("ROLE_ADMIN")',
+            ContentVoter::DELETE => 'has_role("ROLE_ADMIN")',
         ];
         $this->id = $id;
     }
@@ -100,7 +100,7 @@ class ContentType
                 if(!empty($directive['args']['groups'])) {
                     $options['groups'] = $directive['args']['groups'];
                 }
-                $contentType->addConstraint(new Assert\Expression($options));
+                $contentType->addConstraint(new UniteAssert\SaveExpression($options));
             }
 
             // Special handle webhook directive.

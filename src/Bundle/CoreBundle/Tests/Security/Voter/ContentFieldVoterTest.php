@@ -22,9 +22,9 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
             id: ID
             _meta: UniteContentMeta!
             title: String @textField @access(
-                mutation: "user.getFieldData(\'mutation\') == \'mutation\'"  
-                read: "subject and subject.getFieldData(\'title\') == \'access\'"
-                update: "subject and subject.getFieldData(\'title\') == \'access\'"
+                mutation: "user.get(\'mutation\') == \'mutation\'"  
+                read: "content.get(\'title\') == \'access\'"
+                update: "content.get(\'title\') == \'access\'"
             )
             foo: String @textField @access(mutation: "true")
         }

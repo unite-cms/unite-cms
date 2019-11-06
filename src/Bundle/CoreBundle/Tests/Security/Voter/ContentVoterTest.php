@@ -19,12 +19,12 @@ class ContentVoterTest extends SchemaAwareTestCase
     const SCHEMA = '
         type Article implements UniteContent 
             @access(
-                query: "user.getFieldData(\'query\') == \'query\'", 
-                mutation: "user.getFieldData(\'mutation\') == \'mutation\'", 
-                create: "subject.getFieldData(\'title\') == \'create\'", 
-                read: "subject.getFieldData(\'title\') == \'read\'", 
-                update: "subject.getFieldData(\'title\') == \'update\'", 
-                delete: "subject.getFieldData(\'title\') == \'delete\'"
+                query: "user.get(\'query\') == \'query\'", 
+                mutation: "user.get(\'mutation\') == \'mutation\'", 
+                create: "content.get(\'title\') == \'create\'", 
+                read: "content.get(\'title\') == \'read\'", 
+                update: "content.get(\'title\') == \'update\'", 
+                delete: "content.get(\'title\') == \'delete\'"
             ) 
         {
             id: ID

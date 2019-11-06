@@ -7,8 +7,8 @@ use UniteCMS\CoreBundle\Content\ContentField;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 
 class ContentFieldVoter extends Voter
 {
@@ -23,18 +23,18 @@ class ContentFieldVoter extends Voter
     ];
 
     /**
-     * @var AuthorizationCheckerInterface $authorizationChecker
+     * @var SaveExpressionLanguage $expressionLanguage
      */
-    protected $authorizationChecker;
+    protected $expressionLanguage;
 
     /**
      * @var DomainManager $domainManager
      */
     protected $domainManager;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DomainManager $domainManager)
+    public function __construct(SaveExpressionLanguage $expressionLanguage, DomainManager $domainManager)
     {
-        $this->authorizationChecker = $authorizationChecker;
+        $this->expressionLanguage = $expressionLanguage;
         $this->domainManager = $domainManager;
     }
 
@@ -74,6 +74,8 @@ class ContentFieldVoter extends Voter
             return self::ACCESS_ABSTAIN;
         }
 
-        return $this->authorizationChecker->isGranted($fieldType->getPermission($attribute), $fieldData);
+        return (bool)$this->expressionLanguage->evaluate($fieldType->getPermission($attribute), [
+            'content' => $fieldData,
+        ]);
     }
 }

@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\Exception\LockedException;
 use Symfony\Component\Security\Core\Exception\ProviderNotFoundException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use UniteCMS\CoreBundle\Expression\AuthorizationExpressionLanguage;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 
@@ -19,11 +19,11 @@ class UserChecker implements UserCheckerInterface
     protected $schemaManager;
 
     /**
-     * @var AuthorizationExpressionLanguage $expressionLanguage
+     * @var SaveExpressionLanguage $expressionLanguage
      */
     protected $expressionLanguage;
 
-    public function __construct(SchemaManager $schemaManager, AuthorizationExpressionLanguage $expressionLanguage)
+    public function __construct(SchemaManager $schemaManager, SaveExpressionLanguage $expressionLanguage)
     {
         $this->schemaManager = $schemaManager;
         $this->expressionLanguage = $expressionLanguage;

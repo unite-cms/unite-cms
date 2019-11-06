@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use UniteCMS\CoreBundle\Validator\Constraints\SaveExpression;
 
 class ContentTypeField
 {
@@ -187,7 +188,7 @@ class ContentTypeField
                     if(!empty($directive['args']['groups'])) {
                         $options['groups'] = $directive['args']['groups'];
                     }
-                    $field->addConstraint(new Assert\Expression($options));
+                    $field->addConstraint(new SaveExpression($options));
                 }
             }
 
