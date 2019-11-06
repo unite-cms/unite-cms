@@ -63,6 +63,13 @@ class ContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
+    public function transactional(Domain $domain, callable $transaction) {
+        return $this->em($domain)->transactional($transaction);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
         return new ContentResult(
             $this->repository($domain),

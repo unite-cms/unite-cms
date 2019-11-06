@@ -17,6 +17,13 @@ class TestContentManager implements ContentManagerInterface
     protected $versionedData = [];
     protected $repository = [];
 
+    /**
+     * {@inheritDoc}
+     */
+    public function transactional(Domain $domain, callable $transaction) {
+        return $transaction();
+    }
+
     public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
 
         if(!isset($this->repository[$type])) {

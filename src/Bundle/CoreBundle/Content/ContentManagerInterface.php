@@ -12,6 +12,16 @@ interface ContentManagerInterface
     public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null) : ContentResultInterface;
     public function get(Domain $domain, string $type, string $id, bool $includeDeleted = false) : ?ContentInterface;
 
+    /**
+     * Start a transaction, execute $transaction() and finish transaction.
+     *
+     * @param Domain $domain
+     * @param callable $transaction
+     *
+     * @return mixed, the return value of $transaction
+     */
+    public function transactional(Domain $domain, callable $transaction);
+
     public function create(Domain $domain, string $type) : ContentInterface;
 
     public function update(Domain $domain, ContentInterface $content, array $inputData = []) : ContentInterface;

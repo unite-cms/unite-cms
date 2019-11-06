@@ -110,28 +110,43 @@ class MutationResolver implements FieldResolverInterface
         switch ($field) {
             case 'create':
                 $this->contentAccess(ContentVoter::CREATE, $content);
-                $this->contentUpdate($contentManager, $domain, $content, $args['data']);
-                return $this->contentPersist($contentManager, $domain, $content, ContentEvent::CREATE, $args['persist']);
+
+                return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $this->contentUpdate($contentManager, $domain, $content, $args['data']);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::CREATE, $args['persist']);
+                });
 
             case 'update':
                 $this->contentAccess(ContentVoter::UPDATE, $content);
-                $this->contentUpdate($contentManager, $domain, $content, $args['data']);
-                return $this->contentPersist($contentManager, $domain, $content, ContentEvent::UPDATE, $args['persist']);
+
+                return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $this->contentUpdate($contentManager, $domain, $content, $args['data']);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::UPDATE, $args['persist']);
+                });
 
             case 'revert':
                 $this->contentAccess(ContentVoter::UPDATE, $content);
-                $contentManager->revert($domain, $content, $args['version']);
-                return $this->contentPersist($contentManager, $domain, $content, ContentEvent::REVERT, $args['persist']);
+
+                return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $contentManager->revert($domain, $content, $args['version']);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::REVERT, $args['persist']);
+                });
 
             case 'delete':
                 $this->contentAccess(ContentVoter::DELETE, $content);
-                $contentManager->delete($domain, $content);
-                return $this->contentPersist($contentManager, $domain, $content, ContentEvent::DELETE, $args['persist']);
+
+                return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $contentManager->delete($domain, $content);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::DELETE, $args['persist']);
+                });
 
             case 'recover':
                 $this->contentAccess(ContentVoter::UPDATE, $content);
-                $contentManager->recover($domain, $content);
-                $this->contentPersist($contentManager, $domain, $content, ContentEvent::RECOVER, $args['persist']);
+
+                $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $contentManager->recover($domain, $content);
+                    $this->contentPersist($contentManager, $domain, $content, ContentEvent::RECOVER, $args['persist']);
+                });
 
                 // On recover: only return content if we really persist the change
                 return $args['persist'] ? $content: null;
