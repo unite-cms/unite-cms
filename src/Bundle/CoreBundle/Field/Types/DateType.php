@@ -11,6 +11,11 @@ class DateType extends DateTimeType
      * {@inheritDoc}
      */
     static function parseValue($value) {
+
+        if(empty($value)) {
+            return $value;
+        }
+
         $value = parent::parseValue($value);
         $value->setTime(0, 0, 0);
         return $value;

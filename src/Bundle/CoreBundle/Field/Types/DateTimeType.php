@@ -19,6 +19,10 @@ class DateTimeType extends AbstractFieldType
      */
     static function parseValue($value) {
 
+        if(empty($value)) {
+            return $value;
+        }
+
         if(is_int($value)) {
             $date = new DateTime();
             $date->setTimestamp($value);
@@ -29,7 +33,7 @@ class DateTimeType extends AbstractFieldType
             return new DateTime($value);
         }
 
-        throw new Error("Date input must be a unix timestamp INT or a date string.", [$value]);
+        throw new Error("Date input must be a unix timestamp INT or a date string.");
     }
 
     /**
