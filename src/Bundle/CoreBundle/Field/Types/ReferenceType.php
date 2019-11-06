@@ -6,7 +6,6 @@ namespace UniteCMS\CoreBundle\Field\Types;
 use Doctrine\Common\Collections\Expr\Comparison;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
-use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
@@ -17,6 +16,7 @@ use UniteCMS\CoreBundle\Content\ReferenceFieldData;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\BaseFieldComparison;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
@@ -31,9 +31,10 @@ class ReferenceType extends AbstractFieldType
      */
     protected $domainManager;
 
-    public function __construct(DomainManager $domainManager)
+    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage)
     {
         $this->domainManager = $domainManager;
+        parent::__construct($saveExpressionLanguage);
     }
 
     /**
@@ -113,7 +114,8 @@ class ReferenceType extends AbstractFieldType
      * {@inheritDoc}
      */
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
-        return new ReferenceFieldData($inputData ?? $field->getSettings()->get('default'));
+        $fieldData = parent::normalizeInputData($content, $field, $inputData);
+        return new ReferenceFieldData($fieldData->getData());
     }
 
     /**

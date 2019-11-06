@@ -8,6 +8,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage as BaseExpressionLan
 use Symfony\Component\Security\Core\Security;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Expression\FunctionProviders\AuthenticationProvider;
+use UniteCMS\CoreBundle\Expression\FunctionProviders\DateProvider;
 use UniteCMS\CoreBundle\Expression\Variables\ProxyContent;
 use UniteCMS\CoreBundle\Expression\Variables\ProxyUser;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
@@ -29,6 +30,7 @@ class SaveExpressionLanguage extends BaseExpressionLanguage
         $this->security = $security;
         parent::__construct($cache, [
             new AuthenticationProvider(),
+            new DateProvider(),
         ]);
     }
 

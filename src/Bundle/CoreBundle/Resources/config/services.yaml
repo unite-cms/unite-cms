@@ -36,8 +36,14 @@ services:
         UniteCMS\CoreBundle\GraphQL\Schema\Modifier\SchemaModifierInterface:
             tags: ['unite.graphql.schema_modifier']
 
-        UniteCMS\CoreBundle\GraphQL\Resolver\FieldResolverInterface:
+        UniteCMS\CoreBundle\GraphQL\Resolver\Field\FieldResolverInterface:
             tags: ['unite.graphql.field_resolver']
+
+        UniteCMS\CoreBundle\GraphQL\Resolver\Type\TypeResolverInterface:
+            tags: ['unite.graphql.type_resolver']
+
+        UniteCMS\CoreBundle\GraphQL\Resolver\Scalar\ScalarResolverInterface:
+            tags: ['unite.graphql.scalar_resolver']
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

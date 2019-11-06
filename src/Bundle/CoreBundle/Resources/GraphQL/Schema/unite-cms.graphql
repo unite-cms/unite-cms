@@ -2,7 +2,6 @@
 scalar Expression
 scalar JSON
 scalar Date
-scalar Time
 scalar DateTime
 scalar Locale
 scalar NULL

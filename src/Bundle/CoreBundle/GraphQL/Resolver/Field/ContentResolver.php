@@ -1,7 +1,7 @@
 <?php
 
 
-namespace UniteCMS\CoreBundle\GraphQL\Resolver;
+namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use UniteCMS\CoreBundle\Content\ContentField;
 use UniteCMS\CoreBundle\Content\ContentInterface;

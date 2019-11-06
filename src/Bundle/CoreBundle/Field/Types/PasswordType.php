@@ -8,6 +8,7 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\SensitiveFieldData;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\BaseFieldComparison;
 use UniteCMS\CoreBundle\Query\BaseFieldOrderBy;
 use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
@@ -23,9 +24,10 @@ class PasswordType extends AbstractFieldType
      */
     protected $passwordEncoder;
 
-    public function __construct(FieldableUserPasswordEncoder $passwordEncoder)
+    public function __construct(FieldableUserPasswordEncoder $passwordEncoder, SaveExpressionLanguage $saveExpressionLanguage)
     {
         $this->passwordEncoder = $passwordEncoder;
+        parent::__construct($saveExpressionLanguage);
     }
 
     /**

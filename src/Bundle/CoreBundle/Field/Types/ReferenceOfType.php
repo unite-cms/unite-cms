@@ -10,6 +10,7 @@ use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Query\DataFieldComparison;
 
@@ -23,7 +24,7 @@ class ReferenceOfType extends AbstractFieldType
      */
     protected $domainManager;
 
-    public function __construct(DomainManager $domainManager)
+    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $sa)
     {
         $this->domainManager = $domainManager;
     }

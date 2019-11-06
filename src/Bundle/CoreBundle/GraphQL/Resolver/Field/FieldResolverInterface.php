@@ -1,9 +1,8 @@
 <?php
 
 
-namespace UniteCMS\CoreBundle\GraphQL\Resolver;
+namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
-use UniteCMS\CoreBundle\Domain\ExecutionContext;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 
@@ -16,7 +15,7 @@ interface FieldResolverInterface
 {
 
     /**
-     * Return true, of this resolver supports the given type.
+     * Return true, if this resolver supports the given type.
      *
      * @param string $typeName
      * @param ObjectTypeDefinitionNode $typeDefinitionNode

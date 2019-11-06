@@ -1,6 +1,6 @@
 <?php
 
-namespace UniteCMS\CoreBundle\GraphQL\Resolver;
+namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -299,6 +299,7 @@ class EmailPasswordResetResolver implements FieldResolverInterface
         $passwordField->validateFieldData(
             $user,
             $domain->getContentTypeManager()->getUserType($user->getType())->getField($config['passwordField']),
+            $context->getValidator()->startContext()->atPath($config['passwordField']),
             $context,
             $user->getFieldData($config['passwordField'])
         );

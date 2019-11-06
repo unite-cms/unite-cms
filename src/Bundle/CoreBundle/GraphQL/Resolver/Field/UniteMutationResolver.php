@@ -1,29 +1,36 @@
 <?php
 
-namespace UniteCMS\CoreBundle\GraphQL\Resolver;
+namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Security;
 use UniteCMS\CoreBundle\UniteCMSCoreBundle;
 
-class UniteQueryResolver implements FieldResolverInterface
+class UniteMutationResolver implements FieldResolverInterface
 {
     /**
      * @var Security $security
      */
     protected $security;
 
-    public function __construct(Security $security)
+    /**
+     * @var JWTTokenManagerInterface $tokenManager
+     */
+    protected $tokenManager;
+
+    public function __construct(Security $security, JWTTokenManagerInterface $tokenManager)
     {
         $this->security = $security;
+        $this->tokenManager = $tokenManager;
     }
 
     /**
      * @inheritDoc
      */
     public function supports(string $typeName, ObjectTypeDefinitionNode $typeDefinitionNode): bool {
-        return $typeName === 'UniteQuery';
+        return $typeName === 'UniteMutation';
     }
 
     /**
@@ -32,8 +39,8 @@ class UniteQueryResolver implements FieldResolverInterface
     public function resolve($value, $args, $context, ResolveInfo $info) {
 
         switch ($info->fieldName) {
-            case 'me':
-                return $this->security->getUser();
+            case 'generateJWT':
+                return $this->tokenManager->create($this->security->getUser());
             case '_version':
                 return UniteCMSCoreBundle::UNITE_VERSION;
             default: return null;

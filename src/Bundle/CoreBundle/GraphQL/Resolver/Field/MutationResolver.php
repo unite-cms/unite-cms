@@ -1,7 +1,7 @@
 <?php
 
 
-namespace UniteCMS\CoreBundle\GraphQL\Resolver;
+namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use GraphQL\Error\Error;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
@@ -22,6 +22,7 @@ use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentNotFoundException;
+use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class MutationResolver implements FieldResolverInterface
@@ -70,6 +71,7 @@ class MutationResolver implements FieldResolverInterface
 
     /**
      * @inheritDoc
+     * @throws \UniteCMS\CoreBundle\Exception\ContentNotFoundException
      */
     public function resolve($value, $args, $context, ResolveInfo $info) {
 
@@ -97,7 +99,7 @@ class MutationResolver implements FieldResolverInterface
 
         // If this is a single content type, get id from repository.
         if($domain->getContentTypeManager()->getSingleContentType($type)) {
-            $allSingleContent = $contentManager->find($domain, $type);
+            $allSingleContent = $contentManager->find($domain, $type, new ContentCriteria());
             $args['id'] = $allSingleContent->getTotal() === 0 ? null : $allSingleContent->getResult()[0]->getId();
         }
 

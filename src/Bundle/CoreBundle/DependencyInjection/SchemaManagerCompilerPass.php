@@ -55,7 +55,21 @@ class SchemaManagerCompilerPass implements CompilerPassInterface
         $taggedServices = $container->findTaggedServiceIds('unite.graphql.field_resolver');
 
         foreach ($taggedServices as $id => $tags) {
-            $definition->addMethodCall('registerResolver', [new Reference($id)]);
+            $definition->addMethodCall('registerFieldResolver', [new Reference($id)]);
+        }
+
+        // Register type resolver
+        $taggedServices = $container->findTaggedServiceIds('unite.graphql.type_resolver');
+
+        foreach ($taggedServices as $id => $tags) {
+            $definition->addMethodCall('registerTypeResolver', [new Reference($id)]);
+        }
+
+        // Register scalar resolver
+        $taggedServices = $container->findTaggedServiceIds('unite.graphql.scalar_resolver');
+
+        foreach ($taggedServices as $id => $tags) {
+            $definition->addMethodCall('registerScalarResolver', [new Reference($id)]);
         }
     }
 }

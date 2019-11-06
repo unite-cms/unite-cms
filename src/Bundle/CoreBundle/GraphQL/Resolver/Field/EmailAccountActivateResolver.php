@@ -1,6 +1,6 @@
 <?php
 
-namespace UniteCMS\CoreBundle\GraphQL\Resolver;
+namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -291,6 +291,7 @@ class EmailAccountActivateResolver implements FieldResolverInterface
         $stateFieldType->validateFieldData(
             $user,
             $stateField,
+            $context->getValidator()->startContext()->atPath($config['stateField']),
             $context,
             $user->getFieldData($config['stateField'])
         );

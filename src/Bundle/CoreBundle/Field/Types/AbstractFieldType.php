@@ -12,6 +12,7 @@ use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
 use UniteCMS\CoreBundle\Query\BaseFieldComparison;
@@ -24,6 +25,16 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
 {
     const TYPE = null;
     const GRAPHQL_INPUT_TYPE = Type::STRING;
+
+    /**
+     * @var SaveExpressionLanguage $expressionLanguage
+     */
+    protected $expressionLanguage;
+
+    public function __construct(SaveExpressionLanguage $expressionLanguage)
+    {
+        $this->expressionLanguage = $expressionLanguage;
+    }
 
     /**
      * {@inheritDoc}
@@ -102,10 +113,27 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     }
 
     /**
+     * This method can be used normalize default input data during normalization.
+     *
+     * @param mixed $data
+     * @return mixed $data
+     */
+    protected function normalizeDefaultValue($data) {
+        return $data;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
-        return new FieldData($inputData ?? $field->getSettings()->get('default'));
+
+        $inputData = $inputData ?? $this->normalizeDefaultValue($field->getSettings()->get('default'));
+
+        if(empty($inputData) && !empty($field->getSettings()->get('defaultExpression'))) {
+            $inputData = $this->expressionLanguage->evaluate($field->getSettings()->get('defaultExpression'));
+        }
+
+        return new FieldData($inputData);
     }
 
     /**

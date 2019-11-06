@@ -1,4 +1,0 @@
-
-directive @timeField(
-    default: Time
-) on FIELD_DEFINITION

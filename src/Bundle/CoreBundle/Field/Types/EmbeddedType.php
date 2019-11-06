@@ -15,6 +15,7 @@ use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 
 class EmbeddedType extends AbstractFieldType
 {
@@ -35,11 +36,12 @@ class EmbeddedType extends AbstractFieldType
      */
     protected $domainLogger;
 
-    public function __construct(DomainManager $domainManager, FieldDataMapper $fieldDataMapper, LoggerInterface $uniteCMSDomainLogger)
+    public function __construct(DomainManager $domainManager, FieldDataMapper $fieldDataMapper, SaveExpressionLanguage $saveExpressionLanguage, LoggerInterface $uniteCMSDomainLogger)
     {
         $this->domainManager = $domainManager;
         $this->fieldDataMapper = $fieldDataMapper;
         $this->domainLogger = $uniteCMSDomainLogger;
+        parent::__construct($saveExpressionLanguage);
     }
 
     /**
@@ -71,7 +73,14 @@ class EmbeddedType extends AbstractFieldType
      * {@inheritDoc}
      */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
-        return new EmbeddedContent($fieldData->getId(), $fieldData->getType(), $fieldData->getData());
+
+        if($fieldData instanceof EmbeddedFieldData) {
+            return new EmbeddedContent($fieldData->getId(), $fieldData->getType(), $fieldData->getData());
+        }
+
+        // Create embedded field data if not already set.
+        $returnTypes = empty($field->getUnionTypes()) ? [$field->getReturnType()] : array_keys($field->getUnionTypes());
+        return new EmbeddedContent(uniqid(), $returnTypes[0]);
     }
 
     /**

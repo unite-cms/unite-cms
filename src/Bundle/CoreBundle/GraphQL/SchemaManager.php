@@ -7,14 +7,15 @@ use GraphQL\Language\AST\InterfaceTypeDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
+use UniteCMS\CoreBundle\GraphQL\Resolver\Field\FieldResolverInterface;
+use UniteCMS\CoreBundle\GraphQL\Resolver\Scalar\ScalarResolverInterface;
+use UniteCMS\CoreBundle\GraphQL\Resolver\Type\TypeResolverInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Modifier\SchemaModifierInterface;
-use UniteCMS\CoreBundle\GraphQL\Resolver\FieldResolverInterface;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
 use GraphQL\Language\AST\DocumentNode;
@@ -95,7 +96,17 @@ class SchemaManager
     /**
      * @var FieldResolverInterface[]
      */
-    protected $resolvers = [];
+    protected $fieldResolvers = [];
+
+    /**
+     * @var TypeResolverInterface[]
+     */
+    protected $typeResolvers = [];
+
+    /**
+     * @var ScalarResolverInterface[]
+     */
+    protected $scalarResolvers = [];
 
     /**
      * @param SchemaProviderInterface $provider
@@ -145,12 +156,154 @@ class SchemaManager
      * @param FieldResolverInterface $resolver
      * @return $this
      */
-    public function registerResolver(FieldResolverInterface $resolver) : self {
-        if(!in_array($resolver, $this->resolvers)) {
-            $this->resolvers[] = $resolver;
+    public function registerFieldResolver(FieldResolverInterface $resolver) : self {
+        if(!in_array($resolver, $this->fieldResolvers)) {
+            $this->fieldResolvers[] = $resolver;
         }
 
         return $this;
+    }
+
+    /**
+     * @param TypeResolverInterface $resolver
+     * @return $this
+     */
+    public function registerTypeResolver(TypeResolverInterface $resolver) : self {
+        if(!in_array($resolver, $this->typeResolvers)) {
+            $this->typeResolvers[] = $resolver;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ScalarResolverInterface $resolver
+     * @return $this
+     */
+    public function registerScalarResolver(ScalarResolverInterface $resolver) : self {
+        if(!in_array($resolver, $this->scalarResolvers)) {
+            $this->scalarResolvers[] = $resolver;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param array $resolvers
+     * @param array $typeConfig
+     * @param $typeDefinitionNode
+     *
+     * @return array
+     */
+    protected function getSupportedResolvers(array $resolvers, array $typeConfig, $typeDefinitionNode) : array{
+        $supportedResolvers = [];
+        foreach ($resolvers as $resolver) {
+            if ($resolver->supports($typeConfig['name'], $typeDefinitionNode)) {
+                $supportedResolvers[] = $resolver;
+            }
+        }
+        return $supportedResolvers;
+    }
+
+    /**
+     * @param array $typeConfig
+     * @param $typeDefinitionNode
+     *
+     * @return mixed
+     */
+    protected function decorateObjectType(array $typeConfig, $typeDefinitionNode) {
+
+        $resolvers = $this->getSupportedResolvers($this->fieldResolvers, $typeConfig, $typeDefinitionNode);
+
+        if(count($resolvers) === 1) {
+            $typeConfig['resolveField'] = [$resolvers[0], 'resolve'];
+        } elseif(count($resolvers) > 1) {
+            $typeConfig['resolveField'] = function($value, $args, $context, ResolveInfo $info) use ($resolvers) {
+                foreach($resolvers as $resolver) {
+                    $result = $resolver->resolve($value, $args, $context, $info);
+                    if($result !== null) {
+                        return $result;
+                    }
+                }
+                return null;
+            };
+        }
+
+        return $typeConfig;
+    }
+
+    /**
+     * @param $typeConfig
+     * @param $typeDefinitionNode
+     *
+     * @return array
+     */
+    protected function decorateAbstractType(array $typeConfig, $typeDefinitionNode) {
+
+        $resolvers = $this->getSupportedResolvers($this->typeResolvers, $typeConfig, $typeDefinitionNode);
+
+        if(count($resolvers) === 1) {
+            $typeConfig['resolveType'] = [$resolvers[0], 'resolve'];
+        } elseif(count($resolvers) > 1) {
+            $typeConfig['resolveType'] = function($value, $context, ResolveInfo $info) use ($resolvers) {
+                foreach($resolvers as $resolver) {
+                    $result = $resolver->resolve($value, $context, $info);
+                    if($result !== null) {
+                        return $result;
+                    }
+                }
+                return null;
+            };
+        }
+
+        return $typeConfig;
+    }
+
+    /**
+     * @param array $typeConfig
+     * @param $typeDefinitionNode
+     *
+     * @return array
+     */
+    protected function decorateScalarType(array $typeConfig, $typeDefinitionNode) {
+
+        $resolvers = $this->getSupportedResolvers($this->scalarResolvers, $typeConfig, $typeDefinitionNode);
+
+        if(count($resolvers) === 1) {
+            $typeConfig['serialize'] = [$resolvers[0], 'serialize'];
+            $typeConfig['parseValue'] = [$resolvers[0], 'parseValue'];
+            $typeConfig['parseLiteral'] = [$resolvers[0], 'parseLiteral'];
+        } elseif(count($resolvers) > 1) {
+            $typeConfig['serialize'] = function($value) use ($resolvers) {
+                foreach($resolvers as $resolver) {
+                    $result = $resolver->serialize($value);
+                    if($result !== null) {
+                        return $result;
+                    }
+                }
+                return null;
+            };
+            $typeConfig['parseValue'] = function($value) use ($resolvers) {
+                foreach($resolvers as $resolver) {
+                    $result = $resolver->parseValue($value);
+                    if($result !== null) {
+                        return $result;
+                    }
+                }
+                return null;
+            };
+            $typeConfig['parseLiteral'] = function($valueNode, array $variables = null) use ($resolvers) {
+                foreach($resolvers as $resolver) {
+                    $result = $resolver->parseLiteral($valueNode, $variables);
+                    if($result !== null) {
+                        return $result;
+                    }
+                }
+                return null;
+            };
+        }
+
+        return $typeConfig;
     }
 
     /**
@@ -240,53 +393,20 @@ class SchemaManager
         }
 
         $this->executableSchema = BuildSchema::build($this->buildCacheableSchema(), function(array $typeConfig, $typeDefinitionNode) {
+
+            // Resolve GraphQL objects.
             if($typeDefinitionNode instanceof ObjectTypeDefinitionNode) {
-
-                $supportedResolvers = [];
-
-                foreach ($this->resolvers as $resolver) {
-                    if ($resolver->supports($typeConfig['name'], $typeDefinitionNode)) {
-                        $supportedResolvers[] = $resolver;
-                    }
-                }
-
-                if(count($supportedResolvers) === 1) {
-                    $typeConfig['resolveField'] = [$supportedResolvers[0], 'resolve'];
-                } elseif(count($supportedResolvers) > 1) {
-                    $typeConfig['resolveField'] = function($value, $args, $context, ResolveInfo $info) use ($supportedResolvers) {
-                        foreach($supportedResolvers as $resolver) {
-                            $result = $resolver->resolve($value, $args, $context, $info);
-                            if($result !== null) {
-                                return $result;
-                            }
-                        }
-                        return null;
-                    };
-                }
+                $typeConfig = $this->decorateObjectType($typeConfig, $typeDefinitionNode);
             }
 
+            // Resolve GraphQL union and interface types.
             else if ($typeDefinitionNode instanceof UnionTypeDefinitionNode || $typeDefinitionNode instanceof InterfaceTypeDefinitionNode) {
-                $typeConfig['resolveType'] = function($value) {
-
-                    // At the moment we can only resolve Unite Content
-                    if($value instanceof ContentInterface) {
-                        return $this->executableSchema->getType($value->getType());
-                    }
-
-                    // TODO: Allow others to resolve custom types.
-                    return null;
-                };
+                $typeConfig = $this->decorateAbstractType($typeConfig, $typeDefinitionNode);
             }
 
+            // Resolve GraphQL scalars.
             else if($typeDefinitionNode instanceof ScalarTypeDefinitionNode) {
-
-                if($typeDefinitionNode->name->value === 'NULL') {
-                    $typeConfig['serialize'] = function () {
-                        return '';
-                    };
-                }
-
-                // TODO: Allow others to resolve custom scalars.
+                $typeConfig = $this->decorateScalarType($typeConfig, $typeDefinitionNode);
             }
 
             return $typeConfig;
