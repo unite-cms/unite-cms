@@ -89,7 +89,7 @@ class ReferenceType extends AbstractFieldType
             // Find all content objects by id.
             $criteria = new ContentCriteria();
             $criteria->andWhere(
-                new Comparison('id', Comparison::EQ, array_unique($rowIds))
+                new Comparison('id', Comparison::IN, array_unique($rowIds))
             );
 
             $result = $contentManager->find($domain, $field->getReturnType(), $criteria);
