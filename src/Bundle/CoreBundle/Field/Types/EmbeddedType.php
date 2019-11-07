@@ -111,7 +111,13 @@ class EmbeddedType extends AbstractFieldType
                 $embeddedContent[] = $this->resolveRowData($content, $field, $row);
             }
 
-            $validator->validate($embeddedContent, null, [$context->getGroup()]);
+            if(!empty($embeddedContent)) {
+                $validator->validate(
+                    $fieldData instanceof FieldDataList ? $embeddedContent : $embeddedContent[0],
+                    null,
+                    [$context->getGroup()]
+                );
+            }
         }
     }
 

@@ -19,8 +19,9 @@ type UniteGeoLocation {
     postal_code: String
     locality: String
     sub_locality: String
-    admin_levels: String
     country_code: String
+    stairs_number: String
+    door_number: String
 }
 
 input UniteGeoLocationInput {
@@ -39,6 +40,7 @@ input UniteGeoLocationInput {
     postal_code: String
     locality: String
     sub_locality: String
-    admin_levels: String
     country_code: String
+    stairs_number: String
+    door_number: String
 }

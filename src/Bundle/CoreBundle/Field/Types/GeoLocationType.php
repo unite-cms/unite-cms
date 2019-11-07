@@ -33,13 +33,14 @@ class GeoLocationType extends AbstractFieldType
             'bound_west' => $fieldData->resolveData('bound_west', null),
             'bound_north' => $fieldData->resolveData('bound_north', null),
             'bound_east' => $fieldData->resolveData('bound_east', null),
-            'street_number' => $fieldData->resolveData('bound_east', null),
-            'street_name' => $fieldData->resolveData('bound_east', null),
-            'postal_code' => $fieldData->resolveData('bound_east', null),
-            'locality' => $fieldData->resolveData('bound_east', null),
-            'sub_locality' => $fieldData->resolveData('bound_east', null),
-            'admin_levels' => $fieldData->resolveData('bound_east', []),
-            'country_code' => $fieldData->resolveData('bound_east', null),
+            'country_code' => $fieldData->resolveData('country_code', null),
+            'locality' => $fieldData->resolveData('locality', null),
+            'sub_locality' => $fieldData->resolveData('sub_locality', null),
+            'postal_code' => $fieldData->resolveData('postal_code', null),
+            'street_name' => $fieldData->resolveData('street_name', null),
+            'street_number' => $fieldData->resolveData('street_number', null),
+            'stairs_number' => $fieldData->resolveData('stairs_number', null),
+            'door_number' => $fieldData->resolveData('door_number', null),
         ];
     }
 }
