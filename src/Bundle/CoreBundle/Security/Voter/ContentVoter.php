@@ -18,6 +18,7 @@ class ContentVoter extends Voter
     const READ = 'read';
     const UPDATE = 'update';
     const DELETE = 'delete';
+    const PERMANENT_DELETE = 'permanent_delete';
 
     const PERMISSIONS = [
         self::QUERY,
@@ -26,6 +27,7 @@ class ContentVoter extends Voter
         self::READ,
         self::UPDATE,
         self::DELETE,
+        self::PERMANENT_DELETE,
     ];
 
     /**

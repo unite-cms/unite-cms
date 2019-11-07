@@ -24,9 +24,10 @@ class ReferenceOfType extends AbstractFieldType
      */
     protected $domainManager;
 
-    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $sa)
+    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage)
     {
         $this->domainManager = $domainManager;
+        parent::__construct($saveExpressionLanguage);
     }
 
     /**

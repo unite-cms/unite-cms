@@ -47,6 +47,7 @@ directive @access(
     read: Expression
     update: Expression
     delete: Expression
+    permanent_delete: Expression
 ) on FIELD_DEFINITION | OBJECT
 
 directive @valid(

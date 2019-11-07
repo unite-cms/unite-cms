@@ -7,12 +7,12 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Security\Core\Security;
+use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
-use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\InvalidContentVersionException;
 use UniteCMS\DoctrineORMBundle\Entity\Content;
 use UniteCMS\DoctrineORMBundle\Entity\Revision;
@@ -133,11 +133,19 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function delete(Domain $domain, ContentInterface $content, bool $persist = false): ContentInterface {
-        return $content;    // Delete will be handled in persist.
+        $content->setDeleted(new DateTime());
+        return $content;
     }
 
     public function recover(Domain $domain, ContentInterface $content) : ContentInterface {
         return $content->setDeleted(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function permanentDelete(Domain $domain, ContentInterface $content): ContentInterface {
+        return $content;    // Delete will be handled in persist.
     }
 
     /**
@@ -151,32 +159,22 @@ class ContentManager implements ContentManagerInterface
 
         $contentId = $content->getId();
         $contentType = $content->getType();
-        $softDelete = false;
 
-        if($persistType === ContentEvent::DELETE) {
-
-            // Hard delete content.
-            if(!empty($content->getDeleted())) {
-                $this->em($domain)->remove($content);
-
-            // Soft delete content.
-            } else {
-                $content->setDeleted(new DateTime());
-                $softDelete = true;
-            }
+        if($persistType === ContentEvent::PERMANENT_DELETE) {
+            $this->em($domain)->remove($content);
         }
 
         $this->em($domain)->flush($content);
 
         // Create revision entry for all operations but hard delete.
-        if($persistType !== ContentEvent::DELETE || $softDelete) {
+        if($persistType !== ContentEvent::PERMANENT_DELETE) {
             $revision = $this->em($domain)
                 ->getRepository(Revision::class)
                 ->createRevisionForContent($content, $persistType, $this->security->getUser());
             $this->em($domain)->persist($revision);
             $this->em($domain)->flush($revision);
 
-        // On hard delete, remove all revision entries.
+        // On permanent delete, remove all revision entries.
         } else {
             $this->em($domain)
                 ->getRepository(Revision::class)

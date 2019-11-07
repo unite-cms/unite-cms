@@ -69,6 +69,13 @@ class TestContentManager implements ContentManagerInterface
         return $content;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function permanentDelete(Domain $domain, ContentInterface $content): ContentInterface {
+        return $content;
+    }
+
     public function delete(Domain $domain, ContentInterface $content): ContentInterface {
         return $content;
     }
@@ -86,12 +93,11 @@ class TestContentManager implements ContentManagerInterface
         }
 
         else if($persistType === ContentEvent::DELETE) {
+            $content->setDeleted(new DateTime());
+        }
 
-            if($content->getDeleted()) {
-                unset($this->repository[$content->getType()][$content->getId()]);
-            } else {
-                $content->setDeleted(new DateTime());
-            }
+        else if($persistType === ContentEvent::PERMANENT_DELETE) {
+            unset($this->repository[$content->getType()][$content->getId()]);
         }
 
         else if ($persistType === ContentEvent::RECOVER) {

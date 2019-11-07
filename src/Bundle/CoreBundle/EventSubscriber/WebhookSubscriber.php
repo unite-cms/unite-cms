@@ -5,10 +5,11 @@ namespace UniteCMS\CoreBundle\EventSubscriber;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Event\ContentEventAfter;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 
 class WebhookSubscriber implements EventSubscriberInterface
 {
@@ -27,10 +28,10 @@ class WebhookSubscriber implements EventSubscriberInterface
      */
     protected $domainLogger;
 
-    public function __construct(DomainManager $domainManager, LoggerInterface $uniteCMSDomainLogger)
+    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage, LoggerInterface $uniteCMSDomainLogger)
     {
         $this->domainManager = $domainManager;
-        $this->expressionLanguage = new ExpressionLanguage();
+        $this->expressionLanguage = $saveExpressionLanguage;
         $this->domainLogger = $uniteCMSDomainLogger;
     }
 
@@ -40,9 +41,9 @@ class WebhookSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            ContentEvent::CREATE => 'onCreate',
-            ContentEvent::UPDATE => 'onUpdate',
-            ContentEvent::DELETE => 'onDelete',
+            ContentEventAfter::CREATE => 'onCreate',
+            ContentEventAfter::UPDATE => 'onUpdate',
+            ContentEventAfter::DELETE => 'onDelete',
         ];
     }
 
@@ -55,8 +56,13 @@ class WebhookSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $values = [
+            'event' => $event,
+            'content' => $content,
+        ];
+
         foreach($contentType->getWebhooks() as $webhook) {
-            if((bool)$this->expressionLanguage->evaluate($webhook->getExpression())) {
+            if((bool)$this->expressionLanguage->evaluate($webhook->getExpression(), $values)) {
                 // TODO: Execute $webhook->url();
                 $this->domainLogger->info('TODO: Webhook was not really executed at the moment...');
             }

@@ -317,7 +317,7 @@ class EmailPasswordResetResolver implements FieldResolverInterface
 
         // Persist new password
         $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
-        $this->uniteCMSDomainLogger->info(sprintf('Successfully confirmed password reser for user with username "%s".', $args['username']));
+        $this->uniteCMSDomainLogger->info(sprintf('Successfully confirmed password reset for user with username "%s".', $args['username']));
         return true;
     }
 }

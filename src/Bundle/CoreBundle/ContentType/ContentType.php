@@ -54,7 +54,8 @@ class ContentType
      *   ContentVoter::CREATE = @Assert\NotBlank(),
      *   ContentVoter::READ = @Assert\NotBlank(),
      *   ContentVoter::UPDATE = @Assert\NotBlank(),
-     *   ContentVoter::DELETE = @Assert\NotBlank()
+     *   ContentVoter::DELETE = @Assert\NotBlank(),
+     *   ContentVoter::PERMANENT_DELETE = @Assert\NotBlank()
      * })
      */
     protected $permissions = [];
@@ -68,6 +69,7 @@ class ContentType
             ContentVoter::READ => 'true',
             ContentVoter::UPDATE => 'has_role("ROLE_ADMIN")',
             ContentVoter::DELETE => 'has_role("ROLE_ADMIN")',
+            ContentVoter::PERMANENT_DELETE => 'has_role("ROLE_ADMIN")',
         ];
         $this->id = $id;
     }

@@ -35,7 +35,7 @@ class SchemaManagerTest extends SchemaAwareTestCase
     public function testBasicContentCrud() {
 
         $this->buildSchema('
-            type Article implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+            type Article implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true", permanent_delete: "true") {
                 id: ID
                 _meta: UniteContentMeta!
                 title: String @textField
@@ -45,6 +45,7 @@ class SchemaManagerTest extends SchemaAwareTestCase
         $create = 'mutation($data: ArticleInput!, $persist: Boolean!) { createArticle(data: $data, persist: $persist) { id, title }}';
         $update = 'mutation($id: ID!, $data: ArticleInput!, $persist: Boolean!) { updateArticle(id: $id, data: $data, persist: $persist) { id, title }}';
         $delete = 'mutation($id: ID!, $persist: Boolean!) { deleteArticle(id: $id, persist: $persist) { id, title }}';
+        $permanent_delete = 'mutation($id: ID!, $force: Boolean, $persist: Boolean!) { permanent_deleteArticle(id: $id, persist: $persist, force: $force) { id, title }}';
         $recover = 'mutation($id: ID!, $persist: Boolean!) { recoverArticle(id: $id, persist: $persist) { id, title }}';
         $get = 'query($id: ID!) { getArticle(id: $id) { id, title }}';
         $find = 'query { findArticle { total, result { id, title }}}';
@@ -163,6 +164,20 @@ class SchemaManagerTest extends SchemaAwareTestCase
             ]
         ], $get, ['id' => $id]);
 
+        // Permanently delete article by id with persist, but without force.
+        // Since this article was not deleted before, it will throw an error.
+        $this->assertGraphQL([
+            [
+                'message' => 'You can only permanent delete content if it is already deleted or if you set the "force" argument to true.',
+                'path' => [
+                    'permanent_deleteArticle'
+                ],
+                'extensions' => [
+                    'category' => 'user',
+                ],
+            ]
+        ], $permanent_delete, ['id' => $id, 'persist' => true], false);
+
         // Delete article by id with persist
         $this->assertGraphQL([
             'deleteArticle' => [
@@ -173,11 +188,11 @@ class SchemaManagerTest extends SchemaAwareTestCase
 
         // Permanently delete article by id with persist
         $this->assertGraphQL([
-            'deleteArticle' => [
+            'permanent_deleteArticle' => [
                 'id' => $id,
                 'title' => 'Baa'
             ],
-        ], $delete, ['id' => $id, 'persist' => true]);
+        ], $permanent_delete, ['id' => $id, 'persist' => true]);
 
         // Recover will produce content not found error.
         $this->assertGraphQL([

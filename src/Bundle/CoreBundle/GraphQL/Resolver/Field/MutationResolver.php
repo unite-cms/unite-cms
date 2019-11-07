@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use GraphQL\Error\Error;
+use GraphQL\Error\UserError;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
@@ -19,6 +20,8 @@ use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Event\ContentEventAfter;
+use UniteCMS\CoreBundle\Event\ContentEventBefore;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentNotFoundException;
@@ -88,7 +91,7 @@ class MutationResolver implements FieldResolverInterface
         $type = substr($info->fieldName, strlen($field));
 
         // If not one of the defined fields
-        if(!in_array($field, ['create', 'update', 'delete', 'revert', 'recover'])) {
+        if(!in_array($field, ['create', 'update', 'delete', 'revert', 'recover', 'permanent_delete'])) {
             return null;
         }
 
@@ -150,6 +153,18 @@ class MutationResolver implements FieldResolverInterface
 
                 // On recover: only return content if we really persist the change
                 return $args['persist'] ? $content: null;
+
+            case 'permanent_delete':
+                $this->contentAccess(ContentVoter::PERMANENT_DELETE, $content);
+
+                if(!$content->getDeleted() && empty($args['force'])) {
+                    throw new UserError('You can only permanent delete content if it is already deleted or if you set the "force" argument to true.');
+                }
+
+                return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $contentManager->permanentDelete($domain, $content);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::PERMANENT_DELETE, $args['persist']);
+                });
 
             default:
                 return null;
@@ -217,7 +232,7 @@ class MutationResolver implements FieldResolverInterface
     protected function getContent(ContentManagerInterface $contentManager, Domain $domain, string $type, array $args, $field) : ContentInterface {
 
         // Should we also include deleted content?
-        $includeDeleted = in_array($field, ['recover', 'delete']);
+        $includeDeleted = in_array($field, ['recover', 'delete', 'permanent_delete']);
 
 
         // Get or create content.
@@ -285,8 +300,9 @@ class MutationResolver implements FieldResolverInterface
 
         // Persist content.
         if($persist) {
+            $this->eventDispatcher->dispatch(new ContentEventBefore($content), $eventName);
             $contentManager->persist($domain, $content, $eventName);
-            $this->eventDispatcher->dispatch(new ContentEvent($content), $eventName);
+            $this->eventDispatcher->dispatch(new ContentEventAfter($content), 'AFTER ' . $eventName);
         }
 
         return $content;

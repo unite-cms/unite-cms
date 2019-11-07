@@ -49,5 +49,7 @@ interface ContentManagerInterface
     public function delete(Domain $domain, ContentInterface $content) : ContentInterface;
     public function recover(Domain $domain, ContentInterface $content) : ContentInterface;
 
+    public function permanentDelete(Domain $domain, ContentInterface $content) : ContentInterface;
+
     public function persist(Domain $domain, ContentInterface $content, string $persistType) : void;
 }
