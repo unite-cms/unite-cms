@@ -50,9 +50,9 @@ class ContentType
      * @var array
      * @Assert\Collection(fields={
      *   ContentVoter::QUERY = @Assert\NotBlank(),
+     *   ContentVoter::READ = @Assert\NotBlank(),
      *   ContentVoter::MUTATION = @Assert\NotBlank(),
      *   ContentVoter::CREATE = @Assert\NotBlank(),
-     *   ContentVoter::READ = @Assert\NotBlank(),
      *   ContentVoter::UPDATE = @Assert\NotBlank(),
      *   ContentVoter::DELETE = @Assert\NotBlank(),
      *   ContentVoter::PERMANENT_DELETE = @Assert\NotBlank()
@@ -64,9 +64,9 @@ class ContentType
     {
         $this->permissions = [
             ContentVoter::QUERY => 'true',
+            ContentVoter::READ => 'true',
             ContentVoter::MUTATION => 'has_role("ROLE_ADMIN")',
             ContentVoter::CREATE => 'has_role("ROLE_ADMIN")',
-            ContentVoter::READ => 'true',
             ContentVoter::UPDATE => 'has_role("ROLE_ADMIN")',
             ContentVoter::DELETE => 'has_role("ROLE_ADMIN")',
             ContentVoter::PERMANENT_DELETE => 'has_role("ROLE_ADMIN")',

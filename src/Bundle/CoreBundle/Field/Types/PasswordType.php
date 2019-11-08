@@ -2,8 +2,8 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\SensitiveFieldData;
@@ -17,7 +17,7 @@ use UniteCMS\CoreBundle\Security\User\UserInterface;
 class PasswordType extends AbstractFieldType
 {
     const TYPE = 'password';
-    const GRAPHQL_INPUT_TYPE = 'UnitePasswordInput';
+    const GRAPHQL_INPUT_TYPE = Type::STRING;
 
     /**
      * @var FieldableUserPasswordEncoder $passwordEncoder
@@ -41,22 +41,7 @@ class PasswordType extends AbstractFieldType
      * {@inheritDoc}
      */
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
-
-        if(!$content instanceof UserInterface) {
-            throw new InvalidArgumentException('Password fields can only be added to UniteUser types.');
-        }
-
-        if($content->getId()) {
-            if(empty($inputData['oldPassword'])) {
-                throw new BadCredentialsException('In order to update a password field you need to pass the old password as well.');
-            }
-
-            if(!$this->passwordEncoder->isFieldPasswordValid($content, $field->getId(), $inputData['oldPassword'])) {
-                throw new BadCredentialsException('Old password is not valid.');
-            }
-        }
-
-        return $this->normalizePassword($content, $inputData['password']);
+        return $this->normalizePassword($content, $inputData);
     }
 
     /**
@@ -65,14 +50,14 @@ class PasswordType extends AbstractFieldType
      *
      * @return SensitiveFieldData
      */
-    public function normalizePassword(ContentInterface $content, string $password) : SensitiveFieldData {
+    public function normalizePassword(ContentInterface $content, ?string $password = '') : SensitiveFieldData {
 
         if(!$content instanceof UserInterface) {
             throw new InvalidArgumentException('Password fields can only be added to UniteUser types.');
         }
 
         return new SensitiveFieldData(
-            $this->passwordEncoder->encodePassword($content, $password)
+            empty($password) ? null : $this->passwordEncoder->encodePassword($content, $password)
         );
     }
 

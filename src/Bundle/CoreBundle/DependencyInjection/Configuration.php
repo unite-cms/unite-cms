@@ -8,6 +8,9 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
+    const DEFAULT_JWT_TTL_SHORT_LIVING = 1800;          // 30 Minutes
+    const DEFAULT_JWT_TTL_LONG_LIVING = 31536000;       // 1 Year
+
     /**
      * @var string $defaultConfigDir
      */
@@ -67,6 +70,14 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('user_manager')
                             ->cannotBeEmpty()
                             ->defaultValue($this->defaultUserManager)
+                        ->end()
+                        ->scalarNode('jwt_ttl_short_living')
+                            ->cannotBeEmpty()
+                            ->defaultValue(static::DEFAULT_JWT_TTL_SHORT_LIVING)
+                        ->end()
+                        ->scalarNode('jwt_ttl_long_living')
+                            ->cannotBeEmpty()
+                            ->defaultValue(static::DEFAULT_JWT_TTL_LONG_LIVING)
                         ->end()
                     ->end()
                 ->end()

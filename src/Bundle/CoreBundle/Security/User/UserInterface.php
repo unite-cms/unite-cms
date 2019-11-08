@@ -8,6 +8,9 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 
 interface UserInterface extends ContentInterface, BaseUserInterface
 {
+    public function setFullyAuthenticated(bool $fullyAuthenticated = true) : void;
+    public function isFullyAuthenticated() : bool;
+
     public function getPasswordResetToken() : ?string;
     public function setPasswordResetToken(?string $token = null) : void;
 }

@@ -10,6 +10,7 @@ class TestUser extends TestContent implements UserInterface
 {
     public $username;
     public $resetToken;
+    public $fullyAuthenticated = false;
 
     /**
      * {@inheritDoc}
@@ -100,5 +101,21 @@ class TestUser extends TestContent implements UserInterface
     public function setPasswordResetToken(?string $token = null): void
     {
         $this->resetToken = $token;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setFullyAuthenticated(bool $fullyAuthenticated = true): void
+    {
+        $this->fullyAuthenticated = $fullyAuthenticated;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isFullyAuthenticated(): bool
+    {
+        return $this->fullyAuthenticated;
     }
 }

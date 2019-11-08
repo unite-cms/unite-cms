@@ -140,6 +140,7 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
      * {@inheritDoc}
      */
     public function validateFieldData(ContentInterface $content, ContentTypeField $field, ContextualValidatorInterface $validator, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
+
         if($field->isNonNull() && (empty($fieldData) || empty($fieldData->resolveData()))) {
             $validator->validate('', new NotBlank(), [$context->getGroup()]);
         }

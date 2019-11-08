@@ -71,4 +71,19 @@ class ProxyUser extends ProxyContent
     public function isAnonymous() : bool {
         return empty($this->user);
     }
+
+    /**
+     * @return bool
+     */
+    public function isFullyAuthenticated() : bool {
+        if($this->isAnonymous()) {
+           return false;
+        }
+
+        if(!method_exists($this->user, 'isFullyAuthenticated')) {
+            return false;
+        }
+
+        return $this->user->isFullyAuthenticated();
+    }
 }

@@ -50,7 +50,9 @@ class DomainManager
             $id,
             $config['content_manager'],
             $config['user_manager'],
-            $config['schema']
+            $config['schema'],
+            $config['jwt_ttl_short_living'],
+            $config['jwt_ttl_long_living']
         ));
 
         return $this;

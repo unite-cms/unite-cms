@@ -194,6 +194,11 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      * {@inheritDoc}
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
+
+        if($token->getUser() instanceof \UniteCMS\CoreBundle\Security\User\UserInterface) {
+            $token->getUser()->setFullyAuthenticated(true);
+        }
+
         return;
     }
 

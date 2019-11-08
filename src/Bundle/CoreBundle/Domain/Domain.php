@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Domain;
 
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
+use UniteCMS\CoreBundle\DependencyInjection\Configuration;
 use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
 
 class Domain
@@ -35,20 +36,40 @@ class Domain
     protected $schema;
 
     /**
+     * @var int
+     */
+    protected $jwtTTLShortLiving;
+
+    /**
+     * @var int
+     */
+    protected $jwtTTLLongLiving;
+
+    /**
      * Domain constructor.
      *
      * @param string $id
      * @param ContentManagerInterface $contentManager
      * @param UserManagerInterface $userManager
      * @param string[] $schema
+     * @param int $jwtTTLShortLiving
+     * @param int $jwtTTLLongLiving
      * @param ContentTypeManager|null $contentTypeManager
      */
-    public function __construct(string $id, ContentManagerInterface $contentManager, UserManagerInterface $userManager, array $schema, ContentTypeManager $contentTypeManager = null)
-    {
+    public function __construct(
+        string $id,
+        ContentManagerInterface $contentManager,
+        UserManagerInterface $userManager,
+        array $schema,
+        int $jwtTTLShortLiving = Configuration::DEFAULT_JWT_TTL_SHORT_LIVING,
+        int $jwtTTLLongLiving = Configuration::DEFAULT_JWT_TTL_LONG_LIVING,
+        ContentTypeManager $contentTypeManager = null) {
         $this->id = $id;
         $this->contentManager = $contentManager;
         $this->userManager = $userManager;
         $this->schema = $schema;
+        $this->jwtTTLShortLiving = $jwtTTLShortLiving;
+        $this->jwtTTLLongLiving = $jwtTTLLongLiving;
         $this->contentTypeManager = $contentTypeManager ?? new ContentTypeManager();
     }
 
@@ -119,5 +140,19 @@ class Domain
             return join("\n", $schemaFiles);
 
         }, $this->schema);
+    }
+
+    /**
+     * @return int
+     */
+    public function getJwtTTLShortLiving(): int {
+        return $this->jwtTTLShortLiving;
+    }
+
+    /**
+     * @return int
+     */
+    public function getJwtTTLLongLiving(): int {
+        return $this->jwtTTLLongLiving;
     }
 }

@@ -66,6 +66,11 @@ class User implements UserInterface
     protected $passwordResetToken;
 
     /**
+     * @var bool $fullyAuthenticated
+     */
+    protected $fullyAuthenticated = false;
+
+    /**
      * Content constructor.
      *
      * @param string $type
@@ -187,6 +192,20 @@ class User implements UserInterface
      * {@inheritDoc}
      */
     public function eraseCredentials() {}
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setFullyAuthenticated(bool $fullyAuthenticated = true) : void {
+        $this->fullyAuthenticated = $fullyAuthenticated;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isFullyAuthenticated() : bool {
+        return $this->fullyAuthenticated;
+    }
 
     /**
      * {@inheritDoc}

@@ -113,4 +113,5 @@ type UniteQuery {
 type UniteMutation {
     _version: String!
     generateJWT: String! @hide(if: "user.isAnonymous()")
+    generateLongLivingJWT: String! @hide(if: "not user.isFullyAuthenticated()")
 }
