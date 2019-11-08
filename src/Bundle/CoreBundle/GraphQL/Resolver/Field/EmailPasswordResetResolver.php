@@ -1,5 +1,6 @@
 <?php
 
+
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
@@ -8,13 +9,10 @@ use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Validator\Context\ExecutionContext;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\LocaleAwareInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Contracts\Translation\TranslatorTrait;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
 use UniteCMS\CoreBundle\Field\Types\PasswordType;
@@ -201,6 +199,28 @@ class EmailPasswordResetResolver implements FieldResolverInterface
     }
 
     /**
+     * @param UserInterface $user
+     * @param array $config
+     * @param string $password
+     */
+    protected function tryToUpdatePassword(UserInterface $user, array $config, string $password) {
+
+        $domain = $this->domainManager->current();
+        $passwordField = $domain->getContentTypeManager()->getUserType($user->getType())->getField($config['passwordField']);
+        $passwordFieldType = $this->fieldTypeManager->getFieldType($passwordField->getType());
+
+        $data = $user->getData();
+        $data[$config['passwordField']] = $passwordFieldType->normalizeInputData($user, $passwordField, $password);
+
+        $domain->getUserManager()->update($domain, $user, $data);
+        $violations = $this->validator->validate($user);
+
+        if(count($violations) > 0) {
+            throw new ConstraintViolationsException($violations);
+        }
+    }
+
+    /**
      * @param $args
      *
      * @return bool
@@ -281,41 +301,8 @@ class EmailPasswordResetResolver implements FieldResolverInterface
         }
 
         // If we reach this point, we can save the new password.
-
-        /**
-         * @var PasswordType $passwordField
-         */
-        $passwordField = $this->fieldTypeManager->getFieldType(PasswordType::getType());
-
-        // Update user password field.
-        $data = $user->getData();
-        $data[$config['passwordField']] = $passwordField->normalizePassword($user, $args['password']);
-        $domain->getUserManager()->update($domain, $user, $data);
-
-        // Only validate the single password field.
-        $context = new ExecutionContext($this->validator, $user, new class() implements TranslatorInterface, LocaleAwareInterface {
-            use TranslatorTrait;
-        });
-        $passwordField->validateFieldData(
-            $user,
-            $domain->getContentTypeManager()->getUserType($user->getType())->getField($config['passwordField']),
-            $context->getValidator()->startContext()->atPath($config['passwordField']),
-            $context,
-            $user->getFieldData($config['passwordField'])
-        );
-        $violations = $context->getViolations();
-
-        if(count($violations) > 0) {
-            foreach($violations as $violation) {
-                $this->uniteCMSDomainLogger->warning(sprintf('Could not confirm password reset for user with username "%s" because the password is not valid: %s', $args['username'], $violation->getMessage()));
-            }
-            return false;
-        }
-
-        // Clear token
+        $this->tryToUpdatePassword($user, $config, $args['password']);
         $user->setPasswordResetToken(null);
-
-        // Persist new password
         $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
         $this->uniteCMSDomainLogger->info(sprintf('Successfully confirmed password reset for user with username "%s".', $args['username']));
         return true;

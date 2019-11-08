@@ -15,3 +15,10 @@ email:
         text_button: Confirm registration
         text_after_button: If you did not created an account recently, please ignore this email.
         footer: This is a one-time email sent to you by unite cms.
+    change_email:
+        subject: Confirm new email address
+        headline: Hey!
+        text_before_button: In order to confirm your email change, please confirm your new email address by clicking on the following link
+        text_button: Confirm new email address
+        text_after_button: If you did not tried to change your email address recently, please ignore this email.
+        footer: This is a one-time email sent to you by unite cms.

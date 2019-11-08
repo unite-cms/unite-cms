@@ -1,0 +1,10 @@
+
+directive @emailChange(
+    changeUrl: String!
+    emailField: String!
+) on OBJECT
+
+extend type UniteMutation {
+    emailChangeRequest(email: String!) : Boolean! @hide(if: "not user.isFullyAuthenticated()")
+    emailChangeConfirm(token: String!) : Boolean! @hide(if: "user.isAnonymous()")
+}

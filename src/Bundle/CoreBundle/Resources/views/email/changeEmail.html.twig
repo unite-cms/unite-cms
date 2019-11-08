@@ -1,0 +1,21 @@
+{% set subject = 'email.change_email.subject'|trans %}
+{% set footer = 'email.change_email.footer'|trans %}
+{% extends '@UniteCMSCore/email/base.html.twig' %}
+{% block content %}
+
+    {% embed '@UniteCMSCore/email/_partial/text.html.twig' %}
+        {% block content %}
+            <h1>{% trans %}email.change_email.headline{% endtrans %}</h1>
+            <p>{% trans %}email.change_email.text_before_button{% endtrans %}</p>
+        {% endblock %}
+    {% endembed %}
+
+    {% embed '@UniteCMSCore/email/_partial/button.html.twig' with { text: 'email.change_email.text_button'|trans, link: changeUrl|replace({'{token}' : changeToken|url_encode}) } %}{% endembed %}
+
+    {% embed '@UniteCMSCore/email/_partial/text.html.twig' %}
+        {% block content %}
+            <p>{% trans %}email.change_email.text_after_button{% endtrans %}</p>
+        {% endblock %}
+    {% endembed %}
+
+{% endblock %}

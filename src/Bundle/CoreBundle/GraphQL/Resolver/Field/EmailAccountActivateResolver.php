@@ -1,18 +1,16 @@
 <?php
 
+
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Validator\Context\ExecutionContext;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\LocaleAwareInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Contracts\Translation\TranslatorTrait;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
 use UniteCMS\CoreBundle\Mailer\AccountActivationMailer;
@@ -196,6 +194,28 @@ class EmailAccountActivateResolver implements FieldResolverInterface
     }
 
     /**
+     * @param UserInterface $user
+     * @param array $config
+     * @param string $state
+     */
+    protected function tryToUpdateState(UserInterface $user, array $config, string $state) {
+
+        $domain = $this->domainManager->current();
+        $stateField = $domain->getContentTypeManager()->getUserType($user->getType())->getField($config['stateField']);
+        $stateFieldType = $this->fieldTypeManager->getFieldType($stateField->getType());
+
+        $data = $user->getData();
+        $data[$config['stateField']] = $stateFieldType->normalizeInputData($user, $stateField, $state);
+
+        $domain->getUserManager()->update($domain, $user, $data);
+        $violations = $this->validator->validate($user);
+
+        if(count($violations) > 0) {
+            throw new ConstraintViolationsException($violations);
+        }
+    }
+
+    /**
      * @param $args
      *
      * @return bool
@@ -274,37 +294,7 @@ class EmailAccountActivateResolver implements FieldResolverInterface
 
 
         // If we reach this point, we can activate the user.
-
-        $stateField = $domain->getContentTypeManager()->getUserType($user->getType())->getField($config['stateField']);
-        $stateFieldType = $this->fieldTypeManager->getFieldType($stateField->getType());
-
-        // Update user state field
-        $data = $user->getData();
-        $data[$config['stateField']] = $stateFieldType->normalizeInputData($user, $stateField, $config['activeValue']);
-
-        $domain->getUserManager()->update($domain, $user, $data);
-
-        // Only validate the single state field.
-        $context = new ExecutionContext($this->validator, $user, new class() implements TranslatorInterface, LocaleAwareInterface {
-            use TranslatorTrait;
-        });
-        $stateFieldType->validateFieldData(
-            $user,
-            $stateField,
-            $context->getValidator()->startContext()->atPath($config['stateField']),
-            $context,
-            $user->getFieldData($config['stateField'])
-        );
-        $violations = $context->getViolations();
-
-        if(count($violations) > 0) {
-            foreach($violations as $violation) {
-                $this->uniteCMSDomainLogger->warning(sprintf('Could not confirm account activation for user with username "%s" because the password is not valid: %s', $args['username'], $violation->getMessage()));
-            }
-            return false;
-        }
-
-        // Persist new password
+        $this->tryToUpdateState($user, $config, $config['activeValue']);
         $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
         $this->uniteCMSDomainLogger->info(sprintf('Successfully confirmed account activation for user with username "%s".', $args['username']));
         return true;
