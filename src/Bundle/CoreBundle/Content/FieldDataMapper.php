@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\Domain;
+use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
 
@@ -59,11 +60,16 @@ class FieldDataMapper
             // Use present field data or null as input
             $fieldData = null;
 
-            // If we are allowed to update this field AND it is present, map it!
-            if($this->authorizationChecker->isGranted(ContentFieldVoter::UPDATE, new ContentField($content, $id))) {
-                if(array_key_exists($id, $inputData) && $inputData[$id] !== null) {
-                    $fieldData = $inputData[$id];
+            // If field vale is present
+            if(array_key_exists($id, $inputData) && $inputData[$id] !== null) {
+
+                // If we are not allowed to update this field throw an exception.
+                if(!$this->authorizationChecker->isGranted(ContentFieldVoter::UPDATE, new ContentField($content, $id))) {
+                    throw new ContentAccessDeniedException(sprintf('You are not allowed to update field "%s".', $id));
                 }
+
+                // If we are allowed to update this field add it to fieldData
+                $fieldData = $inputData[$id];
             }
 
             // If field data is empty AND we already have a value set, skip this field.

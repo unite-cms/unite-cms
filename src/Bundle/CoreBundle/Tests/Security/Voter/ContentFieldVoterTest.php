@@ -180,15 +180,27 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
         $this->buildSchema(static::SCHEMA);
         $contentManager = $domain->getContentManager();
 
+        $this->assertGraphQL([
+            [
+                'message' => 'You are not allowed to update field "title".',
+                'extensions' => [
+                    'category' => 'access',
+                ],
+                'path' => ['createArticle'],
+            ]
+        ], 'mutation($data: ArticleInput!) { createArticle(persist: true, data: $data) { id, title } }', [
+            'data' => [
+                'title' => 'foo',
+            ],
+        ], false);
+
         list($id) = $this->assertGraphQL([
             'createArticle' => [
                 'id' => '{id}',
                 'title' => null,
             ],
         ], 'mutation($data: ArticleInput!) { createArticle(persist: true, data: $data) { id, title } }', [
-            'data' => [
-                'title' => 'foo',
-            ],
+            'data' => [],
         ]);
 
         $content = $contentManager->get($domain, 'Article', $id);
@@ -197,15 +209,19 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
         ]);
 
         $this->assertGraphQL([
-            'updateArticle' => [
-                'id' => $id,
-            ],
-        ], 'mutation($data: ArticleInput!, $id: ID!) { updateArticle(id: $id, persist: true, data: $data) { id } }', [
+            [
+                'message' => 'You are not allowed to update field "title".',
+                'extensions' => [
+                    'category' => 'access',
+                ],
+                'path' => ['updateArticle'],
+            ]
+        ], 'mutation($data: ArticleInput!, $id: ID!) { updateArticle(id: $id, persist: true, data: $data) { id, title } }', [
             'id' => $id,
             'data' => [
                 'title' => 'access',
             ],
-        ]);
+        ], false);
 
         $this->assertEquals('foo', $content->getFieldData('title')->resolveData());
         $content->setData([
