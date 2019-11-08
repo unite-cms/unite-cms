@@ -59,11 +59,11 @@ class User implements UserInterface
     protected $deleted = null;
 
     /**
-     * @var string
+     * @var array
      *
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="json_document", options={"jsonb": true})
      */
-    protected $passwordResetToken;
+    protected $tokens = [];
 
     /**
      * @var bool $fullyAuthenticated
@@ -210,16 +210,14 @@ class User implements UserInterface
     /**
      * {@inheritDoc}
      */
-    public function getPasswordResetToken(): ?string
-    {
-        return $this->passwordResetToken;
+    public function getToken(string $key) : ?string {
+        return $this->tokens[$key] ?? null;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setPasswordResetToken(?string $token = null): void
-    {
-        $this->passwordResetToken = $token;
+    public function setToken(string $key, ?string $token = null) : void {
+        $this->tokens[$key] = $token;
     }
 }

@@ -3,83 +3,36 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
-use GraphQL\Language\AST\ObjectTypeDefinitionNode;
-use GraphQL\Type\Definition\ResolveInfo;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
-use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
 use UniteCMS\CoreBundle\Mailer\AccountActivationMailer;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
-class EmailAccountActivateResolver implements FieldResolverInterface
+class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
 {
-    /**
-     * @var DomainManager $domainManager
-     */
-    protected $domainManager;
-
-    /**
-     * @var LoggerInterface $uniteCMSDomainLogger
-     */
-    protected $uniteCMSDomainLogger;
-
-    /**
-     * @var ValidatorInterface $validator
-     */
-    protected $validator;
-
-    /**
-     * @var FieldTypeManager $fieldTypeManager
-     */
-    protected $fieldTypeManager;
-
-    /**
-     * @var JWTEncoderInterface $JWTEncoder
-     */
-    protected $JWTEncoder;
+    const TOKEN_KEY = 'unite_account_activate';
+    const REQUEST_FIELD = 'emailAccountActivateRequest';
+    const CONFIRM_FIELD = 'emailAccountActivateConfirm';
 
     /**
      * @var AccountActivationMailer $accountActivationMailer
      */
     protected $accountActivationMailer;
 
-    public function __construct(DomainManager $domainManager, LoggerInterface $uniteCMSDomainLogger, ValidatorInterface $validator, FieldTypeManager $fieldTypeManager, JWTEncoderInterface $JWTEncoder, AccountActivationMailer $accountActivationMailer)
-    {
-        $this->domainManager = $domainManager;
-        $this->uniteCMSDomainLogger = $uniteCMSDomainLogger;
-        $this->validator = $validator;
-        $this->fieldTypeManager = $fieldTypeManager;
-        $this->JWTEncoder = $JWTEncoder;
+    public function __construct(
+        DomainManager $domainManager,
+        LoggerInterface $uniteCMSDomainLogger,
+        ValidatorInterface $validator,
+        FieldDataMapper $fieldDataMapper,
+        JWTEncoderInterface $JWTEncoder,
+        AccountActivationMailer $accountActivationMailer) {
         $this->accountActivationMailer = $accountActivationMailer;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function supports(string $typeName, ObjectTypeDefinitionNode $typeDefinitionNode): bool {
-        return $typeName === 'UniteMutation';
-    }
-
-    /**
-     * {@inheritDoc}
-     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException
-     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException
-     * @throws \Twig\Error\LoaderError
-     * @throws \Twig\Error\RuntimeError
-     * @throws \Twig\Error\SyntaxError
-     */
-    public function resolve($value, $args, $context, ResolveInfo $info)
-    {
-        switch ($info->fieldName) {
-            case 'emailAccountActivateRequest': return $this->resolveRequest($args);
-            case 'emailAccountActivateConfirm': return $this->resolveConfirm($args);
-            default: return null;
-        }
+        parent::__construct($domainManager, $uniteCMSDomainLogger, $validator, $fieldDataMapper, $JWTEncoder);
     }
 
     /**
@@ -128,39 +81,6 @@ class EmailAccountActivateResolver implements FieldResolverInterface
         return $activateDirective;
     }
 
-
-    /**
-     * @param UserInterface $user
-     * @param string $token
-     *
-     * @param array $config
-     *
-     * @return bool
-     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException
-     */
-    protected function isTokenValid(UserInterface $user, string $token, array $config) : bool {
-
-        $payload = $this->JWTEncoder->decode($token);
-
-        if($payload['exp'] < time()) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to confirm an account activation, however the provided token is expired.', $user->getUsername()));
-            return false;
-        }
-
-        if($payload['username'] !== $user->getUsername()) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to confirm an account activation, however the provided token is not valid.', $user->getUsername()));
-            return false;
-        }
-
-        $stateValue = $user->getFieldData($config['stateField'])->resolveData();
-        if($payload['value'] !== sha1($stateValue)) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to confirm an account activation, however the provided token is not valid.', $user->getUsername()));
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * @param UserInterface $user
      * @param array $config
@@ -177,45 +97,7 @@ class EmailAccountActivateResolver implements FieldResolverInterface
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\Security\User\UserInterface $user
-     * @param $config
-     *
-     * @return string
-     *
-     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException
-     */
-    protected function generateToken(UserInterface $user, $config) {
-        $stateValue = $user->getFieldData($config['stateField'])->resolveData();
-        return $this->JWTEncoder->encode([
-            'value' => sha1($stateValue),
-            'type' => 'email_account_activation',
-            'username' => $user->getUsername(),
-        ]);
-    }
-
-    /**
-     * @param UserInterface $user
-     * @param array $config
-     * @param string $state
-     */
-    protected function tryToUpdateState(UserInterface $user, array $config, string $state) {
-
-        $domain = $this->domainManager->current();
-        $stateField = $domain->getContentTypeManager()->getUserType($user->getType())->getField($config['stateField']);
-        $stateFieldType = $this->fieldTypeManager->getFieldType($stateField->getType());
-
-        $data = $user->getData();
-        $data[$config['stateField']] = $stateFieldType->normalizeInputData($user, $stateField, $state);
-
-        $domain->getUserManager()->update($domain, $user, $data);
-        $violations = $this->validator->validate($user);
-
-        if(count($violations) > 0) {
-            throw new ConstraintViolationsException($violations);
-        }
-    }
-
-    /**
+     * {@inheritDoc}
      * @param $args
      *
      * @return bool
@@ -223,6 +105,7 @@ class EmailAccountActivateResolver implements FieldResolverInterface
      * @throws \Twig\Error\LoaderError
      * @throws \Twig\Error\RuntimeError
      * @throws \Twig\Error\SyntaxError
+     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException
      */
     protected function resolveRequest($args) : bool {
 
@@ -243,16 +126,22 @@ class EmailAccountActivateResolver implements FieldResolverInterface
             return false;
         }
 
+        if(!$this->isTokenEmptyOrExpired($user)) {
+            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to request a password reset, however there already exist a non-expired reset token. If it is you: please wait until the token is expired and try again.', $args['username']));
+            return false;
+        }
+
         // Check current state field value.
         if(!$this->canUserActivateAccount($user, $config)) {
             return false;
         }
 
         // Generate activation token.
-        $token = $this->generateToken($user, $config);
+        $this->generateToken($user);
+        $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
 
         // Send out email
-        if($this->accountActivationMailer->send($config['activateUrl'], $token, $email) === 0) {
+        if($this->accountActivationMailer->send($config['activateUrl'], $user->getToken(static::TOKEN_KEY), $email) === 0) {
             $this->uniteCMSDomainLogger->error(sprintf('Could not send out account activation email to user with username "%s".', $args['username']));
             return false;
         }
@@ -287,14 +176,14 @@ class EmailAccountActivateResolver implements FieldResolverInterface
             return false;
         }
 
-        // Generate activation token.
-        if(!$this->isTokenValid($user, $args['token'], $config)) {
+        // If token is valid
+        if(!$this->isTokenValid($user, $args['token'])) {
             return false;
         }
 
-
         // If we reach this point, we can activate the user.
-        $this->tryToUpdateState($user, $config, $config['activeValue']);
+        $this->tryToUpdate($user, $config['stateField'], $config['activeValue']);
+        $user->setToken(static::TOKEN_KEY, null);
         $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
         $this->uniteCMSDomainLogger->info(sprintf('Successfully confirmed account activation for user with username "%s".', $args['username']));
         return true;

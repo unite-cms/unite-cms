@@ -3,86 +3,31 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
-use GraphQL\Language\AST\ObjectTypeDefinitionNode;
-use GraphQL\Type\Definition\ResolveInfo;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
-use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
-use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
-use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
 use UniteCMS\CoreBundle\Field\Types\PasswordType;
 use UniteCMS\CoreBundle\Mailer\PasswordResetMailer;
-use UniteCMS\CoreBundle\Security\User\UserInterface;
 
-class EmailPasswordResetResolver implements FieldResolverInterface
+class EmailPasswordResetResolver extends AbstractEmailConfirmationResolver
 {
-    /**
-     * @var DomainManager $domainManager
-     */
-    protected $domainManager;
-
-    /**
-     * @var LoggerInterface $uniteCMSDomainLogger
-     */
-    protected $uniteCMSDomainLogger;
-
-    /**
-     * @var ValidatorInterface $validator
-     */
-    protected $validator;
-
-    /**
-     * @var FieldTypeManager $fieldTypeManager
-     */
-    protected $fieldTypeManager;
-
-    /**
-     * @var JWTEncoderInterface $JWTEncoder
-     */
-    protected $JWTEncoder;
+    const TOKEN_KEY = 'unite_password_reset';
+    const REQUEST_FIELD = 'emailPasswordResetRequest';
+    const CONFIRM_FIELD = 'emailPasswordResetConfirm';
 
     /**
      * @var PasswordResetMailer $passwordResetMailer
      */
     protected $passwordResetMailer;
 
-    public function __construct(DomainManager $domainManager, LoggerInterface $uniteCMSDomainLogger, ValidatorInterface $validator, FieldTypeManager $fieldTypeManager, JWTEncoderInterface $JWTEncoder, PasswordResetMailer $passwordResetMailer)
+    public function __construct(DomainManager $domainManager, LoggerInterface $uniteCMSDomainLogger, ValidatorInterface $validator, FieldDataMapper $fieldDataMapper, JWTEncoderInterface $JWTEncoder, PasswordResetMailer $passwordResetMailer)
     {
-        $this->domainManager = $domainManager;
-        $this->uniteCMSDomainLogger = $uniteCMSDomainLogger;
-        $this->validator = $validator;
-        $this->fieldTypeManager = $fieldTypeManager;
-        $this->JWTEncoder = $JWTEncoder;
         $this->passwordResetMailer = $passwordResetMailer;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function supports(string $typeName, ObjectTypeDefinitionNode $typeDefinitionNode): bool {
-        return $typeName === 'UniteMutation';
-    }
-
-    /**
-     * {@inheritDoc}
-     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException
-     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException
-     * @throws \Twig\Error\LoaderError
-     * @throws \Twig\Error\RuntimeError
-     * @throws \Twig\Error\SyntaxError
-     */
-    public function resolve($value, $args, $context, ResolveInfo $info)
-    {
-        switch ($info->fieldName) {
-            case 'emailPasswordResetRequest': return $this->resolveRequest($args);
-            case 'emailPasswordResetConfirm': return $this->resolveConfirm($args);
-            default: return null;
-        }
+        parent::__construct($domainManager, $uniteCMSDomainLogger, $validator, $fieldDataMapper, $JWTEncoder);
     }
 
     /**
@@ -137,90 +82,6 @@ class EmailPasswordResetResolver implements FieldResolverInterface
     }
 
     /**
-     * @param UserInterface $user
-     * @return bool
-     *
-     * @throws JWTDecodeFailureException
-     */
-    protected function isTokenEmptyOrExpired(UserInterface $user) : bool {
-
-        $token = $user->getPasswordResetToken();
-
-        if(empty($token)) {
-            return true;
-        }
-
-        $payload = $this->JWTEncoder->decode($token);
-
-        if($payload['exp'] < time()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param UserInterface $user
-     * @param string $token
-     *
-     * @return bool
-     * @throws JWTDecodeFailureException
-     */
-    protected function isTokenValid(UserInterface $user, string $token) : bool {
-
-        if($this->isTokenEmptyOrExpired($user)) {
-            return false;
-        }
-
-        $storedToken = $user->getPasswordResetToken();
-        $payload = $this->JWTEncoder->decode($storedToken);
-
-        if($token !== $storedToken) {
-            return false;
-        }
-
-        if($payload['username'] !== $user->getUsername()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @param UserInterface $user
-     * @throws JWTEncodeFailureException
-     */
-    protected function generateToken(UserInterface $user) : void {
-        $user->setPasswordResetToken(
-            $this->JWTEncoder->encode([
-                'username' => $user->getUsername(),
-            ])
-        );
-    }
-
-    /**
-     * @param UserInterface $user
-     * @param array $config
-     * @param string $password
-     */
-    protected function tryToUpdatePassword(UserInterface $user, array $config, string $password) {
-
-        $domain = $this->domainManager->current();
-        $passwordField = $domain->getContentTypeManager()->getUserType($user->getType())->getField($config['passwordField']);
-        $passwordFieldType = $this->fieldTypeManager->getFieldType($passwordField->getType());
-
-        $data = $user->getData();
-        $data[$config['passwordField']] = $passwordFieldType->normalizeInputData($user, $passwordField, $password);
-
-        $domain->getUserManager()->update($domain, $user, $data);
-        $violations = $this->validator->validate($user);
-
-        if(count($violations) > 0) {
-            throw new ConstraintViolationsException($violations);
-        }
-    }
-
-    /**
      * @param $args
      *
      * @return bool
@@ -254,13 +115,12 @@ class EmailPasswordResetResolver implements FieldResolverInterface
             return false;
         }
 
-        $this->generateToken($user);
-
         // Persist token
+        $this->generateToken($user);
         $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
 
         // Send out email
-        if($this->passwordResetMailer->send($config['resetUrl'], $user->getPasswordResetToken(), $email) === 0) {
+        if($this->passwordResetMailer->send($config['resetUrl'], $user->getToken(static::TOKEN_KEY), $email) === 0) {
             $this->uniteCMSDomainLogger->error(sprintf('Could not send out password reset email to user with username "%s".', $args['username']));
             return false;
         }
@@ -290,19 +150,14 @@ class EmailPasswordResetResolver implements FieldResolverInterface
             return false;
         }
 
-        if($this->isTokenEmptyOrExpired($user)) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to confirm a password reset, however the provided token is expired.', $args['username']));
-            return false;
-        }
-
         if(!$this->isTokenValid($user, $args['token'])) {
             $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to confirm a password reset, however the provided token is not valid.', $args['username']));
             return false;
         }
 
         // If we reach this point, we can save the new password.
-        $this->tryToUpdatePassword($user, $config, $args['password']);
-        $user->setPasswordResetToken(null);
+        $this->tryToUpdate($user, $config['passwordField'], $args['password']);
+        $user->setToken(static::TOKEN_KEY, null);
         $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
         $this->uniteCMSDomainLogger->info(sprintf('Successfully confirmed password reset for user with username "%s".', $args['username']));
         return true;

@@ -11,6 +11,6 @@ interface UserInterface extends ContentInterface, BaseUserInterface
     public function setFullyAuthenticated(bool $fullyAuthenticated = true) : void;
     public function isFullyAuthenticated() : bool;
 
-    public function getPasswordResetToken() : ?string;
-    public function setPasswordResetToken(?string $token = null) : void;
+    public function getToken(string $key) : ?string;
+    public function setToken(string $key, ?string $token = null) : void;
 }

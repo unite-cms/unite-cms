@@ -38,10 +38,11 @@ class FieldDataMapper
      * @param ContentInterface $content
      * @param $inputData
      * @param ContentType|null $contentType
+     * @param bool $bypassAccess
      *
      * @return array
      */
-    public function mapToFieldData(Domain $domain, ContentInterface $content, $inputData, ContentType $contentType = null) : array {
+    public function mapToFieldData(Domain $domain, ContentInterface $content, $inputData, ContentType $contentType = null, bool $bypassAccess = false) : array {
 
         $inputData = empty($inputData) || !is_array($inputData) ? [] : $inputData;
         $normalizedData = $content->getData();
@@ -64,7 +65,7 @@ class FieldDataMapper
             if(array_key_exists($id, $inputData) && $inputData[$id] !== null) {
 
                 // If we are not allowed to update this field throw an exception.
-                if(!$this->authorizationChecker->isGranted(ContentFieldVoter::UPDATE, new ContentField($content, $id))) {
+                if(!$bypassAccess && !$this->authorizationChecker->isGranted(ContentFieldVoter::UPDATE, new ContentField($content, $id))) {
                     throw new ContentAccessDeniedException(sprintf('You are not allowed to update field "%s".', $id));
                 }
 
