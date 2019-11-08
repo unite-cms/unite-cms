@@ -8,7 +8,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Security;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\EventSubscriber\CreateJWTTokenSubscriber;
-use UniteCMS\CoreBundle\UniteCMSCoreBundle;
+use UniteCMS\CoreBundle\UniteCMSAdminBundle;
 
 class UniteMutationResolver implements FieldResolverInterface
 {
@@ -61,7 +61,7 @@ class UniteMutationResolver implements FieldResolverInterface
                 return $this->tokenManager->create($this->security->getUser());
 
             case '_version':
-                return UniteCMSCoreBundle::UNITE_VERSION;
+                return UniteCMSAdminBundle::UNITE_VERSION;
 
             default: return null;
         }

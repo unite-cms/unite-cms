@@ -68,10 +68,12 @@ type Article implements UniteContent @access(query: "true", mutation: "true", cr
     foo: Expression                     @hide(if: "not has_role('ROLE_ADMIN')")
 }
 
-type Admin implements UniteUser @hide(if: "not has_role('ROLE_ADMIN')") {
+type Admin implements UniteUser @hide(if: "not has_role('ROLE_ADMIN')")
+    @passwordAuthenticator(passwordField: "password") {
     _meta: UniteContentMeta!
     id: ID
     username: String!                   @textField
+    password: NULL!                    @passwordField
 }
 
 type CommunityUser

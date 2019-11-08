@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <title>unite cms</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('unite') }}
+    {% endblock %}
+</head>
+<body>
+<div id="app">
+    <unite-admin-app></unite-admin-app>
+</div>
+{% block javascripts %}
+    {{ encore_entry_script_tags('unite') }}
+{% endblock %}
+</body>
+</html>

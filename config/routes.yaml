@@ -4,3 +4,10 @@ unite_cms_core_api:
     controller: UniteCMS\CoreBundle\Controller\ApiController::api
     defaults:
         unite_domain: 'default'
+
+unite_cms_admin:
+    path: /{unite_domain}
+    methods: [GET]
+    controller: UniteCMS\AdminBundle\Controller\AdminController::app
+    defaults:
+        unite_domain: 'default'

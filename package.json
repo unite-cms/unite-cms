@@ -1,0 +1,23 @@
+{
+    "dependencies": {
+        "unite-admin": "file:src/Bundle/AdminBundle"
+    },
+    "devDependencies": {
+        "@symfony/webpack-encore": "^0.28.0",
+        "core-js": "^3.0.0",
+        "node-sass": "^4.13.0",
+        "regenerator-runtime": "^0.13.2",
+        "sass-loader": "^7.0.1",
+        "vue-loader": "^15.0.11",
+        "vue-template-compiler": "^2.6.10",
+        "webpack-notifier": "^1.6.0"
+    },
+    "license": "UNLICENSED",
+    "private": true,
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
+    }
+}

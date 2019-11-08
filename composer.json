@@ -21,6 +21,13 @@
             "options": {
                 "symlink": true
             }
+        },
+        {
+            "type": "path",
+            "url": "./src/Bundle/AdminBundle",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "require": {
@@ -33,7 +40,8 @@
         "symfony/framework-bundle": "4.3.*",
         "symfony/yaml": "4.3.*",
         "unite-cms/core-bundle": "0@dev",
-        "unite-cms/doctrine-orm-bundle": "0@dev"
+        "unite-cms/doctrine-orm-bundle": "0@dev",
+        "unite-cms/admin-bundle": "0@dev"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.13",
