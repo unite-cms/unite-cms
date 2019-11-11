@@ -18,9 +18,9 @@
 
         <hr />
         <ul class="uk-iconnav uk-flex-center uk-margin-medium-bottom">
-          <li><router-link to="explorer" uk-tooltip="GraphQL explorer"><icon name="globe" /></router-link></li>
-          <li><router-link to="domain" uk-tooltip="Schema"><icon name="code" /></router-link></li>
-          <li><router-link to="log" uk-tooltip="Logs"><icon name="activity" /></router-link></li>
+          <li><router-link to="/explorer" uk-tooltip="GraphQL explorer"><icon name="globe" /></router-link></li>
+          <li><router-link to="/domain" uk-tooltip="Schema"><icon name="code" /></router-link></li>
+          <li><router-link to="/log" uk-tooltip="Logs"><icon name="activity" /></router-link></li>
 
           <li><router-link  :uk-tooltip="'Update user&#58; ' + user.username" :to="'/user/' + user.type + '/' + user.id"><icon name="user" /></router-link></li>
           <li><a  uk-tooltip="Logout" class="uk-text-danger" @click="logout"><icon name="log-out" /></a></li>
@@ -36,7 +36,6 @@
     import Icon from "./Icon";
 
     export default {
-        name: "AppNavigation",
         components: {Icon},
         methods: {
             logout() {
@@ -61,7 +60,7 @@
         }
     }
 </script>
-<style scoped type="text/scss">
+<style scoped lang="scss">
   .uk-offcanvas-bar {
     padding-bottom: 0;
   }

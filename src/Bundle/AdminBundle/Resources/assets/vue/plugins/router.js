@@ -1,15 +1,17 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import UserState from '../state/User';
+
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
-
-import UserState from '../state/User';
+import Explorer from "../pages/Explorer";
 
 Vue.use(VueRouter);
 
 const routes = [
     { path: '/', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/login', component: Login, meta: { requiresAnonymous: true } },
+    { path: '/explorer', component: Explorer, meta: { requiresAuth: true } },
 ];
 
 export const router = new VueRouter({

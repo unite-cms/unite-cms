@@ -9,7 +9,5 @@
 </template>
 
 <script>
-    export default {
-        name: "AppMobileNavbar",
-    }
+    export default {}
 </script>

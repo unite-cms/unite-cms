@@ -1,4 +1,0 @@
-
-type TestType implements UniteContent {
-    id: ID
-}

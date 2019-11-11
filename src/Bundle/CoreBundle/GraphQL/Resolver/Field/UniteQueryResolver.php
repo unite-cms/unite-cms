@@ -5,7 +5,7 @@ namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Security\Core\Security;
-use UniteCMS\CoreBundle\UniteCMSAdminBundle;
+use UniteCMS\CoreBundle\UniteCMSCoreBundle;
 
 class UniteQueryResolver implements FieldResolverInterface
 {
@@ -35,7 +35,7 @@ class UniteQueryResolver implements FieldResolverInterface
             case 'me':
                 return $this->security->getUser();
             case '_version':
-                return UniteCMSAdminBundle::UNITE_VERSION;
+                return UniteCMSCoreBundle::UNITE_VERSION;
             default: return null;
         }
     }
