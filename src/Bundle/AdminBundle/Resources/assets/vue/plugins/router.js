@@ -5,6 +5,11 @@ import UserState from '../state/User';
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
 import Explorer from "../pages/Explorer";
+import Schema from "../pages/Schema";
+import Logs from "../pages/Logs";
+import Container from "../pages/content/Container";
+import List from "../pages/content/List";
+import Update from "../pages/content/Update";
 
 Vue.use(VueRouter);
 
@@ -12,6 +17,20 @@ const routes = [
     { path: '/', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/login', component: Login, meta: { requiresAnonymous: true } },
     { path: '/explorer', component: Explorer, meta: { requiresAuth: true } },
+    { path: '/schema', component: Schema, meta: { requiresAuth: true } },
+    { path: '/logs', component: Logs, meta: { requiresAuth: true } },
+
+    { path: '/content/:type', component: Container, children: [
+        { path: '', component: List },
+        { path: ':id', component: Update },
+    ], meta: { requiresAuth: true } },
+    { path: '/user/:type', component: Container, children: [
+        { path: '', component: List },
+        { path: ':id', component: Update },
+    ], meta: { requiresAuth: true } },
+    { path: '/setting/:type', component: Container, children: [
+            { path: '', component: Update },
+    ], meta: { requiresAuth: true } },
 ];
 
 export const router = new VueRouter({

@@ -7,6 +7,7 @@ import User from './User';
 export const ContentTypes = new Vue({
     data() {
         return {
+            loaded: false,
             contentTypes: [],
             userTypes: [],
             singleContentTypes: [],
@@ -21,6 +22,7 @@ export const ContentTypes = new Vue({
                 return;
             }
 
+            this.loaded = false;
             this.$apollo.query({
                 query: gql(getIntrospectionQuery()),
             }).then((data) => {
@@ -53,6 +55,8 @@ export const ContentTypes = new Vue({
                         }
                     });
 
+                    this.loaded = true;
+                    this.$emit('loaded');
                 });
             }).catch(fail).catch(fin).then(success);
         });
@@ -69,6 +73,12 @@ export const ContentTypes = new Vue({
                 name: type.name,
                 description: type.description
             };
+        },
+        get(id) {
+            let foundTypes = this.contentTypes.concat(this.userTypes, this.singleContentTypes, this.embeddedContentTypes).filter((type) => {
+                return type.id === id
+            });
+            return foundTypes.length > 0 ? foundTypes[0] : null;
         }
     }
 });
