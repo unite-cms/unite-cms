@@ -1,0 +1,22 @@
+
+#app-navigation {
+
+}
+
+#app-main {
+
+}
+
+@media (min-width: $breakpoint-medium) {
+  #app-navigation {
+    display: block;
+
+    .uk-offcanvas-bar {
+      left: 0;
+    }
+
+    + #app-main {
+      margin-left: $offcanvas-bar-width-m;
+    }
+  }
+}

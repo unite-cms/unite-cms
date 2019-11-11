@@ -1,18 +1,17 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import ApolloClient from 'apollo-boost';
-
-import UserState from '../state/User';
+import User from "../state/User";
 
 Vue.use(VueApollo);
 
 const apolloClient = new ApolloClient({
-    uri: location.origin,
+    uri: location.origin + UNITE_ADMIN_CONFIG.baseurl,
     request: (operation) => {
-        if(UserState.token) {
+        if(User.token) {
             operation.setContext({
                 headers: {
-                    authorization: `Bearer ${UserState.token}`
+                    authorization: `Bearer ${ User.token }`
                 }
             })
         }
@@ -21,4 +20,3 @@ const apolloClient = new ApolloClient({
 
 export const apolloProvider = new VueApollo({ defaultClient: apolloClient });
 export default apolloProvider;
-UserState.$apolloProvider = apolloProvider;

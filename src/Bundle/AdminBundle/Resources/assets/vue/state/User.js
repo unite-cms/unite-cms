@@ -5,7 +5,7 @@ import gql from 'graphql-tag';
 
 const COOKIE_NAME = 'UNITE_ADMIN_USER';
 
-export const UserState = new Vue({
+export const User = new Vue({
     data() {
         return {
             user: Cookies.getJSON(COOKIE_NAME) || {},
@@ -32,18 +32,13 @@ export const UserState = new Vue({
                 this.user = { token: data.data.unite.generateLongLivingJWT };
 
                 // Get user information
-                this.$apollo.query({
-                    query: gql`query {
-                        unite {
-                            me {
-                                id
-                                username
-                            }
-                        }
-                    }`
-                }).then((data) => {
-                    this.user.id = data.data.unite.me.id;
-                    this.user.username = data.data.unite.me.username;
+                this.$apollo.query({ query: gql`query { unite { me { __typename, id, username } }}` }).then((data) => {
+                    this.user = {
+                        token: this.user.token,
+                        id: data.data.unite.me.id,
+                        username: data.data.unite.me.username,
+                        type: data.data.unite.me.__typename,
+                    };
                 }).then(success).catch(fail).finally(fin);
             }).catch(fail).catch(fin);
         });
@@ -66,9 +61,12 @@ export const UserState = new Vue({
         isAuthenticated() {
             return !!this.user.token;
         },
+        hasUserInformation() {
+            return !!this.user.token && !!this.user.username;
+        },
         token() {
             return this.isAuthenticated ? this.user.token : null;
         }
     }
 });
-export default UserState;
+export default User;

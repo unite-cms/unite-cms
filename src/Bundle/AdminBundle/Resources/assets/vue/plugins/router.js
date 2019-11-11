@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Dashboard from "../components/Dashboard";
-import Login from "../components/Login";
+import Dashboard from "../pages/Dashboard";
+import Login from "../pages/Login";
 
 import UserState from '../state/User';
 
@@ -12,7 +12,11 @@ const routes = [
     { path: '/login', component: Login, meta: { requiresAnonymous: true } },
 ];
 
-export const router = new VueRouter({ routes });
+export const router = new VueRouter({
+    base: UNITE_ADMIN_CONFIG.baseurl || '',
+    mode: 'history',
+    routes,
+});
 
 router.beforeEach((to, from, next) => {
 

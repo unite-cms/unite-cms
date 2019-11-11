@@ -1,5 +1,5 @@
 <template>
-  <div class="uk-placeholder">Dashboard</div>
+  <div class="uk-placeholder" style="margin: 20px;">Dashboard</div>
 </template>
 
 <script>

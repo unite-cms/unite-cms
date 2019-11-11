@@ -1,31 +1,21 @@
 <template>
-  <div>
-    <section>
-      <router-link to="/">Dashboard</router-link>
-      <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
-      <a v-if="isAuthenticated" @click="logout">Logout</a>
-    </section>
-    <section class="uk-container">
-      <router-view></router-view>
-    </section>
+  <div class="uk-height-1-1 uk-flex uk-flex-column">
+    <slot name="mobile-navbar"><app-mobile-navbar v-if="hasUserInformation" /></slot>
+    <slot name="navigation"><app-navigation v-if="hasUserInformation" /></slot>
+    <section id="app-main" class="uk-height-1-1"><router-view></router-view></section>
   </div>
 </template>
 <script>
+    import UserState from "./state/User";
+    import AppNavigation from "./components/AppNavigation";
+    import AppMobileNavbar from "./components/AppMobileNavbar";
 
-  import UserState from "./state/User";
-
-  export default {
-    methods: {
-        logout() {
-            UserState.$emit('logout', {}, () => {
-                this.$router.push('/login');
-            })
-        }
-    },
-    computed: {
-        isAuthenticated() {
-            return UserState.isAuthenticated;
+    export default {
+        components: {AppMobileNavbar, AppNavigation},
+        computed: {
+            hasUserInformation() {
+                return UserState.hasUserInformation;
+            }
         }
     }
-  }
 </script>

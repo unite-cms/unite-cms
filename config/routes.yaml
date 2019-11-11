@@ -2,12 +2,26 @@ unite_cms_core_api:
     path: /{unite_domain}
     methods: [POST, OPTIONS]
     controller: UniteCMS\CoreBundle\Controller\ApiController::api
+    requirements:
+        unite_domain: '[a-z0-9_]*'
     defaults:
         unite_domain: 'default'
 
 unite_cms_admin:
-    path: /{unite_domain}
+    path: /{!unite_domain}/{path}
     methods: [GET]
     controller: UniteCMS\AdminBundle\Controller\AdminController::app
     defaults:
         unite_domain: 'default'
+        path: ''
+    requirements:
+        unite_domain: '[a-z0-9_]+'
+        path: '.*'
+
+unite_cms_admin_default:
+    path: /
+    methods: [GET]
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /default
+        permanent: false

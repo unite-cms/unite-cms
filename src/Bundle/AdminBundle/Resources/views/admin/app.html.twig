@@ -13,6 +13,11 @@
     <unite-admin-app></unite-admin-app>
 </div>
 {% block javascripts %}
+    <script type="text/javascript">
+        const UNITE_ADMIN_CONFIG = {
+            baseurl: '{{ path('unite_cms_admin', { unite_domain: domain.id }) }}'
+        };
+    </script>
     {{ encore_entry_script_tags('unite') }}
 {% endblock %}
 </body>
