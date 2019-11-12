@@ -68,6 +68,27 @@ type UniteContentMeta {
     locale: Locale
 }
 
+type UniteSchemaFile {
+    name: String!
+    value: String!
+}
+
+input UniteSchemaFileInput {
+    name: String!
+    value: String!
+}
+
+type UniteContentTypeField {
+    id: ID!
+    type: ID!
+}
+
+type UniteContentType {
+    id: ID!
+    type: ID!
+    fields: [UniteContentTypeField!]
+}
+
 interface UniteUser {
     id: ID
     username: String!
@@ -108,10 +129,14 @@ input UniteOrderByInput {
 
 type UniteQuery {
     _version: String!
+    logs(before: DateTime, after: DateTime) : String! @hide(if: "not has_role('ROLE_ADMIN')")
+    types: [UniteContentType!] @hide(if: "not has_role('ROLE_ADMIN')")
+    schemaFiles: [UniteSchemaFile!]! @hide(if: "not has_role('ROLE_ADMIN')")
 }
 
 type UniteMutation {
     _version: String!
     generateJWT: String! @hide(if: "user.isAnonymous()")
     generateLongLivingJWT: String! @hide(if: "not user.isFullyAuthenticated()")
+    updateSchemaFiles(schemaFiles: [UniteSchemaFileInput]!) : Boolean! @hide(if: "not has_role('ROLE_ADMIN')")
 }
