@@ -70,6 +70,17 @@
             // TODO: Load real schema files
             this.createModel('type Foo { id: ID! }', 'schema');
         },
+
+        beforeDestroy() {
+            if(!this.monaco){
+                return;
+            }
+
+            this.monaco.editor.getModels().forEach((model) => {
+                model.dispose();
+            });
+        },
+
         methods: {
 
             models() {

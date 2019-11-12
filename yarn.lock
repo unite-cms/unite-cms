@@ -650,6 +650,13 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@femessage/log-viewer@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@femessage/log-viewer/-/log-viewer-1.2.2.tgz#795dea37d96021524b3e1b5463a0ed8aeae3398d"
+  integrity sha512-2LoZc8X+pHMM3ZmvnS3YeLxQVU2yrSuKEdFJhwgDpIrBIf/7J5jp5MItRfCQGRZEepeuyQKrthaki6Dur2iHpw==
+  dependencies:
+    vue-virtual-scroll-list "^1.4.1"
+
 "@symfony/webpack-encore@^0.28.0":
   version "0.28.0"
   resolved "https://registry.yarnpkg.com/@symfony/webpack-encore/-/webpack-encore-0.28.0.tgz#75f24034602cfca35eea95400e88926821a1d7dc"
@@ -6842,6 +6849,7 @@ unique-slug@^2.0.0:
 "unite-admin@file:src/Bundle/AdminBundle":
   version "0.10.0"
   dependencies:
+    "@femessage/log-viewer" "^1.2.2"
     apollo-boost "^0.4.4"
     feather-icons "^4.24.1"
     graphql "^14.5.8"
@@ -7053,6 +7061,11 @@ vue-template-es2015-compiler@^1.9.0:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
+
+vue-virtual-scroll-list@^1.4.1:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/vue-virtual-scroll-list/-/vue-virtual-scroll-list-1.4.2.tgz#c9308029a10587cb25480ed1b41798636b35f296"
+  integrity sha512-jcXl1cYDxGZX+aF9vsUauXWnUkXm8oQxnvLTJ8UMTmMxwzbmlHX7vs0xGDdEej91vJpBNrdNNseWPxboTvI+UA==
 
 vue@^2.6.10:
   version "2.6.10"
