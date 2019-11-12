@@ -1,6 +1,5 @@
-
 import Vue from 'vue';
-import { getIntrospectionQuery } from 'graphql'
+import {getIntrospectionQuery} from 'graphql'
 import gql from 'graphql-tag';
 import User from './User';
 
@@ -67,12 +66,32 @@ export const ContentTypes = new Vue({
         });
     },
     methods: {
-        transformType(type) {
+        transformField(field) {
             return {
+                id: field.name,
+                name: field.name,
+                description: field.description,
+            };
+        },
+        transformType(type) {
+            let contentType = {
                 id: type.name,
                 name: type.name,
-                description: type.description
+                description: type.description,
+                fields: type.fields.map(this.transformField),
+                listFields: function() {
+                    return this.fields.filter((field) => {
+                        return field.id === 'id';
+                    });
+                },
             };
+
+            contentType.fields = contentType.fields.map((field) => {
+                field.type = this.$unite.getFieldType(contentType, field.id);
+                return field;
+            });
+
+            return contentType;
         },
         get(id) {
             let foundTypes = this.contentTypes.concat(this.userTypes, this.singleContentTypes, this.embeddedContentTypes).filter((type) => {

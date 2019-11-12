@@ -2,7 +2,9 @@
 import Vue from 'vue';
 import State from './vue/state';
 import apolloProvider from './vue/plugins/apollo';
+import { Unite, VueUnite } from './vue/plugins/unite';
 import router from './vue/plugins/router';
+
 import UniteAdminApp from './vue/App';
 
 
@@ -26,6 +28,8 @@ Object.keys(State).forEach((state) => {
 
 
 ////////// INIT VUE //////////
+Vue.use(VueUnite);
+
 new Vue({
     el: '#app',
     apolloProvider,

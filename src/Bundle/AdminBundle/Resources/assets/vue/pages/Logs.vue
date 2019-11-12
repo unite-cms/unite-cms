@@ -11,7 +11,7 @@
             return {
                 log: 'FOO',
                 hasMore: true,
-                loading: false,
+                loading: true,
             };
         },
         mounted(){
@@ -19,13 +19,10 @@
         },
         methods: {
             loadMore() {
-                this.loading = true;
-
                 setTimeout(() => {
                     for(let i = 0; i < 10000; i++) {
                         this.log += "\nFake Log Entry " + i;
                     }
-                    this.loading = false;
                 }, 300);
             }
         }

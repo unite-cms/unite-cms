@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import UserState from '../state/User';
+import User from '../state/User';
+import Alerts from "../state/Alerts";
 
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
@@ -8,7 +9,7 @@ import Explorer from "../pages/Explorer";
 import Schema from "../pages/Schema";
 import Logs from "../pages/Logs";
 import Container from "../pages/content/Container";
-import List from "../pages/content/List";
+import List from "../pages/content/List/List";
 import Update from "../pages/content/Update";
 
 Vue.use(VueRouter);
@@ -41,15 +42,17 @@ export const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
 
+    Alerts.$emit('clear');
+
     // If this route requires auth but user is not authenticated
-    if(to.matched.some(record => record.meta.requiresAuth) && !UserState.isAuthenticated) {
+    if(to.matched.some(record => record.meta.requiresAuth) && !User.isAuthenticated) {
         next({
             path: '/login',
             query: {redirect: to.fullPath}
         });
 
     // If this route requires anonymous but user is authenticated
-    } else if(to.matched.some(record => record.meta.requiresAnonymous) && UserState.isAuthenticated) {
+    } else if(to.matched.some(record => record.meta.requiresAnonymous) && User.isAuthenticated) {
             next({
                 path: '/'
             });

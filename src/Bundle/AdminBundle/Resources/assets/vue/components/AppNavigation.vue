@@ -1,5 +1,5 @@
 <template>
-  <section id="app-navigation" uk-offcanvas="overlay: true">
+  <section ref="offcanvas" id="app-navigation" uk-offcanvas="overlay: true">
     <div class="uk-offcanvas-bar">
       <button class="uk-offcanvas-close uk-hidden@m" type="button" uk-close></button>
       <div class="uk-flex uk-flex-column uk-height-1-1">
@@ -35,6 +35,7 @@
 </template>
 
 <script>
+    import UIkit from "uikit";
     import User from "../state/User"
     import ContentTypes from '../state/ContentTypes';
     import Icon from "./Icon";
@@ -50,6 +51,11 @@
             ContentTypes.$on('loaded', () => { this.loading = false; });
             if(ContentTypes.loaded) {
                 this.loading = false;
+            }
+        },
+        watch: {
+            '$route'(){
+                UIkit.offcanvas(this.$refs.offcanvas).hide();
             }
         },
         methods: {

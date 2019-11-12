@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import ApolloClient from 'apollo-boost';
 import User from "../state/User";
+import Alerts from "../state/Alerts";
 
 Vue.use(VueApollo);
 
@@ -18,5 +19,9 @@ const apolloClient = new ApolloClient({
     }
 });
 
-export const apolloProvider = new VueApollo({ defaultClient: apolloClient });
+export const apolloProvider = new VueApollo({
+    defaultClient: apolloClient,
+    watchLoading: () => { Alerts.$emit('clear'); },
+    errorHandler: Alerts.apolloErrorHandler
+});
 export default apolloProvider;
