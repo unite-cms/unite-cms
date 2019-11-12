@@ -2,19 +2,19 @@
   <div class="schema-editor uk-height-1-1 uk-flex uk-flex-column">
     <div class="tab-bar uk-flex">
       <div class="file-tabs uk-flex-1">
-        <button class="uk-button uk-button-secondary file-tab" v-for="file in files" :class="{ active: file.name === selected }">
-          <span @click="selected = file.name">
+        <button class="uk-button uk-button-secondary file-tab" v-for="model in models()" :class="{ active: isCurrentModel(model) }">
+          <span @click="setCurrentModel(model)">
             <icon-graph-q-l />
-            {{ file.name }}.graphql
+            {{ model.uri.authority }}
           </span>
-          <span @click="updateFile(file)" v-if="file.name === selected" class="uk-margin-medium-left">
+          <span @click="updateModelUri(model)" v-if="isCurrentModel(model)" class="uk-margin-medium-left">
             <icon :width="12" :height="12" name="edit" />
           </span>
-          <span @click="deleteFile(file)" v-if="file.name === selected" class="uk-text-danger">
+          <span @click="deleteModel(model)" v-if="isCurrentModel(model)" class="uk-text-danger">
             <icon :width="12" :height="12" name="trash" />
           </span>
         </button>
-        <button class="uk-button uk-button-secondary add-file" @click="createFile">
+        <button class="uk-button uk-button-secondary add-file" @click="composeModel">
           <icon name="plus" />
           Add file
         </button>
@@ -28,7 +28,7 @@
         </button>
       </div>
     </div>
-    <MonacoEditor ref="monaco" class="uk-flex-1" :options="monacoOptions" :value="currentSchema.schema" @change="setCurrentSchema" />
+    <MonacoEditor ref="monaco" class="uk-flex-1" value="" :options="monacoOptions" @editorWillMount="editorWillMount" @change="changed = true" />
   </div>
 </template>
 
@@ -44,106 +44,90 @@
         components: {MonacoEditor, Icon, IconGraphQL},
         data() {
             return {
+                monaco: null,
                 changed: false,
                 loading: false,
                 saveSuccess: false,
-                selected: 'schema',
-                files: [
-                    {
-                        name: "schema",
-                        schema: "\n\n",
-                    }
-                ]
+                uniteReferenceModel: null
             }
-        },
-        mounted() {
-            graphQLLanguageProvider(monaco);
         },
         computed: {
             monacoOptions() {
                 return editorOptions;
-            },
-
-            currentSchema() {
-                return this.getSchema(this.selected, { schema: '' });
             }
         },
-        watch: {
-            files: {
-                deep: true,
-                handler() {
-                    this.changed = true;
-                    this.saveSuccess = false;
-                }
-            }
+        mounted() {
+
+            this.$refs.monaco.getEditor().addAction({
+                id: 'save',
+                label: 'Save',
+                keybindings: [
+                    this.monaco.KeyMod.CtrlCmd | this.monaco.KeyCode.KEY_S
+                ],
+                run: this.save
+            });
+
+            // TODO: Load real schema files
+            this.createModel('type Foo { id: ID! }', 'schema');
         },
         methods: {
 
-            getSchema(filename, defaultValue = null) {
-                let found = this.files.filter((file) => {
-                    return file.name === filename;
-                });
-                return found.length > 0 ? found[0] : defaultValue;
+            models() {
+                return this.monaco ? this.monaco.editor.getModels().filter((model) => {
+                    return model.uri.scheme === 'unite' && !model.isDisposed();
+                }) : [];
             },
 
-            removeSchema(filename) {
-                this.files = this.files.filter((file) => {
-                    return file.name !== filename;
-                });
+            editorWillMount(monaco) {
+                this.monaco = monaco;
+                graphQLLanguageProvider(this.monaco);
+                this.uniteReferenceModel = this.monaco.editor.createModel("type Test { id: ID! }\n\n type Baa { id: ID! }", 'graphql', new this.monaco.Uri('unite-vendor', `unite-cms.graphql`));
             },
 
-            setCurrentSchema(data) {
-                if(!this.currentSchema.name) {
-                    return;
-                }
-
-                if(this.currentSchema.schema !== data) {
-                    this.currentSchema.schema = data;
-                }
+            createModel(value, filename) {
+                let model = this.monaco.editor.createModel(value, 'graphql', new this.monaco.Uri('unite', `${filename}.graphql`));
+                this.setCurrentModel(model);
             },
 
-            createFile() {
-                UIkit.modal.prompt('Name (without .graphql)', 'new').then((filename) => {
+            setCurrentModel(model) {
+                this.$refs.monaco.getEditor().setModel(model);
+                this.$forceUpdate();
+            },
 
+            isCurrentModel(model) {
+                return model === this.$refs.monaco.getEditor().getModel();
+            },
+
+            composeModel() {
+                UIkit.modal.prompt('Create new schema file (filename without .graphql)', 'untitled').then((filename) => {
                     filename = filename.replace(/[^A-Za-z0-9-_]/gi, '_');
-
-                    if(this.getSchema(filename)) {
-                        UIkit.modal.alert(`A schema with the name "${ filename }"already exists.`);
-                    } else {
-                        this.files.push({
-                            name: filename,
-                            schema: "\n\n",
-                        });
-                        this.selected = filename;
-                    }
-
+                    this.createModel("\n", filename);
+                    this.changed = true;
                 })
             },
 
-            updateFile(file) {
-                UIkit.modal.prompt('Update filename (without .graphql)', file.name).then((filename) => {
-
+            updateModelUri(model) {
+                UIkit.modal.prompt('Update filename (without .graphql)', model.uri.authority.replace('.graphql', '')).then((filename) => {
                     filename = filename.replace(/[^A-Za-z0-9-_]/gi, '_');
-
-                    if(filename !== file.name && this.getSchema(filename)) {
-                        UIkit.modal.alert(`Another schema with the name "${ filename }"already exists.`);
-                    } else {
-                        this.removeSchema(file.name);
-                        this.files.push({
-                            name: filename,
-                            schema: file.schema,
-                        });
-                        this.selected = filename;
-                    }
-
+                    let value = model.getValue();
+                    model.dispose();
+                    this.createModel(value, filename);
+                    this.changed = true;
+                    this.$forceUpdate();
                 })
             },
 
-            deleteFile(file) {
-                UIkit.modal.confirm(`Do you really want to delete schema file "${ file.name }"?`).then(() => {
-                    this.removeSchema(file.name);
-                    if(this.files.length > 0) {
-                        this.selected = this.files[0].name;
+            deleteModel(model) {
+                UIkit.modal.confirm(`Do you really want to delete schema file "${ model.uri.authority }"?`).then(() => {
+                    model.dispose();
+                    this.changed = true;
+
+                    let allModels = this.models();
+
+                    if(allModels.length > 0) {
+                        this.setCurrentModel(allModels[0]);
+                    } else {
+                        this.$forceUpdate();
                     }
                 });
             },
