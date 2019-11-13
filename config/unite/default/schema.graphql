@@ -80,7 +80,7 @@ type CommunityUser
     implements UniteUser
     @passwordAuthenticator(passwordField: "password")
     @emailPasswordReset(emailField: "email", passwordField: "password", resetUrl: "https://unitecms.io/password-reset/{token}")
-    @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+    @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true", permanent_delete: "true") {
     _meta: UniteContentMeta!
     id: ID
     username: String!                  @textField

@@ -1,11 +1,14 @@
 
+@import "sass/base/reset";
+@import "sass/base/typography";
+
+@import "sass/base/variables";
 @import "~uikit/src/scss/variables-theme.scss";
 
-@import "sass/variables/uikit-theme";
-
 @import "~uikit/src/scss/mixins-theme.scss";
+@import "sass/base/mixins-theme";
+
 @import "~uikit/src/scss/uikit-theme.scss";
 
-@import "sass/components/reset";
 @import "sass/components/app-layout";
 @import "sass/components/nav";

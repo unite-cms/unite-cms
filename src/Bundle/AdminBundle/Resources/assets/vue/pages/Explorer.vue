@@ -9,18 +9,21 @@
 
     export default {
         mounted() {
-
             let scriptUrl = '//cdn.jsdelivr.net/npm/graphql-playground-react/build/static/js/middleware.js';
             if(!document.querySelector(`script[src="${scriptUrl}"]`)) {
-                let script = document.createElement("script");
-                script.src = scriptUrl;
-                script.onload = () => {
+                this.script = document.createElement("script");
+                this.script.src = scriptUrl;
+                this.script.onload = () => {
                     this.mountPlayground();
                 };
-                document.body.appendChild(script);
+                document.body.appendChild(this.script);
             } else {
                 this.mountPlayground();
             }
+        },
+        beforeDestroy() {
+            this.script.remove();
+            delete window.GraphQLPlayground;
         },
         computed: {
             playgroundConfig() {
