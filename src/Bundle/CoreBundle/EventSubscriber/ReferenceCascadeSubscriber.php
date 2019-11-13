@@ -2,7 +2,6 @@
 
 namespace UniteCMS\CoreBundle\EventSubscriber;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -14,6 +13,7 @@ use UniteCMS\CoreBundle\Event\ContentEventAfter;
 use UniteCMS\CoreBundle\Event\ContentEventBefore;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\Types\ReferenceOfType;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 
 class ReferenceCascadeSubscriber implements EventSubscriberInterface
 {
@@ -29,20 +29,14 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
     protected $fieldTypeManager;
 
     /**
-     * @var LoggerInterface $uniteCMSDomainLogger
-     */
-    protected $uniteCMSDomainLogger;
-
-    /**
      * @var EventDispatcherInterface $eventDispatcher
      */
     protected $eventDispatcher;
 
-    public function __construct(DomainManager $domainManager, FieldTypeManager $fieldTypeManager, LoggerInterface $uniteCMSDomainLogger, EventDispatcherInterface $eventDispatcher)
+    public function __construct(DomainManager $domainManager, FieldTypeManager $fieldTypeManager, EventDispatcherInterface $eventDispatcher)
     {
         $this->domainManager = $domainManager;
         $this->fieldTypeManager = $fieldTypeManager;
-        $this->uniteCMSDomainLogger = $uniteCMSDomainLogger;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -88,7 +82,7 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
         $this->eventDispatcher->dispatch(new ContentEventBefore($referencedContent), ContentEventBefore::PERMANENT_DELETE);
         $domain->getContentManager()->persist($domain, $referencedContent, ContentEvent::PERMANENT_DELETE);
 
-        $this->uniteCMSDomainLogger->info(sprintf(
+        $domain->log(LoggerInterface::NOTICE, sprintf(
             'Cascade delete referenced "%s" content with id "%s", because "%s" content with id "%s" was hard deleted.',
             $referencedContent->getType(),
             $referencedContent->getId(),

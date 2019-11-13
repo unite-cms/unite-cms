@@ -1,2 +1,0 @@
-monolog:
-    channels: ["unite_domain"]

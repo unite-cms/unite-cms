@@ -3,13 +3,13 @@
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Mailer\EmailChangeMailer;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
@@ -32,14 +32,13 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
     public function __construct(
         Security $security,
         DomainManager $domainManager,
-        LoggerInterface $uniteCMSDomainLogger,
         ValidatorInterface $validator,
         FieldDataMapper $fieldDataMapper,
         JWTEncoderInterface $JWTEncoder,
         EmailChangeMailer $emailChangeMailer) {
         $this->security = $security;
         $this->emailChangeMailer = $emailChangeMailer;
-        parent::__construct($domainManager, $uniteCMSDomainLogger, $validator, $fieldDataMapper, $JWTEncoder);
+        parent::__construct($domainManager, $validator, $fieldDataMapper, $JWTEncoder);
     }
 
     /**
@@ -48,7 +47,8 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
      */
     protected function getDirectiveConfig(string $type) : ?array {
 
-        $userType = $this->domainManager->current()->getContentTypeManager()->getUserType($type);
+        $domain = $this->domainManager->current();
+        $userType = $domain->getContentTypeManager()->getUserType($type);
 
         if(!$userType) {
             return null;
@@ -63,19 +63,19 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
         }
 
         if(empty($changeDirective)) {
-            $this->uniteCMSDomainLogger->warning(sprintf('A user tried to request or confirm an email change for the user type "%s", however this user type is not configured for email change.', $type));
+            $domain->log(LoggerInterface::WARNING, sprintf('A user tried to request or confirm an email change for the user type "%s", however this user type is not configured for email change.', $type));
             return null;
         }
 
         $emailField = $userType->getField($changeDirective['emailField']);
 
         if(!$emailField) {
-            $this->uniteCMSDomainLogger->warning(sprintf('Missing emailField "%s" for @emailChange of user type "%s"', $changeDirective['emailField'], $type));
+            $domain->log(LoggerInterface::WARNING, sprintf('Missing emailField "%s" for @emailChange of user type "%s"', $changeDirective['emailField'], $type));
             return null;
         }
 
         if($emailField->getType() !== EmailType::getType()) {
-            $this->uniteCMSDomainLogger->warning(sprintf('emailField "%s" for @emailChange of user type "%s" must be of type "%s".', $changeDirective['emailField'], $type, EmailType::getType()));
+            $domain->log(LoggerInterface::WARNING, sprintf('emailField "%s" for @emailChange of user type "%s" must be of type "%s".', $changeDirective['emailField'], $type, EmailType::getType()));
             return null;
         }
 
@@ -98,7 +98,7 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
         $user = $this->security->getUser();
 
         if(!$user || !$user instanceof UserInterface) {
-            $this->uniteCMSDomainLogger->warning('A user tried to request an email change for an anonymous user.');
+            $domain->log(LoggerInterface::WARNING, 'A user tried to request an email change for an anonymous user.');
             return false;
         }
 
@@ -107,12 +107,12 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
         }
 
         if($args['email'] === $user->getFieldData($config['emailField'])->resolveData()) {
-            $this->uniteCMSDomainLogger->error(sprintf('User with username "%s" tried to request an email change for the same email.', $user->getUsername()));
+            $domain->log(LoggerInterface::WARNING, 'User tried to request an email change for the same email.');
             return false;
         }
 
         if(!$this->isTokenEmptyOrExpired($user)) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to request an email change, however there already exist a non-expired reset token. If it is you: please wait until the token is expired and try again.', $args['username']));
+            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an email change, however there already exist a non-expired reset token. If it is you: please wait until the token is expired and try again.', $args['username']));
             return false;
         }
 
@@ -125,12 +125,12 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
 
         // Send out email
         if($this->emailChangeMailer->send($config['changeUrl'], $user->getToken(static::TOKEN_KEY), $args['email']) === 0) {
-            $this->uniteCMSDomainLogger->error(sprintf('Could not send out email change email to user with username "%s".', $user->getUsername()));
+            $domain->log(LoggerInterface::ERROR, 'Could not send out email change email.');
             return false;
         }
 
         // Replay to user
-        $this->uniteCMSDomainLogger->info(sprintf('User with username "%s" requested an email change.', $user->getUsername()));
+        $domain->log(LoggerInterface::NOTICE, 'User requested an email change.');
         return true;
     }
 
@@ -146,7 +146,7 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
         $user = $this->security->getUser();
 
         if(!$user || !$user instanceof UserInterface) {
-            $this->uniteCMSDomainLogger->warning('A user tried to confirm an email change for an anonymous user.');
+            $domain->log(LoggerInterface::WARNING, 'A user tried to confirm an email change for an anonymous user.');
             return false;
         }
 
@@ -165,7 +165,7 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
         $this->tryToUpdate($user, $config['emailField'], $payload['email']);
         $user->setToken(static::TOKEN_KEY, null);
         $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
-        $this->uniteCMSDomainLogger->info(sprintf('Successfully confirmed email change for user with username "%s".', $user->getUsername()));
+        $domain->log(LoggerInterface::NOTICE, 'Successfully confirmed email change.');
         return true;
     }
 }

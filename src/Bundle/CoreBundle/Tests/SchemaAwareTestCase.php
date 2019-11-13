@@ -39,6 +39,7 @@ class SchemaAwareTestCase extends KernelTestCase
             'test',
             $domain->getContentManager(),
             $domain->getUserManager(),
+            $domain->getLogger(),
             array_merge($domain->getSchema(), [$schema])
         ));
 

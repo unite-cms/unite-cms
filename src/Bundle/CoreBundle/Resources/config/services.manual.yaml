@@ -24,7 +24,3 @@ services:
         arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/email-change.graphql']
         tags:
             - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }
-
-    unite.cms_core.monolog.domain_stream_handler:
-        class: UniteCMS\CoreBundle\Monolog\DomainStreamHandler
-        arguments: ['%kernel.logs_dir%/unite/{domain}.log', '@UniteCMS\CoreBundle\Domain\DomainManager']

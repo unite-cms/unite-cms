@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 
 class Configuration implements ConfigurationInterface
 {
@@ -31,12 +32,18 @@ class Configuration implements ConfigurationInterface
      */
     protected $defaultUserManager;
 
-    public function __construct(string $defaultConfigDir, array $uniteCMSSchemaFiles = [], string $defaultContentManager = null, string $defaultUserManager = null)
+    /**
+     * @var LoggerInterface $defaultLogger
+     */
+    protected $defaultLogger;
+
+    public function __construct(string $defaultConfigDir, array $uniteCMSSchemaFiles = [], string $defaultContentManager = null, string $defaultUserManager = null, string $defaultLogger = null)
     {
         $this->defaultConfigDir = $defaultConfigDir;
         $this->uniteCMSSchemaFiles = $uniteCMSSchemaFiles;
         $this->defaultContentManager = $defaultContentManager;
         $this->defaultUserManager = $defaultUserManager;
+        $this->defaultLogger = $defaultLogger;
     }
 
     /**
@@ -70,6 +77,10 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('user_manager')
                             ->cannotBeEmpty()
                             ->defaultValue($this->defaultUserManager)
+                        ->end()
+                        ->scalarNode('logger')
+                            ->cannotBeEmpty()
+                            ->defaultValue($this->defaultLogger)
                         ->end()
                         ->scalarNode('jwt_ttl_short_living')
                             ->cannotBeEmpty()

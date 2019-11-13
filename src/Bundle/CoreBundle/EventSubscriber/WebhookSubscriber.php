@@ -3,13 +3,13 @@
 
 namespace UniteCMS\CoreBundle\EventSubscriber;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Event\ContentEventAfter;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 
 class WebhookSubscriber implements EventSubscriberInterface
 {
@@ -23,16 +23,10 @@ class WebhookSubscriber implements EventSubscriberInterface
      */
     protected $expressionLanguage;
 
-    /**
-     * @var LoggerInterface $domainLogger
-     */
-    protected $domainLogger;
-
-    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage, LoggerInterface $uniteCMSDomainLogger)
+    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage)
     {
         $this->domainManager = $domainManager;
         $this->expressionLanguage = $saveExpressionLanguage;
-        $this->domainLogger = $uniteCMSDomainLogger;
     }
 
     /**
@@ -64,7 +58,7 @@ class WebhookSubscriber implements EventSubscriberInterface
         foreach($contentType->getWebhooks() as $webhook) {
             if((bool)$this->expressionLanguage->evaluate($webhook->getExpression(), $values)) {
                 // TODO: Execute $webhook->url();
-                $this->domainLogger->info('TODO: Webhook was not really executed at the moment...');
+                $domain->log(LoggerInterface::WARNING, 'TODO: Webhook was not really executed at the moment...');
             }
         }
     }

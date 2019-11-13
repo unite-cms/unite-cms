@@ -12,7 +12,8 @@ Encore
     .setPublicPath('/build')
 
     .addEntry('unite', [
-        './src/Bundle/AdminBundle/Resources/assets/app.js'
+        './src/Bundle/AdminBundle/Resources/assets/app.js',
+        './src/Bundle/AdminBundle/Resources/assets/vue/translations/en.js'
     ])
 
     .splitEntryChunks()

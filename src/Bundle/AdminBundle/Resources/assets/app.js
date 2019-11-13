@@ -2,6 +2,7 @@
 import Vue from 'vue';
 import State from './vue/state';
 import apolloProvider from './vue/plugins/apollo';
+import i18n from './vue/plugins/i18n';
 import { Unite, VueUnite } from './vue/plugins/unite';
 import router from './vue/plugins/router';
 
@@ -34,5 +35,6 @@ new Vue({
     el: '#app',
     apolloProvider,
     router,
+    i18n,
     components: { UniteAdminApp },
 });

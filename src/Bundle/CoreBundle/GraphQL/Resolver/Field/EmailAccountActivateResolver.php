@@ -4,12 +4,12 @@
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Mailer\AccountActivationMailer;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
@@ -26,13 +26,12 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
 
     public function __construct(
         DomainManager $domainManager,
-        LoggerInterface $uniteCMSDomainLogger,
         ValidatorInterface $validator,
         FieldDataMapper $fieldDataMapper,
         JWTEncoderInterface $JWTEncoder,
         AccountActivationMailer $accountActivationMailer) {
         $this->accountActivationMailer = $accountActivationMailer;
-        parent::__construct($domainManager, $uniteCMSDomainLogger, $validator, $fieldDataMapper, $JWTEncoder);
+        parent::__construct($domainManager, $validator, $fieldDataMapper, $JWTEncoder);
     }
 
     /**
@@ -41,7 +40,8 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
      */
     protected function getDirectiveConfig(string $type) : ?array {
 
-        $userType = $this->domainManager->current()->getContentTypeManager()->getUserType($type);
+        $domain = $this->domainManager->current();
+        $userType = $domain->getContentTypeManager()->getUserType($type);
 
         if(!$userType) {
             return null;
@@ -56,7 +56,7 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
         }
 
         if(empty($activateDirective)) {
-            $this->uniteCMSDomainLogger->warning(sprintf('A user tried to request or confirm a password activation for the user type "%s", however this user type is not configured for account activation', $type));
+            $domain->log(LoggerInterface::WARNING, sprintf('A user tried to request or confirm a password activation for the user type "%s", however this user type is not configured for account activation', $type));
             return null;
         }
 
@@ -64,17 +64,17 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
         $stateField = $userType->getField($activateDirective['stateField']);
 
         if(!$emailField) {
-            $this->uniteCMSDomainLogger->warning(sprintf('Missing emailField "%s" for @emailAccountActivate of user type "%s"', $activateDirective['emailField'], $type));
+            $domain->log(LoggerInterface::WARNING, sprintf('Missing emailField "%s" for @emailAccountActivate of user type "%s"', $activateDirective['emailField'], $type));
             return null;
         }
 
         if(!$stateField) {
-            $this->uniteCMSDomainLogger->warning(sprintf('Missing stateField "%s" for @emailAccountActivate of user type "%s"', $activateDirective['stateField'], $type));
+            $domain->log(LoggerInterface::WARNING, sprintf('Missing stateField "%s" for @emailAccountActivate of user type "%s"', $activateDirective['stateField'], $type));
             return null;
         }
 
         if($emailField->getType() !== EmailType::getType()) {
-            $this->uniteCMSDomainLogger->warning(sprintf('emailField "%s" for @emailAccountActivate of user type "%s" must be of type "%s".', $activateDirective['emailField'], $type, EmailType::getType()));
+            $domain->log(LoggerInterface::WARNING, sprintf('emailField "%s" for @emailAccountActivate of user type "%s" must be of type "%s".', $activateDirective['emailField'], $type, EmailType::getType()));
             return null;
         }
 
@@ -90,7 +90,7 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
     protected function canUserActivateAccount(UserInterface $user, array $config) : bool {
         $stateValue = $user->getFieldData($config['stateField'])->resolveData();
         if($stateValue == $config['activeValue']) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to request an account activation, however the account is already activated.', $user->getUsername()));
+            $this->domainManager->current()->log(LoggerInterface::WARNING, 'User tried to request an account activation, however the account is already activated.');
             return false;
         }
         return true;
@@ -117,17 +117,17 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
         $user = $domain->getUserManager()->findByUsername($domain, $args['type'], $args['username']);
 
         if(!$user) {
-            $this->uniteCMSDomainLogger->warning(sprintf('A user tried to request an account activation for the unknown user "%s".', $args['username']));
+            $domain->log(LoggerInterface::WARNING, sprintf('A user tried to request an account activation for the unknown user "%s".', $args['username']));
             return false;
         }
 
         if(empty($email = $user->getFieldData($config['emailField']))) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to request an account activation, however the value of field "%s" is empty.', $args['username'], $config['emailField']));
+            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an account activation, however the value of field "%s" is empty.', $args['username'], $config['emailField']));
             return false;
         }
 
         if(!$this->isTokenEmptyOrExpired($user)) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to request a password reset, however there already exist a non-expired reset token. If it is you: please wait until the token is expired and try again.', $args['username']));
+            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request a password reset, however there already exist a non-expired reset token. If it is you: please wait until the token is expired and try again.', $args['username']));
             return false;
         }
 
@@ -142,12 +142,12 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
 
         // Send out email
         if($this->accountActivationMailer->send($config['activateUrl'], $user->getToken(static::TOKEN_KEY), $email) === 0) {
-            $this->uniteCMSDomainLogger->error(sprintf('Could not send out account activation email to user with username "%s".', $args['username']));
+            $domain->log(LoggerInterface::ERROR, sprintf('Could not send out account activation email to user with username "%s".', $args['username']));
             return false;
         }
 
         // Replay to user
-        $this->uniteCMSDomainLogger->info(sprintf('User with username "%s" requested an account activation.', $args['username']));
+        $domain->log(LoggerInterface::NOTICE, sprintf('User with username "%s" requested an account activation.', $args['username']));
         return true;
     }
 
@@ -167,7 +167,7 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
         $user = $domain->getUserManager()->findByUsername($domain, $args['type'], $args['username']);
 
         if(!$user) {
-            $this->uniteCMSDomainLogger->warning(sprintf('A user tried to confirm an account activation for the unknown user "%s".', $args['username']));
+            $domain->log(LoggerInterface::WARNING, sprintf('A user tried to confirm an account activation for the unknown user "%s".', $args['username']));
             return false;
         }
 
@@ -185,7 +185,8 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
         $this->tryToUpdate($user, $config['stateField'], $config['activeValue']);
         $user->setToken(static::TOKEN_KEY, null);
         $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
-        $this->uniteCMSDomainLogger->info(sprintf('Successfully confirmed account activation for user with username "%s".', $args['username']));
+
+        $domain->log(LoggerInterface::NOTICE, sprintf('Successfully confirmed account activation for user with username "%s".', $args['username']));
         return true;
     }
 }

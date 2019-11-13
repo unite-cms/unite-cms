@@ -29,6 +29,7 @@ class UniteCMSCoreExtension extends Extension
 
         $defaultContentManager = null;
         $defaultUserManager = null;
+        $defaultLogger = null;
 
         if(class_exists('UniteCMS\DoctrineORMBundle\Content\ContentManager')) {
             $defaultContentManager = 'UniteCMS\DoctrineORMBundle\Content\ContentManager';
@@ -38,11 +39,16 @@ class UniteCMSCoreExtension extends Extension
             $defaultUserManager = 'UniteCMS\DoctrineORMBundle\User\UserManager';
         }
 
+        if(class_exists('UniteCMS\DoctrineORMBundle\Logger\Logger')) {
+            $defaultLogger = 'UniteCMS\DoctrineORMBundle\Logger\Logger';
+        }
+
         $configuration = new Configuration(
             $container->getParameter('kernel.project_dir') . '/config/unite/',
             [SchemaManager::UNITE_CMS_ROOT_SCHEMA],
             $defaultContentManager,
-            $defaultUserManager
+            $defaultUserManager,
+            $defaultLogger
         );
         $config = $this->processConfiguration($configuration, $configs);
 
@@ -52,6 +58,9 @@ class UniteCMSCoreExtension extends Extension
 
             $params['user_manager'] = substr($params['user_manager'], 0, 1) === '@' ? substr($params['user_manager'], 1) : $params['user_manager'];
             $config['domains'][$id]['user_manager'] = new Reference($params['user_manager']);
+
+            $params['logger'] = substr($params['logger'], 0, 1) === '@' ? substr($params['logger'], 1) : $params['logger'];
+            $config['domains'][$id]['logger'] = new Reference($params['logger']);
         }
 
         $container->findDefinition(DomainManager::class)->setArgument('$domainConfig', $config['domains']);

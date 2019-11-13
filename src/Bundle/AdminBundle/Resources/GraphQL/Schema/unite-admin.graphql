@@ -1,0 +1,31 @@
+
+type UniteSchemaFile {
+    name: String!
+    value: String!
+}
+
+input UniteSchemaFileInput {
+    name: String!
+    value: String!
+}
+
+type UniteContentTypeField {
+    id: ID!
+    type: ID!
+}
+
+type UniteContentType {
+    id: ID!
+    type: ID!
+    fields: [UniteContentTypeField!]
+}
+
+extend type UniteQuery {
+    logs(before: DateTime!, after: DateTime) : [UniteLogEntry!] @hide(if: "not has_role('ROLE_ADMIN')")
+    types: [UniteContentType!] @hide(if: "not has_role('ROLE_ADMIN')")
+    schemaFiles: [UniteSchemaFile!]! @hide(if: "not has_role('ROLE_ADMIN')")
+}
+
+extend type UniteMutation {
+    updateSchemaFiles(schemaFiles: [UniteSchemaFileInput]!) : Boolean! @hide(if: "not has_role('ROLE_ADMIN')")
+}

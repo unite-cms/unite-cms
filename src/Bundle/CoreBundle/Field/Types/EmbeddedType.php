@@ -3,7 +3,6 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -16,6 +15,7 @@ use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 
 class EmbeddedType extends AbstractFieldType
 {
@@ -31,16 +31,10 @@ class EmbeddedType extends AbstractFieldType
      */
     protected $fieldDataMapper;
 
-    /**
-     * @var LoggerInterface $uniteCMSDomainLogger
-     */
-    protected $domainLogger;
-
-    public function __construct(DomainManager $domainManager, FieldDataMapper $fieldDataMapper, SaveExpressionLanguage $saveExpressionLanguage, LoggerInterface $uniteCMSDomainLogger)
+    public function __construct(DomainManager $domainManager, FieldDataMapper $fieldDataMapper, SaveExpressionLanguage $saveExpressionLanguage)
     {
         $this->domainManager = $domainManager;
         $this->fieldDataMapper = $fieldDataMapper;
-        $this->domainLogger = $uniteCMSDomainLogger;
         parent::__construct($saveExpressionLanguage);
     }
 
@@ -130,7 +124,7 @@ class EmbeddedType extends AbstractFieldType
 
         // If this is not a known embedded type.
         if(!$contentType = $domain->getContentTypeManager()->getEmbeddedContentType($field->getReturnType())) {
-            $this->domainLogger->warning(sprintf('Unknown embedded content type "%s" was used as return type of field "%s".', $field->getReturnType(), $field->getId()));
+            $domain->log(LoggerInterface::WARNING, sprintf('Unknown embedded content type "%s" was used as return type of field "%s".', $field->getReturnType(), $field->getId()));
             return null;
         }
 

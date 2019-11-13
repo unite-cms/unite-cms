@@ -4,18 +4,17 @@
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 
-use GraphQL\Error\UserError;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 abstract class AbstractEmailConfirmationResolver implements FieldResolverInterface
@@ -29,11 +28,6 @@ abstract class AbstractEmailConfirmationResolver implements FieldResolverInterfa
      * @var DomainManager $domainManager
      */
     protected $domainManager;
-
-    /**
-     * @var LoggerInterface $uniteCMSDomainLogger
-     */
-    protected $uniteCMSDomainLogger;
 
     /**
      * @var ValidatorInterface $validator
@@ -55,10 +49,9 @@ abstract class AbstractEmailConfirmationResolver implements FieldResolverInterfa
      */
     protected $JWTEncoder;
 
-    public function __construct(DomainManager $domainManager, LoggerInterface $uniteCMSDomainLogger, ValidatorInterface $validator, FieldDataMapper $fieldDataMapper, JWTEncoderInterface $JWTEncoder)
+    public function __construct(DomainManager $domainManager, ValidatorInterface $validator, FieldDataMapper $fieldDataMapper, JWTEncoderInterface $JWTEncoder)
     {
         $this->domainManager = $domainManager;
-        $this->uniteCMSDomainLogger = $uniteCMSDomainLogger;
         $this->fieldDataMapper = $fieldDataMapper;
         $this->validator = $validator;
         $this->JWTEncoder = $JWTEncoder;
@@ -132,13 +125,8 @@ abstract class AbstractEmailConfirmationResolver implements FieldResolverInterfa
         $storedToken = $user->getToken(static::TOKEN_KEY);
         $payload = $this->JWTEncoder->decode($storedToken);
 
-        if($token !== $storedToken) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to confirm an invalid token for %s.', $user->getUsername(), static::CONFIRM_FIELD));
-            return false;
-        }
-
-        if($payload['username'] !== $user->getUsername()) {
-            $this->uniteCMSDomainLogger->warning(sprintf('User with username "%s" tried to confirm an invalid token for %s.', $user->getUsername(), static::CONFIRM_FIELD));
+        if($token !== $storedToken || $payload['username'] !== $user->getUsername()) {
+            $this->domainManager->current()->log(LoggerInterface::WARNING, sprintf('User tried to confirm an invalid token for %s.', static::CONFIRM_FIELD));
             return false;
         }
 

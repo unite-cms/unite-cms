@@ -12,7 +12,6 @@
     "doctrine/collections": "1.6",
     "webonyx/graphql-php": "^0.13",
     "lexik/jwt-authentication-bundle": "^2.6",
-    "symfony/monolog-bundle": "^3.4",
     "symfony/translation": "4.3",
     "symfony/twig-bridge": "4.3",
     "symfony/swiftmailer-bundle": "3.3"

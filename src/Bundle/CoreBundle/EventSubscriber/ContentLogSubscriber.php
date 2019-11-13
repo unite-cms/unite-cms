@@ -3,28 +3,28 @@
 
 namespace UniteCMS\CoreBundle\EventSubscriber;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Security;
+use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Event\ContentEventAfter;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 
 class ContentLogSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var LoggerInterface $domainLogger
+     * @var DomainManager $domainManager
      */
-    protected $domainLogger;
+    protected $domainManager;
 
     /**
      * @var Security $security
      */
     protected $security;
 
-    public function __construct(LoggerInterface $uniteCMSDomainLogger, Security $security)
+    public function __construct(DomainManager $domainManager)
     {
-        $this->domainLogger = $uniteCMSDomainLogger;
-        $this->security = $security;
+        $this->domainManager = $domainManager;
     }
 
     /**
@@ -48,12 +48,7 @@ class ContentLogSubscriber implements EventSubscriberInterface
      */
     protected function log(ContentEvent $event, string $name) {
         $message = sprintf('%s "%s" content with id "%s".', $name, $event->getContent()->getType(), $event->getContent()->getId());
-
-        if($user = $this->security->getUser()) {
-            $message .= sprintf(' by user "%s" ', $user->getUsername());
-        }
-
-        $this->domainLogger->info($message, ['content' => $event->getContent()]);
+        $this->domainManager->current()->log(LoggerInterface::NOTICE, $message);
     }
 
     /**

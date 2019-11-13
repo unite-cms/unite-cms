@@ -3,7 +3,6 @@
 namespace UniteCMS\CoreBundle\Security\Authenticator;
 
 use InvalidArgumentException;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -16,9 +15,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
 use UniteCMS\CoreBundle\Security\Token\PreAuthenticationUniteUserToken;
 use UniteCMS\CoreBundle\Security\User\TypeAwareUserProvider;
@@ -36,15 +37,15 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
     protected $schemaManager;
 
     /**
-     * @var LoggerInterface $uniteCMSDomainLogger
+     * @var DomainManager $domainManager
      */
-    protected $domainLogger;
+    protected $domainManager;
 
-    public function __construct(FieldableUserPasswordEncoder $passwordEncoder, SchemaManager $schemaManager, LoggerInterface $uniteCMSDomainLogger)
+    public function __construct(FieldableUserPasswordEncoder $passwordEncoder, SchemaManager $schemaManager, DomainManager $domainManager)
     {
         $this->passwordEncoder = $passwordEncoder;
         $this->schemaManager = $schemaManager;
-        $this->domainLogger = $uniteCMSDomainLogger;
+        $this->domainManager = $domainManager;
     }
 
     /**
@@ -76,7 +77,7 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
         $minimalSchema = $this->schemaManager->buildBaseSchema();
 
         if(!in_array($userType, array_keys($minimalSchema->getTypeMap()))) {
-            $this->domainLogger->warning(sprintf('Unknown GraphQL type "%s" used for username/password login.', $userType));
+            $this->domainManager->current()->log(LoggerInterface::WARNING, sprintf('Unknown GraphQL type "%s" used for username/password login.', $userType));
             throw new ProviderNotFoundException(sprintf('The GraphQL type "%s" was not found.', $userType));
         }
 
@@ -90,7 +91,7 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
             }
         }
 
-        $this->domainLogger->warning(sprintf('@passwordAuthenticator was not configured for GraphQL user type "%s".', $userType));
+        $this->domainManager->current()->log(LoggerInterface::WARNING, sprintf('@passwordAuthenticator was not configured for GraphQL user type "%s".', $userType));
         throw new ProviderNotFoundException(sprintf('Password authenticator is not enabled for user type "%s".', $userType));
     }
 
@@ -198,6 +199,8 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
         if($token->getUser() instanceof \UniteCMS\CoreBundle\Security\User\UserInterface) {
             $token->getUser()->setFullyAuthenticated(true);
         }
+
+        $this->domainManager->current()->log(LoggerInterface::NOTICE, 'User successfully authenticated via PasswordAuthenticator.');
 
         return;
     }

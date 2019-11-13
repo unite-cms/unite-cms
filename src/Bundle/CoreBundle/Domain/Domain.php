@@ -6,6 +6,8 @@ namespace UniteCMS\CoreBundle\Domain;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\DependencyInjection\Configuration;
+use UniteCMS\CoreBundle\Log\LoggerInterface;
+use UniteCMS\CoreBundle\Log\LogInterface;
 use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
 
 class Domain
@@ -24,6 +26,11 @@ class Domain
      * @var UserManagerInterface $userManager
      */
     protected $userManager;
+
+    /**
+     * @var LoggerInterface $logger
+     */
+    protected $logger;
 
     /**
      * @var ContentTypeManager $contentTypeManager
@@ -51,6 +58,7 @@ class Domain
      * @param string $id
      * @param ContentManagerInterface $contentManager
      * @param UserManagerInterface $userManager
+     * @param LoggerInterface $logger
      * @param string[] $schema
      * @param int $jwtTTLShortLiving
      * @param int $jwtTTLLongLiving
@@ -60,6 +68,7 @@ class Domain
         string $id,
         ContentManagerInterface $contentManager,
         UserManagerInterface $userManager,
+        LoggerInterface $logger,
         array $schema,
         int $jwtTTLShortLiving = Configuration::DEFAULT_JWT_TTL_SHORT_LIVING,
         int $jwtTTLLongLiving = Configuration::DEFAULT_JWT_TTL_LONG_LIVING,
@@ -67,6 +76,7 @@ class Domain
         $this->id = $id;
         $this->contentManager = $contentManager;
         $this->userManager = $userManager;
+        $this->logger = $logger;
         $this->schema = $schema;
         $this->jwtTTLShortLiving = $jwtTTLShortLiving;
         $this->jwtTTLLongLiving = $jwtTTLLongLiving;
@@ -106,6 +116,24 @@ class Domain
     }
 
     /**
+     * @return LoggerInterface
+     */
+    public function getLogger() : LoggerInterface {
+        return $this->logger;
+    }
+
+    /**
+     * @param string $level
+     * @param string $message
+     * @param string $username
+     *
+     * @return LogInterface
+     */
+    public function log(string $level, string $message, string $username = null) : LogInterface {
+        return $this->getLogger()->log($this, $level, $message, $username);
+    }
+
+    /**
      * @return string[]
      */
     public function getSchema() : array
@@ -140,6 +168,13 @@ class Domain
             return join("\n", $schemaFiles);
 
         }, $this->schema);
+    }
+
+    /**
+     * @return array string
+     */
+    public function getRawSchema() : array {
+        return $this->schema;
     }
 
     /**

@@ -1,0 +1,9 @@
+
+# Create services based on arguments
+services:
+
+    unite.cms_admin.graphql.extender:
+        parent: UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaFileExtender
+        arguments: ['%kernel.project_dir%/vendor/unite-cms/admin-bundle/Resources/GraphQL/Schema/unite-admin.graphql']
+        tags:
+            - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }

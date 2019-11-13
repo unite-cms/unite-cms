@@ -5,7 +5,7 @@
       <div class="uk-flex uk-flex-column uk-height-1-1">
         <ul class="uk-nav uk-nav-default uk-flex-1">
 
-          <li v-if="contentTypes.length > 0" class="uk-nav-header">Content Types</li>
+          <li v-if="contentTypes.length > 0" class="uk-nav-header">{{ $t("navigation.content_types.headline") }}</li>
           <li v-for="type in contentTypes"><router-link :to="'/content/' + type.id"><icon name="layers" class="uk-margin-small-right" /> {{ type.name }}</router-link></li>
 
           <li v-if="singleContentTypes.length > 0" class="uk-nav-header">Single Content Types</li>

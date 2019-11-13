@@ -42,7 +42,7 @@ class QueryExtender implements SchemaExtenderInterface
 
         $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
 
-        foreach($contentTypeManager->getContentTypes() as $type) {
+        foreach(($contentTypeManager->getContentTypes() + $contentTypeManager->getUserTypes()) as $type) {
             if(!Util::isHidden($schema->getType($type->getId())->astNode, $this->expressionLanguage)) {
                 if($this->authorizationChecker->isGranted(ContentVoter::QUERY, $type)) {
                     $extension .= sprintf('
