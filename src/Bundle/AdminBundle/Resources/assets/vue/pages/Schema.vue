@@ -2,8 +2,8 @@
   <div class="schema-editor uk-height-1-1 uk-flex uk-flex-column">
     <div class="tab-bar uk-flex">
       <div class="file-tabs uk-flex-1">
-        <button class="uk-button uk-button-secondary file-tab" v-for="model in models()" :class="{ active: isCurrentModel(model) }">
-          <span @click="setCurrentModel(model)">
+        <button @click="setCurrentModel(model)" class="uk-button uk-button-secondary file-tab" v-for="model in models()" :class="{ active: isCurrentModel(model) }">
+          <span>
             <icon-graph-q-l />
             {{ model.uri.authority }}
           </span>
@@ -20,10 +20,11 @@
         </button>
       </div>
       <div class="action-links uk-flex">
-        <button class="uk-button uk-button-primary uk-button-small" :disabled="!changed || loading" @click="save">
+        <button class="uk-button uk-button-primary uk-button-small" :disabled="!changed || loading" @click="save" :class="{ 'uk-button-danger': (saveStatus === false) }">
           <div v-if="loading" class="uk-margin-small-right" uk-spinner="ratio: 0.4"></div>
-          <icon v-else-if="!saveSuccess" class="uk-margin-small-right" name="save" />
-          <icon v-else class="uk-margin-small-right" name="check" />
+          <icon v-else-if="saveStatus === null" class="uk-margin-small-right" name="save" />
+          <icon v-else-if="saveStatus === true" class="uk-margin-small-right" name="check" />
+          <icon v-else-if="saveStatus === false" class="uk-margin-small-right" name="x" />
           Save
         </button>
       </div>
@@ -33,6 +34,7 @@
 </template>
 
 <script>
+    import gql from 'graphql-tag';
     import MonacoEditor from 'vue-monaco'
     import { graphQLLanguageProvider, editorOptions } from "../plugins/monacoUnite";
 
@@ -47,7 +49,7 @@
                 monaco: null,
                 changed: false,
                 loading: false,
-                saveSuccess: false,
+                saveStatus: null,
                 uniteReferenceModel: null
             }
         },
@@ -67,8 +69,21 @@
                 run: this.save
             });
 
-            // TODO: Load real schema files
-            this.createModel('type Foo { id: ID! }', 'schema');
+            this.$apollo.query({
+                query: gql`query {
+                  unite {
+                    schemaFiles {
+                      name
+                      value
+                    }
+                  }
+                }
+                `
+            }).then((data) => {
+                data.data.unite.schemaFiles.forEach((schemaFile) => {
+                    this.createModel(schemaFile.value, schemaFile.name);
+                });
+            });
         },
 
         beforeDestroy() {
@@ -144,14 +159,33 @@
             },
 
             save() {
+                this.saveStatus = null;
                 this.loading = true;
 
-                // TODO
-                setTimeout(() => {
+                this.$apollo.mutate({
+                    mutation: gql`mutation($schemaFiles: [UniteSchemaFileInput!]!) {
+                        unite {
+                            updateSchemaFiles(schemaFiles: $schemaFiles)
+                        }
+                    }`,
+                    variables: {
+                        schemaFiles: this.models().map((model) => {
+                            return {
+                                name: model.uri.authority.replace('.graphql', ''),
+                                value: model.getValue(),
+                            };
+                        })
+                    },
+                }).then((data) => {
+                    this.saveStatus = data.data.unite.updateSchemaFiles;
+
+                    if(this.saveStatus) {
+                        this.changed = false;
+                    }
+
+                }).finally(() => {
                     this.loading = false;
-                    this.saveSuccess = true;
-                    this.changed = false;
-                }, 1000);
+                });
             }
 
         }

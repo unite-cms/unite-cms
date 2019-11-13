@@ -138,42 +138,6 @@ class Domain
      */
     public function getSchema() : array
     {
-        return array_map(function($fileOrString){
-
-            // If this is a direct schema string
-            if(!file_exists($fileOrString)) {
-                return $fileOrString;
-            }
-
-            $pathInfo = pathinfo($fileOrString);
-            $schemaFiles = [];
-
-            // If this is a single .graphql schema file.
-            if(!empty($pathInfo['extension']) && $pathInfo['extension'] = 'graphql') {
-                $schemaFiles[] = file_get_contents($fileOrString);
-            }
-
-            // If this is a folder, add all .graphql schema files.
-            if(is_dir($fileOrString)) {
-                foreach (scandir($fileOrString) as $file) {
-                    $filePath = $fileOrString . '/'. $file;
-                    $pathInfo = pathinfo($filePath);
-
-                    if(!empty($pathInfo['extension']) && $pathInfo['extension'] = 'graphql') {
-                        $schemaFiles[] = file_get_contents($filePath);
-                    }
-                }
-            }
-
-            return join("\n", $schemaFiles);
-
-        }, $this->schema);
-    }
-
-    /**
-     * @return array string
-     */
-    public function getRawSchema() : array {
         return $this->schema;
     }
 

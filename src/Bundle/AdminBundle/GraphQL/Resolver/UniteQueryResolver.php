@@ -36,9 +36,31 @@ class UniteQueryResolver implements FieldResolverInterface
         $domain = $this->domainManager->current();
 
         switch ($info->fieldName) {
-            case 'logs': return $domain->getLogger()->getLogs($domain, $args['before'], $args['after'] ?? null);
+            case 'logs':
+                return $domain->getLogger()->getLogs($domain, $args['before'], $args['after'] ?? null);
+
             case 'types': return [];
-            case 'schemaFiles': return [];
+
+            case 'schemaFiles':
+                $domainSchemaFiles = [];
+                $schemaDir = $this->domainManager->getSchemaConfigDir();
+                if(substr($schemaDir, -1, 1) !== '/') {
+                    $schemaDir .= '/';
+                }
+                $schemaDir .= $domain->getId();
+
+                foreach($domain->getSchema() as $name => $value) {
+                    if(substr($name, 0, strlen($schemaDir)) === $schemaDir) {
+                        $name = substr($name, strlen($schemaDir) + 1);
+                        $nameParts = explode('.', $name);
+                        $domainSchemaFiles[] = [
+                            'name' => $nameParts[0],
+                            'value' => $value,
+                        ];
+                    }
+                }
+                return $domainSchemaFiles;
+
             default: return null;
         }
     }

@@ -27,5 +27,5 @@ extend type UniteQuery {
 }
 
 extend type UniteMutation {
-    updateSchemaFiles(schemaFiles: [UniteSchemaFileInput]!) : Boolean! @hide(if: "not has_role('ROLE_ADMIN')")
+    updateSchemaFiles(schemaFiles: [UniteSchemaFileInput!]!) : Boolean! @hide(if: "not has_role('ROLE_ADMIN')")
 }
