@@ -1,5 +1,5 @@
 <template>
-  <div class="schema-editor uk-height-1-1 uk-flex uk-flex-column">
+  <div class="schema-editor uk-height-1-1 uk-flex uk-flex-column uk-position-relative">
     <div class="tab-bar uk-flex">
       <div class="file-tabs uk-flex-1">
         <button @click="setCurrentModel(model)" class="uk-button uk-button-secondary file-tab" v-for="model in models()" :class="{ active: isCurrentModel(model) }">
@@ -30,6 +30,9 @@
       </div>
     </div>
     <MonacoEditor ref="monaco" class="uk-flex-1" value="" :options="monacoOptions" @editorWillMount="editorWillMount" @change="changed = true" />
+    <div class="uk-overlay-default uk-position-cover" v-if="initialLoading">
+      <div uk-spinner class="uk-position-center"></div>
+    </div>
   </div>
 </template>
 
@@ -48,6 +51,7 @@
             return {
                 monaco: null,
                 changed: false,
+                initialLoading: true,
                 loading: false,
                 saveStatus: null,
                 uniteReferenceModel: null
@@ -83,6 +87,7 @@
                 data.data.unite.schemaFiles.forEach((schemaFile) => {
                     this.createModel(schemaFile.value, schemaFile.name);
                 });
+                this.initialLoading = false;
             });
         },
 
