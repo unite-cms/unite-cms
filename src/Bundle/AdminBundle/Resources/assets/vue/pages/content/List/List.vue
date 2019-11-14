@@ -4,16 +4,16 @@
       <table class="uk-table uk-table-small uk-table-divider uk-table-striped uk-table-hover uk-table-middle">
         <thead>
           <tr>
-            <th v-for="column in columns">{{ column.label }}</th>
-            <th>Actions</th>
+            <th v-for="column in columns">{{ column.name }}</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="row in items.result">
             <td v-for="column in columns">
-              <component :is="column.type.listComponent" :row="row" :id="column.id" />
+              <component :is="$unite.getFieldType(column.type).listComponent" :row="row" :id="column.id" />
             </td>
-            <td>TODO: Actions</td>
+            <td><actions-field :row="row" id="_actions" /></td>
           </tr>
         </tbody>
         <tfoot v-if="items.result.length < items.total">
@@ -33,55 +33,71 @@
 
 <script>
     import gql from 'graphql-tag';
-    import ContentTypes from '../../../state/ContentTypes';
+    import actionsField from '../../../components/Fields/List/_actions';
     import pagination from "./_pagination";
 
     export default {
-        components: { pagination },
+        components: { pagination, actionsField },
         data() {
             return {
                 items: {
                     total: 0,
                     result: [],
                 },
-                offset: 0,
-                limit: 5
+                showDeleted: false,
+                customFilter: null,
+                customOrderBy: [],
+                offset: 0
             }
         },
         apollo: {
             items: {
                 query() { return this.query; },
-                update(data) { return data[`find${ this.type.id }`] || { total: 0, results: [] }; },
-                skip() { return !this.type; },
+                update(data) { return data[`find${ this.view.type }`] || { total: 0, results: [] }; },
+                skip() { return !this.view; },
                 variables() {
                     return {
                         offset: this.offset,
-                        limit: this.limit,
+                        limit: this.view.limit,
+                        filter: this.customFilter || this.view.filter,
+                        orderBy: this.customOrderBy || this.view.orderBy,
+                        showDeleted: this.showDeleted,
                     }
                 },
             }
         },
         computed: {
             query() {
-                return gql`query($offset: Int!, $limit: Int!) {
-                    find${ this.type.id }(offset:$offset, limit:$limit) {
-                        total
-                        result {
-                            ${ this.fields }
-                        }
-                    }
-                }`;
+                return gql`
+                    ${ this.view.fragment }
+                    query($offset: Int!, $limit: Int!, $filter: UniteFilterInput, $orderBy: [UniteOrderByInput!], $showDeleted: Boolean!) {
+                      find${ this.view.type }(offset:$offset, limit:$limit, filter: $filter, orderBy: $orderBy, includeDeleted: $showDeleted) {
+                          total
+                          result {
+                              _meta {
+                                  id
+                                  version
+                                  deleted
+                                  locale
+                                  permissions {
+                                      create
+                                      mutation
+                                      read
+                                      update
+                                      delete
+                                      permanent_delete
+                                  }
+                              }
+                              ... ${ this.view.id }
+                          }
+                      }
+                  }`;
             },
-            type() {
-                return ContentTypes.get(this.$route.params.type);
-            },
-            fields() {
-                return this.columns.map((column) => {
-                    return column.type.fieldQuery(column.id);
-                }).join("\n");
+            view() {
+                return this.$unite.adminViews[this.$route.params.type];
             },
             columns() {
-                return this.type ? this.type.listFields() : [];
+                return this.view ? this.view.fields : [];
             },
         }
     }

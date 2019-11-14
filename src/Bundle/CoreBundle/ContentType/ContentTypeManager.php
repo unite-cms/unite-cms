@@ -65,10 +65,10 @@ class ContentTypeManager
         // Find and generate nested union types.
         foreach($contentType->getFields() as $field) {
             if(!empty($field->getUnionTypes())) {
-                $unionType = new ContentType($field->getReturnType());
+                $unionType = new ContentType($field->getReturnType(), $field->getReturnType());
 
                 foreach($field->getUnionTypes() as $type) {
-                    $unionType->registerField(new ContentTypeField($type->name, $field->getType(), [], false, false, null, null, $type->name));
+                    $unionType->registerField(new ContentTypeField($type->name, $type->description ?? $type->name, $field->getType(), [], false, false, null, null, $type->name));
                 }
 
                 $this->unionContentTypes[$unionType->getId()] = $unionType;

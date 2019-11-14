@@ -1,0 +1,17 @@
+
+fragment categories on Category @adminView(name: "Kategorien") {
+    id
+    name
+    anotherName: name
+}
+
+fragment articles on Article @adminView {
+    title
+    tags {
+        id
+    }
+}
+
+fragment admins on Admin @adminView {
+    username
+}

@@ -32,6 +32,13 @@ class ContentTypeField
     protected $id;
 
     /**
+     * @var string $id
+     *
+     * @Assert\NotBlank
+     */
+    protected $name;
+
+    /**
      * @var string $type
      *
      * @Assert\NotBlank
@@ -90,7 +97,7 @@ class ContentTypeField
      */
     protected $constraints = [];
 
-    public function __construct(string $id, string $type, array $settings = [], $nonNull = false, $listOf = false, $enumValues = null, $unionTypes = null, $returnType = Type::STRING)
+    public function __construct(string $id, string $name, string $type, array $settings = [], $nonNull = false, $listOf = false, $enumValues = null, $unionTypes = null, $returnType = Type::STRING)
     {
         $this->permissions = [
             ContentFieldVoter::MUTATION => 'true',
@@ -98,6 +105,7 @@ class ContentTypeField
             ContentFieldVoter::UPDATE => 'true',
         ];
         $this->id = $id;
+        $this->name = $name;
         $this->type = $type;
         $this->settings = new ParameterBag($settings);
         $this->nonNull = $nonNull;
@@ -158,6 +166,7 @@ class ContentTypeField
 
             $field = new self(
                 $fieldDefinition->name,
+                $fieldDefinition->description ?? $fieldDefinition->name,
                 $args['type'],
                 $args['settings'],
                 $nonNull,
@@ -230,6 +239,23 @@ class ContentTypeField
      */
     public function getId() : string {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName() : string {
+        $nameLines = explode("\n", $this->name);
+        return $nameLines[0];
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription() : ?string {
+        $nameLines = explode("\n", $this->name);
+        array_shift($nameLines);
+        return join("\n", $nameLines);
     }
 
     /**

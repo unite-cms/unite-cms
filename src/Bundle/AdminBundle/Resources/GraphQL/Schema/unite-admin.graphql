@@ -1,4 +1,12 @@
 
+directive @adminView(
+    name: String
+    filter: UniteFilterInput
+    orderBy: [UniteOrderByInput!]
+    limit: Int
+    if: Expression
+) on FRAGMENT_DEFINITION
+
 type UniteSchemaFile {
     name: String!
     value: String!
@@ -9,20 +17,27 @@ input UniteSchemaFileInput {
     value: String!
 }
 
-type UniteContentTypeField {
+type UniteAdminViewField {
     id: ID!
     type: ID!
+    name: String!
 }
 
-type UniteContentType {
+type UniteAdminView {
     id: ID!
     type: ID!
-    fields: [UniteContentTypeField!]
+    name: String!
+    limit: Int!
+    filter: UniteFilter
+    orderBy: [UniteOrderBy!]
+    fragment: String!
+    fields: [UniteAdminViewField!]!
+    category: String!
 }
 
 extend type UniteQuery {
     logs(before: DateTime!, after: DateTime) : [UniteLogEntry!] @hide(if: "not has_role('ROLE_ADMIN')")
-    types: [UniteContentType!] @hide(if: "not has_role('ROLE_ADMIN')")
+    adminViews: [UniteAdminView!] @hide(if: "not has_role('ROLE_ADMIN')")
     schemaFiles: [UniteSchemaFile!]! @hide(if: "not has_role('ROLE_ADMIN')")
 }
 

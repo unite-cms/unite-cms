@@ -77,10 +77,21 @@ directive @webhook(
     groups: [CONTENT_EVENT!]
 ) on OBJECT
 
+type UniteContentPermissions {
+    create: Boolean!
+    mutation: Boolean!
+    read: Boolean!
+    update: Boolean!
+    delete: Boolean!
+    permanent_delete: Boolean!
+}
+
 type UniteContentMeta {
+    id: ID!
     version: Int!
     deleted: DateTime
     locale: Locale
+    permissions: UniteContentPermissions!
 }
 
 interface UniteUser {
@@ -115,7 +126,21 @@ input UniteFilterInput {
     OR: [UniteFilterInput]
 }
 
+type UniteFilter {
+    field: String
+    path: [String]
+    operator: OPERATOR
+    value: [String]
+    AND: [UniteFilter]
+    OR: [UniteFilter]
+}
+
 input UniteOrderByInput {
+    field: String!
+    order: ORDER!
+}
+
+type UniteOrderBy {
     field: String!
     order: ORDER!
 }

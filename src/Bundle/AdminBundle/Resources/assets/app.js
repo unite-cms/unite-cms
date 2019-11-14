@@ -7,7 +7,7 @@ import { Unite, VueUnite } from './vue/plugins/unite';
 import router from './vue/plugins/router';
 
 import UniteAdminApp from './vue/App';
-
+import Text from "./vue/components/Fields/List/Text";
 
 
 ////////// INIT UIKIT //////////
@@ -28,9 +28,16 @@ Object.keys(State).forEach((state) => {
 
 
 
-////////// INIT VUE //////////
+////////// INIT UNITE //////////
 Vue.use(VueUnite);
+Unite.$apolloProvider = apolloProvider;
+Unite.$emit('load');
+Unite.$emit('registerFieldType', 'text', {
+    listComponent: Text,
+});
 
+
+////////// INIT VUE //////////
 new Vue({
     el: '#app',
     apolloProvider,

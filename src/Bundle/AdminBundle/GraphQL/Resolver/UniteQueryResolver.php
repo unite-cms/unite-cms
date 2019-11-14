@@ -5,7 +5,8 @@ namespace UniteCMS\AdminBundle\GraphQL\Resolver;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
-use UniteCMS\AdminBundle\Exception\NoEditableSchemaFilesDirectory;
+use UniteCMS\AdminBundle\AdminView\AdminViewManager;
+use UniteCMS\AdminBundle\EditableSchemaFiles\EditableSchemaFileManager;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\Resolver\Field\FieldResolverInterface;
 
@@ -17,9 +18,21 @@ class UniteQueryResolver implements FieldResolverInterface
      */
     protected $domainManager;
 
-    public function __construct(DomainManager $domainManager)
+    /**
+     * @var AdminViewManager $adminViewManager
+     */
+    protected $adminViewManager;
+
+    /**
+     * @var EditableSchemaFileManager
+     */
+    protected $editableSchemaFileManager;
+
+    public function __construct(DomainManager $domainManager, AdminViewManager $adminViewManager, EditableSchemaFileManager $editableSchemaFileManager)
     {
         $this->domainManager = $domainManager;
+        $this->adminViewManager = $adminViewManager;
+        $this->editableSchemaFileManager = $editableSchemaFileManager;
     }
 
     /**
@@ -40,23 +53,11 @@ class UniteQueryResolver implements FieldResolverInterface
             case 'logs':
                 return $domain->getLogger()->getLogs($domain, $args['before'], $args['after'] ?? null);
 
-            case 'types': return [];
+            case 'adminViews':
+                return $this->adminViewManager->getAdminViews($domain);
 
             case 'schemaFiles':
-
-                if(empty($domain->getEditableSchemaFilesDirectory())) {
-                    throw new NoEditableSchemaFilesDirectory();
-                }
-
-                $domainSchemaFiles = [];
-                foreach(DomainManager::findSchemaFilesInDir($domain->getEditableSchemaFilesDirectory()) as $name => $value) {
-                    $nameParts = explode('/', $name);
-                    $domainSchemaFiles[] = [
-                        'name' => array_pop($nameParts),
-                        'value' => $value,
-                    ];
-                }
-                return $domainSchemaFiles;
+                return $this->editableSchemaFileManager->getEditableSchemaFiles($domain);
 
             default: return null;
         }

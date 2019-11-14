@@ -22,7 +22,7 @@ const routes = [
     { path: '/logs', component: Logs, meta: { requiresAuth: true } },
 
     { path: '/content/:type', component: Container, children: [
-        { path: '', component: List },
+        { path: '', component: List } ,
         { path: ':id', component: Update },
     ], meta: { requiresAuth: true } },
     { path: '/user/:type', component: Container, children: [

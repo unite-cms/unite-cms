@@ -1,6 +1,6 @@
 <template>
   <section class="uk-section">
-    <h2>{{ type ? type.name : null }}</h2>
+    <h2>{{ view ? view.name : null }}</h2>
     <router-view></router-view>
 
     <div class="uk-overlay-default uk-position-cover" v-if="loading">
@@ -10,8 +10,6 @@
 </template>
 
 <script>
-    import ContentTypes from "../../state/ContentTypes";
-
     export default {
         data() {
             return {
@@ -19,14 +17,14 @@
             };
         },
         mounted() {
-            ContentTypes.$on('loaded', () => { this.loading = false; });
-            if(ContentTypes.loaded) {
+            this.$unite.$on('loaded', () => { this.loading = false; });
+            if(this.$unite.loaded) {
                 this.loading = false;
             }
         },
         computed: {
-            type() {
-                return ContentTypes.get(this.$route.params.type);
+            view() {
+                return this.$unite.adminViews[this.$route.params.type];
             }
         }
     }

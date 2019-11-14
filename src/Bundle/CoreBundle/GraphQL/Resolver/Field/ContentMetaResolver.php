@@ -4,10 +4,12 @@
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use InvalidArgumentException;
+use Symfony\Component\Security\Core\Security;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentMetaResolver implements FieldResolverInterface
 {
@@ -16,9 +18,15 @@ class ContentMetaResolver implements FieldResolverInterface
      */
     protected $domainManager;
 
-    public function __construct(DomainManager $domainManager)
+    /**
+     * @var Security $security
+     */
+    protected $security;
+
+    public function __construct(DomainManager $domainManager, Security $security)
     {
         $this->domainManager = $domainManager;
+        $this->security = $security;
     }
 
     /**
@@ -38,8 +46,15 @@ class ContentMetaResolver implements FieldResolverInterface
         }
 
         switch ($info->fieldName) {
+            case 'id': return $value->getId();
             case 'deleted': return $value->getDeleted();
             case 'locale': return null; // TODO: Implement
+            case 'permissions':
+                $permissions = [];
+                foreach(ContentVoter::PERMISSIONS as  $permission) {
+                    $permissions[$permission] = $this->security->isGranted($permission, $value);
+                }
+                return $permissions;
             case 'version':
                 $domain = $this->domainManager->current();
                 $versions = $domain->getContentManager()->revisions($domain, $value, 1);

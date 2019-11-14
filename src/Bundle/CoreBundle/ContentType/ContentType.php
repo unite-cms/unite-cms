@@ -25,6 +25,11 @@ class ContentType
     protected $id;
 
     /**
+     * @var string
+     */
+    protected $name;
+
+    /**
      * @var array $directives
      */
     protected $directives = [];
@@ -60,7 +65,7 @@ class ContentType
      */
     protected $permissions = [];
 
-    public function __construct(string $id)
+    public function __construct(string $id, string $name)
     {
         $this->permissions = [
             ContentVoter::QUERY => 'true',
@@ -72,6 +77,7 @@ class ContentType
             ContentVoter::PERMANENT_DELETE => 'has_role("ROLE_ADMIN")',
         ];
         $this->id = $id;
+        $this->name = $name;
     }
 
     /**
@@ -79,7 +85,7 @@ class ContentType
      * @return static
      */
     static function fromObjectType(ObjectType $type) : self {
-        $contentType = new static($type->name);
+        $contentType = new static($type->name, $type->description ?? $type->name);
 
         // Get all directives of this content type.
         $contentType->directives = Util::getDirectives($type->astNode);
@@ -153,6 +159,23 @@ class ContentType
      */
     public function getId() : string {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName() : string {
+        $nameLines = explode("\n", $this->name);
+        return $nameLines[0];
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription() : ?string {
+        $nameLines = explode("\n", $this->name);
+        array_shift($nameLines);
+        return join("\n", $nameLines);
     }
 
     /**
