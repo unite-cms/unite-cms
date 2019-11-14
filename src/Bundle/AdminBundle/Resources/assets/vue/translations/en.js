@@ -8,6 +8,13 @@ messages.en = {
         content_types: {
             headline: 'Content Types'
         }
+    },
+    schema: {
+        save: 'Save',
+        add: 'Add schema file',
+        compose: 'Create new schema file (filename without .graphql)',
+        rename: 'Update filename (without .graphql)',
+        delete: 'Do you really want to delete schema file "{filename}"?',
     }
 };
 

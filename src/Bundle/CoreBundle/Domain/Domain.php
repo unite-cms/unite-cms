@@ -40,7 +40,17 @@ class Domain
     /**
      * @var string[] $schema
      */
-    protected $schema;
+    protected $schema = [];
+
+    /**
+     * @var null|string $editableSchemaFilesDirectory
+     */
+    protected $editableSchemaFilesDirectory = null;
+
+    /**
+     * @var string[] $schema
+     */
+    protected $editableSchemaFilesSchema = [];
 
     /**
      * @var int
@@ -60,6 +70,7 @@ class Domain
      * @param UserManagerInterface $userManager
      * @param LoggerInterface $logger
      * @param string[] $schema
+     * @param string $editableSchemaFilesDirectory
      * @param int $jwtTTLShortLiving
      * @param int $jwtTTLLongLiving
      * @param ContentTypeManager|null $contentTypeManager
@@ -69,7 +80,8 @@ class Domain
         ContentManagerInterface $contentManager,
         UserManagerInterface $userManager,
         LoggerInterface $logger,
-        array $schema,
+        array $schema = [],
+        string $editableSchemaFilesDirectory = null,
         int $jwtTTLShortLiving = Configuration::DEFAULT_JWT_TTL_SHORT_LIVING,
         int $jwtTTLLongLiving = Configuration::DEFAULT_JWT_TTL_LONG_LIVING,
         ContentTypeManager $contentTypeManager = null) {
@@ -78,6 +90,7 @@ class Domain
         $this->userManager = $userManager;
         $this->logger = $logger;
         $this->schema = $schema;
+        $this->editableSchemaFilesDirectory = $editableSchemaFilesDirectory;
         $this->jwtTTLShortLiving = $jwtTTLShortLiving;
         $this->jwtTTLLongLiving = $jwtTTLLongLiving;
         $this->contentTypeManager = $contentTypeManager ?? new ContentTypeManager();
@@ -139,6 +152,34 @@ class Domain
     public function getSchema() : array
     {
         return $this->schema;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getCompleteSchema() : array
+    {
+        $schema = $this->getSchema();
+        if($this->getEditableSchemaFilesDirectory()) {
+            $schema = array_merge(
+                $schema,
+                DomainManager::findSchemaFilesInDir($this->getEditableSchemaFilesDirectory())
+            );
+        }
+        return $schema;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEditableSchemaFilesDirectory() : ?string
+    {
+        if(empty($this->editableSchemaFilesDirectory)) {
+            return null;
+        }
+
+        $suffix = substr($this->editableSchemaFilesDirectory, -1, 1) !== '/' ? '/' : '';
+        return $this->editableSchemaFilesDirectory . $suffix;
     }
 
     /**

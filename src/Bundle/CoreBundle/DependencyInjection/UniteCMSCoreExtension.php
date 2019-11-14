@@ -64,6 +64,5 @@ class UniteCMSCoreExtension extends Extension
         }
 
         $container->findDefinition(DomainManager::class)->setArgument('$domainConfig', $config['domains']);
-        $container->findDefinition(DomainManager::class)->setArgument('$schemaConfigDir', $config['schema_config_dir']);
     }
 }

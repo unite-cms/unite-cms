@@ -2,6 +2,11 @@
 enum Tags {
     FOO
     BAA
+    LAA
+    AND_AGAIN
+    NEU
+    LA
+    A
 }
 
 type Category implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {

@@ -104,7 +104,6 @@ interface UniteEmbeddedContent {
 
 interface UniteContentResult {
     total: Int!
-    result: [UniteContent!]
 }
 
 input UniteFilterInput {

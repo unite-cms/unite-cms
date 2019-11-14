@@ -307,15 +307,17 @@ class SchemaManager
     }
 
     /**
+     * @param bool $forceFresh
+     *
      * @return \GraphQL\Type\Schema
      */
-    public function buildBaseSchema() : Schema {
+    public function buildBaseSchema(bool $forceFresh = false) : Schema {
 
         // TODO: Cache + load from Cache + load generateContentTypes types from cache
         // AST::fromArray
 
         // If the schema is already in memory, use it from there.
-        if($this->cacheableBaseSchema) {
+        if(!$forceFresh && $this->cacheableBaseSchema) {
             return $this->cacheableBaseSchema;
         }
 
@@ -325,28 +327,30 @@ class SchemaManager
             $schemaDefinition .= $provider->extend() . "\n";
         }
 
-        $schemaDefinition .= join("\n", $this->domainManager->current()->getSchema());
+        $schemaDefinition .= join("\n", $this->domainManager->current()->getCompleteSchema());
         $this->cacheableBaseSchema = BuildSchema::build($schemaDefinition);
         return $this->cacheableBaseSchema;
     }
 
     /**
+     * @param bool $forceFresh
+     *
      * @return DocumentNode
      * @throws \GraphQL\Error\Error
      * @throws \GraphQL\Error\SyntaxError
      */
-    public function buildCacheableSchema() : DocumentNode {
+    public function buildCacheableSchema(bool $forceFresh = false) : DocumentNode {
 
         // TODO: Cache + load from Cache + load generateContentTypes types from cache
         // AST::fromArray
 
         // If the schema is already in memory, use it from there.
-        if($this->cacheableSchema) {
+        if(!$forceFresh && $this->cacheableSchema) {
             return $this->cacheableSchema;
         }
 
         // Build base schema from domain and providers.
-        $schema = $this->buildBaseSchema();
+        $schema = $this->buildBaseSchema($forceFresh);
 
         // Execute before type extenders.
         foreach($this->beforeTypeExtenders as $extender) {
@@ -382,17 +386,19 @@ class SchemaManager
     }
 
     /**
+     * @param bool $forceFresh
+     *
      * @return \GraphQL\Type\Schema
      * @throws \GraphQL\Error\Error
      * @throws \GraphQL\Error\SyntaxError
      */
-    public function buildExecutableSchema() : Schema {
+    public function buildExecutableSchema(bool $forceFresh = false) : Schema {
 
-        if($this->executableSchema) {
+        if(!$forceFresh && $this->executableSchema) {
             return $this->executableSchema;
         }
 
-        $this->executableSchema = BuildSchema::build($this->buildCacheableSchema(), function(array $typeConfig, $typeDefinitionNode) {
+        $this->executableSchema = BuildSchema::build($this->buildCacheableSchema($forceFresh), function(array $typeConfig, $typeDefinitionNode) {
 
             // Resolve GraphQL objects.
             if($typeDefinitionNode instanceof ObjectTypeDefinitionNode) {
@@ -420,12 +426,14 @@ class SchemaManager
      * @param array $args
      * @param null $context
      *
+     * @param bool $forceFresh
+     *
      * @return ExecutionResult
      * @throws \GraphQL\Error\Error
      * @throws \GraphQL\Error\SyntaxError
      */
-    public function execute(string $query, array $args = [], $context = null) : ExecutionResult {
-        $schema = $this->buildExecutableSchema();
+    public function execute(string $query, array $args = [], $context = null, bool $forceFresh = false) : ExecutionResult {
+        $schema = $this->buildExecutableSchema($forceFresh);
         return GraphQL::executeQuery($schema, $query, null, $context, $args)
             ->setErrorFormatter([ErrorFormatter::class, 'createFromException']);
     }
@@ -435,15 +443,17 @@ class SchemaManager
      * @param bool $debug
      * @param null $context
      *
+     * @param bool $forceFresh
+     *
      * @return ExecutionResult
      * @throws \GraphQL\Error\Error
      * @throws \GraphQL\Error\SyntaxError
      * @throws \GraphQL\Server\RequestError
      */
-    public function executeRequest(Request $request, bool $debug = false, $context = null) : ExecutionResult {
+    public function executeRequest(Request $request, bool $debug = false, $context = null, bool $forceFresh = false) : ExecutionResult {
 
         $server = new StandardServer(ServerConfig::create()
-            ->setSchema($this->buildExecutableSchema())
+            ->setSchema($this->buildExecutableSchema($forceFresh))
             ->setQueryBatching(true)
             ->setDebug($debug)
             ->setContext($context)

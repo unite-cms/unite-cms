@@ -27,7 +27,7 @@ class TestLogger implements LoggerInterface
     /**
      * {@inheritDoc}
      */
-    public function getLogs(Domain $domain, DateTime $before, DateTime $after, int $limit = 100, int $offset = 0): array {
+    public function getLogs(Domain $domain, DateTime $before, DateTime $after = null, int $limit = 100, int $offset = 0): array {
         if(!isset($this->logs[$domain->getId()])) {
             $this->logs[$domain->getId()] = [];
         }

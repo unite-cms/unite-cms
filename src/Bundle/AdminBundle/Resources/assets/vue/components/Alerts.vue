@@ -18,6 +18,10 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+  .uk-alert {
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
 </style>

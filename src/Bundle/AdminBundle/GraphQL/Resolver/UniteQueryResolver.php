@@ -5,6 +5,7 @@ namespace UniteCMS\AdminBundle\GraphQL\Resolver;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
+use UniteCMS\AdminBundle\Exception\NoEditableSchemaFilesDirectory;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\Resolver\Field\FieldResolverInterface;
 
@@ -42,22 +43,18 @@ class UniteQueryResolver implements FieldResolverInterface
             case 'types': return [];
 
             case 'schemaFiles':
-                $domainSchemaFiles = [];
-                $schemaDir = $this->domainManager->getSchemaConfigDir();
-                if(substr($schemaDir, -1, 1) !== '/') {
-                    $schemaDir .= '/';
-                }
-                $schemaDir .= $domain->getId();
 
-                foreach($domain->getSchema() as $name => $value) {
-                    if(substr($name, 0, strlen($schemaDir)) === $schemaDir) {
-                        $name = substr($name, strlen($schemaDir) + 1);
-                        $nameParts = explode('.', $name);
-                        $domainSchemaFiles[] = [
-                            'name' => $nameParts[0],
-                            'value' => $value,
-                        ];
-                    }
+                if(empty($domain->getEditableSchemaFilesDirectory())) {
+                    throw new NoEditableSchemaFilesDirectory();
+                }
+
+                $domainSchemaFiles = [];
+                foreach(DomainManager::findSchemaFilesInDir($domain->getEditableSchemaFilesDirectory()) as $name => $value) {
+                    $nameParts = explode('/', $name);
+                    $domainSchemaFiles[] = [
+                        'name' => array_pop($nameParts),
+                        'value' => $value,
+                    ];
                 }
                 return $domainSchemaFiles;
 

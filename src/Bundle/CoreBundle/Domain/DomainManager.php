@@ -6,12 +6,6 @@ use LogicException;
 
 class DomainManager
 {
-
-    /**
-     * @var string $schemaConfigDir
-     */
-    protected $schemaConfigDir;
-
     /**
      * @var array
      */
@@ -22,9 +16,8 @@ class DomainManager
      */
     protected $domain = null;
 
-    public function __construct(string $schemaConfigDir, array $domainConfig = [])
+    public function __construct(array $domainConfig = [])
     {
-        $this->schemaConfigDir = $schemaConfigDir;
         $this->domainConfig = $domainConfig;
     }
 
@@ -41,7 +34,7 @@ class DomainManager
      * @param string $schemaFile
      * @return null|string
      */
-    public function getSchemaFromFile(string $schemaFile) : ?string {
+    static function getSchemaFromFile(string $schemaFile) : ?string {
 
         if(!file_exists($schemaFile)) {
             return null;
@@ -60,7 +53,7 @@ class DomainManager
      * @param string $dir
      * @return array
      */
-    public function findSchemaFilesInDir(string $dir) : array {
+    static function findSchemaFilesInDir(string $dir) : array {
         $schemaFiles = [];
 
         if(is_dir($dir)) {
@@ -72,7 +65,7 @@ class DomainManager
             foreach (scandir($dir) as $file) {
                 $filePath = $dir . $file;
 
-                if($content = $this->getSchemaFromFile($filePath)) {
+                if($content = static::getSchemaFromFile($filePath)) {
                     $schemaFiles[$filePath] = $content;
                 }
             }
@@ -85,7 +78,7 @@ class DomainManager
      * @param array $schemaConfig
      * @return array
      */
-    protected function normalizeSchemaConfig(array $schemaConfig) : array {
+    static function normalizeSchemaConfig(array $schemaConfig) : array {
 
         $normalizedConfig = [];
 
@@ -98,13 +91,13 @@ class DomainManager
             }
 
             // If this is a schema file
-            if($content = $this->getSchemaFromFile($config)) {
+            if($content = static::getSchemaFromFile($config)) {
                 $normalizedConfig[$config] = $content;
                 continue;
             }
 
             // If this is a folder, add all .graphql schema files.
-            $normalizedConfig = array_merge($normalizedConfig, $this->findSchemaFilesInDir($config));
+            $normalizedConfig = array_merge($normalizedConfig, static::findSchemaFilesInDir($config));
         }
 
         return $normalizedConfig;
@@ -131,7 +124,8 @@ class DomainManager
             $config['content_manager'],
             $config['user_manager'],
             $config['logger'],
-            $this->normalizeSchemaConfig($config['schema']),
+            static::normalizeSchemaConfig($config['schema']),
+            $config['editable_schema_files_directory'] ?? null,
             $config['jwt_ttl_short_living'],
             $config['jwt_ttl_long_living']
         ));
@@ -159,9 +153,9 @@ class DomainManager
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getSchemaConfigDir() : string {
-        return $this->schemaConfigDir;
+    public function getDomainConfig() : array {
+        return $this->domainConfig;
     }
 }

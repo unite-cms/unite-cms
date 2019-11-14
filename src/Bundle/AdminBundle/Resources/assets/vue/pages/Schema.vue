@@ -16,16 +16,16 @@
         </button>
         <button class="uk-button uk-button-secondary add-file" @click="composeModel">
           <icon name="plus" />
-          Add file
+          {{ $t('schema.add') }}
         </button>
       </div>
       <div class="action-links uk-flex">
-        <button class="uk-button uk-button-primary uk-button-small" :disabled="!changed || loading" @click="save" :class="{ 'uk-button-danger': (saveStatus === false) }">
+        <button class="uk-button uk-button-primary uk-button-small" :disabled="!changed || loading" @click.prevent="save(false)" :class="{ 'uk-button-danger': (saveStatus === false) }">
           <div v-if="loading" class="uk-margin-small-right" uk-spinner="ratio: 0.4"></div>
           <icon v-else-if="saveStatus === null" class="uk-margin-small-right" name="save" />
           <icon v-else-if="saveStatus === true" class="uk-margin-small-right" name="check" />
           <icon v-else-if="saveStatus === false" class="uk-margin-small-right" name="x" />
-          Save
+          {{ $t('schema.save') }}
         </button>
       </div>
     </div>
@@ -33,6 +33,16 @@
     <div class="uk-overlay-default uk-position-cover" v-if="initialLoading">
       <div uk-spinner class="uk-position-center"></div>
     </div>
+
+    <modal v-if="changed && saveStatus === true" @hide="saveStatus = null" :title="$t('schema.diff.headline')">
+      <div class="uk-flex">
+        <pre>{{ originalSchemaFiles }}</pre>
+        <pre>{{ schemaFiles() }}</pre>
+      </div>
+      <slot name="footer">
+        <button class="uk-button uk-button-primary" @click="save(true)">{{ $t('schema.diff.save') }}</button>
+      </slot>
+    </modal>
   </div>
 </template>
 
@@ -44,11 +54,14 @@
     import Icon from "../components/Icon"
     import IconGraphQL from '../components/Icons/GraphQL'
     import UIkit from 'uikit';
+    import Alerts from "../state/Alerts";
+    import Modal from "../components/Modal";
 
     export default {
-        components: {MonacoEditor, Icon, IconGraphQL},
+        components: {Modal, MonacoEditor, Icon, IconGraphQL},
         data() {
             return {
+                originalSchemaFiles: [],
                 monaco: null,
                 changed: false,
                 initialLoading: true,
@@ -60,7 +73,7 @@
         computed: {
             monacoOptions() {
                 return editorOptions;
-            }
+            },
         },
         mounted() {
 
@@ -70,35 +83,16 @@
                 keybindings: [
                     this.monaco.KeyMod.CtrlCmd | this.monaco.KeyCode.KEY_S
                 ],
-                run: this.save
+                run: () => {
+                    this.save(false);
+                }
             });
 
-            this.$apollo.query({
-                query: gql`query {
-                  unite {
-                    schemaFiles {
-                      name
-                      value
-                    }
-                  }
-                }
-                `
-            }).then((data) => {
-                data.data.unite.schemaFiles.forEach((schemaFile) => {
-                    this.createModel(schemaFile.value, schemaFile.name);
-                });
-                this.initialLoading = false;
-            });
+            this.loadModels();
         },
 
         beforeDestroy() {
-            if(!this.monaco){
-                return;
-            }
-
-            this.monaco.editor.getModels().forEach((model) => {
-                model.dispose();
-            });
+            this.unloadModels();
         },
 
         methods: {
@@ -109,18 +103,68 @@
                 }) : [];
             },
 
+            schemaFiles() {
+                return this.models().map((model) => {
+                    return {
+                        name: model.uri.authority,
+                        value: model.getValue(),
+                    };
+                })
+            },
+
+            unloadModels() {
+                if(!this.monaco){
+                    return;
+                }
+
+                this.monaco.editor.getModels().forEach((model) => {
+                    model.dispose();
+                });
+            },
+
+            loadModels() {
+                this.unloadModels();
+
+                this.$apollo.query({
+                    query: gql`query {
+                  unite {
+                    schemaFiles {
+                      name
+                      value
+                    }
+                  }
+                }
+                `
+                }).then((data) => {
+                    this.originalSchemaFiles = [];
+                    data.data.unite.schemaFiles.forEach((schemaFile) => {
+                        this.originalSchemaFiles.push({
+                            name: schemaFile.name,
+                            value: schemaFile.value,
+                        });
+                        this.createModel(schemaFile.value, schemaFile.name);
+                    });
+                    this.initialLoading = false;
+                });
+            },
+
             editorWillMount(monaco) {
                 this.monaco = monaco;
                 graphQLLanguageProvider(this.monaco);
-                this.uniteReferenceModel = this.monaco.editor.createModel("type Test { id: ID! }\n\n type Baa { id: ID! }", 'graphql', new this.monaco.Uri('unite-vendor', `unite-cms.graphql`));
+                this.createModel("interface UniteContent { id: ID! }\n", 'unite-cms.graphql', 'unite-vendor');
             },
 
-            createModel(value, filename) {
-                let model = this.monaco.editor.createModel(value, 'graphql', new this.monaco.Uri('unite', `${filename}.graphql`));
+            createModel(value, filename, scheme = 'unite') {
+                let model = this.monaco.editor.createModel(value, 'graphql', new this.monaco.Uri(scheme, filename));
                 this.setCurrentModel(model);
             },
 
             setCurrentModel(model) {
+
+                if(!this.$refs.monaco.getEditor()) {
+                    return;
+                }
+
                 this.$refs.monaco.getEditor().setModel(model);
                 this.$forceUpdate();
             },
@@ -130,26 +174,26 @@
             },
 
             composeModel() {
-                UIkit.modal.prompt('Create new schema file (filename without .graphql)', 'untitled').then((filename) => {
+                UIkit.modal.prompt(this.$t('schema.compose'), 'untitled').then((filename) => {
                     filename = filename.replace(/[^A-Za-z0-9-_]/gi, '_');
-                    this.createModel("\n", filename);
+                    this.createModel("\n", `${filename}.graphql`);
                     this.changed = true;
                 })
             },
 
             updateModelUri(model) {
-                UIkit.modal.prompt('Update filename (without .graphql)', model.uri.authority.replace('.graphql', '')).then((filename) => {
+                UIkit.modal.prompt(this.$t('schema.rename'), model.uri.authority.replace('.graphql', '')).then((filename) => {
                     filename = filename.replace(/[^A-Za-z0-9-_]/gi, '_');
                     let value = model.getValue();
                     model.dispose();
-                    this.createModel(value, filename);
+                    this.createModel(value, `${filename}.graphql`);
                     this.changed = true;
                     this.$forceUpdate();
                 })
             },
 
             deleteModel(model) {
-                UIkit.modal.confirm(`Do you really want to delete schema file "${ model.uri.authority }"?`).then(() => {
+                UIkit.modal.confirm(this.$t('schema.delete', { filename: model.uri.authority })).then(() => {
                     model.dispose();
                     this.changed = true;
 
@@ -163,32 +207,32 @@
                 });
             },
 
-            save() {
+            save(persist = false) {
+                Alerts.$emit('clear');
                 this.saveStatus = null;
                 this.loading = true;
 
                 this.$apollo.mutate({
-                    mutation: gql`mutation($schemaFiles: [UniteSchemaFileInput!]!) {
+                    mutation: gql`mutation($schemaFiles: [UniteSchemaFileInput!]!, $persist: Boolean!) {
                         unite {
-                            updateSchemaFiles(schemaFiles: $schemaFiles)
+                            updateSchemaFiles(schemaFiles: $schemaFiles, persist: $persist)
                         }
                     }`,
                     variables: {
-                        schemaFiles: this.models().map((model) => {
-                            return {
-                                name: model.uri.authority.replace('.graphql', ''),
-                                value: model.getValue(),
-                            };
-                        })
+                        persist: persist,
+                        schemaFiles: this.schemaFiles()
                     },
                 }).then((data) => {
                     this.saveStatus = data.data.unite.updateSchemaFiles;
 
-                    if(this.saveStatus) {
+                    if (persist && this.saveStatus) {
                         this.changed = false;
+                        this.loading = true;
+                        window.location.reload();
                     }
 
-                }).finally(() => {
+                }).catch(Alerts.apolloErrorHandler)
+                .finally(() => {
                     this.loading = false;
                 });
             }

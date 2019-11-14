@@ -54,7 +54,7 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('unite_cms_core');
         $treeBuilder->getRootNode()
         ->children()
-            ->scalarNode('schema_config_dir')
+            ->scalarNode('default_schema_config_dir')
                 ->cannotBeEmpty()
                 ->defaultValue($this->defaultConfigDir)
             ->end()
@@ -70,6 +70,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->scalarPrototype()->end()
                         ->end()
+                        ->scalarNode('editable_schema_files_directory')->end()
                         ->scalarNode('content_manager')
                             ->cannotBeEmpty()
                             ->defaultValue($this->defaultContentManager)
@@ -101,7 +102,7 @@ class Configuration implements ConfigurationInterface
                 foreach($v['domains'] as $key => $domain) {
                     if(empty($domain['schema'])) {
                         $v['domains'][$key]['schema'] = $this->uniteCMSSchemaFiles;
-                        $v['domains'][$key]['schema'][] = sprintf('%s%s/', $v['schema_config_dir'], $key);
+                        $v['domains'][$key]['editable_schema_files_directory'] = sprintf('%s%s/', $v['default_schema_config_dir'], $key);
                     }
                 }
                 return $v;
