@@ -15,13 +15,35 @@ env:
 matrix:
     include:
         - php: 7.2
+        - php: 7.3
+
+jobs:
+    include:
+        - php: 7.3
+          if: type == push AND branch = master AND fork = false
+          env:
+              - COVERAGE = true
 
 before_install:
     - |
-        mysql -e 'CREATE DATABASE unite_test;'
+        if ! [[ COVERAGE ]]; then
+            phpenv config-rm xdebug.ini
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+            ./cc-test-reporter before-build
+        fi
+    - mysql -e 'CREATE DATABASE unite_test;'
 
 install:
     - composer install
 
 script:
-    - php ./bin/phpunit
+    - |
+        if [[ COVERAGE ]]; then
+            php ./bin/phpunit --coverage-clover clover.xml
+        else
+            php ./bin/phpunit
+        fi
+
+after_script:
+    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
