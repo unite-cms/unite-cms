@@ -29,11 +29,12 @@ jobs:
 
 before_install:
     - |
-        if ! [[ COVERAGE ]]; then
-            phpenv config-rm xdebug.ini
+        if [[ COVERAGE ]]; then
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
             chmod +x ./cc-test-reporter
             ./cc-test-reporter before-build
+        else
+            phpenv config-rm xdebug.ini
         fi
     - mysql -e 'CREATE DATABASE unite_test;'
 
@@ -49,4 +50,7 @@ script:
         fi
 
 after_script:
-    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT clover.xml
+    - |
+        if [[ COVERAGE ]]; then
+            ./cc-test-reporter after-build -t clover --exit-code $TRAVIS_TEST_RESULT
+        fi
