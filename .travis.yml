@@ -4,23 +4,26 @@ sudo: false
 dist: xenial
 os: linux
 
-services:
-    - mysql
+#services:
+#    - mysql
 
 env:
     global:
         - SYMFONY_DEPRECATIONS_HELPER=weak
-        - DATABASE_URL=mysql://root:@127.0.0.1:3306/unite_test
-
-matrix:
-    include:
-        - php: 7.2
-        - php: 7.3
+#        - DATABASE_URL=mysql://root:@127.0.0.1:3306/unite_test
 
 jobs:
     include:
+        - php: 7.2
+          if: type != push OR branch != master OR fork != false
+          env:
+              - COVERAGE = false
         - php: 7.3
-          if: type == push AND branch = master AND fork = false
+          if: type != push OR branch != master OR fork != false
+          env:
+              - COVERAGE = false
+        - php: 7.3
+          if: type == push AND branch == master AND fork == false
           env:
               - COVERAGE = true
 
@@ -32,7 +35,7 @@ before_install:
             chmod +x ./cc-test-reporter
             ./cc-test-reporter before-build
         fi
-    - mysql -e 'CREATE DATABASE unite_test;'
+#    - mysql -e 'CREATE DATABASE unite_test;'
 
 install:
     - composer install
@@ -46,4 +49,4 @@ script:
         fi
 
 after_script:
-    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT clover.xml
