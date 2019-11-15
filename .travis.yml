@@ -4,13 +4,13 @@ sudo: false
 dist: xenial
 os: linux
 
-#services:
-#    - mysql
+services:
+    - mysql
 
 env:
     global:
         - SYMFONY_DEPRECATIONS_HELPER=weak
-#        - DATABASE_URL=mysql://root:@127.0.0.1:3306/unite_test
+        - DATABASE_URL=mysql://root:@127.0.0.1:3306/unite_test
 
 jobs:
     include:
@@ -35,7 +35,7 @@ before_install:
             chmod +x ./cc-test-reporter
             ./cc-test-reporter before-build
         fi
-#    - mysql -e 'CREATE DATABASE unite_test;'
+    - mysql -e 'CREATE DATABASE unite_test;'
 
 install:
     - composer install
