@@ -1,109 +1,38 @@
 
-enum Tags {
-    FOO
-    BAA
-    LAA
-    AND_AGAIN
-    NEU
-    LA
-    A
-}
-
-type Category implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
-    _meta: UniteContentMeta!
-    id: ID
-    name: String! @textField
-    articles_of: [Article!] @referenceOfField(reference_field: "category")
-    tags_of: [Article!] @referenceOfField(reference_field: "tags")
-    tag: Tags @choiceField(default: "FOO")
-}
-
-type OtherCategory implements UniteContent {
-    _meta: UniteContentMeta!
-    id: ID
-    name: String! @textField
-}
-
-type ArticleTeaser implements UniteEmbeddedContent {
-    id: ID
-    title: String!              @textField
-    computedTitle: String
-}
-
 enum ArticleStatus {
     DRAFT
-    MODERATION
     PUBLISHED
 }
 
-type TextBlock implements UniteEmbeddedContent {
-    id: ID
-    text: String!   @textField
-}
-
-type HeadlineBlock implements UniteEmbeddedContent {
-    id: ID
-    headline: String!   @textField
-}
-
-union ContentBlock = TextBlock | HeadlineBlock
-union AnyCategory = Category | OtherCategory
-
-type Article implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+"""Categories"""
+type DemoCategory implements UniteContent {
     _meta: UniteContentMeta!
     id: ID
-    title: String                       @textField
-
-    """Main Content"""
-    content: String                     @textField
-
-    """
-    Weitere Title
-    Verwende dieses Feld, um weitere Titel zu definieren.
-    """
-    extra_titles: [String!]             @textField
-    link: UniteLink                     @linkField
-    teaser: ArticleTeaser               @embeddedField
-    extra_teasers: [ArticleTeaser!]     @embeddedField
-    category: Category                  @referenceField
-    tags: [Category!]                   @referenceField
-    status: ArticleStatus               @choiceField(default: "DRAFT")
-    contentBlocks: [ContentBlock!]      @embeddedField
-    categoryUnionTest: AnyCategory      @referenceField
-    foo: Expression                     @hide(if: "not has_role('ROLE_ADMIN')")
+    name: String! @textField
 }
 
-type Admin implements UniteUser @hide(if: "not has_role('ROLE_ADMIN')")
-    @passwordAuthenticator(passwordField: "password") {
+
+"""Articles"""
+type DemoArticle implements UniteContent {
     _meta: UniteContentMeta!
     id: ID
-    username: String!                   @textField
-    password: NULL!                    @passwordField
+    name: String! @textField
+    categories: [DemoCategory!] @referenceField
+    status: ArticleStatus @choiceField(default: "DRAFT")
 }
 
-type CommunityUser
-    implements UniteUser
-    @passwordAuthenticator(passwordField: "password")
-    @emailPasswordReset(emailField: "email", passwordField: "password", resetUrl: "https://unitecms.io/password-reset/{token}")
-    @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true", permanent_delete: "true") {
+
+"""Admin Users"""
+type Admin implements UniteUser @hide(if: "not has_role('ROLE_ADMIN')") @passwordAuthenticator(passwordField: "password") {
     _meta: UniteContentMeta!
     id: ID
-    username: String!                  @textField
-    password: NULL!                    @passwordField
-    email: String!                     @emailField
-
-    firstname: String                  @textField
-    lastname: String                   @textField
+    username: String!@emailField
+    password: NULL!@passwordField
 }
 
-type Token implements UniteUser @passwordAuthenticator(passwordField: "secret") {
-    _meta: UniteContentMeta!
-    id: ID
-    username: String! @textField
-    secret: NULL! @passwordField
-}
 
-type GeneralSettings implements UniteSingleContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+"""Demo Settings"""
+type DemoSettings implements UniteSingleContent {
     _meta: UniteContentMeta!
-    title: String                       @textField
+    title: String @textField
 }
