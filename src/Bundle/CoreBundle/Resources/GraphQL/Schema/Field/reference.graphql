@@ -1,0 +1,5 @@
+
+directive @referenceField(
+    default: String
+    defaultExpression: Expression
+) on FIELD_DEFINITION

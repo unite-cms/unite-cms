@@ -1,109 +1,89 @@
 <?php
 
+
 namespace UniteCMS\CoreBundle\Security\Voter;
 
+use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\ContentType\ContentType;
+use UniteCMS\CoreBundle\Domain\DomainManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use UniteCMS\CoreBundle\Entity\DomainAccessor;
-use UniteCMS\CoreBundle\Entity\Content;
-use UniteCMS\CoreBundle\Entity\ContentType;
-use UniteCMS\CoreBundle\Expression\UniteExpressionChecker;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 
 class ContentVoter extends Voter
 {
-    const LIST = 'list content';
-    const CREATE = 'create content';
-    const VIEW = 'view content';
-    const UPDATE = 'update content';
-    const DELETE = 'delete content';
-    const TRANSLATE = 'translate content';
+    const QUERY = 'query';
+    const MUTATION = 'mutation';
+    const CREATE = 'create';
+    const READ = 'read';
+    const UPDATE = 'update';
+    const DELETE = 'delete';
+    const PERMANENT_DELETE = 'permanent_delete';
 
-    const BUNDLE_PERMISSIONS = [self::LIST, self::CREATE];
-    const ENTITY_PERMISSIONS = [self::VIEW, self::UPDATE, self::DELETE, self::TRANSLATE];
+    const PERMISSIONS = [
+        self::QUERY,
+        self::MUTATION,
+        self::CREATE,
+        self::READ,
+        self::UPDATE,
+        self::DELETE,
+        self::PERMANENT_DELETE,
+    ];
 
     /**
-     * @var UniteExpressionChecker $accessExpressionChecker
+     * @var SaveExpressionLanguage $expressionLanguage
      */
-    protected $accessExpressionChecker;
+    protected $expressionLanguage;
 
-    public function __construct()
+    /**
+     * @var DomainManager $domainManager
+     */
+    protected $domainManager;
+
+    public function __construct(SaveExpressionLanguage $expressionLanguage, DomainManager $domainManager)
     {
-        $this->accessExpressionChecker = new UniteExpressionChecker();
+        $this->expressionLanguage = $expressionLanguage;
+        $this->domainManager = $domainManager;
     }
 
     /**
-     * Determines if the attribute and subject are supported by this voter.
-     *
-     * @param string $attribute An attribute
-     * @param mixed $subject The subject to secure, e.g. an object the user wants to access or any other PHP type
-     *
-     * @return bool True if the attribute and subject are supported, false otherwise
+     * @inheritDoc
      */
     protected function supports($attribute, $subject)
     {
-        if (in_array($attribute, self::BUNDLE_PERMISSIONS)) {
-            return ($subject instanceof ContentType);
-        }
-
-        if (in_array($attribute, self::ENTITY_PERMISSIONS)) {
-            return ($subject instanceof Content && $subject->getDeleted() == null);
-        }
-
-        return false;
+        return in_array($attribute, self::PERMISSIONS)
+            && ($subject instanceof ContentInterface || $subject instanceof ContentType);
     }
 
     /**
-     * Perform a single access check operation on a given attribute, subject and token.
-     * It is safe to assume that $attribute and $subject already passed the "supports()" method check.
-     *
-     * @param string $attribute
-     * @param mixed $subject
-     * @param TokenInterface $token
-     *
-     * @return bool
+     * {@inheritDoc}
      */
-    protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
-    {
-        if(!$subject instanceof Content && !$subject instanceof ContentType) {
+    protected function voteOnAttribute($attribute, $subject, TokenInterface $token) {
+
+        $type = null;
+        $data = null;
+
+        if($subject instanceof ContentInterface) {
+            $type = $subject->getType();
+            $data = $subject;
+        }
+
+        else if ($subject instanceof ContentType) {
+            $type = $subject->getId();
+        }
+
+        if(empty($type)) {
             return self::ACCESS_ABSTAIN;
         }
 
-        // We can only vote on DomainAccessor user objects.
-        if (!$token->getUser() instanceof DomainAccessor) {
+        $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
+
+        if(!$contentType = $contentTypeManager->getAnyType($type)) {
             return self::ACCESS_ABSTAIN;
         }
 
-        $contentType = $subject instanceof ContentType ? $subject : $subject->getContentType();
-
-        if(!$contentType) {
-            return self::ACCESS_ABSTAIN;
-        }
-
-        $domainMembers = $token->getUser()->getDomainMembers($contentType->getDomain());
-
-        // Only work for non-deleted content
-        if ($subject instanceof Content && $subject->getDeleted() != null) {
-            return self::ACCESS_ABSTAIN;
-        }
-
-        // If the requested permission is not defined, throw an exception.
-        if (empty($contentType->getPermissions()[$attribute])) {
-            throw new \InvalidArgumentException("Permission '$attribute' was not found in ContentType '$contentType'");
-        }
-
-        // If the expression evaluates to true, we grant access.
-        foreach ($domainMembers as $domainMember) {
-
-            $this->accessExpressionChecker
-                ->clearVariables()
-                ->registerDomainMember($domainMember)
-                ->registerFieldableContent($subject instanceof Content ? $subject : null);
-
-            if($this->accessExpressionChecker->evaluateToBool($contentType->getPermissions()[$attribute])) {
-                return self::ACCESS_GRANTED;
-            }
-        }
-
-        return self::ACCESS_ABSTAIN;
+        return (bool)$this->expressionLanguage->evaluate($contentType->getPermission($attribute), [
+            'content' => $data,
+        ]);
     }
 }

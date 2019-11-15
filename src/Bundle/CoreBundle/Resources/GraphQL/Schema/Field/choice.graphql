@@ -1,0 +1,5 @@
+
+directive @choiceField(
+    default: String
+    defaultExpression: Expression
+) on FIELD_DEFINITION

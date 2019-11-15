@@ -1,0 +1,10 @@
+
+enum REFERENCE_OF_DELETE {
+    CASCADE
+    SET_NULL
+}
+
+directive @referenceOfField(
+    reference_field: String!
+    onDelete: REFERENCE_OF_DELETE = SET_NULL
+) on FIELD_DEFINITION

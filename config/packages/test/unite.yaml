@@ -1,11 +1,9 @@
 
 unite_cms_core:
-    domain_config_dir: '%kernel.cache_dir%/unite/config/'
-    maximum_nesting_level: 6
-    maximum_query_limit: 101
-
-    domain_config_parameters:
-        foo: 'baa'
-        foo1: '["Foo", "Baa"]'
-        foo2: '{ "title": "Foo", "identifier": "baa" }'
-        foo3: '%env(APP_ENV)%'
+    domains:
+        default:
+            content_manager: UniteCMS\CoreBundle\Tests\Mock\TestContentManager
+            user_manager: UniteCMS\CoreBundle\Tests\Mock\TestUserManager
+            logger: UniteCMS\CoreBundle\Tests\Mock\TestLogger
+            schema:
+                - !php/const UniteCMS\CoreBundle\GraphQL\SchemaManager::UNITE_CMS_ROOT_SCHEMA

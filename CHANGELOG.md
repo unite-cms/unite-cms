@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.10.x-dev (2019-11-15)
+- Complete rewrite of the unite cms core. More information wil follow. 
+
 ## 0.9.1 (2019-07-05)
 - Improved #460: not_empty setting for variant field
 - Improved #656: Allow to upload multiple files at once when in collection

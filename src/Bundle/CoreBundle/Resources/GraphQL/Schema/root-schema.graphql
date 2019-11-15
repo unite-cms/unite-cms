@@ -1,0 +1,9 @@
+
+
+type Query {
+    unite: UniteQuery
+}
+
+type Mutation {
+    unite: UniteMutation
+}

@@ -1,51 +1,39 @@
-# To get started with security, check out the documentation:
-# https://symfony.com/doc/current/security.html
 security:
-
-    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
-    providers:
-        unite_core_user:
-            entity:
-                class: UniteCMSCoreBundle:User
-                property: email
-
-        unite_core_api_key:
-            id: unite.cms.api_key_provider
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
 
     encoders:
-        UniteCMS\CoreBundle\Entity\User:
-            algorithm: bcrypt
-            cost: 12
+        UniteCMS\CoreBundle\Security\User\UserInterface:
+            algorithm: auto
+
+    providers:
+        unite_cms:
+            id: UniteCMS\CoreBundle\Security\User\DomainUserProvider
 
     firewalls:
-        # Disables authentication for assets and the profiler, adapt it according to your needs.
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # Stateless api fire. Authentication is done via api token.
-        # If Authentication-Fallback header is present, this firewall gets skipped and the main firewall will be used.
         api:
-            anonymous: false
-            provider: unite_core_api_key
-            request_matcher: unite.cms.api_request_matcher
+            pattern:   ^/
+            methods: ['POST']
             stateless: true
+            anonymous: true
+            user_checker: UniteCMS\CoreBundle\Security\User\UserChecker
             guard:
                 authenticators:
-                    - unite.cms.api_key_authenticator
+                    - UniteCMS\CoreBundle\Security\Authenticator\JWTTokenAuthenticator
+                    - UniteCMS\CoreBundle\Security\Authenticator\PasswordAuthenticator
+                entry_point: UniteCMS\CoreBundle\Security\Authenticator\JWTTokenAuthenticator
 
-        # Main firewall for authentication via user or remember_me cookie.
-        main:
-            anonymous: ~
-            provider: unite_core_user
-            form_login:
-                login_path: unitecms_core_authentication_login
-                check_path: unitecms_core_authentication_login
-            logout:
-                path:   unitecms_core_logout
-                target: unitecms_core_authentication_login
-            remember_me:
-                secret:   '%env(APP_SECRET)%'
-                lifetime: 8640000 # 100 days
-                path:     /
-                domain:   '%default_hostname%'
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#firewalls-authentication
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }

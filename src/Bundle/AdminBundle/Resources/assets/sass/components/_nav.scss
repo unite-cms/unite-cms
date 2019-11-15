@@ -1,0 +1,18 @@
+
+.uk-nav-default > li > a {
+  &.router-link-active {
+    color: $nav-default-item-active-color;
+    @if (mixin-exists(hook-nav-default-item-active)) {
+      @include hook-nav-default-item-active();
+    }
+  }
+}
+
+.uk-iconnav > * > a {
+  &.router-link-active {
+    color: $iconnav-item-active-color;
+    @if (mixin-exists(hook-iconnav-item-active)) {
+      @include hook-iconnav-item-active();
+    }
+  }
+}

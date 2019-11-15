@@ -1,5 +1,0 @@
-
-unitecms_registration_registration:
-    resource: "@UniteCMSRegistrationBundle/Controller/RegistrationController.php"
-    type:     annotation
-    prefix:   /profile

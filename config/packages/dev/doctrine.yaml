@@ -1,0 +1,55 @@
+doctrine:
+    dbal:
+        connections:
+
+            default:
+                url: '%env(DATABASE_URL)%'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: utf8mb4
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+
+            alternative:
+                url: '%env(DATABASE_URL)%_neu'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: utf8mb4
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+    orm:
+        entity_managers:
+            auto_generate_proxy_classes: true
+            default:
+                connection: default
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+
+                dql:
+                    string_functions:
+                        JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
+                        JSON_SEARCH:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSearch
+                        JSON_SET:       Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
+                        JSON_REMOVE:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
+                        JSON_UNQUOTE:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
+
+                mappings:
+                    UniteCMSDoctrineORMBundle:
+                        type: annotation
+
+            alternative:
+                connection: alternative
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+
+                dql:
+                    string_functions:
+                        JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
+                        JSON_SEARCH:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSearch
+                        JSON_SET:       Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonSet
+                        JSON_REMOVE:    Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonRemove
+                        JSON_UNQUOTE:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonUnquote
+
+                mappings:
+                    UniteCMSDoctrineORMBundle:
+                        type: annotation

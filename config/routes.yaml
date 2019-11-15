@@ -1,0 +1,32 @@
+unite_cms_core_api:
+    path: /{unite_domain}
+    methods: [POST, OPTIONS]
+    controller: UniteCMS\CoreBundle\Controller\ApiController::api
+    requirements:
+        unite_domain: '[a-z0-9_]+'
+    defaults:
+        unite_domain: 'default'
+
+unite_cms_admin:
+    path: /{unite_domain}/{path}
+    methods: [GET]
+    controller: UniteCMS\AdminBundle\Controller\AdminController::app
+    defaults:
+        unite_domain: 'default'
+        path: ''
+    requirements:
+        path: '.*'
+        unite_domain: '[a-z0-9_]+'
+
+# This route is exactly the same as unite_cms_admin, however with required unite_domain. This allows us to generate
+# urls to this route with the domain included, even for the default domain.
+unite_cms_admin_force_domain:
+    path: /{!unite_domain}/{path}
+    methods: [GET]
+    controller: UniteCMS\AdminBundle\Controller\AdminController::app
+    defaults:
+        unite_domain: 'default'
+        path: ''
+    requirements:
+        path: '.*'
+        unite_domain: '[a-z0-9_]+'

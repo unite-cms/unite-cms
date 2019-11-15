@@ -1,0 +1,21 @@
+{% set subject = 'email.account_activate.subject'|trans %}
+{% set footer = 'email.account_activate.footer'|trans %}
+{% extends '@UniteCMSCore/email/base.html.twig' %}
+{% block content %}
+
+    {% embed '@UniteCMSCore/email/_partial/text.html.twig' %}
+        {% block content %}
+            <h1>{% trans %}email.account_activate.headline{% endtrans %}</h1>
+            <p>{% trans %}email.account_activate.text_before_button{% endtrans %}</p>
+        {% endblock %}
+    {% endembed %}
+
+    {% embed '@UniteCMSCore/email/_partial/button.html.twig' with { text: 'email.account_activate.text_button'|trans, link: activateUrl|replace({'{token}' : activateToken|url_encode}) } %}{% endembed %}
+
+    {% embed '@UniteCMSCore/email/_partial/text.html.twig' %}
+        {% block content %}
+            <p>{% trans %}email.account_activate.text_after_button{% endtrans %}</p>
+        {% endblock %}
+    {% endembed %}
+
+{% endblock %}

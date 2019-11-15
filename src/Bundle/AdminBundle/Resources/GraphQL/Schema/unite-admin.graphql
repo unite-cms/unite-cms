@@ -1,0 +1,25 @@
+
+type UniteSchemaFile {
+    name: String!
+    value: String!
+}
+
+input UniteSchemaFileInput {
+    name: String!
+    value: String!
+}
+
+type UniteAdminViewField {
+    id: ID!
+    type: ID!
+    name: String!
+}
+
+interface UniteAdminView {
+    id: ID!
+    type: ID!
+    name: String!
+    fragment: String!
+    category: String!
+    fields: [UniteAdminViewField!]!
+}

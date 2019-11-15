@@ -1,0 +1,156 @@
+
+scalar Expression
+scalar JSON
+scalar Date
+scalar DateTime
+scalar Locale
+scalar NULL
+
+enum CONTENT_EVENT {
+    CREATE
+    UPDATE
+    DELETE
+    RECOVER
+    REVERT
+}
+
+enum ORDER {
+    ASC
+    DESC
+}
+
+enum OPERATOR {
+    EQ
+    IS
+    NEQ
+    LT
+    LTE
+    GT
+    GTE
+    IN
+    NIN
+    CONTAINS
+    NCONTAINS
+}
+
+enum LOG_LEVEL {
+    NOTICE
+    WARNING
+    ERROR
+    CRITICAL
+    EMERGENCY
+}
+
+type UniteLogEntry {
+    level: LOG_LEVEL!
+    message: String!
+    username: String
+    created: DateTime!
+}
+
+directive @hide(
+    if: Expression!
+) on FIELD_DEFINITION | OBJECT
+
+directive @access(
+    # used in schema extender
+    query: Expression
+    mutation: Expression
+
+    # used in resolver
+    create: Expression
+    read: Expression
+    update: Expression
+    delete: Expression
+    permanent_delete: Expression
+) on FIELD_DEFINITION | OBJECT
+
+directive @valid(
+    if: Expression!
+    message: String
+    groups: [CONTENT_EVENT!]
+) on FIELD_DEFINITION | OBJECT
+
+directive @webhook(
+    if: Expression!
+    url: String!
+    groups: [CONTENT_EVENT!]
+) on OBJECT
+
+type UniteContentPermissions {
+    create: Boolean!
+    mutation: Boolean!
+    read: Boolean!
+    update: Boolean!
+    delete: Boolean!
+    permanent_delete: Boolean!
+}
+
+type UniteContentMeta {
+    id: ID!
+    version: Int!
+    deleted: DateTime
+    locale: Locale
+    permissions: UniteContentPermissions!
+}
+
+interface UniteUser {
+    id: ID
+    username: String!
+    _meta: UniteContentMeta!
+}
+
+interface UniteContent {
+    id: ID
+    _meta: UniteContentMeta!
+}
+
+interface UniteSingleContent {
+    _meta: UniteContentMeta!
+}
+
+interface UniteEmbeddedContent {
+    id: ID
+}
+
+interface UniteContentResult {
+    total: Int!
+}
+
+input UniteFilterInput {
+    field: String
+    path: [String]
+    operator: OPERATOR
+    value: [String]
+    AND: [UniteFilterInput]
+    OR: [UniteFilterInput]
+}
+
+type UniteFilter {
+    field: String
+    path: [String]
+    operator: OPERATOR
+    value: [String]
+    AND: [UniteFilter]
+    OR: [UniteFilter]
+}
+
+input UniteOrderByInput {
+    field: String!
+    order: ORDER!
+}
+
+type UniteOrderBy {
+    field: String!
+    order: ORDER!
+}
+
+type UniteQuery {
+    _version: String!
+}
+
+type UniteMutation {
+    _version: String!
+    generateJWT: String! @hide(if: "user.isAnonymous()")
+    generateLongLivingJWT: String! @hide(if: "not user.isFullyAuthenticated()")
+}

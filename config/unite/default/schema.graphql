@@ -1,0 +1,38 @@
+
+enum ArticleStatus {
+    DRAFT
+    PUBLISHED
+}
+
+"""Categories"""
+type DemoCategory implements UniteContent {
+    _meta: UniteContentMeta!
+    id: ID
+    name: String! @textField
+}
+
+
+"""Articles"""
+type DemoArticle implements UniteContent {
+    _meta: UniteContentMeta!
+    id: ID
+    name: String! @textField
+    categories: [DemoCategory!] @referenceField
+    status: ArticleStatus @choiceField(default: "DRAFT")
+}
+
+
+"""Admin Users"""
+type Admin implements UniteUser @hide(if: "not has_role('ROLE_ADMIN')") @passwordAuthenticator(passwordField: "password") {
+    _meta: UniteContentMeta!
+    id: ID
+    username: String!@emailField
+    password: NULL!@passwordField
+}
+
+
+"""Demo Settings"""
+type DemoSettings implements UniteSingleContent {
+    _meta: UniteContentMeta!
+    title: String @textField
+}

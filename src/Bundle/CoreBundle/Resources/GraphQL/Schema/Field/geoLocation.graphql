@@ -1,0 +1,46 @@
+
+directive @geoLocationField(
+    default: UniteGeoLocationInput
+) on FIELD_DEFINITION
+
+type UniteGeoLocation {
+    provided_by: String
+    id: ID
+    category: String
+    display_name: String
+    latitude: Float
+    longitude: Float
+    bound_south: Float
+    bound_west: Float
+    bound_north: Float
+    bound_east: Float
+    street_number: String
+    street_name: String
+    postal_code: String
+    locality: String
+    sub_locality: String
+    country_code: String
+    stairs_number: String
+    door_number: String
+}
+
+input UniteGeoLocationInput {
+    provided_by: String
+    id: ID
+    category: String
+    display_name: String
+    latitude: Float
+    longitude: Float
+    bound_south: Float
+    bound_west: Float
+    bound_north: Float
+    bound_east: Float
+    street_number: String
+    street_name: String
+    postal_code: String
+    locality: String
+    sub_locality: String
+    country_code: String
+    stairs_number: String
+    door_number: String
+}

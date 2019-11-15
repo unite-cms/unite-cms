@@ -1,7 +1,4 @@
 framework:
     router:
-        strict_requirements: ~
-
-sensio_framework_extra:
-    router:
-        annotations: false
+        strict_requirements: null
+        utf8: true

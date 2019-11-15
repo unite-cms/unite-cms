@@ -1,0 +1,15 @@
+
+/**
+ * UI KIT VARIABLE OVERRIDES.
+ */
+$inverse-global-color-mode: 'dark' !default;
+$offcanvas-bar-width-m: 300px !default;
+$navbar-nav-item-height: 50px !default;
+$global-primary-background: #0BD49E !default;
+$global-success-background: #0BD49E !default;
+$global-warning-background: #faa05a !default;
+$global-danger-background: #FF5A8A !default;
+
+$alert-danger-background: lighten(mix(white, $global-danger-background, 30%), 20%) !default;
+
+$global-font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !default;

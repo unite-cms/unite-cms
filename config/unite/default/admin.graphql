@@ -1,0 +1,15 @@
+
+fragment articles on DemoArticle @tableAdminView(name: "News") {
+    id
+    name
+    status
+}
+
+fragment admins on Admin @tableAdminView {
+    id
+    username
+}
+
+fragment settings on DemoSettings @settingsAdminView {
+    title
+}
