@@ -17,7 +17,7 @@ interface SchemaExtenderInterface
     /**
      * Return new or extended definitions to add to the schema.
      *
-     * Don't modify $unite, just use it to access already defined types.
+     * Don't modify $schema, just use it to access already defined types.
      * Implement App\GraphQL\Schema\Modifier\SchemaModifierInterface if you
      * want to modify the schema.
      *

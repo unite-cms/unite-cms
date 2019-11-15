@@ -1,8 +1,7 @@
 
 import { messages, i18n } from "../plugins/i18n";
 
-i18n.locale = 'de';
-
+// Set de part of messages.
 messages.de = {
     navigation: {
         content_types: {
@@ -10,3 +9,6 @@ messages.de = {
         }
     }
 };
+
+// If we include this file, set the language to "de".
+i18n.locale = 'de';

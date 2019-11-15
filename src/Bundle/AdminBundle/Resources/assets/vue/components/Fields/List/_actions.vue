@@ -1,13 +1,13 @@
 <template>
   <ul class="uk-iconnav">
     <template v-if="row._meta.permissions.mutation">
-      <li v-if="!row._meta.deleted && row._meta.permissions.update"><router-link uk-tooltip :to="to('update')" :title="$t('content.list.actions.update')"><icon name="edit-2" /></router-link></li>
-      <li v-if="!row._meta.deleted && row._meta.permissions.update"><router-link uk-tooltip :to="to('revert')" :title="$t('content.list.actions.revert')"><icon name="rotate-ccw" /></router-link></li>
-      <li v-if="!row._meta.deleted && row._meta.permissions.update"><router-link uk-tooltip :to="to('revert')" :title="$t('content.list.actions.translate')"><icon name="globe" /></router-link></li>
-      <li v-if="!row._meta.deleted && row._meta.permissions.delete"><router-link uk-tooltip :to="to('delete')" :title="$t('content.list.actions.delete')" class="uk-text-danger"><icon name="trash-2" /></router-link></li>
+      <li v-if="!deleted && is_granted('update')"><router-link uk-tooltip :to="to('update')" :title="$t('content.list.actions.update')"><icon name="edit-2" /></router-link></li>
+      <li v-if="!deleted && is_granted('update')"><router-link uk-tooltip :to="to('revert')" :title="$t('content.list.actions.revert')"><icon name="rotate-ccw" /></router-link></li>
+      <li v-if="!deleted && is_granted('update')"><router-link uk-tooltip :to="to('translate')" :title="$t('content.list.actions.translate')"><icon name="globe" /></router-link></li>
+      <li v-if="!deleted && is_granted('delete')"><router-link uk-tooltip :to="to('delete')" :title="$t('content.list.actions.delete')" class="uk-text-danger"><icon name="trash-2" /></router-link></li>
 
-      <li v-if="row._meta.deleted && row._meta.permissions.update"><router-link uk-tooltip :to="to('recover')" :title="$t('content.list.actions.recover')" class="uk-text-success"><icon name="rewind" /></router-link></li>
-      <li v-if="row._meta.deleted && row._meta.permissions.permanent_delete"><router-link uk-tooltip :to="to('permanent_delete')" :title="$t('content.list.actions.permanent_delete')" class="uk-text-danger"><icon name="x-circle" /></router-link></li>
+      <li v-if="deleted && is_granted('update')"><router-link uk-tooltip :to="to('recover')" :title="$t('content.list.actions.recover')" class="uk-text-success"><icon name="rewind" /></router-link></li>
+      <li v-if="deleted && is_granted('permanent_delete')"><router-link uk-tooltip :to="to('permanent_delete')" :title="$t('content.list.actions.permanent_delete')" class="uk-text-danger"><icon name="x-circle" /></router-link></li>
     </template>
   </ul>
 </template>
@@ -20,7 +20,7 @@
       components: { Icon },
       methods: {
           to(action) {
-              return '/content/' + this.$route.params.type + '/' + this.row.id + '/' + action;
+              return this.$route.path + '/' + this.id + '/' + action;
           }
       }
   }

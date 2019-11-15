@@ -1,0 +1,20 @@
+
+directive @tableAdminView(
+    name: String
+    filter: UniteFilterInput
+    orderBy: [UniteOrderByInput!]
+    limit: Int
+    if: Expression
+) on FRAGMENT_DEFINITION
+
+type TableAdminView implements UniteAdminView{
+    id: ID!
+    type: ID!
+    name: String!
+    fragment: String!
+    category: String!
+    fields: [UniteAdminViewField!]!
+    limit: Int!
+    filter: UniteFilter
+    orderBy: [UniteOrderBy!]
+}

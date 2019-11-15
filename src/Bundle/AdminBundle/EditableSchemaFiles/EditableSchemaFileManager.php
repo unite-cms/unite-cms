@@ -5,7 +5,7 @@ namespace UniteCMS\AdminBundle\EditableSchemaFiles;
 
 
 use Symfony\Component\Filesystem\Filesystem;
-use UniteCMS\AdminBundle\AdminView\AdminView;
+use UniteCMS\AdminBundle\AdminView\TableAdminView;
 use UniteCMS\AdminBundle\Exception\NoEditableSchemaFilesDirectory;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
@@ -33,7 +33,8 @@ class EditableSchemaFileManager
 
     /**
      * @param Domain $domain
-     * @return AdminView[]
+     *
+     * @return TableAdminView[]
      */
     public function getEditableSchemaFiles(Domain $domain = null) : array {
 

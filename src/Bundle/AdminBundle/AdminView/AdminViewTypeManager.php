@@ -16,11 +16,16 @@ use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
-class AdminViewManager
+class AdminViewTypeManager
 {
     const TYPE_CONTENT = 'content';
     const TYPE_USER = 'user';
     const TYPE_SINGLE_CONTENT = 'single_content';
+
+    /**
+     * @var AdminViewTypeInterface[]
+     */
+    protected $adminViewTypes = [];
 
     /**
      * @var \UniteCMS\CoreBundle\Domain\DomainManager
@@ -45,6 +50,15 @@ class AdminViewManager
     }
 
     /**
+     * @param AdminViewTypeInterface $adminViewType
+     * @return self
+     */
+    public function registerAdminViewType(AdminViewTypeInterface $adminViewType) : self {
+        $this->adminViewTypes[$adminViewType::getType()] = $adminViewType;
+        return $this;
+    }
+
+    /**
      * @param Domain $domain
      *
      * @return AdminView[]
@@ -66,34 +80,32 @@ class AdminViewManager
 
         foreach($schema->definitions as $definition) {
             if($definition instanceof FragmentDefinitionNode) {
-                $directives = Util::getDirectives($definition);
 
-                $adminDirective = null;
+                $directive = Util::typedDirectiveArgs($definition, 'AdminView');
 
-                foreach($directives as $directive) {
-                    if($directive['name'] === 'adminView') {
-                        $adminDirective = $directive;
-                        break;
-                    }
+                if(!$directive) {
+                    continue;
                 }
 
-                if(!$adminDirective) {
+                $adminViewType = $this->adminViewTypes[$directive['type']] ?? null;
+
+                if(!$adminViewType) {
                     continue;
                 }
 
                 $id = $definition->typeCondition->name->value;
-                $type = null;
+                $category = null;
 
                 if($domain->getContentTypeManager()->getContentType($id)) {
-                    $type = self::TYPE_CONTENT;
+                    $category = self::TYPE_CONTENT;
                 }
 
                 else if($domain->getContentTypeManager()->getUserType($id)) {
-                    $type = self::TYPE_USER;
+                    $category = self::TYPE_USER;
                 }
 
                 else if($domain->getContentTypeManager()->getSingleContentType($id)) {
-                    $type = self::TYPE_SINGLE_CONTENT;
+                    $category = self::TYPE_SINGLE_CONTENT;
                 }
 
                 else {
@@ -108,16 +120,12 @@ class AdminViewManager
                 }
 
                 // If the user is not allowed to see this adminView.
-                if(!empty($adminDirective['args']['if']) && !(bool)$this->expressionLanguage->evaluate($adminDirective['args']['if'])) {
+                if(!empty($directive['args']['if']) && !(bool)$this->expressionLanguage->evaluate($directive['args']['if'])) {
                     continue;
                 }
 
-                $adminViews[] = new AdminView(
-                    $definition,
-                    $adminDirective,
-                    $contentType,
-                    $type
-                );
+                // Ask the admin view type to create a new AdminView
+                $adminViews[] = $adminViewType->createView($definition, $directive, $category, $contentType);
             }
         }
 

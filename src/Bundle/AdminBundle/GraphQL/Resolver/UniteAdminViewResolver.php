@@ -15,7 +15,12 @@ class UniteAdminViewResolver implements FieldResolverInterface
      * {@inheritDoc}
      */
     public function supports(string $typeName, ObjectTypeDefinitionNode $typeDefinitionNode): bool {
-        return $typeName === 'UniteAdminView';
+        foreach($typeDefinitionNode->interfaces as $interface) {
+            if ($interface->name->value === 'UniteAdminView') {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -46,16 +51,8 @@ class UniteAdminViewResolver implements FieldResolverInterface
             case 'category':
                 return $value->getCategory();
 
-            case 'limit':
-                return $value->getLimit();
-
-            case 'orderBy':
-                return $value->getOrderBy();
-
-            case 'filter':
-                return $value->getFilter();
-
-            default: return null;
+            default:
+                return $value->getConfig($info->fieldName);
         }
     }
 }

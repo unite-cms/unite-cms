@@ -1,5 +1,5 @@
 <template>
-  <div>{{ row[id] }}</div>
+  <div>{{ row[field.id] }}</div>
 </template>
 <script>
   import _abstract from "./_abstract";

@@ -1,17 +1,21 @@
 
-fragment categories on Category @adminView(name: "Kategorien") {
+fragment categories on Category @tableAdminView(name: "Kategorien") {
     id
     name
     anotherName: name
 }
 
-fragment articles on Article @adminView {
+fragment articles on Article @tableAdminView {
     title
     tags {
         id
     }
 }
 
-fragment admins on Admin @adminView {
+fragment admins on Admin @tableAdminView {
     username
+}
+
+fragment settings on GeneralSettings @settingsAdminView {
+    title
 }

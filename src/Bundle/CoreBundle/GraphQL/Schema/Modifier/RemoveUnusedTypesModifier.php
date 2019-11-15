@@ -5,8 +5,10 @@ namespace UniteCMS\CoreBundle\GraphQL\Schema\Modifier;
 
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Language\AST\NodeKind;
+use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Language\Visitor;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\UnionType;
@@ -15,12 +17,12 @@ use GraphQL\Type\Schema;
 
 class RemoveUnusedTypesModifier implements SchemaModifierInterface
 {
-
     /**
      * @param array $types
+     * @param array $interfaces
      * @param Type $type
      */
-    protected function findAllReachableTypes(array &$types, Type $type) : void {
+    protected function findAllReachableTypes(array &$types, array &$interfaces, Type $type) : void {
         foreach($type->getFields() as $field) {
 
             $type = $field->getType();
@@ -31,8 +33,8 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
             if(!in_array($type->name, $types)) {
                 $types[] = $type->name;
 
-                if($type instanceof ObjectType || $type instanceof InputObjectType) {
-                    $this->findAllReachableTypes($types, $type);
+                if($type instanceof ObjectType || $type instanceof InputObjectType || $type instanceof InterfaceType) {
+                    $this->findAllReachableTypes($types, $interfaces, $type);
                 }
 
                 if($type instanceof ObjectType) {
@@ -40,7 +42,7 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
 
                         if(!in_array($interface->name, $types)) {
                             $types[] = $interface->name;
-                            $this->findAllReachableTypes($types, $interface);
+                            $this->findAllReachableTypes($types, $interfaces, $interface);
                         }
                     }
                 }
@@ -51,11 +53,16 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
                         if($unionType instanceof ObjectType) {
                             if(!in_array($unionType->name, $types)) {
                                 $types[] = $unionType->name;
-                                $this->findAllReachableTypes($types, $unionType);
+                                $this->findAllReachableTypes($types, $interfaces, $unionType);
                             }
                         }
                     }
                 }
+
+                if($type instanceof InterfaceType) {
+                    $interfaces[] = $type;
+                }
+
             }
 
             if(!empty($field->config['args'])) {
@@ -69,7 +76,7 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
                         $types[] = $type->name;
 
                         if ($type instanceof ObjectType || $type instanceof InputObjectType) {
-                            $this->findAllReachableTypes($types, $type);
+                            $this->findAllReachableTypes($types,$interfaces,  $type);
                         }
                     }
                 }
@@ -83,16 +90,25 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
     public function modify(DocumentNode &$document, Schema $schema) : void
     {
         $usedTypes = [$schema->getQueryType()->name];
-        $this->findAllReachableTypes($usedTypes, $schema->getQueryType());
+        $usedInterfaces = [];
+
+        $this->findAllReachableTypes($usedTypes, $usedInterfaces, $schema->getQueryType());
 
         if($schema->getMutationType()) {
             $usedTypes[] = $schema->getMutationType()->name;
-            $this->findAllReachableTypes($usedTypes, $schema->getMutationType());
+            $this->findAllReachableTypes($usedTypes, $usedInterfaces, $schema->getMutationType());
         }
 
         if($schema->getSubscriptionType()) {
             $usedTypes[] = $schema->getSubscriptionType()->name;
-            $this->findAllReachableTypes($usedTypes, $schema->getSubscriptionType());
+            $this->findAllReachableTypes($usedTypes, $usedInterfaces, $schema->getSubscriptionType());
+        }
+
+        foreach($usedInterfaces as $interface) {
+            foreach($schema->getPossibleTypes($interface) as $possibleType) {
+                $usedTypes[] = $possibleType->name;
+                $this->findAllReachableTypes($usedTypes, $usedInterfaces, $possibleType);
+            }
         }
 
         // Modify the schema document and remove all hidden objects and fields.

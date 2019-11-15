@@ -4,21 +4,21 @@
       <table class="uk-table uk-table-small uk-table-divider uk-table-striped uk-table-hover uk-table-middle">
         <thead>
           <tr>
-            <th v-for="column in columns">{{ column.name }}</th>
+            <th v-for="field in fields">{{ field.name }}</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="row in items.result">
-            <td v-for="column in columns">
-              <component :is="$unite.getFieldType(column.type).listComponent" :row="row" :id="column.id" />
+            <td v-for="field in fields">
+              <component :is="$unite.getListFieldType(field.type)" :row="row" :field="field" />
             </td>
             <td><actions-field :row="row" id="_actions" /></td>
           </tr>
         </tbody>
         <tfoot v-if="items.result.length < items.total">
           <tr>
-            <td :colspan="columns.length + 1">
+            <td :colspan="fields.length + 1">
               <pagination :count="items.result.length" :total="items.total" :offset="offset" :limit="limit" @change="(page) => { offset = page.offset }" />
             </td>
           </tr>
@@ -33,10 +33,12 @@
 
 <script>
     import gql from 'graphql-tag';
-    import actionsField from '../../../components/Fields/List/_actions';
+    import actionsField from '../Fields/List/_actions';
     import pagination from "./_pagination";
+    import _abstract from "./_abstract";
 
     export default {
+        extends: _abstract,
         components: { pagination, actionsField },
         data() {
             return {
@@ -50,11 +52,17 @@
                 offset: 0
             }
         },
+        fragments: {
+            adminView: gql`fragment TableAdminViewFragment on TableAdminView {
+              limit
+              orderBy { field, order },
+              filter { field, value, operator }
+          }`
+        },
         apollo: {
             items: {
                 query() { return this.query; },
                 update(data) { return data[`find${ this.view.type }`] || { total: 0, results: [] }; },
-                skip() { return !this.view; },
                 variables() {
                     return {
                         offset: this.offset,
@@ -92,12 +100,6 @@
                           }
                       }
                   }`;
-            },
-            view() {
-                return this.$unite.adminViews[this.$route.params.type];
-            },
-            columns() {
-                return this.view ? this.view.fields : [];
             },
         }
     }

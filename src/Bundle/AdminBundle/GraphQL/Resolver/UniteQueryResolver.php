@@ -5,7 +5,7 @@ namespace UniteCMS\AdminBundle\GraphQL\Resolver;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
-use UniteCMS\AdminBundle\AdminView\AdminViewManager;
+use UniteCMS\AdminBundle\AdminView\AdminViewTypeManager;
 use UniteCMS\AdminBundle\EditableSchemaFiles\EditableSchemaFileManager;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\Resolver\Field\FieldResolverInterface;
@@ -19,7 +19,7 @@ class UniteQueryResolver implements FieldResolverInterface
     protected $domainManager;
 
     /**
-     * @var AdminViewManager $adminViewManager
+     * @var AdminViewTypeManager $adminViewManager
      */
     protected $adminViewManager;
 
@@ -28,7 +28,7 @@ class UniteQueryResolver implements FieldResolverInterface
      */
     protected $editableSchemaFileManager;
 
-    public function __construct(DomainManager $domainManager, AdminViewManager $adminViewManager, EditableSchemaFileManager $editableSchemaFileManager)
+    public function __construct(DomainManager $domainManager, AdminViewTypeManager $adminViewManager, EditableSchemaFileManager $editableSchemaFileManager)
     {
         $this->domainManager = $domainManager;
         $this->adminViewManager = $adminViewManager;

@@ -1,6 +1,8 @@
 <?php
 
+
 namespace UniteCMS\AdminBundle\AdminView;
+
 
 use GraphQL\Language\AST\FieldNode;
 use GraphQL\Language\AST\FragmentDefinitionNode;
@@ -9,6 +11,11 @@ use UniteCMS\CoreBundle\ContentType\ContentType;
 
 class AdminView
 {
+    /**
+     * @var string $returnType
+     */
+    protected $returnType;
+
     /**
      * @var string
      */
@@ -40,45 +47,36 @@ class AdminView
     protected $fields = [];
 
     /**
-     * @var ?array $filter
+     * @var array $config
      */
-    protected $filter = [];
-
-    /**
-     * @var array $orderBy
-     */
-    protected $orderBy;
-
-    /**
-     * @var int $limit
-     */
-    protected $limit = 20;
+    protected $config = [];
 
     /**
      * AdminView constructor.
      *
-     * @param FragmentDefinitionNode $fragment
+     * @param string $returnType
+     * @param FragmentDefinitionNode $definition
      * @param array $directive
-     * @param ContentType $contentType
      * @param string $category
+     * @param ContentType $contentType
+     * @param array $config
      */
-    public function __construct(FragmentDefinitionNode $fragment, array $directive, ContentType $contentType, string $category)
+    public function __construct(string $returnType, FragmentDefinitionNode $definition, array $directive, string $category, ContentType $contentType, array $config = [])
     {
-        $this->id = $fragment->name->value;
-        $this->name = $directive['args']['name'] ?? $contentType->getName();
-        $this->filter = $directive['args']['filter'] ?? [];
-        $this->orderBy = $directive['args']['orderBy'] ?? [];
-        $this->limit = $directive['args']['limit'] ?? 20;
+        $this->returnType = $returnType;
+        $this->id = $definition->name->value;
+        $this->name = $directive['settings']['name'] ?? $contentType->getName();
+        $this->config = $config;
 
         $this->category = $category;
 
-        $this->type = $fragment->typeCondition->name->value;
+        $this->type = $definition->typeCondition->name->value;
 
-        $fragment->directives = [];
-        $this->fragment = Printer::doPrint($fragment);
+        $definition->directives = [];
+        $this->fragment = Printer::doPrint($definition);
         $this->fields = [];
 
-        foreach($fragment->selectionSet->selections as $selection) {
+        foreach($definition->selectionSet->selections as $selection) {
             if($selection instanceof FieldNode) {
                 $this->fields[] = new AdminViewField(
                     $selection,
@@ -86,6 +84,14 @@ class AdminView
                 );
             }
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getReturnType() : string
+    {
+        return $this->returnType;
     }
 
     /**
@@ -112,6 +118,9 @@ class AdminView
         return $this->type;
     }
 
+    /**
+     * @return string
+     */
     public function getFragment() : string {
         return $this->fragment;
     }
@@ -131,34 +140,19 @@ class AdminView
     }
 
     /**
-     * @return array
+     * @param string $key
+     * @return null|mixed
      */
-    public function getFilter(): ?array
-    {
-        if(empty($this->filter)) {
-            return null;
-        }
-
-        if(empty($this->filter['field']) && empty($this->filter['AND']) && empty($this->filter['OR'])) {
-            return null;
-        }
-
-        return $this->filter;
+    public function getConfig(string $key) {
+        return $this->config[$key] ?? null;
     }
 
     /**
-     * @return array
+     * @param array $config
+     * @return self
      */
-    public function getOrderBy(): array
-    {
-        return $this->orderBy;
-    }
-
-    /**
-     * @return int
-     */
-    public function getLimit(): int
-    {
-        return $this->limit;
+    public function setConfig(array $config) : self {
+        $this->config = $config;
+        return $this;
     }
 }

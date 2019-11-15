@@ -1,13 +1,11 @@
 
 import Vue from 'vue';
 import gql from 'graphql-tag';
-
-import _fallback from "../components/Fields/List/_fallback";
+import {getIntrospectionQuery} from 'graphql'
+import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
+import ListFieldTypeFallback from "../components/Fields/List/_fallback";
+import ViewTypeFallback from "../components/Views/_fallback";
 import User from "../state/User";
-
-export const UniteFallbackFieldType = {
-    listComponent: _fallback,
-};
 
 const removeIntroSpecType = function(val){
     if(val && typeof val === 'object') {
@@ -28,108 +26,23 @@ const removeIntroSpecType = function(val){
     return val;
 };
 
-const FilterFragment = gql`fragment filter on UniteFilter {
-    field
-    path
-    operator
-    value
-    AND {
-        field
-        path
-        operator
-        value
-        AND {
-            field
-            path
-            operator
-            value
-            AND {
-                field
-                path
-                operator
-                value
-            }
-            OR {
-                field
-                path
-                operator
-                value
-            }
-        }
-        OR {
-            field
-            path
-            operator
-            value
-            AND {
-                field
-                path
-                operator
-                value
-            }
-            OR {
-                field
-                path
-                operator
-                value
-            }
-        }
-    }
-    OR {
-        field
-        path
-        operator
-        value
-        AND {
-            field
-            path
-            operator
-            value
-            AND {
-                field
-                path
-                operator
-                value
-            }
-            OR {
-                field
-                path
-                operator
-                value
-            }
-        }
-        OR {
-            field
-            path
-            operator
-            value
-            AND {
-                field
-                path
-                operator
-                value
-            }
-            OR {
-                field
-                path
-                operator
-                value
-            }
-        }
-    }
-}`;
-
 export const Unite = new Vue({
+
     data() {
         return {
             loaded: false,
-            fieldTypes: {},
+            listFieldTypes: {},
+            viewTypes: {},
             adminViews: {},
         }
     },
     created() {
-        this.$on('registerFieldType', (type, field) => {
-            this.fieldTypes[type] = field;
+        this.$on('registerListFieldType', (type, field) => {
+            this.listFieldTypes[type] = field;
+        });
+
+        this.$on('registerViewType', (type, view) => {
+            this.viewTypes[type] = view;
         });
 
         this.$on('load', (data, success, fail, fin) => {
@@ -140,52 +53,84 @@ export const Unite = new Vue({
             }
 
             this.loaded = false;
+
             this.$apollo.query({
-                query: gql`
-                    ${ FilterFragment }
-                    query {
-                        unite {
-                            adminViews {
-                                id
-                                name
-                                type
-                                category
-                                fragment
-                                limit
-                                orderBy {
-                                    field
-                                    order
-                                }
-                                filter {
-                                    ... filter
-                                }
-                                fields {
-                                    id
-                                    type
-                                    name
+                query: gql(getIntrospectionQuery()),
+            }).then((data) => {
+                this.fragmentMatcher.possibleTypesMap = this.fragmentMatcher.parseIntrospectionResult(data.data);
+
+                this.$apollo.query({
+                    query: gql`
+                        ${ this.adminViewsFragment }
+                        query {
+                            unite {
+                                adminViews {
+                                    ... adminViews
                                 }
                             }
                         }
-                    }
-                `,
-            }).then((data) => {
-                this.adminViews = [];
+                    `,
+                }).then((data) => {
+                    this.adminViews = [];
+                    data.data.unite.adminViews.forEach((view) => {
+                        this.adminViews[view.id] = removeIntroSpecType(view);
+                    });
 
-                data.data.unite.adminViews.forEach((view) => {
-                    this.adminViews[view.id] = removeIntroSpecType(view);
-                });
+                    this.loaded = true;
+                    this.$emit('loaded');
 
-                this.loaded = true;
-                this.$emit('loaded');
-
-            }).catch(fail).catch(fin).then(success);
+                }).catch(fail).finally(fin).then(success);
+            });
         });
     },
+    computed: {
+        adminViewsFragment() {
+
+            let fragments = [];
+            let fragmentNames = [];
+            Object.keys(this.viewTypes).forEach((type) => {
+                if(this.viewTypes[type].fragments && this.viewTypes[type].fragments.adminView) {
+                    fragmentNames.push(`... ${type}Fragment`);
+                    fragments.push(this.viewTypes[type].fragments.adminView.loc.source.body);
+                }
+            });
+
+            return `
+                ${ fragments.join("\n") }
+                
+                fragment adminViews on UniteAdminView {
+                    viewType :__typename
+                    id
+                    type
+                    name
+                    fragment
+                    category
+                    fields {
+                        id
+                        type
+                        name
+                    }
+                    ${fragmentNames.join("\n")}
+                }`;
+        },
+    },
     methods: {
-        getFieldType(type) {
-            return this.fieldTypes[type] || UniteFallbackFieldType;
+        getListFieldType(type) {
+            return this.listFieldTypes[type] || ListFieldTypeFallback;
+        },
+
+        getViewType(type) {
+            return this.viewTypes[type] || ViewTypeFallback;
         },
     }
+});
+
+Unite.fragmentMatcher = new IntrospectionFragmentMatcher({
+    introspectionQueryResultData: {
+        __schema: {
+            types: [],
+        },
+    },
 });
 
 export const VueUnite = {

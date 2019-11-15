@@ -1,12 +1,4 @@
 
-directive @adminView(
-    name: String
-    filter: UniteFilterInput
-    orderBy: [UniteOrderByInput!]
-    limit: Int
-    if: Expression
-) on FRAGMENT_DEFINITION
-
 type UniteSchemaFile {
     name: String!
     value: String!
@@ -23,24 +15,11 @@ type UniteAdminViewField {
     name: String!
 }
 
-type UniteAdminView {
+interface UniteAdminView {
     id: ID!
     type: ID!
     name: String!
-    limit: Int!
-    filter: UniteFilter
-    orderBy: [UniteOrderBy!]
     fragment: String!
-    fields: [UniteAdminViewField!]!
     category: String!
-}
-
-extend type UniteQuery {
-    logs(before: DateTime!, after: DateTime) : [UniteLogEntry!] @hide(if: "not has_role('ROLE_ADMIN')")
-    adminViews: [UniteAdminView!] @hide(if: "not has_role('ROLE_ADMIN')")
-    schemaFiles: [UniteSchemaFile!]! @hide(if: "not has_role('ROLE_ADMIN')")
-}
-
-extend type UniteMutation {
-    updateSchemaFiles(schemaFiles: [UniteSchemaFileInput!]!, persist: Boolean!) : Boolean! @hide(if: "not has_role('ROLE_ADMIN')")
+    fields: [UniteAdminViewField!]!
 }

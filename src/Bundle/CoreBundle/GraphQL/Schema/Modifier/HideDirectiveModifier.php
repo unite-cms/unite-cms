@@ -14,7 +14,6 @@ use GraphQL\Type\Schema;
 
 class HideDirectiveModifier implements SchemaModifierInterface
 {
-
     /**
      * @var SaveExpressionLanguage $expressionLanguage
      */

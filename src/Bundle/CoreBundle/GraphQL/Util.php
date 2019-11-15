@@ -63,12 +63,19 @@ class Util
             return null;
         }
 
+        $suffixParts = array_filter(preg_split('/(?=[A-Z])/',$suffix));
+
         foreach($node->directives as $directive) {
 
-            $directiveNameParts = preg_split('/(?=[A-Z])/',$directive->name->value);
+            $directiveNameParts = array_filter(preg_split('/(?=[A-Z])/',$directive->name->value));
 
-            if(count($directiveNameParts) >= 2) {
-                $foundSuffix = array_pop($directiveNameParts);
+            if(count($directiveNameParts) > count($suffixParts)) {
+
+                $foundSuffix = '';
+                for($i = 0; $i < count($suffixParts); $i++) {
+                    $foundSuffix = array_pop($directiveNameParts) . $foundSuffix;
+                }
+
                 $type = substr($directive->name->value, 0, -strlen($foundSuffix));
 
                 if($foundSuffix === $suffix) {

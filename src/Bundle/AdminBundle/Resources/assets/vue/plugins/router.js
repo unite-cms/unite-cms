@@ -9,8 +9,13 @@ import Explorer from "../pages/Explorer";
 import Schema from "../pages/Schema";
 import Logs from "../pages/Logs";
 import Container from "../pages/content/Container";
-import List from "../pages/content/List/List";
 import Update from "../pages/content/Update";
+import Index from "../pages/content/List";
+import PermanentDelete from "../pages/content/PermanentDelete";
+import Recover from "../pages/content/Recover";
+import Delete from "../pages/content/Delete";
+import Revert from "../pages/content/Revert";
+import Translate from "../pages/content/Translate";
 
 Vue.use(VueRouter);
 
@@ -22,15 +27,27 @@ const routes = [
     { path: '/logs', component: Logs, meta: { requiresAuth: true } },
 
     { path: '/content/:type', component: Container, children: [
-        { path: '', component: List } ,
-        { path: ':id', component: Update },
+        { path: '', component: Index } ,
+        { path: ':id/update', component: Update },
+        { path: ':id/translate', component: Translate },
+        { path: ':id/revert', component: Revert },
+        { path: ':id/delete', component: Delete },
+        { path: ':id/recover', component: Recover },
+        { path: ':id/permanent_delete', component: PermanentDelete },
     ], meta: { requiresAuth: true } },
     { path: '/user/:type', component: Container, children: [
-        { path: '', component: List },
-        { path: ':id', component: Update },
+        { path: '',  component: Index },
+        { path: ':id/update', component: Update },
+        { path: ':id/translate', component: Translate },
+        { path: ':id/revert', component: Revert },
+        { path: ':id/delete', component: Delete },
+        { path: ':id/recover', component: Recover },
+        { path: ':id/permanent_delete', component: PermanentDelete },
     ], meta: { requiresAuth: true } },
     { path: '/setting/:type', component: Container, children: [
-            { path: '', component: Update },
+            { path: '', component: Index },
+            { path: 'translate', component: Translate },
+            { path: 'revert', component: Revert },
     ], meta: { requiresAuth: true } },
 ];
 
