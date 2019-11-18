@@ -23,11 +23,11 @@ type DemoArticle implements UniteContent {
 
 
 """Admin Users"""
-type Admin implements UniteUser @hide(if: "not has_role('ROLE_ADMIN')") @passwordAuthenticator(passwordField: "password") {
+type Admin implements UniteUser @passwordAuthenticator(passwordField: "password") {
     _meta: UniteContentMeta!
     id: ID
-    username: String!@emailField
-    password: NULL!@passwordField
+    username: String! @emailField
+    password: NULL! @passwordField
 }
 
 

@@ -40,7 +40,7 @@ export const User = new Vue({
                         type: data.data.unite.me.__typename,
                     };
                 }).then(success).catch(fail).finally(fin);
-            }).catch(fail).catch(fin);
+            }).catch((error) => { fail(error); fin(); });
         });
 
         this.$on('logout', (data, success, fail, fin) => {

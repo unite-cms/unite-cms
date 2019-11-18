@@ -46,41 +46,11 @@ export const Unite = new Vue({
         });
 
         this.$on('load', (data, success, fail, fin) => {
+            this.loadAdminViews(data, success, fail, fin);
+        });
 
-            if(!User.isAuthenticated) {
-                if(success) { success(); }
-                return;
-            }
-
-            this.loaded = false;
-
-            this.$apollo.query({
-                query: gql(getIntrospectionQuery()),
-            }).then((data) => {
-                this.fragmentMatcher.possibleTypesMap = this.fragmentMatcher.parseIntrospectionResult(data.data);
-
-                this.$apollo.query({
-                    query: gql`
-                        ${ this.adminViewsFragment }
-                        query {
-                            unite {
-                                adminViews {
-                                    ... adminViews
-                                }
-                            }
-                        }
-                    `,
-                }).then((data) => {
-                    this.adminViews = [];
-                    data.data.unite.adminViews.forEach((view) => {
-                        this.adminViews[view.id] = removeIntroSpecType(view);
-                    });
-
-                    this.loaded = true;
-                    this.$emit('loaded');
-
-                }).catch(fail).finally(fin).then(success);
-            });
+        User.$watch('user.token', () => {
+            this.loadAdminViews();
         });
     },
     computed: {
@@ -115,6 +85,55 @@ export const Unite = new Vue({
         },
     },
     methods: {
+
+        /**
+         * Do a full schema introspection and load all adminViews.
+         *
+         * @param data
+         * @param success
+         * @param fail
+         * @param fin
+         */
+        loadAdminViews(data, success, fail, fin) {
+
+            if(!User.isAuthenticated) {
+                if(success) { success(); }
+                return;
+            }
+
+            this.loaded = false;
+
+            this.$apollo.query({
+                query: gql(getIntrospectionQuery()),
+            }).then((data) => {
+                this.fragmentMatcher.possibleTypesMap = this.fragmentMatcher.parseIntrospectionResult(data.data);
+
+                setTimeout(() => {
+                    this.$apollo.query({
+                        query: gql`
+                            ${ this.adminViewsFragment }
+                            query {
+                                unite {
+                                    adminViews {
+                                        ... adminViews
+                                    }
+                                }
+                            }
+                        `,
+                    }).then((data) => {
+                        this.adminViews = [];
+                        data.data.unite.adminViews.forEach((view) => {
+                            this.adminViews[view.id] = removeIntroSpecType(view);
+                        });
+
+                        this.loaded = true;
+                        this.$emit('loaded');
+
+                    }).catch(fail).finally(fin).then(success);
+                }, 10);
+            });
+        },
+
         getListFieldType(type) {
             return this.listFieldTypes[type] || ListFieldTypeFallback;
         },
