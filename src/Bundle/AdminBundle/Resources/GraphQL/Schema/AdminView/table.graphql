@@ -14,6 +14,7 @@ type TableAdminView implements UniteAdminView{
     fragment: String!
     category: String!
     fields: [UniteAdminViewField!]!
+    permissions: UniteContentListPermissions!
     limit: Int!
     filter: UniteFilter
     orderBy: [UniteOrderBy!]

@@ -20,6 +20,19 @@ class ContentVoter extends Voter
     const DELETE = 'delete';
     const PERMANENT_DELETE = 'permanent_delete';
 
+    const LIST_PERMISSIONS = [
+        self::QUERY,
+        self::MUTATION,
+        self::CREATE,
+    ];
+
+    const ENTITY_PERMISSIONS = [
+        self::READ,
+        self::UPDATE,
+        self::DELETE,
+        self::PERMANENT_DELETE,
+    ];
+
     const PERMISSIONS = [
         self::QUERY,
         self::MUTATION,

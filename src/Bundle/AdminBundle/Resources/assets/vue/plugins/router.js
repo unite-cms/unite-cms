@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import User from '../state/User';
 import Alerts from "../state/Alerts";
+import { Unite } from "./unite";
 
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
@@ -9,6 +10,7 @@ import Explorer from "../pages/Explorer";
 import Schema from "../pages/Schema";
 import Logs from "../pages/Logs";
 import Container from "../pages/content/Container";
+import Create from "../pages/content/Create";
 import Update from "../pages/content/Update";
 import Index from "../pages/content/List";
 import PermanentDelete from "../pages/content/PermanentDelete";
@@ -28,6 +30,7 @@ const routes = [
 
     { path: '/content/:type', component: Container, children: [
         { path: '', component: Index } ,
+        { path: 'create', component: Create },
         { path: ':id/update', component: Update },
         { path: ':id/translate', component: Translate },
         { path: ':id/revert', component: Revert },
@@ -37,6 +40,7 @@ const routes = [
     ], meta: { requiresAuth: true } },
     { path: '/user/:type', component: Container, children: [
         { path: '',  component: Index },
+        { path: 'create', component: Create },
         { path: ':id/update', component: Update },
         { path: ':id/translate', component: Translate },
         { path: ':id/revert', component: Revert },
@@ -59,6 +63,7 @@ export const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
 
+    // Clear all alerts on page change.
     Alerts.$emit('clear');
 
     // If this route requires auth but user is not authenticated
@@ -76,7 +81,13 @@ router.beforeEach((to, from, next) => {
 
     // User is logged in or public route
     } else {
-        next();
+
+        // Make sure that adminViews are loaded for all logged in routes.
+        if(User.isAuthenticated) {
+            Unite.$emit('load', false, next);
+        } else {
+            next();
+        }
     }
 });
 

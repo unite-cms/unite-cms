@@ -13,7 +13,8 @@ Encore
 
     .addEntry('unite', [
         './src/Bundle/AdminBundle/Resources/assets/app.js',
-        './src/Bundle/AdminBundle/Resources/assets/vue/translations/en.js'
+        './src/Bundle/AdminBundle/Resources/assets/vue/translations/en.js',
+        './src/Bundle/AdminBundle/Resources/assets/mount.js',
     ])
 
     .splitEntryChunks()

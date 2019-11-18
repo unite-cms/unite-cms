@@ -125,7 +125,16 @@ class AdminViewTypeManager
                 }
 
                 // Ask the admin view type to create a new AdminView
-                $adminViews[] = $adminViewType->createView($definition, $directive, $category, $contentType);
+                $adminView = $adminViewType->createView($definition, $directive, $category, $contentType);
+
+                // Check list permissions for this admin view.
+                $permissions = [];
+                foreach(ContentVoter::LIST_PERMISSIONS as $permission) {
+                    $permissions[$permission] = $this->security->isGranted($permission, $contentType);
+                }
+                $adminView->setPermissions($permissions);
+
+                $adminViews[] = $adminView;
             }
         }
 

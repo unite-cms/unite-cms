@@ -1,12 +1,14 @@
 
-fragment articles on DemoArticle @tableAdminView(name: "News") {
-    id
+fragment categories on DemoCategory @tableAdminView {
+    name
+}
+
+fragment articles on DemoArticle @tableAdminView {
     name
     status
 }
 
 fragment admins on Admin @tableAdminView {
-    id
     username
 }
 

@@ -4,10 +4,15 @@
 }
 
 #app-main {
-
+  min-height: calc(100vh - #{$navbar-nav-item-height});
 }
 
 @media (min-width: $breakpoint-medium) {
+
+  #app-main {
+    min-height: 100vh;
+  }
+
   #app-navigation {
     display: block;
 

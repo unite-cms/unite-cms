@@ -51,7 +51,7 @@ class ContentMetaResolver implements FieldResolverInterface
             case 'locale': return null; // TODO: Implement
             case 'permissions':
                 $permissions = [];
-                foreach(ContentVoter::PERMISSIONS as  $permission) {
+                foreach(ContentVoter::ENTITY_PERMISSIONS as  $permission) {
                     $permissions[$permission] = $this->security->isGranted($permission, $value);
                 }
                 return $permissions;

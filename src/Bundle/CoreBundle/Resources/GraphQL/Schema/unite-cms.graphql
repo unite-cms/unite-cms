@@ -77,9 +77,11 @@ directive @webhook(
     groups: [CONTENT_EVENT!]
 ) on OBJECT
 
-type UniteContentPermissions {
+type UniteContentListPermissions {
     create: Boolean!
-    mutation: Boolean!
+}
+
+type UniteContentEntityPermissions {
     read: Boolean!
     update: Boolean!
     delete: Boolean!
@@ -91,7 +93,7 @@ type UniteContentMeta {
     version: Int!
     deleted: DateTime
     locale: Locale
-    permissions: UniteContentPermissions!
+    permissions: UniteContentEntityPermissions!
 }
 
 interface UniteUser {

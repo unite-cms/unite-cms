@@ -3,8 +3,15 @@
  * UI KIT VARIABLE OVERRIDES.
  */
 $inverse-global-color-mode: 'dark' !default;
+
+$offcanvas-bar-background: #FFF !default;
+$navbar-background: #FFF !default;
+
 $offcanvas-bar-width-m: 300px !default;
 $navbar-nav-item-height: 50px !default;
+$section-padding-vertical: 15px !default;
+$section-padding-vertical-m: 40px !default;
+
 $global-primary-background: #0BD49E !default;
 $global-success-background: #0BD49E !default;
 $global-warning-background: #faa05a !default;

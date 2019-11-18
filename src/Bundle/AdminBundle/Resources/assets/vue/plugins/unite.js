@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 import {getIntrospectionQuery} from 'graphql'
 import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ListFieldTypeFallback from "../components/Fields/List/_fallback";
+import FormFieldTypeFallback from "../components/Fields/Form/_fallback";
 import ViewTypeFallback from "../components/Views/_fallback";
 import User from "../state/User";
 
@@ -26,12 +27,47 @@ const removeIntroSpecType = function(val){
     return val;
 };
 
+const createAdminView = function (view, unite) {
+    view = removeIntroSpecType(view);
+    view.listFields = function(){ return this.fields.filter(field => field.show_in_list); };
+    view.formFields = function(){ return this.fields.filter(field => field.show_in_form); };
+
+    /**
+     * Returns an array with field query statements for all form fields of this view.
+     * @returns Array
+     */
+    view.queryFormData = function(){
+        return this.formFields().filter((field) => {
+            return !!unite.getFormFieldType(field.type).queryData;
+        }).map((field) => {
+            return unite.getFormFieldType(field.type).queryData(field);
+        });
+    };
+
+    /**
+     * Returns an array with all normalized values for all form fields of this view.
+     * @returns Array
+     */
+    view.normalizeFormData = function(inputData = {}){
+        let data = {};
+        this.formFields().forEach((field) => {
+            let type = unite.getFormFieldType(field.type);
+            let inputFieldData = inputData[field.id] || undefined;
+            data[field.id] = !!type.normalizeData ? type.normalizeData(inputFieldData) : inputFieldData;
+        });
+        return data;
+    };
+
+    return view;
+};
+
 export const Unite = new Vue({
 
     data() {
         return {
             loaded: false,
             listFieldTypes: {},
+            formFieldTypes: {},
             viewTypes: {},
             adminViews: {},
         }
@@ -41,12 +77,16 @@ export const Unite = new Vue({
             this.listFieldTypes[type] = field;
         });
 
+        this.$on('registerFormFieldType', (type, field) => {
+            this.formFieldTypes[type] = field;
+        });
+
         this.$on('registerViewType', (type, view) => {
             this.viewTypes[type] = view;
         });
 
-        this.$on('load', (data, success, fail, fin) => {
-            this.loadAdminViews(data, success, fail, fin);
+        this.$on('load', (reload = false, success, fail, fin) => {
+            this.loadAdminViews(reload, success, fail, fin);
         });
 
         User.$watch('user.token', () => {
@@ -77,8 +117,14 @@ export const Unite = new Vue({
                     category
                     fields {
                         id
-                        type
                         name
+                        type
+                        show_in_list
+                        show_in_form
+                        form_group
+                    }
+                    permissions {
+                        create
                     }
                     ${fragmentNames.join("\n")}
                 }`;
@@ -89,14 +135,14 @@ export const Unite = new Vue({
         /**
          * Do a full schema introspection and load all adminViews.
          *
-         * @param data
+         * @param reload
          * @param success
          * @param fail
          * @param fin
          */
-        loadAdminViews(data, success, fail, fin) {
+        loadAdminViews(reload, success, fail, fin) {
 
-            if(!User.isAuthenticated) {
+            if(!User.isAuthenticated || (!reload && this.loaded)) {
                 if(success) { success(); }
                 return;
             }
@@ -123,7 +169,7 @@ export const Unite = new Vue({
                     }).then((data) => {
                         this.adminViews = [];
                         data.data.unite.adminViews.forEach((view) => {
-                            this.adminViews[view.id] = removeIntroSpecType(view);
+                            this.adminViews[view.id] = createAdminView(view, this);
                         });
 
                         this.loaded = true;
@@ -134,10 +180,32 @@ export const Unite = new Vue({
             });
         },
 
+        /**
+         * Get all registered list field types.
+         *
+         * @param type
+         * @returns {*|{extends}}
+         */
         getListFieldType(type) {
             return this.listFieldTypes[type] || ListFieldTypeFallback;
         },
 
+        /**
+         * Get all registered form field types.
+         *
+         * @param type
+         * @returns {*|{extends}}
+         */
+        getFormFieldType(type) {
+            return this.formFieldTypes[type] || FormFieldTypeFallback;
+        },
+
+        /**
+         * Get all registered view field types.
+         *
+         * @param type
+         * @returns {*|{extends}}
+         */
         getViewType(type) {
             return this.viewTypes[type] || ViewTypeFallback;
         },

@@ -8,4 +8,5 @@ type SettingsAdminView implements UniteAdminView{
     fragment: String!
     category: String!
     fields: [UniteAdminViewField!]!
+    permissions: UniteContentListPermissions!
 }

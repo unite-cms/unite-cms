@@ -8,6 +8,9 @@
             is_granted(attribute) {
                 return this.row._meta.permissions[attribute] || false;
             },
+            to(action) {
+                return this.$route.path + '/' + this.id + '/' + action;
+            },
         },
         computed: {
             id() {

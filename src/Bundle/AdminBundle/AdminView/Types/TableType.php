@@ -3,6 +3,7 @@
 namespace UniteCMS\AdminBundle\AdminView\Types;
 
 use GraphQL\Language\AST\FragmentDefinitionNode;
+use UniteCMS\AdminBundle\AdminView\AdminView;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 
 class TableType extends AbstractAdminViewType
@@ -13,7 +14,7 @@ class TableType extends AbstractAdminViewType
     /**
      * {@inheritDoc}
      */
-    public function createView(FragmentDefinitionNode $definition, array $directive, string $category, ContentType $contentType) {
+    public function createView(FragmentDefinitionNode $definition, array $directive, string $category, ContentType $contentType) : AdminView {
         $config = [
             'limit' => $directive['settings']['limit'] ?? 20,
         ];
