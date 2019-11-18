@@ -30,8 +30,11 @@ messages.en = {
                 create: 'Create',
                 update: 'Update',
                 delete: 'Delete',
+                permanent_delete: 'Permanent delete',
                 revert: 'Revert',
+                recover: 'Recover',
                 translate: 'Translate',
+                toggle_deleted: 'Toggle deleted content'
             }
         },
         form: {
@@ -40,19 +43,40 @@ messages.en = {
             },
         },
         create: {
-            headline: 'Create {name}',
+            headline: 'Create {name} content',
             actions: {
-                create: 'Save'
+                submit: 'Save'
             },
             success: 'New "{name}" content was created.',
         },
         update: {
-            headline: 'Update {name}',
+            headline: 'Update {name} content',
             actions: {
-                update: 'Save'
+                submit: 'Save'
             },
             success: '"{name}" content was updated.',
-        }
+        },
+        delete: {
+            headline: 'Move {name} content to trash',
+            actions: {
+                submit: 'Move to trash'
+            },
+            success: '"{name}" content was moved to trash.',
+        },
+        recover: {
+            headline: 'Recover {name} content from trash',
+            actions: {
+                submit: 'Recover from trash'
+            },
+            success: '"{name}" content was recovered.',
+        },
+        permanent_delete: {
+            headline: 'Remove {name}',
+            actions: {
+                submit: 'Permanently remove'
+            },
+            success: '"{name}" content was removed.',
+        },
     }
 };
 

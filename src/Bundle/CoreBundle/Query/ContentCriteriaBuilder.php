@@ -33,7 +33,7 @@ class ContentCriteriaBuilder
                 CompositeExpression::TYPE_AND,
                 array_map(function($and_where) use($contentType) {
                     return $this->buildNestedWhereExpression($contentType, $and_where);
-                }, $where['AND'])
+                }, array_filter($where['AND']))
             );
         }
 
@@ -42,7 +42,7 @@ class ContentCriteriaBuilder
                 CompositeExpression::TYPE_OR,
                 array_map(function($or_where) use($contentType) {
                     return $this->buildNestedWhereExpression($contentType, $or_where);
-                }, $where['OR'])
+                }, array_filter($where['OR']))
             );
         }
 

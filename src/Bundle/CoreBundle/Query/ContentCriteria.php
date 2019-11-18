@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Expr\Comparison;
 
 class ContentCriteria extends Criteria
 {
-    const BASE_FIELDS = ['id'];
+    const BASE_FIELDS = ['id', 'deleted'];
 
     const NCONTAINS = 'NCONTAINS';
 

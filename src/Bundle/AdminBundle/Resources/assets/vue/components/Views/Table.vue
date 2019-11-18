@@ -2,8 +2,9 @@
   <section class="uk-section uk-position-relative">
     <div class="uk-container">
       <div class="uk-flex uk-flex-middle uk-margin-bottom">
-        <div class="uk-flex-1">
+        <div class="uk-flex-1 uk-flex uk-flex-middle">
           <h2 class="uk-margin-remove">{{ view.name }}</h2>
+          <a href="" class="uk-icon-button uk-margin-small-left" uk-tooltip :title="$t('content.list.actions.toggle_deleted')" :class="{ 'uk-button-danger': $route.query.deleted }" @click.prevent="toggleDeleted"><icon name="trash-2" /></a>
         </div>
         <router-link :to="to('create')" class="uk-button uk-button-primary uk-margin-left"><icon name="plus" /> {{ $t('content.list.actions.create') }}</router-link>
       </div>
@@ -16,7 +17,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in items.result" :class="{ updated: $route.query.updated === row._meta.id }">
+            <tr v-for="row in items.result" :class="{ updated: $route.query.updated === row._meta.id }" :key="row._meta.id">
               <td v-for="field in view.listFields()">
                 <component :is="$unite.getListFieldType(field.type)" :row="row" :field="field" />
               </td>
@@ -55,15 +56,9 @@
                     total: 0,
                     result: [],
                 },
-                showDeleted: false,
                 customFilter: null,
                 customOrderBy: [],
                 offset: 0
-            }
-        },
-        mounted(){
-            if(this.$route.query.updated) {
-                this.$apollo.queries.items.refetch();
             }
         },
         fragments: {
@@ -75,20 +70,28 @@
         },
         apollo: {
             items: {
+                fetchPolicy: 'network-only',
                 query() { return this.query; },
                 update(data) {return data[`find${ this.view.type }`] || { total: 0, results: [] }; },
                 variables() {
                     return {
                         offset: this.offset,
                         limit: this.view.limit,
-                        filter: this.customFilter || this.view.filter,
+                        filter: this.activeFilter,
                         orderBy: this.customOrderBy || this.view.orderBy,
-                        showDeleted: this.showDeleted,
+                        showDeleted: !!this.$route.query.deleted,
                     }
                 },
             }
         },
         computed: {
+            activeFilter(){
+                let filter = this.customFilter || this.view.filter || {};
+                let deletedFilter = { field: "deleted", operator: !!this.$route.query.deleted ? 'NEQ' : 'EQ', value: null };
+                return {
+                    AND: [deletedFilter, filter]
+                };
+            },
             query() {
                 return gql`
                     ${ this.view.fragment }
@@ -113,6 +116,23 @@
                       }
                   }`;
             },
+        },
+        methods: {
+            toggleDeleted() {
+
+                let query = Object.assign({}, this.$route.query);
+
+                if(this.$route.query.deleted) {
+                    delete query.deleted;
+                } else {
+                    query.deleted = true;
+                }
+
+                this.$router.replace({
+                    path: this.$route.path,
+                    query: query,
+                })
+            }
         }
     }
 </script>

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import User from '../state/User';
 import Alerts from "../state/Alerts";
+import Route from "../state/Route";
 import { Unite } from "./unite";
 
 import Dashboard from "../pages/Dashboard";
@@ -81,6 +82,9 @@ router.beforeEach((to, from, next) => {
 
     // User is logged in or public route
     } else {
+
+        // Store the previous route.
+        Route.$emit('setPreviousRoute', from);
 
         // Make sure that adminViews are loaded for all logged in routes.
         if(User.isAuthenticated) {

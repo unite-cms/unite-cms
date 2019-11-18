@@ -25,8 +25,7 @@
           <li><a  uk-tooltip="Logout" class="uk-text-danger" @click="logout"><icon name="log-out" /></a></li>
         </ul>
       </div>
-
-      <div class="uk-overlay-default uk-position-cover" v-if="loading">
+      <div class="uk-overlay-default uk-position-cover" v-if="!$unite.loaded">
         <div uk-spinner class="uk-position-center"></div>
       </div>
     </div>
@@ -40,17 +39,6 @@
 
     export default {
         components: {Icon},
-        data() {
-            return {
-                loading: true
-            }
-        },
-        mounted() {
-            this.$unite.$on('loaded', () => { this.loading = false; });
-            if(this.$unite.loaded) {
-                this.loading = false;
-            }
-        },
         watch: {
             '$route'(){
                 UIkit.offcanvas(this.$refs.offcanvas).hide();

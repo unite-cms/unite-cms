@@ -1,5 +1,5 @@
 <template>
-  <div class="uk-background-secondary uk-height-1-1 uk-flex uk-flex-center uk-flex-middle">
+  <div class="uk-background-secondary uk-height-viewport uk-flex uk-flex-center uk-flex-middle">
     <div class="uk-card uk-card-default uk-padding">
       <form class="uk-form">
         <div class="uk-alert uk-alert-danger" v-for="error in errors">{{ error }}</div>

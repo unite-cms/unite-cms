@@ -1,11 +1,14 @@
 <template>
-  <div class="uk-height-1-1 uk-flex uk-flex-column">
+  <div class="uk-flex uk-flex-column">
     <slot name="mobile-navbar"><app-mobile-navbar v-if="hasUserInformation" /></slot>
     <slot name="navigation"><app-navigation v-if="hasUserInformation" /></slot>
-    <section id="app-main" class="uk-background-muted uk-height-1-1 uk-flex uk-flex-column">
+    <section id="app-main" class="uk-background-muted uk-flex uk-flex-column">
       <alerts />
       <div class="uk-flex-1">
         <router-view></router-view>
+      </div>
+      <div class="uk-overlay-default uk-position-cover" v-if="hasUserInformation && !$unite.loaded">
+        <div uk-spinner class="uk-position-center"></div>
       </div>
     </section>
   </div>

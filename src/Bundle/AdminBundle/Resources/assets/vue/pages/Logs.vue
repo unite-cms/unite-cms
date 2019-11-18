@@ -1,5 +1,5 @@
 <template>
-  <div class="uk-background-secondary uk-height-1-1 uk-flex uk-flex-column">
+  <div class="uk-background-secondary uk-height-viewport uk-flex uk-flex-column">
     <div>
       <button class="load-more load-more-new uk-button uk-button-small" @click="loadNew" :disabled="$apollo.loading">
         <div v-if="$apollo.loading" class="uk-margin-small-right" uk-spinner="ratio: 0.4"></div>
