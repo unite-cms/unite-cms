@@ -2,7 +2,7 @@
   <section class="uk-section uk-position-relative">
     <div class="uk-container">
       <div class="uk-flex uk-flex-middle uk-margin-bottom">
-        <router-link :to="back" class="uk-button uk-button-small uk-button-default uk-margin-right"><icon name="arrow-left" /> {{ $t('general.back') }}</router-link>
+        <button @click="goBack" class="uk-button uk-button-small uk-button-default uk-margin-right"><icon name="arrow-left" /> {{ $t('general.back') }}</button>
         <div class="uk-flex-1">
           <h2 class="uk-margin-remove">{{ $t('content.recover.headline', view) }}</h2>
         </div>
