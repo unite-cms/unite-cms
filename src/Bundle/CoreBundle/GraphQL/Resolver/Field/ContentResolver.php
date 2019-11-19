@@ -3,11 +3,13 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
+use UniteCMS\CoreBundle\Content\Content;
 use UniteCMS\CoreBundle\Content\ContentField;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
+use UniteCMS\CoreBundle\Content\RevisionContent;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
@@ -46,19 +48,8 @@ class ContentResolver implements FieldResolverInterface
      */
     public function supports(string $typeName, ObjectTypeDefinitionNode $typeDefinitionNode): bool {
         foreach($typeDefinitionNode->interfaces as $interface) {
-            if($interface->name->value === 'UniteContent') {
-                return true;
-            }
 
-            if($interface->name->value === 'UniteSingleContent') {
-                return true;
-            }
-
-            if($interface->name->value === 'UniteUser') {
-                return true;
-            }
-
-            if($interface->name->value === 'UniteEmbeddedContent') {
+            if($interface->name->value === 'UniteFieldable') {
                 return true;
             }
 
@@ -93,8 +84,9 @@ class ContentResolver implements FieldResolverInterface
                 switch ($info->fieldName) {
                     case 'id':
                         return $value->getId();
-                    Case '_meta':
-                        return $value;
+                    case '_meta':
+                        // Prevent _meta on revision content (which is a sub field of _meta).
+                        return ($value instanceof RevisionContent) ? null : $value;
                     default:
 
                         // Special handle user content.

@@ -28,7 +28,7 @@ class ContentVoterTest extends SchemaAwareTestCase
             ) 
         {
             id: ID
-            _meta: UniteContentMeta!
+            _meta: UniteContentMeta
             title: String @textField
         }
     ';
@@ -50,7 +50,7 @@ class ContentVoterTest extends SchemaAwareTestCase
         $this->buildSchema('
             type Article implements UniteContent @access(query: "", mutation: "true", read: "true", update: "true") {
                 id: ID
-                _meta: UniteContentMeta!
+                _meta: UniteContentMeta
                 title: String @textField
             }
         ');
@@ -60,7 +60,7 @@ class ContentVoterTest extends SchemaAwareTestCase
         $schema = BuildSchema::build($this->buildSchema('
             type Article implements UniteContent @access(query: "true", mutation: "true", read: "true", update: "true") {
                 id: ID
-                _meta: UniteContentMeta!
+                _meta: UniteContentMeta
                 title: String @textField
             }
         '));

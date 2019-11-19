@@ -103,7 +103,6 @@
                                   id
                                   version
                                   deleted
-                                  locale
                                   permissions {
                                       read
                                       update

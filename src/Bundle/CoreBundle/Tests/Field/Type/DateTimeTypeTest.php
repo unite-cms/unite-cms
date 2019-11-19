@@ -13,7 +13,7 @@ class DateTimeTypeTest extends SchemaAwareTestCase
         $this->buildSchema('
             type Test implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
                 id: ID
-                _meta: UniteContentMeta!
+                _meta: UniteContentMeta
                 field: DateTime @dateTimeField
             }
         ');

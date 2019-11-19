@@ -3,7 +3,6 @@ scalar Expression
 scalar JSON
 scalar Date
 scalar DateTime
-scalar Locale
 scalar NULL
 
 enum CONTENT_EVENT {
@@ -88,27 +87,41 @@ type UniteContentEntityPermissions {
     permanent_delete: Boolean!
 }
 
-type UniteContentMeta {
-    id: ID!
+type UniteContentRevision {
     version: Int!
+    operation: CONTENT_EVENT!
+    operationTime: DateTime!
+    operatorName: String!
+    operatorType: String
+    operatorId: ID
+    content: UniteFieldable!
+}
+
+type UniteContentMeta {
+    id: ID
+    version: Int!
+    revisions: [UniteContentRevision!]
     deleted: DateTime
-    locale: Locale
     permissions: UniteContentEntityPermissions!
+}
+
+interface UniteFieldable {
+    _meta: UniteContentMeta
 }
 
 interface UniteUser {
     id: ID
     username: String!
-    _meta: UniteContentMeta!
+    _meta: UniteContentMeta
 }
 
 interface UniteContent {
     id: ID
-    _meta: UniteContentMeta!
+    _meta: UniteContentMeta
 }
 
 interface UniteSingleContent {
-    _meta: UniteContentMeta!
+    _meta: UniteContentMeta
 }
 
 interface UniteEmbeddedContent {
@@ -117,6 +130,7 @@ interface UniteEmbeddedContent {
 
 interface UniteContentResult {
     total: Int!
+    result: [UniteFieldable!]
 }
 
 input UniteFilterInput {

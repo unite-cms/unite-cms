@@ -13,8 +13,15 @@ use UniteCMS\CoreBundle\Event\ContentEvent;
  */
 interface ContentInterface
 {
+
+    /**
+     * @return string|null
+     */
     public function getId() : ?string;
 
+    /**
+     * @return string
+     */
     public function getType() : string;
 
     /**
@@ -22,7 +29,15 @@ interface ContentInterface
      */
     public function getData() : array;
 
+    /**
+     * @param string $fieldName
+     *
+     * @return FieldData|null
+     */
     public function getFieldData(string $fieldName) : ?FieldData;
 
+    /**
+     * @return DateTime|null
+     */
     public function getDeleted() : ?DateTime;
 }

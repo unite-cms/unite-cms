@@ -27,7 +27,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                 @valid(if: "this.getFieldData(\'lastname\') and not this.getFieldData(\'lastname\').empty()", message: "INVALID ALL GROUPS!")
             {
                 id: ID
-                _meta: UniteContentMeta!
+                _meta: UniteContentMeta
                 firstname: String @textField
                     @valid(if: "value and not value.empty()", message: "INVALID FIELD ALL GROUPS!")
                 lastname: String @textField

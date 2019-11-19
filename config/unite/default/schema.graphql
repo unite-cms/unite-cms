@@ -6,7 +6,7 @@ enum ArticleStatus {
 
 """Categories"""
 type DemoCategory implements UniteContent {
-    _meta: UniteContentMeta!
+    _meta: UniteContentMeta
     id: ID
     name: String! @textField
 }
@@ -14,7 +14,7 @@ type DemoCategory implements UniteContent {
 
 """Articles"""
 type DemoArticle implements UniteContent {
-    _meta: UniteContentMeta!
+    _meta: UniteContentMeta
     id: ID
     name: String! @textField
     categories: [DemoCategory!] @referenceField
@@ -24,7 +24,7 @@ type DemoArticle implements UniteContent {
 
 """Admin Users"""
 type Admin implements UniteUser @passwordAuthenticator(passwordField: "password") {
-    _meta: UniteContentMeta!
+    _meta: UniteContentMeta
     id: ID
     username: String! @emailField
     password: NULL! @passwordField
@@ -33,6 +33,6 @@ type Admin implements UniteUser @passwordAuthenticator(passwordField: "password"
 
 """Demo Settings"""
 type DemoSettings implements UniteSingleContent {
-    _meta: UniteContentMeta!
+    _meta: UniteContentMeta
     title: String @textField
 }

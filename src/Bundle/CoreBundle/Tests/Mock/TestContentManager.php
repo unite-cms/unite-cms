@@ -111,7 +111,7 @@ class TestContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20): array {
+    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20, int $offset = 0): array {
         return [];
     }
 }

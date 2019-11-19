@@ -20,7 +20,7 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
             @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") 
         {
             id: ID
-            _meta: UniteContentMeta!
+            _meta: UniteContentMeta
             title: String @textField @access(
                 mutation: "user.get(\'mutation\') == \'mutation\'"  
                 read: "content.get(\'title\') == \'access\'"
@@ -47,7 +47,7 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
         $this->buildSchema('
             type Article implements UniteContent {
                 id: ID
-                _meta: UniteContentMeta!
+                _meta: UniteContentMeta
                 title: String @textField
                     @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true")
             }
@@ -62,7 +62,7 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
         $this->buildSchema('
             type Article implements UniteContent {
                 id: ID
-                _meta: UniteContentMeta!
+                _meta: UniteContentMeta
                 title: String @textField
                     @access(mutation: "", read: "true", update: "true")
             }
@@ -73,7 +73,7 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
         $schema = BuildSchema::build($this->buildSchema('
             type Article implements UniteContent {
                 id: ID
-                _meta: UniteContentMeta!
+                _meta: UniteContentMeta
                 title: String @textField
                     @access(mutation: "true", read: "true", update: "true")
             }

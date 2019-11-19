@@ -123,10 +123,10 @@ class ContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20) : array {
+    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20, int $offset = 0) : array {
         return $this->em($domain)
             ->getRepository(Revision::class)
-            ->findForContent($content, $limit);
+            ->findForContent($content, $limit, $offset);
     }
 
     /**

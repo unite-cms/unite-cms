@@ -3,7 +3,9 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Schema\Modifier;
 
+use GraphQL\Language\AST\FieldDefinitionNode;
 use GraphQL\Language\AST\NodeKind;
+use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Language\Visitor;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\GraphQL\Util;
@@ -51,7 +53,7 @@ class HideDirectiveModifier implements SchemaModifierInterface
         // Modify the schema document and remove all hidden objects and fields.
         $document = Visitor::visit($document, [
             'enter' => [
-                NodeKind::OBJECT_TYPE_DEFINITION => function ($node, $key, $parent, $path, $ancestors) use ($hideMap) {
+                NodeKind::OBJECT_TYPE_DEFINITION => function (ObjectTypeDefinitionNode $node, $key, $parent, $path, $ancestors) use ($hideMap) {
 
                     // Remove hidden object types.
                     if($hideMap[$node->name->value]['hide']) {
@@ -72,7 +74,7 @@ class HideDirectiveModifier implements SchemaModifierInterface
                     return $node;
                 },
 
-                NodeKind::FIELD_DEFINITION => function ($node, $key, $parent, $path, $ancestors) use ($hideMap) {
+                NodeKind::FIELD_DEFINITION => function (FieldDefinitionNode $node, $key, $parent, $path, $ancestors) use ($hideMap) {
                     if(!empty($node->mark_to_remove)) {
                         return Visitor::removeNode();
                     }

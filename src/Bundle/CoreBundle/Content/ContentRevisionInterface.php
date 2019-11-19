@@ -48,7 +48,7 @@ interface ContentRevisionInterface
     public function getOperatorId() : ?string;
 
     /**
-     * @return \UniteCMS\CoreBundle\Content\FieldData[]
+     * @return FieldData[]
      */
     public function getData(): array;
 }
