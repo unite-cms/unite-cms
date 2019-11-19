@@ -1,36 +1,19 @@
 <template>
-  <section class="uk-section uk-position-relative">
-    <div class="uk-container">
-      <div class="uk-flex uk-flex-middle uk-margin-bottom">
-        <button @click="goBack" class="uk-button uk-button-small uk-button-default uk-margin-right"><icon name="arrow-left" /> {{ $t('general.back') }}</button>
-        <div class="uk-flex-1">
-          <h2 class="uk-margin-remove">{{ $t('content.recover.headline', view) }}</h2>
-        </div>
-      </div>
-      <form class="uk-card uk-card-default" @submit.prevent="submit">
-
-        <div class="uk-card-body">
-          <div class="uk-text-center">
-            <button class="uk-button uk-button-primary" type="submit">{{ $t('content.recover.actions.submit') }}</button>
-          </div>
-        </div>
-
-        <div class="uk-overlay-default uk-position-cover" v-if="loading || $apollo.loading">
-          <div uk-spinner class="uk-position-center"></div>
-        </div>
-      </form>
-    </div>
-  </section>
+  <content-detail :loading="loading || $apollo.loading" @submit="submit">
+    <h1 class="uk-card-title">{{ $t('content.recover.headline', view) }}</h1>
+    <button slot="footer" class="uk-button uk-button-primary" type="submit">{{ $t('content.recover.actions.submit') }}</button>
+  </content-detail>
 </template>
 
 <script>
     import gql from 'graphql-tag';
     import Icon from "../../components/Icon";
+    import ContentDetail from './_detail';
     import Alerts from "../../state/Alerts";
     import Route from "../../state/Route";
 
     export default {
-        components: {Icon},
+        components: {Icon, ContentDetail},
         data(){
             return {
                 content: {},
@@ -62,9 +45,6 @@
             }
         },
         methods: {
-            goBack() {
-                Route.back();
-            },
             submit() {
                 this.loading = true;
                 this.$apollo.mutate({

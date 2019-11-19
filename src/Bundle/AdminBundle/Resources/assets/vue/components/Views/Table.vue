@@ -8,15 +8,15 @@
         </div>
         <router-link :to="to('create')" class="uk-button uk-button-primary uk-margin-left"><icon name="plus" /> {{ $t('content.list.actions.create') }}</router-link>
       </div>
-      <div class="uk-card uk-card-default uk-overflow-auto">
-        <table class="uk-table uk-table-small uk-table-divider uk-table-striped uk-table-middle">
+      <div class="uk-overflow-auto">
+        <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
           <thead>
             <tr>
               <th v-for="field in view.listFields()">{{ field.name }}</th>
               <th></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="uk-card uk-card-default uk-table-striped">
             <tr v-for="row in items.result" :class="{ updated: $route.query.updated === row._meta.id }" :key="row._meta.id">
               <td v-for="field in view.listFields()">
                 <component :is="$unite.getListFieldType(field.type)" :row="row" :field="field" />

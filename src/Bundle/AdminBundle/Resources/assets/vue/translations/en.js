@@ -31,9 +31,8 @@ messages.en = {
                 update: 'Update',
                 delete: 'Delete',
                 permanent_delete: 'Permanent delete',
-                revert: 'Revert',
+                revert: 'Manage Revisions',
                 recover: 'Recover',
-                translate: 'Translate',
                 toggle_deleted: 'Toggle deleted content'
             }
         },
@@ -58,6 +57,7 @@ messages.en = {
         },
         delete: {
             headline: 'Move {name} content to trash',
+            message: 'Do you really want to move this content to trash?',
             actions: {
                 submit: 'Move to trash'
             },
@@ -70,8 +70,25 @@ messages.en = {
             },
             success: '"{name}" content was recovered.',
         },
+        revert: {
+            headline: 'Revisions of {name} content',
+            success: '"{name}" content was reverted to {version}. revision.',
+            confirm: 'Do you really want to revert this content to version {version}?',
+            label: {
+                current: 'Current'
+            },
+            header: {
+                version: '#',
+                operation: 'Operation',
+                meta: 'Meta'
+            },
+            actions: {
+                revert: 'Revert content to this version'
+            }
+        },
         permanent_delete: {
             headline: 'Remove {name}',
+            message: 'Do you really want to permanently delete this content? Be careful, you cannot undo this action!',
             actions: {
                 submit: 'Permanently remove'
             },

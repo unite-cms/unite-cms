@@ -18,7 +18,6 @@ import PermanentDelete from "../pages/content/PermanentDelete";
 import Recover from "../pages/content/Recover";
 import Delete from "../pages/content/Delete";
 import Revert from "../pages/content/Revert";
-import Translate from "../pages/content/Translate";
 
 Vue.use(VueRouter);
 
@@ -33,7 +32,6 @@ const routes = [
         { path: '', component: Index } ,
         { path: 'create', component: Create },
         { path: ':id/update', component: Update },
-        { path: ':id/translate', component: Translate },
         { path: ':id/revert', component: Revert },
         { path: ':id/delete', component: Delete },
         { path: ':id/recover', component: Recover },
@@ -43,7 +41,6 @@ const routes = [
         { path: '',  component: Index },
         { path: 'create', component: Create },
         { path: ':id/update', component: Update },
-        { path: ':id/translate', component: Translate },
         { path: ':id/revert', component: Revert },
         { path: ':id/delete', component: Delete },
         { path: ':id/recover', component: Recover },
@@ -51,7 +48,6 @@ const routes = [
     ], meta: { requiresAuth: true } },
     { path: '/setting/:type', component: Container, children: [
             { path: '', component: Index },
-            { path: 'translate', component: Translate },
             { path: 'revert', component: Revert },
     ], meta: { requiresAuth: true } },
 ];

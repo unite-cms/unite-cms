@@ -1,28 +1,9 @@
 <template>
-  <section class="uk-section uk-position-relative">
-    <div class="uk-container">
-      <div class="uk-flex uk-flex-middle uk-margin-bottom">
-        <button @click="goBack" class="uk-button uk-button-small uk-button-default uk-margin-right"><icon name="arrow-left" /> {{ $t('general.back') }}</button>
-        <div class="uk-flex-1">
-          <h2 class="uk-margin-remove">{{ $t('content.update.headline', view) }}</h2>
-        </div>
-      </div>
-      <form class="uk-card uk-card-default" @submit.prevent="submit">
-
-        <div class="uk-card-body">
-          <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.type)" :field="field" v-model="formData[field.id]" />
-
-          <div class="uk-text-right">
-            <button class="uk-button uk-button-primary" type="submit">{{ $t('content.update.actions.submit') }}</button>
-          </div>
-        </div>
-
-        <div class="uk-overlay-default uk-position-cover" v-if="loading || $apollo.loading">
-          <div uk-spinner class="uk-position-center"></div>
-        </div>
-      </form>
-    </div>
-  </section>
+  <content-detail :loading="loading || $apollo.loading" @submit="submit">
+    <h1 class="uk-card-title">{{ $t('content.update.headline', view) }}</h1>
+    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.type)" :field="field" v-model="formData[field.id]" />
+    <button slot="footer" class="uk-button uk-button-primary" type="submit">{{ $t('content.update.actions.submit') }}</button>
+  </content-detail>
 </template>
 
 <script>
@@ -30,9 +11,10 @@
     import Icon from "../../components/Icon";
     import Alerts from "../../state/Alerts";
     import Route from "../../state/Route";
+    import ContentDetail from './_detail';
 
     export default {
-        components: {Icon},
+        components: {Icon, ContentDetail},
         data(){
             return {
                 loading: false,
@@ -64,9 +46,6 @@
             }
         },
         methods: {
-            goBack() {
-                Route.back();
-            },
             submit() {
                 this.loading = true;
                 this.$apollo.mutate({

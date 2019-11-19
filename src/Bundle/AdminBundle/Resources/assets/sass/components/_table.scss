@@ -1,7 +1,42 @@
 
 .uk-table tbody {
+
+  &.uk-card {
+    tr {
+      background: none;
+
+      &:first-child {
+        border-top: none;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    &.uk-table-striped > tr:nth-of-type(even) {
+      background: $table-striped-row-background;
+      @if(mixin-exists(hook-table-striped)) {@include hook-table-striped();}
+
+      &:first-child {
+        border-top: none;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
   tr.updated {
     background: $table-hover-row-background;
     @if(mixin-exists(hook-table-hover)) {@include hook-table-hover();}
   }
+}
+
+.uk-overflow-auto {
+  padding: 0 $global-margin / 1.5 $global-margin;
+  margin-left: -$global-margin / 1.5;
+  margin-right: -$global-margin / 1.5;
+  margin-bottom: -$global-margin;
 }
