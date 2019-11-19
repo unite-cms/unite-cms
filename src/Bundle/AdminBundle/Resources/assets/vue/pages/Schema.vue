@@ -1,5 +1,5 @@
 <template>
-  <div class="schema-editor uk-height-1-1 uk-flex uk-flex-column uk-position-relative">
+  <div class="schema-editor uk-height-viewport uk-flex uk-flex-column uk-position-relative">
     <div class="tab-bar uk-flex">
       <div class="file-tabs uk-flex-1">
         <button @click="setCurrentModel(model)" class="uk-button uk-button-secondary file-tab" v-for="model in models()" :class="{ active: isCurrentModel(model) }">

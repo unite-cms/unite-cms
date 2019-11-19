@@ -7,6 +7,14 @@
   min-height: calc(100vh - #{$navbar-nav-item-height});
 }
 
+@media (max-width: $breakpoint-medium) {
+  #app-navbar-mobile + #app-navigation + #app-main {
+    .uk-height-viewport {
+      min-height: calc(100vh - #{$navbar-nav-item-height});
+    }
+  }
+}
+
 @media (min-width: $breakpoint-medium) {
 
   #app-main {
