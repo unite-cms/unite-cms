@@ -5,6 +5,7 @@ enum REFERENCE_OF_DELETE {
 }
 
 directive @referenceOfField(
+    content_type: String!
     reference_field: String!
     onDelete: REFERENCE_OF_DELETE = SET_NULL
 ) on FIELD_DEFINITION

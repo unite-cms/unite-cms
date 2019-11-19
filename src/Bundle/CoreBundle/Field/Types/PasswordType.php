@@ -64,7 +64,7 @@ class PasswordType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
         // We will never return any password information!
         return '';
     }

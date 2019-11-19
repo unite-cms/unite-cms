@@ -123,7 +123,7 @@ class ContentResolver implements FieldResolverInterface
 
                         return $this->fieldTypeManager
                             ->getFieldType($field->getType())
-                            ->resolveField($value, $field, $fieldData);
+                            ->resolveField($value, $field, $fieldData, $args);
                 }
             }
         }

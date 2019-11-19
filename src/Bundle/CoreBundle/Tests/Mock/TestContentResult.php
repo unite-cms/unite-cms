@@ -40,4 +40,11 @@ class TestContentResult implements ContentResultInterface
     {
         return $this->resultFilter ? array_filter($this->content, $this->resultFilter) : $this->content;
     }
+
+    /**
+     * @return string
+     */
+    public function getType() : string {
+        return '';
+    }
 }

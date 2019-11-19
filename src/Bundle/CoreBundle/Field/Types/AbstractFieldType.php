@@ -88,7 +88,7 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
     /**
      * {@inheritDoc}
      */
-    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
 
         if($fieldData instanceof FieldDataList) {
             $resolve = [];
@@ -98,17 +98,18 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
             return $resolve;
         }
 
-        return $this->resolveRowData($content, $field, $fieldData);
+        return $this->resolveRowData($content, $field, $fieldData, $args);
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\Content\ContentInterface $content
-     * @param \UniteCMS\CoreBundle\ContentType\ContentTypeField $field
-     * @param \UniteCMS\CoreBundle\Content\FieldData $fieldData
+     * @param ContentInterface $content
+     * @param ContentTypeField $field
+     * @param FieldData $fieldData
+     * @param array $args
      *
      * @return mixed
      */
-    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
         return $fieldData->resolveData('', $field->isNonNull() ? '' : null);
     }
 

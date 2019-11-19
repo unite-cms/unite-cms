@@ -21,7 +21,7 @@ class GeoLocationType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
         return [
             'provided_by' => $fieldData->resolveData('provided_by', null),
             'id' => $fieldData->resolveData('id', null),

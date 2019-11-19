@@ -69,4 +69,11 @@ class ContentResult implements ContentResultInterface
         $result = $this->repository->typedFindBy($this->type, $this->criteria, $this->includeDeleted);
         return $this->resultFilter ? array_filter($result, $this->resultFilter) : $result;
     }
+
+    /**
+     * @return string
+     */
+    public function getType() : string {
+        return $this->type;
+    }
 }

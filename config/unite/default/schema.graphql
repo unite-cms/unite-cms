@@ -9,6 +9,7 @@ type DemoCategory implements UniteContent {
     _meta: UniteContentMeta
     id: ID
     name: String! @textField
+    articles(filter: UniteFilterInput, orderBy: [UniteOrderByInput!], limit: Int = 20, offset: Int = 0): UniteContentResult @referenceOfField(content_type: "DemoArticle", reference_field: "categories")
 }
 
 

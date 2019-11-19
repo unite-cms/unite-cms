@@ -59,7 +59,7 @@ class ReferenceType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
 
         if(empty($fieldData->getData())) {
             return null;

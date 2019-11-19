@@ -21,7 +21,7 @@ class LinkType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
         return [
             'url' => $fieldData->resolveData('url', ''),
             'title' => $fieldData->resolveData('title', ''),

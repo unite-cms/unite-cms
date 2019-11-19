@@ -66,7 +66,7 @@ class EmbeddedType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData) {
+    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
 
         if($fieldData instanceof EmbeddedFieldData) {
             return new EmbeddedContent($fieldData->getId(), $fieldData->getType(), $fieldData->getData());
