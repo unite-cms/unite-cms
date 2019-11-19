@@ -32,6 +32,15 @@ const createAdminView = function (view, unite) {
     view.listFields = function(){ return this.fields.filter(field => field.show_in_list); };
     view.formFields = function(){ return this.fields.filter(field => field.show_in_form); };
 
+    view.rawType = unite.getRawType(view.type);
+    view.fields.forEach((field) => {
+        view.rawType.fields.forEach((rawField) => {
+            if(field.id === rawField.name) {
+                field.rawField = rawField;
+            }
+        });
+    });
+
     /**
      * Returns an array with field query statements for all form fields of this view.
      * @returns Array
@@ -66,6 +75,7 @@ export const Unite = new Vue({
     data() {
         return {
             loaded: false,
+            rawTypes: [],
             listFieldTypes: {},
             formFieldTypes: {},
             viewTypes: {},
@@ -152,6 +162,7 @@ export const Unite = new Vue({
             this.$apollo.query({
                 query: gql(getIntrospectionQuery()),
             }).then((data) => {
+                this.rawTypes = data.data.__schema.types;
                 this.fragmentMatcher.possibleTypesMap = this.fragmentMatcher.parseIntrospectionResult(data.data);
 
                 setTimeout(() => {
@@ -178,6 +189,17 @@ export const Unite = new Vue({
                     }).catch(fail).finally(fin).then(success);
                 }, 10);
             });
+        },
+
+        /**
+         * Returns a rawType for the given name.
+         *
+         * @param typeName
+         * @returns {*|{extends}}
+         */
+        getRawType(typeName) {
+            let found = this.rawTypes.filter((type) => { return type.name === typeName });
+            return found.length > 0 ? found[0] : null;
         },
 
         /**

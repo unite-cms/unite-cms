@@ -129,6 +129,11 @@ class ReferenceType extends AbstractFieldType
             return;
         }
 
+        // If we have no value, stop here.
+        if((empty($fieldData) || empty($fieldData->resolveData()))) {
+            return;
+        }
+
         // Check that referenced content can be resolved.
         $validator->validate(
             $this->resolveField($content, $field, $fieldData),

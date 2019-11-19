@@ -1,5 +1,6 @@
 
 enum ArticleStatus {
+    """This is just a test name"""
     DRAFT
     PUBLISHED
 }
