@@ -94,6 +94,15 @@ messages.en = {
             },
             success: '"{name}" content was removed.',
         },
+    },
+    field: {
+        reference: {
+            select: 'Select',
+            missing_view_warning: 'No admin view for the referenced content of this field was found. Please add one to your schema!',
+            modal: {
+                headline: 'Select a content to reference'
+            }
+        }
     }
 };
 

@@ -22,6 +22,16 @@ class AdminViewField
     protected $type;
 
     /**
+     * @var bool $isListOf
+     */
+    protected $isListOf = false;
+
+    /**
+     * @var bool $isNonNull
+     */
+    protected $isNonNull = false;
+
+    /**
      * @var bool $showInList
      */
     protected $showInList = false;
@@ -42,12 +52,16 @@ class AdminViewField
      * @param string $id
      * @param string $type
      * @param string $name
+     * @param bool $isListOf
+     * @param bool $isNonNull
      */
-    public function __construct(string $id, string $type, string $name)
+    public function __construct(string $id, string $type, string $name, bool $isListOf = false, bool $isNonNull = false)
     {
         $this->id = $id;
         $this->type = $type;
         $this->name = $name;
+        $this->isListOf = $isListOf;
+        $this->isNonNull = $isNonNull;
     }
 
     /**
@@ -58,7 +72,9 @@ class AdminViewField
         return new self(
             $contentTypeField->getId(),
             $contentTypeField->getType(),
-            $contentTypeField->getName()
+            $contentTypeField->getName(),
+            $contentTypeField->isListOf(),
+            $contentTypeField->isNonNull()
         );
     }
 
@@ -145,5 +161,39 @@ class AdminViewField
      */
     public function getFormGroup() : ?string {
         return $this->formGroup;
+    }
+
+    /**
+     * @param bool $isNonNull
+     * @return self
+     */
+    public function setIsNonNull(bool $isNonNull): self
+    {
+        $this->isNonNull = $isNonNull;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNonNull() : bool {
+        return $this->isNonNull;
+    }
+
+    /**
+     * @param bool $isListOf
+     * @return self
+     */
+    public function setIsListOf(bool $isListOf): self
+    {
+        $this->isListOf = $isListOf;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isListOf() : bool {
+        return $this->isListOf;
     }
 }

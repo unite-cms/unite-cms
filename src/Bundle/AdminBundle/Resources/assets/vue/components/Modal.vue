@@ -1,7 +1,7 @@
 <template>
   <div>
     <div ref="modal" id="modal-close-default" :class="{ 'uk-modal-container': this.container }" uk-modal>
-      <div class="uk-modal-dialog">
+      <div class="uk-modal-dialog uk-background-muted">
         <button class="uk-modal-close-default" type="button" uk-close></button>
 
         <div v-if="title" class="uk-modal-header">

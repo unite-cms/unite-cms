@@ -27,6 +27,10 @@ const removeIntroSpecType = function(val){
     return val;
 };
 
+const innerType = function(type) {
+    return type.ofType ? innerType(type.ofType) : type.name;
+}
+
 const createAdminView = function (view, unite) {
     view = removeIntroSpecType(view);
     view.listFields = function(){ return this.fields.filter(field => field.show_in_list); };
@@ -34,11 +38,17 @@ const createAdminView = function (view, unite) {
 
     view.rawType = unite.getRawType(view.type);
     view.fields.forEach((field) => {
+
+        // Set raw field to field
         view.rawType.fields.forEach((rawField) => {
             if(field.id === rawField.name) {
                 field.rawField = rawField;
             }
         });
+
+        // normalize returnType
+        field.returnType = innerType(field.rawField.type);
+
     });
 
     /**
@@ -129,6 +139,8 @@ export const Unite = new Vue({
                         id
                         name
                         type
+                        non_null
+                        list_of
                         show_in_list
                         show_in_form
                         form_group

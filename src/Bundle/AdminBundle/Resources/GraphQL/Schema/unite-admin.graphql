@@ -19,6 +19,8 @@ type UniteAdminViewField {
     id: ID!
     type: ID!
     name: String!
+    list_of: Boolean!
+    non_null: Boolean!
     show_in_list: Boolean!
     show_in_form: Boolean!
     form_group: String

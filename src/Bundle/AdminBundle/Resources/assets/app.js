@@ -8,6 +8,7 @@ import TextList from "./vue/components/Fields/List/Text";
 import TextForm from "./vue/components/Fields/Form/Text";
 import ChoiceList from "./vue/components/Fields/List/Choice";
 import ChoiceForm from "./vue/components/Fields/Form/Choice";
+import ReferenceForm from "./vue/components/Fields/Form/Reference";
 
 import Table from "./vue/components/Views/Table";
 import Settings from "./vue/components/Views/Settings";
@@ -31,6 +32,8 @@ Unite.$emit('registerListFieldType', 'text', TextList);
 Unite.$emit('registerFormFieldType', 'text', TextForm);
 Unite.$emit('registerListFieldType', 'choice', ChoiceList);
 Unite.$emit('registerFormFieldType', 'choice', ChoiceForm);
+Unite.$emit('registerFormFieldType', 'reference', ReferenceForm);
+
 Unite.$emit('registerViewType', 'TableAdminView', Table);
 Unite.$emit('registerViewType', 'SettingsAdminView', Settings);
 

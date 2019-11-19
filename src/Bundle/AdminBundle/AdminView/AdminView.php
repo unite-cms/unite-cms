@@ -104,7 +104,10 @@ class AdminView
 
                 // If this field is a ct field, replace the ct field with this one.
                 if(array_key_exists($id, $ctFields)) {
-                    $field->setShowInForm($ctFields[$id]->showInForm());
+                    $field
+                        ->setShowInForm($ctFields[$id]->showInForm())
+                        ->setIsListOf($ctFields[$id]->isListOf())
+                        ->setIsNonNull($ctFields[$id]->isNonNull());
                     unset($ctFields[$id]);
                 }
 

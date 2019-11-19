@@ -37,6 +37,12 @@ class UniteAdminViewFieldResolver implements FieldResolverInterface
             case 'type':
                 return $value->getType();
 
+            case 'list_of':
+                return $value->isListOf();
+
+            case 'non_null':
+                return $value->isNonNull();
+
             case 'show_in_list':
                 return $value->showInList();
 

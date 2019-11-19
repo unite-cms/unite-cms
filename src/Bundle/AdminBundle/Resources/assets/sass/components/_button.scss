@@ -1,0 +1,13 @@
+
+.uk-button-light {
+  background-color: $global-inverse-color;
+  color: $button-default-color;
+  @if(mixin-exists(hook-button-default)) {@include hook-button-default();}
+}
+
+/* Hover + Focus */
+.uk-button-light:hover,
+.uk-button-light:focus {
+  color: $button-default-hover-color;
+  @if(mixin-exists(hook-button-default-hover)) {@include hook-button-default-hover();}
+}
