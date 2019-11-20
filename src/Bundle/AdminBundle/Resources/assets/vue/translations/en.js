@@ -34,6 +34,10 @@ messages.en = {
                 revert: 'Manage Revisions',
                 recover: 'Recover',
                 toggle_deleted: 'Toggle deleted content'
+            },
+            selection: {
+                select: 'Select',
+                confirm: 'Confirm selection of {count}'
             }
         },
         form: {

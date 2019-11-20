@@ -2,7 +2,7 @@
     export default {
         data() {
             return {
-                val: this.value
+                val: this.value || (this.field.list_of ? [] : null)
             }
         },
         props: {
@@ -24,12 +24,36 @@
             }
         },
         computed: {
+            values() {
+                if(!this.value) {
+                    return [];
+                }
+                return this.field.list_of ? this.value : [this.value]
+            },
             name() {
                 return this.field.name.slice(0, 1).toUpperCase() + this.field.name.slice(1);
             },
             domID() {
                 return 'form-field-' + this.field.id + '-' + this._uid;
             }
+        },
+        methods: {
+            removeValue(value = null) {
+                if(this.field.list_of) {
+                    this.val = this.val.filter((val) => {
+                        return val !== value;
+                    });
+                } else {
+                    this.val = null;
+                }
+            },
+            removeByKey(key) {
+                if(this.field.list_of) {
+                    this.val = this.val.filter((val, val_key) => {
+                        return val_key !== key;
+                    });
+                }
+            },
         },
     }
 </script>

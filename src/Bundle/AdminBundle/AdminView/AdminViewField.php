@@ -12,9 +12,14 @@ class AdminViewField
     protected $id;
 
     /**
-     * @var string $alias
+     * @var string $name
      */
     protected $name;
+
+    /**
+     * @var null|string $description
+     */
+    protected $description = null;
 
     /**
      * @var string $type
@@ -54,14 +59,16 @@ class AdminViewField
      * @param string $name
      * @param bool $isListOf
      * @param bool $isNonNull
+     * @param string $description
      */
-    public function __construct(string $id, string $type, string $name, bool $isListOf = false, bool $isNonNull = false)
+    public function __construct(string $id, string $type, string $name, bool $isListOf = false, bool $isNonNull = false, ?string $description = null)
     {
         $this->id = $id;
         $this->type = $type;
         $this->name = $name;
         $this->isListOf = $isListOf;
         $this->isNonNull = $isNonNull;
+        $this->description = $description;
     }
 
     /**
@@ -74,7 +81,8 @@ class AdminViewField
             $contentTypeField->getType(),
             $contentTypeField->getName(),
             $contentTypeField->isListOf(),
-            $contentTypeField->isNonNull()
+            $contentTypeField->isNonNull(),
+            $contentTypeField->getDescription()
         );
     }
 
@@ -106,6 +114,24 @@ class AdminViewField
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string|null $description
+     * @return self
+     */
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+        return $this;
     }
 
     /**

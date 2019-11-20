@@ -7,11 +7,8 @@ fragment categories on DemoCategory @tableAdminView {
 }
 
 fragment articles on DemoArticle @tableAdminView {
+    id
     name
-    status
-    categories {
-        name
-    }
 }
 
 fragment admins on Admin @tableAdminView {

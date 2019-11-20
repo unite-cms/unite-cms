@@ -19,8 +19,20 @@ type DemoArticle implements UniteContent {
     _meta: UniteContentMeta
     id: ID
     name: String! @textField
+
+    extra_names: [String!] @textField
+
     categories: [DemoCategory!] @referenceField
+
+    """Main Category"""
+    main_category: DemoCategory @referenceField
+
+    """Status
+    This is my description
+    """
     status: ArticleStatus @choiceField(default: "DRAFT")
+
+    stati: [ArticleStatus!] @choiceField(default: "DRAFT")
 }
 
 

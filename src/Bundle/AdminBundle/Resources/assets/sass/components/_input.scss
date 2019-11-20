@@ -1,0 +1,15 @@
+
+.uk-input-group {
+  padding: $form-padding-vertical;
+  height: auto;
+  overflow: auto;
+  max-width: 100%;
+  width: 100%;
+  background: $global-muted-background;
+  color: $form-color;
+  @if(mixin-exists(hook-form)) {@include hook-form();}
+
+  > * {
+    margin: $form-padding-vertical;
+  }
+}

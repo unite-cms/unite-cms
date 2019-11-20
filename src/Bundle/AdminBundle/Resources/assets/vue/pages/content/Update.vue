@@ -28,6 +28,7 @@
         },
         apollo: {
             formData: {
+                fetchPolicy: 'network-only',
                 query() {
                     return gql`query($id: ID!) {
                         get${ this.view.type }(id: $id) {

@@ -1,27 +1,35 @@
 <template>
   <section class="uk-section uk-position-relative">
     <div class="uk-container">
-      <div class="uk-flex uk-flex-middle uk-margin-bottom">
+
+      <div class="uk-flex uk-flex-middle uk-margin-bottom" v-if="!select">
         <div class="uk-flex-1 uk-flex uk-flex-middle">
           <h2 class="uk-margin-remove">{{ view.name }}</h2>
           <a href="" class="uk-icon-button uk-margin-small-left" uk-tooltip :title="$t('content.list.actions.toggle_deleted')" :class="{ 'uk-button-danger': $route.query.deleted }" @click.prevent="toggleDeleted"><icon name="trash-2" /></a>
         </div>
         <router-link :to="to('create')" class="uk-button uk-button-primary uk-margin-left"><icon name="plus" /> {{ $t('content.list.actions.create') }}</router-link>
       </div>
+
       <div class="uk-overflow-auto">
         <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
           <thead>
             <tr>
+              <th v-if="select"></th>
               <th v-for="field in view.listFields()">{{ field.name }}</th>
-              <th></th>
+              <th v-if="!select"></th>
             </tr>
           </thead>
           <tbody class="uk-card uk-card-default uk-table-striped">
             <tr v-for="row in items.result" :class="{ updated: $route.query.updated === row._meta.id }" :key="row._meta.id">
+              <td v-if="select" class="uk-table-shrink">
+                <button @click.prevent="selectRow(row._meta.id)" class="uk-icon-button uk-icon-button-small" :class="isSelected(row._meta.id) ? 'uk-button-primary' : 'uk-button-default'" uk-icon="check" :title="$t('content.list.selection.select')">
+                  <icon v-if="isSelected(row._meta.id)" name="check" />
+                </button>
+              </td>
               <td v-for="field in view.listFields()">
                 <component :is="$unite.getListFieldType(field.type)" :row="row" :field="field" />
               </td>
-              <td class="uk-table-shrink"><actions-field :row="row" id="_actions" /></td>
+              <td v-if="!select" class="uk-table-shrink"><actions-field :row="row" id="_actions" /></td>
             </tr>
           </tbody>
           <tfoot v-if="items.result.length < items.total">
@@ -37,6 +45,11 @@
         <div uk-spinner class="uk-position-center"></div>
       </div>
     </div>
+
+    <div class="uk-position-fixed uk-position-bottom uk-background-primary uk-dark uk-padding-small uk-text-center" v-if="select === 'MULTIPLE' && (selection.length > 0 || (initialSelection && initialSelection.length > 0))">
+      <button class="uk-button uk-button-default uk-button-small" @click.prevent="confirmSelection">{{ $t('content.list.selection.confirm', { count: selection.length }) }}</button>
+    </div>
+
   </section>
 </template>
 

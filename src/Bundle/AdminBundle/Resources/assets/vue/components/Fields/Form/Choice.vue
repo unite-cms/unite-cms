@@ -2,9 +2,15 @@
   <div class="uk-margin">
     <label class="uk-form-label" :for="domID">{{ name }}</label>
     <div class="uk-form-controls">
-      <select class="uk-select" :id="domID" v-model="val">
+      <select v-if="!field.list_of" class="uk-select" :id="domID" v-model="val">
         <option v-for="option in options" :value="option.value">{{ option.label }}</option>
       </select>
+      <template v-else>
+        <template v-for="option in options">
+          <label><input v-model="val" class="uk-checkbox" type="checkbox" :value="option.value"> {{ option.label }}</label><br>
+        </template>
+      </template>
+      <p v-if="field.description" class="uk-text-meta uk-margin-small-top">{{ field.description }}</p>
     </div>
   </div>
 </template>
@@ -17,7 +23,7 @@
       normalizeData(inputData, field) { return inputData; },
       computed: {
           options() {
-              let enumType = this.$unite.getRawType(this.field.rawField.type.name);
+              let enumType = this.$unite.getRawType(this.field.returnType);
 
               if(!enumType) {
                   return [];

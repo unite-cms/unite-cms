@@ -1,5 +1,10 @@
 <template>
-  <span class="uk-label uk-label-muted">{{ label(row[field.id]) }}</span>
+  <div>
+    <template v-for="value in values">
+      <span class="uk-label uk-label-muted">{{ label(value) }}</span>
+      <br v-if="!isLastValue(value)" />
+    </template>
+  </div>
 </template>
 <script>
   import _abstract from "./_abstract";
@@ -12,7 +17,7 @@
                   return null;
               }
 
-              let enumType = this.$unite.getRawType(this.field.rawField.type.name);
+              let enumType = this.$unite.getRawType(this.field.returnType);
 
               if(!enumType) {
                   return null;

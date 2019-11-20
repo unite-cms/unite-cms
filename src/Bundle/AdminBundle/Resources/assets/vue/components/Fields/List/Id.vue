@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-for="value in values">
-      {{ value }}
+      <div class="uk-text-meta uk-text-truncate" :title="value" uk-tooltip>{{ value }}</div>
       <br v-if="!isLastValue(value)" />
     </template>
   </div>
@@ -12,3 +12,8 @@
       extends: _abstract
   }
 </script>
+<style scoped lang="scss">
+  .uk-text-truncate {
+    width: 100px;
+  }
+</style>

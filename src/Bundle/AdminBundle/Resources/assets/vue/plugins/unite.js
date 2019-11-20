@@ -72,7 +72,7 @@ const createAdminView = function (view, unite) {
         this.formFields().forEach((field) => {
             let type = unite.getFormFieldType(field.type);
             let inputFieldData = inputData[field.id] || undefined;
-            data[field.id] = !!type.normalizeData ? type.normalizeData(inputFieldData) : inputFieldData;
+            data[field.id] = !!type.normalizeData ? type.normalizeData(inputFieldData, field) : inputFieldData;
         });
         return data;
     };
@@ -138,6 +138,7 @@ export const Unite = new Vue({
                     fields {
                         id
                         name
+                        description
                         type
                         non_null
                         list_of

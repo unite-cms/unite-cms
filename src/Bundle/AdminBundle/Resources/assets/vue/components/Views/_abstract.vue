@@ -2,11 +2,12 @@
     export default {
         data() {
             return {
-                selection: []
+                selection: (this.initialSelection || []).slice(0)
             };
         },
         props: {
             view: Object,
+            initialSelection: Array,
             select: String,
         },
         methods: {

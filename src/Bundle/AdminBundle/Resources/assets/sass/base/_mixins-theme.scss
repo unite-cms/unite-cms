@@ -1,4 +1,9 @@
 
 @mixin hook-icon-button(){
   background: darken($icon-button-background, 5%);
+
+  &.uk-icon-button-small {
+    width: $icon-button-size / 1.5;
+    height: $icon-button-size / 1.5;
+  }
 }
