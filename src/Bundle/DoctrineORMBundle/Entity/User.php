@@ -71,6 +71,28 @@ class User implements UserInterface
     protected $fullyAuthenticated = false;
 
     /**
+     * @var bool
+     */
+    protected $markedAsNew = false;
+
+    /**
+     * @param bool $new
+     *
+     * @return $this
+     */
+    public function markAsNew($new = true) : self {
+        $this->markedAsNew = $new;
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isNew() : bool {
+        return empty($this->getId()) ?? $this->markedAsNew;
+    }
+
+    /**
      * Content constructor.
      *
      * @param string $type

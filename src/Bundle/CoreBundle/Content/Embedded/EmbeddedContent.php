@@ -32,6 +32,10 @@ class EmbeddedContent implements ContentInterface
         $this->data = $data;
     }
 
+    public function isNew() : bool {
+        return false;
+    }
+
     public function getId(): ?string
     {
         return $this->id;

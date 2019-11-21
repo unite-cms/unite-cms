@@ -93,6 +93,7 @@ class ContentManager implements ContentManagerInterface
         $class = static::ENTITY;
         $content = new $class($type);
         $this->em($domain)->persist($content);
+        $content->markAsNew(true);
         return $content;
     }
 

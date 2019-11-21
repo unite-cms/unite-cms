@@ -20,6 +20,11 @@ class TestContent implements ContentInterface
         $this->data = $data;
     }
 
+    public function isNew(): bool
+    {
+        return empty($this->getId());
+    }
+
     public function setId() : self {
         $this->id = uniqid();
         return $this;

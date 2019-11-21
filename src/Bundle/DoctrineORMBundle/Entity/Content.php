@@ -38,4 +38,26 @@ class Content extends BaseContent
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $deleted = null;
+
+    /**
+     * @var bool
+     */
+    protected $markedAsNew = false;
+
+    /**
+     * @param bool $new
+     *
+     * @return $this
+     */
+    public function markAsNew($new = true) : self {
+        $this->markedAsNew = $new;
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isNew() : bool {
+        return parent::isNew() ?? $this->markedAsNew;
+    }
 }

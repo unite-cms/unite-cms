@@ -13,6 +13,10 @@ use UniteCMS\CoreBundle\Event\ContentEvent;
  */
 interface ContentInterface
 {
+    /**
+     * @return bool
+     */
+    public function isNew() : bool;
 
     /**
      * @return string|null

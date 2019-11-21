@@ -27,6 +27,13 @@ class Content implements ContentInterface
     }
 
     /**
+     * @return bool
+     */
+    public function isNew() : bool {
+        return empty($this->getId());
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getId(): ?string

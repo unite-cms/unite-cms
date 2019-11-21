@@ -37,7 +37,7 @@ class ProxyContent
      * @return bool
      */
     public function isNew() : bool {
-        return empty($this->id());
+        return $this->content ? $this->content->isNew() : true;
     }
 
     /**
