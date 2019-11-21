@@ -24,6 +24,7 @@ doctrine:
             auto_generate_proxy_classes: true
             default:
                 connection: default
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
                 dql:
                     string_functions:
                         JSON_EXTRACT:   Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
@@ -38,7 +39,7 @@ doctrine:
 
             alternative:
                 connection: alternative
-                naming_strategy: doctrine.orm.naming_strategy.underscore
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
 
                 dql:
                     string_functions:
