@@ -138,7 +138,7 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
 
         // Generate activation token.
         $this->generateToken($user);
-        $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
+        $domain->getUserManager()->flush($domain);
 
         // Send out email
         if($this->accountActivationMailer->send($config['activateUrl'], $user->getToken(static::TOKEN_KEY), $email) === 0) {
@@ -184,7 +184,7 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
         // If we reach this point, we can activate the user.
         $this->tryToUpdate($user, $config['stateField'], $config['activeValue']);
         $user->setToken(static::TOKEN_KEY, null);
-        $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
+        $domain->getUserManager()->flush($domain);
 
         $domain->log(LoggerInterface::NOTICE, sprintf('Successfully confirmed account activation for user with username "%s".', $args['username']));
         return true;

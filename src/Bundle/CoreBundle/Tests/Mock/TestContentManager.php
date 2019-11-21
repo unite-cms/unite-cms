@@ -9,13 +9,13 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\Domain\Domain;
-use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Exception\InvalidContentVersionException;
 
 class TestContentManager implements ContentManagerInterface
 {
-    protected $versionedData = [];
     protected $repository = [];
+    protected $versionedData = [];
+    protected $actions = [];
 
     /**
      * {@inheritDoc}
@@ -24,6 +24,9 @@ class TestContentManager implements ContentManagerInterface
         return $transaction();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
 
         if(!isset($this->repository[$type])) {
@@ -35,6 +38,9 @@ class TestContentManager implements ContentManagerInterface
         }), $criteria->getFirstResult(), $criteria->getMaxResults()), $resultFilter);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get(Domain $domain, string $type, string $id, bool $includeDeleted = false): ?ContentInterface {
 
         if(!isset($this->repository[$type][$id])) {
@@ -48,12 +54,28 @@ class TestContentManager implements ContentManagerInterface
         return $this->repository[$type][$id];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function create(Domain $domain, string $type): ContentInterface {
-        return new TestContent($type);
+        $content = new TestContent($type);
+        $this->actions[] = function() use ($content) {
+            $content->setId();
+            $this->repository[$content->getType()][$content->getId()] = $content;
+            $this->versionedData[$content->getId()] = $this->versionedData[$content->getId()] ?? [];
+            $this->versionedData[$content->getId()][] = $content->getData();
+        };
+        return $content;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update(Domain $domain, ContentInterface $content, array $inputData = []): ContentInterface {
-        return $content->setData($inputData);
+        $content->setData($inputData);
+        $this->versionedData[$content->getId()] = $this->versionedData[$content->getId()] ?? [];
+        $this->versionedData[$content->getId()][] = $content->getData();
+        return $content;
     }
 
     /**
@@ -65,7 +87,10 @@ class TestContentManager implements ContentManagerInterface
             throw new InvalidContentVersionException();
         }
 
-        $content->setData($this->versionedData[$content->getId()][$version]);
+        $this->actions[] = function() use ($content, $domain, $version) {
+            $this->update($domain, $content, $this->versionedData[$content->getId()][$version]);
+        };
+
         return $content;
     }
 
@@ -73,39 +98,30 @@ class TestContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function permanentDelete(Domain $domain, ContentInterface $content): ContentInterface {
-        return $content;
-    }
-
-    public function delete(Domain $domain, ContentInterface $content): ContentInterface {
-        return $content;
-    }
-
-    public function recover(Domain $domain, ContentInterface $content): ContentInterface {
-        return $content;
-    }
-
-    public function persist(Domain $domain, ContentInterface $content, string $persistType): void {
-        $this->repository[$content->getType()] = $this->repository[$content->getType()] ?? [];
-
-        if($persistType === ContentEvent::CREATE) {
-            $content->setId();
-            $this->repository[$content->getType()][$content->getId()] = $content;
-        }
-
-        else if($persistType === ContentEvent::DELETE) {
-            $content->setDeleted(new DateTime());
-        }
-
-        else if($persistType === ContentEvent::PERMANENT_DELETE) {
+        $this->actions[] = function() use ($content) {
             unset($this->repository[$content->getType()][$content->getId()]);
-        }
+        };
+        return $content;
+    }
 
-        else if ($persistType === ContentEvent::RECOVER) {
+    /**
+     * {@inheritDoc}
+     */
+    public function delete(Domain $domain, ContentInterface $content): ContentInterface {
+        $this->actions[] = function() use ($content) {
+            $content->setDeleted(new DateTime());
+        };
+        return $content;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function recover(Domain $domain, ContentInterface $content): ContentInterface {
+        $this->actions[] = function() use ($content) {
             $content->setDeleted(null);
-        }
-
-        $this->versionedData[$content->getId()] = $this->versionedData[$content->getId()] ?? [];
-        $this->versionedData[$content->getId()][] = $content->getData();
+        };
+        return $content;
     }
 
     /**
@@ -113,5 +129,25 @@ class TestContentManager implements ContentManagerInterface
      */
     public function revisions(Domain $domain, ContentInterface $content, int $limit = 20, int $offset = 0): array {
         return [];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function flush(Domain $domain): void {
+
+        // Execute and clean all actions.
+        foreach($this->actions as $action) {
+            $action();
+        }
+
+        $this->actions = [];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function noFlush(Domain $domain) : void {
+        $this->actions = [];
     }
 }

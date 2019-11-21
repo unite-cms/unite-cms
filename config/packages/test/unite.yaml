@@ -7,3 +7,9 @@ unite_cms_core:
             logger: UniteCMS\CoreBundle\Tests\Mock\TestLogger
             schema:
                 - !php/const UniteCMS\CoreBundle\GraphQL\SchemaManager::UNITE_CMS_ROOT_SCHEMA
+        doctrine_orm:
+            content_manager: UniteCMS\DoctrineORMBundle\Content\ContentManager
+            user_manager: UniteCMS\DoctrineORMBundle\User\UserManager
+            logger: UniteCMS\DoctrineORMBundle\Logger\Logger
+            schema:
+                - !php/const UniteCMS\CoreBundle\GraphQL\SchemaManager::UNITE_CMS_ROOT_SCHEMA

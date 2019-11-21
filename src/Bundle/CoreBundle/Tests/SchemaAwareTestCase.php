@@ -19,6 +19,7 @@ class SchemaAwareTestCase extends KernelTestCase
     public function setUp() {
         static::bootKernel();
         static::$container->get('security.token_storage')->setToken(new AnonymousToken('', ''));
+        static::$container->get(DomainManager::class)->setCurrentDomainFromConfigId('default');
     }
 
     /**

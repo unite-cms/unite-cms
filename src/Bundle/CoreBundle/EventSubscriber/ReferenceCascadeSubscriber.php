@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\EventSubscriber;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
+use UniteCMS\CoreBundle\Content\ContentResultInterface;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
@@ -64,9 +65,14 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
         foreach($contentType->getFields() as $field) {
             if($field->getType() === ReferenceOfType::getType()) {
 
-                foreach($fieldType->resolveField($content, $field, $content->getFieldData($field->getId())) as $referencedContent) {
+                /**
+                 * @var ContentResultInterface $referencedContentResult
+                 */
+                $referencedContentResult = $fieldType->resolveField($content, $field, $content->getFieldData($field->getId()));
+
+                foreach($referencedContentResult->getResult() as $referencedContent) {
                     if($field->getSettings()->get('onDelete') === 'CASCADE') {
-                        $this->cascade($domain, $content, $referencedContent, $field);
+                        $this->cascade($domain, $content, $referencedContent);
                     } else {
                         $this->setNull($domain, $content, $referencedContent, $field);
                     }
@@ -75,12 +81,11 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
         }
     }
 
-    protected function cascade(Domain $domain, ContentInterface $deletedContent, ContentInterface $referencedContent, ContentTypeField $field) {
+    protected function cascade(Domain $domain, ContentInterface $deletedContent, ContentInterface $referencedContent) {
 
         $domain->getContentManager()->permanentDelete($domain, $referencedContent);
-
         $this->eventDispatcher->dispatch(new ContentEventBefore($referencedContent), ContentEventBefore::PERMANENT_DELETE);
-        $domain->getContentManager()->persist($domain, $referencedContent, ContentEvent::PERMANENT_DELETE);
+        $domain->getContentManager()->flush($domain);
 
         $domain->log(LoggerInterface::NOTICE, sprintf(
             'Cascade delete referenced "%s" content with id "%s", because "%s" content with id "%s" was hard deleted.',
@@ -95,14 +100,11 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
 
     protected function setNull(Domain $domain, ContentInterface $deletedContent, ContentInterface $referencedContent, ContentTypeField $field) {
 
-        $domain->getContentManager()->update($domain, $referencedContent, [
-            $field->getId() => null,
-        ]);
-
+        $domain->getContentManager()->update($domain, $referencedContent, [$field->getId() => null]);
         $this->eventDispatcher->dispatch(new ContentEventBefore($referencedContent), ContentEventBefore::UPDATE);
-        $domain->getContentManager()->persist($domain, $referencedContent, ContentEvent::UPDATE);
+        $domain->getContentManager()->flush($domain);
 
-        $this->uniteCMSDomainLogger->info(sprintf(
+        $domain->log(LoggerInterface::NOTICE, sprintf(
             'Set referenced "%s" of "%s" content with id "%s" to NULL, because "%s" content with id "%s" was hard deleted.',
             $field->getId(),
             $referencedContent->getType(),

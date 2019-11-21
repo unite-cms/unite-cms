@@ -34,7 +34,7 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
 
     public function setUp()
     {
-        static::bootKernel();
+        parent::setUp();
         $this->user = new TestUser('User');
         static::$container->get('security.token_storage')->setToken(new AnonymousToken('', $this->user));
     }
@@ -139,7 +139,7 @@ class ContentFieldVoterTest extends SchemaAwareTestCase
         // Create test content
         $content = $contentManager->create($domain, 'Article');
         $content->setData(['title' => new FieldData('foo')]);
-        $contentManager->persist($domain, $content, ContentEvent::CREATE);
+        $contentManager->flush($domain);
 
 
         $this->assertGraphQL([

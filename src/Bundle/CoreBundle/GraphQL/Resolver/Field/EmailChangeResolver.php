@@ -121,7 +121,7 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
 
         // Generate activation token.
         $this->generateToken($user, ['email' => $args['email']]);
-        $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
+        $domain->getUserManager()->flush($domain);
 
         // Send out email
         if($this->emailChangeMailer->send($config['changeUrl'], $user->getToken(static::TOKEN_KEY), $args['email']) === 0) {
@@ -164,7 +164,7 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
         // If we reach this point, we can change the email
         $this->tryToUpdate($user, $config['emailField'], $payload['email']);
         $user->setToken(static::TOKEN_KEY, null);
-        $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
+        $domain->getUserManager()->flush($domain);
         $domain->log(LoggerInterface::NOTICE, 'Successfully confirmed email change.');
         return true;
     }

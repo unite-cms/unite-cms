@@ -37,7 +37,7 @@ class ContentVoterTest extends SchemaAwareTestCase
 
     public function setUp()
     {
-        static::bootKernel();
+        parent::setUp();
         $this->user = new TestUser('User');
         static::$container->get('security.token_storage')->setToken(new AnonymousToken('', $this->user));
     }
@@ -204,7 +204,7 @@ class ContentVoterTest extends SchemaAwareTestCase
         $this->buildSchema(static::SCHEMA);
         $contentManager = $domain->getContentManager();
         $content = $domain->getContentManager()->create($domain, 'Article');
-        $contentManager->persist($domain, $content, ContentEvent::CREATE);
+        $contentManager->flush($domain);
 
         $this->assertGraphQL([
             [

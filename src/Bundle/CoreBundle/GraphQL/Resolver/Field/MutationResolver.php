@@ -112,14 +112,14 @@ class MutationResolver implements FieldResolverInterface
         // Handle all fields
         switch ($field) {
             case 'create':
-                $this->contentAccess(ContentVoter::CREATE, $content);
+                $this->contentAccess(ContentVoter::CREATE, $content, $contentManager, $domain);
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $this->contentUpdate($contentManager, $domain, $content, $args['data']);
                     return $this->contentPersist($contentManager, $domain, $content, ContentEvent::CREATE, $args['persist']);
                 });
 
             case 'update':
-                $this->contentAccess(ContentVoter::UPDATE, $content);
+                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $this->contentUpdate($contentManager, $domain, $content, $args['data']);
@@ -127,7 +127,7 @@ class MutationResolver implements FieldResolverInterface
                 });
 
             case 'revert':
-                $this->contentAccess(ContentVoter::UPDATE, $content);
+                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $contentManager->revert($domain, $content, $args['version']);
@@ -135,7 +135,7 @@ class MutationResolver implements FieldResolverInterface
                 });
 
             case 'delete':
-                $this->contentAccess(ContentVoter::DELETE, $content);
+                $this->contentAccess(ContentVoter::DELETE, $content, $contentManager, $domain);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $contentManager->delete($domain, $content);
@@ -143,7 +143,7 @@ class MutationResolver implements FieldResolverInterface
                 });
 
             case 'recover':
-                $this->contentAccess(ContentVoter::UPDATE, $content);
+                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
 
                 $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $contentManager->recover($domain, $content);
@@ -154,7 +154,7 @@ class MutationResolver implements FieldResolverInterface
                 return $args['persist'] ? $content: null;
 
             case 'permanent_delete':
-                $this->contentAccess(ContentVoter::PERMANENT_DELETE, $content);
+                $this->contentAccess(ContentVoter::PERMANENT_DELETE, $content, $contentManager, $domain);
 
                 if(!$content->getDeleted() && empty($args['force'])) {
                     throw new UserError('You can only permanent delete content if it is already deleted or if you set the "force" argument to true.');
@@ -251,14 +251,18 @@ class MutationResolver implements FieldResolverInterface
     }
 
     /**
-     * @param ContentInterface $content
      * @param string $attribute
+     *
+     * @param ContentInterface $content
+     * @param ContentManagerInterface $contentManager
+     * @param Domain $domain
      *
      * @return ContentInterface
      */
-    protected function contentAccess(string $attribute, ContentInterface $content) : ContentInterface {
+    protected function contentAccess(string $attribute, ContentInterface $content, ContentManagerInterface $contentManager, Domain $domain) : ContentInterface {
 
         if(!$this->authorizationChecker->isGranted($attribute, $content)) {
+            $contentManager->noFlush($domain);
             throw new ContentAccessDeniedException(sprintf('You are not allowed to %s content of type "%s".', $attribute, $content->getType()));
         }
 
@@ -294,14 +298,17 @@ class MutationResolver implements FieldResolverInterface
 
         // Throw exception, if there where constraint violations.
         if(count($violations) > 0) {
+            $contentManager->noFlush($domain);
             throw new ConstraintViolationsException($violations);
         }
 
         // Persist content.
         if($persist) {
             $this->eventDispatcher->dispatch(new ContentEventBefore($content), $eventName);
-            $contentManager->persist($domain, $content, $eventName);
+            $contentManager->flush($domain);
             $this->eventDispatcher->dispatch(new ContentEventAfter($content), 'AFTER ' . $eventName);
+        } else {
+            $contentManager->noFlush($domain);
         }
 
         return $content;

@@ -3,11 +3,10 @@
 namespace UniteCMS\DoctrineORMBundle\Content;
 
 use DateTime;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Security\Core\Security;
-use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
@@ -22,7 +21,7 @@ class ContentManager implements ContentManagerInterface
     const ENTITY = Content::class;
 
     /**
-     * @var \Symfony\Bridge\Doctrine\RegistryInterface
+     * @var ManagerRegistry
      */
     protected $registry;
 
@@ -34,10 +33,10 @@ class ContentManager implements ContentManagerInterface
     /**
      * ContentManager constructor.
      *
-     * @param \Symfony\Bridge\Doctrine\RegistryInterface $registry
-     * @param \Symfony\Component\Security\Core\Security $security
+     * @param ManagerRegistry $registry
+     * @param Security $security
      */
-    public function __construct(RegistryInterface $registry, Security $security) {
+    public function __construct(ManagerRegistry $registry, Security $security) {
         $this->registry = $registry;
         $this->security = $security;
     }
@@ -92,13 +91,15 @@ class ContentManager implements ContentManagerInterface
      */
     public function create(Domain $domain, string $type): ContentInterface {
         $class = static::ENTITY;
-        return new $class($type);
+        $content = new $class($type);
+        $this->em($domain)->persist($content);
+        return $content;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function update(Domain $domain, ContentInterface $content, array $inputData = [], bool $persist = false): ContentInterface {
+    public function update(Domain $domain, ContentInterface $content, array $inputData = []): ContentInterface {
         return $content->setData($inputData);
     }
 
@@ -116,7 +117,6 @@ class ContentManager implements ContentManagerInterface
         }
 
         $content->setData($revision->getData());
-
         return $content;
     }
 
@@ -132,7 +132,7 @@ class ContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function delete(Domain $domain, ContentInterface $content, bool $persist = false): ContentInterface {
+    public function delete(Domain $domain, ContentInterface $content): ContentInterface {
         $content->setDeleted(new DateTime());
         return $content;
     }
@@ -145,41 +145,19 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function permanentDelete(Domain $domain, ContentInterface $content): ContentInterface {
-        return $content;    // Delete will be handled in persist.
+        $this->em($domain)->remove($content);
+        return $content;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function persist(Domain $domain, ContentInterface $content, string $persistType) : void {
-
-        if(empty($content->getId())) {
-            $this->em($domain)->persist($content);
-        }
-
-        $contentId = $content->getId();
-        $contentType = $content->getType();
-
-        if($persistType === ContentEvent::PERMANENT_DELETE) {
-            $this->em($domain)->remove($content);
-        }
-
-        $this->em($domain)->flush($content);
-
-        // Create revision entry for all operations but hard delete.
-        if($persistType !== ContentEvent::PERMANENT_DELETE) {
-            $revision = $this->em($domain)
-                ->getRepository(Revision::class)
-                ->createRevisionForContent($content, $persistType, $this->security->getUser());
-            $this->em($domain)->persist($revision);
-            $this->em($domain)->flush($revision);
-
-        // On permanent delete, remove all revision entries.
-        } else {
-            $this->em($domain)
-                ->getRepository(Revision::class)
-                ->deleteAllForContent($contentId, $contentType);
-
-        }
+    public function flush(Domain $domain) : void {
+        $this->em($domain)->flush();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function noFlush(Domain $domain) : void {}
 }

@@ -123,7 +123,7 @@ class CreateUserCommand extends Command
         }
 
         if($input->getOption('persist')) {
-            $domain->getUserManager()->persist($domain, $user, ContentEvent::CREATE);
+            $domain->getUserManager()->flush($domain);
         }
 
         $output->writeln([

@@ -6,7 +6,6 @@ namespace UniteCMS\CoreBundle\Tests\Validator;
 use DateTime;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
-use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\GraphQL\ErrorFormatter;
 use UniteCMS\CoreBundle\Tests\SchemaAwareTestCase;
 
@@ -142,7 +141,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
         $domain = static::$container->get(DomainManager::class)->current();
         $contentManager = $domain->getContentManager();
         $content = $contentManager->create($domain, 'Article');
-        $contentManager->persist($domain, $content, ContentEvent::CREATE);
+        $contentManager->flush($domain);
 
         $this->assertGraphQL([
             [
@@ -224,7 +223,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
         $domain = static::$container->get(DomainManager::class)->current();
         $contentManager = $domain->getContentManager();
         $content = $contentManager->create($domain, 'Article');
-        $contentManager->persist($domain, $content, ContentEvent::CREATE);
+        $contentManager->flush($domain);
 
         $dataMapper = static::$container->get(FieldDataMapper::class);
 
@@ -304,7 +303,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
         $domain = static::$container->get(DomainManager::class)->current();
         $contentManager = $domain->getContentManager();
         $content = $contentManager->create($domain, 'Article');
-        $contentManager->persist($domain, $content, ContentEvent::CREATE);
+        $contentManager->flush($domain);
 
         $content->setDeleted(new DateTime());
 
@@ -386,12 +385,12 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
         $domain = static::$container->get(DomainManager::class)->current();
         $contentManager = $domain->getContentManager();
         $content = $contentManager->create($domain, 'Article');
-        $contentManager->persist($domain, $content, ContentEvent::CREATE);
+        $contentManager->flush($domain);
 
         $dataMapper = static::$container->get(FieldDataMapper::class);
 
-        $content->setData($dataMapper->mapToFieldData($domain, $content, []));
-        $contentManager->persist($domain, $content, ContentEvent::UPDATE);
+        $contentManager->update($domain, $content, $dataMapper->mapToFieldData($domain, $content, []));
+        $contentManager->flush($domain);
 
         $this->assertGraphQL([
             [
@@ -421,11 +420,11 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
             ]
         ], $query, ['id' => $content->getId(), 'v' => 1], false);
 
-        $content->setData($dataMapper->mapToFieldData($domain, $content, [
+        $contentManager->update($domain, $content, $dataMapper->mapToFieldData($domain, $content, [
             'firstname' => 'DELETE',
             'lastname' => 'DELETE',
         ]));
-        $contentManager->persist($domain, $content, ContentEvent::UPDATE);
+        $contentManager->flush($domain);
 
         $this->assertGraphQL([
             [
@@ -447,11 +446,11 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
             ]
         ], $query, ['id' => $content->getId(), 'v' => 2], false);
 
-        $content->setData($dataMapper->mapToFieldData($domain, $content, [
+        $contentManager->update($domain, $content, $dataMapper->mapToFieldData($domain, $content, [
             'firstname' => 'REVERT',
             'lastname' => 'REVERT',
         ]));
-        $contentManager->persist($domain, $content, ContentEvent::UPDATE);
+        $contentManager->flush($domain);
 
         $this->assertGraphQL([
             'revertArticle' => [

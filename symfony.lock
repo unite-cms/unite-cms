@@ -1,4 +1,16 @@
 {
+    "dama/doctrine-test-bundle": {
+        "version": "4.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "4.0",
+            "ref": "56eaa387b5e48ebcc7c95a893b47dfa1ad51449c"
+        },
+        "files": [
+            "config/packages/test/dama_doctrine_test_bundle.yaml"
+        ]
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -91,9 +103,6 @@
         "files": [
             "config/packages/lexik_jwt_authentication.yaml"
         ]
-    },
-    "monolog/monolog": {
-        "version": "1.25.1"
     },
     "namshi/jose": {
         "version": "7.2.3"
@@ -219,23 +228,6 @@
     },
     "symfony/mime": {
         "version": "v4.3.5"
-    },
-    "symfony/monolog-bridge": {
-        "version": "v4.3.5"
-    },
-    "symfony/monolog-bundle": {
-        "version": "3.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "3.3",
-            "ref": "6240c6d43e8237a32452f057f81816820fd56ab6"
-        },
-        "files": [
-            "config/packages/dev/monolog.yaml",
-            "config/packages/prod/monolog.yaml",
-            "config/packages/test/monolog.yaml"
-        ]
     },
     "symfony/phpunit-bridge": {
         "version": "4.3",

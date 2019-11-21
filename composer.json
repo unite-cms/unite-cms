@@ -44,10 +44,11 @@
         "unite-cms/admin-bundle": "0@dev"
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^6.2",
         "symfony/maker-bundle": "^1.13",
+        "symfony/phpunit-bridge": "4.3.*",
         "symfony/profiler-pack": "^1.0",
-        "symfony/web-server-bundle": "4.3.*",
-        "symfony/phpunit-bridge": "4.3.*"
+        "symfony/web-server-bundle": "4.3.*"
     },
     "config": {
         "preferred-install": {

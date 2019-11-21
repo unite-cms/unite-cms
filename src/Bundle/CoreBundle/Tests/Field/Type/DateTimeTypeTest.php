@@ -28,6 +28,6 @@ class DateTimeTypeTest extends SchemaAwareTestCase
                 'id' => '{id}',
                 'field' => $dateTime
             ],
-        ], $create, ['persist' => false, 'data' => ['field' => $dateTime]]);
+        ], $create, ['data' => ['field' => $dateTime]]);
     }
 }

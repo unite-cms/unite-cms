@@ -3,9 +3,9 @@
 namespace UniteCMS\DoctrineORMBundle\Logger;
 
 use DateTime;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Security\Core\Security;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Log\LogInterface;
@@ -15,7 +15,7 @@ use UniteCMS\DoctrineORMBundle\Entity\Log;
 class Logger implements LoggerInterface
 {
     /**
-     * @var \Symfony\Bridge\Doctrine\RegistryInterface
+     * @var ManagerRegistry
      */
     protected $registry;
 
@@ -27,10 +27,10 @@ class Logger implements LoggerInterface
     /**
      * ContentManager constructor.
      *
-     * @param \Symfony\Bridge\Doctrine\RegistryInterface $registry
-     * @param \Symfony\Component\Security\Core\Security $security
+     * @param ManagerRegistry $registry
+     * @param Security $security
      */
-    public function __construct(RegistryInterface $registry, Security $security) {
+    public function __construct(ManagerRegistry $registry, Security $security) {
         $this->registry = $registry;
         $this->security = $security;
     }
@@ -71,8 +71,7 @@ class Logger implements LoggerInterface
             $log->setUsername($user->getUsername());
         }
 
-        $this->em($domain)->persist($log);
-        $this->em($domain)->flush($log);
+        $this->em($domain)->flush();
         return $log;
     }
 

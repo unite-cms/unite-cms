@@ -13,6 +13,7 @@
         <server name="SHELL_VERBOSITY" value="-1" />
         <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
         <server name="SYMFONY_PHPUNIT_VERSION" value="7.5" />
+        <server name="TEST_DATABASE_URL" value="mysql://root:@127.0.0.1:3306/unite_test" />
     </php>
 
     <testsuites>

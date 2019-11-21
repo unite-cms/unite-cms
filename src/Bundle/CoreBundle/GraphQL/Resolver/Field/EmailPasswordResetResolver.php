@@ -118,7 +118,7 @@ class EmailPasswordResetResolver extends AbstractEmailConfirmationResolver
 
         // Persist token
         $this->generateToken($user);
-        $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
+        $domain->getUserManager()->flush($domain);
 
         // Send out email
         if($this->passwordResetMailer->send($config['resetUrl'], $user->getToken(static::TOKEN_KEY), $email) === 0) {
@@ -159,7 +159,7 @@ class EmailPasswordResetResolver extends AbstractEmailConfirmationResolver
         // If we reach this point, we can save the new password.
         $this->tryToUpdate($user, $config['passwordField'], $args['password']);
         $user->setToken(static::TOKEN_KEY, null);
-        $domain->getUserManager()->persist($domain, $user, ContentEvent::UPDATE);
+        $domain->getUserManager()->flush($domain);
 
         $domain->log(LoggerInterface::NOTICE, sprintf('Successfully confirmed password reset for user with username "%s".', $args['username']));
         return true;

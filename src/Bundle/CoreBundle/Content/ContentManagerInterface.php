@@ -127,14 +127,18 @@ interface ContentManagerInterface
     public function permanentDelete(Domain $domain, ContentInterface $content) : ContentInterface;
 
     /**
-     * Persist a (created, updated, deleted etc.) content.
-     *
-     * $persistType will be one of the defined content events
-     * @see \UniteCMS\CoreBundle\Event\ContentEvent.
+     * Flush all pending updates.
      *
      * @param Domain $domain
-     * @param ContentInterface $content
-     * @param string $persistType
      */
-    public function persist(Domain $domain, ContentInterface $content, string $persistType) : void;
+    public function flush(Domain $domain) : void;
+
+    /**
+     * Will be called after an persist=false operations instead of flush.
+     *
+     * This allows cleanup and stuff.
+     *
+     * @param Domain $domain
+     */
+    public function noFlush(Domain $domain) : void;
 }
