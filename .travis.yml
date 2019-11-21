@@ -10,7 +10,7 @@ services:
 env:
     global:
         - SYMFONY_DEPRECATIONS_HELPER=weak
-        - TEST_DATABASE_URL=mysql://root:@127.0.0.1:3306/unite_test
+        - DATABASE_URL=mysql://root:@127.0.0.1:3306/unite_test
 
 jobs:
     include:
