@@ -1,10 +1,10 @@
 
-fragment categories on DemoCategory @tableAdminView {
-    name
-    articles {
-        total
-    }
-}
+#fragment categories on DemoCategory @tableAdminView {
+#    name
+#    articles {
+#        total
+#    }
+#}
 
 fragment articles on DemoArticle @tableAdminView {
     id

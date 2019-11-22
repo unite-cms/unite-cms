@@ -1,7 +1,7 @@
 
-directive @settingsAdminView(name: String if: Expression) on FRAGMENT_DEFINITION
+directive @embeddedAdminView on FRAGMENT_DEFINITION
 
-type SettingsAdminView implements UniteAdminView {
+type EmbeddedAdminView implements UniteAdminView {
     id: ID!
     type: ID!
     name: String!

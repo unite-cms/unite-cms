@@ -54,6 +54,19 @@
                     });
                 }
             },
+            setValue(args, key) {
+
+                let value = args ? args[0] : null;
+                if(value && typeof value === "object" && value.constructor.name === 'InputEvent') {
+                   value = value.target.value;
+                }
+
+                if(this.field.list_of) {
+                    this.$set(this.val, key, value);
+                } else {
+                    this.val = value;
+                }
+            }
         },
     }
 </script>

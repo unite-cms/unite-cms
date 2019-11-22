@@ -64,20 +64,33 @@ class AdminView
      * @param ContentType $contentType
      * @param array $config
      */
-    public function __construct(string $returnType, FragmentDefinitionNode $definition, array $directive, string $category, ContentType $contentType, array $config = [])
+    public function __construct(string $returnType, string $category, ContentType $contentType, ?FragmentDefinitionNode $definition = null, ?array $directive = null, array $config = [])
     {
         $this->returnType = $returnType;
-        $this->id = $definition->name->value;
-        $this->name = $directive['settings']['name'] ?? $contentType->getName();
+        $this->name = empty($directive['settings']['name']) ? $contentType->getName() : $directive['settings']['name'];
         $this->config = $config;
         $this->category = $category;
-        $this->type = $definition->typeCondition->name->value;
 
         // First of all, create admin fields for all content type fields, but hidden in list.
         $ctFields = [];
         foreach($contentType->getFields() as $field) {
             $ctFields[$field->getId()] = AdminViewField::fromContentTypeField($field);
         }
+
+        // If we created this adminView without a fragment definition.
+        if(!$definition) {
+            $this->id = $contentType->getId() . 'defaultAdminView';
+            $this->type = $contentType->getId();
+            $this->fields = array_merge([
+                AdminViewField::computedField('id', 'id', 'id'),
+            ], array_values($ctFields));
+            $this->fragment = sprintf('fragment %s on %s { id }', $this->id, $this->type);
+            return;
+        }
+
+        // If we create this adminView based on a fragment definition.
+        $this->id = $definition->name->value;
+        $this->type = $definition->typeCondition->name->value;
 
         // Now check the fragment and allow to override field config.
         $this->fields = [];

@@ -8,7 +8,11 @@ use GraphQL\Error\SyntaxError;
 use GraphQL\Language\AST\FragmentDefinitionNode;
 use GraphQL\Language\Parser;
 use Symfony\Component\Security\Core\Security;
+use UniteCMS\AdminBundle\AdminView\Types\EmbeddedType;
+use UniteCMS\AdminBundle\AdminView\Types\SettingsType;
+use UniteCMS\AdminBundle\AdminView\Types\TableType;
 use UniteCMS\AdminBundle\Exception\InvalidAdminViewType;
+use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
@@ -21,6 +25,7 @@ class AdminViewTypeManager
     const TYPE_CONTENT = 'content';
     const TYPE_USER = 'user';
     const TYPE_SINGLE_CONTENT = 'single_content';
+    const TYPE_EMBEDDED = 'embedded';
 
     /**
      * @var AdminViewTypeInterface[]
@@ -59,6 +64,55 @@ class AdminViewTypeManager
     }
 
     /**
+     * @param ContentTypeManager $contentTypeManager
+     * @param string $contentType
+     *
+     * @return string
+     */
+    protected function mapContentTypeCategory(ContentTypeManager $contentTypeManager, string $contentType) : string {
+        if($contentTypeManager->getContentType($contentType)) {
+            return self::TYPE_CONTENT;
+        }
+
+        else if($contentTypeManager->getUserType($contentType)) {
+            return self::TYPE_USER;
+        }
+
+        else if($contentTypeManager->getSingleContentType($contentType)) {
+            return self::TYPE_SINGLE_CONTENT;
+        }
+
+        else if($contentTypeManager->getEmbeddedContentType($contentType)) {
+            return self::TYPE_EMBEDDED;
+        }
+
+        else {
+            throw new InvalidAdminViewType();
+        }
+    }
+
+    /**
+     * @param string $category
+     * @return AdminViewTypeInterface
+     */
+    protected function mapDefaultAdminViewType(string $category) : AdminViewTypeInterface {
+        switch ($category) {
+            case self::TYPE_CONTENT :
+            case self::TYPE_USER :
+                return $this->adminViewTypes[TableType::getType()];
+
+            case self::TYPE_SINGLE_CONTENT :
+                return $this->adminViewTypes[SettingsType::getType()];
+
+            case self::TYPE_EMBEDDED :
+                return $this->adminViewTypes[EmbeddedType::getType()];
+
+            default:
+                throw new InvalidAdminViewType();
+        }
+    }
+
+    /**
      * @param Domain $domain
      *
      * @return AdminView[]
@@ -69,6 +123,7 @@ class AdminViewTypeManager
             $domain = $this->domainManager->current();
         }
 
+        $usedContentTypes = [];
         $adminViews = [];
 
         try {
@@ -78,44 +133,15 @@ class AdminViewTypeManager
             return [];
         }
 
+        // Check all adminView fragments and create adminViews out of them.
         foreach($schema->definitions as $definition) {
             if($definition instanceof FragmentDefinitionNode) {
 
-                $directive = Util::typedDirectiveArgs($definition, 'AdminView');
-
-                if(!$directive) {
+                if(!($directive = Util::typedDirectiveArgs($definition, 'AdminView'))) {
                     continue;
                 }
 
-                $adminViewType = $this->adminViewTypes[$directive['type']] ?? null;
-
-                if(!$adminViewType) {
-                    continue;
-                }
-
-                $id = $definition->typeCondition->name->value;
-                $category = null;
-
-                if($domain->getContentTypeManager()->getContentType($id)) {
-                    $category = self::TYPE_CONTENT;
-                }
-
-                else if($domain->getContentTypeManager()->getUserType($id)) {
-                    $category = self::TYPE_USER;
-                }
-
-                else if($domain->getContentTypeManager()->getSingleContentType($id)) {
-                    $category = self::TYPE_SINGLE_CONTENT;
-                }
-
-                else {
-                    throw new InvalidAdminViewType();
-                }
-
-                $contentType = $domain->getContentTypeManager()->getAnyType($id);
-
-                // If the user is not allowed to query this content type.
-                if(!$this->security->isGranted(ContentVoter::QUERY, $contentType)) {
+                if(!($adminViewType = $this->adminViewTypes[$directive['type']] ?? null)) {
                     continue;
                 }
 
@@ -124,8 +150,51 @@ class AdminViewTypeManager
                     continue;
                 }
 
+                // AdminView basic infos.
+                $id = $definition->typeCondition->name->value;
+                $category = $this->mapContentTypeCategory($domain->getContentTypeManager(), $id);
+                $contentType = $domain->getContentTypeManager()->getAnyType($id);
+
+                // If the user is not allowed to query this content type.
+                if(!$this->security->isGranted(ContentVoter::QUERY, $contentType)) {
+                    continue;
+                }
+
                 // Ask the admin view type to create a new AdminView
-                $adminView = $adminViewType->createView($definition, $directive, $category, $contentType);
+                $adminView = $adminViewType->createView($category, $contentType, $definition, $directive);
+
+                // Check list permissions for this admin view.
+                $permissions = [];
+                foreach(ContentVoter::LIST_PERMISSIONS as $permission) {
+                    $permissions[$permission] = $this->security->isGranted($permission, $contentType);
+                }
+                $adminView->setPermissions($permissions);
+
+                $adminViews[] = $adminView;
+                $usedContentTypes[] = $contentType->getId();
+            }
+        }
+
+        // Add a fallback adminView for all list types.
+        foreach($domain->getContentTypeManager()->getAllTypes() as $contentType) {
+            if(!in_array($contentType->getId(), $usedContentTypes)) {
+
+                // TODO: Do we need to support union types?
+                if($domain->getContentTypeManager()->getUnionContentType($contentType->getId())) {
+                    continue;
+                }
+
+                $category = $this->mapContentTypeCategory($domain->getContentTypeManager(), $contentType->getId());
+
+                // If the user is not allowed to query this content type.
+                if(!$this->security->isGranted(ContentVoter::QUERY, $contentType)) {
+                    continue;
+                }
+
+                // Ask the admin view type to create a new AdminView
+                $adminView = $this
+                    ->mapDefaultAdminViewType($category)
+                    ->createView($category, $contentType);
 
                 // Check list permissions for this admin view.
                 $permissions = [];

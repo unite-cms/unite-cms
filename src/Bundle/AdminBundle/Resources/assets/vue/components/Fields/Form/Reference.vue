@@ -5,13 +5,13 @@
           {{ value }}
           <a href="" @click.prevent="removeValue(value)" class="uk-icon-link"><icon name="x" /></a>
         </div>
-        <button class="uk-button uk-button-small uk-button-light" :id="domID" @click.prevent="selectModalOpen = true" :disabled="!referencedView">
+        <button type="button" class="uk-button uk-button-small uk-button-light" :id="domID" @click.prevent="selectModalOpen = true" :disabled="!referencedView">
           <icon name="plus" />
           {{ $t('field.reference.select') }}
         </button>
       </div>
       <modal v-if="referencedView && selectModalOpen" @hide="selectModalOpen = false" :title="$t('field.reference.modal.headline')">
-        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="this.val" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
+        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="values" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
       </modal>
   </form-row>
 </template>
@@ -20,6 +20,7 @@
   import FormRow from './_formRow';
   import Icon from "../../Icon";
   import Modal from "../../Modal";
+  import { getAdminViewByType } from "../../../plugins/unite";
 
   export default {
 
@@ -50,12 +51,7 @@
           referencedView() {
 
               // TODO: Allow to configure the adminView to use.
-
-              let referencedView = Object.values(this.$unite.adminViews).filter((view) => {
-                  return view.type === this.field.returnType;
-              });
-
-              return referencedView.length > 0 ? referencedView[0] : null;
+              return getAdminViewByType(this.$unite, this.field.returnType);
           }
       },
       methods: {

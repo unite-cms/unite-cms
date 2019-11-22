@@ -113,7 +113,7 @@ class ReferenceType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null) : FieldData {
         $fieldData = parent::normalizeInputData($content, $field, $inputData);
         return new ReferenceFieldData($fieldData->getData());
     }

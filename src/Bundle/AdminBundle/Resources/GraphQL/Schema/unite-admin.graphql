@@ -16,7 +16,7 @@ input UniteSchemaFileInput {
 }
 
 type UniteAdminViewField {
-    id: ID!
+    fid: ID!
     type: ID!
     name: String!
     description: String

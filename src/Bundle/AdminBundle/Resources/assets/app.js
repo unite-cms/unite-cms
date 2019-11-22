@@ -9,19 +9,21 @@ import TextList from "./vue/components/Fields/List/Text";
 import EmailList from "./vue/components/Fields/List/Text";
 import IntegerList from "./vue/components/Fields/List/Text";
 import ChoiceList from "./vue/components/Fields/List/Choice";
-import ReferenceList from "./vue/components/Fields/List/Reference";
 import SequenceList from "./vue/components/Fields/List/Sequence";
 import DateList from "./vue/components/Fields/List/Date";
 import DateTimeList from "./vue/components/Fields/List/DateTime";
+import ReferenceList from "./vue/components/Fields/List/Reference";
+import EmbeddedList from "./vue/components/Fields/List/Reference";
 
 import TextForm from "./vue/components/Fields/Form/Text";
 import EmailForm from "./vue/components/Fields/Form/Email";
 import IntegerForm from "./vue/components/Fields/Form/Integer";
 import ChoiceForm from "./vue/components/Fields/Form/Choice";
-import ReferenceForm from "./vue/components/Fields/Form/Reference";
 import SequenceForm from "./vue/components/Fields/Form/Sequence";
 import DateForm from "./vue/components/Fields/Form/Date";
 import DateTimeForm from "./vue/components/Fields/Form/DateTime";
+import ReferenceForm from "./vue/components/Fields/Form/Reference";
+import EmbeddedForm from "./vue/components/Fields/Form/Embedded";
 
 import Table from "./vue/components/Views/Table";
 import Settings from "./vue/components/Views/Settings";
@@ -50,15 +52,17 @@ Unite.$emit('registerListFieldType', 'reference', ReferenceList);
 Unite.$emit('registerListFieldType', 'sequence', SequenceList);
 Unite.$emit('registerListFieldType', 'date', DateList);
 Unite.$emit('registerListFieldType', 'dateTime', DateTimeList);
+Unite.$emit('registerListFieldType', 'embedded', EmbeddedList);
 
 Unite.$emit('registerFormFieldType', 'text', TextForm);
 Unite.$emit('registerFormFieldType', 'email', EmailForm);
 Unite.$emit('registerFormFieldType', 'integer', IntegerForm);
 Unite.$emit('registerFormFieldType', 'choice', ChoiceForm);
-Unite.$emit('registerFormFieldType', 'reference', ReferenceForm);
 Unite.$emit('registerFormFieldType', 'sequence', SequenceForm);
 Unite.$emit('registerFormFieldType', 'date', DateForm);
 Unite.$emit('registerFormFieldType', 'dateTime', DateTimeForm);
+Unite.$emit('registerFormFieldType', 'reference', ReferenceForm);
+Unite.$emit('registerFormFieldType', 'embedded', EmbeddedForm);
 
 Unite.$emit('registerViewType', 'TableAdminView', Table);
 Unite.$emit('registerViewType', 'SettingsAdminView', Settings);

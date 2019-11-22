@@ -9,7 +9,7 @@ import ViewTypeFallback from "../components/Views/_fallback";
 import User from "../state/User";
 import router from "./router";
 
-const removeIntroSpecType = function(val){
+export const removeIntroSpecType = function(val){
     if(val && typeof val === 'object') {
 
         if(Array.isArray(val)) {
@@ -28,8 +28,15 @@ const removeIntroSpecType = function(val){
     return val;
 };
 
-const innerType = function(type) {
+export const innerType = function(type) {
     return type.ofType ? innerType(type.ofType) : type.name;
+};
+
+export const getAdminViewByType = function(unite, returnType) {
+    let embeddedView = Object.values(unite.adminViews).filter((view) => {
+        return view.type === returnType;
+    });
+    return embeddedView.length > 0 ? embeddedView[0] : null;
 };
 
 const createAdminView = function (view, unite) {
@@ -42,6 +49,10 @@ const createAdminView = function (view, unite) {
 
         // Set raw field to field
         view.rawType.fields.forEach((rawField) => {
+
+            // We are using "fid" instead of "id" for the GraphQL query, so apollo won't get confused with fields with the same id.
+            field.id = field.fid;
+
             if(field.id === rawField.name) {
                 field.rawField = rawField;
             }
@@ -60,7 +71,7 @@ const createAdminView = function (view, unite) {
         return this.formFields().filter((field) => {
             return !!unite.getFormFieldType(field.type).queryData;
         }).map((field) => {
-            return unite.getFormFieldType(field.type).queryData(field);
+            return unite.getFormFieldType(field.type).queryData(field, unite);
         });
     };
 
@@ -73,7 +84,7 @@ const createAdminView = function (view, unite) {
         this.formFields().forEach((field) => {
             let type = unite.getFormFieldType(field.type);
             let inputFieldData = inputData[field.id] || undefined;
-            data[field.id] = !!type.normalizeData ? type.normalizeData(inputFieldData, field) : inputFieldData;
+            data[field.id] = !!type.normalizeData ? type.normalizeData(inputFieldData, field, unite) : inputFieldData;
         });
         return data;
     };
@@ -137,7 +148,7 @@ export const Unite = new Vue({
                     fragment
                     category
                     fields {
-                        id
+                        fid
                         name
                         description
                         type

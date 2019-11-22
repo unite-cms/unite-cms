@@ -5,7 +5,8 @@
   overflow: auto;
   max-width: 100%;
   width: 100%;
-  background: $global-muted-background;
+  box-sizing: border-box;
+  background: lighten($global-muted-background, 0.5%);
   color: $form-color;
   @if(mixin-exists(hook-form)) {@include hook-form();}
 

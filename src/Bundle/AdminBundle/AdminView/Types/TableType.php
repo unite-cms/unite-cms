@@ -14,19 +14,21 @@ class TableType extends AbstractAdminViewType
     /**
      * {@inheritDoc}
      */
-    public function createView(FragmentDefinitionNode $definition, array $directive, string $category, ContentType $contentType) : AdminView {
+    public function createView(string $category, ContentType $contentType, ?FragmentDefinitionNode $definition = null, ?array $directive = null) : AdminView {
         $config = [
-            'limit' => $directive['settings']['limit'] ?? 20,
+            'limit' => empty($directive['settings']['limit'])? 20 : $directive['settings']['limit'],
         ];
 
-        if(!empty($directive['settings']['filter']['field']) || !empty($directive['settings']['filter']['AND']) || !empty($directive['settings']['filter']['OR'])) {
-            $config['filter'] = $directive['settings']['filter'];
+        if($directive) {
+            if (!empty($directive['settings']['filter']['field']) || !empty($directive['settings']['filter']['AND']) || !empty($directive['settings']['filter']['OR'])) {
+                $config['filter'] = $directive['settings']['filter'];
+            }
+
+            if (!empty($directive['settings']['orderBy'])) {
+                $config['orderBy'] = $directive['settings']['orderBy'];
+            }
         }
 
-        if(!empty($directive['settings']['orderBy'])) {
-            $config['orderBy'] = $directive['settings']['orderBy'];
-        }
-
-        return parent::createView($definition, $directive, $category, $contentType)->setConfig($config);
+        return parent::createView($category, $contentType, $definition, $directive)->setConfig($config);
     }
 }

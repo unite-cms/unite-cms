@@ -118,7 +118,7 @@ class EmbeddedType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null) : FieldData {
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null) : FieldData {
 
         $domain = $this->domainManager->current();
 
@@ -130,6 +130,11 @@ class EmbeddedType extends AbstractFieldType
 
         // Create embedded field data if not already set.
         $fieldData = $content->getFieldData($field->getId()) ?? new EmbeddedFieldData(uniqid(), $contentType->getId());
+
+        // If we update a list of embedded type.
+        if($fieldData instanceof FieldDataList) {
+            $fieldData = $fieldData->rows()[$rowDelta] ?? new EmbeddedFieldData(uniqid(), $contentType->getId());
+        }
 
         // If we have no input data and the field can be null, just return the empty field.
         if(empty($inputData) && !$field->isNonNull()) {
