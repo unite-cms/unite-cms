@@ -1,7 +1,7 @@
 <template>
   <form-row :domID="domID" :field="field">
     <multi-field :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
-      <input class="uk-input" :id="domID" :type="inputType" :value="values[multiProps.rowKey || 0]" @input="setValue(arguments, multiProps.rowKey)" />
+      <input class="uk-input" :required="field.non_null" :id="domID" :type="inputType" :value="values[multiProps.rowKey || 0]" @input="setValue(arguments, multiProps.rowKey)" />
     </multi-field>
   </form-row>
 </template>

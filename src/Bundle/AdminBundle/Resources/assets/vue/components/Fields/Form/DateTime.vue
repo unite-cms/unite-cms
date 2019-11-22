@@ -4,7 +4,7 @@
       <div class="uk-flex uk-flex-middle">
 
         <div class="uk-flex-1 date-picker-input">
-          <date-picker :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setDate(arguments, multiProps.rowKey)" :language="$t('field.date')" format="d MMMM yyyy" />
+          <date-picker :required="field.non_null" :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setDate(arguments, multiProps.rowKey)" :language="$t('field.date')" format="d MMMM yyyy" />
         </div>
 
         <div class="date-picker-separator">:</div>

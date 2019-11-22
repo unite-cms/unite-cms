@@ -48,6 +48,7 @@
         },
         methods: {
             submit() {
+                Alerts.$emit('clear');
                 this.loading = true;
                 this.$apollo.mutate({
                     mutation: gql`mutation($id: ID!, $persist: Boolean!, $data: ${ this.view.type }Input!) {
@@ -63,7 +64,7 @@
                 }).then((data) => {
                     Route.back({ updated: this.$route.params.id });
                     Alerts.$emit('push', 'success', this.$t('content.update.success', this.view));
-                }).finally(() => { this.loading = false })
+                }).finally(() => { this.loading = false }).catch(Alerts.apolloErrorHandler)
             }
         }
     }

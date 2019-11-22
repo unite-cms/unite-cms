@@ -1,6 +1,6 @@
 <template>
   <div class="uk-margin">
-    <label class="uk-form-label" :for="domID">{{ name }}</label>
+    <label class="uk-form-label" :for="domID">{{ name }}<span class="uk-text-danger" v-if="field.non_null"> *</span></label>
     <div class="uk-form-controls">
       <slot></slot>
       <p v-if="field.description" class="uk-text-meta uk-margin-small-top">{{ field.description }}</p>

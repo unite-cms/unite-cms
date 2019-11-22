@@ -31,6 +31,7 @@
         },
         methods: {
             submit() {
+                Alerts.$emit('clear');
                 this.loading = true;
                 this.$apollo.mutate({
                     mutation: gql`mutation($persist: Boolean!, $data: ${ this.view.type }Input!) {
@@ -43,9 +44,9 @@
                         data: this.formData
                     }
                 }).then((data) => {
-                    Route.back({ updated: data.data[`create${ this.view.type }`].id });
+                    Route.back({updated: data.data[`create${this.view.type}`].id});
                     Alerts.$emit('push', 'success', this.$t('content.create.success', this.view));
-                }).finally(() => { this.loading = false })
+                }).finally(() => { this.loading = false }).catch(Alerts.apolloErrorHandler);
             }
         }
     }
