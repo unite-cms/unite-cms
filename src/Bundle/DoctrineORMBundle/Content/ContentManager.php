@@ -155,7 +155,7 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function permanentDelete(Domain $domain, ContentInterface $content): ContentInterface {
-        $this->em($domain)->remove($content);
+        $this->contentToRemove[] = $content;
         return $content;
     }
 
