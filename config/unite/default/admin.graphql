@@ -9,6 +9,19 @@ fragment categories on DemoCategory @tableAdminView {
 fragment articles on DemoArticle @tableAdminView {
     id
     name
+    email
+    sequence
+    date
+    dateTime
+    integer
+    seo {
+        headline
+        metaDescription
+    }
+    seo1 {
+        headline
+        metaDescription
+    }
 }
 
 fragment admins on Admin @tableAdminView {

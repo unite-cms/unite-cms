@@ -5,6 +5,12 @@ enum ArticleStatus {
     PUBLISHED
 }
 
+type SEO implements UniteEmbeddedContent {
+    id: ID
+    headline: String @textField
+    metaDescription: String @textField
+}
+
 """Categories"""
 type DemoCategory implements UniteContent {
     _meta: UniteContentMeta
@@ -19,6 +25,26 @@ type DemoArticle implements UniteContent {
     _meta: UniteContentMeta
     id: ID
     name: String! @textField
+
+    email: String @emailField
+    email1: [String!] @emailField
+
+    integer: Int @integerField
+    integer1: [Int!] @integerField
+
+    sequence: Int @sequenceField
+
+    seo: SEO @embeddedField
+
+    seo1: SEO! @embeddedField
+
+    seo2: [SEO!] @embeddedField
+
+    date: Date @dateField
+    date1: [Date!] @dateField
+
+    dateTime: DateTime @dateTimeField
+    dateTime1: [DateTime!] @dateTimeField
 
     extra_names: [String!] @textField
 

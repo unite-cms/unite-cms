@@ -1,5 +1,6 @@
 
 import { messages, dateTimeFormats, i18n } from "../plugins/i18n";
+import { en } from 'vuejs-datepicker/dist/locale'
 
 // Set en part of messages.
 messages.en = {
@@ -106,7 +107,8 @@ messages.en = {
             modal: {
                 headline: 'Select a content to reference'
             }
-        }
+        },
+        date: en
     }
 };
 
@@ -114,6 +116,9 @@ messages.en = {
 dateTimeFormats.en = {
     full: {
         year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', seconds: '2-digit', hour12: false
+    },
+    date: {
+        year: '2-digit', month: '2-digit', day: '2-digit'
     }
 };
 

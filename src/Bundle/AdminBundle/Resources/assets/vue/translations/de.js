@@ -1,5 +1,6 @@
 
 import { messages, i18n } from "../plugins/i18n";
+import { de } from 'vuejs-datepicker/dist/locale'
 
 // Set de part of messages.
 messages.de = {
@@ -7,6 +8,9 @@ messages.de = {
         content_types: {
             headline: 'Inhalte'
         }
+    },
+    field: {
+        date: de
     }
 };
 

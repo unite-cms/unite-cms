@@ -1,0 +1,15 @@
+
+.vdp-datepicker {
+  .vdp-datepicker__calendar {
+    .cell:not(.blank):not(.disabled).day:hover,
+    .cell:not(.blank):not(.disabled).month:hover,
+    .cell:not(.blank):not(.disabled).year:hover {
+      border: 1px solid $global-primary-background;
+    }
+    .cell.selected,
+    .cell.selected:hover,
+    .cell.selected.highlighted {
+      background: $global-primary-background;
+    }
+  }
+}

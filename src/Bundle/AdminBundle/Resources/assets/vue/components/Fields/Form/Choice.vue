@@ -1,7 +1,5 @@
 <template>
-  <div class="uk-margin">
-    <label class="uk-form-label" :for="domID">{{ name }}</label>
-    <div class="uk-form-controls">
+  <form-row :domID="domID" :field="field">
       <select v-if="!field.list_of" class="uk-select" :id="domID" v-model="val">
         <option v-for="option in options" :value="option.value">{{ option.label }}</option>
       </select>
@@ -10,17 +8,21 @@
           <label><input v-model="val" class="uk-checkbox" type="checkbox" :value="option.value"> {{ option.label }}</label><br>
         </template>
       </template>
-      <p v-if="field.description" class="uk-text-meta uk-margin-small-top">{{ field.description }}</p>
-    </div>
-  </div>
+  </form-row>
 </template>
 <script>
   import _abstract from "./_abstract";
+  import FormRow from './_formRow';
 
   export default {
-      extends: _abstract,
+
+      // Static query methods for unite system.
       queryData(field) { return field.id },
       normalizeData(inputData, field) { return inputData; },
+
+      // Vue properties for this component.
+      components: { FormRow },
+      extends: _abstract,
       computed: {
           options() {
               let enumType = this.$unite.getRawType(this.field.returnType);

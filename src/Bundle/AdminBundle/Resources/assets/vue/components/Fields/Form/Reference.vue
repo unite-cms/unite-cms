@@ -1,7 +1,5 @@
 <template>
-  <div class="uk-margin">
-    <label class="uk-form-label" :for="domID">{{ name }}</label>
-    <div class="uk-form-controls">
+  <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference.missing_view_warning') }] : []">
       <div class="uk-input-group uk-flex uk-flex-middle uk-flex-wrap">
         <div class="uk-label uk-label-muted" v-for="value in values">
           {{ value }}
@@ -12,23 +10,20 @@
           {{ $t('field.reference.select') }}
         </button>
       </div>
-      <p v-if="field.description" class="uk-text-meta uk-margin-small-top">{{ field.description }}</p>
-      <div v-if="!referencedView" class="uk-alert uk-alert-warning">{{ $t('field.reference.missing_view_warning') }}</div>
-    </div>
-
-    <modal v-if="referencedView && selectModalOpen" @hide="selectModalOpen = false" :title="$t('field.reference.modal.headline')">
-      <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="this.val" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
-    </modal>
-
-  </div>
+      <modal v-if="referencedView && selectModalOpen" @hide="selectModalOpen = false" :title="$t('field.reference.modal.headline')">
+        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="this.val" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
+      </modal>
+  </form-row>
 </template>
 <script>
   import _abstract from "./_abstract";
+  import FormRow from './_formRow';
   import Icon from "../../Icon";
   import Modal from "../../Modal";
 
   export default {
-      extends: _abstract,
+
+      // Static query methods for unite system.
       queryData(field) { return `${ field.id } { id }` },
       normalizeData(inputData, field) {
 
@@ -39,10 +34,13 @@
           if(field.list_of) {
               return inputData.map(row => row.id);
           } else {
-            return inputData.id;
+              return inputData.id;
           }
       },
-      components: { Icon, Modal },
+
+      // Vue properties for this component.
+      extends: _abstract,
+      components: { FormRow, Icon, Modal },
       data(){
           return {
               selectModalOpen: false,
