@@ -7,6 +7,7 @@ import ListFieldTypeFallback from "../components/Fields/List/_fallback";
 import FormFieldTypeFallback from "../components/Fields/Form/_fallback";
 import ViewTypeFallback from "../components/Views/_fallback";
 import User from "../state/User";
+import router from "./router";
 
 const removeIntroSpecType = function(val){
     if(val && typeof val === 'object') {
@@ -29,7 +30,7 @@ const removeIntroSpecType = function(val){
 
 const innerType = function(type) {
     return type.ofType ? innerType(type.ofType) : type.name;
-}
+};
 
 const createAdminView = function (view, unite) {
     view = removeIntroSpecType(view);
@@ -178,29 +179,31 @@ export const Unite = new Vue({
                 this.rawTypes = data.data.__schema.types;
                 this.fragmentMatcher.possibleTypesMap = this.fragmentMatcher.parseIntrospectionResult(data.data);
 
-                setTimeout(() => {
-                    this.$apollo.query({
-                        query: gql`
-                            ${ this.adminViewsFragment }
-                            query {
-                                unite {
-                                    adminViews {
-                                        ... adminViews
-                                    }
+                this.$apollo.query({
+                    query: gql`
+                        ${ this.adminViewsFragment }
+                        query {
+                            unite {
+                                adminViews {
+                                    ... adminViews
                                 }
                             }
-                        `,
-                    }).then((data) => {
-                        this.adminViews = [];
-                        data.data.unite.adminViews.forEach((view) => {
-                            this.adminViews[view.id] = createAdminView(view, this);
-                        });
+                        }
+                    `,
+                }).then((data) => {
+                    this.adminViews = [];
+                    data.data.unite.adminViews.forEach((view) => {
+                        this.adminViews[view.id] = createAdminView(view, this);
+                    });
 
-                        this.loaded = true;
-                        this.$emit('loaded');
+                    this.loaded = true;
+                    this.$emit('loaded');
 
-                    }).catch(fail).finally(fin).then(success);
-                }, 10);
+                }).catch(fail).finally(fin).then(success);
+            }).catch((error) => {
+                User.$emit('logout', {}, () => {
+                    router.push('/login');
+                })
             });
         },
 
