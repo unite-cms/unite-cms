@@ -3,7 +3,6 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
-use UniteCMS\CoreBundle\Content\Content;
 use UniteCMS\CoreBundle\Content\ContentField;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentResultInterface;
@@ -119,6 +118,7 @@ class ContentResolver implements FieldResolverInterface
                         // If type is not a list, but a list is stored, get the first value.
                         if(!$field->isListOf() && $fieldData instanceof FieldDataList) {
                             $fieldData = $fieldData->resolveData(0);
+                            $fieldData = empty($fieldData) ? new FieldData() : $fieldData;
                         }
 
                         return $this->fieldTypeManager
