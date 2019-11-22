@@ -5,9 +5,10 @@ namespace UniteCMS\DoctrineORMBundle\Tests;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Tests\SchemaAwareTestCase;
 
-class DatabaseAwareTestCase extends KernelTestCase
+class DatabaseAwareTestCase extends SchemaAwareTestCase
 {
     /**
      * @var EntityManager
@@ -17,7 +18,9 @@ class DatabaseAwareTestCase extends KernelTestCase
     public function setUp()
     {
         parent::setUp();
-        static::bootKernel();
+        static::$container->get(DomainManager::class)
+            ->clearDomain()
+            ->setCurrentDomainFromConfigId('doctrine_orm');
         $this->em = static::$container->get('doctrine')->getManager('doctrine_orm');
         $schemaTool = new SchemaTool($this->em);
         $metadata = $this->em->getMetadataFactory()->getAllMetadata();

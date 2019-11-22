@@ -57,11 +57,7 @@ class Logger implements LoggerInterface
      * {@inheritDoc}
      */
     public function log(Domain $domain, string $level, string $message, string $username = null): LogInterface {
-        $log = new Log();
-        $log
-            ->setLevel($level)
-            ->setMessage($message)
-            ->setCreated(new DateTime('now'));
+        $log = new Log($level, $message);
 
         if($username) {
             $log->setUsername($username);

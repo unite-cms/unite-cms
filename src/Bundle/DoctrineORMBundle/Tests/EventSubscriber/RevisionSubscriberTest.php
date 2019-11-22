@@ -4,8 +4,6 @@
 namespace UniteCMS\DoctrineORMBundle\Tests\EventSubscriber;
 
 use DateTime;
-use UniteCMS\CoreBundle\ContentType\ContentType;
-use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\Event\ContentEventAfter;
 use UniteCMS\CoreBundle\Event\ContentEventBefore;
@@ -18,12 +16,6 @@ class RevisionSubscriberTest extends DatabaseAwareTestCase
     public function testRevisionsCRUD() {
 
         $dispatcher = static::$container->get('event_dispatcher');
-        static::$container->get(DomainManager::class)->setCurrentDomainFromConfigId('doctrine_orm');
-        static::$container
-            ->get(DomainManager::class)
-            ->current()
-            ->getContentTypeManager()
-            ->registerContentType(new ContentType('Foo', 'Foo'));
 
         // CREATE
         $content = new Content('Foo');
@@ -43,7 +35,7 @@ class RevisionSubscriberTest extends DatabaseAwareTestCase
         $this->assertEquals('anon', $revisions[0]->getOperatorName());
 
         // UPDATE
-        $content->setData(['la' => 'lu']);
+        $content->setData(['baa' => 'lu']);
         $this->em->flush();
         $dispatcher->dispatch(new ContentEventAfter($content), ContentEventAfter::UPDATE);
 
@@ -57,7 +49,7 @@ class RevisionSubscriberTest extends DatabaseAwareTestCase
 
 
         // RECOVER
-        $content->setData(['la' => 'a']);
+        $content->setData(['baa' => 'a']);
         $this->em->flush();
         $dispatcher->dispatch(new ContentEventAfter($content), ContentEventAfter::RECOVER);
 

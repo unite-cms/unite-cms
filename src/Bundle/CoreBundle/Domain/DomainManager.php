@@ -153,6 +153,14 @@ class DomainManager
     }
 
     /**
+     * @return DomainManager
+     */
+    public function clearDomain() : DomainManager {
+        $this->domain = null;
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getDomainConfig() : array {

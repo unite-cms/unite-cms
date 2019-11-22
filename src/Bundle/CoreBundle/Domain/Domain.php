@@ -48,11 +48,6 @@ class Domain
     protected $editableSchemaFilesDirectory = null;
 
     /**
-     * @var string[] $schema
-     */
-    protected $editableSchemaFilesSchema = [];
-
-    /**
      * @var int
      */
     protected $jwtTTLShortLiving;

@@ -10,9 +10,9 @@ use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Utils\BuildSchema;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
-use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\GraphQL\SchemaManager;
+use UniteCMS\CoreBundle\Tests\Mock\TestDomain;
 
 class SchemaAwareTestCase extends KernelTestCase
 {
@@ -20,6 +20,22 @@ class SchemaAwareTestCase extends KernelTestCase
         static::bootKernel();
         static::$container->get('security.token_storage')->setToken(new AnonymousToken('', ''));
         static::$container->get(DomainManager::class)->setCurrentDomainFromConfigId('default');
+    }
+
+    /**
+     * @return TestDomain
+     */
+    protected function replaceCurrentDomain() : TestDomain {
+        $domain = static::$container->get(DomainManager::class)->current();
+        $replacedDomain = new TestDomain(
+            $domain->getId(),
+            $domain->getContentManager(),
+            $domain->getUserManager(),
+            $domain->getLogger(),
+            $domain->getSchema()
+        );
+        static::$container->get(DomainManager::class)->setCurrentDomain($replacedDomain);
+        return $replacedDomain;
     }
 
     /**
@@ -36,13 +52,11 @@ class SchemaAwareTestCase extends KernelTestCase
         $domainManager = static::$container->get(DomainManager::class);
         $domain = $domainManager->current();
 
-        $domainManager->setCurrentDomain(new Domain(
-            'test',
-            $domain->getContentManager(),
-            $domain->getUserManager(),
-            $domain->getLogger(),
-            array_merge($domain->getSchema(), [$schema])
-        ));
+        if(!$domain instanceof TestDomain) {
+            $domain = $this->replaceCurrentDomain();
+        }
+
+        $domain->setExtraSchema([$schema]);
 
         if($catch) {
             try {

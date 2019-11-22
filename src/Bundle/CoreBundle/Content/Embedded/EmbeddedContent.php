@@ -4,64 +4,40 @@
 namespace UniteCMS\CoreBundle\Content\Embedded;
 
 use DateTime;
-use UniteCMS\CoreBundle\Content\ContentInterface;
-use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\Content\BaseContent;
 
-class EmbeddedContent implements ContentInterface
+class EmbeddedContent extends BaseContent
 {
 
     /**
-     * @var string $id
+     * EmbeddedContent constructor.
+     *
+     * @param string $id
+     * @param string $type
+     * @param array $data
      */
-    protected $id;
-
-    /**
-     * @var string $type
-     */
-    protected $type;
-
-    /**
-     * @var array $data
-     */
-    protected $data;
-
     public function __construct(string $id, string $type, array $data = [])
     {
         $this->id = $id;
-        $this->type = $type;
         $this->data = $data;
-    }
-
-    public function isNew() : bool {
-        return false;
-    }
-
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
+        parent::__construct($type);
     }
 
     /**
-     * @return FieldData[]
+     * {@inheritDoc}
      */
-    public function getData(): array
+    public function isNew() : bool
     {
-        return $this->data;
+        // Will always return false
+        return false;
     }
 
-    public function getFieldData(string $fieldName): ?FieldData
-    {
-        return isset($this->data[$fieldName]) ? $this->data[$fieldName] : null;
-    }
-
-    // Will always return null
+    /**
+     * {@inheritDoc}
+     */
     public function getDeleted(): ?DateTime
     {
+        // Will always return null
         return null;
     }
 }

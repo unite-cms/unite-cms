@@ -10,11 +10,28 @@ use DateTime;
  *
  * @package UniteCMS\CoreBundle\Content
  */
-class Content implements ContentInterface
+abstract class BaseContent implements ContentInterface
 {
+
+    /**
+     * @var string|null
+     */
     protected $id = null;
+
+    /**
+     * @var string
+     */
     protected $type;
+
+    /**
+     * @var FieldData[]
+     */
     protected $data = [];
+
+    /**
+     * @var null|DateTime
+     */
+    protected $deleted = null;
 
     /**
      * Content constructor.
@@ -53,15 +70,18 @@ class Content implements ContentInterface
      */
     public function getData(): array
     {
+        if(!is_array($this->data)) {
+            $this->data = [];
+        }
+
         return $this->data;
     }
 
     /**
-     * @param array $data
-     *
-     * @return Content
+     * @param FieldData[] $data
+     * @return self
      */
-    public function setData(array $data) : self
+    public function setData(array $data) : ContentInterface
     {
         $this->data = $data;
         return $this;
@@ -77,9 +97,9 @@ class Content implements ContentInterface
 
     /**
      * @param DateTime|null $deleted
-     * @return $this
+     * @return self
      */
-    public function setDeleted(?DateTime $deleted = null) : self {
+    public function setDeleted(?DateTime $deleted = null) : ContentInterface {
         $this->deleted = $deleted;
         return $this;
     }

@@ -5,7 +5,7 @@ namespace UniteCMS\DoctrineORMBundle\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use UniteCMS\CoreBundle\Content\FieldData;
-use UniteCMS\CoreBundle\Content\Content as BaseContent;
+use UniteCMS\CoreBundle\Content\BaseContent;
 
 /**
  * @ORM\Table(name="unite_content")
@@ -58,6 +58,6 @@ class Content extends BaseContent
      * {@inheritDoc}
      */
     public function isNew() : bool {
-        return parent::isNew() ?? $this->markedAsNew;
+        return parent::isNew() || $this->markedAsNew;
     }
 }
