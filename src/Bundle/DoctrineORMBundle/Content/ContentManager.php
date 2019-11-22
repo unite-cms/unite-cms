@@ -31,6 +31,16 @@ class ContentManager implements ContentManagerInterface
     protected $security;
 
     /**
+     * @var ContentInterface[]
+     */
+    protected $contentToPersist = [];
+
+    /**
+     * @var ContentInterface[]
+     */
+    protected $contentToRemove = [];
+
+    /**
      * ContentManager constructor.
      *
      * @param ManagerRegistry $registry
@@ -92,8 +102,7 @@ class ContentManager implements ContentManagerInterface
     public function create(Domain $domain, string $type): ContentInterface {
         $class = static::ENTITY;
         $content = new $class($type);
-        $this->em($domain)->persist($content);
-        $content->markAsNew(true);
+        $this->contentToPersist[] = $content;
         return $content;
     }
 
@@ -154,11 +163,30 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function flush(Domain $domain) : void {
+
+        foreach($this->contentToPersist as $content) {
+            $this->em($domain)->persist($content);
+        }
+
+        foreach($this->contentToRemove as $content) {
+            $this->em($domain)->remove($content);
+        }
+
         $this->em($domain)->flush();
+        $this->contentToPersist = [];
+        $this->contentToRemove = [];
     }
 
     /**
      * {@inheritDoc}
      */
-    public function noFlush(Domain $domain) : void {}
+    public function noFlush(Domain $domain) : void {
+
+        foreach($this->contentToPersist as $content) {
+            unset($content);
+        }
+
+        $this->contentToPersist = [];
+        $this->contentToRemove = [];
+    }
 }

@@ -47,7 +47,7 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            ContentEventAfter::PERMANENT_DELETE => 'onPermanentDelete',
+            ContentEventBefore::PERMANENT_DELETE => 'onPermanentDelete',
         ];
     }
 

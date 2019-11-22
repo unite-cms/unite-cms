@@ -63,26 +63,4 @@ class User extends BaseUser
      * @ORM\Column(type="json_document", options={"jsonb": true})
      */
     protected $tokens = [];
-
-    /**
-     * @var bool
-     */
-    protected $markedAsNew = false;
-
-    /**
-     * @param bool $new
-     *
-     * @return $this
-     */
-    public function markAsNew($new = true) : self {
-        $this->markedAsNew = $new;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function isNew() : bool {
-        return parent::isNew() || $this->markedAsNew;
-    }
 }

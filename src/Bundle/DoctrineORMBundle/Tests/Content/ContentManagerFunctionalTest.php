@@ -20,13 +20,13 @@ class ContentManagerFunctionalTest extends DatabaseAwareTestCase
 
         // CREATE
         $content = $manager->create($domain, 'Foo');
-        $this->assertTrue($content->isNew());
-        $this->assertNotNull($content->getId());
+        $this->assertNull($content->getId());
         $this->assertEquals('Foo', $content->getType());
 
         $this->assertEquals(0, $manager->find($domain, 'Foo', $criteria)->getTotal());
         $manager->flush($domain);
         $this->assertEquals(1, $manager->find($domain, 'Foo', $criteria)->getTotal());
+        $this->assertNotNull($content->getId());
 
         // UPDATE
         $manager->update($domain, $content, ['baa' => new FieldData('fuu')]);

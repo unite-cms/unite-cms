@@ -13,6 +13,17 @@ use UniteCMS\DoctrineORMBundle\Tests\DatabaseAwareTestCase;
 
 class RevisionSubscriberTest extends DatabaseAwareTestCase
 {
+    public function setUp()
+    {
+        parent::setUp();
+        $this->buildSchema('
+            type Foo implements UniteContent @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true") {
+                id: ID
+                _meta: UniteContentMeta
+            }
+        ');
+    }
+
     public function testRevisionsCRUD() {
 
         $dispatcher = static::$container->get('event_dispatcher');
