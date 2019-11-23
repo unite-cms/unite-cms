@@ -25,10 +25,10 @@
         },
         computed: {
             values() {
-                if(!this.value) {
+                if(!this.val) {
                     return [];
                 }
-                return this.field.list_of ? this.value : [this.value]
+                return this.field.list_of ? this.val : [this.val]
             },
             name() {
                 return this.field.name.slice(0, 1).toUpperCase() + this.field.name.slice(1);
