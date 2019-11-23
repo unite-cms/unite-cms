@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
+use UniteCMS\CoreBundle\Content\BaseContent;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataList;
@@ -107,7 +108,17 @@ class ReferenceType extends AbstractFieldType
             return $resolvedContent;
         }
 
-        return $contentManager->get($domain, $field->getReturnType(), $fieldData->getData());
+        $referencedContent = $contentManager->get($domain, $field->getReturnType(), $fieldData->getData());
+
+        // With this little trick we make sure, that we don't run into GraphQL
+        // issues for deleted references. Note, that the problem still exists
+        // on sub fields of this content, but at least we can query the id,
+        // which will be an empty string.
+        if(!$referencedContent && $field->isNonNull()) {
+            return new class($field->getReturnType()) extends BaseContent {};
+        }
+
+        return $referencedContent;
     }
 
     /**
