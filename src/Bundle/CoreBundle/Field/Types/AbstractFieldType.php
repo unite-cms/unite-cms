@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use GraphQL\Type\Definition\Type;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -83,6 +84,13 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
                 ->addViolation();
             return;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPublicSettings(ContentTypeField $field) : ?ArrayCollection {
+        return null;
     }
 
     /**

@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\Field\Types;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Expr\Comparison;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -111,10 +112,20 @@ class ReferenceOfType extends AbstractFieldType
             $context
                 ->buildViolation('Invalid content_type or reference_field setting for field of type "{{ type }}". Please use a GraphQL type implements UniteContent or UniteUser with a reference to this type.')
                 ->setParameter('{{ type }}', static::getType())
-                ->setParameter('{{ content_type }}', $field->getSettings()->get('content_Type'))
+                ->setParameter('{{ content_type }}', $field->getSettings()->get('content_type'))
                 ->addViolation();
             return;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPublicSettings(ContentTypeField $field) : ?ArrayCollection {
+        return new ArrayCollection([
+            'reference_field' => $field->getSettings()->get('reference_field'),
+            'content_type' => $field->getSettings()->get('content_type'),
+        ]);
     }
 
     /**

@@ -1,7 +1,7 @@
 <template>
   <content-detail :loading="loading || $apollo.loading" @submit="submit">
     <h1 class="uk-card-title">{{ $t('content.create.headline', view) }}</h1>
-    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.type)" :field="field" v-model="formData[field.id]" />
+    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :field="field" v-model="formData[field.id]" />
     <button slot="footer" class="uk-button uk-button-primary" type="submit">{{ $t('content.create.actions.submit') }}</button>
   </content-detail>
 </template>

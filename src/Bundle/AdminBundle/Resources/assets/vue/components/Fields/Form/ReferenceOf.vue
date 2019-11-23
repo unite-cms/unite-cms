@@ -1,10 +1,8 @@
 <template>
-  <form-row :domID="domID" :field="field" :alerts="!embeddedView ? [{ level: 'warning', message: $t('field.embedded.missing_view_warning') }] : []">
-    <multi-field v-if="embeddedView" :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
-      <div class="uk-input-group">
-        <component :key="field.id" v-for="field in embeddedView.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :field="field" :value="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0][field.id] : undefined" @input="setFieldValue(field.id, arguments, multiProps.rowKey)" />
-      </div>
-    </multi-field>
+  <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference_of.missing_view_warning') }] : []">
+    <div class="uk-input-group">
+      <div class="uk-placeholder">TODO: Implement</div>
+    </div>
   </form-row>
 </template>
 <script>
@@ -18,7 +16,7 @@
 
       // Static query methods for unite system.
       queryData(field, unite) {
-          return `${ field.id } { ${ getAdminViewByType(unite, field.returnType).queryFormData().join("\n") } }`
+          return `${ field.id } { __typename }`
       },
       normalizeData(inputData, field, unite) {
           return removeIntroSpecType(inputData);
@@ -28,8 +26,8 @@
       extends: _abstract,
       components: { FormRow, MultiField, Modal },
       computed: {
-          embeddedView() {
-              return getAdminViewByType(this.$unite, this.field.returnType);
+          referencedView() {
+              return getAdminViewByType(this.$unite, this.field.config.content_type);
           }
       },
       methods: {

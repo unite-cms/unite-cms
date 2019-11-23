@@ -12,10 +12,12 @@ use UniteCMS\AdminBundle\AdminView\Types\EmbeddedType;
 use UniteCMS\AdminBundle\AdminView\Types\SettingsType;
 use UniteCMS\AdminBundle\AdminView\Types\TableType;
 use UniteCMS\AdminBundle\Exception\InvalidAdminViewType;
+use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -38,6 +40,11 @@ class AdminViewTypeManager
     protected $domainManager;
 
     /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    protected $fieldTypeManager;
+
+    /**
      * @var Security $security
      */
     protected $security;
@@ -47,9 +54,10 @@ class AdminViewTypeManager
      */
     protected $expressionLanguage;
 
-    public function __construct(DomainManager $domainManager, Security $security, SaveExpressionLanguage $expressionLanguage)
+    public function __construct(DomainManager $domainManager, FieldTypeManager $fieldTypeManager, Security $security, SaveExpressionLanguage $expressionLanguage)
     {
         $this->domainManager = $domainManager;
+        $this->fieldTypeManager = $fieldTypeManager;
         $this->security = $security;
         $this->expressionLanguage = $expressionLanguage;
     }
@@ -113,6 +121,40 @@ class AdminViewTypeManager
     }
 
     /**
+     * @param AdminView $adminView
+     * @param ContentType $contentType
+     *
+     * @return AdminView
+     */
+    protected function mapFieldConfig(AdminView $adminView, ContentType $contentType) : AdminView {
+        foreach($adminView->getFields() as $field) {
+            if($ctField = $contentType->getField($field->getName())) {
+                if($config = $this->fieldTypeManager->getFieldType($ctField->getType())->getPublicSettings($ctField)) {
+                    $field->setConfig($config);
+                }
+
+            }
+        }
+
+        return $adminView;
+    }
+
+    /**
+     * @param AdminView $adminView
+     * @param ContentType $contentType
+     *
+     * @return AdminView
+     */
+    protected function mapPermissions(AdminView $adminView, ContentType $contentType) : AdminView {
+        $permissions = [];
+        foreach(ContentVoter::LIST_PERMISSIONS as $permission) {
+            $permissions[$permission] = $this->security->isGranted($permission, $contentType);
+        }
+        $adminView->setPermissions($permissions);
+        return $adminView;
+    }
+
+    /**
      * @param Domain $domain
      *
      * @return AdminView[]
@@ -164,11 +206,10 @@ class AdminViewTypeManager
                 $adminView = $adminViewType->createView($category, $contentType, $definition, $directive);
 
                 // Check list permissions for this admin view.
-                $permissions = [];
-                foreach(ContentVoter::LIST_PERMISSIONS as $permission) {
-                    $permissions[$permission] = $this->security->isGranted($permission, $contentType);
-                }
-                $adminView->setPermissions($permissions);
+                $this->mapPermissions($adminView, $contentType);
+
+                // Enrich content type fields with field settings.
+                $this->mapFieldConfig($adminView, $contentType);
 
                 $adminViews[] = $adminView;
                 $usedContentTypes[] = $contentType->getId();
@@ -197,11 +238,10 @@ class AdminViewTypeManager
                     ->createView($category, $contentType);
 
                 // Check list permissions for this admin view.
-                $permissions = [];
-                foreach(ContentVoter::LIST_PERMISSIONS as $permission) {
-                    $permissions[$permission] = $this->security->isGranted($permission, $contentType);
-                }
-                $adminView->setPermissions($permissions);
+                $this->mapPermissions($adminView, $contentType);
+
+                // Enrich content type fields with field settings.
+                $this->mapFieldConfig($adminView, $contentType);
 
                 $adminViews[] = $adminView;
             }

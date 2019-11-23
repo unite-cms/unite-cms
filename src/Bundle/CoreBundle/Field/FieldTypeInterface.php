@@ -2,6 +2,7 @@
 
 namespace UniteCMS\CoreBundle\Field;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
@@ -18,6 +19,8 @@ interface FieldTypeInterface
     public function GraphQLInputType(ContentTypeField $field) : ?string;
 
     public function validateFieldDefinition(ContentType $contentType, ContentTypeField $field, ExecutionContextInterface $context) : void;
+
+    public function getPublicSettings(ContentTypeField $field) : ?ArrayCollection;
 
     public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []);
 

@@ -13,6 +13,7 @@ import SequenceList from "./vue/components/Fields/List/Sequence";
 import DateList from "./vue/components/Fields/List/Date";
 import DateTimeList from "./vue/components/Fields/List/DateTime";
 import ReferenceList from "./vue/components/Fields/List/Reference";
+import ReferenceOfList from "./vue/components/Fields/List/ReferenceOf";
 import EmbeddedList from "./vue/components/Fields/List/Reference";
 
 import TextForm from "./vue/components/Fields/Form/Text";
@@ -23,6 +24,7 @@ import SequenceForm from "./vue/components/Fields/Form/Sequence";
 import DateForm from "./vue/components/Fields/Form/Date";
 import DateTimeForm from "./vue/components/Fields/Form/DateTime";
 import ReferenceForm from "./vue/components/Fields/Form/Reference";
+import ReferenceOfForm from "./vue/components/Fields/Form/ReferenceOf";
 import EmbeddedForm from "./vue/components/Fields/Form/Embedded";
 
 import Table from "./vue/components/Views/Table";
@@ -49,6 +51,7 @@ Unite.$emit('registerListFieldType', 'email', EmailList);
 Unite.$emit('registerListFieldType', 'integer', IntegerList);
 Unite.$emit('registerListFieldType', 'choice', ChoiceList);
 Unite.$emit('registerListFieldType', 'reference', ReferenceList);
+Unite.$emit('registerListFieldType', 'referenceOf', ReferenceOfList);
 Unite.$emit('registerListFieldType', 'sequence', SequenceList);
 Unite.$emit('registerListFieldType', 'date', DateList);
 Unite.$emit('registerListFieldType', 'dateTime', DateTimeList);
@@ -62,6 +65,7 @@ Unite.$emit('registerFormFieldType', 'sequence', SequenceForm);
 Unite.$emit('registerFormFieldType', 'date', DateForm);
 Unite.$emit('registerFormFieldType', 'dateTime', DateTimeForm);
 Unite.$emit('registerFormFieldType', 'reference', ReferenceForm);
+Unite.$emit('registerFormFieldType', 'referenceOf', ReferenceOfForm);
 Unite.$emit('registerFormFieldType', 'embedded', EmbeddedForm);
 
 Unite.$emit('registerViewType', 'TableAdminView', Table);

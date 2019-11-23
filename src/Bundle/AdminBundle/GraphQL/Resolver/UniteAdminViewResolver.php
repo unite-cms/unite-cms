@@ -6,10 +6,8 @@ namespace UniteCMS\AdminBundle\GraphQL\Resolver;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use InvalidArgumentException;
-use Symfony\Component\Security\Core\Security;
 use UniteCMS\AdminBundle\AdminView\AdminView;
 use UniteCMS\CoreBundle\GraphQL\Resolver\Field\FieldResolverInterface;
-use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class UniteAdminViewResolver implements FieldResolverInterface
 {
@@ -57,7 +55,7 @@ class UniteAdminViewResolver implements FieldResolverInterface
                 return $value->getPermissions();
 
             default:
-                return $value->getConfig($info->fieldName);
+                return $value->getConfig()->get($info->fieldName);
         }
     }
 }

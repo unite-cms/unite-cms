@@ -2,6 +2,7 @@
 
 namespace UniteCMS\AdminBundle\AdminView;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 
 class AdminViewField
@@ -10,6 +11,11 @@ class AdminViewField
      * @var string $id
      */
     protected $id;
+
+    /**
+     * @var string $type
+     */
+    protected $type;
 
     /**
      * @var string $name
@@ -22,9 +28,9 @@ class AdminViewField
     protected $description = null;
 
     /**
-     * @var string $type
+     * @var string $fieldType
      */
-    protected $type;
+    protected $fieldType;
 
     /**
      * @var bool $isListOf
@@ -52,23 +58,32 @@ class AdminViewField
     protected $formGroup = null;
 
     /**
+     * @var ArrayCollection $config
+     */
+    protected $config;
+
+    /**
      * AdminView constructor.
      *
      * @param string $id
      * @param string $type
+     * @param string $fieldType
      * @param string $name
      * @param bool $isListOf
      * @param bool $isNonNull
      * @param string $description
+     * @param array|ArrayCollection $config
      */
-    public function __construct(string $id, string $type, string $name, bool $isListOf = false, bool $isNonNull = false, ?string $description = null)
+    public function __construct(string $id, string $type, string $fieldType, string $name, bool $isListOf = false, bool $isNonNull = false, ?string $description = null, $config = null)
     {
         $this->id = $id;
         $this->type = $type;
+        $this->fieldType = $fieldType;
         $this->name = $name;
         $this->isListOf = $isListOf;
         $this->isNonNull = $isNonNull;
         $this->description = $description;
+        $this->config = $config ? (is_array($config) ? new ArrayCollection($config) : $config) : new ArrayCollection();
     }
 
     /**
@@ -77,6 +92,7 @@ class AdminViewField
      */
     static function fromContentTypeField(ContentTypeField $contentTypeField) : self {
         return new self(
+            $contentTypeField->getId(),
             $contentTypeField->getId(),
             $contentTypeField->getType(),
             $contentTypeField->getName(),
@@ -89,12 +105,13 @@ class AdminViewField
     /**
      * @param string $id
      * @param string $type
+     * @param string $fieldType
      * @param string $name
      *
      * @return static
      */
-    static function computedField(string $id, string $type, string $name) : self {
-        $field = new self($id, $type, $name);
+    static function computedField(string $id, string $type, string $fieldType, string $name) : self {
+        $field = new self($id, $type, $fieldType, $name);
         $field->setShowInList(true);
         $field->setShowInForm(false);
         return $field;
@@ -135,10 +152,37 @@ class AdminViewField
     }
 
     /**
+     * @param string $type
+     * @return $this
+     */
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getType() : string {
         return $this->type;
+    }
+
+    /**
+     * @param string $fieldType
+     * @return $this
+     */
+    public function setFieldType(string $fieldType): self
+    {
+        $this->fieldType = $fieldType;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldType() : string {
+        return $this->fieldType;
     }
 
     /**
@@ -221,5 +265,22 @@ class AdminViewField
      */
     public function isListOf() : bool {
         return $this->isListOf;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getConfig(): ArrayCollection
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param ArrayCollection $config
+     * @return self
+     */
+    public function setConfig(ArrayCollection $config): self {
+        $this->config = $config;
+        return $this;
     }
 }

@@ -2,7 +2,7 @@
   <div>
     <div v-for="value in values">
       <template v-for="nestedField in nestedFields(value)">
-        <component :is="$unite.getListFieldType(nestedField.type)" :field="nestedField" :row="value" />
+        <component :is="$unite.getListFieldType(nestedField.fieldType)" :field="nestedField" :row="value" />
       </template>
     </div>
   </div>

@@ -40,6 +40,9 @@ class UniteAdminViewFieldResolver implements FieldResolverInterface
             case 'type':
                 return $value->getType();
 
+            case 'fieldType':
+                return $value->getFieldType();
+
             case 'list_of':
                 return $value->isListOf();
 
@@ -54,6 +57,16 @@ class UniteAdminViewFieldResolver implements FieldResolverInterface
 
             case 'form_group':
                 return $value->getFormGroup();
+
+            case 'config':
+                $config = [];
+                foreach($value->getConfig() as $key => $value) {
+                    $config[] = [
+                        'key' => $key,
+                        'value' => json_encode($value),
+                    ];
+                }
+                return $config;
 
             default: return null;
         }

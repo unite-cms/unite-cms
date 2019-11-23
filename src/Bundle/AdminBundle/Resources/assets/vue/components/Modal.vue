@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div ref="modal" id="modal-close-default" :class="{ 'uk-modal-container': this.container }" uk-modal>
+    <div :id="'modal' + _uid" ref="modal" :class="{ 'uk-modal-container': this.container }" uk-modal="stack: true">
       <div class="uk-modal-dialog uk-background-muted">
         <button class="uk-modal-close-default" type="button" uk-close></button>
 
@@ -36,7 +36,9 @@
         },
         mounted() {
             UIkit.modal(this.$refs.modal).show();
-            UIkit.util.on(this.$refs.modal, 'hide', () => { this.$emit('hide') });
+            UIkit.util.on(this.$refs.modal, 'hide', (e) => {
+                this.$emit('hide');
+            });
         },
         beforeDestroy() {
             UIkit.modal(this.$refs.modal).hide();

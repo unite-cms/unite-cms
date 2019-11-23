@@ -21,7 +21,7 @@
           <span class="uk-text-nowrap">{{ revision.operatorName }}</span>
         </td>
         <td v-for="field in view.listFields()">
-          <component :is="$unite.getListFieldType(field.type)" :row="revision.content" :field="field" />
+          <component :is="$unite.getListFieldType(field.fieldType)" :row="revision.content" :field="field" />
         </td>
         <td class="uk-table-shrink">
           <span class="uk-label uk-label-muted" v-if="meta.version === revision.version">{{ $t('content.revert.label.current') }}</span>

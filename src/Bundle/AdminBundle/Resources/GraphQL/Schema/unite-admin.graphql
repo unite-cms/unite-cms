@@ -15,9 +15,15 @@ input UniteSchemaFileInput {
     value: String!
 }
 
+type UniteAdminViewFieldConfig {
+    key: String!
+    value: JSON
+}
+
 type UniteAdminViewField {
     fid: ID!
     type: ID!
+    fieldType: ID!
     name: String!
     description: String
     list_of: Boolean!
@@ -25,6 +31,7 @@ type UniteAdminViewField {
     show_in_list: Boolean!
     show_in_form: Boolean!
     form_group: String
+    config: [UniteAdminViewFieldConfig!]
 }
 
 interface UniteAdminView {

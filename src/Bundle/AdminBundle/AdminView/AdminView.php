@@ -2,6 +2,7 @@
 
 namespace UniteCMS\AdminBundle\AdminView;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use GraphQL\Language\AST\FieldNode;
 use GraphQL\Language\AST\FragmentDefinitionNode;
 use GraphQL\Language\Printer;
@@ -50,9 +51,9 @@ class AdminView
     protected $fields = [];
 
     /**
-     * @var array $config
+     * @var ArrayCollection|array $config
      */
-    protected $config = [];
+    protected $config;
 
     /**
      * AdminView constructor.
@@ -62,14 +63,15 @@ class AdminView
      * @param array $directive
      * @param string $category
      * @param ContentType $contentType
-     * @param array $config
+     * @param array|ArrayCollection $config
      */
-    public function __construct(string $returnType, string $category, ContentType $contentType, ?FragmentDefinitionNode $definition = null, ?array $directive = null, array $config = [])
+    public function __construct(string $returnType, string $category, ContentType $contentType, ?FragmentDefinitionNode $definition = null, ?array $directive = null, $config = null)
     {
         $this->returnType = $returnType;
         $this->name = empty($directive['settings']['name']) ? $contentType->getName() : $directive['settings']['name'];
         $this->config = $config;
         $this->category = $category;
+        $this->config = $config ? (is_array($config) ? new ArrayCollection($config) : $config) : new ArrayCollection();
 
         // First of all, create admin fields for all content type fields, but hidden in list.
         $ctFields = [];
@@ -82,7 +84,7 @@ class AdminView
             $this->id = $contentType->getId() . 'defaultAdminView';
             $this->type = $contentType->getId();
             $this->fields = array_merge([
-                AdminViewField::computedField('id', 'id', 'id'),
+                AdminViewField::computedField('id', 'id', 'id', '#'),
             ], array_values($ctFields));
             $this->fragment = sprintf('fragment %s on %s { id }', $this->id, $this->type);
             return;
@@ -98,8 +100,9 @@ class AdminView
             if($selection instanceof FieldNode) {
 
                 $id = $selection->name->value;
+                $type = $id;
                 $name = null;
-                $type = ($id === 'id') ? 'id' : 'text';
+                $fieldType = ($id === 'id') ? 'id' : 'text';
 
                 // If this is an aliased field.
                 if(!empty($selection->alias)) {
@@ -109,11 +112,11 @@ class AdminView
                 // If this field or alias is a ct field, use that information.
                 if(array_key_exists($selection->name->value, $ctFields)) {
                     $name = $ctFields[$selection->name->value]->getName();
-                    $type = $ctFields[$selection->name->value]->getType();
+                    $fieldType = $ctFields[$selection->name->value]->getFieldType();
                 }
 
                 $name = $name ?? $id;
-                $field = AdminViewField::computedField($id, $type, $name);
+                $field = AdminViewField::computedField($id, $type, $fieldType, $name);
 
                 // If this field is a ct field, replace the ct field with this one.
                 if(array_key_exists($id, $ctFields)) {
@@ -206,18 +209,18 @@ class AdminView
     }
 
     /**
-     * @param string $key
-     * @return null|mixed
+     * @return ArrayCollection
      */
-    public function getConfig(string $key) {
-        return $this->config[$key] ?? null;
+    public function getConfig(): ArrayCollection
+    {
+        return $this->config;
     }
 
     /**
-     * @param array $config
+     * @param ArrayCollection $config
      * @return self
      */
-    public function setConfig(array $config) : self {
+    public function setConfig(ArrayCollection $config): self {
         $this->config = $config;
         return $this;
     }

@@ -49,13 +49,19 @@ const createAdminView = function (view, unite) {
 
         // Set raw field to field
         view.rawType.fields.forEach((rawField) => {
-
-            // We are using "fid" instead of "id" for the GraphQL query, so apollo won't get confused with fields with the same id.
-            field.id = field.fid;
-
-            if(field.id === rawField.name) {
+            if(field.type === rawField.name) {
                 field.rawField = rawField;
             }
+        });
+
+        // We are using "fid" instead of "id" for the GraphQL query, so apollo won't get confused with fields with the same id.
+        field.id = field.fid;
+
+        // parse field config.
+        let rawConfig = field.config;
+        field.config = {};
+        rawConfig.forEach((row) => {
+            field.config[row.key] = JSON.parse(row.value);
         });
 
         // normalize returnType
@@ -69,9 +75,9 @@ const createAdminView = function (view, unite) {
      */
     view.queryFormData = function(){
         return this.formFields().filter((field) => {
-            return !!unite.getFormFieldType(field.type).queryData;
+            return !!unite.getFormFieldType(field.fieldType).queryData;
         }).map((field) => {
-            return unite.getFormFieldType(field.type).queryData(field, unite);
+            return unite.getFormFieldType(field.fieldType).queryData(field, unite);
         });
     };
 
@@ -82,7 +88,7 @@ const createAdminView = function (view, unite) {
     view.normalizeFormData = function(inputData = {}){
         let data = {};
         this.formFields().forEach((field) => {
-            let type = unite.getFormFieldType(field.type);
+            let type = unite.getFormFieldType(field.fieldType);
             let inputFieldData = inputData[field.id] || undefined;
             data[field.id] = !!type.normalizeData ? type.normalizeData(inputFieldData, field, unite) : inputFieldData;
         });
@@ -152,11 +158,16 @@ export const Unite = new Vue({
                         name
                         description
                         type
+                        fieldType
                         non_null
                         list_of
                         show_in_list
                         show_in_form
                         form_group
+                        config {
+                            key
+                            value
+                        }
                     }
                     permissions {
                         create
