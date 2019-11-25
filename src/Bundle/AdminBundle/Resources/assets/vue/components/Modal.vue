@@ -8,7 +8,7 @@
           <h2 class="uk-modal-title">{{ title }}</h2>
         </div>
 
-        <div class="uk-modal-body" uk-overflow-auto>
+        <div class="uk-modal-body" :uk-overflow-auto="overflowAuto" :class="{ 'uk-padding-remove': !overflowAuto }">
           <slot></slot>
         </div>
 
@@ -30,6 +30,10 @@
         props: {
             title: String,
             container: {
+                type: Boolean,
+                default: true
+            },
+            overflowAuto: {
                 type: Boolean,
                 default: true
             }

@@ -46,6 +46,10 @@ const createAdminView = function (view, unite) {
 
     view.rawType = unite.getRawType(view.type);
 
+    if(!view.rawType) {
+        return null;
+    }
+
     view.fields.forEach((field) => {
 
         // Set raw field to field
@@ -228,7 +232,9 @@ export const Unite = new Vue({
 
                     this.adminViews = [];
                     data.data.unite.adminViews.forEach((view) => {
-                        this.adminViews[view.id] = createAdminView(view, this);
+                        if(view = createAdminView(view, this)) {
+                            this.adminViews[view.id] = view;
+                        }
                     });
                     this.loaded = true;
                     this.$emit('loaded');

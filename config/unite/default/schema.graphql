@@ -29,39 +29,11 @@ type DemoArticle implements UniteContent {
     id: ID
     name: String! @textField
 
-    email: String @emailField
-    email1: [String!] @emailField
-
-    integer: Int @integerField
-    integer1: [Int!] @integerField
-
-    sequence: Int @sequenceField
-
-    seo: SEO @embeddedField
-
-    seo1: SEO! @embeddedField
-
-    seo2: [SEO!] @embeddedField
-
-    date: Date @dateField
-    date1: [Date!] @dateField
-
-    dateTime: DateTime @dateTimeField
-    dateTime1: [DateTime!] @dateTimeField
-
-    extra_names: [String!] @textField
-
-    categories: [DemoCategory!] @referenceField
-
     """Main Category"""
     main_category: DemoCategory @referenceField
 
-    """Status
-    This is my description
-    """
-    status: ArticleStatus @choiceField(default: "DRAFT")
-
-    stati: [ArticleStatus!] @choiceField(default: "DRAFT")
+    geo: UniteGeoLocation @geoLocationField
+    geos: [UniteGeoLocation!] @geoLocationField
 }
 
 

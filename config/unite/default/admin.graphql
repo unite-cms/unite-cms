@@ -18,18 +18,16 @@ fragment categories on DemoCategory @tableAdminView {
 fragment articles on DemoArticle @tableAdminView {
     id
     name
-    email
-    sequence
-    date
-    dateTime
-    integer
-    seo {
-        headline
-        metaDescription
+    geo {
+        display_name
+        stairs_number
+        door_number
+        latitude
+        longitude
     }
-    seo1 {
-        headline
-        metaDescription
+    geos {
+        latitude
+        longitude
     }
 }
 

@@ -22,7 +22,7 @@ messages.en = {
     content: {
         list: {
             field: {
-                fallback_warning: 'Missing list field type "{type}" for field "{id}".',
+                fallback_warning: 'Missing list field type "{fieldType}" for field "{id}".',
             },
             view: {
                 fallback_warning: 'Missing view type "{viewType}" for view with id "{id}".',
@@ -113,6 +113,15 @@ messages.en = {
             no_content_id: 'A reference to this field is only possible after creation.',
             modal: {
                 headline: 'Referenced {name} of this content'
+            }
+        },
+        geoLocation: {
+            placeholder: {
+                stairs_number: 'Stairs',
+                door_number: 'Door'
+            },
+            modal: {
+                headline: '{display_name}'
             }
         },
         date: en
