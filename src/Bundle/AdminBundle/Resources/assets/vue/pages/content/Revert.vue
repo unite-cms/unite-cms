@@ -68,6 +68,7 @@
                             get${ this.view.type }(id: $id) {
                                 ... ${ this.view.id }
                                 _meta {
+                                    id
                                     version
                                     revisions {
                                         version
@@ -90,7 +91,16 @@
                     };
                 },
                 update(data) {
-                    return data[`get${ this.view.type }`]._meta;
+                    let revisionData = data[`get${ this.view.type }`]._meta;
+                    revisionData.revisions = revisionData.revisions.map((revision) => {
+                        revision.content = Object.assign(revision.content, {
+                            _meta: {
+                                id: revisionData.id
+                            }
+                        });
+                        return revision;
+                    });
+                    return revisionData;
                 }
             }
         },

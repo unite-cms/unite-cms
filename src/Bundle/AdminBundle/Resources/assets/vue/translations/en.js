@@ -108,6 +108,13 @@ messages.en = {
                 headline: 'Select a content to reference'
             }
         },
+        reference_of: {
+            missing_view_warning: 'No admin view for the referenced content of this field was found. Please add one to your schema!',
+            no_content_id: 'A reference to this field is only possible after creation.',
+            modal: {
+                headline: 'Referenced {name} of this content'
+            }
+        },
         date: en
     }
 };

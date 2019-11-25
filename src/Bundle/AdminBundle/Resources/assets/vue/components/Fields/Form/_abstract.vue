@@ -6,6 +6,7 @@
             }
         },
         props: {
+            contentId: String,
             field: Object,
             value: {}
         },

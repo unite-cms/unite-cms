@@ -8,7 +8,7 @@ namespace UniteCMS\CoreBundle\Content;
  *
  * @package UniteCMS\CoreBundle\Content
  */
-class RevisionContent extends Content
+class RevisionContent extends BaseContent
 {
     /**
      * Content constructor.

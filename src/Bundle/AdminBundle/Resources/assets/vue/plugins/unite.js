@@ -178,6 +178,15 @@ export const Unite = new Vue({
                     ${fragmentNames.join("\n")}
                 }`;
         },
+
+        /**
+         * Get the current view for the current route or null.
+         *
+         * @returns {*|{extends}}
+         */
+        currentView() {
+            return this.adminViews[router.currentRoute.params.type];
+        },
     },
     methods: {
 

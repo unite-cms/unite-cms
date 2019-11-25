@@ -1,5 +1,11 @@
 <template>
-  <component :is="$unite.getViewType(view.viewType)" :view="view" />
+  <component :is="$unite.getViewType(view.viewType)"
+             :view="view"
+             :order-by="view.orderBy"
+             :filter="view.filter"
+             :deleted="!!$route.query.deleted"
+             :highlight-row="$route.query.updated"
+             @toggleDeleted="toggleDeleted" />
 </template>
 
 <script>
@@ -7,6 +13,22 @@
         computed: {
             view() {
                 return this.$unite.adminViews[this.$route.params.type];
+            }
+        },
+        methods: {
+            toggleDeleted() {
+                let query = Object.assign({}, this.$route.query);
+
+                if(this.$route.query.deleted) {
+                    delete query.deleted;
+                } else {
+                    query.deleted = true;
+                }
+
+                this.$router.replace({
+                    path: this.$route.path,
+                    query: query,
+                })
             }
         }
     }

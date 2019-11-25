@@ -7,6 +7,7 @@ enum ArticleStatus {
 
 type SEO implements UniteEmbeddedContent {
     id: ID
+    _meta: UniteContentMeta
     headline: String @textField
     metaDescription: String @textField
 }

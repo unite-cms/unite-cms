@@ -2,10 +2,10 @@
   <div>
     <div class="uk-flex uk-flex-middle">
       <span v-if="total" class="uk-margin-small-right uk-label uk-label-muted">{{ total }}</span>
-      <button type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
+      <button v-if="total !== 0" type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
     </div>
-    <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.referenceOf.modal.headline')">
-      <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" />
+    <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.referenceOf.modal.headline', field)">
+      <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :header="false" :filter="filter" />
     </modal>
   </div>
 </template>
@@ -27,8 +27,20 @@
             referencedView() {
                 return getAdminViewByType(this.$unite, this.field.config.content_type);
             },
+            filter() {
+                return {
+                    field: this.field.config.reference_field,
+                    operator: 'EQ',
+                    value: this.id
+                }
+            },
             total() {
-                return this.row[this.field.id].total || null;
+
+                if(!this.row[this.field.id]) {
+                    return null;
+                }
+
+                return this.row[this.field.id].total;
             }
         },
     }

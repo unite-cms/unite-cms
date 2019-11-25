@@ -1,6 +1,7 @@
 <script>
     export default {
         props: {
+            view: Object,
             field: Object,
             row: Object,
         },
@@ -9,7 +10,7 @@
                 return this.row._meta.permissions[attribute] || false;
             },
             to(action) {
-                return this.$route.path + '/' + this.id + '/' + action;
+                return ["", this.view.category, this.view.id, this.id, action].join('/');
             },
             isLastValue(value) {
               let values = this.values;

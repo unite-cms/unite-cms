@@ -7,6 +7,18 @@
         },
         props: {
             view: Object,
+            orderBy: Object,
+            filter: Object,
+            header: {
+                type: Boolean,
+                default: true,
+            },
+            pagination: {
+                type: Boolean,
+                default: true,
+            },
+            highlightRow: String,
+            deleted: Boolean,
             initialSelection: Array,
             select: String,
         },

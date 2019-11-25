@@ -11,7 +11,7 @@
         </button>
       </div>
       <modal v-if="referencedView && selectModalOpen" @hide="selectModalOpen = false" :title="$t('field.reference.modal.headline')">
-        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="values" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
+        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="values" :header="false" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
       </modal>
   </form-row>
 </template>

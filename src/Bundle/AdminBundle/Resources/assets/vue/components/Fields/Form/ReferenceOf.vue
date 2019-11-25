@@ -1,45 +1,59 @@
 <template>
   <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference_of.missing_view_warning') }] : []">
-    <div class="uk-input-group">
-      <div class="uk-placeholder">TODO: Implement</div>
-    </div>
+    <template v-if="contentId">
+      <div class="uk-input-group" v-for="value in values">
+        <span v-if="value.total" class="uk-margin-small-right uk-label uk-label-muted">{{ value.total }}</span>
+        <button v-if="value.total !== 0" type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
+      </div>
+      <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', field)">
+        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :header="false" :filter="filter" />
+      </modal>
+    </template>
+    <div v-else class="uk-placeholder uk-padding-small">{{ $t('field.reference_of.no_content_id') }}</div>
   </form-row>
 </template>
 <script>
-  import _abstract from "./_abstract";
   import FormRow from './_formRow';
   import MultiField from './_multiField';
   import Modal from "../../Modal";
+  import Icon from "../../Icon";
   import { getAdminViewByType, removeIntroSpecType } from '../../../plugins/unite';
+  import _abstractReadOnly from "./_abstractReadOnly";
 
   export default {
 
       // Static query methods for unite system.
       queryData(field, unite) {
-          return `${ field.id } { __typename }`
+          return `${ field.id } { total }`
       },
       normalizeData(inputData, field, unite) {
           return removeIntroSpecType(inputData);
       },
 
       // Vue properties for this component.
-      extends: _abstract,
-      components: { FormRow, MultiField, Modal },
+      extends: _abstractReadOnly,
+      components: { Icon, FormRow, MultiField, Modal },
+      data() {
+          return {
+              modalIsOpen: false
+          }
+      },
       computed: {
           referencedView() {
               return getAdminViewByType(this.$unite, this.field.config.content_type);
-          }
-      },
-      methods: {
-          setFieldValue(field, args, key) {
-              if(this.field.list_of) {
-                  this.val[key] = this.val[key] || {};
-                  this.$set(this.val[key], field, args[0]);
-              } else {
-                  this.val = this.val || {};
-                  this.$set(this.val, field, args[0]);
+          },
+          filter() {
+              return {
+                  field: this.field.config.reference_field,
+                  operator: 'EQ',
+                  value: this.contentId
               }
-          }
-      }
+          },
+      },
   }
 </script>
+<style scoped lang="scss">
+  .uk-placeholder {
+    padding: 10px;
+  }
+</style>

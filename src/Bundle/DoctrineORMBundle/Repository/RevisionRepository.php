@@ -5,6 +5,7 @@ namespace UniteCMS\DoctrineORMBundle\Repository;
 
 use InvalidArgumentException;
 use Symfony\Component\Security\Core\User\UserInterface;
+use UniteCMS\CoreBundle\Security\User\UserInterface as UniteUserInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\DoctrineORMBundle\Entity\Revision;
 
@@ -43,11 +44,16 @@ class RevisionRepository extends ContentRepository {
             return null;
         }
 
-        return $this->findOneBy([
+        /**
+         * @var Revision $revision
+         */
+        $revision = $this->findOneBy([
             'entityType' => $content->getType(),
             'entityId' => $content->getId(),
             'version' => $version,
         ]);
+
+        return $revision;
     }
 
     /**
@@ -79,6 +85,7 @@ class RevisionRepository extends ContentRepository {
      * @param UserInterface $user
      *
      * @return Revision
+     * @throws \Exception
      */
     public function createRevisionForContent(ContentInterface $content, string $operation, UserInterface $user = null) : Revision {
 
@@ -98,7 +105,7 @@ class RevisionRepository extends ContentRepository {
             ->setOperation($operation)
             ->setOperatorName($user ? $user->getUsername() : 'anon');
 
-        if($user instanceof \UniteCMS\CoreBundle\Security\User\UserInterface) {
+        if($user instanceof UniteUserInterface) {
             $revision
                 ->setOperatorId($user->getId())
                 ->setOperatorType($user->getType());

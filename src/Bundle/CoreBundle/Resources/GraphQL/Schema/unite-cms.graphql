@@ -126,6 +126,7 @@ interface UniteSingleContent {
 
 interface UniteEmbeddedContent {
     id: ID
+    _meta: UniteContentMeta
 }
 
 interface UniteContentResult {

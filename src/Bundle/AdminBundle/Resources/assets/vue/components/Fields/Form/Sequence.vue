@@ -4,7 +4,7 @@
   </form-row>
 </template>
 <script>
-  import _abstract from "./_abstract";
+  import _abstractReadOnly from "./_abstractReadOnly";
   import FormRow from './_formRow';
 
   export default {
@@ -14,31 +14,7 @@
       normalizeData(inputData, field) { return inputData; },
 
       // Vue properties for this component.
-      extends: _abstract,
+      extends: _abstractReadOnly,
       components: { FormRow },
-      data() {
-          return {
-              internalVal: null,
-          }
-      },
-      watch: {
-          val: {
-              deep: true,
-              handler(value) {
-                  if(value) {
-                      this.internalVal = value;
-                  }
-                  this.$emit('input', undefined);
-              }
-          }
-      },
-      computed: {
-          values() {
-              if(!this.internalVal) {
-                  return [];
-              }
-              return this.field.list_of ? this.internalVal : [this.internalVal]
-          },
-      }
   }
 </script>
