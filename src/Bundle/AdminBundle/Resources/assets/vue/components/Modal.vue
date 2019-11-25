@@ -41,7 +41,10 @@
             });
         },
         beforeDestroy() {
-            UIkit.modal(this.$refs.modal).hide();
+            let modal = this.$refs.modal;
+            UIkit.modal(modal).hide().finally(() => {
+                modal.remove();
+            });
         }
     }
 </script>

@@ -1,0 +1,15 @@
+
+@media (min-width: $breakpoint-medium) {
+
+  $var: #{"&"};
+  @for $i from 1 to 20 {
+    .uk-modal.uk-open {
+      #{append($var, #{"+ &"})} {
+        padding-top: $modal-padding-horizontal-m + ($modal-padding-horizontal-m * 2 * log($i + 1));
+        padding-left: $modal-padding-horizontal-m + ($modal-padding-horizontal-m * 2 * log($i + 1));
+      }
+    }
+
+    $var: append($var, #{"+ &"});
+  }
+}

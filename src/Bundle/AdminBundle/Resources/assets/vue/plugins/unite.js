@@ -45,6 +45,7 @@ const createAdminView = function (view, unite) {
     view.formFields = function(){ return this.fields.filter(field => field.show_in_form); };
 
     view.rawType = unite.getRawType(view.type);
+
     view.fields.forEach((field) => {
 
         // Set raw field to field
@@ -58,11 +59,13 @@ const createAdminView = function (view, unite) {
         field.id = field.fid;
 
         // parse field config.
-        let rawConfig = field.config;
-        field.config = {};
-        rawConfig.forEach((row) => {
-            field.config[row.key] = JSON.parse(row.value);
-        });
+        if(Array.isArray(field.config)) {
+            let rawConfig = field.config;
+            field.config = {};
+            rawConfig.forEach((row) => {
+                field.config[row.key] = JSON.parse(row.value);
+            });
+        }
 
         // normalize returnType
         field.returnType = innerType(field.rawField.type);
@@ -213,15 +216,17 @@ export const Unite = new Vue({
                         }
                     `,
                 }).then((data) => {
+
                     this.adminViews = [];
                     data.data.unite.adminViews.forEach((view) => {
                         this.adminViews[view.id] = createAdminView(view, this);
                     });
-
                     this.loaded = true;
                     this.$emit('loaded');
 
                 }).catch(fail).finally(fin).then(success);
+
+
             }).catch((error) => {
                 User.$emit('logout', {}, () => {
                     router.push('/login');

@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "node-sass": "^4.13.0",
+    "mathsass": "^0.11.0",
     "vue": "^2.6.10",
     "apollo-boost": "^0.4.4",
     "feather-icons": "^4.24.1",
