@@ -1,6 +1,6 @@
 <template>
   <content-detail :loading="loading || $apollo.loading" @submit="submit">
-    <h1 class="uk-card-title">{{ $t('content.update.headline', view) }}</h1>
+    <h1 class="uk-card-title">{{ $t('content.update.headline', { contentTitle, view }) }}</h1>
     <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" />
     <button slot="footer" class="uk-button uk-button-primary" type="submit">{{ $t('content.update.actions.submit') }}</button>
   </content-detail>
@@ -24,6 +24,9 @@
         computed: {
             view() {
                 return this.$unite.adminViews[this.$route.params.type];
+            },
+            contentTitle() {
+                return this.view.contentTitle(this.formData);
             }
         },
         apollo: {
@@ -63,7 +66,7 @@
                     }
                 }).then((data) => {
                     Route.back({ updated: this.$route.params.id });
-                    Alerts.$emit('push', 'success', this.$t('content.update.success', this.view));
+                    Alerts.$emit('push', 'success', this.$t('content.update.success', { contentTitle: this.contentTitle, view: this.view }));
                 }).finally(() => { this.loading = false }).catch(Alerts.apolloErrorHandler)
             }
         }

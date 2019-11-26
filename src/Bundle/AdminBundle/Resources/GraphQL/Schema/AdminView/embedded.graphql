@@ -1,10 +1,13 @@
 
-directive @embeddedAdminView on FRAGMENT_DEFINITION
+directive @embeddedAdminView(
+    titlePattern: String!
+) on FRAGMENT_DEFINITION
 
 type EmbeddedAdminView implements UniteAdminView {
     id: ID!
     type: ID!
     name: String!
+    titlePattern: String!
     fragment: String!
     category: String!
     fields: [UniteAdminViewField!]!

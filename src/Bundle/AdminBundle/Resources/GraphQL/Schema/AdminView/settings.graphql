@@ -1,10 +1,15 @@
 
-directive @settingsAdminView(name: String if: Expression) on FRAGMENT_DEFINITION
+directive @settingsAdminView(
+    name: String
+    titlePattern: String
+    if: Expression
+) on FRAGMENT_DEFINITION
 
 type SettingsAdminView implements UniteAdminView {
     id: ID!
     type: ID!
     name: String!
+    titlePattern: String!
     fragment: String!
     category: String!
     fields: [UniteAdminViewField!]!

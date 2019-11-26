@@ -16,7 +16,7 @@
       computed: {
           referencedView() {
               return getAdminViewByType(this.$unite, this.field.returnType);
-          },
+          }
       },
       methods: {
           nestedFields(value) {

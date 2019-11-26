@@ -47,38 +47,39 @@ messages.en = {
             },
         },
         create: {
-            headline: 'Create {name} content',
+            headline: 'Create "{contentTitle}"',
             actions: {
                 submit: 'Save'
             },
-            success: 'New "{name}" content was created.',
+            success: '"{contentTitle}" was created.',
         },
         update: {
-            headline: 'Update {name} content',
+            headline: 'Update "{contentTitle}"',
             actions: {
                 submit: 'Save'
             },
-            success: '"{name}" content was updated.',
+            success: '"{contentTitle}" was updated.',
         },
         delete: {
-            headline: 'Move {name} content to trash',
-            message: 'Do you really want to move this content to trash?',
+            headline: 'Move "{contentTitle}" to trash',
+            message: 'Do you really want to move "{contentTitle}" to trash?',
             actions: {
                 submit: 'Move to trash'
             },
-            success: '"{name}" content was moved to trash.',
+            success: '"{contentTitle}" content was moved to trash.',
         },
         recover: {
-            headline: 'Recover {name} content from trash',
+            headline: 'Recover "{contentTitle}" from trash',
+            message: 'Do you really want to recover "{contentTitle}" from trash?',
             actions: {
                 submit: 'Recover from trash'
             },
-            success: '"{name}" content was recovered.',
+            success: '"{contentTitle}" was recovered.',
         },
         revert: {
-            headline: 'Revisions of {name} content',
-            success: '"{name}" content was reverted to {version}. revision.',
-            confirm: 'Do you really want to revert this content to version {version}?',
+            headline: 'Revisions of "{contentTitle}"',
+            success: '"{contentTitle}" was reverted to {version}. revision.',
+            confirm: 'Do you really want to revert "{contentTitle}" to version {version}?',
             label: {
                 current: 'Current'
             },
@@ -92,17 +93,16 @@ messages.en = {
             }
         },
         permanent_delete: {
-            headline: 'Remove {name}',
-            message: 'Do you really want to permanently delete this content? Be careful, you cannot undo this action!',
+            headline: 'Remove "{contentTitle}"',
+            message: 'Do you really want to permanently delete "{contentTitle}"? Be careful, you cannot undo this action!',
             actions: {
                 submit: 'Permanently remove'
             },
-            success: '"{name}" content was removed.',
+            success: '"{contentTitle}" was removed.',
         },
     },
     field: {
         reference: {
-            select: 'Select',
             missing_view_warning: 'No admin view for the referenced content of this field was found. Please add one to your schema!',
             modal: {
                 headline: 'Select a content to reference'
@@ -112,7 +112,7 @@ messages.en = {
             missing_view_warning: 'No admin view for the referenced content of this field was found. Please add one to your schema!',
             no_content_id: 'A reference to this field is only possible after creation.',
             modal: {
-                headline: 'Referenced {name} of this content'
+                headline: 'Referenced {name} of "{contentTitle}"'
             }
         },
         geoLocation: {

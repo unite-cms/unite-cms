@@ -82,7 +82,7 @@ class QueryResolver implements FieldResolverInterface
             case 'get':
                 return $this->ifAccess(empty($args['id']) ?
                     $contentManager->create($domain, $type) :
-                    $contentManager->get($domain, $type, $args['id'])
+                    $contentManager->get($domain, $type, $args['id'], $args['includeDeleted'])
                 );
             case 'find':
                 return $contentManager->find(

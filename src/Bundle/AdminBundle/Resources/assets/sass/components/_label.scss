@@ -3,3 +3,7 @@
   background: darken($global-muted-background, 5%);
   color: $global-muted-color;
 }
+
+.uk-label-secondary {
+  background: darken($global-secondary-background, 5%);
+}

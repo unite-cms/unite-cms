@@ -27,6 +27,11 @@ class AdminView
     protected $name;
 
     /**
+     * @var string $titlePattern
+     */
+    protected $titlePattern = '{{^name}}{{^username}}{{ title }}{{/username}}{{/name}}{{^title}}{{^username}}{{ name }}{{/username}}{{/title}}{{^name}}{{^title}}{{username}}{{/title}}{{/name}}{{^name}}{{^title}}{{^username}}{{ _name }} {{ _category }}{{#_meta.id }}: {{ _meta.id }}{{/_meta.id}}{{/username}}{{/title}}{{/name}}';
+
+    /**
      * @var string $type
      */
     protected $type;
@@ -70,6 +75,7 @@ class AdminView
     {
         $this->returnType = $returnType;
         $this->name = empty($directive['settings']['name']) ? $contentType->getName() : $directive['settings']['name'];
+        $this->titlePattern = empty($directive['settings']['titlePattern']) ? $this->titlePattern : $directive['settings']['titlePattern'];
         $this->config = $config;
         $this->category = $category;
         $this->config = $config ? (is_array($config) ? new ArrayCollection($config) : $config) : new ArrayCollection();
@@ -167,6 +173,24 @@ class AdminView
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitlePattern(): string
+    {
+        return $this->titlePattern;
+    }
+
+    /**
+     * @param string $titlePattern
+     * @return self
+     */
+    public function setTitlePattern(string $titlePattern): self
+    {
+        $this->titlePattern = $titlePattern;
+        return $this;
     }
 
     /**

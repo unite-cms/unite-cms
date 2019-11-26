@@ -1,6 +1,6 @@
 <template>
   <content-detail :loading="loading || $apollo.loading" :card="false">
-    <h3>{{ $t('content.revert.headline', view) }}</h3>
+    <h3>{{ $t('content.revert.headline', { contentTitle, view }) }}</h3>
     <div class="uk-overflow-auto">
       <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
       <thead>
@@ -50,12 +50,15 @@
             return {
                 revertedVersion: null,
                 loading: false,
-                meta: []
+                meta: {}
             };
         },
         computed: {
             view() {
                 return this.$unite.adminViews[this.$route.params.type];
+            },
+            contentTitle() {
+                return this.view.contentTitle(this.meta.revisions && this.meta.revisions.length > 0 ? this.meta.revisions[0].content : {});
             }
         },
         apollo: {
@@ -122,7 +125,7 @@
                 }
             },
             revertToVersion(version){
-                UIkit.modal.confirm(this.$t('content.revert.confirm', { version })).then(() => {
+                UIkit.modal.confirm(this.$t('content.revert.confirm', { contentTitle: this.contentTitle, version })).then(() => {
 
                     this.revertedVersion = null;
                     this.loading = true;
@@ -142,7 +145,7 @@
                         }
                     }).then((data) => {
                         this.revertedVersion = data.data[`revert${ this.view.type }`]._meta.version;
-                        Alerts.$emit('push', 'success', this.$t('content.revert.success', { name: this.view.name, version: version }));
+                        Alerts.$emit('push', 'success', this.$t('content.revert.success', { contentTitle: this.contentTitle, name: this.view.name, version: version }));
                         this.$apollo.queries.meta.refetch();
                     }).finally(() => { this.loading = false })
                 });

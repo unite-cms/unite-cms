@@ -8,6 +8,7 @@ import FormFieldTypeFallback from "../components/Fields/Form/_fallback";
 import ViewTypeFallback from "../components/Views/_fallback";
 import User from "../state/User";
 import router from "./router";
+import Mustache from 'mustache';
 
 export const removeIntroSpecType = function(val){
     if(val && typeof val === 'object') {
@@ -45,6 +46,13 @@ const createAdminView = function (view, unite) {
     view.formFields = function(){ return this.fields.filter(field => field.show_in_form); };
 
     view.rawType = unite.getRawType(view.type);
+
+    view.contentTitle = function(content){
+        return Mustache.render(view.titlePattern, Object.assign({}, content, {
+            _name: view.name,
+            _category: view.category,
+        }));
+    };
 
     if(!view.rawType) {
         return null;
@@ -155,6 +163,7 @@ export const Unite = new Vue({
                     id
                     type
                     name
+                    titlePattern
                     fragment
                     category
                     fields {

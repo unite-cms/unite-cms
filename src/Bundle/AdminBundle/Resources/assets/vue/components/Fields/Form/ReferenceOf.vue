@@ -3,7 +3,7 @@
     <template v-if="contentId">
       <div class="uk-input-group" v-for="value in values">
         <span v-if="value.total" class="uk-margin-small-right uk-label uk-label-muted">{{ value.total }}</span>
-        <button v-if="value.total !== 0" type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
+        <a v-if="value.total !== 0" class="uk-icon-button uk-button-light uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="more-horizontal" /></a>
       </div>
       <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', field)">
         <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :header="false" :filter="filter" />

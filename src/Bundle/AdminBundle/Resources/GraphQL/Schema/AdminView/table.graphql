@@ -1,6 +1,7 @@
 
 directive @tableAdminView(
     name: String
+    titlePattern: String
     filter: UniteFilterInput
     orderBy: [UniteOrderByInput!]
     limit: Int
@@ -11,6 +12,7 @@ type TableAdminView implements UniteAdminView{
     id: ID!
     type: ID!
     name: String!
+    titlePattern: String!
     fragment: String!
     category: String!
     fields: [UniteAdminViewField!]!
