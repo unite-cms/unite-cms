@@ -7,6 +7,7 @@ use GraphQL\Language\AST\FieldNode;
 use GraphQL\Language\AST\FragmentDefinitionNode;
 use GraphQL\Language\Printer;
 use UniteCMS\CoreBundle\ContentType\ContentType;
+use UniteCMS\CoreBundle\GraphQL\Util;
 
 class AdminView
 {
@@ -128,6 +129,11 @@ class AdminView
                     unset($ctFields[$id]);
                 }
 
+                // Add any found field directives to the field, so modifiers can use them later.
+                $field->setDirectives(Util::getDirectives($selection));
+
+                // Remove directives from node, so fragment printer will not include it.
+                $selection->directives = [];
                 $this->fields[] = $field;
             }
         }

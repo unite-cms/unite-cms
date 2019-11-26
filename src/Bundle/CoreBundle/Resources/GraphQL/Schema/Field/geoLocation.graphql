@@ -3,10 +3,16 @@ directive @geoLocationField(
     default: UniteGeoLocationInput
 ) on FIELD_DEFINITION
 
+enum GEO_LOCATION_TYPE {
+    STREET_ADDRESS
+    SUBLOCALITY
+    CITY
+}
+
 type UniteGeoLocation {
     provided_by: String
     id: ID
-    category: String
+    type: GEO_LOCATION_TYPE
     display_name: String
     latitude: Float
     longitude: Float
@@ -27,7 +33,7 @@ type UniteGeoLocation {
 input UniteGeoLocationInput {
     provided_by: String
     id: ID
-    category: String
+    type: GEO_LOCATION_TYPE
     display_name: String
     latitude: Float
     longitude: Float

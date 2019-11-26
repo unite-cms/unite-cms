@@ -708,9 +708,9 @@
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
 "@types/node@*", "@types/node@>=6":
-  version "12.12.12"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.12.tgz#529bc3e73dbb35dd9e90b0a1c83606a9d3264bdb"
-  integrity sha512-MGuvYJrPU0HUwqF7LqvIj50RZUX23Z+m583KBygKYUZLlZ88n6w28XRNJRJgsHukLEnLz6w6SvxZoLgbr5wLqQ==
+  version "12.12.14"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.14.tgz#1c1d6e3c75dba466e0326948d56e8bd72a1903d2"
+  integrity sha512-u/SJDyXwuihpwjXy7hOOghagLEV1KdAST6syfnOk6QZAMzZuWZqXy5aYYZbh8Jdpd4escVFP0MvftHNDb9pruA==
 
 "@types/q@^1.5.1":
   version "1.5.2"
@@ -1000,12 +1000,7 @@ ajv@^6.1.0, ajv@^6.10.2, ajv@^6.5.5:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-algolia-aerial@^1.5.3:
-  version "1.5.3"
-  resolved "https://registry.yarnpkg.com/algolia-aerial/-/algolia-aerial-1.5.3.tgz#c8b8ca6bc484164ffc7b36717689a424ea6bfe6c"
-  integrity sha512-LZTpVlYnhqNFd+ru/Spm73omhsagiRQLmjrosa5bJ6/I9OMRp4Sb9pYZkAxcx3RSr+ZNXZqthL7rpXqMFdrnPA==
-
-algoliasearch@^3.31.0:
+algoliasearch@^3.35.1:
   version "3.35.1"
   resolved "https://registry.yarnpkg.com/algoliasearch/-/algoliasearch-3.35.1.tgz#297d15f534a3507cab2f5dfb996019cac7568f0c"
   integrity sha512-K4yKVhaHkXfJ/xcUnil04xiSrB8B8yHZoFEhWNpXg23eiCnqvTZw1tn/SqvdsANlYHLJlKl0qi3I/Q2Sqo7LwQ==
@@ -2869,9 +2864,9 @@ express@^4.17.1:
     vary "~1.1.2"
 
 ext@^1.1.2:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/ext/-/ext-1.2.0.tgz#8dd8d2dd21bcced3045be09621fa0cbf73908ba4"
-  integrity sha512-0ccUQK/9e3NreLFg6K6np8aPyRgwycx+oFGtfx1dSp7Wj00Ozw9r05FgBRlzjf2XBM7LAzwgLyDscRrtSU91hA==
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/ext/-/ext-1.2.1.tgz#67e635e8d1c63a3250766a593aa8c3d6db332a32"
+  integrity sha512-x+OKKC57tNiLhDW26UmWtvQBpvO+2wxdC/A0jP7RkmjAc4gze9/U98hQyIYJUzo9A+o9ntMHpC+LH3pWMSbrVQ==
   dependencies:
     type "^2.0.0"
 
@@ -4175,6 +4170,11 @@ leaflet@^1.6.0:
   resolved "https://registry.yarnpkg.com/leaflet/-/leaflet-1.6.0.tgz#aecbb044b949ec29469eeb31c77a88e2f448f308"
   integrity sha512-CPkhyqWUKZKFJ6K8umN5/D2wrJ2+/8UIpXppY7QDnUZW5bZL5+SEI2J7GBpwh4LIupOKqbNSQXgqmrEJopHVNQ==
 
+load-js@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/load-js/-/load-js-3.0.3.tgz#9a5dd937de72fa789a0e696f7e917ecfe970de8a"
+  integrity sha512-y1Iqt5vikLPrI9xJHV3gK6TKDvGdJQPHjejJgP4BmS7wx4oo45+IMvnAT9jY8quL9NGtt0WlTuLq1pw7WuODYA==
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -5219,13 +5219,12 @@ pkg-up@^1.0.0:
   dependencies:
     find-up "^1.0.0"
 
-places.js@^1.17.0:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/places.js/-/places.js-1.17.0.tgz#e7b4767dd15fe034a50647d0275ba631b9cf74ae"
-  integrity sha512-eahnJ0eqXWmxwRNfSqamkNLE/Rzlyy2FK+mQdDjWYzCJSB8UTdoIu7IRDu/e5l+EHkYsHd/9q8Pz6SI3Ath+LA==
+places.js@^1.17.1:
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/places.js/-/places.js-1.17.1.tgz#fc6ef07f5ee87ec332820d7d03ac4c894a8ff764"
+  integrity sha512-TzDw893Uo3121vmEg0oV5L0HVbxcHUyanaSmnwcMs0Zll1F83/06lNJRcMiiuwNQWIik6xY3BeDDZzpaMaOILA==
   dependencies:
-    algolia-aerial "^1.5.3"
-    algoliasearch "^3.31.0"
+    algoliasearch "^3.35.1"
     autocomplete.js "^0.37.0"
     events "^3.0.0"
     insert-css "^2.0.0"
@@ -6004,9 +6003,9 @@ resolve-url@^0.2.1:
   integrity sha1-LGN/53yJOv0qZj/iGqkIAGjiBSo=
 
 resolve@^1.10.0, resolve@^1.3.2:
-  version "1.12.2"
-  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.12.2.tgz#08b12496d9aa8659c75f534a8f05f0d892fff594"
-  integrity sha512-cAVTI2VLHWYsGOirfeYVVQ7ZDejtQ9fp4YhYckWDEkFfqbVjaT11iM8k6xSAfGFMM+gDpZjMnFssPu8we+mqFw==
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.13.0.tgz#e879eb397efb40511056ede7300b6ac28c51290b"
+  integrity sha512-HHZ3hmOrk5SvybTb18xq4Ek2uLqLO5/goFCYUyvn26nWox4hdlKlfC/+dChIZ6qc4ZeYcN9ekTz0yyHsFgumMw==
   dependencies:
     path-parse "^1.0.6"
 
@@ -6975,6 +6974,7 @@ unique-slug@^2.0.0:
     uikit "^3.2.1"
     vue "^2.6.10"
     vue-apollo "^3.0.0"
+    vue-google-places "^0.1.6"
     vue-i18n "^8.15.0"
     vue-monaco "^1.1.0"
     vue-places "^2.1.0"
@@ -7132,6 +7132,13 @@ vue-apollo@^3.0.0:
     serialize-javascript "^2.1.0"
     throttle-debounce "^2.1.0"
 
+vue-google-places@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/vue-google-places/-/vue-google-places-0.1.6.tgz#c752e0810db533f9135b8ef84c2f79cb5254965f"
+  integrity sha512-OrkT4be4pvnRU3hh19FowESPXkYdNaQDmcz1HWT85OUeiRNO7E1BTubENniOAxizsOAE7u1vAFMBGon88E1sEQ==
+  dependencies:
+    load-js "^3.0.3"
+
 vue-hot-reload-api@^2.3.0:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.4.tgz#532955cc1eb208a3d990b3a9f9a70574657e08f2"
@@ -7162,11 +7169,11 @@ vue-monaco@^1.1.0:
     nano-assign "^1.0.0"
 
 vue-places@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/vue-places/-/vue-places-2.1.0.tgz#6470e4e714c957ca1b0225c6014a767262c66c2b"
-  integrity sha512-iIQRkdzicDOOvcKClvL+hvl0LeMDqCXv3nrj3BOsdb1FqIU4GHwUOvWrMo9UxWP/Dxeepsavy+obm3HVKRG71A==
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/vue-places/-/vue-places-2.1.1.tgz#6a5d91479c4a269e327868fb1f58dc3010785d67"
+  integrity sha512-1L5piUeP0a4OBS2UE/1puyM386Ees8e+WnDps4Vw6cXrJPxhk+88s5p0n8I/j6vb0OUbQodcotGZByOe8/xccA==
   dependencies:
-    places.js "^1.17.0"
+    places.js "^1.17.1"
 
 vue-router@^3.1.3:
   version "3.1.3"

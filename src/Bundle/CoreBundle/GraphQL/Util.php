@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\GraphQL;
 
 use GraphQL\Language\AST\ListValueNode;
+use GraphQL\Language\AST\ObjectValueNode;
 use GraphQL\Language\AST\ValueNode;
 use Symfony\Component\ExpressionLanguage\Expression;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
@@ -18,6 +19,15 @@ class Util
             }
             return $values;
         }
+
+        else if ($node instanceof ObjectValueNode) {
+            $values = [];
+            foreach($node->fields as $field) {
+                $values[$field->name->value] = static::getNodeValue($field->value);
+            }
+            return $values;
+        }
+
         return $node->value;
     }
 

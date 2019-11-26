@@ -1,10 +1,4 @@
 
-directive @adminField(
-    listIf: Expression
-    formIf: Expression
-    formGroup: String
-) on FIELD
-
 type UniteSchemaFile {
     name: String!
     value: String!

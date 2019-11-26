@@ -33,7 +33,7 @@ fragment articles on DemoArticle @tableAdminView {
 
 fragment admins on Admin @tableAdminView {
     username
-    password
+    password @adminField(formIf: "false", listIf: "false")
 }
 
 fragment settings on DemoSettings @settingsAdminView {

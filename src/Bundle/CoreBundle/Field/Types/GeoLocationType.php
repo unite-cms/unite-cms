@@ -25,7 +25,7 @@ class GeoLocationType extends AbstractFieldType
         return [
             'provided_by' => $fieldData->resolveData('provided_by', null),
             'id' => $fieldData->resolveData('id', null),
-            'category' => $fieldData->resolveData('category', null),
+            'type' => $fieldData->resolveData('type', null),
             'display_name' => $fieldData->resolveData('display_name', null),
             'latitude' => $fieldData->resolveData('latitude', null),
             'longitude' => $fieldData->resolveData('longitude', null),

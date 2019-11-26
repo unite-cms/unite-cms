@@ -23,11 +23,16 @@ class AdminViewTypeCompilerPass implements CompilerPassInterface
 
         $definition = $container->findDefinition(AdminViewTypeManager::class);
 
-        // Register schema extender
+        // Register admin view types
         $taggedServices = $container->findTaggedServiceIds('unite.admin_view_type');
-
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('registerAdminViewType', [new Reference($id)]);
+        }
+
+        // Register admin views field configurators
+        $taggedServices = $container->findTaggedServiceIds('unite.admin_view_field_configurator');
+        foreach ($taggedServices as $id => $tags) {
+            $definition->addMethodCall('registerAdminViewFieldConfigurator', [new Reference($id)]);
         }
     }
 }

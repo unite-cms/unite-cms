@@ -35,6 +35,11 @@ class AdminViewTypeManager
     protected $adminViewTypes = [];
 
     /**
+     * @var AdminFieldConfiguratorInterface[]
+     */
+    protected $adminViewFieldConfigurators = [];
+
+    /**
      * @var \UniteCMS\CoreBundle\Domain\DomainManager
      */
     protected $domainManager;
@@ -68,6 +73,17 @@ class AdminViewTypeManager
      */
     public function registerAdminViewType(AdminViewTypeInterface $adminViewType) : self {
         $this->adminViewTypes[$adminViewType::getType()] = $adminViewType;
+        return $this;
+    }
+
+    /**
+     * @param AdminFieldConfiguratorInterface $adminViewFieldConfigurator
+     *
+     * @return self
+     */
+    public function registerAdminViewFieldConfigurator(
+        AdminFieldConfiguratorInterface $adminViewFieldConfigurator) : self {
+        $this->adminViewFieldConfigurators[] = $adminViewFieldConfigurator;
         return $this;
     }
 
@@ -133,6 +149,22 @@ class AdminViewTypeManager
                     $field->setConfig($config);
                 }
 
+            }
+        }
+
+        return $adminView;
+    }
+
+    /**
+     * @param AdminView $adminView
+     * @param ContentType $contentType
+     *
+     * @return AdminView
+     */
+    protected function configureFields(AdminView $adminView, ContentType $contentType) : AdminView {
+        foreach($adminView->getFields() as $field) {
+            foreach($this->adminViewFieldConfigurators as $adminViewFieldConfigurator) {
+                $adminViewFieldConfigurator->configureField($field, $adminView, $contentType);
             }
         }
 
@@ -211,6 +243,9 @@ class AdminViewTypeManager
                 // Enrich content type fields with field settings.
                 $this->mapFieldConfig($adminView, $contentType);
 
+                // Allow admin field configurators to alter field config.
+                $this->configureFields($adminView, $contentType);
+
                 $adminViews[] = $adminView;
                 $usedContentTypes[] = $contentType->getId();
             }
@@ -242,6 +277,9 @@ class AdminViewTypeManager
 
                 // Enrich content type fields with field settings.
                 $this->mapFieldConfig($adminView, $contentType);
+
+                // Allow admin field configurators to alter field config.
+                $this->configureFields($adminView, $contentType);
 
                 $adminViews[] = $adminView;
             }

@@ -1,0 +1,21 @@
+
+input GeoLocationAdminFieldAlgoliaConfig {
+    appId: String
+    apiKey: String
+    countries: [String!]
+    type: GEO_LOCATION_TYPE
+}
+
+input GeoLocationAdminFieldGoogleConfig {
+    apiKey: String!
+    type: GEO_LOCATION_TYPE
+    countries: [String!]
+}
+
+directive @geoLocationAdminField(
+    listIf: Expression
+    formIf: Expression
+    formGroup: String
+    algolia: GeoLocationAdminFieldAlgoliaConfig
+    google: GeoLocationAdminFieldGoogleConfig
+) on FIELD

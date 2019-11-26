@@ -63,6 +63,11 @@ class AdminViewField
     protected $config;
 
     /**
+     * @var array
+     */
+    protected $directives = [];
+
+    /**
      * AdminView constructor.
      *
      * @param string $id
@@ -73,8 +78,9 @@ class AdminViewField
      * @param bool $isNonNull
      * @param string $description
      * @param array|ArrayCollection $config
+     * @param array $directives
      */
-    public function __construct(string $id, string $type, string $fieldType, string $name, bool $isListOf = false, bool $isNonNull = false, ?string $description = null, $config = null)
+    public function __construct(string $id, string $type, string $fieldType, string $name, bool $isListOf = false, bool $isNonNull = false, ?string $description = null, $config = null, array $directives = [])
     {
         $this->id = $id;
         $this->type = $type;
@@ -84,6 +90,7 @@ class AdminViewField
         $this->isNonNull = $isNonNull;
         $this->description = $description;
         $this->config = $config ? (is_array($config) ? new ArrayCollection($config) : $config) : new ArrayCollection();
+        $this->directives = $directives;
     }
 
     /**
@@ -281,6 +288,24 @@ class AdminViewField
      */
     public function setConfig(ArrayCollection $config): self {
         $this->config = $config;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDirectives(): array
+    {
+        return $this->directives;
+    }
+
+    /**
+     * @param array $directives
+     * @return self
+     */
+    public function setDirectives(array $directives): self
+    {
+        $this->directives = $directives;
         return $this;
     }
 }
