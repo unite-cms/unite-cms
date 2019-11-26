@@ -18,6 +18,7 @@ module.exports = {
 
             .addEntry('unite', [
                 __dirname + '/app.js',
+                __dirname + '/tiptap.js',
                 __dirname + `/vue/translations/${ lang }.js`,
                 __dirname + '/mount.js'
             ])

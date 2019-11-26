@@ -28,7 +28,7 @@ class UniteAdminViewFieldResolver implements FieldResolverInterface
         }
 
         switch ($info->fieldName) {
-            case 'fid':
+            case 'id':
                 return $value->getId();
 
             case 'name':

@@ -59,9 +59,6 @@ const createAdminView = function (view, unite) {
             }
         });
 
-        // We are using "fid" instead of "id" for the GraphQL query, so apollo won't get confused with fields with the same id.
-        field.id = field.fid;
-
         // parse field config.
         if(Array.isArray(field.config)) {
             let rawConfig = field.config;
@@ -161,7 +158,7 @@ export const Unite = new Vue({
                     fragment
                     category
                     fields {
-                        fid
+                        id
                         name
                         description
                         type

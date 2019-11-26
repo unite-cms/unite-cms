@@ -19,7 +19,9 @@
     "vue2-leaflet": "^2.2.1",
     "vue-google-places": "^0.1.6",
     "monaco-editor-webpack-plugin": "^1.7.0",
-    "vue-virtual-scroll-list": "^1.4.2"
+    "vue-virtual-scroll-list": "^1.4.2",
+    "tiptap": "^1.26.4",
+    "tiptap-extensions": "^1.28.4"
   },
   "license": "UNLICENSED",
   "private": true,

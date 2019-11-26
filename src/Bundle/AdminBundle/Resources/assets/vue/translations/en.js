@@ -43,7 +43,7 @@ messages.en = {
         },
         form: {
             field: {
-                fallback_warning: 'Missing form field type "{type}" for field "{id}".',
+                fallback_warning: 'Missing form field type "{fieldType}" for field "{id}".',
             },
         },
         create: {

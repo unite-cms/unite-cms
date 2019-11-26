@@ -29,6 +29,12 @@ type DemoArticle implements UniteContent {
     id: ID
     name: String! @textField
 
+    """ Article content"""
+    content: String @textField(escape: false)
+
+    """ Article content"""
+    extra_content: [String!] @textField(escape: false)
+
     """Main Category"""
     main_category: DemoCategory @referenceField
 

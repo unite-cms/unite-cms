@@ -15,7 +15,7 @@ type UniteAdminViewFieldConfig {
 }
 
 type UniteAdminViewField {
-    fid: ID!
+    id: ID!
     type: ID!
     fieldType: ID!
     name: String!

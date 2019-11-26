@@ -2,5 +2,6 @@
 directive @textField(
     default: String
     defaultExpression: Expression
+    escape: Boolean = true
     xss_clean: Boolean = true
 ) on FIELD_DEFINITION

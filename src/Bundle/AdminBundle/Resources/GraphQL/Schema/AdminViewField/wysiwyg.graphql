@@ -1,0 +1,6 @@
+
+directive @wysiwygAdminField(
+    listIf: Expression
+    formIf: Expression
+    formGroup: String
+) on FIELD

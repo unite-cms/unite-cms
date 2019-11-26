@@ -18,6 +18,10 @@ fragment categories on DemoCategory @tableAdminView {
 fragment articles on DemoArticle @tableAdminView {
     id
     name
+
+    content1 : content @textareaAdminField
+    content @wysiwygAdminField
+    extra_content @wysiwygAdminField
     geo {
         display_name
         stairs_number

@@ -7,3 +7,9 @@
     height: $icon-button-size / 1.5;
   }
 }
+
+@mixin hook-base-blockquote() {
+  background: $global-muted-background;
+  color: $global-muted-color;
+  padding: $base-blockquote-margin-vertical / 2;
+}
