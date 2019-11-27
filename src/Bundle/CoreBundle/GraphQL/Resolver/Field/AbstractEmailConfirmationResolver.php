@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 
+use GraphQL\Error\UserError;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
@@ -98,8 +99,15 @@ abstract class AbstractEmailConfirmationResolver implements FieldResolverInterfa
      */
     protected function isTokenEmptyOrExpired(UserInterface $user) : bool {
 
-        if(!($payload = $this->getTokenPayload($user))) {
-            return true;
+        try {
+            if (!($payload = $this->getTokenPayload($user))) {
+                return true;
+            }
+        } catch (JWTDecodeFailureException $e) {
+            if($e->getReason() === JWTDecodeFailureException::EXPIRED_TOKEN) {
+                return true;
+            }
+            throw $e;
         }
 
         if($payload['exp'] < time()) {
