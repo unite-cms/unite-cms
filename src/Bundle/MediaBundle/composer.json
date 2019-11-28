@@ -1,0 +1,24 @@
+{
+  "name": "unite-cms/media-bundle",
+  "type": "symfony-bundle",
+  "description": "File and media handling for for unite cms",
+  "require": {
+    "unite-cms/core-bundle": "0@dev"
+  },
+  "autoload": {
+    "psr-4": { "UniteCMS\\MediaBundle\\": "" },
+    "exclude-from-classmap": [
+      "/Tests/"
+    ]
+  },
+  "authors": [
+    {
+      "name": "Franz Wilding",
+      "email": "franz@unite.co.at"
+    },
+    {
+      "name": "Stefan Kamsker",
+      "email": "stefan@unite.co.at"
+    }
+  ]
+}

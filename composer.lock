@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9d64974053872e8bd07cecf517d5d4de",
+    "content-hash": "0b1cdb22e1d257096d9292093d3ea3b5",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -404,16 +404,16 @@
         },
         {
             "name": "doctrine/doctrine-bundle",
-            "version": "1.12.0",
+            "version": "1.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrineBundle.git",
-                "reference": "a374f3bc54fe7c23ddb722ef6b9ddd2d9dcb9115"
+                "reference": "1035bdda574f6beb39468c9a6b6066f5368a6b18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/DoctrineBundle/zipball/a374f3bc54fe7c23ddb722ef6b9ddd2d9dcb9115",
-                "reference": "a374f3bc54fe7c23ddb722ef6b9ddd2d9dcb9115",
+                "url": "https://api.github.com/repos/doctrine/DoctrineBundle/zipball/1035bdda574f6beb39468c9a6b6066f5368a6b18",
+                "reference": "1035bdda574f6beb39468c9a6b6066f5368a6b18",
                 "shasum": ""
             },
             "require": {
@@ -421,6 +421,7 @@
                 "doctrine/doctrine-cache-bundle": "~1.2",
                 "jdorn/sql-formatter": "^1.2.16",
                 "php": "^7.1",
+                "symfony/cache": "^3.4.30|^4.3.3",
                 "symfony/config": "^3.4.30|^4.3.3",
                 "symfony/console": "^3.4.30|^4.3.3",
                 "symfony/dependency-injection": "^3.4.30|^4.3.3",
@@ -436,7 +437,6 @@
                 "doctrine/orm": "^2.6",
                 "php-coveralls/php-coveralls": "^2.1",
                 "phpunit/phpunit": "^7.5",
-                "symfony/cache": "^3.4.30|^4.3.3",
                 "symfony/phpunit-bridge": "^4.2",
                 "symfony/property-info": "^3.4.30|^4.3.3",
                 "symfony/twig-bridge": "^3.4|^4.1",
@@ -490,7 +490,7 @@
                 "orm",
                 "persistence"
             ],
-            "time": "2019-11-19T11:42:20+00:00"
+            "time": "2019-11-27T08:24:00+00:00"
         },
         {
             "name": "doctrine/doctrine-cache-bundle",
@@ -3058,16 +3058,16 @@
         },
         {
             "name": "symfony/polyfill-intl-grapheme",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-grapheme.git",
-                "reference": "f6d623160da72288a9b704d324e5a0e4b385331a"
+                "reference": "45c566a1ca16273f7ea6b930e013462e00e14502"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/f6d623160da72288a9b704d324e5a0e4b385331a",
-                "reference": "f6d623160da72288a9b704d324e5a0e4b385331a",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/45c566a1ca16273f7ea6b930e013462e00e14502",
+                "reference": "45c566a1ca16273f7ea6b930e013462e00e14502",
                 "shasum": ""
             },
             "require": {
@@ -3079,7 +3079,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -3114,20 +3114,20 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-08-06T08:03:45+00:00"
+            "time": "2019-11-27T13:56:44+00:00"
         },
         {
             "name": "symfony/polyfill-intl-idn",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-idn.git",
-                "reference": "6af626ae6fa37d396dc90a399c0ff08e5cfc45b2"
+                "reference": "6f9c239e61e1b0c9229a28ff89a812dc449c3d46"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-idn/zipball/6af626ae6fa37d396dc90a399c0ff08e5cfc45b2",
-                "reference": "6af626ae6fa37d396dc90a399c0ff08e5cfc45b2",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-idn/zipball/6f9c239e61e1b0c9229a28ff89a812dc449c3d46",
+                "reference": "6f9c239e61e1b0c9229a28ff89a812dc449c3d46",
                 "shasum": ""
             },
             "require": {
@@ -3141,7 +3141,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -3176,20 +3176,20 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-08-06T08:03:45+00:00"
+            "time": "2019-11-27T13:56:44+00:00"
         },
         {
             "name": "symfony/polyfill-intl-normalizer",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
-                "reference": "c7fcec8e5cd3fc87f91120b0b5d3cb1b7d44f7a9"
+                "reference": "cfe6ad557c15f3797f667e9518ce759aa04ae4f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/c7fcec8e5cd3fc87f91120b0b5d3cb1b7d44f7a9",
-                "reference": "c7fcec8e5cd3fc87f91120b0b5d3cb1b7d44f7a9",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/cfe6ad557c15f3797f667e9518ce759aa04ae4f3",
+                "reference": "cfe6ad557c15f3797f667e9518ce759aa04ae4f3",
                 "shasum": ""
             },
             "require": {
@@ -3201,7 +3201,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -3239,20 +3239,20 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-08-06T08:03:45+00:00"
+            "time": "2019-11-27T13:56:44+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "b42a2f66e8f1b15ccf25652c3424265923eb4f17"
+                "reference": "7b4aab9743c30be783b73de055d24a39cf4b954f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/b42a2f66e8f1b15ccf25652c3424265923eb4f17",
-                "reference": "b42a2f66e8f1b15ccf25652c3424265923eb4f17",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/7b4aab9743c30be783b73de055d24a39cf4b954f",
+                "reference": "7b4aab9743c30be783b73de055d24a39cf4b954f",
                 "shasum": ""
             },
             "require": {
@@ -3264,7 +3264,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -3298,20 +3298,20 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-08-06T08:03:45+00:00"
+            "time": "2019-11-27T14:18:11+00:00"
         },
         {
             "name": "symfony/polyfill-php72",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php72.git",
-                "reference": "04ce3335667451138df4307d6a9b61565560199e"
+                "reference": "66fea50f6cb37a35eea048d75a7d99a45b586038"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php72/zipball/04ce3335667451138df4307d6a9b61565560199e",
-                "reference": "04ce3335667451138df4307d6a9b61565560199e",
+                "url": "https://api.github.com/repos/symfony/polyfill-php72/zipball/66fea50f6cb37a35eea048d75a7d99a45b586038",
+                "reference": "66fea50f6cb37a35eea048d75a7d99a45b586038",
                 "shasum": ""
             },
             "require": {
@@ -3320,7 +3320,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -3353,20 +3353,20 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-08-06T08:03:45+00:00"
+            "time": "2019-11-27T13:56:44+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php73.git",
-                "reference": "2ceb49eaccb9352bff54d22570276bb75ba4a188"
+                "reference": "4b0e2222c55a25b4541305a053013d5647d3a25f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php73/zipball/2ceb49eaccb9352bff54d22570276bb75ba4a188",
-                "reference": "2ceb49eaccb9352bff54d22570276bb75ba4a188",
+                "url": "https://api.github.com/repos/symfony/polyfill-php73/zipball/4b0e2222c55a25b4541305a053013d5647d3a25f",
+                "reference": "4b0e2222c55a25b4541305a053013d5647d3a25f",
                 "shasum": ""
             },
             "require": {
@@ -3375,7 +3375,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -3411,7 +3411,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-08-06T08:03:45+00:00"
+            "time": "2019-11-27T16:25:15+00:00"
         },
         {
             "name": "symfony/property-access",
@@ -4844,6 +4844,41 @@
             }
         },
         {
+            "name": "unite-cms/media-bundle",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./src/Bundle/MediaBundle",
+                "reference": "392b8d5525f9a8180ca08c1e8ccba6fd1c44a4fb"
+            },
+            "require": {
+                "unite-cms/core-bundle": "0@dev"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "UniteCMS\\MediaBundle\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "authors": [
+                {
+                    "name": "Franz Wilding",
+                    "email": "franz@unite.co.at"
+                },
+                {
+                    "name": "Stefan Kamsker",
+                    "email": "stefan@unite.co.at"
+                }
+            ],
+            "description": "File and media handling for for unite cms",
+            "transport-options": {
+                "symlink": true
+            }
+        },
+        {
             "name": "voku/anti-xss",
             "version": "4.1.19",
             "source": {
@@ -5729,7 +5764,8 @@
     "stability-flags": {
         "unite-cms/core-bundle": 20,
         "unite-cms/doctrine-orm-bundle": 20,
-        "unite-cms/admin-bundle": 20
+        "unite-cms/admin-bundle": 20,
+        "unite-cms/media-bundle": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

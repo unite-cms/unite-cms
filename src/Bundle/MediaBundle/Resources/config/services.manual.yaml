@@ -1,0 +1,21 @@
+
+# Create services based on arguments
+services:
+
+    unite.cms_media.graphql.extender.pre_signed_url:
+        parent: UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaFileExtender
+        arguments: ['%kernel.project_dir%/vendor/unite-cms/media-bundle/Resources/GraphQL/Schema/pre-signed-url.graphql']
+        tags:
+            - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }
+
+    unite.cms_core.graphql.extender.email_account_activate:
+        parent: UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaFileExtender
+        arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/email-account-activate.graphql']
+        tags:
+            - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }
+
+    unite.cms_core.graphql.extender.email_change:
+        parent: UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaFileExtender
+        arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/email-change.graphql']
+        tags:
+            - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }

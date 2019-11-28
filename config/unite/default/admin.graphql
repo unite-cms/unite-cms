@@ -1,20 +1,4 @@
 
-fragment categories on DemoCategory @tableAdminView {
-    name
-    articles1: articles {
-        __typename
-    }
-    articles {
-        total
-    }
-    parent {
-        name
-    }
-    children {
-        total
-    }
-}
-
 fragment articles on DemoArticle @tableAdminView {
     id
     name
@@ -34,6 +18,7 @@ fragment articles on DemoArticle @tableAdminView {
         longitude
     }
 }
+
 
 fragment admins on Admin @tableAdminView {
     username

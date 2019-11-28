@@ -445,6 +445,9 @@
     "unite-cms/doctrine-orm-bundle": {
         "version": "dev-draft-version-0.10"
     },
+    "unite-cms/media-bundle": {
+        "version": "dev-master"
+    },
     "voku/anti-xss": {
         "version": "4.1.19"
     },

@@ -1,0 +1,12 @@
+
+directive @mediaFileField(
+    todo: String!
+) on FIELD_DEFINITION
+
+type UniteMediaFile {
+    todo: String!
+}
+
+input UniteMediaFileInput {
+    todo: String!
+}

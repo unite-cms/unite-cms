@@ -28,6 +28,13 @@
             "options": {
                 "symlink": true
             }
+        },
+        {
+            "type": "path",
+            "url": "./src/Bundle/MediaBundle",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "require": {
@@ -41,7 +48,8 @@
         "symfony/yaml": "4.3.*",
         "unite-cms/core-bundle": "0@dev",
         "unite-cms/doctrine-orm-bundle": "0@dev",
-        "unite-cms/admin-bundle": "0@dev"
+        "unite-cms/admin-bundle": "0@dev",
+        "unite-cms/media-bundle": "0@dev"
     },
     "require-dev": {
         "dama/doctrine-test-bundle": "^6.2",

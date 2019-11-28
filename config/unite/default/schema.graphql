@@ -22,6 +22,17 @@ type DemoCategory implements UniteContent {
     children: UniteContentResult @referenceOfField(content_type: "DemoCategory", reference_field: "parent")
 }
 
+type TeaserRegion implements UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    title: String @textField
+    intro_text: String @textField
+
+    nestedTeaser: [TeaserRegion!] @embeddedField
+    main_category: DemoCategory @referenceField
+    subcategories: [DemoCategory!] @referenceField
+}
+
 
 """Articles"""
 type DemoArticle implements UniteContent {
@@ -40,6 +51,14 @@ type DemoArticle implements UniteContent {
 
     geo: UniteGeoLocation @geoLocationField
     geos: [UniteGeoLocation!] @geoLocationField
+
+    teaser: TeaserRegion @embeddedField
+    teasers: [TeaserRegion!] @embeddedField
+
+    testFile: UniteMediaFile @mediaFileField(todo: "FOO")
+    testFile1: UniteMediaFile! @mediaFileField(todo: "FOO")
+    testFiles: [UniteMediaFile!] @mediaFileField(todo: "FOO")
+
 }
 
 
@@ -49,6 +68,8 @@ type Admin implements UniteUser @passwordAuthenticator(passwordField: "password"
     id: ID
     username: String! @emailField
     password: NULL! @passwordField
+
+    teaser: TeaserRegion @embeddedField
 }
 
 
