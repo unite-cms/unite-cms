@@ -3,7 +3,9 @@
   "type": "symfony-bundle",
   "description": "File and media handling for for unite cms",
   "require": {
-    "unite-cms/core-bundle": "0@dev"
+    "php": "^7.2",
+    "league/flysystem": "^1.0",
+    "league/flysystem-bundle": "^1.3"
   },
   "autoload": {
     "psr-4": { "UniteCMS\\MediaBundle\\": "" },

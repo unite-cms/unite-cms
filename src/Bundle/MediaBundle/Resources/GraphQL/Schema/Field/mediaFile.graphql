@@ -1,12 +1,18 @@
 
 directive @mediaFileField(
-    todo: String!
+    default: UniteMediaFileInput
 ) on FIELD_DEFINITION
 
 type UniteMediaFile {
-    todo: String!
+    id: ID
+    path: String
+    width: Int
+    height: Int
 }
 
 input UniteMediaFileInput {
-    todo: String!
+    id: ID
+    path: String
+    width: Int
+    height: Int
 }
