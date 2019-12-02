@@ -67,6 +67,7 @@ class Logger implements LoggerInterface
             $log->setUsername($user->getUsername());
         }
 
+        $this->em($domain)->persist($log);
         $this->em($domain)->flush();
         return $log;
     }
