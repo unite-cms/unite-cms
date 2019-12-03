@@ -1,6 +1,6 @@
 <template>
   <form-row :domID="domID" :field="field">
-      <select :required="field.non_null" v-if="!field.list_of" class="uk-select" :id="domID" v-model="val">
+      <select :required="field.required" v-if="!field.list_of" class="uk-select" :id="domID" v-model="val">
         <option v-for="option in options" :value="option.value">{{ option.label }}</option>
       </select>
       <template v-else>

@@ -222,6 +222,7 @@ export const Unite = new Vue({
                         type
                         fieldType
                         non_null
+                        required
                         list_of
                         show_in_list
                         show_in_form

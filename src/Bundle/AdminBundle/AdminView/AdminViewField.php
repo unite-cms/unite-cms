@@ -43,6 +43,11 @@ class AdminViewField
     protected $isNonNull = false;
 
     /**
+     * @var bool $required
+     */
+    protected $required = false;
+
+    /**
      * @var bool $showInList
      */
     protected $showInList = false;
@@ -76,11 +81,12 @@ class AdminViewField
      * @param string $name
      * @param bool $isListOf
      * @param bool $isNonNull
+     * @param bool $required
      * @param string $description
      * @param array|ArrayCollection $config
      * @param array $directives
      */
-    public function __construct(string $id, string $type, string $fieldType, string $name, bool $isListOf = false, bool $isNonNull = false, ?string $description = null, $config = null, array $directives = [])
+    public function __construct(string $id, string $type, string $fieldType, string $name, bool $isListOf = false, bool $isNonNull = false, bool $required = false, ?string $description = null, $config = null, array $directives = [])
     {
         $this->id = $id;
         $this->type = $type;
@@ -88,6 +94,7 @@ class AdminViewField
         $this->name = $name;
         $this->isListOf = $isListOf;
         $this->isNonNull = $isNonNull;
+        $this->required = $required;
         $this->description = $description;
         $this->config = $config ? (is_array($config) ? new ArrayCollection($config) : $config) : new ArrayCollection();
         $this->directives = $directives;
@@ -105,6 +112,7 @@ class AdminViewField
             $contentTypeField->getName(),
             $contentTypeField->isListOf(),
             $contentTypeField->isNonNull(),
+            $contentTypeField->isRequired(),
             $contentTypeField->getDescription()
         );
     }
@@ -255,6 +263,23 @@ class AdminViewField
      */
     public function isNonNull() : bool {
         return $this->isNonNull;
+    }
+
+    /**
+     * @param bool $required
+     * @return self
+     */
+    public function setRequired(bool $required): self
+    {
+        $this->required = $required;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRequired() : bool {
+        return $this->required;
     }
 
     /**

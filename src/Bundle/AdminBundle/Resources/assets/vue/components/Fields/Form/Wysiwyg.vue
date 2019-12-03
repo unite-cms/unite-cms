@@ -61,7 +61,7 @@
                           content: this.values[key] || '',
                           attributes: {
                               class: 'uk-textarea',
-                              required: this.field.non_null,
+                              required: this.field.required,
                               id: this.domID,
                           }
                       },

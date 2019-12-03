@@ -37,6 +37,10 @@ fragment articles on DemoArticle @tableAdminView {
         latitude
         longitude
     }
+
+    boolTest
+    boolTest1
+    boolTest2
 }
 
 

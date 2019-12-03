@@ -118,7 +118,7 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
      * @return mixed
      */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
-        return $fieldData->resolveData('', $field->isNonNull() ? '' : null);
+        return $fieldData->resolveData('', ($field->isNonNull() || $field->isListOf()) ? '' : null);
     }
 
     /**
@@ -150,7 +150,7 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
      */
     public function validateFieldData(ContentInterface $content, ContentTypeField $field, ContextualValidatorInterface $validator, ExecutionContextInterface $context, FieldData $fieldData = null) : void {
 
-        if($field->isNonNull() && (empty($fieldData) || empty($fieldData->resolveData()))) {
+        if($field->isRequired() && (empty($fieldData) || empty($fieldData->resolveData()))) {
             $validator->validate('', new NotBlank(), [$context->getGroup()]);
         }
     }

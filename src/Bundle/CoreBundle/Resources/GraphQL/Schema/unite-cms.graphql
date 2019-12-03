@@ -76,6 +76,8 @@ directive @webhook(
     groups: [CONTENT_EVENT!]
 ) on OBJECT
 
+directive @required on FIELD_DEFINITION
+
 type UniteContentListPermissions {
     create: Boolean!
 }

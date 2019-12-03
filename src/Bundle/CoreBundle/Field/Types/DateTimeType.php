@@ -59,7 +59,7 @@ class DateTimeType extends AbstractFieldType
      * {@inheritDoc}
      */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
-        $timestamp = $fieldData->resolveData('', $field->isNonNull() ? 0 : null);
+        $timestamp = $fieldData->resolveData('', 0);
         $date = new DateTime();
         $date->setTimestamp((int)$timestamp);
         return $date;

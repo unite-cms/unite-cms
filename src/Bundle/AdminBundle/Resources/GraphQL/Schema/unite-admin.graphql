@@ -22,6 +22,7 @@ type UniteAdminViewField {
     description: String
     list_of: Boolean!
     non_null: Boolean!
+    required: Boolean!
     show_in_list: Boolean!
     show_in_form: Boolean!
     form_group: String

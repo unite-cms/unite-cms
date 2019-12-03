@@ -131,6 +131,7 @@ class AdminView
                         ->setShowInForm($ctFields[$id]->showInForm())
                         ->setIsListOf($ctFields[$id]->isListOf())
                         ->setIsNonNull($ctFields[$id]->isNonNull())
+                        ->setRequired($ctFields[$id]->isRequired())
                         ->setDescription($ctFields[$id]->getDescription());
                     unset($ctFields[$id]);
                 }

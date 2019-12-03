@@ -68,7 +68,7 @@ class ContentTypeManager
                 $unionType = new ContentType($field->getReturnType(), $field->getReturnType());
 
                 foreach($field->getUnionTypes() as $type) {
-                    $unionType->registerField(new ContentTypeField($type->name, $type->description ?? $type->name, $field->getType(), [], false, false, null, null, $type->name));
+                    $unionType->registerField(new ContentTypeField($type->name, $type->description ?? $type->name, $field->getType(), [], false, false, false, null, null, $type->name));
                 }
 
                 $this->unionContentTypes[$unionType->getId()] = $unionType;

@@ -7,7 +7,7 @@ enum ArticleStatus {
 
 type SEO implements UniteEmbeddedContent {
     id: ID
-    _meta: UniteContentMeta @textField(default: "%(DATABASE_URL)%")
+    _meta: UniteContentMeta
     headline: String @textField
     metaDescription: String @textField
 }
@@ -70,6 +70,10 @@ type DemoArticle implements UniteContent {
 
     teaser: TeaserRegion @embeddedField
     teasers: [TeaserRegion!] @embeddedField
+
+    boolTest: Boolean @booleanField
+    boolTest1: Boolean @booleanField @required
+    boolTest2: [Boolean!] @booleanField
 
     #testFile: UniteMediaFile @mediaFileField(todo: "FOO")
     #testFile1: UniteMediaFile! @mediaFileField(todo: "FOO")

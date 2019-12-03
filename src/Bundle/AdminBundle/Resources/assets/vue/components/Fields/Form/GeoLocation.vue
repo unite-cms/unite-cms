@@ -9,7 +9,7 @@
             <input class="uk-search-input" type="search" placeholder="" :value="geoValues[multiProps.rowKey || 0]" />
           </google-places>
 
-          <places v-else class="uk-input" :options="algoliaOptions()" :required="field.non_null" :id="domID" :value="geoValues[multiProps.rowKey || 0]" @change="setAlgoliaValue(arguments, multiProps.rowKey)" />
+          <places v-else class="uk-input" :options="algoliaOptions()" :required="field.required" :id="domID" :value="geoValues[multiProps.rowKey || 0]" @change="setAlgoliaValue(arguments, multiProps.rowKey)" />
 
         </div>
 

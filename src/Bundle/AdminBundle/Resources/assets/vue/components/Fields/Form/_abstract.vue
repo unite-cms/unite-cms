@@ -58,8 +58,13 @@
             setValue(args, key) {
 
                 let value = args ? args[0] : null;
+
                 if(value && typeof value === "object" && value.constructor.name === 'InputEvent') {
                    value = value.target.value;
+                }
+
+                else if(value && typeof value === "object" && value.constructor.name === 'Event') {
+                    value = value.target.checked;
                 }
 
                 if(this.field.list_of) {

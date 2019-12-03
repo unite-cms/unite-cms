@@ -4,7 +4,7 @@
       <div class="uk-flex uk-flex-middle">
 
         <div class="uk-flex-1 date-picker-input">
-          <date-picker :required="field.non_null" :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setDate(arguments, multiProps.rowKey)" :language="$t('field.date')" format="d MMMM yyyy" />
+          <date-picker :required="field.required" :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setDate(arguments, multiProps.rowKey)" :language="$t('field.date')" format="d MMMM yyyy" />
         </div>
 
         <div class="date-picker-separator">:</div>
@@ -19,7 +19,7 @@
           <input pattern="\d{1,2}" class="uk-input uk-form-width-xsmall uk-text-center" placeholder="00" :value="minutes[multiProps.rowKey || 0]" @input="setTime(arguments, multiProps.rowKey, true)" />
         </div>
 
-        <div v-if="!field.list_of && !field.non_null && val" class="uk-margin-small-left">
+        <div v-if="!field.list_of && !field.required && val" class="uk-margin-small-left">
           <a class="uk-icon-link uk-text-danger" @click.prevent="setValue(null)"><icon name="x" /></a>
         </div>
       </div>
