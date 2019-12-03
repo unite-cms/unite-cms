@@ -2,7 +2,7 @@
   <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference_of.missing_view_warning') }] : []">
     <template v-if="contentId">
       <div class="uk-input-group" v-for="value in values">
-        <span v-if="value.total" class="uk-margin-small-right uk-label uk-label-muted">{{ value.total }}</span>
+        <span v-if="value.total !== null" class="uk-margin-small-right uk-label uk-label-muted">{{ value.total }}</span>
         <a v-if="value.total !== 0" class="uk-icon-button uk-button-light uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="more-horizontal" /></a>
       </div>
       <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', field)">
@@ -17,21 +17,20 @@
   import MultiField from './_multiField';
   import Modal from "../../Modal";
   import Icon from "../../Icon";
-  import { getAdminViewByType, removeIntroSpecType } from '../../../plugins/unite';
-  import _abstractReadOnly from "./_abstractReadOnly";
+  import { getAdminViewByType } from '../../../plugins/unite';
+  import _abstract from "./_abstract";
 
   export default {
 
       // Static query methods for unite system.
-      queryData(field, unite) {
+      queryData(field, unite, depth) {
           return `${ field.id } { total }`
       },
-      normalizeData(inputData, field, unite) {
-          return removeIntroSpecType(inputData);
-      },
+      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeMutationData(formData, field, unite) { return undefined; },
 
       // Vue properties for this component.
-      extends: _abstractReadOnly,
+      extends: _abstract,
       components: { Icon, FormRow, MultiField, Modal },
       data() {
           return {

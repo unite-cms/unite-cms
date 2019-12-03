@@ -1,7 +1,27 @@
 
+fragment categories on DemoCategory @tableAdminView {
+    block {
+        ... on Headline {
+            headline
+        }
+        ... on Text {
+            text
+        }
+    }
+    blocks {
+        ... on Headline {
+            headline
+        }
+        ... on Text {
+            text
+        }
+    }
+}
+
 fragment articles on DemoArticle @tableAdminView {
     id
     name
+
 
     content1 : content @textareaAdminField
     content @wysiwygAdminField

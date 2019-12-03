@@ -37,7 +37,7 @@
   import MultiField from './_multiField';
   import GooglePlaces from 'vue-google-places/src/VueGooglePlaces'
   import Places from 'vue-places/src/Places';
-  import { removeIntroSpecType } from '../../../plugins/unite';
+  import {removeIntroSpecType} from "../../../plugins/unite";
 
   const GoogleTypeMap = {
       locality: 'CITY',
@@ -57,7 +57,7 @@
   export default {
 
       // Static query methods for unite system.
-      queryData(field) { return `${ field.id } {
+      queryData(field, unite, depth) { return `${ field.id } {
         provided_by,
         id,
         type,
@@ -77,9 +77,8 @@
         stairs_number,
         door_number
       }`; },
-      normalizeData(inputData, field, unite) {
-          return removeIntroSpecType(inputData);
-      },
+      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeMutationData(formData, field, unite) { return removeIntroSpecType(formData); },
 
       // Vue properties for this component.
       extends: _abstract,

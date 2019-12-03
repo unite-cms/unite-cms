@@ -1,7 +1,7 @@
 <template>
   <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference.missing_view_warning') }] : []">
       <div class="uk-input-group uk-flex uk-flex-middle uk-flex-wrap">
-        <div class="uk-label uk-label-primary" v-for="value in values">
+        <div class="uk-label uk-label-secondary" v-for="value in values">
           {{ referencedContentTitle(value) }}
           <a href="" @click.prevent="removeValue(value)" class="uk-icon-link"><icon name="x" /></a>
         </div>
@@ -18,13 +18,13 @@
   import Icon from "../../Icon";
   import Modal from "../../Modal";
   import gql from 'graphql-tag';
-  import { getAdminViewByType } from "../../../plugins/unite";
+  import {getAdminViewByType} from "../../../plugins/unite";
 
   export default {
 
       // Static query methods for unite system.
-      queryData(field) { return `${ field.id } { id }` },
-      normalizeData(inputData, field) {
+      queryData(field, unite, depth) { return `${ field.id } { id }` },
+      normalizeQueryData(inputData, field) {
 
           if(!inputData || inputData.length === 0) {
               return null;
@@ -36,6 +36,7 @@
               return inputData.id;
           }
       },
+      normalizeMutationData(formData, field, unite) { return formData; },
 
       // Vue properties for this component.
       extends: _abstract,
@@ -55,6 +56,7 @@
       },
       apollo: {
           referencedContent: {
+              fetchPolicy: 'network-only',
               query() {
                   return gql`
                     ${ this.referencedView.fragment }
@@ -86,11 +88,3 @@
       }
   }
 </script>
-<style scoped lang="scss">
-  .uk-label {
-    .uk-icon-link {
-      margin-right: -5px;
-      color: white;
-    }
-  }
-</style>

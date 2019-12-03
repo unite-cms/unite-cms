@@ -12,6 +12,20 @@ type SEO implements UniteEmbeddedContent {
     metaDescription: String @textField
 }
 
+type Text implements UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    text: String @textField
+}
+
+type Headline implements UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    headline: String @textField
+}
+
+union Blocks = Text | Headline
+
 """Categories"""
 type DemoCategory implements UniteContent {
     _meta: UniteContentMeta
@@ -20,6 +34,8 @@ type DemoCategory implements UniteContent {
     articles(filter: UniteFilterInput, orderBy: [UniteOrderByInput!], limit: Int = 20, offset: Int = 0): UniteContentResult @referenceOfField(content_type: "DemoArticle", reference_field: "main_category")
     parent: DemoCategory @referenceField
     children: UniteContentResult @referenceOfField(content_type: "DemoCategory", reference_field: "parent")
+    block: Blocks @embeddedField
+    blocks: [Blocks!] @embeddedField
 }
 
 type TeaserRegion implements UniteEmbeddedContent {
@@ -55,9 +71,9 @@ type DemoArticle implements UniteContent {
     teaser: TeaserRegion @embeddedField
     teasers: [TeaserRegion!] @embeddedField
 
-    testFile: UniteMediaFile @mediaFileField(todo: "FOO")
-    testFile1: UniteMediaFile! @mediaFileField(todo: "FOO")
-    testFiles: [UniteMediaFile!] @mediaFileField(todo: "FOO")
+    #testFile: UniteMediaFile @mediaFileField(todo: "FOO")
+    #testFile1: UniteMediaFile! @mediaFileField(todo: "FOO")
+    #testFiles: [UniteMediaFile!] @mediaFileField(todo: "FOO")
 
 }
 

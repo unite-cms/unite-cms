@@ -1,8 +1,20 @@
 <template>
   <form-row :domID="domID" :field="field" :alerts="!embeddedView ? [{ level: 'warning', message: $t('field.embedded.missing_view_warning') }] : []">
-    <multi-field v-if="embeddedView" :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
-      <div class="uk-input-group">
-        <component :key="field.id" v-for="field in embeddedView.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :field="field" :value="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0][field.id] : undefined" @input="setFieldValue(field.id, arguments, multiProps.rowKey)" />
+    <multi-field v-if="embeddedView" :field="field" :val="val" @addRow="val.push({})" @removeRow="removeByKey" v-slot:default="multiProps">
+
+      <div class="uk-input-group uk-text-center" v-if="embeddedView.category === 'union' && !unionViews[multiProps.rowKey || 0]">
+        <a class="union-select-card uk-card uk-card-small uk-card-default uk-card-body uk-text-center" @click.prevent="setFieldValue('__typename', [view.type], multiProps.rowKey || 0)" v-for="view in embeddedView.possibleViews">
+          {{ view.name }}
+        </a>
+      </div>
+      <div v-else class="uk-input-group">
+
+        <div v-if="embeddedView.category === 'union'" class="uk-label uk-label-secondary">
+          {{ unionViews[multiProps.rowKey || 0].name }}
+          <a @click.prevent="clearUnionView(multiProps.rowKey || 0)" class="uk-icon-link"><icon name="x" /></a>
+        </div>
+
+        <component :key="field.id" v-for="field in normalizedViews[multiProps.rowKey || 0].formFields()" :is="$unite.getFormFieldType(field.fieldType)" :field="field" :value="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0][field.id] : undefined" @input="setFieldValue(field.id, arguments, multiProps.rowKey || 0)" />
       </div>
     </multi-field>
   </form-row>
@@ -11,26 +23,63 @@
   import _abstract from "./_abstract";
   import FormRow from './_formRow';
   import MultiField from './_multiField';
-  import Modal from "../../Modal";
-  import { getAdminViewByType, removeIntroSpecType } from '../../../plugins/unite';
+  import Icon from "../../Icon";
+  import UIkit from 'uikit';
+  import {getAdminViewByType, removeIntroSpecType} from '../../../plugins/unite';
 
   export default {
 
       // Static query methods for unite system.
-      queryData(field, unite) {
-          return `${ field.id } { ${ getAdminViewByType(unite, field.returnType).queryFormData().join("\n") } }`
+      queryData(field, unite, depth) {
+          return `${ field.id } { ${ getAdminViewByType(unite, field.returnType).queryFormData(depth + 1).join("\n") } }`
       },
-      normalizeData(inputData, field, unite) {
-          return removeIntroSpecType(inputData);
+      normalizeQueryData(queryData, field, unite, depth) { return queryData; },
+      normalizeMutationData(formData, field, unite, depth) {
+
+          let view = getAdminViewByType(unite, field.returnType);
+
+          // Manipulate values for union type.
+          if(view.category === 'union') {
+              let rowValues = field.list_of ? formData : [formData];
+              rowValues = rowValues.filter((value) => { return !!value.__typename }).map((value) => {
+                  let type = value.__typename;
+                  let unionViews = view.possibleViews.filter((uview) => { return uview.type === type; });
+                  let unionView = unionViews[0];
+                  let unionValue = {};
+                  unionValue[type] = unionView.normalizeMutationData(value, depth + 1);
+                  return unionValue;
+              });
+              formData = field.list_of ? rowValues : rowValues[0];
+          } else {
+              formData = view.normalizeMutationData(formData, depth + 1);
+          }
+
+          return removeIntroSpecType(formData);
       },
 
       // Vue properties for this component.
       extends: _abstract,
-      components: { FormRow, MultiField, Modal },
+      components: { FormRow, MultiField, Icon },
+
       computed: {
           embeddedView() {
               return getAdminViewByType(this.$unite, this.field.returnType);
-          }
+          },
+
+          unionViews() {
+              let rows = this.values;
+              rows = rows.length > 0 ? rows : [{}];
+              return rows.map((row) => {
+                  return this.unionView(row.__typename)
+              });
+          },
+
+          normalizedViews() {
+              return this.unionViews.map((view) => {
+                  return view || this.embeddedView;
+              });
+          },
+
       },
       methods: {
           setFieldValue(field, args, key) {
@@ -41,7 +90,27 @@
                   this.val = this.val || {};
                   this.$set(this.val, field, args[0]);
               }
+          },
+
+          unionView(type) {
+              if(!type || this.embeddedView.category !== 'union') {
+                  return null;
+              }
+              let views = this.embeddedView.possibleViews.filter((view) => { return view.type === type; });
+              return views.length > 0 ? views[0] : null;
+          },
+
+          clearUnionView(delta) {
+              UIkit.modal.confirm(this.$t('field.embedded.confirm.clear_union_selection', this.unionView[delta])).then(() => {
+                  this.setValue([{}], delta);
+              });
           }
       }
   }
 </script>
+<style scoped lang="scss">
+  .union-select-card {
+    width: 200px;
+    display: inline-block
+  }
+</style>

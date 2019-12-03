@@ -124,6 +124,14 @@ messages.en = {
                 headline: '{display_name}'
             }
         },
+
+        embedded: {
+            missing_view_warning: 'No admin view for the embedded content of this field was found. Please add one to your schema!',
+            confirm: {
+                clear_union_selection: 'Do you really want to select another {view.name} type? Your already entered vales for this field will be deleted.'
+            }
+        },
+
         date: en
     }
 };

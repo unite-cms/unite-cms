@@ -22,7 +22,7 @@
             }
         },
         mounted() {
-            this.formData = this.view.normalizeFormData();
+            this.formData = this.view.normalizeQueryData();
         },
         computed: {
             view() {
@@ -44,7 +44,7 @@
                     }`,
                     variables: {
                         persist: true,
-                        data: this.formData
+                        data: this.view.normalizeMutationData(Object.assign({}, this.formData)),
                     }
                 }).then((data) => {
                     Route.back({updated: data.data[`create${this.view.type}`].id});

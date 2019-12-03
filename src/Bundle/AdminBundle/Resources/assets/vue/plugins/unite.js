@@ -10,6 +10,8 @@ import User from "../state/User";
 import router from "./router";
 import Mustache from 'mustache';
 
+const MAX_QUERY_DEPTH = 12;
+
 export const removeIntroSpecType = function(val){
     if(val && typeof val === 'object') {
 
@@ -34,6 +36,24 @@ export const innerType = function(type) {
 };
 
 export const getAdminViewByType = function(unite, returnType) {
+
+    // For unions, we need to return a special object.
+    let rawType = unite.getRawType(returnType);
+    if(rawType.kind === 'UNION') {
+        return {
+            category: 'union',
+            rawType: rawType,
+            possibleViews: rawType.possibleTypes.map((possibleType) => {
+                return getAdminViewByType(unite, possibleType.name);
+            }),
+            queryFormData(depth) {
+                return this.possibleViews.map((possibleView) => {
+                    return `... on ${ possibleView.type } { ${ possibleView.queryFormData(depth) } }`
+                });
+            }
+        };
+    }
+
     let embeddedView = Object.values(unite.adminViews).filter((view) => {
         return view.type === returnType;
     });
@@ -85,24 +105,53 @@ const createAdminView = function (view, unite) {
      * Returns an array with field query statements for all form fields of this view.
      * @returns Array
      */
-    view.queryFormData = function(){
+    view.queryFormData = function(depth = 0){
+
+        if(depth >= MAX_QUERY_DEPTH) {
+            return ['__typename'];
+        }
+
         return this.formFields().filter((field) => {
             return !!unite.getFormFieldType(field.fieldType).queryData;
         }).map((field) => {
-            return unite.getFormFieldType(field.fieldType).queryData(field, unite);
+            return unite.getFormFieldType(field.fieldType).queryData(field, unite, depth);
         });
     };
 
     /**
-     * Returns an array with all normalized values for all form fields of this view.
-     * @returns Array
+     * Returns an object with all normalized values for field internal use.
+     * @returns Object
      */
-    view.normalizeFormData = function(inputData = {}){
+    view.normalizeQueryData = function(queryData = {}, depth = 0){
+
+        if(depth >= MAX_QUERY_DEPTH) {
+            return queryData;
+        }
+
         let data = {};
         this.formFields().forEach((field) => {
             let type = unite.getFormFieldType(field.fieldType);
-            let inputFieldData = inputData[field.id] || undefined;
-            data[field.id] = !!type.normalizeData ? type.normalizeData(inputFieldData, field, unite) : inputFieldData;
+            let fieldData = queryData[field.id] || undefined;
+            data[field.id] = !!type.normalizeQueryData ? type.normalizeQueryData(fieldData, field, unite, depth) : fieldData;
+        });
+        return data;
+    };
+
+    /**
+     * Returns an object with all normalized values for used in a create / update mutation
+     * @returns Object
+     */
+    view.normalizeMutationData = function(formData = {}, depth = 0){
+
+        if(depth >= MAX_QUERY_DEPTH) {
+            return formData;
+        }
+
+        let data = {};
+        this.formFields().forEach((field) => {
+            let type = unite.getFormFieldType(field.fieldType);
+            let fieldData = formData[field.id] || undefined;
+            data[field.id] = !!type.normalizeMutationData ? type.normalizeMutationData(fieldData, field, unite, depth) : fieldData;
         });
         return data;
     };
@@ -238,7 +287,8 @@ export const Unite = new Vue({
 
                     this.adminViews = [];
                     data.data.unite.adminViews.forEach((view) => {
-                        if(view = createAdminView(view, this)) {
+                        view = createAdminView(view, this);
+                        if(view) {
                             this.adminViews[view.id] = view;
                         }
                     });

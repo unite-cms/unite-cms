@@ -45,7 +45,7 @@
                     };
                 },
                 update(data) {
-                    return this.view.normalizeFormData(data[`get${ this.view.type }`]);
+                    return this.view.normalizeQueryData(data[`get${ this.view.type }`]);
                 }
             }
         },
@@ -62,7 +62,7 @@
                     variables: {
                         id: this.$route.params.id,
                         persist: true,
-                        data: this.formData
+                        data: this.view.normalizeMutationData(JSON.parse(JSON.stringify(this.formData))),
                     }
                 }).then((data) => {
                     Route.back({ updated: this.$route.params.id });

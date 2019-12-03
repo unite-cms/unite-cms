@@ -36,6 +36,7 @@
         },
         apollo: {
           logs: {
+              fetchPolicy: 'network-only',
               query: gql`query($before: DateTime!, $after: DateTime) {
                 unite {
                   logs(before: $before, after: $after) {
