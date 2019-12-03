@@ -1,18 +1,43 @@
 
 directive @mediaFileField(
     default: UniteMediaFileInput
+    s3: MediaFileFieldS3Config
+    google: MediaFileFieldGoogleConfig
 ) on FIELD_DEFINITION
+
+enum MEDIA_FILE_DRIVER {
+    S3
+    GOOGLE
+}
+
+input MediaFileFieldS3Config {
+    key: String!
+    secret: String!
+    region: String
+    version: String!
+    endpoint: String!
+    bucket: String!
+    path: String
+}
+
+input MediaFileFieldGoogleConfig {
+    projectId: String!
+    bucket: String!
+    private_key_id: String!
+    private_key: String!
+    client_id: String!
+    client_email: String!
+    ctype: String!
+}
 
 type UniteMediaFile {
     id: ID
     path: String
-    width: Int
-    height: Int
+    type: MEDIA_FILE_DRIVER
 }
 
 input UniteMediaFileInput {
     id: ID
     path: String
-    width: Int
-    height: Int
+    type: MEDIA_FILE_DRIVER
 }

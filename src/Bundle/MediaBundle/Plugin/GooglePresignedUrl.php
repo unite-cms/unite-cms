@@ -1,16 +1,14 @@
 <?php
+
 /**
- * PresignedUrl plugin.
+ * GooglePresignedUrl plugin.
  */
 namespace UniteCMS\MediaBundle\Plugin;
 
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\PluginInterface;
 
-/**
- *  PresignedUrl plugin.
- */
-class PresignedUrl implements PluginInterface
+class GooglePresignedUrl implements PluginInterface
 {
     /**
      * FilesystemInterface instance.
@@ -42,9 +40,7 @@ class PresignedUrl implements PluginInterface
     /**
      * Method logic.
      *
-     * Get a Presigned Url for a file.
-     *
-     * @see https://docs.aws.amazon.com/aws-sdk-php/v3/guide/service/s3-presigned-url.html.
+     * Get a Presigned Url for a file
      *
      * @param   string  $path        File.
      * @param   string  $expiration  Expiration time of url.
@@ -53,7 +49,18 @@ class PresignedUrl implements PluginInterface
      */
     public function handle($path, $expiration = "+20 minutes", $getObjectOptions = [])
     {
-        $adapter = $this->filesystem->getAdapter();
+        /*
+        $storageClient = new StorageClient([
+            'projectId' => your gcp projectId here ,
+            'keyFilePath' =>  your gcp keyFilePath here ,
+        ]);
+        $bucket = $storageClient->bucket($objPath);
+        $object = $bucket->object();
+        $url = $object->signedUrl(new \DateTime('+ ' . $duration . ' seconds'));
+        return $url
+        */
+
+        /*$adapter = $this->filesystem->getAdapter();
 
         $options = [
             'Bucket' => $adapter->getBucket(),
@@ -61,13 +68,13 @@ class PresignedUrl implements PluginInterface
         ];
         $options = array_merge($options, $getObjectOptions);
         $S3Client = $adapter->getClient();
-        $command = $S3Client->getCommand('getObject', $options /*+ $adapter->getOptions() */ );
+        $command = $S3Client->getCommand('getObject', $options );
         try {
             $request = $S3Client->createPresignedRequest($command, $expiration);
             return (string) $request->getUri();
         } catch (S3Exception $exception) {
             return false;
-        }
+        }*/
 
         return false;
     }

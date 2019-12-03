@@ -5,7 +5,9 @@
   "require": {
     "php": "^7.2",
     "league/flysystem": "^1.0",
-    "league/flysystem-bundle": "^1.3"
+    "league/flysystem-bundle": "^1.3",
+    "superbalist/flysystem-google-storage": "^7.2",
+    "league/flysystem-aws-s3-v3": "^1.0"
   },
   "autoload": {
     "psr-4": { "UniteCMS\\MediaBundle\\": "" },
