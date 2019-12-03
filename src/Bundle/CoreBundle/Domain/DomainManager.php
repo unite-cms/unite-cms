@@ -125,6 +125,7 @@ class DomainManager
             $config['user_manager'],
             $config['logger'],
             static::normalizeSchemaConfig($config['schema']),
+            $config['parameters'] ?? [],
             $config['editable_schema_files_directory'] ?? null,
             $config['jwt_ttl_short_living'],
             $config['jwt_ttl_long_living']

@@ -32,7 +32,8 @@ class SchemaAwareTestCase extends KernelTestCase
             $domain->getContentManager(),
             $domain->getUserManager(),
             $domain->getLogger(),
-            $domain->getSchema()
+            $domain->getSchema(),
+            $domain->getParameters()
         );
         static::$container->get(DomainManager::class)->setCurrentDomain($replacedDomain);
         return $replacedDomain;

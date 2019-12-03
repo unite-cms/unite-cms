@@ -43,6 +43,11 @@ class Domain
     protected $schema = [];
 
     /**
+     * @var string[] $parameters
+     */
+    protected $parameters = [];
+
+    /**
      * @var null|string $editableSchemaFilesDirectory
      */
     protected $editableSchemaFilesDirectory = null;
@@ -65,6 +70,7 @@ class Domain
      * @param UserManagerInterface $userManager
      * @param LoggerInterface $logger
      * @param string[] $schema
+     * @param array $parameters
      * @param string $editableSchemaFilesDirectory
      * @param int $jwtTTLShortLiving
      * @param int $jwtTTLLongLiving
@@ -76,6 +82,7 @@ class Domain
         UserManagerInterface $userManager,
         LoggerInterface $logger,
         array $schema = [],
+        array $parameters = [],
         string $editableSchemaFilesDirectory = null,
         int $jwtTTLShortLiving = Configuration::DEFAULT_JWT_TTL_SHORT_LIVING,
         int $jwtTTLLongLiving = Configuration::DEFAULT_JWT_TTL_LONG_LIVING,
@@ -85,6 +92,7 @@ class Domain
         $this->userManager = $userManager;
         $this->logger = $logger;
         $this->schema = $schema;
+        $this->parameters = $parameters;
         $this->editableSchemaFilesDirectory = $editableSchemaFilesDirectory;
         $this->jwtTTLShortLiving = $jwtTTLShortLiving;
         $this->jwtTTLLongLiving = $jwtTTLLongLiving;
@@ -152,6 +160,14 @@ class Domain
     /**
      * @return string[]
      */
+    public function getParameters() : array
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * @return string[]
+     */
     public function getCompleteSchema() : array
     {
         $schema = $this->getSchema();
@@ -161,7 +177,16 @@ class Domain
                 DomainManager::findSchemaFilesInDir($this->getEditableSchemaFilesDirectory())
             );
         }
-        return $schema;
+
+        // Replace domain parameters %(NAME)% => NAME
+        $search = array_map(function($key){
+            return '%(' . $key . ')%';
+        }, array_keys($this->parameters));
+        $replace = array_values($this->parameters);
+
+        return array_map(function($schemaContent) use ($search, $replace) {
+            return str_replace($search, $replace, $schemaContent);
+        }, $schema);
     }
 
     /**
