@@ -1,0 +1,21 @@
+{% set subject = 'email.invite.subject'|trans %}
+{% set footer = 'email.invite.footer'|trans %}
+{% extends '@UniteCMSCore/email/base.html.twig' %}
+{% block content %}
+
+    {% embed '@UniteCMSCore/email/_partial/text.html.twig' %}
+        {% block content %}
+            <h1>{% trans %}email.invite.headline{% endtrans %}</h1>
+            <p>
+                {% if inviteText is not empty %}
+                    {{ inviteText }}
+                {% else %}
+                    {% trans %}email.invite.text{% endtrans %}
+                {% endif %}
+            </p>
+        {% endblock %}
+    {% endembed %}
+
+    {% embed '@UniteCMSCore/email/_partial/button.html.twig' with { text: 'email.invite.text_button'|trans, link: inviteUrl|replace({'{token}' : inviteToken|url_encode}) } %}{% endembed %}
+
+{% endblock %}

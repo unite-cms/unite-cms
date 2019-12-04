@@ -3,59 +3,27 @@
 
 namespace UniteCMS\CoreBundle\Mailer;
 
-use Swift_Mailer;
 use Swift_Message;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Environment;
 
-class AccountActivationMailer
+class AccountActivationMailer extends BaseMailer
 {
-
     /**
-     * @var Swift_Mailer $mailer
-     */
-    protected $mailer;
-
-    /**
-     * @var Environment $twig
-     */
-    protected $twig;
-
-    /**
-     * @var TranslatorInterface $translator
-     */
-    protected $translator;
-
-    /**
-     * @var $defaultMailerFrom
-     */
-    protected $defaultMailerFrom;
-
-    public function __construct(Swift_Mailer $mailer, Environment $twig, TranslatorInterface $translator, string $defaultMailerFrom)
-    {
-        $this->mailer = $mailer;
-        $this->twig = $twig;
-        $this->translator = $translator;
-        $this->defaultMailerFrom = $defaultMailerFrom;
-    }
-
-    /**
-     * @param string $resetUrl
-     * @param string $resetToken
+     * @param string $activateToken
      * @param string $email
+     * @param string|null $activateUrl
      *
      * @return int
      * @throws \Twig\Error\LoaderError
      * @throws \Twig\Error\RuntimeError
      * @throws \Twig\Error\SyntaxError
      */
-    public function send(string $resetUrl, string $resetToken, string $email) : int {
+    public function send(string $activateToken, string $email, ?string $activateUrl = null) : int {
 
         $message = new Swift_Message(
             $this->translator->trans('email.account_activate.subject'),
             $this->twig->render('@UniteCMSCore/email/accountActivate.html.twig', [
-                'activateUrl' => $resetUrl,
-                'activateToken' => $resetToken,
+                'activateUrl' => $this->defaultUrl($activateUrl, 'email-confirm/activate-account/{token}'),
+                'activateToken' => $activateToken,
             ]),
             'text/html'
         );

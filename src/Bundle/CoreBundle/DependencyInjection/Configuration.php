@@ -9,6 +9,7 @@ use UniteCMS\CoreBundle\Log\LoggerInterface;
 
 class Configuration implements ConfigurationInterface
 {
+    const DEFAULT_IS_ADMIN_EXPRESSION = 'has_role("ROLE_ADMIN")';
     const DEFAULT_JWT_TTL_SHORT_LIVING = 1800;          // 30 Minutes
     const DEFAULT_JWT_TTL_LONG_LIVING = 31536000;       // 1 Year
 
@@ -54,6 +55,10 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('unite_cms_core');
         $treeBuilder->getRootNode()
         ->children()
+            ->scalarNode('is_admin_expression')
+                ->cannotBeEmpty()
+            ->defaultValue(static::DEFAULT_IS_ADMIN_EXPRESSION)
+            ->end()
             ->scalarNode('default_schema_config_dir')
                 ->cannotBeEmpty()
                 ->defaultValue($this->defaultConfigDir)

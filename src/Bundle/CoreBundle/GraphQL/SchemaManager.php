@@ -3,10 +3,13 @@
 
 namespace UniteCMS\CoreBundle\GraphQL;
 
+use GraphQL\Error\ClientAware;
 use GraphQL\Language\AST\InterfaceTypeDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Throwable;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\Domain\DomainManager;
@@ -52,11 +55,10 @@ class SchemaManager
      */
     protected $validator;
 
-    public function __construct(DomainManager $domainManager, ValidatorInterface $validator)
-    {
-        $this->domainManager = $domainManager;
-        $this->validator = $validator;
-    }
+    /**
+     * @var LoggerInterface $logger
+     */
+    protected $logger;
 
     /**
      * @var Schema
@@ -107,6 +109,13 @@ class SchemaManager
      * @var ScalarResolverInterface[]
      */
     protected $scalarResolvers = [];
+
+    public function __construct(DomainManager $domainManager, ValidatorInterface $validator, LoggerInterface $logger)
+    {
+        $this->domainManager = $domainManager;
+        $this->validator = $validator;
+        $this->logger = $logger;
+    }
 
     /**
      * @param SchemaProviderInterface $provider
@@ -355,6 +364,7 @@ class SchemaManager
         // Execute before type extenders.
         foreach($this->beforeTypeExtenders as $extender) {
             if($extension = $extender->extend($schema)) {
+                $extension = Util::replaceSchemaParameters($extension, $this->domainManager->current()->getParameters());
                 $schema = SchemaExtender::extend($schema, Parser::parse($extension));
             }
         }
@@ -371,6 +381,7 @@ class SchemaManager
         // Execute after type extenders.
         foreach($this->afterTypeExtenders as $extender) {
             if($extension = $extender->extend($schema)) {
+                $extension = Util::replaceSchemaParameters($extension, $this->domainManager->current()->getParameters());
                 $schema = SchemaExtender::extend($schema, Parser::parse($extension));
             }
         }
@@ -435,7 +446,7 @@ class SchemaManager
     public function execute(string $query, array $args = [], $context = null, bool $forceFresh = false) : ExecutionResult {
         $schema = $this->buildExecutableSchema($forceFresh);
         return GraphQL::executeQuery($schema, $query, null, $context, $args)
-            ->setErrorFormatter([ErrorFormatter::class, 'createFromException']);
+            ->setErrorFormatter([ErrorFormatter::class, 'createFromException'])->setErrorsHandler([$this, 'handleErrors']);
     }
 
     /**
@@ -466,7 +477,7 @@ class SchemaManager
                 json_decode($request->getContent(), true),
                 $request->request->all()
             )
-        )->setErrorFormatter([ErrorFormatter::class, 'createFromException']);
+        )->setErrorFormatter([ErrorFormatter::class, 'createFromException'])->setErrorsHandler([$this, 'handleErrors']);
     }
 
     /**
@@ -505,26 +516,46 @@ class SchemaManager
 
                 // Register content type in content type manager.
                 if($type->implementsInterface($uniteContent)){
-                    $contentTypeManager->registerContentType(ContentType::fromObjectType($type));
+                    $contentTypeManager->registerContentType(ContentType::fromObjectType($type, $this->domainManager->getIsAdminExpression()));
                 }
 
                 // Register single content type in content type manager.
                 if($type->implementsInterface($uniteSingleContent)){
-                    $contentTypeManager->registerSingleContentType(ContentType::fromObjectType($type));
+                    $contentTypeManager->registerSingleContentType(ContentType::fromObjectType($type, $this->domainManager->getIsAdminExpression()));
                 }
 
                 // Register embedded content type in content type manager.
                 if($type->implementsInterface($uniteContentEmbed)){
-                    $contentTypeManager->registerEmbeddedContentType(ContentType::fromObjectType($type));
+                    $contentTypeManager->registerEmbeddedContentType(ContentType::fromObjectType($type, $this->domainManager->getIsAdminExpression()));
                 }
 
                 // Register user content type in content type manager.
                 if($type->implementsInterface($uniteUser)){
-                    $contentTypeManager->registerUserType(UserType::fromObjectType($type));
+                    $contentTypeManager->registerUserType(UserType::fromObjectType($type, $this->domainManager->getIsAdminExpression()));
                 }
             }
         }
 
         return $contentTypeManager;
+    }
+
+    /**
+     * @param array $errors
+     * @param callable $formatter
+     *
+     * @return array
+     */
+    public function handleErrors(array $errors, callable $formatter) {
+
+        // All errors that cannot be shown to the user should be logged somewhere.
+        foreach($errors as $error) {
+            if($error instanceof Throwable) {
+                if (!$error instanceof ClientAware || !$error->isClientSafe()) {
+                    $this->logger->error($error->getMessage(), ['e' => $error]);
+                }
+            }
+        }
+
+        return array_map($formatter, $errors);
     }
 }

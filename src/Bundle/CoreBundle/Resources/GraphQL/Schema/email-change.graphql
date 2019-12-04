@@ -1,5 +1,6 @@
 
 directive @emailChange(
+    if: Expression
     changeUrl: String!
     emailField: String!
 ) on OBJECT

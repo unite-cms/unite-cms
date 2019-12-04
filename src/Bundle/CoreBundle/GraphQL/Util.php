@@ -123,4 +123,35 @@ class Util
 
         return false;
     }
+
+    /**
+     * Replace domain parameters %(NAME)% => NAME
+     *
+     * @param string|array $schema
+     * @param array $parameters
+     *
+     * @return string|array
+     */
+    static function replaceSchemaParameters($schema, array $parameters) {
+
+        $search = array_map(function($key){
+            return '%(' . $key . ')%';
+        }, array_keys($parameters));
+
+        $replace = array_map(function($parameter){
+            return str_replace('"', '\"', $parameter);
+        }, array_values($parameters));
+
+        if(is_string($schema)) {
+            return str_replace($search, $replace, $schema);
+        }
+
+        if(is_array($schema)) {
+            return array_map(function($schemaContent) use ($search, $replace) {
+                return str_replace($search, $replace, $schemaContent);
+            }, $schema);
+        }
+
+        return $schema;
+    }
 }

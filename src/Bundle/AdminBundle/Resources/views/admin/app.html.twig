@@ -18,7 +18,7 @@
 {% block javascripts %}
     <script type="text/javascript">
         const UNITE_ADMIN_CONFIG = {
-            baseurl: '{{ path('unite_cms_admin_force_domain', { unite_domain: domain.id }) }}'
+            baseurl: '{{ path('unite_cms_admin', { unite_domain: domain.id }) }}'
         };
     </script>
     {{ encore_entry_script_tags('unite') }}

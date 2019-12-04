@@ -83,11 +83,13 @@ type DemoArticle implements UniteContent {
 
 
 """Admin Users"""
-type Admin implements UniteUser @passwordAuthenticator(passwordField: "password") {
+type Admin implements UniteUser
+@passwordAuthenticator(passwordField: "password")
+@emailInvite(if: "%(IS_ADMIN)", emailField: "username", passwordField: "password") {
     _meta: UniteContentMeta
     id: ID
     username: String! @emailField
-    password: NULL! @passwordField
+    password: NULL @passwordField
 
     teaser: TeaserRegion @embeddedField
 }

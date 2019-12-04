@@ -1,5 +1,6 @@
 
 directive @emailAccountActivate(
+    if: Expression
     activateUrl: String!
     emailField: String!
     stateField: String!

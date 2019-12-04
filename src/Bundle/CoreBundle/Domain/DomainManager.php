@@ -12,13 +12,26 @@ class DomainManager
     protected $domainConfig = [];
 
     /**
+     * @var array
+     */
+    protected $globalParameters = [];
+
+    /**
+     * @var string $isAdminExpression
+     */
+    protected $isAdminExpression;
+
+    /**
      * @var Domain
      */
     protected $domain = null;
 
-    public function __construct(array $domainConfig = [])
+    public function __construct(array $domainConfig = [], array $globalParameters = [], string $isAdminExpression = 'false')
     {
         $this->domainConfig = $domainConfig;
+        $this->globalParameters = $globalParameters;
+        $this->isAdminExpression = $isAdminExpression;
+        $this->globalParameters['IS_ADMIN'] = $this->globalParameters['IS_ADMIN'] ?? $isAdminExpression;
     }
 
     /**
@@ -125,7 +138,7 @@ class DomainManager
             $config['user_manager'],
             $config['logger'],
             static::normalizeSchemaConfig($config['schema']),
-            $config['parameters'] ?? [],
+            $this->globalParameters + ($config['parameters'] ?? []),
             $config['editable_schema_files_directory'] ?? null,
             $config['jwt_ttl_short_living'],
             $config['jwt_ttl_long_living']
@@ -166,5 +179,41 @@ class DomainManager
      */
     public function getDomainConfig() : array {
         return $this->domainConfig;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGlobalParameters(): array
+    {
+        return $this->globalParameters;
+    }
+
+    /**
+     * @param array $globalParameters
+     * @return self
+     */
+    public function setGlobalParameters(array $globalParameters = []): self
+    {
+        $this->globalParameters = $globalParameters;
+        return $this;
+    }
+
+    /**
+     * @param string $key
+     * @param string $parameter
+     * @return self
+     */
+    public function setGlobalParameter(string $key, string $parameter) : self {
+        $this->globalParameters[$key] = $parameter;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIsAdminExpression(): string
+    {
+        return $this->isAdminExpression;
     }
 }

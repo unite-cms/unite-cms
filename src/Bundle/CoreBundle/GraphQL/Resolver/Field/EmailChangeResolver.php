@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
-use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Mailer\EmailChangeMailer;
@@ -20,6 +20,11 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
     const CONFIRM_FIELD = 'emailChangeConfirm';
 
     /**
+     * @var SaveExpressionLanguage $expressionLanguage
+     */
+    protected $expressionLanguage;
+
+    /**
      * @var Security $security
      */
     protected $security;
@@ -30,12 +35,15 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
     protected $emailChangeMailer;
 
     public function __construct(
+        SaveExpressionLanguage $expressionLanguage,
         Security $security,
         DomainManager $domainManager,
         ValidatorInterface $validator,
         FieldDataMapper $fieldDataMapper,
         JWTEncoderInterface $JWTEncoder,
         EmailChangeMailer $emailChangeMailer) {
+
+        $this->expressionLanguage = $expressionLanguage;
         $this->security = $security;
         $this->emailChangeMailer = $emailChangeMailer;
         parent::__construct($domainManager, $validator, $fieldDataMapper, $JWTEncoder);
@@ -111,6 +119,11 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
             return false;
         }
 
+        if(!empty($config['if']) && !$this->expressionLanguage->evaluate($config['if'], ['content' => $user]))  {
+            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an email chnage, however the directive if-expression evaluates to false.', $args['username']));
+            return false;
+        }
+
         if(!$this->isTokenEmptyOrExpired($user)) {
             $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an email change, however there already exist a non-expired reset token. If it is you: please wait until the token is expired and try again.', $args['username']));
             return false;
@@ -124,7 +137,7 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
         $domain->getUserManager()->flush($domain);
 
         // Send out email
-        if($this->emailChangeMailer->send($config['changeUrl'], $user->getToken(static::TOKEN_KEY), $args['email']) === 0) {
+        if($this->emailChangeMailer->send($user->getToken(static::TOKEN_KEY), $args['email'], $config['changeUrl'] ?? null) === 0) {
             $domain->log(LoggerInterface::ERROR, 'Could not send out email change email.');
             return false;
         }
@@ -151,6 +164,11 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
         }
 
         if(!$config = $this->getDirectiveConfig($user->getType())) {
+            return false;
+        }
+
+        if(!empty($config['if']) && !$this->expressionLanguage->evaluate($config['if'], ['content' => $user]))  {
+            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an email change, however the directive if-expression evaluates to false.', $args['username']));
             return false;
         }
 

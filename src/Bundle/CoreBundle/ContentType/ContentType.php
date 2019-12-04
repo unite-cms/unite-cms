@@ -65,16 +65,16 @@ class ContentType
      */
     protected $permissions = [];
 
-    public function __construct(string $id, string $name)
+    public function __construct(string $id, string $name, string $defaultPermission)
     {
         $this->permissions = [
             ContentVoter::QUERY => 'true',
             ContentVoter::READ => 'true',
-            ContentVoter::MUTATION => 'has_role("ROLE_ADMIN")',
-            ContentVoter::CREATE => 'has_role("ROLE_ADMIN")',
-            ContentVoter::UPDATE => 'has_role("ROLE_ADMIN")',
-            ContentVoter::DELETE => 'has_role("ROLE_ADMIN")',
-            ContentVoter::PERMANENT_DELETE => 'has_role("ROLE_ADMIN")',
+            ContentVoter::MUTATION => $defaultPermission,
+            ContentVoter::CREATE => $defaultPermission,
+            ContentVoter::UPDATE => $defaultPermission,
+            ContentVoter::DELETE => $defaultPermission,
+            ContentVoter::PERMANENT_DELETE => $defaultPermission,
         ];
         $this->id = $id;
         $this->name = $name;
@@ -82,10 +82,12 @@ class ContentType
 
     /**
      * @param ObjectType $type
+     * @param string $defaultPermission
+     *
      * @return static
      */
-    static function fromObjectType(ObjectType $type) : self {
-        $contentType = new static($type->name, $type->description ?? $type->name);
+    static function fromObjectType(ObjectType $type, string $defaultPermission) : self {
+        $contentType = new static($type->name, $type->description ?? $type->name, $defaultPermission);
 
         // Get all directives of this content type.
         $contentType->directives = Util::getDirectives($type->astNode);

@@ -6,6 +6,7 @@ namespace UniteCMS\CoreBundle\Domain;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\DependencyInjection\Configuration;
+use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Log\LogInterface;
 use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
@@ -178,15 +179,7 @@ class Domain
             );
         }
 
-        // Replace domain parameters %(NAME)% => NAME
-        $search = array_map(function($key){
-            return '%(' . $key . ')%';
-        }, array_keys($this->parameters));
-        $replace = array_values($this->parameters);
-
-        return array_map(function($schemaContent) use ($search, $replace) {
-            return str_replace($search, $replace, $schemaContent);
-        }, $schema);
+        return Util::replaceSchemaParameters($schema, $this->getParameters());
     }
 
     /**

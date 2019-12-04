@@ -1,10 +1,10 @@
 
 extend type UniteQuery {
-    logs(before: DateTime!, after: DateTime) : [UniteLogEntry!] @hide(if: "not has_role('ROLE_ADMIN')")
-    adminViews: [UniteAdminView!] @hide(if: "not has_role('ROLE_ADMIN')")
-    schemaFiles: [UniteSchemaFile!]! @hide(if: "not has_role('ROLE_ADMIN')")
+    logs(before: DateTime!, after: DateTime) : [UniteLogEntry!] @hide(if: "not (%(IS_ADMIN)%)")
+    adminViews: [UniteAdminView!] @hide(if: "not (%(IS_ADMIN)%)")
+    schemaFiles: [UniteSchemaFile!]! @hide(if: "not (%(IS_ADMIN)%)")
 }
 
 extend type UniteMutation {
-    updateSchemaFiles(schemaFiles: [UniteSchemaFileInput!]!, persist: Boolean!) : Boolean! @hide(if: "not has_role('ROLE_ADMIN')")
+    updateSchemaFiles(schemaFiles: [UniteSchemaFileInput!]!, persist: Boolean!) : Boolean! @hide(if: "not (%(IS_ADMIN)%)")
 }

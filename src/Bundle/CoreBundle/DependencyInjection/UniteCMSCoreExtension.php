@@ -63,6 +63,8 @@ class UniteCMSCoreExtension extends Extension
             $config['domains'][$id]['logger'] = new Reference($params['logger']);
         }
 
-        $container->findDefinition(DomainManager::class)->setArgument('$domainConfig', $config['domains']);
+        $container->findDefinition(DomainManager::class)
+            ->setArgument('$domainConfig', $config['domains'])
+            ->setArgument('$isAdminExpression', $config['is_admin_expression']);
     }
 }
