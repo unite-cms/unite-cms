@@ -27,7 +27,8 @@ type Media implements UniteContent {
             version: "latest",
             endpoint: "https://example.com/"
             bucket: "test",
-            path: "/tmp"
+            path: "/tmp",
+            tmppath: ""
         }
     )
 }

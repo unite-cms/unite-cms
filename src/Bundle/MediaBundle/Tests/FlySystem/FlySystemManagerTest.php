@@ -1,12 +1,12 @@
 <?php
 
-namespace UniteCMS\Bundle\MediaBundle\Tests\FlySystem;
+namespace UniteCMS\Bundle\MediaBundle\Tests\Flysystem;
 
-use UniteCMS\CoreBundle\Tests\SchemaAwareTestCase;
+use UniteCMS\MediaBundle\Tests\MediaAwareTestCase;
 
-class FlySystemManagerTest extends SchemaAwareTestCase
+class FlySystemManagerTest extends MediaAwareTestCase
 {
-    public function testMethod1() {
+    /*public function testMethod1() {
 
-    }
+    }*/
 }

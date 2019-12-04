@@ -17,7 +17,8 @@ input MediaFileFieldS3Config {
     version: String!
     endpoint: String!
     bucket: String!
-    path: String
+    path: String!
+    tmppath: String
 }
 
 input MediaFileFieldGoogleConfig {

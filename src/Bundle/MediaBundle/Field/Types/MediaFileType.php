@@ -31,7 +31,9 @@ class MediaFileType extends AbstractFieldType
      */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
         return [
-            'todo' => $fieldData->resolveData('todo', 'foo'),
+            'id' => $fieldData->resolveData('id', null),
+            'path' => $fieldData->resolveData('path', null),
+            'type' => $fieldData->resolveData('type', null),
         ];
     }
 }

@@ -3,7 +3,7 @@
 /**
  * GooglePresignedUrl plugin.
  */
-namespace UniteCMS\MediaBundle\FlySystem\Plugin;
+namespace UniteCMS\MediaBundle\Flysystem\Plugin;
 
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\PluginInterface;

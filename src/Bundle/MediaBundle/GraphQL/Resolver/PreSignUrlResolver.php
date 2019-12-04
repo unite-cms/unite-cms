@@ -6,7 +6,7 @@ use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use UniteCMS\CoreBundle\GraphQL\Resolver\Field\FieldResolverInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
-use UniteCMS\MediaBundle\FlySystem\FlySystemManager;
+use UniteCMS\MediaBundle\Flysystem\FlySystemManager;
 
 class PreSignUrlResolver implements FieldResolverInterface
 {
@@ -42,11 +42,20 @@ class PreSignUrlResolver implements FieldResolverInterface
         }
 
         $domain = $this->domainManager->current();
-        $s3Config = $domain->getContentTypeManager()->getContentType($args['type'])->getField($args['field'])->getSettings()->get('s3');
-        if (!$s3Config or empty($s3Config)) {
+
+        $field = $domain->getContentTypeManager()->getContentType($args['type'])->getField($args['field']);
+        if (!$field) {
             return null;
         }
-        $this->flySystemManager->initiate($s3Config);
-        return $this->flySystemManager->getPresignedUrl();
+
+        $keys = $field->getSettings()->keys();
+        foreach ($keys as $driver) {
+            if ($field->getSettings()->get($driver)) {
+                $flySystem = $this->flySystemManager->initialize($driver, $field->getSettings()->get($driver));
+                return $flySystem->getPresignedUrl();
+            }
+        }
+
+        return null;
     }
 }
