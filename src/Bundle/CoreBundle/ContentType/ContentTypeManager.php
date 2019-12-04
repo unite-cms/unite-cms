@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\ContentType;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentTypeManager
 {
@@ -65,7 +66,7 @@ class ContentTypeManager
         // Find and generate nested union types.
         foreach($contentType->getFields() as $field) {
             if(!empty($field->getUnionTypes())) {
-                $unionType = new ContentType($field->getReturnType(), $field->getReturnType());
+                $unionType = new ContentType($field->getReturnType(), $field->getReturnType(), $contentType->getPermission(ContentVoter::MUTATION));
 
                 foreach($field->getUnionTypes() as $type) {
                     $unionType->registerField(new ContentTypeField($type->name, $type->description ?? $type->name, $field->getType(), [], false, false, false, null, null, $type->name));
