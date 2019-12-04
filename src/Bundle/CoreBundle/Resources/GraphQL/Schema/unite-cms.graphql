@@ -87,6 +87,7 @@ type UniteContentEntityPermissions {
     update: Boolean!
     delete: Boolean!
     permanent_delete: Boolean!
+    user_invite: Boolean!
 }
 
 type UniteContentRevision {

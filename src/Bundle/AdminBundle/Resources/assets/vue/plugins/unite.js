@@ -9,6 +9,7 @@ import ViewTypeFallback from "../components/Views/_fallback";
 import User from "../state/User";
 import router from "./router";
 import Mustache from 'mustache';
+import Alerts from "../state/Alerts";
 
 const MAX_QUERY_DEPTH = 12;
 
@@ -169,6 +170,11 @@ export const Unite = new Vue({
             formFieldTypes: {},
             viewTypes: {},
             adminViews: {},
+            permissions: {
+                LOGS: false,
+                SCHEMA: false,
+                QUERY_EXPLORER: false,
+            }
         }
     },
     created() {
@@ -273,6 +279,18 @@ export const Unite = new Vue({
                 this.rawTypes = data.data.__schema.types;
                 this.fragmentMatcher.possibleTypesMap = this.fragmentMatcher.parseIntrospectionResult(data.data);
 
+                let uniteType = this.rawTypes.filter(type => type.name === 'UniteQuery');
+                if(uniteType.length === 0) {
+                    Alerts.$emit('push', 'danger', 'You are not allowed to access the admin views.');
+                    throw 'You are not allowed to access the admin views.';
+                }
+
+                uniteType = uniteType[0];
+                let adminViewFields = uniteType.fields.filter(field => field.name === 'adminViews');
+                if(adminViewFields.length === 0) {
+                    Alerts.$emit('push', 'danger', 'You are not allowed to access the admin views.');
+                    throw 'You are not allowed to access the admin views.';
+                }
                 this.$apollo.query({
                     query: gql`
                         ${ this.adminViewsFragment }
@@ -281,11 +299,17 @@ export const Unite = new Vue({
                                 adminViews {
                                     ... adminViews
                                 }
+                                adminPermissions {
+                                    LOGS
+                                    SCHEMA
+                                    QUERY_EXPLORER
+                                }
                             }
                         }
                     `,
                 }).then((data) => {
 
+                    this.permissions = data.data.unite.adminPermissions;
                     this.adminViews = [];
                     data.data.unite.adminViews.forEach((view) => {
                         view = createAdminView(view, this);

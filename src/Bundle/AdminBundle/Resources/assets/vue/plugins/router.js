@@ -18,6 +18,7 @@ import PermanentDelete from "../pages/content/PermanentDelete";
 import Recover from "../pages/content/Recover";
 import Delete from "../pages/content/Delete";
 import Revert from "../pages/content/Revert";
+import UserInvite from "../pages/content/UserInvite";
 
 Vue.use(VueRouter);
 
@@ -45,6 +46,7 @@ const routes = [
         { path: ':id/delete', component: Delete },
         { path: ':id/recover', component: Recover },
         { path: ':id/permanent_delete', component: PermanentDelete },
+        { path: ':id/user_invite', component: UserInvite },
     ], meta: { requiresAuth: true } },
     { path: '/setting/:type', component: Container, children: [
             { path: '', component: Index },

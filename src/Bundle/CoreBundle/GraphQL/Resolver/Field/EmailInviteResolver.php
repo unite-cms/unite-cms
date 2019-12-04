@@ -138,7 +138,7 @@ class EmailInviteResolver extends AbstractEmailConfirmationResolver
         $domain->getUserManager()->flush($domain);
 
         // Send out email
-        if($this->inviteMailer->send($user->getToken(static::TOKEN_KEY), $email, $config['inviteText'] ?? null, $config['inviteUrl'] ?? null) === 0) {
+        if($this->inviteMailer->send($user->getToken(static::TOKEN_KEY), $email, $config['text'] ?? null, $config['inviteUrl'] ?? null) === 0) {
             $domain->log(LoggerInterface::ERROR, sprintf('Could not send out invitation email to user with username "%s".', $args['username']));
             return false;
         }

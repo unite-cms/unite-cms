@@ -85,7 +85,7 @@ type DemoArticle implements UniteContent {
 """Admin Users"""
 type Admin implements UniteUser
 @passwordAuthenticator(passwordField: "password")
-@emailInvite(if: "%(IS_ADMIN)", emailField: "username", passwordField: "password") {
+@emailInvite(if: "%(IS_ADMIN)%", emailField: "username", passwordField: "password") {
     _meta: UniteContentMeta
     id: ID
     username: String! @emailField

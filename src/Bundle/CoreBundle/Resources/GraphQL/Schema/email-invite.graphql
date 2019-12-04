@@ -8,6 +8,6 @@ directive @emailInvite(
 ) on OBJECT
 
 extend type UniteMutation {
-    emailInviteRequest(type: String!, username: String!) : Boolean! @hide(if: "user.isAnonymous()")
+    emailInviteRequest(type: String!, username: String!, text: String) : Boolean! @hide(if: "user.isAnonymous()")
     emailInviteConfirm(type: String!, username: String!, token: String!, password: String!) : Boolean!
 }

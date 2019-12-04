@@ -8,6 +8,7 @@ use GraphQL\Language\AST\InterfaceTypeDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Throwable;
 use UniteCMS\CoreBundle\ContentType\ContentType;
@@ -364,7 +365,8 @@ class SchemaManager
         // Execute before type extenders.
         foreach($this->beforeTypeExtenders as $extender) {
             if($extension = $extender->extend($schema)) {
-                $extension = Util::replaceSchemaParameters($extension, $this->domainManager->current()->getParameters());
+                $parameters = $this->domainManager->getGlobalParameters() + $this->domainManager->current()->getParameters();
+                $extension = Util::replaceSchemaParameters($extension, $parameters);
                 $schema = SchemaExtender::extend($schema, Parser::parse($extension));
             }
         }
@@ -381,7 +383,8 @@ class SchemaManager
         // Execute after type extenders.
         foreach($this->afterTypeExtenders as $extender) {
             if($extension = $extender->extend($schema)) {
-                $extension = Util::replaceSchemaParameters($extension, $this->domainManager->current()->getParameters());
+                $parameters = $this->domainManager->getGlobalParameters() + $this->domainManager->current()->getParameters();
+                $extension = Util::replaceSchemaParameters($extension, $parameters);
                 $schema = SchemaExtender::extend($schema, Parser::parse($extension));
             }
         }

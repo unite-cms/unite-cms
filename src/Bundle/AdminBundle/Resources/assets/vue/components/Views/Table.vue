@@ -113,6 +113,7 @@
                                       update
                                       delete
                                       permanent_delete
+                                      user_invite
                                   }
                               }
                               ... ${ this.view.id }

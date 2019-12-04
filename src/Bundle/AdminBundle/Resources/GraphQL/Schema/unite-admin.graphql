@@ -1,4 +1,10 @@
 
+type UniteAdminPermissions {
+    LOGS: Boolean!
+    SCHEMA: Boolean!
+    QUERY_EXPLORER: Boolean!
+}
+
 type UniteSchemaFile {
     name: String!
     value: String!

@@ -34,7 +34,8 @@ messages.en = {
                 permanent_delete: 'Permanent delete',
                 revert: 'Manage Revisions',
                 recover: 'Recover',
-                toggle_deleted: 'Toggle deleted content'
+                toggle_deleted: 'Toggle deleted content',
+                user_invite: 'Invite user to unite cms'
             },
             selection: {
                 select: 'Select',
@@ -102,6 +103,14 @@ messages.en = {
             },
             success: '"{contentTitle}" was removed.',
         },
+        user_invite: {
+            headline: 'Invite "{contentTitle}" to unite cms',
+            actions: {
+                submit: 'Send invitation E-Mail'
+            },
+            success: '"{contentTitle}" was invited to unite cms.',
+            error: '"Could not invite {contentTitle}" to unite cms. This is most likely because of an existing invitation for this user. Please wait some time and then try to invite this user again.',
+        }
     },
     field: {
         reference: {

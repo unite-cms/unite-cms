@@ -10,10 +10,18 @@ use UniteCMS\CoreBundle\Domain\DomainManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentMetaResolver implements FieldResolverInterface
 {
+
+    /**
+     * @var SaveExpressionLanguage $expressionLanguage
+     */
+    protected $expressionLanguage;
+
     /**
      * @var DomainManager $domainManager
      */
@@ -24,8 +32,9 @@ class ContentMetaResolver implements FieldResolverInterface
      */
     protected $security;
 
-    public function __construct(DomainManager $domainManager, Security $security)
+    public function __construct(SaveExpressionLanguage $expressionLanguage, DomainManager $domainManager, Security $security)
     {
+        $this->expressionLanguage = $expressionLanguage;
         $this->domainManager = $domainManager;
         $this->security = $security;
     }
@@ -59,6 +68,10 @@ class ContentMetaResolver implements FieldResolverInterface
                 foreach(ContentVoter::ENTITY_PERMISSIONS as  $permission) {
                     $permissions[$permission] = $this->security->isGranted($permission, $value);
                 }
+
+                // Add extra permissions
+                $permissions['user_invite'] = $this->canInvite($value);
+
                 return $permissions;
 
             case 'version':
@@ -84,5 +97,31 @@ class ContentMetaResolver implements FieldResolverInterface
                 return $domain->getContentManager()->revisions($domain, $value, $limit, $offset);
             default: return null;
         }
+    }
+
+    protected function canInvite(ContentInterface $content) : bool {
+        if(!$content instanceof UserInterface) {
+            return false;
+        }
+
+        $domain = $this->domainManager->current();
+        $directives = $domain->getContentTypeManager()->getUserType($content->getType())->getDirectives();
+
+        foreach($directives as $directive) {
+            if($directive['name'] === 'emailInvite') {
+
+                if(empty($directive['args']['passwordField'])) {
+                    return false;
+                }
+
+                if(!empty($directive['args']['if']) && !$this->expressionLanguage->evaluate($directive['args']['if'])) {
+                    return false;
+                }
+
+                return $content->getFieldData($directive['args']['passwordField'])->empty();
+            }
+        }
+
+        return false;
     }
 }

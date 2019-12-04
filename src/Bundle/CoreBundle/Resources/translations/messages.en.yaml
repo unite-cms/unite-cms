@@ -25,6 +25,6 @@ email:
     invite:
         subject: Invitation to unite cms
         headline: Invitation to unite cms
-        text: You got an invitation to unite cms. Please click the following link to accept the invitation
+        text: This is an invitation to unite cms. Please click the following link to accept the invitation
         text_button: Accept invitation
         footer: This is a one-time email sent to you by unite cms.
