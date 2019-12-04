@@ -466,7 +466,7 @@ class SchemaManager
                 json_decode($request->getContent(), true),
                 $request->request->all()
             )
-        );
+        )->setErrorFormatter([ErrorFormatter::class, 'createFromException']);
     }
 
     /**

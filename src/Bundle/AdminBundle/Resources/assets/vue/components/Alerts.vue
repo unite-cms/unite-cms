@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div uk-alert :class="'uk-alert-' + alert.type" v-for="alert in alerts">
+    <div uk-alert :class="'uk-alert-' + alert.type" v-for="alert in (alerts !== null ? alerts : globalAlerts)">
       <a class="uk-alert-close" uk-close></a>
       <p>{{ alert.message }}</p>
     </div>
@@ -9,10 +9,17 @@
 
 <script>
     import Alerts from "../state/Alerts";
+
     export default {
+        props: {
+            alerts: {
+                type: Array,
+                default() { return null; }
+            },
+        },
         computed: {
-            alerts() {
-                return Alerts.alerts;
+            globalAlerts() {
+                return Alerts.globalErrors;
             }
         }
     }

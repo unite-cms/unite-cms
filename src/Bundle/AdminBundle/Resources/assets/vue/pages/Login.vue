@@ -2,7 +2,8 @@
   <div class="uk-background-secondary uk-height-viewport uk-flex uk-flex-center uk-flex-middle">
     <div class="uk-card uk-card-default uk-padding">
       <form class="uk-form">
-        <div class="uk-alert uk-alert-danger" v-for="error in errors">{{ error }}</div>
+
+        <alerts-list />
 
         <div class="uk-margin">
           <label>Username</label>
@@ -28,20 +29,22 @@
 <script>
 
     import User from '../state/User';
+    import Alerts from '../state/Alerts'
+    import AlertsList from '../components/Alerts';
 
     export default {
         data() {
             return {
-                errors: [],
                 loading: false,
                 username: '',
                 password: '',
             }
         },
+        components: {AlertsList},
         methods: {
             login() {
                 this.loading = true;
-                this.errors = [];
+                Alerts.$emit('clear');
                 User.$emit('login',
                     {
                         type: 'Admin',
@@ -49,7 +52,7 @@
                         password: this.password,
                     },
                     (data) => {  this.$router.push('/'); },
-                    (errors) => { this.errors = errors; },
+                    Alerts.apolloErrorHandler,
                     () => { this.loading = false; }
                 );
             }

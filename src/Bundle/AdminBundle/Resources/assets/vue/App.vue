@@ -3,7 +3,7 @@
     <slot name="mobile-navbar"><app-mobile-navbar v-if="hasUserInformation" /></slot>
     <slot name="navigation"><app-navigation v-if="hasUserInformation" /></slot>
     <section id="app-main" class="uk-background-muted uk-flex uk-flex-column">
-      <alerts />
+      <alerts v-if="hasUserInformation" />
       <div class="uk-flex-1">
         <router-view></router-view>
       </div>

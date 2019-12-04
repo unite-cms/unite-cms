@@ -8,6 +8,7 @@
         props: {
             contentId: String,
             field: Object,
+            violations: Array,
             value: {}
         },
         watch: {

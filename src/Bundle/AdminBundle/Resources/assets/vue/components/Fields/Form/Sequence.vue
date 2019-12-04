@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field">
+  <form-row :domID="domID" :field="field" :alerts="violations">
     <input v-for="value in (values.length > 0 ? values : [''])" disabled type="text" class="uk-input" :id="domID" :value="value" />
   </form-row>
 </template>

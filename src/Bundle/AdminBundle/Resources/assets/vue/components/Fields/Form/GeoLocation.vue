@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field">
+  <form-row :domID="domID" :field="field" :alerts="violations">
     <multi-field :field="field" :val="val" @addRow="addRow" @removeRow="removeByKey" v-slot:default="multiProps">
       <div class="uk-flex uk-flex-middle">
         <div class="uk-flex-1 geo-input">

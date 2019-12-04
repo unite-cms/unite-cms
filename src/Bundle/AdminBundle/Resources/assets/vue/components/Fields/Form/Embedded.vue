@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field" :alerts="!embeddedView ? [{ level: 'warning', message: $t('field.embedded.missing_view_warning') }] : []">
+  <form-row :domID="domID" :field="field" :alerts="!embeddedView ? [{ level: 'warning', message: $t('field.embedded.missing_view_warning') }] : globalViolations">
     <multi-field v-if="embeddedView" :field="field" :val="val" @addRow="val.push({})" @removeRow="removeByKey" v-slot:default="multiProps">
 
       <div class="uk-input-group uk-text-center" v-if="embeddedView.category === 'union' && !unionViews[multiProps.rowKey || 0]">
@@ -14,7 +14,7 @@
           <a @click.prevent="clearUnionView(multiProps.rowKey || 0)" class="uk-icon-link"><icon name="x" /></a>
         </div>
 
-        <component :key="field.id" v-for="field in normalizedViews[multiProps.rowKey || 0].formFields()" :is="$unite.getFormFieldType(field.fieldType)" :field="field" :value="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0][field.id] : undefined" @input="setFieldValue(field.id, arguments, multiProps.rowKey || 0)" />
+        <component :key="field.id" v-for="field in normalizedViews[multiProps.rowKey || 0].formFields()" :is="$unite.getFormFieldType(field.fieldType)" :field="field" :value="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0][field.id] : undefined" @input="setFieldValue(field.id, arguments, multiProps.rowKey || 0)" :violations="violationsForField(field.id, multiProps.rowKey || 0)" />
       </div>
     </multi-field>
   </form-row>
@@ -36,7 +36,17 @@
       normalizeQueryData(queryData, field, unite, depth) { return queryData; },
       normalizeMutationData(formData, field, unite, depth) {
 
+          if(!formData) {
+              return formData;
+          }
+
           let view = getAdminViewByType(unite, field.returnType);
+
+          if(Array.isArray(formData)) {
+              return formData.map((rowData) => {
+                  return view.normalizeMutationData(rowData, depth);
+              });
+          }
 
           // Manipulate values for union type.
           if(view.category === 'union') {
@@ -80,6 +90,12 @@
               });
           },
 
+          globalViolations() {
+              return this.violations.filter((violation) => {
+                  return violation.path.length === 1;
+              });
+          }
+
       },
       methods: {
           setFieldValue(field, args, key) {
@@ -103,6 +119,19 @@
           clearUnionView(delta) {
               UIkit.modal.confirm(this.$t('field.embedded.confirm.clear_union_selection', this.unionView[delta])).then(() => {
                   this.setValue([{}], delta);
+              });
+          },
+
+          violationsForField(field, key) {
+              return this.violations.filter((violation) => {
+                  if(this.field.list_of) {
+                      return violation.path.length > 2 && violation.path[1] === '' + key && violation.path[2] === field;
+                  } else {
+                      return violation.path.length > 1 && violation.path[1] === field;
+                  }
+              }).map((violation) => {
+                  let path = this.field.list_of ? violation.path.slice(2) : violation.path.slice(1);
+                  return Object.assign({}, violation, { path });
               });
           }
       }

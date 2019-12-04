@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference.missing_view_warning') }] : []">
+  <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference.missing_view_warning') }] : violations">
       <div class="uk-input-group uk-flex uk-flex-middle uk-flex-wrap">
         <div class="uk-label uk-label-secondary" v-for="value in values">
           {{ referencedContentTitle(value) }}

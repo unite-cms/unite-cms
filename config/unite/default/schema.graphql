@@ -41,7 +41,7 @@ type DemoCategory implements UniteContent {
 type TeaserRegion implements UniteEmbeddedContent {
     id: ID
     _meta: UniteContentMeta
-    title: String @textField
+    title: String @textField @valid(if: "value == 'foo'", message: "Es ist nur 'foo' erlaubt!")
     intro_text: String @textField
 
     nestedTeaser: [TeaserRegion!] @embeddedField
@@ -54,7 +54,7 @@ type TeaserRegion implements UniteEmbeddedContent {
 type DemoArticle implements UniteContent {
     _meta: UniteContentMeta
     id: ID
-    name: String! @textField
+    name: String @textField
 
     """ Article content"""
     content: String @textField(escape: false)
@@ -72,7 +72,7 @@ type DemoArticle implements UniteContent {
     teasers: [TeaserRegion!] @embeddedField
 
     boolTest: Boolean @booleanField
-    boolTest1: Boolean @booleanField @required
+    boolTest1: Boolean @booleanField
     boolTest2: [Boolean!] @booleanField
 
     #testFile: UniteMediaFile @mediaFileField(todo: "FOO")

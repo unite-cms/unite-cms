@@ -1,7 +1,8 @@
 <template>
   <content-detail :loading="loading || $apollo.loading" @submit="submit">
     <h1 class="uk-card-title">{{ $t('content.update.headline', { contentTitle, view }) }}</h1>
-    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" />
+    <alerts-list :alerts="globalViolations" />
+    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
     <button slot="footer" class="uk-button uk-button-primary" type="submit">{{ $t('content.update.actions.submit') }}</button>
   </content-detail>
 </template>
@@ -10,11 +11,12 @@
     import gql from 'graphql-tag';
     import Icon from "../../components/Icon";
     import Alerts from "../../state/Alerts";
+    import AlertsList from '../../components/Alerts';
     import Route from "../../state/Route";
     import ContentDetail from './_detail';
 
     export default {
-        components: {Icon, ContentDetail},
+        components: {Icon, ContentDetail, AlertsList},
         data(){
             return {
                 loading: false,
@@ -27,6 +29,11 @@
             },
             contentTitle() {
                 return this.view.contentTitle(this.formData);
+            },
+            globalViolations() {
+                return Alerts.violationsWithoutPrefix(this.view.formFields().map(field => field.id)).map((v) => {
+                    return Object.assign({}, v, { message: v.path[0] + ': ' + v.message });
+                });
             }
         },
         apollo: {
@@ -67,7 +74,14 @@
                 }).then((data) => {
                     Route.back({ updated: this.$route.params.id });
                     Alerts.$emit('push', 'success', this.$t('content.update.success', { contentTitle: this.contentTitle, view: this.view }));
-                }).finally(() => { this.loading = false }).catch(Alerts.apolloErrorHandler)
+                }).finally(() => { this.loading = false }).catch((e) => {
+                    Alerts.apolloErrorHandler(e);
+                    Alerts.$emit('push', 'danger', this.$t('content.update.errors', { view: this.view, contentTitle: this.contentTitle }));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            },
+            fieldViolations(prefix) {
+                return Alerts.violationsForPrefix(prefix);
             }
         }
     }

@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field">
+  <form-row :domID="domID" :field="field" :alerts="violations">
     <multi-field :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
       <editor-menu-bar :editor="editorForKey(multiProps.rowKey || 0)" v-slot="{ commands, isActive }">
         <ul class="uk-iconnav">

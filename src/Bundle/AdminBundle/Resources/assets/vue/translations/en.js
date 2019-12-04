@@ -52,6 +52,7 @@ messages.en = {
                 submit: 'Save'
             },
             success: '"{contentTitle}" was created.',
+            errors: '"{contentTitle}" could not be created. Please see violations below.',
         },
         update: {
             headline: 'Update "{contentTitle}"',
@@ -59,6 +60,7 @@ messages.en = {
                 submit: 'Save'
             },
             success: '"{contentTitle}" was updated.',
+            errors: '"{contentTitle}" could not be updated. Please see violations below.',
         },
         delete: {
             headline: 'Move "{contentTitle}" to trash',
@@ -133,6 +135,10 @@ messages.en = {
         },
 
         date: en
+    },
+    network_error: {
+        401: 'Username or password incorrect.',
+        500: 'Could not connect to API. Maybe your GraphQL schema is not valid?',
     }
 };
 

@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field">
+  <form-row :domID="domID" :field="field" :alerts="violations">
     <multi-field :field="field" :val="val" @addRow="val.push(today)" @removeRow="removeByKey" :span-row="false" v-slot:default="multiProps">
       <div class="uk-flex uk-flex-middle">
 
