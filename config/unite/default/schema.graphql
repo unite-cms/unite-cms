@@ -12,6 +12,27 @@ type SEO implements UniteEmbeddedContent {
     metaDescription: String @textField
 }
 
+
+"""Media"""
+type Media implements UniteContent {
+    id: ID
+    _meta: UniteContentMeta
+    alt: String @textField
+    title: String @textField
+    file: UniteMediaFile @mediaFileField ( s3:
+        {
+            key: "XXX",
+            secret: "XXX",
+            region: "",
+            version: "latest",
+            endpoint: "https://example.com/"
+            bucket: "test",
+            path: "/tmp"
+        }
+    )
+}
+
+
 """Categories"""
 type DemoCategory implements UniteContent {
     _meta: UniteContentMeta
