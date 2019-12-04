@@ -2,7 +2,7 @@
 /**
  * S3PresignedUrl plugin.
  */
-namespace UniteCMS\MediaBundle\Plugin;
+namespace UniteCMS\MediaBundle\FlySystem\Plugin;
 
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\PluginInterface;

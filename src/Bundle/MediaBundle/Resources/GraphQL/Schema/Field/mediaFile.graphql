@@ -2,12 +2,12 @@
 directive @mediaFileField(
     default: UniteMediaFileInput
     s3: MediaFileFieldS3Config
-    google: MediaFileFieldGoogleConfig
+    #google: MediaFileFieldGoogleConfig
 ) on FIELD_DEFINITION
 
 enum MEDIA_FILE_DRIVER {
     S3
-    GOOGLE
+    #GOOGLE
 }
 
 input MediaFileFieldS3Config {
