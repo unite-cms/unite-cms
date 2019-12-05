@@ -1,4 +1,4 @@
 
 extend type Mutation {
-    uniteMediaPreSignUrl(type: String!, field: String!) : String!
+    uniteMediaPreSignedUrl(type: String!, field: String!, filename: String!) : String!
 }

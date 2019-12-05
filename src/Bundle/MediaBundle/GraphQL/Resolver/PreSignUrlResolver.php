@@ -37,22 +37,19 @@ class PreSignUrlResolver implements FieldResolverInterface
      */
     public function resolve($value, $args, $context, ResolveInfo $info)
     {
-        if ($info->fieldName !== 'uniteMediaPreSignUrl') {
+        if ($info->fieldName !== 'uniteMediaPreSignedUrl') {
             return null;
         }
 
         $domain = $this->domainManager->current();
-
         $field = $domain->getContentTypeManager()->getContentType($args['type'])->getField($args['field']);
         if (!$field) {
             return null;
         }
 
-        $keys = $field->getSettings()->keys();
-        foreach ($keys as $driver) {
-            if ($field->getSettings()->get($driver)) {
-                $flySystem = $this->flySystemManager->initialize($driver, $field->getSettings()->get($driver));
-                return $flySystem->getPresignedUrl();
+        foreach(['s3', 'google', 'local'] as $driver) {
+            if(!empty($field->getSettings()->get($driver))) {
+                return $this->flySystemManager->createFilesystem($driver, $field->getSettings()->get($driver))->getPreSignedUrl($args['filename']);
             }
         }
 

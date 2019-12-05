@@ -2,17 +2,69 @@
 
 namespace UniteCMS\MediaBundle\Flysystem;
 
-use UniteCMS\MediaBundle\Flysystem\S3FlySystem;
+use Aws\S3\S3Client;
+use Google\Cloud\Storage\StorageClient;
+use InvalidArgumentException;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use League\Flysystem\Filesystem;
+use Superbalist\Flysystem\GoogleStorage\GoogleStorageAdapter;
+use UniteCMS\MediaBundle\Flysystem\Plugin\PreSignedUrl;
 
 class FlySystemManager
 {
-    public function initialize(string $driver, array $config) {
+    /**
+     * @var array Fil
+     */
+    protected $systems = [];
+
+    /**
+     * Create a filesystem for the given driver and config.
+     *
+     * @param string $driver
+     * @param array $config
+     *
+     * @return Filesystem
+     */
+    public function createFilesystem(string $driver, array $config = []) : Filesystem {
+        $filesystem = null;
+        $systemKey = md5($driver . serialize($config));
+
+        if(!empty($this->systems[$systemKey])) {
+            return $this->systems[$systemKey];
+        }
+
+        $adapter = null;
+
         switch ($driver) {
+            case 'local':
+                $adapter = new Local(__DIR__.'/path/to/root');
+                break;
             case 's3':
-                $fs = new S3FlySystem($config);
-                return $fs->getInstance();
+                $client = new S3Client([
+                    'credentials' => [
+                        'key'    => $config['key'],
+                        'secret' => $config['secret'],
+                    ],
+                    'region' => $config['region'],
+                    'version' => $config['version'] ?? 'latest',
+                ]);
+                $adapter = new AwsS3Adapter($client, $config['bucket'], $config['path'] ?? null);
+                break;
+            case 'google':
+                $client = new StorageClient([
+                    'projectId' => $config['id'],
+                ]);
+                $bucket = $client->bucket($config['bucket']);
+                $adapter = new GoogleStorageAdapter($client, $bucket);
+                break;
+            default:
+                throw new InvalidArgumentException(sprintf('No filesystem driver "%s" found', $driver));
             break;
         }
-        return null;
+
+        $this->systems[$systemKey] = new Filesystem($adapter);
+        $this->systems[$systemKey]->addPlugin(new PreSignedUrl());
+        return $this->systems[$systemKey];
     }
 }
