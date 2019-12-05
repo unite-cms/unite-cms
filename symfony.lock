@@ -167,6 +167,9 @@
     "ralouphie/getallheaders": {
         "version": "3.0.3"
     },
+    "ramsey/uuid": {
+        "version": "3.9.1"
+    },
     "rize/uri-template": {
         "version": "0.3.2"
     },

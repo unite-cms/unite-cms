@@ -15,16 +15,26 @@ abstract class ContentEvent extends Event
     const PERMANENT_DELETE = 'PERMANENT_DELETE';
     const RECOVER = 'RECOVER';
 
+    /**
+     * @var array
+     */
+    protected $previousData;
+
+    /**
+     * @var ContentInterface
+     */
     protected $content;
 
     /**
      * ContentEvent constructor.
      *
      * @param \UniteCMS\CoreBundle\Content\ContentInterface $content
+     * @param array $previousData
      */
-    public function __construct(ContentInterface $content)
+    public function __construct(ContentInterface $content, array $previousData = [])
     {
         $this->content = $content;
+        $this->previousData = $previousData;
     }
 
     /**
@@ -32,5 +42,12 @@ abstract class ContentEvent extends Event
      */
     public function getContent() : ContentInterface {
         return $this->content;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPreviousData() : array {
+        return $this->previousData;
     }
 }

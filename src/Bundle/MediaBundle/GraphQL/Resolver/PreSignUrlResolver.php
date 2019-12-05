@@ -4,9 +4,11 @@ namespace UniteCMS\MediaBundle\GraphQL\Resolver;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use UniteCMS\CoreBundle\GraphQL\Resolver\Field\FieldResolverInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\MediaBundle\Flysystem\FlySystemManager;
+use UniteCMS\MediaBundle\Flysystem\UploadToken;
 
 class PreSignUrlResolver implements FieldResolverInterface
 {
@@ -20,9 +22,15 @@ class PreSignUrlResolver implements FieldResolverInterface
      */
     protected $domainManager;
 
-    public function __construct(FlySystemManager $flySystemManager, DomainManager $domainManager) {
+    /**
+     * @var JWTEncoderInterface $JWTEncoder
+     */
+    protected $JWTEncoder;
+
+    public function __construct(FlySystemManager $flySystemManager, DomainManager $domainManager, JWTEncoderInterface $JWTEncoder) {
         $this->flySystemManager = $flySystemManager;
         $this->domainManager = $domainManager;
+        $this->JWTEncoder = $JWTEncoder;
     }
 
     /**
@@ -49,7 +57,15 @@ class PreSignUrlResolver implements FieldResolverInterface
 
         foreach(['s3', 'google', 'local'] as $driver) {
             if(!empty($field->getSettings()->get($driver))) {
-                return $this->flySystemManager->createFilesystem($driver, $field->getSettings()->get($driver))->getPreSignedUrl($args['filename']);
+
+                $flySystem = $this->flySystemManager->createFilesystem($driver, $field->getSettings()->get($driver));
+
+                /**
+                 * @var UploadToken $uploadToken
+                 */
+                $uploadToken = $flySystem->getPreSignedUrl($args['filename'], $field->getSettings()->get($driver));
+                $uploadToken->setField($field->getId())->setType($field->getType());
+                return $this->JWTEncoder->encode($uploadToken->toArray());
             }
         }
 

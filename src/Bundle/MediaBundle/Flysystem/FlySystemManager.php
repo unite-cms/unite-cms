@@ -49,7 +49,7 @@ class FlySystemManager
                     'region' => $config['region'],
                     'version' => $config['version'] ?? 'latest',
                 ]);
-                $adapter = new AwsS3Adapter($client, $config['bucket'], $config['path'] ?? null);
+                $adapter = new AwsS3Adapter($client, $config['bucket']);
                 break;
             case 'google':
                 $client = new StorageClient([
