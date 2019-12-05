@@ -19,6 +19,7 @@ import Recover from "../pages/content/Recover";
 import Delete from "../pages/content/Delete";
 import Revert from "../pages/content/Revert";
 import UserInvite from "../pages/content/UserInvite";
+import Invite from "../pages/emailConfirm/Invite";
 
 Vue.use(VueRouter);
 
@@ -52,6 +53,8 @@ const routes = [
             { path: '', component: Index },
             { path: 'revert', component: Revert },
     ], meta: { requiresAuth: true } },
+
+    { path: '/email-confirm/invite/:token', meta: {requiresAnonymous: true }, component: Invite }
 ];
 
 export const router = new VueRouter({

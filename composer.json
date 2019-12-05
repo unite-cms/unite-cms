@@ -38,6 +38,7 @@
         }
     ],
     "require": {
+        "php": "^7.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",

@@ -184,11 +184,6 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
             return false;
         }
 
-        if(!empty($config['if']) && !$this->expressionLanguage->evaluate($config['if'], ['content' => $user]))  {
-            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an account activation, however the directive if-expression evaluates to false.', $args['username']));
-            return false;
-        }
-
         // Check current state field value.
         if(!$this->canUserActivateAccount($user, $config)) {
             return false;

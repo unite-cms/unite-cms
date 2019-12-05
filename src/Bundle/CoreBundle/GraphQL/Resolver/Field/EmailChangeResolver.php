@@ -167,11 +167,6 @@ class EmailChangeResolver extends AbstractEmailConfirmationResolver
             return false;
         }
 
-        if(!empty($config['if']) && !$this->expressionLanguage->evaluate($config['if'], ['content' => $user]))  {
-            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an email change, however the directive if-expression evaluates to false.', $args['username']));
-            return false;
-        }
-
         // Check valid token.
         if(!$this->isTokenValid($user, $args['token'])) {
             return false;

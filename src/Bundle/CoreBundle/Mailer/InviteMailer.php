@@ -24,7 +24,7 @@ class InviteMailer extends BaseMailer
             $this->translator->trans('email.invite.subject'),
             $this->twig->render('@UniteCMSCore/email/invite.html.twig', [
                 'inviteText' => $inviteText,
-                'inviteUrl' => $this->defaultUrl($inviteUrl, 'email-confirm/invite/{token}'),
+                'inviteUrl' => $this->defaultUrl($inviteUrl, '/email-confirm/invite/{token}'),
                 'inviteToken' => $inviteToken,
             ]),
             'text/html'

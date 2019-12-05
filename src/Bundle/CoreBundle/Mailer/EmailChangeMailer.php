@@ -22,7 +22,7 @@ class EmailChangeMailer extends BaseMailer
         $message = new Swift_Message(
             $this->translator->trans('email.change_email.subject'),
             $this->twig->render('@UniteCMSCore/email/changeEmail.html.twig', [
-                'changeUrl' => $this->defaultUrl($changeUrl, 'email-confirm/change-email/{token}'),
+                'changeUrl' => $this->defaultUrl($changeUrl, '/email-confirm/change-email/{token}'),
                 'changeToken' => $changToken,
             ]),
             'text/html'

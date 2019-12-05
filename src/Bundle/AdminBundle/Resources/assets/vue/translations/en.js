@@ -109,7 +109,7 @@ messages.en = {
                 submit: 'Send invitation E-Mail'
             },
             success: '"{contentTitle}" was invited to unite cms.',
-            error: '"Could not invite {contentTitle}" to unite cms. This is most likely because of an existing invitation for this user. Please wait some time and then try to invite this user again.',
+            error: 'Could not invite "{contentTitle}" to unite cms. This is most likely because of an existing invitation for this user. Please wait some time and then try to invite this user again.',
         }
     },
     field: {
@@ -148,6 +148,24 @@ messages.en = {
     network_error: {
         401: 'Username or password incorrect.',
         500: 'Could not connect to API. Maybe your GraphQL schema is not valid?',
+    },
+
+    email_confirm: {
+        invite: {
+            headline: 'Accept invitation',
+            text: 'You have been invited to create an unite cms account as "{type}". Please choose a password for your new account.',
+            labels: {
+                username: 'Username (you cannot change this)',
+                password: 'Password',
+                password_repeat: 'Repeat password',
+            },
+            actions: {
+                submit: 'Create account'
+            },
+            error: 'Could not create account. Please contact an administrator.',
+            success: 'Successfully created account! You will be automatically logged in...',
+            token_expired: 'Invitation token expired. Please contact an administrator and ask for a new invitation.'
+        }
     }
 };
 

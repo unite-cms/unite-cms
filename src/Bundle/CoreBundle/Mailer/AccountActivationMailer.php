@@ -22,7 +22,7 @@ class AccountActivationMailer extends BaseMailer
         $message = new Swift_Message(
             $this->translator->trans('email.account_activate.subject'),
             $this->twig->render('@UniteCMSCore/email/accountActivate.html.twig', [
-                'activateUrl' => $this->defaultUrl($activateUrl, 'email-confirm/activate-account/{token}'),
+                'activateUrl' => $this->defaultUrl($activateUrl, '/email-confirm/activate-account/{token}'),
                 'activateToken' => $activateToken,
             ]),
             'text/html'

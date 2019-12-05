@@ -25,7 +25,7 @@ class PasswordResetMailer extends BaseMailer
         $message = new Swift_Message(
             $this->translator->trans('email.password_reset.subject'),
             $this->twig->render('@UniteCMSCore/email/passwordReset.html.twig', [
-                'resetUrl' => $this->defaultUrl($resetUrl, 'email-confirm/reset-password/{token}'),
+                'resetUrl' => $this->defaultUrl($resetUrl, '/email-confirm/reset-password/{token}'),
                 'resetToken' => $resetToken,
             ]),
             'text/html'

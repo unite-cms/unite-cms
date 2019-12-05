@@ -1,7 +1,7 @@
 <template>
   <content-detail :loading="loading || $apollo.loading" @submit="submit">
     <h1 class="uk-card-title">{{ $t('content.user_invite.headline', { contentTitle, view }) }}</h1>
-    <textarea-field v-model="text" :field="{ required: true, name: 'text' }" />
+    <textarea-field v-model="text" :field="{ required: true, name: 'text' }" :violations="[]" />
     <button slot="footer" class="uk-button uk-button-primary" type="submit">{{ $t('content.user_invite.actions.submit') }}</button>
   </content-detail>
 </template>
@@ -75,17 +75,14 @@
                       Route.back({ updated: this.$route.params.id });
                       Alerts.$emit('push', 'success', this.$t('content.user_invite.success', { contentTitle: this.contentTitle, view: this.view }));
                     } else {
-                        Alerts.$emit('push', 'danger', this.$t('content.user_invite.error', { view: this.view, contentTitle: this.contentTitle }));
+                        Alerts.$emit('push', 'danger', this.$t('content.user_invite.error', { view: this.view, contentTitle: this.contentTitle }), 'global');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 }).finally(() => { this.loading = false }).catch((e) => {
-                    Alerts.$emit('push', 'danger', this.$t('content.user_invite.error', { view: this.view, contentTitle: this.contentTitle }));
+                    Alerts.$emit('push', 'danger', this.$t('content.user_invite.error', { view: this.view, contentTitle: this.contentTitle }), 'global');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             },
-            fieldViolations(prefix) {
-                return Alerts.violationsForPrefix(prefix);
-            }
         }
     }
 </script>

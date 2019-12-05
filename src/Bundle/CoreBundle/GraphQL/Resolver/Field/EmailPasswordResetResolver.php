@@ -163,11 +163,6 @@ class EmailPasswordResetResolver extends AbstractEmailConfirmationResolver
             return false;
         }
 
-        if(!empty($config['if']) && !$this->expressionLanguage->evaluate($config['if'], ['content' => $user]))  {
-            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request a password reset, however the directive if-expression evaluates to false.', $args['username']));
-            return false;
-        }
-
         if(!$this->isTokenValid($user, $args['token'])) {
             $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to confirm a password reset, however the provided token is not valid.', $args['username']));
             return false;

@@ -3,7 +3,6 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
-use GraphQL\Error\UserError;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
@@ -134,7 +133,7 @@ class EmailInviteResolver extends AbstractEmailConfirmationResolver
         }
 
         // Persist token
-        $this->generateToken($user);
+        $this->generateToken($user, ['type' => $args['type']]);
         $domain->getUserManager()->flush($domain);
 
         // Send out email
@@ -168,12 +167,12 @@ class EmailInviteResolver extends AbstractEmailConfirmationResolver
             return false;
         }
 
-        if(!empty($config['if']) && !$this->expressionLanguage->evaluate($config['if'], ['content' => $user]))  {
-            $domain->log(LoggerInterface::WARNING, sprintf('Cannot invite user "%s", because the directive if-expression evaluates to false.', $args['username']));
+        if(!$this->isTokenValid($user, $args['token'])) {
+            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to confirm an invitation, however the provided token is not valid.', $args['username']));
             return false;
         }
 
-        if(!$this->isTokenValid($user, $args['token'])) {
+        if($this->getTokenPayload($user)['type'] !==  $args['type']) {
             $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to confirm an invitation, however the provided token is not valid.', $args['username']));
             return false;
         }
