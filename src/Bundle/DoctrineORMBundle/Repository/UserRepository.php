@@ -7,9 +7,8 @@ use UniteCMS\DoctrineORMBundle\Entity\User;
 
 class UserRepository extends ContentRepository {
 
-    public function typedFindByUsername(string $type, string $username) : ?User {
+    public function findByUsername(string $username) : ?User {
         $result = $this->findOneBy([
-            'type' => $type,
             'username' => $username,
         ]);
 

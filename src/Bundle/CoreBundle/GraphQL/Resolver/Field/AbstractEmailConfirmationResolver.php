@@ -150,6 +150,7 @@ abstract class AbstractEmailConfirmationResolver implements FieldResolverInterfa
         $user->setToken(static::TOKEN_KEY,
             $this->JWTEncoder->encode(array_merge([
                 'username' => $user->getUsername(),
+                'type' => $user->getType(),
             ], $payload))
         );
     }

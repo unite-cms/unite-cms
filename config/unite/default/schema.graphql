@@ -95,6 +95,19 @@ type Admin implements UniteUser
     teaser: TeaserRegion @embeddedField
 }
 
+"""OtherUser Users"""
+type OtherUser implements UniteUser
+@passwordAuthenticator(passwordField: "password")
+@emailPasswordReset(emailField: "username", passwordField: "password")
+@emailInvite(if: "%(IS_ADMIN)%", emailField: "username", passwordField: "password") {
+    _meta: UniteContentMeta
+    id: ID
+    username: String! @emailField
+    password: NULL @passwordField
+
+    teaser: TeaserRegion @embeddedField
+}
+
 
 """Demo Settings"""
 type DemoSettings implements UniteSingleContent {

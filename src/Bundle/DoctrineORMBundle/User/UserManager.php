@@ -16,7 +16,7 @@ class UserManager extends ContentManager implements UserManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function findByUsername(Domain $domain, string $type, string $username): ?UserInterface {
-        return $this->repository($domain)->typedFindByUsername($type, $username);
+    public function findByUsername(Domain $domain, string $username): ?UserInterface {
+        return $this->repository($domain)->findByUsername($username);
     }
 }

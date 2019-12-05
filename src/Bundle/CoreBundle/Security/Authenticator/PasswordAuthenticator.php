@@ -21,8 +21,6 @@ use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Security\Encoder\FieldableUserPasswordEncoder;
-use UniteCMS\CoreBundle\Security\Token\PreAuthenticationUniteUserToken;
-use UniteCMS\CoreBundle\Security\User\TypeAwareUserProvider;
 
 class PasswordAuthenticator extends AbstractGuardAuthenticator implements SchemaProviderInterface
 {
@@ -100,7 +98,7 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      */
     public function supports(Request $request)
     {
-        return !empty($request->headers->get('PHP_AUTH_USER')) && !empty($request->headers->get('PHP_AUTH_PW')) && count(explode('/', $request->headers->get('PHP_AUTH_USER'))) === 2;
+        return !empty($request->headers->get('PHP_AUTH_USER')) && !empty($request->headers->get('PHP_AUTH_PW'));
     }
 
     /**
@@ -108,37 +106,30 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      */
     public function getCredentials(Request $request)
     {
-        $nameParts = explode('/', $request->headers->get('PHP_AUTH_USER'));
-        return new PreAuthenticationUniteUserToken(
-            $nameParts[1],
-            $request->headers->get('PHP_AUTH_PW'),
-            $nameParts[0],
-            $this->getAuthDirective($nameParts[0])
-        );
+        return [
+            'username' => $request->headers->get('PHP_AUTH_USER'),
+            'password' => $request->headers->get('PHP_AUTH_PW'),
+        ];
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getUser($preAuthToken, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider)
     {
-        if (!$preAuthToken instanceof PreAuthenticationUniteUserToken) {
+        if (!is_array($credentials) || empty($credentials['username']) || empty($credentials['password'])) {
             throw new InvalidArgumentException(
-                sprintf('The first argument of the "%s()" method must be an instance of "%s".', __METHOD__, PreAuthenticationUniteUserToken::class)
+                sprintf('The first argument of the "%s()" method must be array with "username" and "password" keys.', __METHOD__)
             );
         }
 
-        if ($userProvider instanceof TypeAwareUserProvider) {
-            $user = $userProvider->loadUserByUsernameAndType($preAuthToken->getUsername(), $preAuthToken->getType());
+        $user = $userProvider->loadUserByUsername($credentials['username']);
 
-            if(!$user instanceof ContentInterface) {
-                throw new InvalidArgumentException(sprintf('User must be an instance of "%s" in order to work with UsernamePasswordAuthenticator.', ContentInterface::class));
-            }
-
-            return $user;
+        if(!$user instanceof ContentInterface) {
+            throw new InvalidArgumentException(sprintf('User must be an instance of "%s" in order to work with UsernamePasswordAuthenticator.', ContentInterface::class));
         }
 
-        return null;
+        return $user;
     }
 
     /**
@@ -146,23 +137,25 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      *
      * {@inheritDoc}
      */
-    public function checkCredentials($preAuthToken, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user)
     {
-        if (!$preAuthToken instanceof PreAuthenticationUniteUserToken) {
+        if (!is_array($credentials) || empty($credentials['username']) || empty($credentials['password'])) {
             throw new InvalidArgumentException(
-                sprintf('The first argument of the "%s()" method must be an instance of "%s".', __METHOD__, PreAuthenticationUniteUserToken::class)
+                sprintf('The first argument of the "%s()" method must be array with "username" and "password" keys.', __METHOD__)
             );
         }
 
         // Use the custom password field for checking password.
-        if(empty($preAuthToken->getAuthDirective()['args']['passwordField'])) {
+        $authDirective = $this->getAuthDirective($user->getType());
+
+        if(empty($authDirective['args']['passwordField'])) {
             return null;
         }
 
         return $this->passwordEncoder->isFieldPasswordValid(
             $user,
-            $preAuthToken->getAuthDirective()['args']['passwordField'],
-            $preAuthToken->getCredentials()
+            $authDirective['args']['passwordField'],
+            $credentials['password']
         );
     }
 

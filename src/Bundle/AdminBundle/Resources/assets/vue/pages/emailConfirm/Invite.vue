@@ -80,15 +80,14 @@
                 this.success = false;
 
                 this.$apollo.mutate({
-                    mutation: gql`mutation($token: String!, $password: String!, $type: String!, $username: String!) {
+                    mutation: gql`mutation($token: String!, $password: String!, $username: String!) {
                         unite {
-                            emailInviteConfirm(token: $token, password: $password, type: $type, username: $username)
+                            emailInviteConfirm(token: $token, password: $password, username: $username)
                         }
                     }`,
                     variables: {
                         token: this.$route.params.token,
                         password: this.password,
-                        type: this.type,
                         username: this.username
                     }
                 }).then((data) => {
@@ -98,7 +97,6 @@
                         this.success = true;
                         User.$emit('login',
                             {
-                                type: this.type,
                                 username: this.username,
                                 password: this.password,
                             },

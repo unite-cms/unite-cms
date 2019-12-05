@@ -3,13 +3,13 @@
 
 namespace UniteCMS\CoreBundle\Security\User;
 
-use Symfony\Component\Security\Core\Exception\InvalidArgumentException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 
-class DomainUserProvider implements TypeAwareUserProvider
+class DomainUserProvider implements UserProviderInterface
 {
 
     /**
@@ -27,16 +27,8 @@ class DomainUserProvider implements TypeAwareUserProvider
      */
     public function loadUserByUsername($username)
     {
-        throw new InvalidArgumentException('Please call loadUserByUsernameAndType() with a user name and unite cms user type.');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function loadUserByUsernameAndType(string $username, string $type)
-    {
         $domain = $this->domainManager->current();
-        if(!$user = $domain->getUserManager()->findByUsername($domain, $type, $username)) {
+        if(!$user = $domain->getUserManager()->findByUsername($domain, $username)) {
             throw new UsernameNotFoundException();
         }
 
@@ -52,7 +44,7 @@ class DomainUserProvider implements TypeAwareUserProvider
             throw new UnsupportedUserException();
         }
 
-        return $this->loadUserByUsernameAndType($user->getUsername(), $user->getType());
+        return $this->loadUserByUsername($user->getUsername());
     }
 
     /**

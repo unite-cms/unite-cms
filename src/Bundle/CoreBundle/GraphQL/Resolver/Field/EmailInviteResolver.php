@@ -100,15 +100,15 @@ class EmailInviteResolver extends AbstractEmailConfirmationResolver
      */
     protected function resolveRequest($args) : bool {
 
-        if(!$config = $this->getDirectiveConfig($args['type'])) {
-            return false;
-        }
-
         $domain = $this->domainManager->current();
-        $user = $domain->getUserManager()->findByUsername($domain, $args['type'], $args['username']);
+        $user = $domain->getUserManager()->findByUsername($domain, $args['username']);
 
         if(!$user) {
             $domain->log(LoggerInterface::WARNING, sprintf('Cannot invite user "%s", not user with this username was found.', $args['username']));
+            return false;
+        }
+
+        if(!$config = $this->getDirectiveConfig($user->getType())) {
             return false;
         }
 
@@ -133,7 +133,7 @@ class EmailInviteResolver extends AbstractEmailConfirmationResolver
         }
 
         // Persist token
-        $this->generateToken($user, ['type' => $args['type']]);
+        $this->generateToken($user);
         $domain->getUserManager()->flush($domain);
 
         // Send out email
@@ -155,24 +155,19 @@ class EmailInviteResolver extends AbstractEmailConfirmationResolver
      */
     protected function resolveConfirm($args) : bool {
 
-        if(!$config = $this->getDirectiveConfig($args['type'])) {
-            return false;
-        }
-
         $domain = $this->domainManager->current();
-        $user = $domain->getUserManager()->findByUsername($domain, $args['type'], $args['username']);
+        $user = $domain->getUserManager()->findByUsername($domain, $args['username']);
 
         if(!$user) {
             $domain->log(LoggerInterface::WARNING, sprintf('Unknown user "%s" tries to confirm an invitation.', $args['username']));
             return false;
         }
 
-        if(!$this->isTokenValid($user, $args['token'])) {
-            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to confirm an invitation, however the provided token is not valid.', $args['username']));
+        if(!$config = $this->getDirectiveConfig($user->getType())) {
             return false;
         }
 
-        if($this->getTokenPayload($user)['type'] !==  $args['type']) {
+        if(!$this->isTokenValid($user, $args['token'])) {
             $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to confirm an invitation, however the provided token is not valid.', $args['username']));
             return false;
         }

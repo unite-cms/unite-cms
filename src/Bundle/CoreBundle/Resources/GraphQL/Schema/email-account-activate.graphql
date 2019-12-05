@@ -8,6 +8,6 @@ directive @emailAccountActivate(
 ) on OBJECT
 
 extend type UniteMutation {
-    emailAccountActivateRequest(type: String!, username: String!) : Boolean!
-    emailAccountActivateConfirm(type: String!, username: String!, token: String!) : Boolean!
+    emailAccountActivateRequest(username: String!) : Boolean!
+    emailAccountActivateConfirm(username: String!, token: String!) : Boolean!
 }

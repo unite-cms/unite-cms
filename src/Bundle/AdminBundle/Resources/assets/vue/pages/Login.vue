@@ -3,7 +3,7 @@
     <div class="uk-card uk-card-default uk-padding" style="max-width: 500px;">
       <form class="uk-form">
 
-        <h1>{{ $t('login.headline', { type }) }}</h1>
+        <h1>{{ $t('login.headline') }}</h1>
 
         <alerts-list />
 
@@ -42,8 +42,7 @@
             return {
                 loading: false,
                 username: '',
-                password: '',
-                type: 'Admin',
+                password: ''
             }
         },
         components: {AlertsList},
@@ -58,7 +57,6 @@
                 Alerts.$emit('clear');
                 User.$emit('login',
                     {
-                        type: this.type,
                         username: this.username,
                         password: this.password,
                     },

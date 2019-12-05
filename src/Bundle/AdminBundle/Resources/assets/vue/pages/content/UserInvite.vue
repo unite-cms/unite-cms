@@ -60,13 +60,12 @@
                 Alerts.$emit('clear');
                 this.loading = true;
                 this.$apollo.mutate({
-                    mutation: gql`mutation($type: String!, $username: String!, $text: String) {
+                    mutation: gql`mutation($username: String!, $text: String) {
                         unite {
-                            emailInviteRequest(type: $type, username: $username, text: $text)
+                            emailInviteRequest(username: $username, text: $text)
                         }
                     }`,
                     variables: {
-                        type: this.view.type,
                         username: this.user.username,
                         text: this.text
                     }

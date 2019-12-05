@@ -3,8 +3,8 @@
     <div class="uk-card uk-card-default uk-padding" style="max-width: 500px;">
       <form class="uk-form">
 
-        <h1>{{ $t('reset_password.headline', { type }) }}</h1>
-        <p>{{ $t('reset_password.text', { type }) }}</p>
+        <h1>{{ $t('reset_password.headline') }}</h1>
+        <p>{{ $t('reset_password.text') }}</p>
 
         <alerts-list />
 
@@ -50,9 +50,6 @@
         },
         components: {AlertsList},
         computed: {
-            type() {
-                return 'Admin';
-            },
             valid() {
                 return this.username.length > 0;
             }
@@ -64,13 +61,12 @@
                 this.success = false;
 
                 this.$apollo.mutate({
-                    mutation: gql`mutation($type: String!, $username: String!) {
+                    mutation: gql`mutation($username: String!) {
                         unite {
-                            emailPasswordResetRequest(type: $type, username: $username)
+                            emailPasswordResetRequest(username: $username)
                         }
                     }`,
                     variables: {
-                        type: this.type,
                         username: this.username
                     }
                 }).then((data) => {

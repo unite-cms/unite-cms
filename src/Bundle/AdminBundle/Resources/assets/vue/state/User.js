@@ -18,7 +18,7 @@ export const User = new Vue({
             this.$apollo.mutate({
                 context: {
                     headers: {
-                        authorization: 'Basic ' + btoa(data.type + '/' + data.username + ':' + data.password)
+                        authorization: 'Basic ' + btoa(data.username + ':' + data.password)
                     }
                 },
                 mutation: gql`mutation {

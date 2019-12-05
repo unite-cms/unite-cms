@@ -2,7 +2,7 @@
   <section class="uk-section uk-position-relative">
     <div class="uk-container">
 
-      <view-header v-if="header" :can-create="true" :title="view.name" :deleted="deleted" @toggleDeleted="toggleDeleted" />
+      <view-header v-if="header" :can-create="is_granted('create')" :title="view.name" :deleted="deleted" @toggleDeleted="toggleDeleted" />
 
       <div class="uk-overflow-auto">
         <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
@@ -106,7 +106,6 @@
                           result {
                               _meta {
                                   id
-                                  version
                                   deleted
                                   permissions {
                                       read
