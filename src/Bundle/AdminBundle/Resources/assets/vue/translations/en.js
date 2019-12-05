@@ -150,6 +150,32 @@ messages.en = {
         500: 'Could not connect to API. Maybe your GraphQL schema is not valid?',
     },
 
+    login: {
+        headline: 'Login',
+        labels: {
+            username: 'Username',
+            password: 'Password'
+        },
+        actions: {
+            submit: 'Login',
+            reset_password: 'Forgot password?'
+        }
+    },
+
+    reset_password: {
+        headline: 'Reset password',
+        text: 'Please enter your username and we will send a password reset token to your E-Mail address.',
+        labels: {
+            username: 'Username',
+        },
+        actions: {
+            submit: 'Reset password',
+            login: 'Login'
+        },
+        error: 'Could not reset password. If you have already requested a password reset, please wait some time before requesting again.',
+        success: 'Successfully requested a password reset token. Please check your E-Mails.'
+    },
+
     email_confirm: {
         invite: {
             headline: 'Accept invitation',
@@ -165,6 +191,22 @@ messages.en = {
             error: 'Could not create account. Please contact an administrator.',
             success: 'Successfully created account! You will be automatically logged in...',
             token_expired: 'Invitation token expired. Please contact an administrator and ask for a new invitation.'
+        },
+
+        reset_password: {
+            headline: 'Reset password',
+            text: 'You have requested a password reset for your "{type}" user. Please select a new password for your account.',
+            labels: {
+                username: 'Username (you cannot change this)',
+                password: 'New password',
+                password_repeat: 'Repeat new password',
+            },
+            actions: {
+                submit: 'Save new password'
+            },
+            error: 'Could not save new password. Please contact an administrator.',
+            success: 'Successfully saved the new password! You will be automatically logged in...',
+            token_expired: 'Password reset token expired. Please request a new password reset token.'
         }
     }
 };

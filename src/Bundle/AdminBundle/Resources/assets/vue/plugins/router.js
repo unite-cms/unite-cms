@@ -7,6 +7,7 @@ import { Unite } from "./unite";
 
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
+import ResetPassword from "../pages/ResetPassword";
 import Explorer from "../pages/Explorer";
 import Schema from "../pages/Schema";
 import Logs from "../pages/Logs";
@@ -20,12 +21,14 @@ import Delete from "../pages/content/Delete";
 import Revert from "../pages/content/Revert";
 import UserInvite from "../pages/content/UserInvite";
 import Invite from "../pages/emailConfirm/Invite";
+import ResetPasswordConfirm from "../pages/emailConfirm/ResetPassword";
 
 Vue.use(VueRouter);
 
 const routes = [
     { path: '/', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/login', component: Login, meta: { requiresAnonymous: true } },
+    { path: '/reset-password', component: ResetPassword, meta: { requiresAnonymous: true } },
     { path: '/explorer', component: Explorer, meta: { requiresAuth: true } },
     { path: '/schema', component: Schema, meta: { requiresAuth: true } },
     { path: '/logs', component: Logs, meta: { requiresAuth: true } },
@@ -54,7 +57,8 @@ const routes = [
             { path: 'revert', component: Revert },
     ], meta: { requiresAuth: true } },
 
-    { path: '/email-confirm/invite/:token', meta: {requiresAnonymous: true }, component: Invite }
+    { path: '/email-confirm/invite/:token', meta: {requiresAnonymous: true }, component: Invite },
+    { path: '/email-confirm/reset-password/:token', meta: {requiresAnonymous: true }, component: ResetPasswordConfirm },
 ];
 
 export const router = new VueRouter({
