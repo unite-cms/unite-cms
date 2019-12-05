@@ -47,7 +47,9 @@ class FlySystemManager
                         'secret' => $config['secret'],
                     ],
                     'region' => $config['region'],
+                    'endpoint' => $config['endpoint'],
                     'version' => $config['version'] ?? 'latest',
+                    'use_path_style_endpoint' => $config['use_path_style_endpoint'] ?? false,
                 ]);
                 $adapter = new AwsS3Adapter($client, $config['bucket']);
                 break;

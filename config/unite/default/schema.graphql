@@ -21,13 +21,14 @@ type Media implements UniteContent {
     title: String @textField
     file: UniteMediaFile @mediaFileField ( s3:
         {
-            key: "XXX",
-            secret: "XXX",
+            key: "xxxx",
+            secret: "xxxx",
             region: "",
             version: "latest",
-            endpoint: "https://example.com/"
+            endpoint: "https://example.com"
             bucket: "test",
             path: "/uploads",
+            use_path_style_endpoint: true,
             tmp_path: "/tmp"
         }
     )

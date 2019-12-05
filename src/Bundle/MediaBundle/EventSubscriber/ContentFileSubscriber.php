@@ -99,6 +99,16 @@ class ContentFileSubscriber implements EventSubscriberInterface
                 $config['tmp_path'] . '/' . $fieldData->resolveData('id') . '/' . $filename,
                 $config['path'] . '/' . $fieldData->resolveData('id') . '/' . $filename
             );
+
+            $this->domainManager->current()->log(LoggerInterface::NOTICE, sprintf(
+                'File %s for field %s with driver "%s" of type %s was moved to the new location %s successfully',
+                $config['tmp_path'] . '/' . $fieldData->resolveData('id') . '/' . $filename,
+                $field->getId(),
+                $driver,
+                $content->getType(),
+                $config['path'] . '/' . $fieldData->resolveData('id') . '/' . $filename
+            ));
+
         } catch (FileExistsException $e) {
             $this->domainManager->current()->log(LoggerInterface::ERROR, sprintf('Could not upload file %s because a file already exists at destination path. Please try again!', $filename));
         } catch (FileNotFoundException $e) {
@@ -131,6 +141,15 @@ class ContentFileSubscriber implements EventSubscriberInterface
 
         try {
             $flySystem->delete($config['path'] . '/' . $fieldData->resolveData('id') . '/' . $filename);
+
+            $this->domainManager->current()->log(LoggerInterface::NOTICE, sprintf(
+                'File %s for field %s with driver "%s" of type %s was deleted successfully',
+                $config['path'] . '/' . $fieldData->resolveData('id') . '/' . $filename,
+                $field->getId(),
+                $driver,
+                $content->getType()
+            ));
+
         } catch (FileNotFoundException $e) {
             $this->domainManager->current()->log(LoggerInterface::ERROR, sprintf('Could not delete file %s because the file does not exist.', $filename));
         } catch (\Exception $e) {

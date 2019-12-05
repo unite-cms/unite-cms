@@ -10,6 +10,7 @@ input MediaFileFieldS3Config {
     bucket: String!
     path: String!
     tmp_path: String!
+    use_path_style_endpoint: Boolean
     version: String
     region: String
 }
