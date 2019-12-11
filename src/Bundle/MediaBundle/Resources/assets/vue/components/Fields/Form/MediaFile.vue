@@ -1,17 +1,25 @@
 <template>
   <form-row :domID="domID" :field="field">
-    <multi-field :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
-      <file-pond :options="filePondOptions" :files="initialFiles[multiProps.rowKey || 0]" @updatefiles="args => onFilesUpdated(multiProps.rowKey || 0, args)" />
-    </multi-field>
+    <file-pond :allow-multiple="field.list_of" :id="domID" :server="filePondServer" :files="initialFiles" @updatefiles="onFilesUpdated" />
   </form-row>
 </template>
 <script>
   import _abstract from "../../../../../../../AdminBundle/Resources/assets/vue/components/Fields/Form/_abstract";
   import FormRow from "../../../../../../../AdminBundle/Resources/assets/vue/components/Fields/Form/_formRow";
-  import MultiField from "../../../../../../../AdminBundle/Resources/assets/vue/components/Fields/Form/_multiField";
+
+  import gql from 'graphql-tag';
 
   import vueFilePond from 'vue-filepond';
-  const FilePond = vueFilePond();
+  import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+  import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+  import "filepond/dist/filepond.min.css";
+  import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
+
+  const FilePond = vueFilePond( FilePondPluginFileValidateType, FilePondPluginImagePreview );
+
+  const PreSignMutation = gql`mutation($type: String!, $field: String!, $filename: String!) {
+      uniteMediaPreSignedUrl(type: $type, field: $field, filename: $filename)
+  }`;
 
   export default {
 
@@ -21,29 +29,69 @@
 
       // Vue properties for this component.
       extends: _abstract,
-      components: { MultiField, FormRow, FilePond },
+      components: { FormRow, FilePond },
 
       computed: {
           initialFiles() {
-
-              if(this.values.length === 0) {
-                  return [[]];
-              }
-
               return this.values.map((value) => {
                   console.log(value);
                   return [];
               });
           },
 
-          filePondOptions() {
-              return {};
+          filePondServer() {
+              return {
+                  process:(fieldName, file, metadata, load, error, progress, abort, transfer, options) => {
+
+                      const request = new XMLHttpRequest();
+
+                      // First ask unite cms for a pre-signed url to upload this file.
+                      this.$apollo.mutate({
+                          mutation: PreSignMutation,
+                          variables: {
+                              type: this.$unite.adminViews[this.$route.params.type].type,
+                              field: this.field.id,
+                              filename: file.name
+                          }
+                      }).then((data) => {
+                          console.log();
+
+                          const formData = new FormData();
+                          formData.append(fieldName, file, file.name);
+
+                          request.open('POST', data.data.uniteMediaPreSignedUrl);
+                          request.upload.onprogress = (e) => {
+                              progress(e.lengthComputable, e.loaded, e.total);
+                          };
+                          request.onload = function() {
+                              if (request.status >= 200 && request.status < 300) {
+                                  // the load method accepts either a string (id) or an object
+                                  load(request.responseText);
+                              }
+                              else {
+                                  // Can call the error method if something is wrong, should exit after
+                                  error('Could not upload file.');
+                              }
+                          };
+
+                          request.send(formData);
+
+                      }).catch(error);
+
+                      return {
+                          abort: () => {
+                              request.abort();
+                              abort();
+                          }
+                      };
+                  }
+              };
           }
       },
 
       methods: {
-          onFilesUpdated(key, foo) {
-              console.log(key, foo);
+          onFilesUpdated(foo) {
+              console.log(foo);
           }
       },
   }
