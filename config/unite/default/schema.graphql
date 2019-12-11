@@ -32,6 +32,19 @@ type Media implements UniteContent {
             tmp_path: "/tmp"
         }
     )
+    files: [UniteMediaFile!] @mediaFileField ( s3:
+    {
+        key: "xxxx",
+        secret: "xxxx",
+        region: "",
+        version: "latest",
+        endpoint: "https://example.com"
+        bucket: "test",
+        path: "/uploads",
+        use_path_style_endpoint: true,
+        tmp_path: "/tmp"
+    }
+    )
 }
 
 
