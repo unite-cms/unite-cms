@@ -48,6 +48,10 @@ class FieldData
     public function resolveData(string $dataKey = '', $defaultValue = null) {
 
         if(empty($dataKey)) {
+            if(is_bool($this->getData()) && $this->getData() === false) {
+                return $this->getData();
+            }
+
             return empty($this->getData()) ? $defaultValue : $this->getData();
         }
 
