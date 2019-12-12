@@ -16,6 +16,7 @@ class BooleanType extends AbstractFieldType
      * {@inheritDoc}
      */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
-        return $fieldData->resolveData('', ($field->isNonNull() || $field->isListOf()) ? false : null);
+        $value = (is_bool($fieldData->getData()))? $fieldData->getData(): null;
+        return $fieldData->resolveData('', ($field->isNonNull() || $field->isListOf()) ? false : $value);
     }
 }
