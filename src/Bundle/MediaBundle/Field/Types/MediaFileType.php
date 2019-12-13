@@ -81,7 +81,7 @@ class MediaFileType extends AbstractFieldType
 
         // If input data is special KEEP string and we already have data available.
         if($inputData === static::FILE_KEEP) {
-            return $content->getFieldData($field->getId())->resolveData($rowDelta);
+            return $field->isListOf() ? $content->getFieldData($field->getId())->resolveData($rowDelta) : $content->getFieldData($field->getId());
         }
 
         try {

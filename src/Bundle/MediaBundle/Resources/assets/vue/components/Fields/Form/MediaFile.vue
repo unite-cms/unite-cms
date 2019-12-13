@@ -28,18 +28,17 @@
       if(value.file) {
           return value.file;
       } else {
-          console.log(value);
           return {
-              source: 'XXX-YYY-ZZZ',
+              source: value.id,
               options: {
                   type: 'local',
                   file: {
-                      name: 'my-file.png',
-                      size: 3001025,
-                      type: 'image/png'
+                      name: value.filename,
+                      size: value.filesize,
+                      type: value.mimetype
                   },
                   metadata: {
-                      poster: 'http://10.1.29.15:9000/test/A.png'
+                      poster: 'http://10.1.29.15:9000/test' + value.path + '/' + value.id + '/' + value.filename
                   }
               }
           };
@@ -83,10 +82,30 @@
   export default {
 
       // Static query methods for unite system.
-      queryData(field) { return field.id },
-      normalizeData(inputData, field) {
-          console.log(inputData);
-          return inputData;
+      queryData(field, unite, depth) {
+          return `${field.id} {
+            id
+            filename
+            driver
+            filesize
+            mimetype
+            path
+          }`;
+      },
+      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeMutationData(formData, field, unite) {
+
+          if(!formData) {
+              return formData;
+          }
+
+          if(field.list_of) {
+              return formData.map((rowData) => {
+                  return rowData.token || 'FILE_KEEP';
+              });
+          } else {
+              return formData.token || 'FILE_KEEP';
+          }
       },
 
       // Vue properties for this component.
@@ -156,7 +175,6 @@
 
               if(this.field.list_of) {
                   this.$refs.pond.getFiles().forEach((file, delta) => {
-                      console.log(delta, file);
                       this.$set(this.val, delta, fileToValue(file, this.fileInformation));
                   });
               } else {
