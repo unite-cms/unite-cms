@@ -7,3 +7,18 @@
 .uk-label-secondary {
   background: darken($global-secondary-background, 5%);
 }
+
+.uk-label {
+  .uk-icon-link {
+    margin-right: -5px;
+    color: white;
+
+    svg {
+      margin-top: -2px;
+    }
+
+    &:hover {
+      color: $global-danger-background;
+    }
+  }
+}

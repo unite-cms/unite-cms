@@ -34,7 +34,8 @@ messages.en = {
                 permanent_delete: 'Permanent delete',
                 revert: 'Manage Revisions',
                 recover: 'Recover',
-                toggle_deleted: 'Toggle deleted content'
+                toggle_deleted: 'Toggle deleted content',
+                user_invite: 'Invite user to unite cms'
             },
             selection: {
                 select: 'Select',
@@ -52,6 +53,7 @@ messages.en = {
                 submit: 'Save'
             },
             success: '"{contentTitle}" was created.',
+            errors: '"{contentTitle}" could not be created. Please see violations below.',
         },
         update: {
             headline: 'Update "{contentTitle}"',
@@ -59,6 +61,7 @@ messages.en = {
                 submit: 'Save'
             },
             success: '"{contentTitle}" was updated.',
+            errors: '"{contentTitle}" could not be updated. Please see violations below.',
         },
         delete: {
             headline: 'Move "{contentTitle}" to trash',
@@ -100,6 +103,14 @@ messages.en = {
             },
             success: '"{contentTitle}" was removed.',
         },
+        user_invite: {
+            headline: 'Invite "{contentTitle}" to unite cms',
+            actions: {
+                submit: 'Send invitation E-Mail'
+            },
+            success: '"{contentTitle}" was invited to unite cms.',
+            error: 'Could not invite "{contentTitle}" to unite cms. This is most likely because of an existing invitation for this user. Please wait some time and then try to invite this user again.',
+        }
     },
     field: {
         reference: {
@@ -124,7 +135,79 @@ messages.en = {
                 headline: '{display_name}'
             }
         },
+
+        embedded: {
+            missing_view_warning: 'No admin view for the embedded content of this field was found. Please add one to your schema!',
+            confirm: {
+                clear_union_selection: 'Do you really want to select another {view.name} type? Your already entered vales for this field will be deleted.'
+            }
+        },
+
         date: en
+    },
+    network_error: {
+        401: 'Username or password incorrect.',
+        500: 'Could not connect to API. Maybe your GraphQL schema is not valid?',
+    },
+
+    login: {
+        headline: 'Login',
+        labels: {
+            username: 'Username',
+            password: 'Password'
+        },
+        actions: {
+            submit: 'Login',
+            reset_password: 'Forgot password?'
+        }
+    },
+
+    reset_password: {
+        headline: 'Reset password',
+        text: 'Please enter your username and we will send a password reset token to your E-Mail address.',
+        labels: {
+            username: 'Username',
+        },
+        actions: {
+            submit: 'Reset password',
+            login: 'Login'
+        },
+        error: 'Could not reset password. If you have already requested a password reset, please wait some time before requesting again.',
+        success: 'Successfully requested a password reset token. Please check your E-Mails.'
+    },
+
+    email_confirm: {
+        invite: {
+            headline: 'Accept invitation',
+            text: 'You have been invited to create an unite cms account as "{type}". Please choose a password for your new account.',
+            labels: {
+                username: 'Username (you cannot change this)',
+                password: 'Password',
+                password_repeat: 'Repeat password',
+            },
+            actions: {
+                submit: 'Create account'
+            },
+            error: 'Could not create account. Please contact an administrator.',
+            success: 'Successfully created account! You will be automatically logged in...',
+            token_expired: 'Invitation token expired. Please contact an administrator and ask for a new invitation.'
+        },
+
+        reset_password: {
+            headline: 'Reset password',
+            text: 'You have requested a password reset for your "{type}" user. Please select a new password for your account.',
+            labels: {
+                username: 'Username (you cannot change this)',
+                password: 'New password',
+                password_repeat: 'Repeat new password',
+            },
+            actions: {
+                submit: 'Save new password'
+            },
+            error: 'Could not save new password. Please contact an administrator.',
+            success: 'Successfully saved the new password! You will be automatically logged in...',
+            token_expired: 'Password reset token expired. Please request a new password reset token.'
+        }
     }
 };
 

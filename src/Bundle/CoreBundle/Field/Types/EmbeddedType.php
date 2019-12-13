@@ -137,7 +137,7 @@ class EmbeddedType extends AbstractFieldType
         }
 
         // If we have no input data and the field can be null, just return the empty field.
-        if(empty($inputData) && !$field->isNonNull()) {
+        if(empty($inputData) && !$field->isRequired()) {
             return $fieldData;
         }
 

@@ -25,7 +25,7 @@
                 return this.row._meta.deleted;
             },
             values() {
-                if(!this.row[this.field.id]) {
+                if(this.row[this.field.id] === null) {
                     return [];
                 }
                 return this.field.list_of ? this.row[this.field.id] : [this.row[this.field.id]]

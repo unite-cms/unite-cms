@@ -1,0 +1,13 @@
+
+directive @emailInvite(
+    if: Expression
+    inviteUrl: String
+    inviteText: String
+    emailField: String!
+    passwordField: String!
+) on OBJECT
+
+extend type UniteMutation {
+    emailInviteRequest(username: String!, text: String) : Boolean! @hide(if: "user.isAnonymous()")
+    emailInviteConfirm(username: String!, token: String!, password: String!) : Boolean!
+}

@@ -6,9 +6,3 @@ services:
         parent: UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaFileProvider
         arguments: ['%kernel.project_dir%/vendor/unite-cms/admin-bundle/Resources/GraphQL/Schema/unite-admin.graphql']
         tags: ['unite.graphql.schema_provider']
-
-    unite.cms_admin.graphql.extender:
-        parent: UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaFileExtender
-        arguments: ['%kernel.project_dir%/vendor/unite-cms/admin-bundle/Resources/GraphQL/Schema/unite-admin-extender.graphql']
-        tags:
-            - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }

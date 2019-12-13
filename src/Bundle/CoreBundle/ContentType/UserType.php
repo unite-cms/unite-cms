@@ -12,11 +12,11 @@ use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
  */
 class UserType extends ContentType
 {
-    public function __construct(string $id, string $name)
+    public function __construct(string $id, string $name, string $defaultPermission)
     {
-        parent::__construct($id, $name);
-        $this->permissions[ContentVoter::QUERY] = 'has_role("ROLE_ADMIN")';
-        $this->permissions[ContentVoter::READ] = 'has_role("ROLE_ADMIN")';
+        parent::__construct($id, $name, $defaultPermission);
+        $this->permissions[ContentVoter::QUERY] = $defaultPermission;
+        $this->permissions[ContentVoter::READ] = $defaultPermission;
         $this->id = $id;
     }
 }

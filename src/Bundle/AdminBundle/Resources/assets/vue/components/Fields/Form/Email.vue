@@ -3,8 +3,9 @@
   export default {
 
       // Static query methods for unite system.
-      queryData(field) { return field.id },
-      normalizeData(inputData, field) { return inputData; },
+      queryData(field, unite, depth) { return field.id },
+      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeMutationData(formData, field, unite) { return formData; },
 
       // Vue properties for this component.
       extends: Text,

@@ -13,6 +13,7 @@ const cache = new InMemoryCache({
     dataIdFromObject: object => {
 
         // For the moment, prevent cache ids. It is just not working with many sub-types.
+
         /*if (object.__typename) {
             return defaultDataIdFromObject(object);
         }*/

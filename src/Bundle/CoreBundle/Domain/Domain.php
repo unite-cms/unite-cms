@@ -6,6 +6,7 @@ namespace UniteCMS\CoreBundle\Domain;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
 use UniteCMS\CoreBundle\DependencyInjection\Configuration;
+use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Log\LogInterface;
 use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
@@ -43,6 +44,11 @@ class Domain
     protected $schema = [];
 
     /**
+     * @var string[] $parameters
+     */
+    protected $parameters = [];
+
+    /**
      * @var null|string $editableSchemaFilesDirectory
      */
     protected $editableSchemaFilesDirectory = null;
@@ -65,6 +71,7 @@ class Domain
      * @param UserManagerInterface $userManager
      * @param LoggerInterface $logger
      * @param string[] $schema
+     * @param array $parameters
      * @param string $editableSchemaFilesDirectory
      * @param int $jwtTTLShortLiving
      * @param int $jwtTTLLongLiving
@@ -76,6 +83,7 @@ class Domain
         UserManagerInterface $userManager,
         LoggerInterface $logger,
         array $schema = [],
+        array $parameters = [],
         string $editableSchemaFilesDirectory = null,
         int $jwtTTLShortLiving = Configuration::DEFAULT_JWT_TTL_SHORT_LIVING,
         int $jwtTTLLongLiving = Configuration::DEFAULT_JWT_TTL_LONG_LIVING,
@@ -85,6 +93,7 @@ class Domain
         $this->userManager = $userManager;
         $this->logger = $logger;
         $this->schema = $schema;
+        $this->parameters = $parameters;
         $this->editableSchemaFilesDirectory = $editableSchemaFilesDirectory;
         $this->jwtTTLShortLiving = $jwtTTLShortLiving;
         $this->jwtTTLLongLiving = $jwtTTLLongLiving;
@@ -152,6 +161,14 @@ class Domain
     /**
      * @return string[]
      */
+    public function getParameters() : array
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * @return string[]
+     */
     public function getCompleteSchema() : array
     {
         $schema = $this->getSchema();
@@ -161,7 +178,8 @@ class Domain
                 DomainManager::findSchemaFilesInDir($this->getEditableSchemaFilesDirectory())
             );
         }
-        return $schema;
+
+        return Util::replaceSchemaParameters($schema, $this->getParameters());
     }
 
     /**

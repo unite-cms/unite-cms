@@ -1,5 +1,6 @@
 <template>
-  <ul class="uk-iconnav">
+  <ul class="uk-iconnav uk-flex-right">
+    <li v-if="!deleted && is_granted('user_invite')"><router-link uk-tooltip :to="to('user_invite')" :title="$t('content.list.actions.user_invite')" class="uk-text-success"><icon name="send" /></router-link></li>
     <li v-if="!deleted && is_granted('update')"><router-link uk-tooltip :to="to('update')" :title="$t('content.list.actions.update')"><icon name="edit-2" /></router-link></li>
     <li v-if="!deleted && is_granted('update')"><router-link uk-tooltip :to="to('revert')" :title="$t('content.list.actions.revert')"><icon name="rotate-ccw" /></router-link></li>
     <li v-if="!deleted && is_granted('delete')"><router-link uk-tooltip :to="to('delete')" :title="$t('content.list.actions.delete')" class="uk-text-danger"><icon name="trash-2" /></router-link></li>

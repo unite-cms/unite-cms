@@ -13,10 +13,9 @@ interface UserManagerInterface extends ContentManagerInterface
      * Get a single user by his_hers username.
      *
      * @param Domain $domain
-     * @param string $type
      * @param string $username
      *
      * @return ContentInterface|null
      */
-    public function findByUsername(Domain $domain, string $type, string $username) : ?UserInterface;
+    public function findByUsername(Domain $domain, string $username) : ?UserInterface;
 }

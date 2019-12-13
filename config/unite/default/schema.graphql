@@ -47,6 +47,20 @@ type Media implements UniteContent {
     )
 }
 
+type Text implements UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    text: String @textField
+}
+
+type Headline implements UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    headline: String @textField
+}
+
+union Blocks = Text | Headline
+
 
 """Categories"""
 type DemoCategory implements UniteContent {
@@ -56,12 +70,14 @@ type DemoCategory implements UniteContent {
     articles(filter: UniteFilterInput, orderBy: [UniteOrderByInput!], limit: Int = 20, offset: Int = 0): UniteContentResult @referenceOfField(content_type: "DemoArticle", reference_field: "main_category")
     parent: DemoCategory @referenceField
     children: UniteContentResult @referenceOfField(content_type: "DemoCategory", reference_field: "parent")
+    block: Blocks @embeddedField
+    blocks: [Blocks!] @embeddedField
 }
 
 type TeaserRegion implements UniteEmbeddedContent {
     id: ID
     _meta: UniteContentMeta
-    title: String @textField
+    title: String @textField @valid(if: "value == 'foo'", message: "Es ist nur 'foo' erlaubt!")
     intro_text: String @textField
 
     nestedTeaser: [TeaserRegion!] @embeddedField
@@ -74,7 +90,7 @@ type TeaserRegion implements UniteEmbeddedContent {
 type DemoArticle implements UniteContent {
     _meta: UniteContentMeta
     id: ID
-    name: String! @textField
+    name: String @textField
 
     """ Article content"""
     content: String @textField(escape: false)
@@ -91,19 +107,39 @@ type DemoArticle implements UniteContent {
     teaser: TeaserRegion @embeddedField
     teasers: [TeaserRegion!] @embeddedField
 
-    testFile: UniteMediaFile @mediaFileField(todo: "FOO")
-    testFile1: UniteMediaFile! @mediaFileField(todo: "FOO")
-    testFiles: [UniteMediaFile!] @mediaFileField(todo: "FOO")
+    boolTest: Boolean @booleanField
+    boolTest1: Boolean @booleanField
+    boolTest2: [Boolean!] @booleanField
+
+    #testFile: UniteMediaFile @mediaFileField(todo: "FOO")
+    #testFile1: UniteMediaFile! @mediaFileField(todo: "FOO")
+    #testFiles: [UniteMediaFile!] @mediaFileField(todo: "FOO")
 
 }
 
 
 """Admin Users"""
-type Admin implements UniteUser @passwordAuthenticator(passwordField: "password") {
+type Admin implements UniteUser
+@passwordAuthenticator(passwordField: "password")
+@emailPasswordReset(emailField: "username", passwordField: "password")
+@emailInvite(if: "%(IS_ADMIN)%", emailField: "username", passwordField: "password") {
     _meta: UniteContentMeta
     id: ID
     username: String! @emailField
-    password: NULL! @passwordField
+    password: NULL @passwordField
+
+    teaser: TeaserRegion @embeddedField
+}
+
+"""OtherUser Users"""
+type OtherUser implements UniteUser
+@passwordAuthenticator(passwordField: "password")
+@emailPasswordReset(emailField: "username", passwordField: "password")
+@emailInvite(if: "%(IS_ADMIN)%", emailField: "username", passwordField: "password") {
+    _meta: UniteContentMeta
+    id: ID
+    username: String! @emailField
+    password: NULL @passwordField
 
     teaser: TeaserRegion @embeddedField
 }

@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
 use UniteCMS\CoreBundle\Field\Types\PasswordType;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
@@ -20,12 +21,18 @@ class EmailPasswordResetResolver extends AbstractEmailConfirmationResolver
     const CONFIRM_FIELD = 'emailPasswordResetConfirm';
 
     /**
+     * @var SaveExpressionLanguage $expressionLanguage
+     */
+    protected $expressionLanguage;
+
+    /**
      * @var PasswordResetMailer $passwordResetMailer
      */
     protected $passwordResetMailer;
 
-    public function __construct(DomainManager $domainManager, ValidatorInterface $validator, FieldDataMapper $fieldDataMapper, JWTEncoderInterface $JWTEncoder, PasswordResetMailer $passwordResetMailer)
+    public function __construct(SaveExpressionLanguage $expressionLanguage, DomainManager $domainManager, ValidatorInterface $validator, FieldDataMapper $fieldDataMapper, JWTEncoderInterface $JWTEncoder, PasswordResetMailer $passwordResetMailer)
     {
+        $this->expressionLanguage = $expressionLanguage;
         $this->passwordResetMailer = $passwordResetMailer;
         parent::__construct($domainManager, $validator, $fieldDataMapper, $JWTEncoder);
     }
@@ -94,20 +101,25 @@ class EmailPasswordResetResolver extends AbstractEmailConfirmationResolver
      */
     protected function resolveRequest($args) : bool {
 
-        if(!$config = $this->getDirectiveConfig($args['type'])) {
-            return false;
-        }
-
         $domain = $this->domainManager->current();
-        $user = $domain->getUserManager()->findByUsername($domain, $args['type'], $args['username']);
+        $user = $domain->getUserManager()->findByUsername($domain, $args['username']);
 
         if(!$user) {
             $domain->log(LoggerInterface::WARNING, sprintf('A user tried to request a password reset for the unknown user "%s".', $args['username']));
             return false;
         }
 
+        if(!$config = $this->getDirectiveConfig($user->getType())) {
+            return false;
+        }
+
         if(empty($email = $user->getFieldData($config['emailField']))) {
             $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request a password reset, however the value of field "%s" is empty.', $args['username'], $config['emailField']));
+            return false;
+        }
+
+        if(!empty($config['if']) && !$this->expressionLanguage->evaluate($config['if'], ['content' => $user]))  {
+            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request a password reset, however the directive if-expression evaluates to false.', $args['username']));
             return false;
         }
 
@@ -121,7 +133,7 @@ class EmailPasswordResetResolver extends AbstractEmailConfirmationResolver
         $domain->getUserManager()->flush($domain);
 
         // Send out email
-        if($this->passwordResetMailer->send($config['resetUrl'], $user->getToken(static::TOKEN_KEY), $email) === 0) {
+        if($this->passwordResetMailer->send($user->getToken(static::TOKEN_KEY), $email, $config['resetUrl'] ?? null) === 0) {
             $domain->log(LoggerInterface::ERROR, sprintf('Could not send out password reset email to user with username "%s".', $args['username']));
             return false;
         }
@@ -139,15 +151,15 @@ class EmailPasswordResetResolver extends AbstractEmailConfirmationResolver
      */
     protected function resolveConfirm($args) : bool {
 
-        if(!$config = $this->getDirectiveConfig($args['type'])) {
-            return false;
-        }
-
         $domain = $this->domainManager->current();
-        $user = $domain->getUserManager()->findByUsername($domain, $args['type'], $args['username']);
+        $user = $domain->getUserManager()->findByUsername($domain, $args['username']);
 
         if(!$user) {
             $domain->log(LoggerInterface::WARNING, sprintf('A user tried to confirm a password reset for the unknown user "%s".', $args['username']));
+            return false;
+        }
+
+        if(!$config = $this->getDirectiveConfig($user->getType())) {
             return false;
         }
 

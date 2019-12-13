@@ -1,4 +1,10 @@
 
+type UniteAdminPermissions {
+    LOGS: Boolean!
+    SCHEMA: Boolean!
+    QUERY_EXPLORER: Boolean!
+}
+
 type UniteSchemaFile {
     name: String!
     value: String!
@@ -22,6 +28,7 @@ type UniteAdminViewField {
     description: String
     list_of: Boolean!
     non_null: Boolean!
+    required: Boolean!
     show_in_list: Boolean!
     show_in_form: Boolean!
     form_group: String

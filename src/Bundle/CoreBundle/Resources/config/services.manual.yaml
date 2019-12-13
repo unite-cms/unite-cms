@@ -24,3 +24,9 @@ services:
         arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/email-change.graphql']
         tags:
             - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }
+
+    unite.cms_core.graphql.extender.email_invite:
+        parent: UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaFileExtender
+        arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/email-invite.graphql']
+        tags:
+            - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }

@@ -1,7 +1,7 @@
 <template>
-  <form-row :domID="domID" :field="field">
+  <form-row :domID="domID" :field="field" :alerts="violations">
     <multi-field :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
-      <input class="uk-input" :required="field.non_null" :id="domID" :type="inputType" :value="values[multiProps.rowKey || 0]" @input="setValue(arguments, multiProps.rowKey)" />
+      <input class="uk-input" :required="field.required" :id="domID" :type="inputType" :value="values[multiProps.rowKey || 0]" @input="setValue(arguments, multiProps.rowKey)" />
     </multi-field>
   </form-row>
 </template>
@@ -13,8 +13,9 @@
   export default {
 
       // Static query methods for unite system.
-      queryData(field) { return field.id },
-      normalizeData(inputData, field) { return inputData; },
+      queryData(field, unite, depth) { return field.id },
+      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeMutationData(formData, field, unite) { return formData; },
 
       // Vue properties for this component.
       extends: _abstract,

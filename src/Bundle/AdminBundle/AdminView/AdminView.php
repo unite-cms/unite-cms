@@ -7,6 +7,7 @@ use GraphQL\Language\AST\FieldNode;
 use GraphQL\Language\AST\FragmentDefinitionNode;
 use GraphQL\Language\Printer;
 use UniteCMS\CoreBundle\ContentType\ContentType;
+use UniteCMS\CoreBundle\Field\Types\PasswordType;
 use UniteCMS\CoreBundle\GraphQL\Util;
 
 class AdminView
@@ -83,6 +84,12 @@ class AdminView
         // First of all, create admin fields for all content type fields, but hidden in list.
         $ctFields = [];
         foreach($contentType->getFields() as $field) {
+
+            // Special handle password fields.
+            if($field->getType() === PasswordType::getType()) {
+                continue;
+            }
+
             $ctFields[$field->getId()] = AdminViewField::fromContentTypeField($field);
         }
 
@@ -131,6 +138,7 @@ class AdminView
                         ->setShowInForm($ctFields[$id]->showInForm())
                         ->setIsListOf($ctFields[$id]->isListOf())
                         ->setIsNonNull($ctFields[$id]->isNonNull())
+                        ->setRequired($ctFields[$id]->isRequired())
                         ->setDescription($ctFields[$id]->getDescription());
                     unset($ctFields[$id]);
                 }

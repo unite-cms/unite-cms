@@ -7,7 +7,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
-use UniteCMS\CoreBundle\Event\ContentEvent;
+use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Field\Types\EmailType;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Mailer\AccountActivationMailer;
@@ -20,16 +20,24 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
     const CONFIRM_FIELD = 'emailAccountActivateConfirm';
 
     /**
+     * @var SaveExpressionLanguage $expressionLanguage
+     */
+    protected $expressionLanguage;
+
+    /**
      * @var AccountActivationMailer $accountActivationMailer
      */
     protected $accountActivationMailer;
 
     public function __construct(
+        SaveExpressionLanguage $expressionLanguage,
         DomainManager $domainManager,
         ValidatorInterface $validator,
         FieldDataMapper $fieldDataMapper,
         JWTEncoderInterface $JWTEncoder,
         AccountActivationMailer $accountActivationMailer) {
+
+        $this->expressionLanguage = $expressionLanguage;
         $this->accountActivationMailer = $accountActivationMailer;
         parent::__construct($domainManager, $validator, $fieldDataMapper, $JWTEncoder);
     }
@@ -109,20 +117,25 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
      */
     protected function resolveRequest($args) : bool {
 
-        if(!$config = $this->getDirectiveConfig($args['type'])) {
-            return false;
-        }
-
         $domain = $this->domainManager->current();
-        $user = $domain->getUserManager()->findByUsername($domain, $args['type'], $args['username']);
+        $user = $domain->getUserManager()->findByUsername($domain, $args['username']);
 
         if(!$user) {
             $domain->log(LoggerInterface::WARNING, sprintf('A user tried to request an account activation for the unknown user "%s".', $args['username']));
             return false;
         }
 
+        if(!$config = $this->getDirectiveConfig($user->getType())) {
+            return false;
+        }
+
         if(empty($email = $user->getFieldData($config['emailField']))) {
             $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an account activation, however the value of field "%s" is empty.', $args['username'], $config['emailField']));
+            return false;
+        }
+
+        if(!empty($config['if']) && !$this->expressionLanguage->evaluate($config['if'], ['content' => $user]))  {
+            $domain->log(LoggerInterface::WARNING, sprintf('User with username "%s" tried to request an account activation, however the directive if-expression evaluates to false.', $args['username']));
             return false;
         }
 
@@ -141,7 +154,7 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
         $domain->getUserManager()->flush($domain);
 
         // Send out email
-        if($this->accountActivationMailer->send($config['activateUrl'], $user->getToken(static::TOKEN_KEY), $email) === 0) {
+        if($this->accountActivationMailer->send($user->getToken(static::TOKEN_KEY), $email, $config['activateUrl'] ?? null) === 0) {
             $domain->log(LoggerInterface::ERROR, sprintf('Could not send out account activation email to user with username "%s".', $args['username']));
             return false;
         }
@@ -159,15 +172,15 @@ class EmailAccountActivateResolver extends AbstractEmailConfirmationResolver
      */
     protected function resolveConfirm($args) : bool {
 
-        if(!$config = $this->getDirectiveConfig($args['type'])) {
-            return false;
-        }
-
         $domain = $this->domainManager->current();
-        $user = $domain->getUserManager()->findByUsername($domain, $args['type'], $args['username']);
+        $user = $domain->getUserManager()->findByUsername($domain, $args['username']);
 
         if(!$user) {
             $domain->log(LoggerInterface::WARNING, sprintf('A user tried to confirm an account activation for the unknown user "%s".', $args['username']));
+            return false;
+        }
+
+        if(!$config = $this->getDirectiveConfig($user->getType())) {
             return false;
         }
 

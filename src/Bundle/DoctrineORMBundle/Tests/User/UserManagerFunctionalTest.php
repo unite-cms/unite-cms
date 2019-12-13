@@ -59,9 +59,8 @@ class UserManagerFunctionalTest extends DatabaseAwareTestCase
         $manager->flush($domain);
 
         // FIND BY USERNAME
-        $this->assertNull($manager->findByUsername($domain, 'Foo', 'la'));
-        $this->assertNull($manager->findByUsername($domain, 'Baa', 'foo@baa.com'));
-        $this->assertEquals($user, $manager->findByUsername($domain, 'Foo', 'foo@baa.com'));
+        $this->assertNull($manager->findByUsername($domain, 'la'));
+        $this->assertEquals($user, $manager->findByUsername($domain, 'foo@baa.com'));
 
         // DELETE
         $manager->delete($domain, $user);

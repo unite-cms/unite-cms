@@ -22,3 +22,9 @@ email:
         text_button: Confirm new email address
         text_after_button: If you did not tried to change your email address recently, please ignore this email.
         footer: This is a one-time email sent to you by unite cms.
+    invite:
+        subject: Invitation to unite cms
+        headline: Invitation to unite cms
+        text: This is an invitation to unite cms. Please click the following link to accept the invitation
+        text_button: Accept invitation
+        footer: This is a one-time email sent to you by unite cms.

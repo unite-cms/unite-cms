@@ -1,6 +1,6 @@
 <template>
-  <form-row :domID="domID" :field="field">
-      <select :required="field.non_null" v-if="!field.list_of" class="uk-select" :id="domID" v-model="val">
+  <form-row :domID="domID" :field="field" :alerts="violations">
+      <select :required="field.required" v-if="!field.list_of" class="uk-select" :id="domID" v-model="val">
         <option v-for="option in options" :value="option.value">{{ option.label }}</option>
       </select>
       <template v-else>
@@ -17,8 +17,9 @@
   export default {
 
       // Static query methods for unite system.
-      queryData(field) { return field.id },
-      normalizeData(inputData, field) { return inputData; },
+      queryData(field, unite, depth) { return field.id },
+      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeMutationData(formData, field, unite) { return formData; },
 
       // Vue properties for this component.
       components: { FormRow },

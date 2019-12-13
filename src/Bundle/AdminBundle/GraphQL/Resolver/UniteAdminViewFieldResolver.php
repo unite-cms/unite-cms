@@ -49,6 +49,9 @@ class UniteAdminViewFieldResolver implements FieldResolverInterface
             case 'non_null':
                 return $value->isNonNull();
 
+            case 'required':
+                return $value->isRequired();
+
             case 'show_in_list':
                 return $value->showInList();
 

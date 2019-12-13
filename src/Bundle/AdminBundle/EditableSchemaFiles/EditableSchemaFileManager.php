@@ -86,7 +86,8 @@ class EditableSchemaFileManager
             $domain->getContentManager(),
             $domain->getUserManager(),
             $domain->getLogger(),
-            array_merge($domain->getSchema(), $editableSchemaFiles)
+            array_merge($domain->getSchema(), $editableSchemaFiles),
+            $domain->getParameters()
         );
 
         // Executing a query against the schema will build and evaluate the complete schema.

@@ -5,5 +5,10 @@
     margin-bottom: $alert-margin-vertical / 2;
     padding: $alert-padding / 2 $alert-padding-right / 2 $alert-padding / 2 $alert-padding / 2;
     font-size: $global-small-font-size;
+
+    .uk-alert-close {
+      top: 12px;
+      right: 12px;
+    }
   }
 }

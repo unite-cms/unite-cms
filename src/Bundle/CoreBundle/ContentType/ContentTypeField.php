@@ -53,6 +53,11 @@ class ContentTypeField
     /**
      * @var bool
      */
+    protected $required;
+
+    /**
+     * @var bool
+     */
     protected $listOf;
 
     /**
@@ -97,7 +102,7 @@ class ContentTypeField
      */
     protected $constraints = [];
 
-    public function __construct(string $id, string $name, string $type, array $settings = [], $nonNull = false, $listOf = false, $enumValues = null, $unionTypes = null, $returnType = Type::STRING)
+    public function __construct(string $id, string $name, string $type, array $settings = [], $nonNull = false, $required = false, $listOf = false, $enumValues = null, $unionTypes = null, $returnType = Type::STRING)
     {
         $this->permissions = [
             ContentFieldVoter::MUTATION => 'true',
@@ -109,6 +114,7 @@ class ContentTypeField
         $this->type = $type;
         $this->settings = new ParameterBag($settings);
         $this->nonNull = $nonNull;
+        $this->required = $required;
         $this->listOf = $listOf;
         $this->enumValues = $enumValues;
         $this->unionTypes = $unionTypes;
@@ -170,6 +176,7 @@ class ContentTypeField
                 $args['type'],
                 $args['settings'],
                 $nonNull,
+                false,
                 $listOf,
                 $enumValues,
                 $unionTypes,
@@ -198,6 +205,11 @@ class ContentTypeField
                         $options['groups'] = $directive['args']['groups'];
                     }
                     $field->addConstraint(new SaveExpression($options));
+                }
+
+                // Special handle required directive.
+                if($directive['name'] === 'required') {
+                    $field->setRequired(true);
                 }
             }
 
@@ -286,6 +298,22 @@ class ContentTypeField
      */
     public function isNonNull() : bool {
         return $this->nonNull;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRequired() : bool {
+        return $this->nonNull || $this->required;
+    }
+
+    /**
+     * @param bool $required
+     * @return self
+     */
+    public function setRequired(bool $required) : self {
+        $this->required = $required;
+        return $this;
     }
 
     /**

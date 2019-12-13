@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field">
+  <form-row :domID="domID" :field="field" :alerts="violations">
     <multi-field :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
       <editor-menu-bar :editor="editorForKey(multiProps.rowKey || 0)" v-slot="{ commands, isActive }">
         <ul class="uk-iconnav">
@@ -20,8 +20,9 @@
   export default {
 
       // Static query methods for unite system.
-      queryData(field) { return field.id },
-      normalizeData(inputData, field) { return inputData; },
+      queryData(field, unite, depth) { return field.id },
+      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeMutationData(formData, field, unite) { return formData; },
 
       // Vue properties for this component.
       extends: _abstract,
@@ -60,7 +61,7 @@
                           content: this.values[key] || '',
                           attributes: {
                               class: 'uk-textarea',
-                              required: this.field.non_null,
+                              required: this.field.required,
                               id: this.domID,
                           }
                       },

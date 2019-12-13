@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field">
+  <form-row :domID="domID" :field="field" :alerts="violations">
     <multi-field :field="field" :val="val" @addRow="addRow" @removeRow="removeByKey" v-slot:default="multiProps">
       <div class="uk-flex uk-flex-middle">
         <div class="uk-flex-1 geo-input">
@@ -9,7 +9,7 @@
             <input class="uk-search-input" type="search" placeholder="" :value="geoValues[multiProps.rowKey || 0]" />
           </google-places>
 
-          <places v-else class="uk-input" :options="algoliaOptions()" :required="field.non_null" :id="domID" :value="geoValues[multiProps.rowKey || 0]" @change="setAlgoliaValue(arguments, multiProps.rowKey)" />
+          <places v-else class="uk-input" :options="algoliaOptions()" :required="field.required" :id="domID" :value="geoValues[multiProps.rowKey || 0]" @change="setAlgoliaValue(arguments, multiProps.rowKey)" />
 
         </div>
 
@@ -37,7 +37,7 @@
   import MultiField from './_multiField';
   import GooglePlaces from 'vue-google-places/src/VueGooglePlaces'
   import Places from 'vue-places/src/Places';
-  import { removeIntroSpecType } from '../../../plugins/unite';
+  import {removeIntroSpecType} from "../../../plugins/unite";
 
   const GoogleTypeMap = {
       locality: 'CITY',
@@ -57,7 +57,7 @@
   export default {
 
       // Static query methods for unite system.
-      queryData(field) { return `${ field.id } {
+      queryData(field, unite, depth) { return `${ field.id } {
         provided_by,
         id,
         type,
@@ -77,9 +77,8 @@
         stairs_number,
         door_number
       }`; },
-      normalizeData(inputData, field, unite) {
-          return removeIntroSpecType(inputData);
-      },
+      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeMutationData(formData, field, unite) { return removeIntroSpecType(formData); },
 
       // Vue properties for this component.
       extends: _abstract,

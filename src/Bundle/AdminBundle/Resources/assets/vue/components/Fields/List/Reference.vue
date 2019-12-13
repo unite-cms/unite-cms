@@ -21,7 +21,7 @@
       methods: {
           nestedFields(value) {
               return Object.keys(value).map((key) => {
-                  return key === '__typename' ? null : this.fieldComponent(key)
+                  return key === '__typename' ? null : this.fieldComponent(key, value.__typename)
               }).filter((field) => { return !!field });
           },
           fallbackField(key) {
@@ -36,13 +36,27 @@
                   id: key,
               };
           },
-          fieldComponent(key) {
+
+          referencedRowView(type) {
+
+              if(!this.referencedView) {
+                  return null;
+              }
+
+              if(this.referencedView.category === 'union') {
+                  let views = this.referencedView.possibleViews.filter((view) => { return view.type === type; });
+                  return views.length > 0 ? views[0] : null;
+              }
+
+              return this.referencedView;
+          },
+
+          fieldComponent(key, type) {
 
               if(!this.referencedView) {
                   return this.fallbackField(key);
               }
-
-              let referencedField = this.referencedView.fields.filter((field) => {
+              let referencedField = this.referencedRowView(type).fields.filter((field) => {
                   return field.id === key;
               });
 
