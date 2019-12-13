@@ -22,6 +22,7 @@ class MediaFileType extends AbstractFieldType
 {
     const TYPE = 'mediaFile';
     const GRAPHQL_INPUT_TYPE = Type::STRING;
+    const FILE_KEEP = 'FILE_KEEP';
 
     /**
      * @var JWTEncoderInterface $JWTEncoder
@@ -73,8 +74,14 @@ class MediaFileType extends AbstractFieldType
      */
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null) : FieldData {
 
+        // If empty input data, we return an empty field data object.
         if(empty($inputData)) {
             return new FieldData();
+        }
+
+        // If input data is special KEEP string and we already have data available.
+        if($inputData === static::FILE_KEEP) {
+            return $content->getFieldData($field->getId())->resolveData($rowDelta);
         }
 
         try {

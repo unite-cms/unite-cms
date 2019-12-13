@@ -1,6 +1,6 @@
 <template>
   <form-row :domID="domID" :field="field">
-    <file-pond name="file" :allow-multiple="field.list_of" :id="domID" :server="filePondServer" :files="files" @processfile="onFileProcess" @removefile="onFileRemove"  />
+    <file-pond name="file" ref="pond" :allow-multiple="field.list_of" :id="domID" :server="filePondServer" :files="files" @processfiles="setValuesFromFiles" @removefile="setValuesFromFiles" />
   </form-row>
 </template>
 <script>
@@ -25,11 +25,11 @@
   }`;
 
   const valueToFile = function(value) {
-      console.log(value);
-      return {};
-      //return values.;
-      /*return [
-          {
+      if(value.file) {
+          return value.file;
+      } else {
+          console.log(value);
+          return {
               source: 'XXX-YYY-ZZZ',
               options: {
                   type: 'local',
@@ -42,8 +42,16 @@
                       poster: 'http://10.1.29.15:9000/test/A.png'
                   }
               }
-          }
-      ];*/
+          };
+      }
+  };
+
+  const fileToValue = function(file, fileInfos) {
+      return {
+          file: file,
+          token: fileInfos[file.serverId].token,
+          payload: fileInfos[file.serverId].payload,
+      };
   };
 
   const uploadFile = function(request, token, fieldName, file, progress){
@@ -76,11 +84,20 @@
 
       // Static query methods for unite system.
       queryData(field) { return field.id },
-      normalizeData(inputData, field) { return inputData; },
+      normalizeData(inputData, field) {
+          console.log(inputData);
+          return inputData;
+      },
 
       // Vue properties for this component.
       extends: _abstract,
       components: { FormRow, FilePond },
+
+      data() {
+          return {
+              fileInformation: [],
+          }
+      },
 
       computed: {
           files() {
@@ -109,9 +126,17 @@
                       // Then upload the file directly to the endpoint
                       }).then((data) => {
                           uploadFile(request, data.data.uniteMediaPreSignedUrl, fieldName, file, progress).then((payload) => {
+
+                              // Save payload for later use
+                              this.fileInformation[payload.i] = {
+                                  token: data.data.uniteMediaPreSignedUrl,
+                                  payload: payload,
+                              };
+
+                              // Tell file pond to load the file
                               load(payload.i);
-                          }).catch(error)
-                      }).catch(error);
+                          }).catch((e) => { console.log(e); error(e); });
+                      }).catch((e) => { console.log(e); error(e); });
 
                       return {
                           abort: () => {
@@ -125,12 +150,19 @@
       },
 
       methods: {
-          onFileRemove(t, file) {
-              console.log(file);
+          setValuesFromFiles() {
+
+              this.val = this.field.list_of ? [] : null;
+
+              if(this.field.list_of) {
+                  this.$refs.pond.getFiles().forEach((file, delta) => {
+                      console.log(delta, file);
+                      this.$set(this.val, delta, fileToValue(file, this.fileInformation));
+                  });
+              } else {
+                  this.val = this.$refs.pond.getFile(0) ? fileToValue(this.$refs.pond.getFile(0), this.fileInformation) : null;
+              }
           },
-          onFileProcess(t, file) {
-              console.log(file);
-          }
       }
   }
 </script>
