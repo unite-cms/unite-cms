@@ -11,7 +11,7 @@ class ApiController extends AbstractController
 {
     public function api(Request $request, SchemaManager $schemaManager, bool $uniteCMSDebug = false) {
         return $this->json(
-            $schemaManager->executeRequest($request, $uniteCMSDebug)
+            $schemaManager->executeRequest($request, $uniteCMSDebug)->toArray($uniteCMSDebug)
         );
     }
 }

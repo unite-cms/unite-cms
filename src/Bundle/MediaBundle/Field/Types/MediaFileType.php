@@ -2,6 +2,7 @@
 
 namespace UniteCMS\MediaBundle\Field\Types;
 
+use Exception;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\Type;
 use League\Flysystem\FileNotFoundException;
@@ -12,6 +13,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Field\Types\AbstractFieldType;
@@ -22,7 +24,6 @@ class MediaFileType extends AbstractFieldType
 {
     const TYPE = 'mediaFile';
     const GRAPHQL_INPUT_TYPE = Type::STRING;
-    const FILE_KEEP = 'FILE_KEEP';
 
     /**
      * @var JWTEncoderInterface $JWTEncoder
@@ -65,8 +66,14 @@ class MediaFileType extends AbstractFieldType
             return;
         }
 
-        $validator->validate($fieldData->resolveData('type'), new EqualTo($field->getType()), [$context->getGroup()]);
-        $validator->validate($fieldData->resolveData('field'), new EqualTo($field->getId()), [$context->getGroup()]);
+        $fieldDataRows = $fieldData instanceof FieldDataList ? $fieldData->rows() : [$fieldData];
+
+        foreach($fieldDataRows as $row) {
+            if(!$row->empty()) {
+                $validator->validate($row->resolveData('type'), new EqualTo($field->getType()), [$context->getGroup()]);
+                $validator->validate($row->resolveData('field'), new EqualTo($field->getId()), [$context->getGroup()]);
+            }
+        }
     }
 
     /**
@@ -79,9 +86,14 @@ class MediaFileType extends AbstractFieldType
             return new FieldData();
         }
 
-        // If input data is special KEEP string and we already have data available.
-        if($inputData === static::FILE_KEEP) {
-            return $field->isListOf() ? $content->getFieldData($field->getId())->resolveData($rowDelta) : $content->getFieldData($field->getId());
+        // If input data is an existing file id, we can use this
+        $fieldData = $content->getFieldData($field->getId());
+        $fieldDataRows = $fieldData instanceof FieldDataList ? $fieldData->rows() : [$fieldData];
+
+        foreach($fieldDataRows as $fieldDataRow) {
+            if($fieldDataRow->resolveData('id') === $inputData) {
+                return $fieldDataRow;
+            }
         }
 
         try {
@@ -101,7 +113,7 @@ class MediaFileType extends AbstractFieldType
             $mimeType = $flySystem->getMimetype($config['tmp_path'].'/'.$uploadToken->getId().'/'.$uploadToken->getFilename());
         } catch (FileNotFoundException $e) {
             throw new UserError('Could not save file information, because tmp file was not found.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new UserError('Could not save file information, because fileserver is not reachable.');
         }
 
@@ -118,13 +130,18 @@ class MediaFileType extends AbstractFieldType
      * {@inheritDoc}
      */
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
+
+        if($fieldData->empty()) {
+            return null;
+        }
+
         return [
-            'id' => $fieldData->resolveData('id', ''),
-            'filename' => $fieldData->resolveData('filename', ''),
-            'driver' => $fieldData->resolveData('driver', ''),
-            'filesize' => $fieldData->resolveData('filesize', ''),
-            'mimetype' => $fieldData->resolveData('mimetype', 0),
-            'path' => $field->getSettings()->get($fieldData->resolveData('driver'))['path'],
+            'id' => $fieldData->resolveData('id'),
+            'filename' => $fieldData->resolveData('filename'),
+            'driver' => $fieldData->resolveData('driver'),
+            'filesize' => $fieldData->resolveData('filesize'),
+            'mimetype' => $fieldData->resolveData('mimetype'),
+            'config' => $field->getSettings()->get($fieldData->resolveData('driver')),
         ];
     }
 }

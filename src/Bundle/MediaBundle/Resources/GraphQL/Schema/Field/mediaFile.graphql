@@ -18,7 +18,8 @@ input MediaFileFieldS3Config {
 type UniteMediaFile {
     id: String!
     filename: String!
-    path: String!
+    url(pre_sign: Boolean): String!
+    preview(pre_sign: Boolean): String
     driver: String!
     mimetype: String!
     filesize: Int!

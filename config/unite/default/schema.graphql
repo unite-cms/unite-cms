@@ -21,11 +21,11 @@ type Media implements UniteContent {
     title: String @textField
     file: UniteMediaFile @mediaFileField ( s3:
         {
-            key: "xxxx",
-            secret: "xxxx",
+            key: "Z526U6T9BVS9L3LD8ZMQ",
+            secret: "T4BVCHLHiJpgHyGvq65FnWDdFtPU0ecmzrbD8U+3",
             region: "",
             version: "latest",
-            endpoint: "https://example.com"
+            endpoint: "http://127.0.0.1:9001"
             bucket: "test",
             path: "/uploads",
             use_path_style_endpoint: true,
@@ -34,11 +34,11 @@ type Media implements UniteContent {
     )
     files: [UniteMediaFile!] @mediaFileField ( s3:
     {
-        key: "xxxx",
-        secret: "xxxx",
+        key: "Z526U6T9BVS9L3LD8ZMQ",
+        secret: "T4BVCHLHiJpgHyGvq65FnWDdFtPU0ecmzrbD8U+3",
         region: "",
         version: "latest",
-        endpoint: "https://example.com"
+        endpoint: "http://127.0.0.1:9001"
         bucket: "test",
         path: "/uploads",
         use_path_style_endpoint: true,

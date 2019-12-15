@@ -9,7 +9,8 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use League\Flysystem\Filesystem;
 use Superbalist\Flysystem\GoogleStorage\GoogleStorageAdapter;
-use UniteCMS\MediaBundle\Flysystem\Plugin\PreSignedUrl;
+use UniteCMS\MediaBundle\Flysystem\Plugin\DownloadFile;
+use UniteCMS\MediaBundle\Flysystem\Plugin\UploadFile;
 
 class FlySystemManager
 {
@@ -66,7 +67,9 @@ class FlySystemManager
         }
 
         $this->systems[$systemKey] = new Filesystem($adapter);
-        $this->systems[$systemKey]->addPlugin(new PreSignedUrl());
+        $this->systems[$systemKey]->addPlugin(new UploadFile());
+        $this->systems[$systemKey]->addPlugin(new DownloadFile());
+        
         return $this->systems[$systemKey];
     }
 }

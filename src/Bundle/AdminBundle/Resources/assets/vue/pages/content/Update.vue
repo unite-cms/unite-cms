@@ -69,7 +69,7 @@
                     variables: {
                         id: this.$route.params.id,
                         persist: true,
-                        data: this.view.normalizeMutationData(JSON.parse(JSON.stringify(this.formData))),
+                        data: this.view.normalizeMutationData(Object.assign({}, this.formData)),
                     }
                 }).then((data) => {
                     Route.back({ updated: this.$route.params.id });

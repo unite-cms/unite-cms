@@ -42,6 +42,7 @@ class PreSignUrlResolver implements FieldResolverInterface
 
     /**
      * {@inheritDoc}
+     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException
      */
     public function resolve($value, $args, $context, ResolveInfo $info)
     {
@@ -63,7 +64,7 @@ class PreSignUrlResolver implements FieldResolverInterface
                 /**
                  * @var UploadToken $uploadToken
                  */
-                $uploadToken = $flySystem->getPreSignedUrl($args['filename'], $field->getSettings()->get($driver));
+                $uploadToken = $flySystem->createUploadToken($args['filename'], $field->getSettings()->get($driver));
                 $uploadToken->setField($field->getId())->setType($field->getType());
                 return $this->JWTEncoder->encode($uploadToken->toArray());
             }

@@ -1,6 +1,6 @@
 <template>
   <form-row :domID="domID" :field="field">
-    <file-pond name="file" ref="pond" :allow-multiple="field.list_of" :id="domID" :server="filePondServer" :files="files" @processfiles="setValuesFromFiles" @removefile="setValuesFromFiles" />
+    <file-pond name="file" ref="pond" :allow-multiple="field.list_of" :id="domID" :server="filePondServer" :files="values" @addfile="onFileAdded" @processfiles="onFilesProcessed" @removefile="onFileRemoved" />
   </form-row>
 </template>
 <script>
@@ -11,6 +11,7 @@
   import jwtDecode from 'jwt-decode';
 
   import vueFilePond from 'vue-filepond';
+  import { FileOrigin } from 'filepond';
   import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
   import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
   import FilePondPluginFilePoster from 'filepond-plugin-file-poster';
@@ -24,46 +25,75 @@
       uniteMediaPreSignedUrl(type: $type, field: $field, filename: $filename)
   }`;
 
-  const valueToFile = function(value) {
-      if(value.file) {
-          return value.file;
-      } else {
-          return {
-              source: value.id,
-              options: {
-                  type: 'local',
-                  file: {
-                      name: value.filename,
-                      size: value.filesize,
-                      type: value.mimetype
-                  },
-                  metadata: {
-                      poster: 'http://10.1.29.15:9000/test' + value.path + '/' + value.id + '/' + value.filename
-                  }
-              }
-          };
+  /**
+   * Convert API response to filepond initial file format.
+   *
+   * @param value
+   */
+  const queryValueToFileValue = function(value){
+
+    if(!value) {
+      return value;
+    }
+
+    return {
+      source: value.id,
+      options: {
+        type: 'local',
+        file: {
+          name: value.filename,
+          size: value.filesize,
+          type: value.mimetype
+        },
+        metadata: {
+          poster: value.preview
+        }
       }
+    };
   };
 
-  const fileToValue = function(file, fileInfos) {
-      return {
-          file: file,
-          token: fileInfos[file.serverId].token,
-          payload: fileInfos[file.serverId].payload,
-      };
+  /**
+   * Convert filepond file format to unite API mutation input.
+   *
+   * @param value
+   */
+  const fileValueToMutationValue = function(value) {
+
+    if(!value) {
+      return value;
+    }
+
+    // File is already uploaded, we just need to return the uuid of the file for unite.
+    if(value.origin === FileOrigin.LOCAL) {
+      return value.serverId;
+    }
+
+    // File is a new input, so we need to pass the upload token, created by unite cms.
+    else if(value.origin === FileOrigin.INPUT) {
+      return value.getMetadata('uniteInformation').token;
+    }
+
+    throw "Invalid file origin";
   };
 
+  /**
+   * Upload a new file to the url, specified in the given upload token.
+   *
+   * @param request
+   * @param token
+   * @param fieldName
+   * @param file
+   * @param progress
+   * @returns {Promise<unknown>}
+   */
   const uploadFile = function(request, token, fieldName, file, progress){
       return new Promise((resolve, reject) => {
 
           const payload = jwtDecode(token);
-          const formData = new FormData();
-
-          formData.append(fieldName, file, file.name);
           request.open('PUT', payload.u);
 
           request.upload.onprogress = (e) => {
-              progress(e.lengthComputable, e.loaded, e.total);
+                progress(e.lengthComputable, e.loaded, e.total);
           };
 
           request.onload = function() {
@@ -75,7 +105,7 @@
               }
           };
 
-          request.send(formData);
+          request.send(file);
       });
   };
 
@@ -89,23 +119,15 @@
             driver
             filesize
             mimetype
-            path
+            url(pre_sign: true)
+            preview(pre_sign: true)
           }`;
       },
-      normalizeQueryData(queryData, field, unite) { return queryData; },
+      normalizeQueryData(queryData, field, unite) {
+          return field.list_of ? queryData.map(queryValueToFileValue) : queryValueToFileValue(queryData);
+      },
       normalizeMutationData(formData, field, unite) {
-
-          if(!formData) {
-              return formData;
-          }
-
-          if(field.list_of) {
-              return formData.map((rowData) => {
-                  return rowData.token || 'FILE_KEEP';
-              });
-          } else {
-              return formData.token || 'FILE_KEEP';
-          }
+          return field.list_of ? formData.map(fileValueToMutationValue) : fileValueToMutationValue(formData);
       },
 
       // Vue properties for this component.
@@ -119,9 +141,6 @@
       },
 
       computed: {
-          files() {
-              return this.values.map(valueToFile);
-          },
           filePondServer() {
               return {
                   fetch: null,
@@ -169,18 +188,37 @@
       },
 
       methods: {
-          setValuesFromFiles() {
+          syncFiles(files) {
+              files.forEach((file, delta) => {
+                  if(file.serverId) {
+                      // First check if we have any extra file information and add it to the files
+                      if (this.fileInformation[file.serverId]) {
+                        file.setMetadata('uniteInformation', this.fileInformation[file.serverId], true);
+                      }
 
-              this.val = this.field.list_of ? [] : null;
-
-              if(this.field.list_of) {
-                  this.$refs.pond.getFiles().forEach((file, delta) => {
-                      this.$set(this.val, delta, fileToValue(file, this.fileInformation));
-                  });
-              } else {
-                  this.val = this.$refs.pond.getFile(0) ? fileToValue(this.$refs.pond.getFile(0), this.fileInformation) : null;
-              }
+                      // Then sync filepond files with internal field value
+                      this.setValue([file], delta);
+                  }
+              });
           },
+
+          onFileAdded() {
+              this.$nextTick(() => {
+                  this.syncFiles(this.$refs.pond.getFiles());
+              });
+          },
+
+          onFilesProcessed() {
+              this.$nextTick(() => {
+                  this.syncFiles(this.$refs.pond.getFiles());
+              });
+          },
+
+          onFileRemoved() {
+              this.$nextTick(() => {
+                  this.syncFiles(this.$refs.pond.getFiles());
+              });
+          }
       }
   }
 </script>

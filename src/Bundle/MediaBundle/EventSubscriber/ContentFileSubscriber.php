@@ -3,7 +3,7 @@
 
 namespace UniteCMS\MediaBundle\EventSubscriber;
 
-use GraphQL\Error\UserError;
+use Exception;
 use League\Flysystem\FileExistsException;
 use League\Flysystem\FileNotFoundException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -11,6 +11,7 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedContent;
 use UniteCMS\CoreBundle\Content\Embedded\EmbeddedFieldData;
 use UniteCMS\CoreBundle\Content\FieldData;
+use UniteCMS\CoreBundle\Content\FieldDataList;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Event\ContentEvent;
@@ -74,6 +75,26 @@ class ContentFileSubscriber implements EventSubscriberInterface
     }
 
     /**
+     * @param FieldData $fieldData
+     * @return FieldData[]
+     */
+    protected function getFieldValues(FieldData $fieldData) : array {
+
+        $existingFieldData = [];
+
+        if($fieldData && !$fieldData->empty()) {
+            $fieldDataRows = $fieldData instanceof FieldDataList ? $fieldData->rows() : [$fieldData];
+            foreach($fieldDataRows as $fieldDataRow) {
+                if(!$fieldDataRow->empty()) {
+                    $existingFieldData[] = $fieldDataRow;
+                }
+            }
+        }
+
+        return $existingFieldData;
+    }
+
+    /**
      * @param ContentInterface $content
      * @param ContentTypeField $field
      * @param FieldData $fieldData
@@ -113,7 +134,7 @@ class ContentFileSubscriber implements EventSubscriberInterface
             $this->domainManager->current()->log(LoggerInterface::ERROR, sprintf('Could not upload file %s because a file already exists at destination path. Please try again!', $filename));
         } catch (FileNotFoundException $e) {
             $this->domainManager->current()->log(LoggerInterface::ERROR, sprintf('Could not upload file %s because the source file does not exist. Please upload the file again!', $filename));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->domainManager->current()->log(LoggerInterface::ERROR, sprintf('Could not upload file %s because fileserver is not reachable!', $filename));
         }
     }
@@ -152,73 +173,59 @@ class ContentFileSubscriber implements EventSubscriberInterface
 
         } catch (FileNotFoundException $e) {
             $this->domainManager->current()->log(LoggerInterface::ERROR, sprintf('Could not delete file %s because the file does not exist.', $filename));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->domainManager->current()->log(LoggerInterface::ERROR, sprintf('Could not delete file %s because fileserver is not reachable!', $filename));
         }
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\Event\ContentEvent $event
+     * @param ContentEvent $event
      */
     public function onCreate(ContentEvent $event) {
+
         $content = $event->getContent();
+
         foreach($this->getFileFields($content) as $fileField) {
-            if($content->getFieldData($fileField->getId()) && !$content->getFieldData($fileField->getId())->empty()) {
-                $this->uploadFile($content, $fileField, $content->getFieldData($fileField->getId()));
+            foreach($this->getFieldValues($content->getFieldData($fileField->getId())) as $fieldData) {
+                $this->uploadFile($content, $fileField, $fieldData);
             }
         }
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\Event\ContentEvent $event
+     * @param ContentEvent $event
      */
     public function onUpdate(ContentEvent $event) {
-        $content = $event->getContent();
-
-        foreach($this->getFileFields($content) as $fileField) {
-            if($content->getFieldData($fileField->getId()) && !$content->getFieldData($fileField->getId())->empty()) {
-
-                // TODO: Should be remove old files on update?
-                // $prevData = $event->getPreviousData();
-                //if(!empty($prevData[$fileField->getId()])) {
-                //    $this->deleteFile($content, $fileField, $prevData[$fileField->getId()]);
-                //}
-
-                // Add new file on update.
-                $this->uploadFile($content, $fileField, $content->getFieldData($fileField->getId()));
-            }
-        }
+        // TODO: Should be remove old files on update?
+        // $prevData = $event->getPreviousData();
+        //if(!empty($prevData[$fileField->getId()])) {
+        //    $this->deleteFile($content, $fileField, $prevData[$fileField->getId()]);
+        //}
+        $this->onCreate($event);
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\Event\ContentEvent $event
+     * @param ContentEvent $event
      */
     public function onRevert(ContentEvent $event) {
-        $content = $event->getContent();
-
-        foreach($this->getFileFields($content) as $fileField) {
-            if($content->getFieldData($fileField->getId()) && !$content->getFieldData($fileField->getId())->empty()) {
-
-                // TODO: Should be remove old files on revert?
-                // $prevData = $event->getPreviousData();
-                //if(!empty($prevData[$fileField->getId()])) {
-                //    $this->deleteFile($content, $fileField, $prevData[$fileField->getId()]);
-                //}
-
-                // Add new file on update.
-                $this->uploadFile($content, $fileField, $content->getFieldData($fileField->getId()));
-            }
-        }
+        // TODO: Should be remove old files on revert?
+        // $prevData = $event->getPreviousData();
+        //if(!empty($prevData[$fileField->getId()])) {
+        //    $this->deleteFile($content, $fileField, $prevData[$fileField->getId()]);
+        //}
+        $this->onCreate($event);
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\Event\ContentEvent $event
+     * @param ContentEvent $event
      */
     public function onPermanentDelete(ContentEvent $event) {
+
         $content = $event->getContent();
+
         foreach($this->getFileFields($content) as $fileField) {
-            if($content->getFieldData($fileField->getId()) && !$content->getFieldData($fileField->getId())->empty()) {
-                $this->deleteFile($content, $fileField, $content->getFieldData($fileField->getId()));
+            foreach($this->getFieldValues($content->getFieldData($fileField->getId())) as $fieldData) {
+                $this->deleteFile($content, $fileField, $fieldData);
             }
         }
     }

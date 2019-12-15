@@ -11,7 +11,7 @@ use League\Flysystem\PluginInterface;
 use Superbalist\Flysystem\GoogleStorage\GoogleStorageAdapter;
 use UniteCMS\MediaBundle\Flysystem\UploadToken;
 
-class PreSignedUrl implements PluginInterface
+class UploadFile implements PluginInterface
 {
     /**
      * FilesystemInterface instance.
@@ -25,7 +25,7 @@ class PreSignedUrl implements PluginInterface
      */
     public function getMethod()
     {
-        return 'getPreSignedUrl';
+        return 'createUploadToken';
     }
 
     /**
@@ -37,13 +37,12 @@ class PreSignedUrl implements PluginInterface
     }
 
     /**
-     * Presign a filname for upload using on of the defined adapter.
+     * Pre-sign a filename for upload using on of the defined adapter.
      *
      * @param string $filename
      * @param array $config
      *
-     * @return array
-     * @throws \Exception
+     * @return UploadToken
      */
     public function handle(string $filename, array $config = []) : UploadToken
     {
@@ -58,6 +57,7 @@ class PreSignedUrl implements PluginInterface
                 'Bucket' => $adapter->getBucket(),
                 'Key' => $adapter->applyPathPrefix($config['tmp_path'] . '/' . $uploadToken->getId() . '/' . $filename),
             ];
+
             $S3Client = $adapter->getClient();
             $command = $S3Client->getCommand('PutObject', $options);
             $request = $S3Client->createPresignedRequest($command, '+5Minutes');
