@@ -65,7 +65,7 @@ class ProxyContent
 
         $fieldNameParts = explode('.', $fieldName);
         $fieldData = $this->content->getFieldData($fieldNameParts[0]);
-        return $fieldData ? $fieldData->resolveData(count($fieldNameParts) > 1 ? $fieldNameParts[1] : '', $defaultValue) : $fieldNameParts;
+        return $fieldData ? ($fieldData->resolveData(count($fieldNameParts) > 1 ? $fieldNameParts[1] : '', $defaultValue)) : $fieldNameParts;
     }
 
     /**

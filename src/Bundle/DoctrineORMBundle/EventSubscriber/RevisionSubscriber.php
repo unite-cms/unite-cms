@@ -4,7 +4,7 @@
 namespace UniteCMS\DoctrineORMBundle\EventSubscriber;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Security;
 use UniteCMS\CoreBundle\Content\ContentInterface;
