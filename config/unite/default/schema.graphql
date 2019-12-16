@@ -21,8 +21,8 @@ type Media implements UniteContent {
     title: String @textField
     file: UniteMediaFile @mediaFileField ( s3:
         {
-            key: "Z526U6T9BVS9L3LD8ZMQ",
-            secret: "T4BVCHLHiJpgHyGvq65FnWDdFtPU0ecmzrbD8U+3",
+            key: "%(S3_KEY)%",
+            secret: "%(S3_SECRET)%",
             region: "",
             version: "latest",
             endpoint: "http://127.0.0.1:9001"
@@ -34,8 +34,8 @@ type Media implements UniteContent {
     )
     files: [UniteMediaFile!] @mediaFileField ( s3:
     {
-        key: "Z526U6T9BVS9L3LD8ZMQ",
-        secret: "T4BVCHLHiJpgHyGvq65FnWDdFtPU0ecmzrbD8U+3",
+        key: "%(S3_KEY)%",
+        secret: "%(S3_SECRET)%",
         region: "",
         version: "latest",
         endpoint: "http://127.0.0.1:9001"
