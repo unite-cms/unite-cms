@@ -1,7 +1,7 @@
 {
     "dependencies": {
-        "unite-admin": "file:src/Bundle/AdminBundle",
-        "unite-media": "file:src/Bundle/MediaBundle"
+        "@unite/admin": "file:./src/Bundle/AdminBundle",
+        "@unite/media": "file:./src/Bundle/MediaBundle"
     },
     "devDependencies": {
         "@symfony/webpack-encore": "^0.28.0",

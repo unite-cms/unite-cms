@@ -47,7 +47,16 @@ class UniteMediaFileResolver implements FieldResolverInterface
                 return $value[$info->fieldName];
 
             case 'url':
+
+                $flySystem = $this->flySystemManager->createFilesystem($value['driver'], $value['config']);
+                return $flySystem->getDownloadUrl($value['id'], $value['filename'], $args['pre_sign'] ?? false, $value['config'] ?? []);
+
             case 'preview':
+
+                if(substr($value['mimetype'], 0, strlen('image/')) !== 'image/') {
+                    return null;
+                }
+
                 $flySystem = $this->flySystemManager->createFilesystem($value['driver'], $value['config']);
                 return $flySystem->getDownloadUrl($value['id'], $value['filename'], $args['pre_sign'] ?? false, $value['config'] ?? []);
 

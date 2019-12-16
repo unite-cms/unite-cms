@@ -4,8 +4,8 @@
   </form-row>
 </template>
 <script>
-  import _abstract from "../../../../../../../AdminBundle/Resources/assets/vue/components/Fields/Form/_abstract";
-  import FormRow from "../../../../../../../AdminBundle/Resources/assets/vue/components/Fields/Form/_formRow";
+  import _abstract from "@unite/admin/Resources/assets/vue/components/Fields/Form/_abstract";
+  import FormRow from "@unite/admin/Resources/assets/vue/components/Fields/Form/_formRow";
 
   import gql from 'graphql-tag';
   import jwtDecode from 'jwt-decode';

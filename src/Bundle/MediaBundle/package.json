@@ -1,15 +1,6 @@
 {
   "dependencies": {
-    "node-sass": "^4.13.0",
-    "vue": "^2.6.10",
-    "apollo-boost": "^0.4.4",
-    "feather-icons": "^4.24.1",
-    "graphql": "^14.5.8",
-    "graphql-tag": "^2.10.1",
-    "uikit": "^3.2.1",
-    "vue-apollo": "^3.0.0",
-    "vue-router": "^3.1.3",
-    "vue-i18n": "^8.15.0",
+    "@unite/admin": "file:../AdminBundle/",
     "jwt-decode": "^2.2.0",
     "filepond": "^4.8.0",
     "filepond-plugin-image-preview": "^4.5.0",
@@ -19,7 +10,7 @@
   },
   "license": "UNLICENSED",
   "private": true,
-  "name": "unite-media",
+  "name": "@unite/media",
   "version": "0.10.0",
   "author": "Franz Wilding"
 }

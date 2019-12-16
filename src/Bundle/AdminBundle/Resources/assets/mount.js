@@ -4,8 +4,6 @@ import i18n from './vue/plugins/i18n';
 import router from './vue/plugins/router';
 import UniteAdminApp from './vue/App';
 
-require('./app.scss');
-
 new Vue({
     el: '#app',
     apolloProvider,

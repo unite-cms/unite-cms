@@ -1,5 +1,5 @@
 
-import { Unite } from '../../../AdminBundle/Resources/assets/vue/plugins/unite';
+import { Unite } from '@unite/admin/Resources/assets/vue/plugins/unite';
 
 import MediaFileList from "./vue/components/Fields/List/MediaFile";
 import MediaFileForm from "./vue/components/Fields/Form/MediaFile";
