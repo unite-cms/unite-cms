@@ -88,11 +88,14 @@ class MediaFileType extends AbstractFieldType
 
         // If input data is an existing file id, we can use this
         $fieldData = $content->getFieldData($field->getId());
-        $fieldDataRows = $fieldData instanceof FieldDataList ? $fieldData->rows() : [$fieldData];
+        if($fieldData && !$fieldData->empty()) {
 
-        foreach($fieldDataRows as $fieldDataRow) {
-            if($fieldDataRow->resolveData('id') === $inputData) {
-                return $fieldDataRow;
+            $fieldDataRows = $fieldData instanceof FieldDataList ? $fieldData->rows() : [$fieldData];
+
+            foreach ($fieldDataRows as $fieldDataRow) {
+                if ($fieldDataRow->resolveData('id') === $inputData) {
+                    return $fieldDataRow;
+                }
             }
         }
 

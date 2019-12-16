@@ -32,10 +32,6 @@
    */
   const queryValueToFileValue = function(value){
 
-    if(!value) {
-      return value;
-    }
-
     return {
       source: value.id,
       options: {
@@ -58,10 +54,6 @@
    * @param value
    */
   const fileValueToMutationValue = function(value) {
-
-    if(!value) {
-      return value;
-    }
 
     // File is already uploaded, we just need to return the uuid of the file for unite.
     if(value.origin === FileOrigin.LOCAL) {
@@ -124,9 +116,19 @@
           }`;
       },
       normalizeQueryData(queryData, field, unite) {
+
+          if(!queryData) {
+              return queryData;
+          }
+
           return field.list_of ? queryData.map(queryValueToFileValue) : queryValueToFileValue(queryData);
       },
       normalizeMutationData(formData, field, unite) {
+
+          if(!formData) {
+              return formData;
+          }
+
           return field.list_of ? formData.map(fileValueToMutationValue) : fileValueToMutationValue(formData);
       },
 
@@ -202,10 +204,10 @@
               });
           },
 
-          onFileAdded() {
-              this.$nextTick(() => {
+          onFileAdded(t, file) {
+              if(file.serverId) {
                   this.syncFiles(this.$refs.pond.getFiles());
-              });
+              };
           },
 
           onFilesProcessed() {
@@ -214,8 +216,13 @@
               });
           },
 
-          onFileRemoved() {
+          onFileRemoved(t, file) {
               this.$nextTick(() => {
+
+                  if(this.field.list_of) {
+                      this.val = [];
+                  }
+
                   this.syncFiles(this.$refs.pond.getFiles());
               });
           }
