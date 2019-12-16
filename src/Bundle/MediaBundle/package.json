@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@unite/admin": "file:../AdminBundle/",
+    "@unite/admin": "file:../admin-bundle",
     "jwt-decode": "^2.2.0",
     "filepond": "^4.8.0",
     "filepond-plugin-image-preview": "^4.5.0",
