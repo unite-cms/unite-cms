@@ -33,7 +33,7 @@
           <li v-if="$unite.permissions.SCHEMA"><router-link to="/schema" uk-tooltip="Schema"><icon name="code" /></router-link></li>
           <li v-if="$unite.permissions.LOGS"><router-link to="/logs" uk-tooltip="Logs"><icon name="activity" /></router-link></li>
 
-          <li v-if="userAdminView"><router-link  :uk-tooltip="'Update user&#58; ' + user.username" :to="'/user/' + userAdminView.id + '/' + user.id + '/update'"><icon name="user" /></router-link></li>
+          <li v-if="userAdminView"><router-link  :uk-tooltip="'Update user&#58; ' + user.username" :to="viewRoute(userAdminView) + '/' + user.id + '/update'"><icon name="user" /></router-link></li>
           <li><a  uk-tooltip="Logout" class="uk-text-danger" @click="logout"><icon name="log-out" /></a></li>
         </ul>
       </div>
@@ -64,6 +64,9 @@
                   this.group = this.$route.params.viewGroup;
                 }
 
+                if(!this.group && this.viewGroups.length > 0) {
+                    this.group = this.viewGroups[0];
+                }
             },
             viewGroups(groups) {
                 if(!this.group && groups.length > 0) {
@@ -121,7 +124,7 @@
                 return User.user;
             },
             userAdminView() {
-                let views = this.userViews.filter(view => view.type === this.user.type && this.inGroup(view));
+                let views = Object.values(this.$unite.adminViews).filter(view => view.category === 'user' && view.type === this.user.type);
                 return views.length > 0 ? views[0] : null;
             }
         }

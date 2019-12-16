@@ -40,7 +40,7 @@
         <div class="uk-placeholder">
           <icon name="maximize" :width="128" :height="128" style="opacity: 0.125" />
           <p class="uk-margin">{{ $t('content.list.empty_placeholder') }}</p>
-          <p v-if="is_granted('create')">
+          <p v-if="is_granted('create') && header">
             <router-link :to="to('create')" class="uk-button uk-button-default uk-button-small"><icon name="plus" /> {{ $t('content.list.actions.create') }}</router-link>
           </p>
         </div>
