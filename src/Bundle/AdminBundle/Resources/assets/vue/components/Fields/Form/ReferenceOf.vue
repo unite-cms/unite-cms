@@ -3,10 +3,10 @@
     <template v-if="contentId">
       <div class="uk-input-group" v-for="value in values">
         <span v-if="value.total !== null" class="uk-margin-small-right uk-label uk-label-muted">{{ value.total }}</span>
-        <a v-if="value.total !== 0" class="uk-icon-button uk-button-light uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="more-horizontal" /></a>
+        <a class="uk-icon-button uk-button-light uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="more-horizontal" /></a>
       </div>
       <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })">
-        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :embedded="true" :filter="filter" />
+        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :embedded="true" :filter="filter" :initial-create-data="initialCreateData" />
       </modal>
     </template>
     <div v-else class="uk-placeholder uk-padding-small">{{ $t('field.reference_of.no_content_id') }}</div>
@@ -52,6 +52,11 @@
                   value: this.contentId
               }
           },
+          initialCreateData() {
+              let formData = {};
+              formData[this.field.config.reference_field] = this.contentId;
+              return formData;
+          }
       },
   }
 </script>

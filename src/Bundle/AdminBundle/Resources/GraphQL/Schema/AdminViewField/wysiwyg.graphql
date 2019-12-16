@@ -3,4 +3,5 @@ directive @wysiwygAdminField(
     listIf: Expression
     formIf: Expression
     formGroup: String
+    inlineCreate: Boolean
 ) on FIELD

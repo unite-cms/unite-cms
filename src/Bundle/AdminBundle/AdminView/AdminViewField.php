@@ -63,6 +63,11 @@ class AdminViewField
     protected $formGroup = null;
 
     /**
+     * @var bool $inlineCreate
+     */
+    protected $inlineCreate = false;
+
+    /**
      * @var ArrayCollection $config
      */
     protected $config;
@@ -297,6 +302,24 @@ class AdminViewField
      */
     public function isListOf() : bool {
         return $this->isListOf;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInlineCreate(): bool
+    {
+        return $this->inlineCreate;
+    }
+
+    /**
+     * @param bool $inlineCreate
+     * @return self
+     */
+    public function setInlineCreate(bool $inlineCreate): self
+    {
+        $this->inlineCreate = $inlineCreate;
+        return $this;
     }
 
     /**

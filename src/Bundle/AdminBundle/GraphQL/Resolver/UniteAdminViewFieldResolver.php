@@ -61,6 +61,9 @@ class UniteAdminViewFieldResolver implements FieldResolverInterface
             case 'form_group':
                 return $value->getFormGroup();
 
+            case 'inline_create':
+                return $value->isInlineCreate();
+
             case 'config':
                 $config = [];
                 foreach($value->getConfig() as $key => $value) {

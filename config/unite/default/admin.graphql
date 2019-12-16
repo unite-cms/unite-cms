@@ -1,19 +1,14 @@
 
-fragment categories on DemoCategory @tableAdminView(groups: ["Main", "2nd. Group"]) {
-    name
+fragment categories on DemoCategory @tableAdminView {
+    name @adminField(inlineCreate: true)
     articles {
         total
-        result {
-            _meta {
-                id
-            }
-        }
     }
 }
 
-fragment articles on DemoArticle @tableAdminView(groups: "Main") {
+fragment articles on DemoArticle @tableAdminView {
     id
-    name
+    name @adminField(inlineCreate: true)
     main_category {
         name
     }
@@ -54,7 +49,7 @@ fragment medias on Media @tableAdminView {
         filename
         url
     }
-    file {
+    file @adminField(inlineCreate: true) {
         preview
         filename
         url

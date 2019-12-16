@@ -16,6 +16,7 @@ directive @geoLocationAdminField(
     listIf: Expression
     formIf: Expression
     formGroup: String
+    inlineCreate: Boolean
     algolia: GeoLocationAdminFieldAlgoliaConfig
     google: GeoLocationAdminFieldGoogleConfig
 ) on FIELD

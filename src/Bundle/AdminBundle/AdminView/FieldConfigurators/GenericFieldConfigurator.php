@@ -46,6 +46,10 @@ class GenericFieldConfigurator implements AdminFieldConfiguratorInterface, Schem
         if(!empty($directive['args']['formGroup'])) {
             $field->setFormGroup($directive['args']['formGroup']);
         }
+
+        if(!empty($directive['args']['inlineCreate'])) {
+            $field->setInlineCreate($directive['args']['inlineCreate']);
+        }
     }
 
     /**

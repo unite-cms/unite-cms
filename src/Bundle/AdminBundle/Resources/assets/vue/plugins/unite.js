@@ -234,6 +234,7 @@ export const Unite = new Vue({
                         show_in_list
                         show_in_form
                         form_group
+                        inline_create
                         config {
                             key
                             value

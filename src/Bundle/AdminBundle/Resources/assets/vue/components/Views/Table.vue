@@ -4,6 +4,8 @@
 
       <view-header v-if="!embedded" :can-create="is_granted('create')" :title="view.name" :deleted="deleted" @toggleDeleted="toggleDeleted" />
 
+      <inline-create v-if="is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
+
       <div v-if="items.result.length > 0" class="uk-overflow-auto">
         <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
           <thead>
@@ -14,7 +16,7 @@
             </tr>
           </thead>
           <tbody class="uk-card uk-card-default uk-table-striped">
-            <tr v-for="row in items.result" :class="{ updated: highlightRow === row._meta.id }" :key="row._meta.id">
+            <tr v-for="row in items.result" :class="{ updated: highlightRow === row._meta.id }" :key="row._meta.id" :id="'row-' + row._meta.id">
               <td v-if="select" class="uk-table-shrink">
                 <button @click.prevent="selectRow(row._meta.id)" class="uk-icon-button uk-icon-button-small" :class="isSelected(row._meta.id) ? 'uk-button-primary' : 'uk-button-default'" uk-icon="check" :title="$t('content.list.selection.select')">
                   <icon v-if="isSelected(row._meta.id)" name="check" />
@@ -36,7 +38,7 @@
         </table>
       </div>
 
-      <div v-else class="uk-card uk-card-default uk-card-body uk-margin uk-padding uk-text-center">
+      <div v-else-if="!hasInlineCreateForm || !is_granted('create') || deleted" class="uk-card uk-card-default uk-card-body uk-margin uk-padding uk-text-center">
         <div class="uk-placeholder">
           <icon name="maximize" :width="128" :height="128" style="opacity: 0.125" />
           <p class="uk-margin">{{ $t('content.list.empty_placeholder') }}</p>
@@ -65,10 +67,11 @@
     import ViewHeader from "./_header";
     import ViewPagination from "./_pagination";
     import _abstract from "./_abstract";
+    import InlineCreate from "./_inlineCreate";
 
     export default {
         extends: _abstract,
-        components: { ViewHeader, ViewPagination, actionsField, Icon },
+        components: { InlineCreate, ViewHeader, ViewPagination, actionsField, Icon },
         data() {
             return {
                 items: {
@@ -90,6 +93,16 @@
                 fetchPolicy: 'network-only',
                 query() { return this.query; },
                 update(data) {return data[`find${ this.view.type }`] || { total: 0, results: [] }; },
+                result() {
+                    this.$nextTick(() => {
+                        if(this.highlightRow) {
+                            let row = this.$el.querySelector('#row-' + this.highlightRow);
+                            if(row) {
+                                row.scrollIntoView({ behavior: "smooth" });
+                            }
+                        }
+                    })
+                },
                 variables() {
                     return {
                         offset: this.offset,
@@ -108,6 +121,11 @@
                     AND: [deletedFilter, this.filter]
                 };
             },
+
+            hasInlineCreateForm() {
+                return this.view.fields.filter(field => field.inline_create).length > 0;
+            },
+
             query() {
                 return gql`
                     ${ this.view.fragment }
@@ -132,9 +150,39 @@
                   }`;
             },
         },
+        watch: {
+          '$route'(route){
+              this.reloadItems();
+          }
+        },
         methods: {
+
+            reloadItems() {
+                this.items = {
+                    total: 0,
+                    result: [],
+                };
+                this.offset = 0;
+                this.$apollo.queries.items.refresh()
+            },
+
             toggleDeleted() {
                 this.$emit('toggleDeleted');
+            },
+            onInstantCreate(id) {
+
+                if (this.embedded) {
+                    this.reloadItems();
+
+                } else {
+                    let query = Object.assign({}, this.$route.query);
+                    query.updated = id;
+
+                    this.$router.push({
+                        path: this.$route.path,
+                        query: query,
+                    })
+                }
             }
         }
     }

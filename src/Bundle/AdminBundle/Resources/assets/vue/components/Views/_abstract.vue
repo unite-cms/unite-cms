@@ -9,6 +9,10 @@
             view: Object,
             orderBy: Object,
             filter: Object,
+            initialCreateData: {
+                type: Object,
+                default() { return {} }
+            },
             embedded: {
                 type: Boolean,
                 default: false,

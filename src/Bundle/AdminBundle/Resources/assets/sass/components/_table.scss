@@ -28,7 +28,8 @@
     }
   }
 
-  tr.updated {
+  tr.updated,
+  &.uk-table-striped > tr:nth-of-type(even).updated {
     background: $table-hover-row-background;
     @if(mixin-exists(hook-table-hover)) {@include hook-table-hover();}
   }
