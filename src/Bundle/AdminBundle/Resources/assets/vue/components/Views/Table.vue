@@ -2,7 +2,7 @@
   <section class="uk-section uk-position-relative">
     <div class="uk-container">
 
-      <view-header v-if="header" :can-create="is_granted('create')" :title="view.name" :deleted="deleted" @toggleDeleted="toggleDeleted" />
+      <view-header v-if="!embedded" :can-create="is_granted('create')" :title="view.name" :deleted="deleted" @toggleDeleted="toggleDeleted" />
 
       <div v-if="items.result.length > 0" class="uk-overflow-auto">
         <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
@@ -21,9 +21,9 @@
                 </button>
               </td>
               <td v-for="field in view.listFields()">
-                <component :is="$unite.getListFieldType(field.fieldType)" :view="view" :row="row" :field="field" />
+                <component :is="$unite.getListFieldType(field.fieldType)" :view="view" :row="row" :field="field" :embedded="embedded" />
               </td>
-              <td v-if="!select" class="uk-table-shrink"><actions-field :view="view" :row="row" id="_actions" /></td>
+              <td v-if="!select" class="uk-table-shrink"><actions-field :view="view" :row="row" id="_actions" :embedded="embedded" /></td>
             </tr>
           </tbody>
           <tfoot v-if="pagination && items.result.length < items.total">
@@ -40,7 +40,7 @@
         <div class="uk-placeholder">
           <icon name="maximize" :width="128" :height="128" style="opacity: 0.125" />
           <p class="uk-margin">{{ $t('content.list.empty_placeholder') }}</p>
-          <p v-if="is_granted('create') && header">
+          <p v-if="is_granted('create') && !embedded">
             <router-link :to="to('create')" class="uk-button uk-button-default uk-button-small"><icon name="plus" /> {{ $t('content.list.actions.create') }}</router-link>
           </p>
         </div>

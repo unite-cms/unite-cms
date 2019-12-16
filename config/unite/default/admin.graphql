@@ -1,19 +1,12 @@
 
 fragment categories on DemoCategory @tableAdminView(groups: ["Main", "2nd. Group"]) {
-    block {
-        ... on Headline {
-            headline
-        }
-        ... on Text {
-            text
-        }
-    }
-    blocks {
-        ... on Headline {
-            headline
-        }
-        ... on Text {
-            text
+    name
+    articles {
+        total
+        result {
+            _meta {
+                id
+            }
         }
     }
 }
@@ -21,6 +14,9 @@ fragment categories on DemoCategory @tableAdminView(groups: ["Main", "2nd. Group
 fragment articles on DemoArticle @tableAdminView(groups: "Main") {
     id
     name
+    main_category {
+        name
+    }
 
 
     content1 : content @textareaAdminField

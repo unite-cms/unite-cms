@@ -5,7 +5,7 @@
       <button v-if="total !== 0" type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
     </div>
     <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.referenceOf.modal.headline', field)">
-      <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :header="false" :filter="filter" />
+      <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :embedded="true" :filter="filter" />
     </modal>
   </div>
 </template>

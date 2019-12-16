@@ -8,7 +8,7 @@
         <a :id="domID" @click.prevent="selectModalOpen = true" :disabled="!referencedView" class="uk-icon-button uk-button-light uk-icon-button-small"><icon name="plus" /></a>
       </div>
       <modal v-if="referencedView && selectModalOpen" @hide="selectModalOpen = false" :title="$t('field.reference.modal.headline')">
-        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="values" :header="false" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
+        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="values" :embedded="true" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
       </modal>
   </form-row>
 </template>

@@ -8,6 +8,7 @@
         props: {
             contentId: String,
             field: Object,
+            formData: Object,
             violations: Array,
             value: {}
         },

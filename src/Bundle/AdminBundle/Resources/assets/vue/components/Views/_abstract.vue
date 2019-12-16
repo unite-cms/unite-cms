@@ -9,9 +9,9 @@
             view: Object,
             orderBy: Object,
             filter: Object,
-            header: {
+            embedded: {
                 type: Boolean,
-                default: true,
+                default: false,
             },
             pagination: {
                 type: Boolean,
