@@ -52,3 +52,17 @@ fragment admins on Admin @tableAdminView {
 fragment settings on DemoSettings @settingsAdminView {
     title
 }
+
+fragment medias on Media @tableAdminView {
+    filename : file {
+        filename
+    }
+    file {
+        preview
+        filename
+    }
+    files {
+        preview
+        filename
+    }
+}
