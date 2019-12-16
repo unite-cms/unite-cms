@@ -12,4 +12,5 @@ type EmbeddedAdminView implements UniteAdminView {
     category: String!
     fields: [UniteAdminViewField!]!
     permissions: UniteContentListPermissions!
+    groups: [String]
 }

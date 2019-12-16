@@ -33,7 +33,7 @@ const routes = [
     { path: '/schema', component: Schema, meta: { requiresAuth: true } },
     { path: '/logs', component: Logs, meta: { requiresAuth: true } },
 
-    { path: '/content/:type', component: Container, children: [
+    { path: '/content/:viewGroup/:type', component: Container, children: [
         { path: '', component: Index } ,
         { path: 'create', component: Create },
         { path: ':id/update', component: Update },
@@ -42,7 +42,7 @@ const routes = [
         { path: ':id/recover', component: Recover },
         { path: ':id/permanent_delete', component: PermanentDelete },
     ], meta: { requiresAuth: true } },
-    { path: '/user/:type', component: Container, children: [
+    { path: '/user/:viewGroup/:type', component: Container, children: [
         { path: '',  component: Index },
         { path: 'create', component: Create },
         { path: ':id/update', component: Update },
@@ -52,7 +52,7 @@ const routes = [
         { path: ':id/permanent_delete', component: PermanentDelete },
         { path: ':id/user_invite', component: UserInvite },
     ], meta: { requiresAuth: true } },
-    { path: '/setting/:type', component: Container, children: [
+    { path: '/setting/:viewGroup/:type', component: Container, children: [
             { path: '', component: Index },
             { path: 'revert', component: Revert },
     ], meta: { requiresAuth: true } },

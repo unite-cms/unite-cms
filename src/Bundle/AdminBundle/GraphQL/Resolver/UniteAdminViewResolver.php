@@ -57,6 +57,9 @@ class UniteAdminViewResolver implements FieldResolverInterface
             case 'permissions':
                 return $value->getPermissions();
 
+            case 'groups':
+                return $value->getGroups();
+
             default:
                 return $value->getConfig()->get($info->fieldName);
         }

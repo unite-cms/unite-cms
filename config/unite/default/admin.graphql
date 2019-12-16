@@ -1,5 +1,5 @@
 
-fragment categories on DemoCategory @tableAdminView {
+fragment categories on DemoCategory @tableAdminView(groups: ["Main", "2nd. Group"]) {
     block {
         ... on Headline {
             headline
@@ -18,7 +18,7 @@ fragment categories on DemoCategory @tableAdminView {
     }
 }
 
-fragment articles on DemoArticle @tableAdminView {
+fragment articles on DemoArticle @tableAdminView(groups: "Main") {
     id
     name
 

@@ -4,7 +4,7 @@
 
       <view-header v-if="header" :can-create="is_granted('create')" :title="view.name" :deleted="deleted" @toggleDeleted="toggleDeleted" />
 
-      <div class="uk-overflow-auto">
+      <div v-if="items.result.length > 0" class="uk-overflow-auto">
         <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
           <thead>
             <tr>
@@ -35,6 +35,17 @@
           </tfoot>
         </table>
       </div>
+
+      <div v-else class="uk-card uk-card-default uk-card-body uk-margin uk-padding uk-text-center">
+        <div class="uk-placeholder">
+          <icon name="maximize" :width="128" :height="128" style="opacity: 0.125" />
+          <p class="uk-margin">{{ $t('content.list.empty_placeholder') }}</p>
+          <p v-if="is_granted('create')">
+            <router-link :to="to('create')" class="uk-button uk-button-default uk-button-small"><icon name="plus" /> {{ $t('content.list.actions.create') }}</router-link>
+          </p>
+        </div>
+      </div>
+
       <div class="uk-overlay-default uk-position-cover" v-if="$apollo.loading">
         <div uk-spinner class="uk-position-center"></div>
       </div>

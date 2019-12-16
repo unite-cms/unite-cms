@@ -2,7 +2,11 @@
   <div class="uk-flex uk-flex-middle uk-margin-bottom">
     <div class="uk-flex-1 uk-flex uk-flex-middle">
       <h2 class="uk-margin-remove">{{ title }}</h2>
-      <a href="" class="uk-icon-button uk-margin-small-left" uk-tooltip :title="labelTitle" :class="{ 'uk-button-danger': deleted }" @click.prevent="toggleDeleted"><icon name="trash-2" /></a>
+
+      <ul class="uk-subnav uk-subnav-divider uk-margin-left" uk-margin>
+        <li :class="{'uk-active' : !deleted }"><a href="#" @click.prevent="toggleDeleted">{{ $t('content.list.deleted.active') }}</a></li>
+        <li :class="{'uk-active' : deleted}"><a href="#" @click.prevent="toggleDeleted" :class="{ 'uk-text-danger' : deleted }"><icon name="trash-2" /> {{ $t('content.list.deleted.deleted') }}</a></li>
+      </ul>
     </div>
     <router-link v-if="canCreate" :to="to('create')" class="uk-button uk-button-primary uk-margin-left"><icon name="plus" /> {{ labelCreate }}</router-link>
   </div>
@@ -17,10 +21,6 @@
           deleted: Boolean,
           canCreate: Boolean,
           title: String,
-          labelTitle: {
-              type: String,
-              default() { return this.$t('content.list.actions.toggle_deleted'); }
-          },
           labelCreate: {
               type: String,
               default() { return this.$t('content.list.actions.create'); }

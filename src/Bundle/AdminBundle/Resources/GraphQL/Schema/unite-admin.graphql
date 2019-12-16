@@ -44,4 +44,5 @@ interface UniteAdminView {
     category: String!
     fields: [UniteAdminViewField!]!
     permissions: UniteContentListPermissions!
+    groups: [String]
 }

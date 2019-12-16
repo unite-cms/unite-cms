@@ -23,8 +23,7 @@
             },
             backLinkQuery() {
                 return {
-                    updated: this.$route.params.id,
-                    deleted: true
+                    updated: this.$route.params.id
                 };
             },
         }

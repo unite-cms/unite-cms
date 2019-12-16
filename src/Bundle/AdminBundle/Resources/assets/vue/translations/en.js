@@ -27,6 +27,10 @@ messages.en = {
             view: {
                 fallback_warning: 'Missing view type "{viewType}" for view with id "{id}".',
             },
+            deleted: {
+                active: 'Active',
+                deleted: 'Deleted'
+            },
             actions: {
                 create: 'Create',
                 update: 'Update',
@@ -34,13 +38,13 @@ messages.en = {
                 permanent_delete: 'Permanent delete',
                 revert: 'Manage Revisions',
                 recover: 'Recover',
-                toggle_deleted: 'Toggle deleted content',
                 user_invite: 'Invite user to unite cms'
             },
             selection: {
                 select: 'Select',
                 confirm: 'Confirm selection of {count}'
-            }
+            },
+            empty_placeholder: "No content found for this view."
         },
         form: {
             field: {

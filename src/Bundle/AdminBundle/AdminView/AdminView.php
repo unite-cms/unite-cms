@@ -63,6 +63,11 @@ class AdminView
     protected $config;
 
     /**
+     * @var string[]
+     */
+    protected $groups = [];
+
+    /**
      * AdminView constructor.
      *
      * @param string $returnType
@@ -80,6 +85,8 @@ class AdminView
         $this->config = $config;
         $this->category = $category;
         $this->config = $config ? (is_array($config) ? new ArrayCollection($config) : $config) : new ArrayCollection();
+        $this->groups = $directive['settings']['groups'] ?? [];
+        $this->groups = is_array($this->groups) ? $this->groups : [$this->groups];
 
         // First of all, create admin fields for all content type fields, but hidden in list.
         $ctFields = [];
@@ -260,6 +267,24 @@ class AdminView
      */
     public function setConfig(ArrayCollection $config): self {
         $this->config = $config;
+        return $this;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getGroups(): array
+    {
+        return $this->groups;
+    }
+
+    /**
+     * @param string[] $groups
+     * @return self
+     */
+    public function setGroups(array $groups): self
+    {
+        $this->groups = $groups;
         return $this;
     }
 }
