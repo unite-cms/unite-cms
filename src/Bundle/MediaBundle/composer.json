@@ -3,7 +3,10 @@
   "type": "symfony-bundle",
   "description": "File and media handling for for unite cms",
   "require": {
-    "unite-cms/core-bundle": "0@dev"
+    "unite-cms/core-bundle": "0@dev",
+    "league/flysystem": "^1.0",
+    "superbalist/flysystem-google-storage": "^7.2",
+    "league/flysystem-aws-s3-v3": "^1.0"
   },
   "autoload": {
     "psr-4": { "UniteCMS\\MediaBundle\\": "" },

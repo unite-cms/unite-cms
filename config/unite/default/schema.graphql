@@ -12,6 +12,41 @@ type SEO implements UniteEmbeddedContent {
     metaDescription: String @textField
 }
 
+
+"""Media"""
+type Media implements UniteContent {
+    id: ID
+    _meta: UniteContentMeta
+    alt: String @textField
+    title: String @textField
+    file: UniteMediaFile @mediaFileField ( s3:
+        {
+            key: "%(S3_KEY)%",
+            secret: "%(S3_SECRET)%",
+            region: "",
+            version: "latest",
+            endpoint: "http://127.0.0.1:9001"
+            bucket: "test",
+            path: "/uploads",
+            use_path_style_endpoint: true,
+            tmp_path: "/tmp"
+        }
+    )
+    files: [UniteMediaFile!] @mediaFileField ( s3:
+    {
+        key: "%(S3_KEY)%",
+        secret: "%(S3_SECRET)%",
+        region: "",
+        version: "latest",
+        endpoint: "http://127.0.0.1:9001"
+        bucket: "test",
+        path: "/uploads",
+        use_path_style_endpoint: true,
+        tmp_path: "/tmp"
+    }
+    )
+}
+
 type Text implements UniteEmbeddedContent {
     id: ID
     _meta: UniteContentMeta
@@ -25,6 +60,7 @@ type Headline implements UniteEmbeddedContent {
 }
 
 union Blocks = Text | Headline
+
 
 """Categories"""
 type DemoCategory implements UniteContent {

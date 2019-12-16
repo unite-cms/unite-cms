@@ -15,7 +15,8 @@
     "symfony/translation": "4.3",
     "symfony/twig-bridge": "4.3",
     "symfony/swiftmailer-bundle": "3.3",
-    "voku/anti-xss": "^4.1"
+    "voku/anti-xss": "^4.1",
+    "ramsey/uuid": "^3.9"
   },
   "autoload": {
     "psr-4": { "UniteCMS\\CoreBundle\\": "" },

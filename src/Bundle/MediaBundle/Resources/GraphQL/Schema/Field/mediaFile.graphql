@@ -1,12 +1,26 @@
 
 directive @mediaFileField(
-    todo: String!
+    s3: MediaFileFieldS3Config
 ) on FIELD_DEFINITION
 
-type UniteMediaFile {
-    todo: String!
+input MediaFileFieldS3Config {
+    key: String!
+    secret: String!
+    endpoint: String!
+    bucket: String!
+    path: String!
+    tmp_path: String!
+    use_path_style_endpoint: Boolean
+    version: String
+    region: String
 }
 
-input UniteMediaFileInput {
-    todo: String!
+type UniteMediaFile {
+    id: String!
+    filename: String!
+    url(pre_sign: Boolean): String!
+    preview(pre_sign: Boolean): String
+    driver: String!
+    mimetype: String!
+    filesize: Int!
 }

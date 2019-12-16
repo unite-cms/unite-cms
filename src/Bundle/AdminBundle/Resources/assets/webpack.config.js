@@ -10,19 +10,12 @@ if (!Encore.isRuntimeEnvironmentConfigured()) {
 Encore.reset();
 
 module.exports = {
-    build(lang = "en") {
+    build(entries = []) {
 
         Encore
             .setOutputPath('public/build/')
             .setPublicPath('/build')
-
-            .addEntry('unite', [
-                __dirname + '/app.js',
-                __dirname + '/tiptap.js',
-                __dirname + `/vue/translations/${ lang }.js`,
-                __dirname + '/mount.js'
-            ])
-
+            .addEntry('unite', entries)
             .splitEntryChunks()
             .enableSingleRuntimeChunk()
             .cleanupOutputBeforeBuild()
