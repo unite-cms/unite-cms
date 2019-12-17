@@ -1,8 +1,16 @@
 <script>
     export default {
         data() {
+
+            let val = this.value;
+
+            if(!val && !this.contentId) {
+                val = this.field.config.default;
+            }
+            val = val || (this.field.list_of ? [] : null);
+
             return {
-                val: this.value || (this.field.list_of ? [] : null)
+                val
             }
         },
         props: {

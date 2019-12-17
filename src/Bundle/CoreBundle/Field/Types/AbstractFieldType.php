@@ -90,6 +90,18 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
      * {@inheritDoc}
      */
     public function getPublicSettings(ContentTypeField $field) : ?ArrayCollection {
+
+        $defaultValue = $this->normalizeDefaultValue($field->getSettings()->get('default'));
+        if(empty($defaultValue) && !empty($field->getSettings()->get('defaultExpression'))) {
+            $defaultValue = $this->expressionLanguage->evaluate($field->getSettings()->get('defaultExpression'));
+        }
+
+        if(!empty($defaultValue)) {
+            return new ArrayCollection([
+                'default' => $defaultValue,
+            ]);
+        }
+
         return null;
     }
 

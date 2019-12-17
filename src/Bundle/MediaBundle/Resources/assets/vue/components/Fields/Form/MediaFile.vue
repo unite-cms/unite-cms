@@ -10,16 +10,24 @@
   import gql from 'graphql-tag';
   import jwtDecode from 'jwt-decode';
 
-  import vueFilePond from 'vue-filepond';
+  import vueFilePond, { setOptions } from 'vue-filepond';
   import { FileOrigin } from 'filepond';
   import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
   import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
   import FilePondPluginFilePoster from 'filepond-plugin-file-poster';
+  import FilePondPluginGetFile from 'filepond-plugin-get-file';
+
   import "filepond/dist/filepond.min.css";
   import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
   import 'filepond-plugin-file-poster/dist/filepond-plugin-file-poster.css';
+  import 'filepond-plugin-get-file/dist/filepond-plugin-get-file.css';
 
-  const FilePond = vueFilePond( FilePondPluginFileValidateType, FilePondPluginImagePreview, FilePondPluginFilePoster );
+  const FilePond = vueFilePond( FilePondPluginFileValidateType, FilePondPluginImagePreview, FilePondPluginFilePoster, FilePondPluginGetFile );
+  setOptions({
+      labelButtonDownloadItem: 'Download',
+      allowDownloadByUrl: true,
+  });
+
 
   const PreSignMutation = gql`mutation($type: String!, $field: String!, $filename: String!) {
       uniteMediaPreSignedUrl(type: $type, field: $field, filename: $filename)
@@ -42,6 +50,7 @@
           type: value.mimetype
         },
         metadata: {
+          url: value.url,
           poster: value.preview
         }
       }
@@ -158,7 +167,7 @@
                       this.$apollo.mutate({
                           mutation: PreSignMutation,
                           variables: {
-                              type: this.$unite.adminViews[this.$route.params.type].type,
+                              type: this.field.view.type,
                               field: this.field.id,
                               filename: file.name
                           }

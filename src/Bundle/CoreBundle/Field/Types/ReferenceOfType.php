@@ -122,10 +122,10 @@ class ReferenceOfType extends AbstractFieldType
      * {@inheritDoc}
      */
     public function getPublicSettings(ContentTypeField $field) : ?ArrayCollection {
-        return new ArrayCollection([
-            'reference_field' => $field->getSettings()->get('reference_field'),
-            'content_type' => $field->getSettings()->get('content_type'),
-        ]);
+        $settings = parent::getPublicSettings($field) ?? new ArrayCollection();
+        $settings->set('reference_field', $field->getSettings()->get('reference_field'));
+        $settings->set('content_type', $field->getSettings()->get('content_type'));
+        return $settings;
     }
 
     /**

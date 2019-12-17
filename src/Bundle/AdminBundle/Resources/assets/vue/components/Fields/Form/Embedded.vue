@@ -33,7 +33,22 @@
       queryData(field, unite, depth) {
           return `${ field.id } { ${ getAdminViewByType(unite, field.returnType).queryFormData(depth + 1).join("\n") } }`
       },
-      normalizeQueryData(queryData, field, unite, depth) { return queryData; },
+      normalizeQueryData(queryData, field, unite, depth) {
+
+          if(!queryData) {
+              return queryData;
+          }
+
+          let view = getAdminViewByType(unite, field.returnType);
+
+          if(Array.isArray(queryData)) {
+              return queryData.map((rowData) => {
+                  return view.normalizeQueryData(rowData, depth);
+              });
+          }
+
+          return view.normalizeQueryData(queryData, depth + 1);
+      },
       normalizeMutationData(formData, field, unite, depth) {
 
           if(!formData) {

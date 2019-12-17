@@ -144,7 +144,7 @@ class AdminViewTypeManager
      */
     protected function mapFieldConfig(AdminView $adminView, ContentType $contentType) : AdminView {
         foreach($adminView->getFields() as $field) {
-            if($ctField = $contentType->getField($field->getName())) {
+            if($ctField = $contentType->getField($field->getId())) {
                 if($config = $this->fieldTypeManager->getFieldType($ctField->getType())->getPublicSettings($ctField)) {
                     $field->setConfig($config);
                 }

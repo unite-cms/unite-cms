@@ -100,6 +100,9 @@ const createAdminView = function (view, unite) {
         // normalize returnType
         field.returnType = innerType(field.rawField.type);
 
+        // Add a reference to the view
+        field.view = view;
+
     });
 
     /**

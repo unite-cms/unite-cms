@@ -61,7 +61,10 @@ class ContentFileSubscriber implements EventSubscriberInterface
         $contentType = $this->domainManager->current()->getContentTypeManager()->getAnyType($content->getType());
         foreach($contentType->getFields() as $field) {
             if($field->getType() === MediaFileType::getType()) {
-                $fileFields[] = $field;
+                $fileFields[] = [
+                    'field' => $field,
+                    'content' => $content,
+                ];
             }
 
             if($field->getType() === EmbeddedType::getType()) {
@@ -75,10 +78,10 @@ class ContentFileSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @param FieldData $fieldData
+     * @param FieldData|null $fieldData
      * @return FieldData[]
      */
-    protected function getFieldValues(FieldData $fieldData) : array {
+    protected function getFieldValues(?FieldData $fieldData = null) : array {
 
         $existingFieldData = [];
 
@@ -185,9 +188,9 @@ class ContentFileSubscriber implements EventSubscriberInterface
 
         $content = $event->getContent();
 
-        foreach($this->getFileFields($content) as $fileField) {
-            foreach($this->getFieldValues($content->getFieldData($fileField->getId())) as $fieldData) {
-                $this->uploadFile($content, $fileField, $fieldData);
+        foreach($this->getFileFields($content) as $fileFieldConfig) {
+            foreach($this->getFieldValues($fileFieldConfig['content']->getFieldData($fileFieldConfig['field']->getId())) as $fieldData) {
+                $this->uploadFile($fileFieldConfig['content'], $fileFieldConfig['field'], $fieldData);
             }
         }
     }

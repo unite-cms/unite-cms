@@ -51,7 +51,7 @@ class PreSignUrlResolver implements FieldResolverInterface
         }
 
         $domain = $this->domainManager->current();
-        $field = $domain->getContentTypeManager()->getContentType($args['type'])->getField($args['field']);
+        $field = $domain->getContentTypeManager()->getAnyType($args['type'])->getField($args['field']);
         if (!$field) {
             return null;
         }

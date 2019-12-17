@@ -47,7 +47,7 @@ class FlySystemManager
                         'key'    => $config['key'],
                         'secret' => $config['secret'],
                     ],
-                    'region' => $config['region'],
+                    'region' => $config['region'] ?? '',
                     'endpoint' => $config['endpoint'],
                     'version' => $config['version'] ?? 'latest',
                     'use_path_style_endpoint' => $config['use_path_style_endpoint'] ?? false,
