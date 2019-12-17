@@ -226,9 +226,9 @@ class ContentFileSubscriber implements EventSubscriberInterface
 
         $content = $event->getContent();
 
-        foreach($this->getFileFields($content) as $fileField) {
-            foreach($this->getFieldValues($content->getFieldData($fileField->getId())) as $fieldData) {
-                $this->deleteFile($content, $fileField, $fieldData);
+        foreach($this->getFileFields($content) as $fileFieldConfig) {
+            foreach($this->getFieldValues($fileFieldConfig['content']->getFieldData($fileFieldConfig['field']->getId())) as $fieldData) {
+                $this->deleteFile($fileFieldConfig['content'], $fileFieldConfig['field'], $fieldData);
             }
         }
     }
