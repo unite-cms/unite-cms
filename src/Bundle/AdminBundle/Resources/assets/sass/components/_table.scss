@@ -36,8 +36,25 @@
 }
 
 .uk-overflow-auto {
-  padding: 0 $global-margin / 1.5 $global-margin;
-  margin-left: -$global-margin / 1.5;
-  margin-right: -$global-margin / 1.5;
+  padding: 0 $container-padding-horizontal;
+  margin-left: -$container-padding-horizontal;
+  margin-right: -$container-padding-horizontal;
   margin-bottom: -$global-margin;
+}
+
+@media (min-width: $breakpoint-small) {
+  .uk-overflow-auto {
+    padding: 0 $container-padding-horizontal-s;
+    margin-left: -$container-padding-horizontal-s;
+    margin-right: -$container-padding-horizontal-s;
+  }
+
+}
+
+@media (min-width: $breakpoint-medium) {
+  .uk-overflow-auto {
+    padding: 0 $container-padding-horizontal-m;
+    margin-left: -$container-padding-horizontal-m;
+    margin-right: -$container-padding-horizontal-m;
+  }
 }
