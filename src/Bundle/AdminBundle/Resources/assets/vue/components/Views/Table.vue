@@ -31,7 +31,7 @@
           <tfoot v-if="pagination && items.result.length < items.total">
             <tr>
               <td :colspan="view.listFields().length + 1">
-                <view-pagination :count="items.result.length" :total="items.total" :offset="offset" :limit="view.limit" @change="(page) => { offset = page.offset }" />
+                <view-pagination :count="items.result.length" :total="items.total" :offset="offset" :limit="view.limit" @change="updateOffset" />
               </td>
             </tr>
           </tfoot>
@@ -68,6 +68,7 @@
     import ViewPagination from "./_pagination";
     import _abstract from "./_abstract";
     import InlineCreate from "./_inlineCreate";
+    import Alerts from "../../state/Alerts";
 
     export default {
         extends: _abstract,
@@ -77,8 +78,7 @@
                 items: {
                     total: 0,
                     result: [],
-                },
-                offset: 0
+                }
             }
         },
         fragments: {
@@ -97,8 +97,10 @@
                     this.$nextTick(() => {
                         if(this.highlightRow) {
                             let row = this.$el.querySelector('#row-' + this.highlightRow);
+
+                            // If the created form is on this page, scroll to it.
                             if(row) {
-                                row.scrollIntoView({ behavior: "smooth" });
+                                row.scrollIntoView({behavior: "smooth"});
                             }
                         }
                     })
@@ -162,13 +164,29 @@
                     total: 0,
                     result: [],
                 };
-                this.offset = 0;
-                this.$apollo.queries.items.refresh()
+                this.$apollo.queries.items.refresh();
             },
 
             toggleDeleted() {
                 this.$emit('toggleDeleted');
             },
+
+            updateOffset(page) {
+
+              if (this.embedded) {
+                this.reloadItems();
+
+              } else {
+                let query = Object.assign({}, this.$route.query);
+                query.offset = page.offset;
+
+                this.$router.push({
+                  path: this.$route.path,
+                  query: query,
+                });
+              }
+            },
+
             onInstantCreate(id) {
 
                 if (this.embedded) {
@@ -181,7 +199,7 @@
                     this.$router.push({
                         path: this.$route.path,
                         query: query,
-                    })
+                    });
                 }
             }
         }
