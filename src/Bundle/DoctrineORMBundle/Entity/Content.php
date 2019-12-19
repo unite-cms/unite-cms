@@ -35,6 +35,20 @@ class Content extends BaseContent
     /**
      * @var DateTime
      *
+     * @ORM\Column(type="datetime")
+     */
+    protected $created;
+
+    /**
+     * @var DateTime
+     *
+     * @ORM\Column(type="datetime")
+     */
+    protected $updated;
+
+    /**
+     * @var DateTime
+     *
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $deleted = null;

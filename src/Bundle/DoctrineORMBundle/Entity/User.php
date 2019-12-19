@@ -53,6 +53,20 @@ class User extends BaseUser
     /**
      * @var DateTime
      *
+     * @ORM\Column(type="datetime")
+     */
+    protected $created;
+
+    /**
+     * @var DateTime
+     *
+     * @ORM\Column(type="datetime")
+     */
+    protected $updated;
+
+    /**
+     * @var DateTime
+     *
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $deleted = null;

@@ -41,6 +41,16 @@ interface ContentInterface
     public function getFieldData(string $fieldName) : ?FieldData;
 
     /**
+     * @return DateTime
+     */
+    public function getCreated() : DateTime;
+
+    /**
+     * @return DateTime
+     */
+    public function getUpdated() : DateTime;
+
+    /**
      * @return DateTime|null
      */
     public function getDeleted() : ?DateTime;

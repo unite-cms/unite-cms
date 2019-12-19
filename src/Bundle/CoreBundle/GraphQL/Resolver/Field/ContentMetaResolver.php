@@ -61,7 +61,28 @@ class ContentMetaResolver implements FieldResolverInterface
                 return $value->getId();
 
             case 'deleted':
+
+                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                    throw new ContentAccessDeniedException(sprintf('You need %s permission to see if this content is deleted.', ContentVoter::UPDATE));
+                }
+
                 return $value->getDeleted();
+
+            case 'created':
+
+                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                    throw new ContentAccessDeniedException(sprintf('You need %s permission to see the creation date of this content.', ContentVoter::UPDATE));
+                }
+
+                return $value->getCreated();
+
+            case 'updated':
+
+                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                    throw new ContentAccessDeniedException(sprintf('You need %s permission to see the update date of this content.', ContentVoter::UPDATE));
+                }
+
+                return $value->getUpdated();
 
             case 'permissions':
                 $permissions = [];

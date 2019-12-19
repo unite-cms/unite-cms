@@ -18,14 +18,11 @@ class TableType extends AbstractAdminViewType
     public function createView(string $category, ContentType $contentType, ?FragmentDefinitionNode $definition = null, ?array $directive = null) : AdminView {
         $config = new ArrayCollection();
         $config->set('limit', empty($directive['settings']['limit']) ? 20 : $directive['settings']['limit']);
+        $config->set('orderBy', empty($directive['settings']['orderBy']) ? [['field' => 'created', 'order' => 'DESC']] : $directive['settings']['orderBy']);
 
         if($directive) {
             if (!empty($directive['settings']['filter']['field']) || !empty($directive['settings']['filter']['AND']) || !empty($directive['settings']['filter']['OR'])) {
                 $config->set('filter', $directive['settings']['filter']);
-            }
-
-            if (!empty($directive['settings']['orderBy'])) {
-                $config->set('orderBy', $directive['settings']['orderBy']);
             }
         }
 

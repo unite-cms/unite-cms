@@ -34,6 +34,16 @@ abstract class BaseContent implements ContentInterface
     protected $deleted = null;
 
     /**
+     * @var DateTime
+     */
+    protected $created;
+
+    /**
+     * @var DateTime
+     */
+    protected $updated;
+
+    /**
      * Content constructor.
      *
      * @param string $type
@@ -41,6 +51,8 @@ abstract class BaseContent implements ContentInterface
     public function __construct(string $type)
     {
         $this->type = $type;
+        $this->created = new DateTime('now');
+        $this->updated = new DateTime('now');
     }
 
     /**
@@ -110,5 +122,41 @@ abstract class BaseContent implements ContentInterface
     public function getDeleted(): ?DateTime
     {
         return $this->deleted;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getCreated(): DateTime
+    {
+        return $this->created;
+    }
+
+    /**
+     * @param DateTime $created
+     * @return self
+     */
+    public function setCreated(DateTime $created): ContentInterface
+    {
+        $this->created = $created;
+        return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getUpdated(): DateTime
+    {
+        return $this->updated;
+    }
+
+    /**
+     * @param DateTime $updated
+     * @return self
+     */
+    public function setUpdated(DateTime $updated): ContentInterface
+    {
+        $this->updated = $updated;
+        return $this;
     }
 }

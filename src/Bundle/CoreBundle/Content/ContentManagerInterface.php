@@ -85,10 +85,11 @@ interface ContentManagerInterface
      * @param ContentInterface $content
      * @param int $limit
      * @param int $offset
+     * @param array $orderBy
      *
      * @return ContentRevisionInterface[]
      */
-    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20, int $offset = 0) : array;
+    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20, int $offset = 0, array $orderBy = ['version' => 'DESC']) : array;
 
     /**
      * Mark a content item as deleted (without persisting it).

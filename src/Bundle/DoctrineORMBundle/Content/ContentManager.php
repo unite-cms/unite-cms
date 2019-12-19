@@ -7,6 +7,7 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Validator\Constraints\Date;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
@@ -110,7 +111,9 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function update(Domain $domain, ContentInterface $content, array $inputData = []): ContentInterface {
-        return $content->setData($inputData);
+        return $content
+            ->setData($inputData)
+            ->setUpdated(new DateTime('now'));
     }
 
     /**
@@ -133,10 +136,10 @@ class ContentManager implements ContentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20, int $offset = 0) : array {
+    public function revisions(Domain $domain, ContentInterface $content, int $limit = 20, int $offset = 0, array $orderBy = ['version' => 'DESC']) : array {
         return $this->em($domain)
             ->getRepository(Revision::class)
-            ->findForContent($content, $limit, $offset);
+            ->findForContent($content, $limit, $offset, $orderBy);
     }
 
     /**

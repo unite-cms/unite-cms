@@ -15,10 +15,11 @@ class RevisionRepository extends ContentRepository {
      * @param ContentInterface $content
      * @param int $limit
      * @param int $offset
+     * @param array $orderBy
      *
      * @return Revision[]
      */
-    public function findForContent(ContentInterface $content, int $limit = 20, int $offset = 0) : array {
+    public function findForContent(ContentInterface $content, int $limit = 20, int $offset = 0, array $orderBy = ['version' => 'DESC']) : array {
 
         if(empty($content->getId())) {
             return [];
@@ -27,9 +28,7 @@ class RevisionRepository extends ContentRepository {
         return $this->findBy([
             'entityType' => $content->getType(),
             'entityId' => $content->getId(),
-        ], [
-            'version' => 'DESC',
-        ], $limit, $offset);
+        ], $orderBy, $limit, $offset);
     }
 
     /**
