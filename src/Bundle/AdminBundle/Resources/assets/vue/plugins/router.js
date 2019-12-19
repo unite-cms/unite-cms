@@ -5,7 +5,6 @@ import Alerts from "../state/Alerts";
 import Route from "../state/Route";
 import { Unite } from "./unite";
 
-import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import Explorer from "../pages/Explorer";
@@ -26,12 +25,16 @@ import ResetPasswordConfirm from "../pages/emailConfirm/ResetPassword";
 Vue.use(VueRouter);
 
 const routes = [
-    { path: '/', component: Dashboard, meta: { requiresAuth: true } },
+    { path: '/', meta: { requiresAuth: true } },
     { path: '/login', component: Login, meta: { requiresAnonymous: true } },
     { path: '/reset-password', component: ResetPassword, meta: { requiresAnonymous: true } },
     { path: '/explorer', component: Explorer, meta: { requiresAuth: true } },
     { path: '/schema', component: Schema, meta: { requiresAuth: true } },
     { path: '/logs', component: Logs, meta: { requiresAuth: true } },
+
+    { path: '/dashboard/:viewGroup/:type', component: Container, children: [
+        { path: '', component: Index } ,
+    ], meta: { requiresAuth: true } },
 
     { path: '/content/:viewGroup/:type', component: Container, children: [
         { path: '', component: Index } ,
@@ -53,7 +56,7 @@ const routes = [
         { path: ':id/user_invite', component: UserInvite },
     ], meta: { requiresAuth: true } },
     { path: '/setting/:viewGroup/:type', component: Container, children: [
-            { path: '', component: Index },
+            { path: '', component: Update },
             { path: 'revert', component: Revert },
     ], meta: { requiresAuth: true } },
 
@@ -93,7 +96,20 @@ router.beforeEach((to, from, next) => {
 
         // Make sure that adminViews are loaded for all logged in routes.
         if(User.isAuthenticated) {
-            Unite.$emit('load', false, next);
+            Unite.$emit('load', false, () => {
+
+                // Redirect to first view
+                if(to.path === '/') {
+                    let views = Object.values(Unite.adminViews);
+                    if(views.length > 0) {
+
+                        let group = views[0].groups.length > 0 ? views[0].groups[0].name : '_all_';
+                        next({ path: ['', views[0].category, group, views[0].id].join('/') });
+                    }
+                }
+
+                next();
+            });
         } else {
             next();
         }

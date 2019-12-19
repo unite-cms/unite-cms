@@ -1,10 +1,12 @@
 
-directive @embeddedAdminView(
-    titlePattern: String!
+directive @dashboardAdminView(
+    name: String!
+    if: Expression
+    groups: [UniteAdminGroupInput]
     icon: String
 ) on FRAGMENT_DEFINITION
 
-type EmbeddedAdminView implements UniteAdminView {
+type DashboardAdminView implements UniteAdminView {
     id: ID!
     type: ID!
     name: String!

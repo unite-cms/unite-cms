@@ -7,6 +7,7 @@ directive @tableAdminView(
     limit: Int
     if: Expression
     groups: [UniteAdminGroupInput]
+    icon: String
 ) on FRAGMENT_DEFINITION
 
 type TableAdminView implements UniteAdminView{
@@ -14,6 +15,7 @@ type TableAdminView implements UniteAdminView{
     type: ID!
     name: String!
     titlePattern: String!
+    icon: String
     fragment: String!
     category: String!
     fields: [UniteAdminViewField!]!

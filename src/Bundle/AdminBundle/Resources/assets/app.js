@@ -37,6 +37,7 @@ import EmbeddedForm from "./vue/components/Fields/Form/Embedded";
 
 import Table from "./vue/components/Views/Table";
 import Settings from "./vue/components/Views/Settings";
+import Dashboard from "./vue/components/Views/Dashboard";
 
 
 ////////// INIT UIKIT //////////
@@ -86,6 +87,7 @@ Unite.$emit('registerFormFieldType', 'embedded', EmbeddedForm);
 
 Unite.$emit('registerViewType', 'TableAdminView', Table);
 Unite.$emit('registerViewType', 'SettingsAdminView', Settings);
+Unite.$emit('registerViewType', 'DashboardAdminView', Dashboard);
 
 Vue.use(VueUnite);
 Unite.$apolloProvider = apolloProvider;

@@ -1,4 +1,14 @@
 
+fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home") {
+    unite {
+        _version
+    }
+
+    findMedia {
+        total
+    }
+}
+
 fragment categories on DemoCategory @tableAdminView {
     name @adminField(inlineCreate: true)
     articles {

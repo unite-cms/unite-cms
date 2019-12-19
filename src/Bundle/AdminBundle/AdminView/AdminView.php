@@ -33,6 +33,11 @@ class AdminView
     protected $titlePattern = '{{^name}}{{^username}}{{ title }}{{/username}}{{/name}}{{^title}}{{^username}}{{ name }}{{/username}}{{/title}}{{^name}}{{^title}}{{username}}{{/title}}{{/name}}{{^name}}{{^title}}{{^username}}{{ _name }} {{ _category }}{{#_meta.id }}: {{ _meta.id }}{{/_meta.id}}{{/username}}{{/title}}{{/name}}';
 
     /**
+     * @var null|string $icon
+     */
+    protected $icon = null;
+
+    /**
      * @var string $type
      */
     protected $type;
@@ -74,14 +79,15 @@ class AdminView
      * @param FragmentDefinitionNode $definition
      * @param array $directive
      * @param string $category
-     * @param ContentType $contentType
+     * @param null|ContentType $contentType
      * @param array|ArrayCollection $config
      */
-    public function __construct(string $returnType, string $category, ContentType $contentType, ?FragmentDefinitionNode $definition = null, ?array $directive = null, $config = null)
+    public function __construct(string $returnType, string $category, ?ContentType $contentType = null, ?FragmentDefinitionNode $definition = null, ?array $directive = null, $config = null)
     {
         $this->returnType = $returnType;
-        $this->name = empty($directive['settings']['name']) ? $contentType->getName() : $directive['settings']['name'];
+        $this->name = empty($directive['settings']['name']) ? ($contentType ? $contentType->getName() : 'Untitled') : $directive['settings']['name'];
         $this->titlePattern = empty($directive['settings']['titlePattern']) ? $this->titlePattern : $directive['settings']['titlePattern'];
+        $this->icon = empty($directive['settings']['icon']) ? null : $directive['settings']['icon'];
         $this->config = $config;
         $this->category = $category;
         $this->config = $config ? (is_array($config) ? new ArrayCollection($config) : $config) : new ArrayCollection();
@@ -90,25 +96,28 @@ class AdminView
 
         // First of all, create admin fields for all content type fields, but hidden in list.
         $ctFields = [];
-        foreach($contentType->getFields() as $field) {
 
-            // Special handle password fields.
-            if($field->getType() === PasswordType::getType()) {
-                continue;
+        if($contentType) {
+            foreach($contentType->getFields() as $field) {
+
+                // Special handle password fields.
+                if($field->getType() === PasswordType::getType()) {
+                    continue;
+                }
+
+                $ctFields[$field->getId()] = AdminViewField::fromContentTypeField($field);
             }
 
-            $ctFields[$field->getId()] = AdminViewField::fromContentTypeField($field);
-        }
-
-        // If we created this adminView without a fragment definition.
-        if(!$definition) {
-            $this->id = $contentType->getId() . 'defaultAdminView';
-            $this->type = $contentType->getId();
-            $this->fields = array_merge([
-                AdminViewField::computedField('id', 'id', 'id', '#'),
-            ], array_values($ctFields));
-            $this->fragment = sprintf('fragment %s on %s { id }', $this->id, $this->type);
-            return;
+            // If we created this adminView without a fragment definition.
+            if(!$definition) {
+                $this->id = $contentType->getId() . 'defaultAdminView';
+                $this->type = $contentType->getId();
+                $this->fields = array_merge([
+                    AdminViewField::computedField('id', 'id', 'id', '#'),
+                ], array_values($ctFields));
+                $this->fragment = sprintf('fragment %s on %s { id }', $this->id, $this->type);
+                return;
+            }
         }
 
         // If we create this adminView based on a fragment definition.
@@ -205,6 +214,24 @@ class AdminView
     public function setTitlePattern(string $titlePattern): self
     {
         $this->titlePattern = $titlePattern;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getIcon(): ?string
+    {
+        return $this->icon;
+    }
+
+    /**
+     * @param null|string $icon
+     * @return self
+     */
+    public function setIcon(?string $icon = null): self
+    {
+        $this->icon = $icon;
         return $this;
     }
 

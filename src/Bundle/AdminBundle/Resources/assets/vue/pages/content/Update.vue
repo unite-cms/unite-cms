@@ -1,5 +1,5 @@
 <template>
-  <content-detail :loading="loading || $apollo.loading" @submit="submit">
+  <content-detail :loading="loading || $apollo.loading" @submit="submit" :can-go-back="view.category !== 'single_content'">
     <h1 class="uk-card-title">{{ $t('content.update.headline', { contentTitle, view }) }}</h1>
     <alerts-list :alerts="globalViolations" />
     <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :form-data="formData" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
@@ -40,11 +40,20 @@
             formData: {
                 fetchPolicy: 'network-only',
                 query() {
-                    return gql`query($id: ID!) {
-                        get${ this.view.type }(id: $id) {
-                            ${ this.view.queryFormData() }
-                        }
-                    }`;
+
+                    if(this.view.category === 'single_content') {
+                        return gql`query {
+                            get${ this.view.type } {
+                                  ${ this.view.queryFormData() }
+                            }
+                        }`;
+                    } else {
+                        return gql`query($id: ID!) {
+                            get${ this.view.type }(id: $id) {
+                                  ${ this.view.queryFormData() }
+                            }
+                        }`;
+                    }
                 },
                 variables() {
                     return {
@@ -61,18 +70,28 @@
                 Alerts.$emit('clear');
                 this.loading = true;
                 this.$apollo.mutate({
-                    mutation: gql`mutation($id: ID!, $persist: Boolean!, $data: ${ this.view.type }Input!) {
-                        update${ this.view.type }(id: $id, persist:$persist, data:$data) {
-                            id
-                        }
-                    }`,
+                    mutation: (this.view.category === 'single_content') ?
+                        gql`mutation($persist: Boolean!, $data: ${ this.view.type }Input!) {
+                            update${ this.view.type }(persist:$persist, data:$data) {
+                                __typename
+                            }
+                        }` : gql`mutation($id: ID!, $persist: Boolean!, $data: ${ this.view.type }Input!) {
+                            update${ this.view.type }(id: $id, persist:$persist, data:$data) {
+                                __typename
+                            }
+                        }`
+                    ,
                     variables: {
                         id: this.$route.params.id,
                         persist: true,
                         data: this.view.normalizeMutationData(Object.assign({}, this.formData)),
                     }
                 }).then((data) => {
-                    Route.back({ updated: this.$route.params.id });
+
+                    if(this.view.category !== 'single_content') {
+                        Route.back({updated: this.$route.params.id});
+                    }
+
                     Alerts.$emit('push', 'success', this.$t('content.update.success', { contentTitle: this.contentTitle, view: this.view }));
                 }).finally(() => { this.loading = false }).catch((e) => {
                     Alerts.apolloErrorHandler(e);

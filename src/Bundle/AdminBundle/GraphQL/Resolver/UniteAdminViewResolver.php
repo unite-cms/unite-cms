@@ -45,6 +45,9 @@ class UniteAdminViewResolver implements FieldResolverInterface
             case 'titlePattern':
                 return $value->getTitlePattern();
 
+            case 'icon':
+                return $value->getIcon();
+
             case 'fragment':
                 return $value->getFragment();
 

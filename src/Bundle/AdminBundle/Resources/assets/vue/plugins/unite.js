@@ -140,7 +140,9 @@ const createAdminView = function (view, unite) {
         }
 
         // normalize returnType
-        field.returnType = innerType(field.rawField.type);
+        if(field.rawField) {
+            field.returnType = innerType(field.rawField.type);
+        }
 
         // Add a reference to the view
         field.view = function(){ return view; };
@@ -263,6 +265,7 @@ export const Unite = new Vue({
                     type
                     name
                     titlePattern
+                    icon
                     fragment
                     category
                     groups {
@@ -360,12 +363,14 @@ export const Unite = new Vue({
 
                     this.permissions = data.data.unite.adminPermissions;
                     this.adminViews = [];
+
                     data.data.unite.adminViews.forEach((view) => {
                         view = createAdminView(view, this);
                         if(view) {
                             this.adminViews[view.id] = view;
                         }
                     });
+
                     this.loaded = true;
                     this.$emit('loaded');
 

@@ -8,5 +8,5 @@ use UniteCMS\CoreBundle\ContentType\ContentType;
 interface AdminViewTypeInterface
 {
     static function getType(): string;
-    public function createView(string $category, ContentType $contentType, ?FragmentDefinitionNode $definition = null, ?array $directive = null) : AdminView;
+    public function createView(string $category, ?ContentType $contentType = null, ?FragmentDefinitionNode $definition = null, ?array $directive = null) : AdminView;
 }

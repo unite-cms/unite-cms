@@ -24,6 +24,7 @@ use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class AdminViewTypeManager
 {
+    const TYPE_DASHBOARD = 'dashboard';
     const TYPE_CONTENT = 'content';
     const TYPE_USER = 'user';
     const TYPE_SINGLE_CONTENT = 'single_content';
@@ -109,7 +110,6 @@ class AdminViewTypeManager
         else if($contentTypeManager->getEmbeddedContentType($contentType)) {
             return self::TYPE_EMBEDDED;
         }
-
         else {
             throw new InvalidAdminViewType();
         }
@@ -226,28 +226,46 @@ class AdminViewTypeManager
 
                 // AdminView basic infos.
                 $id = $definition->typeCondition->name->value;
-                $category = $this->mapContentTypeCategory($domain->getContentTypeManager(), $id);
-                $contentType = $domain->getContentTypeManager()->getAnyType($id);
 
-                // If the user is not allowed to query this content type.
-                if(!$this->security->isGranted(ContentVoter::QUERY, $contentType)) {
-                    continue;
+                // If this is a dashboard admin view
+                if($id === 'Query') {
+                    $category = self::TYPE_DASHBOARD;
+                    $adminView = $adminViewType->createView($category, null, $definition, $directive);
+
+                    // Fake permissions for special dashboard views
+                    $permissions = [];
+                    foreach(ContentVoter::LIST_PERMISSIONS as $permission) {
+                        $permissions[$permission] = false;
+                    }
+                    $adminView->setPermissions($permissions);
                 }
 
-                // Ask the admin view type to create a new AdminView
-                $adminView = $adminViewType->createView($category, $contentType, $definition, $directive);
+                // If this is a content based type.
+                else {
+                    $category = $this->mapContentTypeCategory($domain->getContentTypeManager(), $id);
+                    $contentType = $domain->getContentTypeManager()->getAnyType($id);
 
-                // Check list permissions for this admin view.
-                $this->mapPermissions($adminView, $contentType);
+                    // If the user is not allowed to query this content type.
+                    if(!$this->security->isGranted(ContentVoter::QUERY, $contentType)) {
+                        continue;
+                    }
 
-                // Enrich content type fields with field settings.
-                $this->mapFieldConfig($adminView, $contentType);
+                    // Ask the admin view type to create a new AdminView
+                    $adminView = $adminViewType->createView($category, $contentType, $definition, $directive);
 
-                // Allow admin field configurators to alter field config.
-                $this->configureFields($adminView, $contentType);
+                    // Check list permissions for this admin view.
+                    $this->mapPermissions($adminView, $contentType);
+
+                    // Enrich content type fields with field settings.
+                    $this->mapFieldConfig($adminView, $contentType);
+
+                    // Allow admin field configurators to alter field config.
+                    $this->configureFields($adminView, $contentType);
+
+                    $usedContentTypes[] = $contentType->getId();
+                }
 
                 $adminViews[] = $adminView;
-                $usedContentTypes[] = $contentType->getId();
             }
         }
 

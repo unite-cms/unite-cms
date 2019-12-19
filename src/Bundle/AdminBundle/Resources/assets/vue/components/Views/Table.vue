@@ -68,7 +68,6 @@
     import ViewPagination from "./_pagination";
     import _abstract from "./_abstract";
     import InlineCreate from "./_inlineCreate";
-    import Alerts from "../../state/Alerts";
 
     export default {
         extends: _abstract,

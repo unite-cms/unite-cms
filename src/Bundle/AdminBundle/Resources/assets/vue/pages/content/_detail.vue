@@ -1,8 +1,8 @@
 <template>
   <section class="uk-section uk-position-relative">
     <div class="uk-container">
-      <div class="uk-flex uk-flex-middle uk-margin-bottom">
-        <button @click="goBack" class="uk-button uk-button-small uk-button-default uk-margin-right"><icon name="arrow-left" /> {{ $t('general.back') }}</button>
+      <div class="uk-flex uk-flex-middle uk-margin-bottom" v-if="canGoBack">
+        <button @click="goBack" class="uk-button uk-button-small uk-button-default uk-margin-right"><icon class="fix-line-height" name="arrow-left" /> {{ $t('general.back') }}</button>
       </div>
       <component :is="$listeners.submit ? 'form' : 'div'" :class="card ? 'uk-card uk-card-default' : null" @submit.prevent="submit">
 
@@ -41,7 +41,11 @@
             },
             card: {
                 type: Boolean,
-                default: true
+                default: true,
+            },
+            canGoBack: {
+                type: Boolean,
+                default: true,
             }
         },
         methods: {

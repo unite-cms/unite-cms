@@ -23,15 +23,7 @@
         </template>
 
         <ul class="uk-nav uk-nav-default uk-flex-1">
-
-          <li v-if="contentViews.length > 0" class="uk-nav-header">{{ $t("navigation.content_types.headline") }}</li>
-          <li v-for="view in contentViews"><router-link :to="viewRoute(view)"><icon name="layers" class="uk-margin-small-right" /> {{ view.name }}</router-link></li>
-
-          <li v-if="singleContentViews.length > 0" class="uk-nav-header">Single Content Types</li>
-          <li v-for="view in singleContentViews"><router-link :to="viewRoute(view)"><icon name="user" class="uk-margin-small-right" /> {{ view.name }}</router-link></li>
-
-          <li v-if="userViews.length > 0" class="uk-nav-header">User</li>
-          <li v-for="view in userViews"><router-link :to="viewRoute(view)"><icon name="settings" class="uk-margin-small-right" /> {{ view.name }}</router-link></li>
+          <li v-for="view in views"><router-link :to="viewRoute(view)"><icon :name="viewIcon(view)" class="uk-margin-small-right" /> {{ view.name }}</router-link></li>
         </ul>
 
         <hr />
@@ -114,6 +106,20 @@
               return route + '/' + (this.group || '_all_') + '/' + view.id;
             },
 
+            viewIcon(view) {
+
+                if(view.icon) {
+                  return view.icon;
+                }
+
+                switch (view.category) {
+                    case 'user': return 'users';
+                    case 'single_content': return 'settings';
+                    case 'dashboard': return 'grid';
+                    default: return 'layers';
+                }
+            },
+
             logout() {
                 User.$emit('logout', {}, () => {
                     this.$router.push('/login');
@@ -133,14 +139,8 @@
                 });
                 return groups;
             },
-            contentViews() {
-                return Object.values(this.$unite.adminViews).filter(view => view.category === 'content' && this.inGroup(view));
-            },
-            userViews() {
-                return Object.values(this.$unite.adminViews).filter(view => view.category === 'user' && this.inGroup(view));
-            },
-            singleContentViews() {
-                return Object.values(this.$unite.adminViews).filter(view => view.category === 'single_content' && this.inGroup(view));
+            views() {
+                return Object.values(this.$unite.adminViews).filter(view => { return ['dashboard', 'content', 'single_content', 'user'].indexOf(view.category) >= 0 }).filter(this.inGroup);
             },
             user() {
                 return User.user;

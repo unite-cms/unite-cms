@@ -4,6 +4,7 @@ directive @settingsAdminView(
     titlePattern: String
     if: Expression
     groups: [UniteAdminGroupInput]
+    icon: String
 ) on FRAGMENT_DEFINITION
 
 type SettingsAdminView implements UniteAdminView {
@@ -11,6 +12,7 @@ type SettingsAdminView implements UniteAdminView {
     type: ID!
     name: String!
     titlePattern: String!
+    icon: String
     fragment: String!
     category: String!
     fields: [UniteAdminViewField!]!

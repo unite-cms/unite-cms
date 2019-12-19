@@ -51,6 +51,7 @@ interface UniteAdminView {
     type: ID!
     name: String!
     titlePattern: String!
+    icon: String
     fragment: String!
     category: String!
     fields: [UniteAdminViewField!]!
