@@ -23,6 +23,7 @@
                 if(this.$route.query.deleted) {
                     delete query.deleted;
                 } else {
+                    query.offset = 0;
                     query.deleted = true;
                 }
 
