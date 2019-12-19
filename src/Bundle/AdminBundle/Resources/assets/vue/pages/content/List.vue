@@ -5,6 +5,7 @@
              :filter="view.filter"
              :deleted="!!$route.query.deleted"
              :highlight-row="$route.query.updated"
+             :offset="parseInt($route.query.offset || 0)"
              @toggleDeleted="toggleDeleted" />
 </template>
 

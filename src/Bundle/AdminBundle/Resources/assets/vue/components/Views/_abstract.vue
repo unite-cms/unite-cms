@@ -1,4 +1,6 @@
 <script>
+    import Integer from "../Fields/Form/Integer";
+
     export default {
         data() {
             return {
@@ -9,6 +11,10 @@
             view: Object,
             orderBy: Object,
             filter: Object,
+            offset: {
+                type: Number,
+                default: 0,
+            },
             initialCreateData: {
                 type: Object,
                 default() { return {} }
