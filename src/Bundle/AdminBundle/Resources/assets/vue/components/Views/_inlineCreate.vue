@@ -1,5 +1,5 @@
 <template>
-    <form class="uk-form-horizontal uk-margin-bottom" :class="formDataIsEmpty ? 'uk-placeholder uk-padding-small' : 'uk-card uk-card-default uk-card-body'" @submit.prevent="submit">
+    <form ref="form" class="uk-form-horizontal uk-margin-bottom" :class="formDataIsEmpty ? 'uk-placeholder uk-padding-small' : 'uk-card uk-card-default uk-card-body'" @submit.prevent="submit">
 
         <alerts-list :alerts="inlineCreateAlerts" class="uk-margin" />
 
@@ -88,6 +88,7 @@
                 }).then((data) => {
                     this.$emit('onCreate', data.data[`create${this.view.type}`].id);
                     this.formData = Object.assign({}, this.initialData);
+                    this.$refs.form.reset();
 
                 }).finally(() => { this.loading = false }).catch((e) => {
                     Alerts.apolloErrorHandler(e);
