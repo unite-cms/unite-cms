@@ -5,7 +5,7 @@
       <button type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
     </div>
     <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })">
-      <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :embedded="true" :filter="filter" :initial-create-data="initialCreateData" />
+      <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :embedded="true" :highlight-row="highlightRow" :filter="filter" :order-by="referencedView.orderBy" :initial-create-data="initialCreateData" @onCreate="onCreate" />
     </modal>
   </div>
 </template>
@@ -20,9 +20,32 @@
         extends: _abstract,
         data() {
             return {
+                highlightRow: null,
                 modalIsOpen: false,
             }
         },
+
+        watch: {
+            modalIsOpen(val) {
+
+                // If content was updated, tell this the parent view on modal close.
+                if(!val && this.highlightRow && this.$route.query.updated !== this.id) {
+                    let query = Object.assign({}, this.$route.query);
+                    query.updated = this.id;
+
+                    this.$router.push({
+                        path: this.$route.path,
+                        query: query,
+                    });
+                }
+
+                // On open, reset highlightRow
+                else {
+                  this.highlightRow = null;
+                }
+            }
+        },
+
         computed: {
             referencedView() {
                 return getAdminViewByType(this.$unite, this.field.config.content_type);
@@ -51,5 +74,10 @@
                 return this.row[this.field.id].total;
             }
         },
+        methods: {
+            onCreate(id) {
+                this.highlightRow = id;
+            }
+        }
     }
 </script>

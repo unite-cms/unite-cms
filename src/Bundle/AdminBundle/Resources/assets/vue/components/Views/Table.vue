@@ -173,18 +173,20 @@
 
             updateOffset(page) {
 
-              if (this.embedded) {
-                this.reloadItems();
+                if (this.embedded) {
+                    this.reloadItems();
 
-              } else {
-                let query = Object.assign({}, this.$route.query);
-                query.offset = page.offset;
+                } else {
+                    let query = Object.assign({}, this.$route.query);
+                    query.offset = page.offset;
 
-                this.$router.push({
-                  path: this.$route.path,
-                  query: query,
-                });
-              }
+                    this.$router.push({
+                        path: this.$route.path,
+                        query: query,
+                    });
+                }
+
+                this.$emit('onOffsetChanged', page.offset);
             },
 
             onInstantCreate(id) {
@@ -201,6 +203,8 @@
                         query: query,
                     });
                 }
+
+              this.$emit('onCreate', id);
             }
         }
     }

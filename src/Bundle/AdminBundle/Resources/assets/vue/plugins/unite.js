@@ -51,6 +51,48 @@ export const getAdminViewByType = function(unite, returnType) {
                 return this.possibleViews.map((possibleView) => {
                     return `... on ${ possibleView.type } { ${ possibleView.queryFormData(depth) } }`
                 });
+            },
+
+            normalizeQueryData(queryData = {}, depth = 0){
+
+                if(depth >= MAX_QUERY_DEPTH) {
+                    return queryData;
+                }
+
+                let view = this.possibleViews.filter(view => view.type === queryData.__typename);
+
+                let data = {
+                    __typename: queryData.__typename
+                };
+
+                if(view.length > 0) {
+                    view[0].formFields().forEach((field) => {
+                        let type = unite.getFormFieldType(field.fieldType);
+                        let fieldData = queryData[field.id] || undefined;
+                        data[field.id] = !!type.normalizeQueryData ? type.normalizeQueryData(fieldData, field, unite, depth) : fieldData;
+                    });
+                }
+
+                return data;
+            },
+
+            normalizeMutationData(formData = {}, depth = 0){
+
+                if(depth >= MAX_QUERY_DEPTH) {
+                    return formData;
+                }
+
+                let rowValues = Array.isArray(formData) ? formData : [formData];
+                rowValues = rowValues.filter((value) => { return !!value.__typename }).map((value) => {
+                    let type = value.__typename;
+                    let unionViews = this.possibleViews.filter((uview) => { return uview.type === type; });
+                    let unionView = unionViews[0];
+                    let unionValue = {};
+                    unionValue[type] = unionView.normalizeMutationData(value, depth + 1);
+                    return unionValue;
+                });
+
+                return Array.isArray(formData) ? rowValues : rowValues[0];
             }
         };
     }

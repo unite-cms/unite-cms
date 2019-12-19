@@ -8,7 +8,7 @@
         <a :id="domID" @click.prevent="selectModalOpen = true" :disabled="!referencedView" class="uk-icon-button uk-button-light uk-icon-button-small"><icon name="plus" /></a>
       </div>
       <modal v-if="referencedView && selectModalOpen" @hide="selectModalOpen = false" :title="$t('field.reference.modal.headline')">
-        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :initial-selection="values" :embedded="true" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" />
+        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :highlight-row="highlightRow" :order-by="referencedView.orderBy" :initial-selection="values" :embedded="true" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" @onCreate="onCreate" />
       </modal>
   </form-row>
 </template>
@@ -45,6 +45,7 @@
           return {
               referencedContent: [],
               selectModalOpen: false,
+              highlightRow: null,
           };
       },
       computed: {
@@ -54,6 +55,15 @@
               return getAdminViewByType(this.$unite, this.field.returnType);
           }
       },
+
+      watch: {
+          selectModalOpen(val) {
+              if(val) {
+                  this.highlightRow = null;
+              }
+          }
+      },
+
       apollo: {
           referencedContent: {
               fetchPolicy: 'network-only',
@@ -80,6 +90,9 @@
           onSelect(values) {
               this.val = values;
               this.selectModalOpen = false;
+          },
+          onCreate(id) {
+              this.highlightRow = id;
           },
           referencedContentTitle(id) {
               let refContent = this.referencedContent.filter((content) => { return content._meta.id === id });

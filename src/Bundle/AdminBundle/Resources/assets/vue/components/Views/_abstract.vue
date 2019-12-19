@@ -9,7 +9,7 @@
         },
         props: {
             view: Object,
-            orderBy: Object,
+            orderBy: Array,
             filter: Object,
             offset: {
                 type: Number,

@@ -63,23 +63,7 @@
               });
           }
 
-          // Manipulate values for union type.
-          if(view.category === 'union') {
-              let rowValues = field.list_of ? formData : [formData];
-              rowValues = rowValues.filter((value) => { return !!value.__typename }).map((value) => {
-                  let type = value.__typename;
-                  let unionViews = view.possibleViews.filter((uview) => { return uview.type === type; });
-                  let unionView = unionViews[0];
-                  let unionValue = {};
-                  unionValue[type] = unionView.normalizeMutationData(value, depth + 1);
-                  return unionValue;
-              });
-              formData = field.list_of ? rowValues : rowValues[0];
-          } else {
-              formData = view.normalizeMutationData(formData, depth + 1);
-          }
-
-          return removeIntroSpecType(formData);
+          return view.normalizeMutationData(formData, depth + 1);
       },
 
       // Vue properties for this component.
