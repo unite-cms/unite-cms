@@ -79,7 +79,7 @@ const createAdminView = function (view, unite) {
         return null;
     }
 
-    view.fields.forEach((field) => {
+    view.fields.forEach((field, delta) => {
 
         // Set raw field to field
         view.rawType.fields.forEach((rawField) => {
@@ -101,8 +101,7 @@ const createAdminView = function (view, unite) {
         field.returnType = innerType(field.rawField.type);
 
         // Add a reference to the view
-        field.view = view;
-
+        field.view = function(){ return view; };
     });
 
     /**

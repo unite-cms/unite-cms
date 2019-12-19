@@ -167,7 +167,7 @@
                       this.$apollo.mutate({
                           mutation: PreSignMutation,
                           variables: {
-                              type: this.field.view.type,
+                              type: this.field.view().type,
                               field: this.field.id,
                               filename: file.name
                           }
