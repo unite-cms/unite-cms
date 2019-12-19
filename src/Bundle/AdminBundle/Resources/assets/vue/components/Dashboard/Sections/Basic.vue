@@ -18,9 +18,12 @@
             title: String,
             width: {
                 type: Array,
-                default() { return ['1-1'] }
+                default() { return ['1-1']; }
             },
-            data: Object
+            data: {
+                type: Object,
+                default() { return {}; }
+            }
         },
         computed: {
             classes() {

@@ -19,6 +19,11 @@ messages.de = {
         rename: 'Dateiname ändern (ohne .graphql)',
         delete: 'Möchtest du die Schema Datei "{filename}" wirklich löschen?',
     },
+    dashboard: {
+        basic: {
+            title: 'Willkommen im unite cms {{#unite._version}} version {{unite._version}}{{/unite._version}} Dashboard!'
+        }
+    },
     content: {
         list: {
             field: {

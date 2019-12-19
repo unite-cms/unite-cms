@@ -1,8 +1,10 @@
 <template>
     <section class="uk-position-relative uk-padding">
 
+        <view-header :title="view.name" :show-delete-toggle="false" />
+
         <div class="uk-flex-middle" uk-grid v-if="dashboard">
-            <component :is="section.component" v-for="(section, delta) in sections" :key="delta" :data="dashboard" v-bind="section.props" />
+            <basic-section :title="$t('dashboard.basic.title')" :data="dashboard" />
         </div>
 
         <div class="uk-overlay-default uk-position-cover" v-if="$apollo.loading">
@@ -12,13 +14,14 @@
 </template>
 
 <script>
+    import ViewHeader from "./_header";
     import _abstract from "./_abstract";
-    import Section from "../DashboardSections/Section";
+    import BasicSection from "../Dashboard/Sections/Basic";
     import gql from 'graphql-tag';
 
     export default {
         extends: _abstract,
-        components: { Section },
+        components: { ViewHeader, BasicSection },
         data() {
             return {
                 dashboard: {}
@@ -44,16 +47,6 @@
                     ${ this.view.fragment }
                     query { ... ${ this.view.id }
                 }`
-            },
-            sections() {
-                return [
-                    {
-                        component: Section,
-                        props: {
-                            title: "Welcome to unite cms!"
-                        }
-                    }
-                ];
             }
         }
     }

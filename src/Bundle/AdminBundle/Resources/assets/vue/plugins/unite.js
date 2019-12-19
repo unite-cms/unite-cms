@@ -67,7 +67,7 @@ export const getAdminViewByType = function(unite, returnType) {
 
                 if(view.length > 0) {
                     view[0].formFields().forEach((field) => {
-                        let type = unite.getFormFieldType(field.fieldType);
+                        let type = unite.getFormFieldType(field);
                         let fieldData = queryData[field.id] || undefined;
                         data[field.id] = !!type.normalizeQueryData ? type.normalizeQueryData(fieldData, field, unite, depth) : fieldData;
                     });
@@ -159,9 +159,9 @@ const createAdminView = function (view, unite) {
         }
 
         return this.formFields().filter((field) => {
-            return !!unite.getFormFieldType(field.fieldType).queryData;
+            return !!unite.getFormFieldType(field).queryData;
         }).map((field) => {
-            return unite.getFormFieldType(field.fieldType).queryData(field, unite, depth);
+            return unite.getFormFieldType(field).queryData(field, unite, depth);
         });
     };
 
@@ -177,7 +177,7 @@ const createAdminView = function (view, unite) {
 
         let data = {};
         this.formFields().forEach((field) => {
-            let type = unite.getFormFieldType(field.fieldType);
+            let type = unite.getFormFieldType(field);
             let fieldData = queryData[field.id] || undefined;
             data[field.id] = !!type.normalizeQueryData ? type.normalizeQueryData(fieldData, field, unite, depth) : fieldData;
         });
@@ -196,7 +196,7 @@ const createAdminView = function (view, unite) {
 
         let data = {};
         this.formFields().forEach((field) => {
-            let type = unite.getFormFieldType(field.fieldType);
+            let type = unite.getFormFieldType(field);
             let fieldData = formData[field.id] || undefined;
             data[field.id] = !!type.normalizeMutationData ? type.normalizeMutationData(fieldData, field, unite, depth) : fieldData;
         });
@@ -212,9 +212,9 @@ export const Unite = new Vue({
         return {
             loaded: false,
             rawTypes: [],
-            listFieldTypes: {},
-            formFieldTypes: {},
-            viewTypes: {},
+            listFieldTypes: [],
+            formFieldTypes: [],
+            viewTypes: [],
             adminViews: {},
             permissions: {
                 LOGS: false,
@@ -224,16 +224,34 @@ export const Unite = new Vue({
         }
     },
     created() {
-        this.$on('registerListFieldType', (type, field) => {
-            this.listFieldTypes[type] = field;
+        this.$on('registerListFieldType', (filter, field) => {
+
+            if(typeof filter === 'string') {
+                let type = filter;
+                filter = (f) => { return f.fieldType === type; };
+            }
+
+            this.listFieldTypes.push({ filter, field });
         });
 
-        this.$on('registerFormFieldType', (type, field) => {
-            this.formFieldTypes[type] = field;
+        this.$on('registerFormFieldType', (filter, field) => {
+
+            if(typeof filter === 'string') {
+                let type = filter;
+                filter = (f) => { return f.fieldType === type; };
+            }
+
+            this.formFieldTypes.push({ filter, field });
         });
 
-        this.$on('registerViewType', (type, view) => {
-            this.viewTypes[type] = view;
+        this.$on('registerViewType', (filter, view) => {
+
+            if(typeof filter === 'string') {
+                let type = filter;
+                filter = (v) => { return v.viewType === type; };
+            }
+
+            this.viewTypes.push({ filter, view });
         });
 
         this.$on('load', (reload = false, success, fail, fin) => {
@@ -249,10 +267,11 @@ export const Unite = new Vue({
 
             let fragments = [];
             let fragmentNames = [];
-            Object.keys(this.viewTypes).forEach((type) => {
-                if(this.viewTypes[type].fragments && this.viewTypes[type].fragments.adminView) {
-                    fragmentNames.push(`... ${type}Fragment`);
-                    fragments.push(this.viewTypes[type].fragments.adminView.loc.source.body);
+
+            this.viewTypes.forEach((viewType) => {
+                if(viewType.view.fragments && viewType.view.fragments.adminView) {
+                    fragmentNames.push('... ' + viewType.view.fragments.adminView.definitions[0].name.value);
+                    fragments.push(viewType.view.fragments.adminView.loc.source.body);
                 }
             });
 
@@ -398,31 +417,34 @@ export const Unite = new Vue({
         /**
          * Get all registered list field types.
          *
-         * @param type
+         * @param field
          * @returns {*|{extends}}
          */
-        getListFieldType(type) {
-            return this.listFieldTypes[type] || ListFieldTypeFallback;
+        getListFieldType(field) {
+            let found = this.listFieldTypes.filter(f => { return f.filter(field) });
+            return found.length > 0 ? found[found.length - 1].field : ListFieldTypeFallback;
         },
 
         /**
          * Get all registered form field types.
          *
-         * @param type
+         * @param field
          * @returns {*|{extends}}
          */
-        getFormFieldType(type) {
-            return this.formFieldTypes[type] || FormFieldTypeFallback;
+        getFormFieldType(field) {
+            let found = this.formFieldTypes.filter(f => { return f.filter(field) });
+            return found.length > 0 ? found[found.length - 1].field : FormFieldTypeFallback;
         },
 
         /**
          * Get all registered view field types.
          *
-         * @param type
+         * @param view
          * @returns {*|{extends}}
          */
-        getViewType(type) {
-            return this.viewTypes[type] || ViewTypeFallback;
+        getViewType(view) {
+            let found = this.viewTypes.filter(v => { return v.filter(view); });
+            return found.length > 0 ? found[found.length - 1].view : ViewTypeFallback;
         },
     }
 });

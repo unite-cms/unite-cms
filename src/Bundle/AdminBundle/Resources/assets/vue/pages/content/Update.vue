@@ -2,7 +2,7 @@
   <content-detail :loading="loading || $apollo.loading" @submit="submit" :can-go-back="view.category !== 'single_content'">
     <h1 class="uk-card-title">{{ $t('content.update.headline', { contentTitle, view }) }}</h1>
     <alerts-list :alerts="globalViolations" />
-    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :form-data="formData" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
+    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field)" :form-data="formData" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
     <button slot="footer" class="uk-button uk-button-primary" type="submit">{{ $t('content.update.actions.submit') }}</button>
   </content-detail>
 </template>

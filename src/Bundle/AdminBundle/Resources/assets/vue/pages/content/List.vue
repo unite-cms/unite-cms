@@ -1,5 +1,5 @@
 <template>
-  <component :is="$unite.getViewType(view.viewType)"
+  <component :is="$unite.getViewType(view)"
              :view="view"
              :order-by="view.orderBy"
              :filter="view.filter"

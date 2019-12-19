@@ -23,7 +23,7 @@
                 </button>
               </td>
               <td v-for="field in view.listFields()">
-                <component :is="$unite.getListFieldType(field.fieldType)" :view="view" :row="row" :field="field" :embedded="embedded" />
+                <component :is="$unite.getListFieldType(field)" :view="view" :row="row" :field="field" :embedded="embedded" />
               </td>
               <td v-if="!select" class="uk-table-shrink"><actions-field :view="view" :row="row" id="_actions" :embedded="embedded" /></td>
             </tr>

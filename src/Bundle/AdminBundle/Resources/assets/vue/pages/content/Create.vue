@@ -2,7 +2,7 @@
   <content-detail :loading="loading || $apollo.loading" @submit="submit">
     <h1 class="uk-card-title">{{ $t('content.create.headline', { contentTitle, view }) }}</h1>
     <alerts-list :alerts="globalViolations" />
-    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field.fieldType)" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
+    <component :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field)" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
     <button slot="footer" class="uk-button uk-button-primary" type="submit">{{ $t('content.create.actions.submit') }}</button>
   </content-detail>
 </template>

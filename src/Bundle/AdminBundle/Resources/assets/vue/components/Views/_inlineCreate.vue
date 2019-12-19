@@ -5,7 +5,7 @@
 
         <div>
             <h4>{{ $t('content.create.headline', { contentTitle, view }) }}</h4>
-            <component :key="field.id" v-for="field in fields" :is="$unite.getFormFieldType(field.fieldType)" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
+            <component :key="field.id" v-for="field in fields" :is="$unite.getFormFieldType(field)" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
         </div>
 
         <div class="uk-text-right" v-if="!formDataIsEmpty">

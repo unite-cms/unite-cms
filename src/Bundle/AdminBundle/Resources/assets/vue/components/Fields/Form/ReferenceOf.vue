@@ -6,7 +6,7 @@
         <a class="uk-icon-button uk-button-light uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="more-horizontal" /></a>
       </div>
       <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })">
-        <component :is="$unite.getViewType(referencedView.viewType)" :view="referencedView" :embedded="true" :highlight-row="highlightRow" :filter="filter" :order-by="referencedView.orderBy" :initial-create-data="initialCreateData" @onCreate="onCreate" />
+        <component :is="$unite.getViewType(referencedView)" :view="referencedView" :embedded="true" :highlight-row="highlightRow" :filter="filter" :order-by="referencedView.orderBy" :initial-create-data="initialCreateData" @onCreate="onCreate" />
       </modal>
     </template>
     <div v-else class="uk-placeholder uk-padding-small">{{ $t('field.reference_of.no_content_id') }}</div>

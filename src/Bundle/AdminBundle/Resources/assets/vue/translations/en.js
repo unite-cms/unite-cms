@@ -19,6 +19,11 @@ messages.en = {
         rename: 'Update filename (without .graphql)',
         delete: 'Do you really want to delete schema file "{filename}"?',
     },
+    dashboard: {
+        basic: {
+            title: 'Welcome to unite cms{{#unite._version}} version {{unite._version}}{{/unite._version}}!'
+        }
+    },
     content: {
         list: {
             field: {
