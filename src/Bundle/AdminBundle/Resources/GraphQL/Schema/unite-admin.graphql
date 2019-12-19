@@ -15,6 +15,16 @@ input UniteSchemaFileInput {
     value: String!
 }
 
+input UniteAdminGroupInput {
+    name: String!
+    icon: String
+}
+
+type UniteAdminGroup {
+    name: String!
+    icon: String
+}
+
 type UniteAdminViewFieldConfig {
     key: String!
     value: JSON
@@ -45,5 +55,5 @@ interface UniteAdminView {
     category: String!
     fields: [UniteAdminViewField!]!
     permissions: UniteContentListPermissions!
-    groups: [String]
+    groups: [UniteAdminGroup!]
 }

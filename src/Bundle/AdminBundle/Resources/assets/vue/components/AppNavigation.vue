@@ -6,10 +6,17 @@
 
         <template v-if="viewGroups.length > 0">
           <div class="uk-margin-large uk-hidden@m"></div>
-          <button class="view-group-toggle uk-button uk-button-default uk-box-shadow-hover-small" type="button">{{ group }} <icon :width="22" :height="22" name="chevron-down" /></button>
+          <button class="view-group-toggle uk-button uk-button-default uk-box-shadow-hover-small" type="button">
+            <icon class="fix-line-height uk-margin-small-right" :name="viewGroupIcon(group)" />
+            {{ group }}
+            <icon class="dropdown-icon" :width="22" :height="22" name="chevron-down" />
+          </button>
           <div ref="viewGroupSelect" uk-dropdown="mode: click; pos: bottom-justify; delay-hide: 0">
             <ul class="uk-nav uk-dropdown-nav">
-              <li v-for="viewGroup in viewGroups" :class="{ 'uk-active': group === viewGroup }"><a href="#" @click.prevent="selectGroup(viewGroup)">{{ viewGroup }}</a></li>
+              <li v-for="viewGroup in viewGroups" :class="{ 'uk-active': group === viewGroup }"><a href="#" @click.prevent="selectGroup(viewGroup)">
+                <icon class="uk-margin-small-right" :name="viewGroupIcon(viewGroup)" />
+                {{ viewGroup }}
+              </a></li>
             </ul>
           </div>
           <hr />
@@ -70,13 +77,13 @@
             },
             viewGroups(groups) {
                 if(!this.group && groups.length > 0) {
-                    this.group = groups[0];
+                    this.group = groups[0].name;
                 }
             },
         },
         methods: {
             inGroup(view) {
-                return !this.group || this.group === '_all_' || view.groups.indexOf(this.group) >= 0;
+                return !this.group || this.group === '_all_' || (view.groups.filter((group) => { return group.name === this.group}).length > 0);
             },
 
             selectGroup(group) {
@@ -85,6 +92,21 @@
                 if(this.$refs.viewGroupSelect) {
                     UIkit.dropdown(this.$refs.viewGroupSelect).hide();
                 }
+            },
+
+            viewGroupIcon(group) {
+
+                let icon = 'layers';
+
+                Object.values(this.$unite.adminViews).forEach((view) => {
+                    view.groups.forEach((g) => {
+                        if(g.name === group && g.icon) {
+                            icon = g.icon;
+                        }
+                    });
+                });
+
+                return icon;
             },
 
             viewRoute(view) {
@@ -104,8 +126,8 @@
 
                 Object.values(this.$unite.adminViews).forEach((view) => {
                     view.groups.forEach((group) => {
-                        if(groups.indexOf(group) === -1) {
-                            groups.push(group);
+                        if(groups.indexOf(group.name) === -1) {
+                            groups.push(group.name);
                         }
                     });
                 });
@@ -138,7 +160,7 @@
   .view-group-toggle {
     position: relative;
 
-    .uk-icon {
+    .uk-icon.dropdown-icon {
       position: absolute;
       right: 12px;
       top: 50%;

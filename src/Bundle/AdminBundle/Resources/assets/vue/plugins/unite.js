@@ -265,7 +265,10 @@ export const Unite = new Vue({
                     titlePattern
                     fragment
                     category
-                    groups
+                    groups {
+                        name
+                        icon
+                    }
                     fields {
                         id
                         name

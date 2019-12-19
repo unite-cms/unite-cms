@@ -19,6 +19,11 @@ type Media implements UniteContent {
     _meta: UniteContentMeta
     alt: String @textField
     title: String @textField
+    seq: Int! @sequenceField
+
+    date: Date @dateField
+    dateTime: DateTime @dateTimeField
+
     file: UniteMediaFile @mediaFileField ( s3:
         {
             key: "%(S3_KEY)%",

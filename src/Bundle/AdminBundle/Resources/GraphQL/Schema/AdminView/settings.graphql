@@ -3,6 +3,7 @@ directive @settingsAdminView(
     name: String
     titlePattern: String
     if: Expression
+    groups: [UniteAdminGroupInput]
 ) on FRAGMENT_DEFINITION
 
 type SettingsAdminView implements UniteAdminView {
@@ -14,5 +15,5 @@ type SettingsAdminView implements UniteAdminView {
     category: String!
     fields: [UniteAdminViewField!]!
     permissions: UniteContentListPermissions!
-    groups: [String]
+    groups: [UniteAdminGroup!]
 }

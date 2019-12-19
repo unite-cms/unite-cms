@@ -6,7 +6,7 @@ directive @tableAdminView(
     orderBy: [UniteOrderByInput!]
     limit: Int
     if: Expression
-    groups: [String]
+    groups: [UniteAdminGroupInput]
 ) on FRAGMENT_DEFINITION
 
 type TableAdminView implements UniteAdminView{
@@ -21,5 +21,5 @@ type TableAdminView implements UniteAdminView{
     limit: Int!
     filter: UniteFilter
     orderBy: [UniteOrderBy!]
-    groups: [String]
+    groups: [UniteAdminGroup!]
 }
