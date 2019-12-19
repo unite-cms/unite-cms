@@ -226,13 +226,10 @@
           },
 
           onFileRemoved(t, file) {
+
               this.$nextTick(() => {
-
-                  if(this.field.list_of) {
-                      this.val = [];
-                  }
-
-                  this.syncFiles(this.$refs.pond.getFiles());
+                let deletedFile = this.values.filter(val => val.id === file.id);
+                this.removeValue(deletedFile[0]);
               });
           }
       }
