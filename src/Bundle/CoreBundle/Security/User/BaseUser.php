@@ -91,7 +91,7 @@ abstract class BaseUser extends BaseContent implements UserInterface
     {
         return $fieldName === 'username' ?
             new FieldData($this->getUsername()) :
-            isset($this->getData()[$fieldName]) ? $this->getData()[$fieldName] : null;
+            (isset($this->getData()[$fieldName]) ? $this->getData()[$fieldName] : null);
     }
 
     /**

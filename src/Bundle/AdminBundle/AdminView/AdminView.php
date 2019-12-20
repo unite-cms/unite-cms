@@ -315,3 +315,4 @@ class AdminView
         return $this;
     }
 }
+
