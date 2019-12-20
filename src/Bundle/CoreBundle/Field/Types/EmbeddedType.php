@@ -69,6 +69,12 @@ class EmbeddedType extends AbstractFieldType
     protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
 
         if($fieldData instanceof EmbeddedFieldData) {
+
+            // If fieldData is empty and is allowed to be empty, just return null.
+            if($fieldData->empty() && !$field->isNonNull()) {
+                return null;
+            }
+
             return new EmbeddedContent($fieldData->getId(), $fieldData->getType(), $fieldData->getData());
         }
 
@@ -137,11 +143,12 @@ class EmbeddedType extends AbstractFieldType
         }
 
         // If we have no input data and the field can be null, just return the empty field.
-        if(empty($inputData) && !$field->isRequired()) {
+        if($inputData === null && !$field->isRequired()) {
             return $fieldData;
         }
 
         $tmpEmbeddedContent = $this->resolveRowData($content, $field, $fieldData);
+        $tmpEmbeddedContent = $tmpEmbeddedContent ?? new EmbeddedContent($fieldData->getId(), $fieldData->getType(), $fieldData->getData());
 
         // Create new embedded content with input data.
         return new EmbeddedFieldData(
