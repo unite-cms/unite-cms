@@ -38,11 +38,11 @@
 
     .number {
       font-size: 0.7rem;
-      width: 35px;
       text-align: right;
       padding-right: 5px;
       opacity: 0.75;
       margin-right: 5px;
+      flex: 0 0 40px;
     }
 
     .uk-label {

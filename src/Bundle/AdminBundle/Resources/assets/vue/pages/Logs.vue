@@ -1,21 +1,21 @@
 <template>
-  <div class="uk-background-secondary uk-height-viewport uk-flex uk-flex-column">
-    <div>
-      <button class="load-more load-more-new uk-button uk-button-small" @click="loadNew" :disabled="$apollo.loading">
-        <div v-if="$apollo.loading" class="uk-margin-small-right" uk-spinner="ratio: 0.4"></div>
-        Refresh
-      </button>
+    <div class="uk-background-secondary uk-height-viewport uk-flex uk-flex-column">
+        <div>
+            <button class="load-more load-more-new uk-button uk-button-small" @click="loadNew" :disabled="$apollo.loading">
+                <div v-if="$apollo.loading" class="uk-margin-small-right" uk-spinner="ratio: 0.4"></div>
+                Refresh
+            </button>
+        </div>
+        <div ref="container" class="container uk-flex-1">
+            <virtual-list class="virtual-list" ref="list" :size="25" :remain="itemsToShow" :item="logEntry" :itemcount="logs.length" :itemprops="getLogEntry" />
+        </div>
+        <div>
+            <button class="load-more load-more-old uk-button uk-button-small" @click="loadOld" :disabled="$apollo.loading">
+                <div v-if="$apollo.loading" class="uk-margin-small-right" uk-spinner="ratio: 0.4"></div>
+                Load older logs
+            </button>
+        </div>
     </div>
-    <div ref="container" class="container uk-flex-1">
-      <virtual-list ref="list" :size="25" :remain="elementHeight / 25" :item="logEntry" :itemcount="logs.length" :itemprops="getLogEntry" />
-    </div>
-    <div>
-      <button class="load-more load-more-old uk-button uk-button-small" @click="loadOld" :disabled="$apollo.loading">
-        <div v-if="$apollo.loading" class="uk-margin-small-right" uk-spinner="ratio: 0.4"></div>
-        Load older logs
-      </button>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -28,16 +28,15 @@
         components: {virtualList, Icon},
         data() {
             return {
-                elementHeight: 100,
+                itemsToShow: 10,
                 logEntry: LogEntry,
                 logs: [],
-                lastFetchTime: null,
             };
         },
         apollo: {
-          logs: {
-              fetchPolicy: 'network-only',
-              query: gql`query($before: DateTime!, $after: DateTime) {
+            logs: {
+                fetchPolicy: 'network-only',
+                query: gql`query($before: DateTime!, $after: DateTime) {
                 unite {
                   logs(before: $before, after: $after) {
                     level
@@ -47,18 +46,15 @@
                   }
                 }
               }`,
-              update: data => data.unite.logs,
-              result() {
-                  this.lastFetchTime = new Date();
-              },
-              variables: {
-                  before: new Date(),
-                  after: null,
-              }
-          }
+                update: data => data.unite.logs,
+                variables: {
+                    before: 'now',
+                    after: null,
+                }
+            }
         },
         mounted() {
-            this.elementHeight = this.$refs.container.clientHeight;
+            this.itemsToShow = parseInt(this.$refs.container.clientHeight / 25);
         },
         methods: {
             getLogEntry(index) {
@@ -88,7 +84,7 @@
                 this.$apollo.queries.logs.fetchMore({
                     variables: {
                         after: this.logs.length > 0 ? this.logs[0].created : null,
-                        before: new Date(),
+                        before: 'now',
                     },
                     updateQuery: (previousResult, { fetchMoreResult }) => {
                         return {
@@ -105,12 +101,16 @@
 </script>
 <style scoped lang="scss">
 
-  .container {
-    overflow: hidden;
-  }
+    .container {
+        overflow: hidden;
+    }
 
-  .load-more {
-    background: none;
-    margin: 5px;
-  }
+    .virtual-list {
+        overflow-y: auto !important;
+    }
+
+    .load-more {
+        background: none;
+        margin: 5px;
+    }
 </style>
