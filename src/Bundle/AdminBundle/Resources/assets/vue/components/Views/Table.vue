@@ -4,7 +4,7 @@
 
       <view-header v-if="!embedded" :can-create="is_granted('create')" :title="view.name" :deleted="deleted" @toggleDeleted="toggleDeleted" />
 
-      <inline-create v-if="is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
+      <inline-create v-if="embedded && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
 
       <div v-if="items.result.length > 0" class="uk-overflow-auto">
         <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
