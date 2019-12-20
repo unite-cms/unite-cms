@@ -30,7 +30,7 @@ class Log extends BaseLog
     protected $level;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="text")
      * @Assert\NotBlank()
      */
     protected $message;
