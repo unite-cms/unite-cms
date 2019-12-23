@@ -123,6 +123,10 @@ abstract class BaseContent implements ContentInterface
      */
     public function getFieldData(string $fieldName): ?FieldData
     {
+        if($fieldName === 'locale') {
+            return new FieldData($this->getLocale());
+        }
+
         return isset($this->data[$fieldName]) ? $this->data[$fieldName] : null;
     }
 
