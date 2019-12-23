@@ -51,6 +51,18 @@ class SequenceType extends AbstractFieldType
     }
 
     /**
+     * @param ContentInterface $content
+     * @param ContentTypeField $field
+     * @param FieldData $fieldData
+     * @param array $args
+     *
+     * @return mixed
+     */
+    protected function resolveRowData(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
+        return $fieldData->resolveData('', ($field->isNonNull() || $field->isListOf()) ? 0 : null);
+    }
+
+    /**
      * Generate a next sequence number for this content.
      *
      * @param ContentInterface $content

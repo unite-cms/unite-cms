@@ -114,7 +114,7 @@ class MutationResolver implements FieldResolverInterface
             case 'create':
                 $this->contentAccess(ContentVoter::CREATE, $content, $contentManager, $domain);
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
-                    $this->contentUpdate($contentManager, $domain, $content, $args['data']);
+                    $this->contentUpdate($contentManager, $domain, $content, $args['data'] ?? []);
                     return $this->contentPersist($contentManager, $domain, $content, ContentEvent::CREATE, $args['persist']);
                 });
 
@@ -122,7 +122,7 @@ class MutationResolver implements FieldResolverInterface
                 $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
-                    $this->contentUpdate($contentManager, $domain, $content, $args['data']);
+                    $this->contentUpdate($contentManager, $domain, $content, $args['data'] ?? []);
                     return $this->contentPersist($contentManager, $domain, $content, ContentEvent::UPDATE, $args['persist']);
                 });
 

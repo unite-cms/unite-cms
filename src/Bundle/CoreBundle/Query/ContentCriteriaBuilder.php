@@ -52,7 +52,7 @@ class ContentCriteriaBuilder
                 return new BaseFieldComparison(
                     $where['field'],
                     ContentCriteria::OPERATOR_MAP[$where['operator']],
-                    $where['value']
+                    ContentCriteria::castValue($where['value'], $where['cast'] ?? null)
                 );
             }
 

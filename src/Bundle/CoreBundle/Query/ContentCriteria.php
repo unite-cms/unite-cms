@@ -29,6 +29,20 @@ class ContentCriteria extends Criteria
     ];
 
     /**
+     * @param $value
+     * @param string|null $cast
+     * @return mixed
+     */
+    static function castValue($value, ?string $cast = null) {
+        switch ($cast) {
+            case 'INT': return intval($value);
+            case 'FLOAT': return floatval($value);
+            case 'BOOLEAN': return boolval($value);
+            default: return $value;
+        }
+    }
+
+    /**
      * @var array
      */
     protected $orderBy = [];

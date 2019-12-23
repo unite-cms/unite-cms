@@ -196,7 +196,7 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
         return new DataFieldComparison(
             $field->getId(),
             ContentCriteria::OPERATOR_MAP[$whereInput['operator']],
-            $whereInput['value'],
+            ContentCriteria::castValue($whereInput['value'], $whereInput['cast'] ?? null),
             $whereInput['path'] ?? ['data']
         );
     }

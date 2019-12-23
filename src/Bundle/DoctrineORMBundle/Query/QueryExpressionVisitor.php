@@ -233,11 +233,12 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 
     /**
      * @param string $field
+     * @param bool $unquote
      * @return string
      *
-     * @throws \Doctrine\ORM\Query\QueryException
+     * @throws QueryException
      */
-    static function wrapJSONField(string $field) : string {
+    static function wrapJSONField(string $field, $unquote = false) : string {
         $parts = explode('.', $field);
 
         if(count($parts) < 2) {
@@ -246,8 +247,8 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 
         $alias = array_shift($parts);
         $field = join('.', $parts);
-
-        return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.data, '$.%s'))", $alias, $field);
+        $field = sprintf("JSON_EXTRACT(%s.data, '$.%s')", $alias, $field);
+        return $unquote ? sprintf('JSON_UNQUOTE(%s)', $field) : $field;
     }
 
     /**

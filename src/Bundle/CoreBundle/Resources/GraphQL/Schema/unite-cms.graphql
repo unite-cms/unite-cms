@@ -32,6 +32,12 @@ enum OPERATOR {
     NCONTAINS
 }
 
+enum CAST {
+    INT
+    FLOAT
+    BOOLEAN
+}
+
 enum LOG_LEVEL {
     NOTICE
     WARNING
@@ -143,6 +149,7 @@ input UniteFilterInput {
     field: String
     path: [String]
     operator: OPERATOR
+    cast: CAST
     value: [String]
     AND: [UniteFilterInput]
     OR: [UniteFilterInput]
@@ -152,6 +159,7 @@ type UniteFilter {
     field: String
     path: [String]
     operator: OPERATOR
+    cast: CAST
     value: [String]
     AND: [UniteFilter]
     OR: [UniteFilter]
