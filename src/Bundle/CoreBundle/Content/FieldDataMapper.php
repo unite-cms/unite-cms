@@ -62,7 +62,7 @@ class FieldDataMapper
             $fieldData = null;
 
             // If field vale is present
-            if(array_key_exists($id, $inputData) && $inputData[$id] !== null) {
+            if(array_key_exists($id, $inputData)) {
 
                 // If we are not allowed to update this field throw an exception.
                 if(!$bypassAccess && !$this->authorizationChecker->isGranted(ContentFieldVoter::UPDATE, new ContentField($content, $id))) {
@@ -71,10 +71,9 @@ class FieldDataMapper
 
                 // If we are allowed to update this field add it to fieldData
                 $fieldData = $inputData[$id];
-            }
 
-            // If field data is empty AND we already have a value set, skip this field.
-            if($fieldData === null && !empty($normalizedData[$id]) && !empty($normalizedData[$id]->resolveData())) {
+            // If field is not set AND we already have a value set, skip this field.
+            } elseif(!empty($normalizedData[$id]) && !empty($normalizedData[$id]->resolveData())) {
                 continue;
             }
 

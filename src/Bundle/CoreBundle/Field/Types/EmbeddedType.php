@@ -143,8 +143,8 @@ class EmbeddedType extends AbstractFieldType
         }
 
         // If we have no input data and the field can be null, just return the empty field.
-        if($inputData === null && !$field->isRequired()) {
-            return $fieldData;
+        if($inputData === null && !$field->isNonNull()) {
+            return new EmbeddedFieldData($fieldData ? $fieldData->getId() : uniqid(), $contentType->getId());
         }
 
         $tmpEmbeddedContent = $this->resolveRowData($content, $field, $fieldData);

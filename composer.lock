@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.129.0",
+            "version": "3.130.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "bd41c4a70e914c8b18c940f2cde19097dd83bd51"
+                "reference": "d426a86391c5d7f1a979dad0fd3bd0fd48ba7575"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/bd41c4a70e914c8b18c940f2cde19097dd83bd51",
-                "reference": "bd41c4a70e914c8b18c940f2cde19097dd83bd51",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d426a86391c5d7f1a979dad0fd3bd0fd48ba7575",
+                "reference": "d426a86391c5d7f1a979dad0fd3bd0fd48ba7575",
                 "shasum": ""
             },
             "require": {
@@ -88,7 +88,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-12-13T19:47:53+00:00"
+            "time": "2019-12-20T19:17:37+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -487,21 +487,22 @@
         },
         {
             "name": "doctrine/doctrine-bundle",
-            "version": "1.12.2",
+            "version": "1.12.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrineBundle.git",
-                "reference": "9ac04186b47abda4759d0c304ab8f0780c470ac9"
+                "reference": "08f944760ac471aa97a9b0386dfdb559db80b32d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/DoctrineBundle/zipball/9ac04186b47abda4759d0c304ab8f0780c470ac9",
-                "reference": "9ac04186b47abda4759d0c304ab8f0780c470ac9",
+                "url": "https://api.github.com/repos/doctrine/DoctrineBundle/zipball/08f944760ac471aa97a9b0386dfdb559db80b32d",
+                "reference": "08f944760ac471aa97a9b0386dfdb559db80b32d",
                 "shasum": ""
             },
             "require": {
                 "doctrine/dbal": "^2.5.12",
                 "doctrine/doctrine-cache-bundle": "~1.2",
+                "doctrine/persistence": "^1.3.3",
                 "jdorn/sql-formatter": "^1.2.16",
                 "php": "^7.1",
                 "symfony/cache": "^3.4.30|^4.3.3",
@@ -509,7 +510,8 @@
                 "symfony/console": "^3.4.30|^4.3.3",
                 "symfony/dependency-injection": "^3.4.30|^4.3.3",
                 "symfony/doctrine-bridge": "^3.4.30|^4.3.3",
-                "symfony/framework-bundle": "^3.4.30|^4.3.3"
+                "symfony/framework-bundle": "^3.4.30|^4.3.3",
+                "symfony/service-contracts": "^1.1.1|^2.0"
             },
             "conflict": {
                 "doctrine/orm": "<2.6",
@@ -518,6 +520,7 @@
             "require-dev": {
                 "doctrine/coding-standard": "^6.0",
                 "doctrine/orm": "^2.6",
+                "ocramius/proxy-manager": "^2.1",
                 "php-coveralls/php-coveralls": "^2.1",
                 "phpunit/phpunit": "^7.5",
                 "symfony/phpunit-bridge": "^4.2",
@@ -573,7 +576,7 @@
                 "orm",
                 "persistence"
             ],
-            "time": "2019-11-28T13:00:49+00:00"
+            "time": "2019-12-19T09:08:00+00:00"
         },
         {
             "name": "doctrine/doctrine-cache-bundle",
@@ -1170,30 +1173,30 @@
         },
         {
             "name": "dunglas/doctrine-json-odm",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dunglas/doctrine-json-odm.git",
-                "reference": "aecbaae6119b04115fbdc2463d01f35600f5cd8d"
+                "reference": "70afdc23e68a31c7cbf8417f2dbb285ec929e14e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dunglas/doctrine-json-odm/zipball/aecbaae6119b04115fbdc2463d01f35600f5cd8d",
-                "reference": "aecbaae6119b04115fbdc2463d01f35600f5cd8d",
+                "url": "https://api.github.com/repos/dunglas/doctrine-json-odm/zipball/70afdc23e68a31c7cbf8417f2dbb285ec929e14e",
+                "reference": "70afdc23e68a31c7cbf8417f2dbb285ec929e14e",
                 "shasum": ""
             },
             "require": {
                 "doctrine/orm": "^2.6.3",
                 "php": "^7.1",
-                "symfony/property-access": "^3.4 || ^4.1",
-                "symfony/property-info": "^3.4 || ^4.1",
-                "symfony/serializer": "^3.4 || ^4.1"
+                "symfony/property-access": "^3.4 || ^4.1 || ^5.0",
+                "symfony/property-info": "^3.4 || ^4.1 || ^5.0",
+                "symfony/serializer": "^3.4 || ^4.1 || ^5.0"
             },
             "require-dev": {
                 "doctrine/doctrine-bundle": "^1.8",
-                "symfony/finder": "^3.4 || ^4.1",
-                "symfony/framework-bundle": "^3.4 || ^4.1",
-                "symfony/phpunit-bridge": "^4.3"
+                "symfony/finder": "^3.4 || ^4.1 || ^5.0",
+                "symfony/framework-bundle": "^3.4 || ^4.1 || ^5.0",
+                "symfony/phpunit-bridge": "^5.0"
             },
             "suggest": {
                 "scienta/doctrine-json-functions": "To add support for JSON functions in DQL.",
@@ -1232,20 +1235,20 @@
                 "postgresql",
                 "rdbms"
             ],
-            "time": "2019-10-24T16:17:49+00:00"
+            "time": "2019-12-23T09:48:22+00:00"
         },
         {
             "name": "egulias/email-validator",
-            "version": "2.1.11",
+            "version": "2.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/egulias/EmailValidator.git",
-                "reference": "92dd169c32f6f55ba570c309d83f5209cefb5e23"
+                "reference": "a6255605af39f2db7f5cb62e672bd8a7bad8d208"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/92dd169c32f6f55ba570c309d83f5209cefb5e23",
-                "reference": "92dd169c32f6f55ba570c309d83f5209cefb5e23",
+                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/a6255605af39f2db7f5cb62e672bd8a7bad8d208",
+                "reference": "a6255605af39f2db7f5cb62e672bd8a7bad8d208",
                 "shasum": ""
             },
             "require": {
@@ -1290,7 +1293,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2019-08-13T17:33:27+00:00"
+            "time": "2019-12-20T12:49:39+00:00"
         },
         {
             "name": "firebase/php-jwt",
@@ -1452,16 +1455,16 @@
         },
         {
             "name": "google/cloud-storage",
-            "version": "v1.16.0",
+            "version": "v1.16.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-storage.git",
-                "reference": "308ad790b257286e02777e3bf1a2c0473a4651a7"
+                "reference": "43dadb634dcbca85c5b9b44296bef2bf22d5153c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-storage/zipball/308ad790b257286e02777e3bf1a2c0473a4651a7",
-                "reference": "308ad790b257286e02777e3bf1a2c0473a4651a7",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-storage/zipball/43dadb634dcbca85c5b9b44296bef2bf22d5153c",
+                "reference": "43dadb634dcbca85c5b9b44296bef2bf22d5153c",
                 "shasum": ""
             },
             "require": {
@@ -1499,7 +1502,7 @@
                 "Apache-2.0"
             ],
             "description": "Cloud Storage Client for PHP",
-            "time": "2019-11-12T23:35:42+00:00"
+            "time": "2019-12-17T22:51:23+00:00"
         },
         {
             "name": "google/crc32",
@@ -1545,16 +1548,16 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "6.5.0",
+            "version": "6.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "dbc2bc3a293ed6b1ae08a3651e2bfd213d19b6a5"
+                "reference": "0274c05370a7bc9bb3a33838858253418bd7d14b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/dbc2bc3a293ed6b1ae08a3651e2bfd213d19b6a5",
-                "reference": "dbc2bc3a293ed6b1ae08a3651e2bfd213d19b6a5",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/0274c05370a7bc9bb3a33838858253418bd7d14b",
+                "reference": "0274c05370a7bc9bb3a33838858253418bd7d14b",
                 "shasum": ""
             },
             "require": {
@@ -1608,7 +1611,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2019-12-07T18:20:45+00:00"
+            "time": "2019-12-21T08:51:15+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -2066,16 +2069,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "2.0.1",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "f9d56fd2f5533322caccdfcddbb56aedd622ef1c"
+                "reference": "c861fcba2ca29404dc9e617eedd9eff4616986b8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/f9d56fd2f5533322caccdfcddbb56aedd622ef1c",
-                "reference": "f9d56fd2f5533322caccdfcddbb56aedd622ef1c",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/c861fcba2ca29404dc9e617eedd9eff4616986b8",
+                "reference": "c861fcba2ca29404dc9e617eedd9eff4616986b8",
                 "shasum": ""
             },
             "require": {
@@ -2143,7 +2146,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2019-11-13T10:27:43+00:00"
+            "time": "2019-12-20T14:22:59+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
@@ -2497,22 +2500,22 @@
         },
         {
             "name": "ramsey/uuid",
-            "version": "3.9.1",
+            "version": "3.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ramsey/uuid.git",
-                "reference": "5ac2740e0c8c599d2bbe7f113a939f2b5b216c67"
+                "reference": "7779489a47d443f845271badbdcedfe4df8e06fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ramsey/uuid/zipball/5ac2740e0c8c599d2bbe7f113a939f2b5b216c67",
-                "reference": "5ac2740e0c8c599d2bbe7f113a939f2b5b216c67",
+                "url": "https://api.github.com/repos/ramsey/uuid/zipball/7779489a47d443f845271badbdcedfe4df8e06fb",
+                "reference": "7779489a47d443f845271badbdcedfe4df8e06fb",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "paragonie/random_compat": "^1 | ^2 | 9.99.99",
-                "php": "^5.4 | ^7",
+                "php": "^5.4 | ^7 | ^8",
                 "symfony/polyfill-ctype": "^1.8"
             },
             "replace": {
@@ -2522,13 +2525,13 @@
                 "codeception/aspect-mock": "^1 | ^2",
                 "doctrine/annotations": "^1.2",
                 "goaop/framework": "1.0.0-alpha.2 | ^1 | ^2.1",
-                "jakub-onderka/php-parallel-lint": "^0.9.0",
-                "mockery/mockery": "^0.9.9",
+                "jakub-onderka/php-parallel-lint": "^1",
+                "mockery/mockery": "^0.9.11 | ^1",
                 "moontoast/math": "^1.1",
                 "paragonie/random-lib": "^2",
                 "php-mock/php-mock-phpunit": "^0.3 | ^1.1",
                 "phpunit/phpunit": "^4.8 | ^5.4 | ^6.5",
-                "squizlabs/php_codesniffer": "^2.3"
+                "squizlabs/php_codesniffer": "^3.5"
             },
             "suggest": {
                 "ext-ctype": "Provides support for PHP Ctype functions",
@@ -2580,7 +2583,7 @@
                 "identifier",
                 "uuid"
             ],
-            "time": "2019-12-01T04:55:27+00:00"
+            "time": "2019-12-17T08:18:51+00:00"
         },
         {
             "name": "rize/uri-template",
@@ -5797,7 +5800,7 @@
         },
         {
             "name": "unite-cms/admin-bundle",
-            "version": "dev-feature/media-bundle",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./src/Bundle/AdminBundle",
@@ -5830,7 +5833,7 @@
         },
         {
             "name": "unite-cms/core-bundle",
-            "version": "dev-feature/media-bundle",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./src/Bundle/CoreBundle",
@@ -5874,7 +5877,7 @@
         },
         {
             "name": "unite-cms/doctrine-orm-bundle",
-            "version": "dev-feature/media-bundle",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./src/Bundle/DoctrineORMBundle",
@@ -5909,7 +5912,7 @@
         },
         {
             "name": "unite-cms/media-bundle",
-            "version": "dev-feature/media-bundle",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./src/Bundle/MediaBundle",
@@ -6004,16 +6007,16 @@
         },
         {
             "name": "voku/portable-ascii",
-            "version": "1.4.2",
+            "version": "1.4.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/voku/portable-ascii.git",
-                "reference": "8b26da3760a6de80eb319493a7e4684f80097e41"
+                "reference": "8cba623f3a5af2b31ad1c70565bde4698c2834b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/voku/portable-ascii/zipball/8b26da3760a6de80eb319493a7e4684f80097e41",
-                "reference": "8b26da3760a6de80eb319493a7e4684f80097e41",
+                "url": "https://api.github.com/repos/voku/portable-ascii/zipball/8cba623f3a5af2b31ad1c70565bde4698c2834b3",
+                "reference": "8cba623f3a5af2b31ad1c70565bde4698c2834b3",
                 "shasum": ""
             },
             "require": {
@@ -6049,20 +6052,20 @@
                 "clean",
                 "php"
             ],
-            "time": "2019-12-13T02:54:15+00:00"
+            "time": "2019-12-19T00:46:43+00:00"
         },
         {
             "name": "voku/portable-utf8",
-            "version": "5.4.32",
+            "version": "5.4.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/voku/portable-utf8.git",
-                "reference": "527aa7e8164ea1f2b6084b1483d8e89a5fc3311b"
+                "reference": "69568049a86e3d6869577c867beb91cc706d9984"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/voku/portable-utf8/zipball/527aa7e8164ea1f2b6084b1483d8e89a5fc3311b",
-                "reference": "527aa7e8164ea1f2b6084b1483d8e89a5fc3311b",
+                "url": "https://api.github.com/repos/voku/portable-utf8/zipball/69568049a86e3d6869577c867beb91cc706d9984",
+                "reference": "69568049a86e3d6869577c867beb91cc706d9984",
                 "shasum": ""
             },
             "require": {
@@ -6123,7 +6126,7 @@
                 "utf-8",
                 "utf8"
             ],
-            "time": "2019-12-13T03:10:14+00:00"
+            "time": "2019-12-19T00:35:44+00:00"
         },
         {
             "name": "webonyx/graphql-php",
