@@ -15,6 +15,7 @@ use UniteCMS\CoreBundle\Security\User\BaseUser;
  * @ORM\Table(name="unite_user")
  * @ORM\Entity(repositoryClass="UniteCMS\DoctrineORMBundle\Repository\UserRepository")
  * @UniqueEntity("username")
+ * @UniqueEntity({"locale", "translate"}, errorPath="locale", message="You cannot add two translations with the same locale.")
  */
 class User extends BaseUser
 {
@@ -77,4 +78,25 @@ class User extends BaseUser
      * @ORM\Column(type="json_document", options={"jsonb": true})
      */
     protected $tokens = [];
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $locale = null;
+
+    /**
+     * @var Content
+     *
+     * @ORM\ManyToOne(targetEntity="UniteCMS\DoctrineORMBundle\Entity\Content", inversedBy="translations")
+     */
+    protected $translate;
+
+    /**
+     * @var Content[]
+     *
+     * @ORM\OneToMany(targetEntity="UniteCMS\DoctrineORMBundle\Entity\Content", mappedBy="translate")
+     */
+    protected $translations;
 }

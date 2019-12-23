@@ -90,10 +90,21 @@ type TeaserRegion implements UniteEmbeddedContent {
     subcategories: [DemoCategory!] @referenceField
 }
 
+enum ArticleLocales {
+    """Deutsch"""
+    de
+
+    """Englisch"""
+    en
+}
 
 """Articles"""
-type DemoArticle implements UniteContent {
+type DemoArticle implements UniteContent & UniteTranslatableContent {
     _meta: UniteContentMeta
+
+    locale: ArticleLocales @choiceField
+    translations(locales: [ArticleLocales!], includeSelf: Boolean = false): [UniteTranslatableContent!]
+
     id: ID
     name: String @textField
 

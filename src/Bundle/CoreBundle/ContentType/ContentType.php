@@ -30,6 +30,11 @@ class ContentType
     protected $name;
 
     /**
+     * @var bool $translatable
+     */
+    protected $translatable = false;
+
+    /**
      * @var array $directives
      */
     protected $directives = [];
@@ -101,21 +106,20 @@ class ContentType
 
             // Special handle valid directive.
             if($directive['name'] === 'valid') {
-                $options = [
-                    'expression' => $directive['args']['if'],
-                ];
-                if(!empty($directive['args']['message'])) {
-                    $options['message'] = $directive['args']['message'];
-                }
-                if(!empty($directive['args']['groups'])) {
-                    $options['groups'] = $directive['args']['groups'];
-                }
-                $contentType->addConstraint(new UniteAssert\SaveExpression($options));
+                $contentType->addConstraintFromDirective($directive);
             }
 
             // Special handle webhook directive.
             if($directive['name'] === 'webhook') {
                 $contentType->addWebhook(new ContentTypeWebhook($directive['args']['if'], $directive['args']['url'], $directive['args']['groups']));
+            }
+        }
+
+        foreach($type->getInterfaces() as $interface) {
+
+            // Make this content type translatable if interface was found.
+            if($interface->name === 'UniteTranslatableContent') {
+                $contentType->setTranslatable(true);
             }
         }
 
@@ -148,6 +152,11 @@ class ContentType
         $inputFields = '';
 
         if($this->canHaveInput($fieldTypeManager)) {
+
+            if($this->isTranslatable()) {
+                $inputFields .= "_translate: ID\n";
+            }
+
             foreach ($this->getFields() as $field) {
                 if ($checker->isGranted(ContentFieldVoter::MUTATION, $field)) {
                     $inputFields .= $field->printInputType($fieldTypeManager) . "\n";
@@ -192,6 +201,24 @@ class ContentType
     }
 
     /**
+     * @return bool
+     */
+    public function isTranslatable(): bool
+    {
+        return $this->translatable;
+    }
+
+    /**
+     * @param bool $translatable
+     * @return self
+     */
+    public function setTranslatable(bool $translatable): ContentType
+    {
+        $this->translatable = $translatable;
+        return $this;
+    }
+
+    /**
      * @param ContentTypeField $field
      *
      * @return $this
@@ -213,6 +240,11 @@ class ContentType
      * @return bool
      */
     public function canHaveInput(FieldTypeManager $fieldTypeManager) : bool {
+
+        if($this->isTranslatable()) {
+            return true;
+        }
+
         if(count($this->fields) === 0) {
             return false;
         }
@@ -258,6 +290,25 @@ class ContentType
     public function addConstraint(Constraint $constraint) : self {
         $this->constraints[] = $constraint;
         return $this;
+    }
+
+    /**
+     * @param array $directive
+     * @return $this
+     */
+    public function addConstraintFromDirective(array $directive) : self {
+
+        $options = [
+            'expression' => $directive['args']['if'],
+        ];
+        if(!empty($directive['args']['message'])) {
+            $options['message'] = $directive['args']['message'];
+        }
+        if(!empty($directive['args']['groups'])) {
+            $options['groups'] = $directive['args']['groups'];
+        }
+
+        return $this->addConstraint(new UniteAssert\SaveExpression($options));
     }
 
     /**

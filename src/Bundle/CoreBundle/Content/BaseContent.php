@@ -4,6 +4,9 @@
 namespace UniteCMS\CoreBundle\Content;
 
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * A base content class that implements ContentInterface.
@@ -12,7 +15,6 @@ use DateTime;
  */
 abstract class BaseContent implements ContentInterface
 {
-
     /**
      * @var string|null
      */
@@ -44,6 +46,22 @@ abstract class BaseContent implements ContentInterface
     protected $updated;
 
     /**
+     * @var string|null
+     * @Assert\Locale
+     */
+    protected $locale = null;
+
+    /**
+     * @var ContentInterface $translate
+     */
+    protected $translate = null;
+
+    /**
+     * @var Collection|ContentInterface[] $translations
+     */
+    protected $translations;
+
+    /**
      * Content constructor.
      *
      * @param string $type
@@ -53,6 +71,7 @@ abstract class BaseContent implements ContentInterface
         $this->type = $type;
         $this->created = new DateTime('now');
         $this->updated = new DateTime('now');
+        $this->translations = new ArrayCollection();
     }
 
     /**
@@ -158,5 +177,59 @@ abstract class BaseContent implements ContentInterface
     {
         $this->updated = $updated;
         return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param string|null $locale
+     */
+    public function setLocale(?string $locale = null) : void
+    {
+        $this->locale = $locale;
+    }
+
+    /**
+     * @return ContentInterface
+     */
+    public function getTranslate(): ContentInterface
+    {
+        return $this->translate;
+    }
+
+    /**
+     * @param ContentInterface $translate
+     */
+    public function setTranslate(?ContentInterface $translate = null) : void
+    {
+        $this->translate = $translate;
+    }
+
+    /**
+     * @return ContentInterface[]|Collection
+     */
+    public function getTranslations() : Collection
+    {
+        if($this->translate) {
+            return $this->translate->getTranslations();
+        }
+
+        return $this->translations;
+    }
+
+    /**
+     * @param ContentInterface $translation
+     */
+    public function addTranslation(ContentInterface $translation) : void {
+        if(!$this->translations->contains($translation)) {
+            $this->translations[] = $translation;
+
+        }
     }
 }

@@ -42,7 +42,7 @@ class MutationResolver implements FieldResolverInterface
     protected $eventDispatcher;
 
     /**
-     * @var \Symfony\Component\Validator\Validator\ValidatorInterface $validator
+     * @var ValidatorInterface $validator
      */
     protected $validator;
 
@@ -74,7 +74,7 @@ class MutationResolver implements FieldResolverInterface
 
     /**
      * @inheritDoc
-     * @throws \UniteCMS\CoreBundle\Exception\ContentNotFoundException
+     * @throws ContentNotFoundException
      */
     public function resolve($value, $args, $context, ResolveInfo $info) {
 
@@ -226,7 +226,7 @@ class MutationResolver implements FieldResolverInterface
      * @param $field
      *
      * @return ContentInterface
-     * @throws \UniteCMS\CoreBundle\Exception\ContentNotFoundException
+     * @throws ContentNotFoundException
      */
     protected function getContent(ContentManagerInterface $contentManager, Domain $domain, string $type, array $args, $field) : ContentInterface {
 
@@ -276,9 +276,39 @@ class MutationResolver implements FieldResolverInterface
      * @param $data
      *
      * @return ContentInterface
+     * @throws ContentNotFoundException
      */
     protected function contentUpdate(ContentManagerInterface $contentManager, Domain $domain, ContentInterface $content, $data) : ContentInterface {
+
+        // Handle special _locale and _translate data
+        if(array_key_exists('locale', $data) || array_key_exists('_translate', $data)) {
+            if ($domain->getContentTypeManager()->getAnyType($content->getType())->isTranslatable()) {
+
+                if(array_key_exists('locale', $data)) {
+                    $content->setLocale($data['locale']);
+                    unset($data['locale']);
+                }
+
+                if(array_key_exists('_translate', $data)) {
+
+                    $translate = null;
+
+                    if($data['_translate']) {
+                        $translate = $contentManager->get($domain, $content->getType(), $data['_translate']);
+
+                        if (!$translate) {
+                            throw new ContentNotFoundException();
+                        }
+                    }
+
+                    $content->setTranslate($translate);
+                    unset($data['_translate']);
+                }
+            }
+        }
+
         $contentManager->update($domain, $content, $this->fieldDataMapper->mapToFieldData($domain, $content, $data));
+
         return $content;
     }
 

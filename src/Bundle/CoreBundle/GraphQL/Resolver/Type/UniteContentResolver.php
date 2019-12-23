@@ -25,7 +25,7 @@ class UniteContentResolver implements TypeResolverInterface
      */
     public function supports(string $typeName, TypeDefinitionNode $typeDefinitionNode): bool {
         if($typeDefinitionNode instanceof InterfaceTypeDefinitionNode) {
-            return in_array($typeDefinitionNode->name->value, ['UniteFieldable', 'UniteContent', 'UniteUser', 'UniteEmbeddedContent', 'UniteSingleContent']);
+            return in_array($typeDefinitionNode->name->value, ['UniteFieldable', 'UniteContent', 'UniteUser', 'UniteEmbeddedContent', 'UniteSingleContent', 'UniteTranslatableContent']);
         }
 
         if($typeDefinitionNode instanceof UnionTypeDefinitionNode) {
