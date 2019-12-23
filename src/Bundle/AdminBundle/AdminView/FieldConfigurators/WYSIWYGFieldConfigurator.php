@@ -7,6 +7,7 @@ use UniteCMS\AdminBundle\AdminView\AdminView;
 use UniteCMS\AdminBundle\AdminView\AdminViewField;
 use UniteCMS\AdminBundle\Exception\InvalidAdminViewFieldConfig;
 use UniteCMS\CoreBundle\ContentType\ContentType;
+use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Field\Types\TextType;
 
 class WYSIWYGFieldConfigurator extends GenericFieldConfigurator
@@ -17,6 +18,22 @@ class WYSIWYGFieldConfigurator extends GenericFieldConfigurator
     public function extend(): string
     {
         return file_get_contents(__DIR__ . '/../../Resources/GraphQL/Schema/AdminViewField/wysiwyg.graphql');
+    }
+
+    /**
+     * @param ContentTypeField|null $field
+     * @param string $type
+     */
+    protected function checkEscapeSetting(?ContentTypeField $field, string $type) {
+
+        if($field && $field->getSettings()->get('escape') !== false) {
+            throw new InvalidAdminViewFieldConfig(sprintf(
+                'You can only use the @wysiwygAdminField directive on %s fields where the "escape" setting is set to false, however it is not for field "%s" on type "%s".',
+                TextType::getType(),
+                $field->getId(),
+                $type
+            ));
+        }
     }
 
     /**
@@ -45,8 +62,12 @@ class WYSIWYGFieldConfigurator extends GenericFieldConfigurator
     public function configureField(AdminViewField $field, AdminView $adminView, ContentType $contentType) {
         foreach($field->getDirectives() as $directive) {
             if($directive['name'] === 'wysiwygAdminField') {
+
+                $this->checkEscapeSetting($contentType->getField($field->getType()), $contentType->getId());
+
                 $this->processAdminFieldDirective($directive, $field);
                 $this->processWysiwygAdminFieldDirective($directive, $field);
+
                 break;
             }
         }
