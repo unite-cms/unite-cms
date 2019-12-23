@@ -147,9 +147,11 @@ class ContentType
     public function printInputType(FieldTypeManager $fieldTypeManager, AuthorizationCheckerInterface $checker) : string {
         $inputFields = '';
 
-        foreach($this->getFields() as $field) {
-            if($checker->isGranted(ContentFieldVoter::MUTATION, $field)) {
-                $inputFields .= $field->printInputType($fieldTypeManager)."\n";
+        if($this->canHaveInput($fieldTypeManager)) {
+            foreach ($this->getFields() as $field) {
+                if ($checker->isGranted(ContentFieldVoter::MUTATION, $field)) {
+                    $inputFields .= $field->printInputType($fieldTypeManager) . "\n";
+                }
             }
         }
 
@@ -204,6 +206,24 @@ class ContentType
      */
     public function getFields() : array {
         return $this->fields;
+    }
+
+    /**
+     * @param FieldTypeManager $fieldTypeManager
+     * @return bool
+     */
+    public function canHaveInput(FieldTypeManager $fieldTypeManager) : bool {
+        if(count($this->fields) === 0) {
+            return false;
+        }
+
+        foreach($this->fields as $field) {
+            if(!empty($fieldTypeManager->getFieldType($field->getType())->GraphQLInputType($field))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

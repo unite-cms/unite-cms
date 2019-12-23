@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle\GraphQL\Schema\Extender;
 
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
+use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use GraphQL\Type\Schema;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -17,6 +18,11 @@ class MutationExtender implements SchemaExtenderInterface
     protected $authorizationChecker;
 
     /**
+     * @var FieldTypeManager $fieldTypeManager
+     */
+    protected $fieldTypeManager;
+
+    /**
      * @var SaveExpressionLanguage $expressionLanguage
      */
     protected $expressionLanguage;
@@ -26,9 +32,10 @@ class MutationExtender implements SchemaExtenderInterface
      */
     protected $domainManager;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, SaveExpressionLanguage $expressionLanguage, DomainManager $domainManager)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, FieldTypeManager $fieldTypeManager, SaveExpressionLanguage $expressionLanguage, DomainManager $domainManager)
     {
         $this->authorizationChecker = $authorizationChecker;
+        $this->fieldTypeManager = $fieldTypeManager;
         $this->expressionLanguage = $expressionLanguage;
         $this->domainManager = $domainManager;
     }
@@ -48,7 +55,7 @@ class MutationExtender implements SchemaExtenderInterface
 
 
                     // Only add data attribute if we have real fields
-                    if(count($type->getFields()) > 0) {
+                    if($type->canHaveInput($this->fieldTypeManager)) {
                         $extension .= sprintf('
                             create%1$s(data: %1$sInput!, persist: Boolean!) : %1$s
                             update%1$s(id: ID!, data: %1$sInput!, persist: Boolean!) : %1$s
@@ -76,7 +83,7 @@ class MutationExtender implements SchemaExtenderInterface
                 if($this->authorizationChecker->isGranted(ContentVoter::QUERY, $type)) {
 
                     // Only add statements if we have real fields
-                    if(count($type->getFields()) > 0) {
+                    if($type->canHaveInput($this->fieldTypeManager)) {
                         $extension .= sprintf('
                             update%1$s(data: %1$sInput!, persist: Boolean!) : %1$s
                             revert%1$s(id: ID!, version: Int!, persist: Boolean!) : %1$s
