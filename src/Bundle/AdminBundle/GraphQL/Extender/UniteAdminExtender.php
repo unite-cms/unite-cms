@@ -9,10 +9,22 @@ use UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface;
 class UniteAdminExtender implements SchemaExtenderInterface
 {
     protected $domainManager;
+    protected $permissions = [];
 
-    public function __construct(DomainManager $domainManager)
-    {
+    public function __construct(
+        DomainManager $domainManager,
+        string $accessAdminViewsExpression = 'false',
+        string $accessLogsExpression = null,
+        string $accessSchemaFiles = null,
+        string $accessQueryExplorer = null
+    ) {
         $this->domainManager = $domainManager;
+        $this->permissions = [
+            'UNITE_ADMIN_ACCESS_ADMIN_VIEWS' => $accessAdminViewsExpression,
+            'UNITE_ADMIN_ACCESS_LOGS' => $accessLogsExpression ?? $domainManager->getIsAdminExpression(),
+            'UNITE_ADMIN_ACCESS_SCHEMA_FILES' => $accessSchemaFiles ?? $domainManager->getIsAdminExpression(),
+            'UNITE_ADMIN_ACCESS_QUERY_EXPLORER' => $accessQueryExplorer ?? $domainManager->getIsAdminExpression(),
+        ];
     }
 
     /**
@@ -20,11 +32,10 @@ class UniteAdminExtender implements SchemaExtenderInterface
      */
     public function extend(Schema $schema): string
     {
-        $this->domainManager
-            ->setGlobalParameter('UNITE_ADMIN_ACCESS_LOGS', $this->domainManager->getIsAdminExpression())
-            ->setGlobalParameter('UNITE_ADMIN_ACCESS_SCHEMA_FILES', $this->domainManager->getIsAdminExpression())
-            ->setGlobalParameter('UNITE_ADMIN_ACCESS_QUERY_EXPLORER', $this->domainManager->getIsAdminExpression())
-            ->setGlobalParameter('UNITE_ADMIN_ACCESS_ADMIN_VIEWS', 'not user.isAnonymous()');
+        foreach($this->permissions as $key => $expression) {
+            $this->domainManager->setGlobalParameter($key, $expression);
+        }
+
         return file_get_contents(__DIR__ . '/../../Resources/GraphQL/Schema/unite-admin-extender.graphql');
     }
 }
