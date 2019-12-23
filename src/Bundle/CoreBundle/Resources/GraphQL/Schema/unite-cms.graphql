@@ -147,7 +147,6 @@ interface UniteContentResult {
 
 
 interface UniteTranslatableContent {
-    locale: String
     translations(locales: [String!], includeSelf: Boolean = false): [UniteTranslatableContent!]
 }
 

@@ -2,6 +2,7 @@
   <ul class="uk-iconnav uk-flex-right">
     <li v-if="!deleted && is_granted('user_invite')"><router-link uk-tooltip :target="embedded ? '_blank' : '_self'" :to="to('user_invite')" :title="$t('content.list.actions.user_invite')" class="uk-text-success"><icon name="send" /></router-link></li>
     <li v-if="!deleted && is_granted('update')"><router-link uk-tooltip :target="embedded ? '_blank' : '_self'" :to="to('update')" :title="$t('content.list.actions.update')"><icon name="edit-2" /></router-link></li>
+    <li v-if="!deleted && is_granted('update')"><router-link uk-tooltip :target="embedded ? '_blank' : '_self'" :to="to('translate')" :title="$t('content.list.actions.translate')"><icon name="globe" /></router-link></li>
     <li v-if="!deleted && is_granted('update')"><router-link uk-tooltip :target="embedded ? '_blank' : '_self'" :to="to('revert')" :title="$t('content.list.actions.revert')"><icon name="rotate-ccw" /></router-link></li>
     <li v-if="!deleted && is_granted('delete')"><router-link uk-tooltip :target="embedded ? '_blank' : '_self'" :to="to('delete')" :title="$t('content.list.actions.delete')" class="uk-text-danger"><icon name="trash-2" /></router-link></li>
 

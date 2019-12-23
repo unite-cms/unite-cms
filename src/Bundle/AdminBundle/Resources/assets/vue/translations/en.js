@@ -39,6 +39,7 @@ messages.en = {
             actions: {
                 create: 'Create',
                 update: 'Update',
+                translate: 'Manage translations',
                 delete: 'Delete',
                 permanent_delete: 'Permanent delete',
                 revert: 'Manage Revisions',
@@ -103,6 +104,14 @@ messages.en = {
             actions: {
                 revert: 'Revert content to this version'
             }
+        },
+        translate: {
+            headline: 'Translations of "{contentTitle}"',
+            select_translation: 'Select a content to use as a translation for this content',
+            header: {
+                locale: 'Locale'
+            },
+            no_locale_warning: 'Locale of this content is empty. Please select a locale first to manage translations.'
         },
         permanent_delete: {
             headline: 'Remove "{contentTitle}"',

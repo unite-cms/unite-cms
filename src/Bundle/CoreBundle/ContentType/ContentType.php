@@ -3,9 +3,11 @@
 
 namespace UniteCMS\CoreBundle\ContentType;
 
+use GraphQL\Error\Error;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraint;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\Field\Types\ChoiceType;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -90,6 +92,7 @@ class ContentType
      * @param string $defaultPermission
      *
      * @return static
+     * @throws Error
      */
     static function fromObjectType(ObjectType $type, string $defaultPermission) : self {
         $contentType = new static($type->name, $type->description ?? $type->name, $defaultPermission);
@@ -127,6 +130,10 @@ class ContentType
             if($contentTypeField = ContentTypeField::fromFieldDefinition($field)) {
                 $contentType->registerField($contentTypeField);
             }
+        }
+
+        if($contentType->isTranslatable() && (!$contentType->getField('locale') || $contentType->getField('locale')->getType() !== ChoiceType::getType())) {
+            throw new Error('Types that implement "UniteContentInterface" must have a "locale" Choice Type.');
         }
 
         return $contentType;

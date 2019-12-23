@@ -103,7 +103,7 @@ type DemoArticle implements UniteContent & UniteTranslatableContent {
     _meta: UniteContentMeta
 
     locale: ArticleLocales @choiceField @required
-    translations(locales: [ArticleLocales!], includeSelf: Boolean = false): [UniteTranslatableContent!]
+    translations(locales: [String!], includeSelf: Boolean = false): [UniteTranslatableContent!]
 
     id: ID
     name: String @textField

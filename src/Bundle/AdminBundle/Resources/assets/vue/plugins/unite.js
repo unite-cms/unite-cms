@@ -148,6 +148,11 @@ const createAdminView = function (view, unite) {
         field.view = function(){ return view; };
     });
 
+    // Check if this content is translatable
+    view.translatable = view.rawType.interfaces.filter((inter) => {
+        return inter.name === 'UniteTranslatableContent';
+    }).length > 0;
+
     /**
      * Returns an array with field query statements for all form fields of this view.
      * @returns Array

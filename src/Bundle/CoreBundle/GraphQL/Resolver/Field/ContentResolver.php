@@ -104,21 +104,17 @@ class ContentResolver implements FieldResolverInterface
                             $translations[] = $value;
                         }
 
-                        return $translations + $value->getTranslations()->filter(function(ContentInterface $content) use ($includeSelf, $locales, $value, $translations) {
+                        return array_merge($translations, $value->getTranslations()->filter(function(ContentInterface $content) use ($locales, $value) {
                             if($locales && !in_array($content->getLocale(), $locales)) {
                                 return false;
                             }
 
-                            if(!$includeSelf && $content->getId() === $value->getId()) {
-                                return false;
-                            }
-
-                            if(in_array($content, $translations)) {
+                            if($content->getId() === $value->getId()) {
                                 return false;
                             }
 
                             return true;
-                        })->toArray();
+                        })->toArray());
 
                     default:
 

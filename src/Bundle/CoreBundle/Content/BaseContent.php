@@ -221,7 +221,7 @@ abstract class BaseContent implements ContentInterface
     public function getTranslations() : Collection
     {
         if($this->translate) {
-            return $this->translate->getTranslations();
+            return new ArrayCollection(array_merge([$this->translate], $this->translate->getTranslations()->toArray()));
         }
 
         return $this->translations;

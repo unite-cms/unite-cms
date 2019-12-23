@@ -13,6 +13,7 @@ import Logs from "../pages/Logs";
 import Container from "../pages/content/Container";
 import Create from "../pages/content/Create";
 import Update from "../pages/content/Update";
+import Translate from "../pages/content/Translate";
 import Index from "../pages/content/List";
 import PermanentDelete from "../pages/content/PermanentDelete";
 import Recover from "../pages/content/Recover";
@@ -40,6 +41,7 @@ const routes = [
         { path: '', component: Index } ,
         { path: 'create', component: Create },
         { path: ':id/update', component: Update },
+        { path: ':id/translate', component: Translate },
         { path: ':id/revert', component: Revert },
         { path: ':id/delete', component: Delete },
         { path: ':id/recover', component: Recover },
@@ -49,6 +51,7 @@ const routes = [
         { path: '',  component: Index },
         { path: 'create', component: Create },
         { path: ':id/update', component: Update },
+        { path: ':id/translate', component: Translate },
         { path: ':id/revert', component: Revert },
         { path: ':id/delete', component: Delete },
         { path: ':id/recover', component: Recover },

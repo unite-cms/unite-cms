@@ -39,6 +39,7 @@ messages.de = {
             actions: {
                 create: 'Erstellen',
                 update: 'Bearbeiten',
+                translate: 'Übersetzungen verwalten',
                 delete: 'Löschen',
                 permanent_delete: 'Unwiederruflich entfernen',
                 revert: 'Versionen verwalten',
@@ -103,6 +104,14 @@ messages.de = {
             actions: {
                 revert: 'Zu dieser Version zurücksetzen'
             }
+        },
+        translate: {
+            headline: 'Übersetzungen von "{contentTitle}"',
+            select_translation: 'Wähle einen Inhalt aus um ihn als Übersetzung für den aktuellen Inhalt auszuwählen',
+            header: {
+                locale: 'Sprache'
+            },
+            no_locale_warning: 'Es wurde noch keine Sprache für diesen Inhalt festgelegt.'
         },
         permanent_delete: {
             headline: '"{contentTitle}" unwiederruflich entfernen',
