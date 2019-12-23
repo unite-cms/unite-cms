@@ -91,9 +91,10 @@ class RevisionSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @param ContentInterface $content
+     * @param string $contentId
+     * @param string $contentType
      */
-    protected function deleteAllRevisions(ContentInterface $content) {
+    protected function deleteAllRevisions(string $contentId, string $contentType) {
         $domain = $this->domainManager->current();
 
         // Only create revision for doctrine ORM content managers.
@@ -103,7 +104,7 @@ class RevisionSubscriber implements EventSubscriberInterface
 
         $this->em($domain)
             ->getRepository(Revision::class)
-            ->deleteAllForContent($content->getId(), $content->getType());
+            ->deleteAllForContent($contentId, $contentType);
         $this->em($domain)->flush();
     }
 
@@ -146,6 +147,8 @@ class RevisionSubscriber implements EventSubscriberInterface
      * @param ContentEventBefore $event
      */
     public function onPermanentDelete(ContentEventBefore $event) {
-        $this->deleteAllRevisions($event->getContent());
+        if($event->getContentId() && $event->getContent()->getType()) {
+            $this->deleteAllRevisions($event->getContentId(), $event->getContent()->getType());
+        }
     }
 }

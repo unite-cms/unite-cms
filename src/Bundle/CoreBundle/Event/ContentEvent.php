@@ -26,22 +26,39 @@ abstract class ContentEvent extends Event
     protected $content;
 
     /**
+     * @var string|null
+     */
+    protected $contentId;
+
+    /**
      * ContentEvent constructor.
      *
-     * @param \UniteCMS\CoreBundle\Content\ContentInterface $content
+     * @param ContentInterface $content
      * @param array $previousData
      */
     public function __construct(ContentInterface $content, array $previousData = [])
     {
         $this->content = $content;
+        $this->contentId = $content->getId();
         $this->previousData = $previousData;
     }
 
     /**
-     * @return \UniteCMS\CoreBundle\Content\ContentInterface
+     * @return ContentInterface
      */
     public function getContent() : ContentInterface {
         return $this->content;
+    }
+
+    /**
+     * Returns the content id, that was taken from content when this event was created.
+     *
+     * This can help to track the content, even when it was deleted and $content->getId() is null.
+     *
+     * @return string|null
+     */
+    public function getContentId() : ?string {
+        return $this->contentId;
     }
 
     /**
