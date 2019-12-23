@@ -145,6 +145,12 @@ interface UniteContentResult {
     result: [UniteFieldable!]
 }
 
+
+interface UniteTranslatableContent {
+    locale: String
+    translations(locales: [String!], includeSelf: Boolean = false): [UniteTranslatableContent!]
+}
+
 input UniteFilterInput {
     field: String
     path: [String]

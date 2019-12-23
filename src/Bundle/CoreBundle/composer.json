@@ -15,6 +15,7 @@
     "symfony/translation": "4.3",
     "symfony/twig-bridge": "4.3",
     "symfony/swiftmailer-bundle": "3.3",
+    "symfony/intl": "4.3",
     "voku/anti-xss": "^4.1",
     "ramsey/uuid": "^3.9"
   },

@@ -86,6 +86,40 @@ class ContentResolver implements FieldResolverInterface
                     case '_meta':
                         // Prevent _meta on revision content (which is a sub field of _meta).
                         return ($value instanceof RevisionContent) ? null : $value;
+
+                    case 'locale':
+                        return $contentType->isTranslatable() ? $value->getLocale() : null;
+
+                    case 'translations':
+
+                        if(!$contentType->isTranslatable()) {
+                            return [];
+                        }
+
+                        $includeSelf = empty($args['includeSelf']) ? false : $args['includeSelf'];
+                        $locales = empty($args['locales']) ? null : (is_array($args['locales']) ? $args['locales'] : [$args['locales']]);
+                        $translations = [];
+
+                        if($includeSelf) {
+                            $translations[] = $value;
+                        }
+
+                        return $translations + $value->getTranslations()->filter(function(ContentInterface $content) use ($includeSelf, $locales, $value, $translations) {
+                            if($locales && !in_array($content->getLocale(), $locales)) {
+                                return false;
+                            }
+
+                            if(!$includeSelf && $content->getId() === $value->getId()) {
+                                return false;
+                            }
+
+                            if(in_array($content, $translations)) {
+                                return false;
+                            }
+
+                            return true;
+                        })->toArray();
+
                     default:
 
                         // Special handle user content.

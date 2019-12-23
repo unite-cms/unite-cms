@@ -4,6 +4,7 @@
 namespace UniteCMS\CoreBundle\Content;
 
 use DateTime;
+use Doctrine\Common\Collections\Collection;
 use UniteCMS\CoreBundle\Validator\Constraints as UniteAssert;
 use UniteCMS\CoreBundle\Event\ContentEvent;
 
@@ -54,4 +55,24 @@ interface ContentInterface
      * @return DateTime|null
      */
     public function getDeleted() : ?DateTime;
+
+    /**
+     * @return string|null
+     */
+    public function getLocale() : ?string;
+
+    /**
+     * @param string|null $locale
+     */
+    public function setLocale(?string $locale = null) : void;
+
+    /**
+     * @param ContentInterface $translate
+     */
+    public function setTranslate(?ContentInterface $translate = null) : void;
+
+    /**
+     * @return ContentInterface[]|Collection
+     */
+    public function getTranslations() : Collection;
 }
