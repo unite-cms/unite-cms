@@ -54,6 +54,7 @@
     },
     "require-dev": {
         "dama/doctrine-test-bundle": "^6.2",
+        "sspooky13/yaml-standards": "^5.1.0",
         "symfony/maker-bundle": "^1.13",
         "symfony/phpunit-bridge": "4.3.*",
         "symfony/profiler-pack": "^1.0",
