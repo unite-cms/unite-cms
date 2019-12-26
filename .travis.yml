@@ -14,18 +14,18 @@ env:
 
 jobs:
     include:
-        - php: 7.2
-          if: type != push OR branch != master OR fork != false
-          env:
-              - COVERAGE = false
-        - php: 7.3
-          if: type != push OR branch != master OR fork != false
-          env:
-              - COVERAGE = false
-        - php: 7.3
-          if: type == push AND branch == master AND fork == false
-          env:
-              - COVERAGE = true
+        -   php: 7.2
+            if: type != push OR branch != master OR fork != false
+            env:
+                - COVERAGE = false
+        -   php: 7.3
+            if: type != push OR branch != master OR fork != false
+            env:
+                - COVERAGE = false
+        -   php: 7.3
+            if: type == push AND branch == master AND fork == false
+            env:
+                - COVERAGE = true
 
 before_install:
     - |
