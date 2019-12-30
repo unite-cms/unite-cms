@@ -1,6 +1,7 @@
 {
   "name": "unite-cms/core-bundle",
   "type": "symfony-bundle",
+  "license": "GPL-3.0-or-later",
   "description": "Core functionality for unite cms",
   "require": {
     "php": "^7.2",

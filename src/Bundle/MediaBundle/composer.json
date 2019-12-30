@@ -1,6 +1,7 @@
 {
   "name": "unite-cms/media-bundle",
   "type": "symfony-bundle",
+  "license": "GPL-3.0-or-later",
   "description": "File and media handling for for unite cms",
   "require": {
     "unite-cms/core-bundle": "0@dev",

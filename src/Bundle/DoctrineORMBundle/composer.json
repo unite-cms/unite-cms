@@ -1,6 +1,7 @@
 {
   "name": "unite-cms/doctrine-orm-bundle",
   "type": "symfony-bundle",
+  "license": "GPL-3.0-or-later",
   "description": "Adds doctrine orm support (MySQL, PostgreSQL, MariaDB etc.) for unite cms",
   "require": {
     "unite-cms/core-bundle": "0@dev",

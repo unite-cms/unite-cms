@@ -1,6 +1,7 @@
 {
   "name": "unite-cms/admin-bundle",
   "type": "symfony-bundle",
+  "license": "GPL-3.0-or-later",
   "description": "Admin interface for unite cms",
   "require": {
     "unite-cms/core-bundle": "0@dev",
