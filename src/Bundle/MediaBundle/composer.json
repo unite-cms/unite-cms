@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "File and media handling for for unite cms",
   "require": {
-    "unite-cms/core-bundle": "0@dev",
+    "unite-cms/core-bundle": "^0.10",
     "league/flysystem": "^1.0",
     "superbalist/flysystem-google-storage": "^7.2",
     "league/flysystem-aws-s3-v3": "^1.0"

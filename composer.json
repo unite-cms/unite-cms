@@ -48,10 +48,10 @@
         "symfony/flex": "^1.6",
         "symfony/framework-bundle": "5.0.*",
         "symfony/yaml": "5.0.*",
-        "unite-cms/core-bundle": "0@dev",
-        "unite-cms/doctrine-orm-bundle": "0@dev",
-        "unite-cms/admin-bundle": "0@dev",
-        "unite-cms/media-bundle": "0@dev"
+        "unite-cms/core-bundle": "^0.10",
+        "unite-cms/doctrine-orm-bundle": "^0.10",
+        "unite-cms/admin-bundle": "^0.10",
+        "unite-cms/media-bundle": "^0.10"
     },
     "require-dev": {
         "dama/doctrine-test-bundle": "^6.3",
