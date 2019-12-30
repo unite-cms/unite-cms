@@ -1,11 +1,11 @@
 
-fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home") {
+fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home", groups: { name: "Foo" }) {
     unite {
         _version
     }
 }
 
-fragment categories on DemoCategory @tableAdminView {
+fragment categories on DemoCategory @tableAdminView(groups: { name: "Foo" }) {
     name @adminField(inlineCreate: true)
     float
     articles {

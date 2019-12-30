@@ -19,7 +19,7 @@
                 }
 
                 else if (this.view.groups.indexOf(group) < 0) {
-                    group = this.view.groups[0];
+                    group = this.view.groups[0].name;
                 }
 
                 return ["", this.view.category, group, this.view.id, this.id, action].join('/');
