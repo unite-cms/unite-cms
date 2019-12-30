@@ -6,6 +6,7 @@
 <script>
   import _abstract from "@unite/admin/Resources/assets/vue/components/Fields/Form/_abstract";
   import FormRow from "@unite/admin/Resources/assets/vue/components/Fields/Form/_formRow";
+  import i18n from "@unite/admin/Resources/assets/vue/plugins/i18n";
 
   import gql from 'graphql-tag';
   import jwtDecode from 'jwt-decode';
@@ -24,8 +25,31 @@
 
   const FilePond = vueFilePond( FilePondPluginFileValidateType, FilePondPluginImagePreview, FilePondPluginFilePoster, FilePondPluginGetFile );
   setOptions({
-      labelButtonDownloadItem: 'Download',
       allowDownloadByUrl: true,
+      allowReorder: true,
+      labelIdle: i18n.t('field.mediaFile.label.idle'),
+      labelInvalidField: i18n.t('field.mediaFile.label.invalidField'),
+      labelFileWaitingForSize: i18n.t('field.mediaFile.label.fileWaitingForSize'),
+      labelFileSizeNotAvailable: i18n.t('field.mediaFile.label.fileSizeNotAvailable'),
+      labelFileLoading: i18n.t('field.mediaFile.label.fileLoading'),
+      labelFileLoadError: i18n.t('field.mediaFile.label.fileLoadError'),
+      labelFileProcessing: i18n.t('field.mediaFile.label.fileProcessing'),
+      labelFileProcessingComplete: i18n.t('field.mediaFile.label.fileProcessingComplete'),
+      labelFileProcessingAborted: i18n.t('field.mediaFile.label.fileProcessingAborted'),
+      labelFileProcessingError: i18n.t('field.mediaFile.label.fileProcessingError'),
+      labelFileProcessingRevertError: i18n.t('field.mediaFile.label.fileProcessingRevertError'),
+      labelFileRemoveError: i18n.t('field.mediaFile.label.fileRemoveError'),
+      labelTapToCancel: i18n.t('field.mediaFile.label.tapToCancel'),
+      labelTapToRetry: i18n.t('field.mediaFile.label.tapToRetry'),
+      labelTapToUndo: i18n.t('field.mediaFile.label.tapToUndo'),
+      labelButtonRemoveItem: i18n.t('field.mediaFile.label.buttonRemoveItem'),
+      labelButtonAbortItemLoad: i18n.t('field.mediaFile.label.buttonAbortItemLoad'),
+      labelButtonRetryItemLoad: i18n.t('field.mediaFile.label.buttonRetryItemLoad'),
+      labelButtonAbortItemProcessing: i18n.t('field.mediaFile.label.buttonAbortItemProcessing'),
+      labelButtonUndoItemProcessing: i18n.t('field.mediaFile.label.buttonUndoItemProcessing'),
+      labelButtonRetryItemProcessing: i18n.t('field.mediaFile.label.buttonRetryItemProcessing'),
+      labelButtonProcessItem: i18n.t('field.mediaFile.label.buttonProcessItem'),
+      labelButtonDownloadItem: i18n.t('field.mediaFile.label.buttonDownloadItem'),
   });
 
 
