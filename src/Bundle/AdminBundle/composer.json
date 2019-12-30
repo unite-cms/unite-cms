@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "Admin interface for unite cms",
   "require": {
-    "unite-cms/core-bundle": "^0.10",
+    "unite-cms/core-bundle": "*",
     "symfony/webpack-encore-bundle": "1.7"
   },
   "autoload": {

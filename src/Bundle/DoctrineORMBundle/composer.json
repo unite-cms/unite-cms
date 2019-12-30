@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "Adds doctrine orm support (MySQL, PostgreSQL, MariaDB etc.) for unite cms",
   "require": {
-    "unite-cms/core-bundle": "^0.10",
+    "unite-cms/core-bundle": "*",
     "doctrine/orm": "^2.7",
     "doctrine/doctrine-bundle": "^2.0",
     "scienta/doctrine-json-functions": "^4.1",

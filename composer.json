@@ -2,7 +2,6 @@
     "name": "unite-cms/unite-cms",
     "type": "project",
     "license": "MIT",
-    "minimum-stability": "RC",
     "autoload": {
         "psr-4": {
             "App\\": "src/"
@@ -48,10 +47,10 @@
         "symfony/flex": "^1.6",
         "symfony/framework-bundle": "5.0.*",
         "symfony/yaml": "5.0.*",
-        "unite-cms/core-bundle": "^0.10",
-        "unite-cms/doctrine-orm-bundle": "^0.10",
-        "unite-cms/admin-bundle": "^0.10",
-        "unite-cms/media-bundle": "^0.10"
+        "unite-cms/core-bundle": "dev-master",
+        "unite-cms/doctrine-orm-bundle": "dev-master",
+        "unite-cms/admin-bundle": "dev-master",
+        "unite-cms/media-bundle": "dev-master"
     },
     "require-dev": {
         "dama/doctrine-test-bundle": "^6.3",
