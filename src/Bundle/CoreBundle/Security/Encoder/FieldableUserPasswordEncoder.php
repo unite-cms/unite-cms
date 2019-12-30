@@ -43,4 +43,18 @@ class FieldableUserPasswordEncoder implements UserPasswordEncoderInterface
         $encoder = $this->encoderFactory->getEncoder($user);
         return $encoder->isPasswordValid($user->getFieldData($fieldName)->resolveData(), $raw, $salt);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function needsRehash(UserInterface $user): bool
+    {
+        if (null === $user->getPassword()) {
+            return false;
+        }
+
+        $encoder = $this->encoderFactory->getEncoder($user);
+
+        return $encoder->needsRehash($user->getPassword());
+    }
 }

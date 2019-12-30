@@ -42,22 +42,21 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
-        "symfony/console": "4.3.*",
-        "symfony/dotenv": "4.3.*",
-        "symfony/flex": "^1.3.1",
-        "symfony/framework-bundle": "4.3.*",
-        "symfony/yaml": "4.3.*",
+        "symfony/console": "5.0.*",
+        "symfony/dotenv": "5.0.*",
+        "symfony/flex": "^1.6",
+        "symfony/framework-bundle": "5.0.*",
+        "symfony/yaml": "5.0.*",
         "unite-cms/core-bundle": "0@dev",
         "unite-cms/doctrine-orm-bundle": "0@dev",
         "unite-cms/admin-bundle": "0@dev",
         "unite-cms/media-bundle": "0@dev"
     },
     "require-dev": {
-        "dama/doctrine-test-bundle": "^6.2",
-        "symfony/maker-bundle": "^1.13",
-        "symfony/phpunit-bridge": "4.3.*",
-        "symfony/profiler-pack": "^1.0",
-        "symfony/web-server-bundle": "4.3.*"
+        "dama/doctrine-test-bundle": "^6.3",
+        "symfony/maker-bundle": "^1.14",
+        "symfony/phpunit-bridge": "5.0.*",
+        "symfony/profiler-pack": "^1.0"
     },
     "config": {
         "preferred-install": {
@@ -69,9 +68,7 @@
         "paragonie/random_compat": "2.*",
         "symfony/polyfill-ctype": "*",
         "symfony/polyfill-iconv": "*",
-        "symfony/polyfill-php71": "*",
-        "symfony/polyfill-php70": "*",
-        "symfony/polyfill-php56": "*"
+        "symfony/polyfill-php71": "*"
     },
     "scripts": {
         "auto-scripts": {
@@ -91,7 +88,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": true,
-            "require": "4.3.*"
+            "require": "5.0.*"
         }
     }
 }

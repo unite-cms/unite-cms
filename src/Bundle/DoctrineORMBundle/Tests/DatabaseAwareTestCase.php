@@ -28,7 +28,7 @@ class DatabaseAwareTestCase extends SchemaAwareTestCase
         $schemaTool->createSchema($metadata);
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
         $this->em->close();
