@@ -7,4 +7,3 @@ services:
         arguments: ['%kernel.project_dir%/vendor/unite-cms/media-bundle/Resources/GraphQL/Schema/pre-signed-url.graphql']
         tags:
             - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_AFTER }
-

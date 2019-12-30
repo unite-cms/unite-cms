@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e15f442b5145714177e52466df185a10",
+    "content-hash": "aa10da5b7f35336990879b660f53c506",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -6424,6 +6424,131 @@
                 "php"
             ],
             "time": "2019-11-08T13:50:10+00:00"
+        },
+        {
+            "name": "sebastian/diff",
+            "version": "3.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/diff.git",
+                "reference": "720fcc7e9b5cf384ea68d9d930d480907a0c1a29"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/720fcc7e9b5cf384ea68d9d930d480907a0c1a29",
+                "reference": "720fcc7e9b5cf384ea68d9d930d480907a0c1a29",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.5 || ^8.0",
+                "symfony/process": "^2 || ^3.3 || ^4"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Kore Nordmann",
+                    "email": "mail@kore-nordmann.de"
+                },
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sebastian@phpunit.de"
+                }
+            ],
+            "description": "Diff implementation",
+            "homepage": "https://github.com/sebastianbergmann/diff",
+            "keywords": [
+                "diff",
+                "udiff",
+                "unidiff",
+                "unified diff"
+            ],
+            "time": "2019-02-04T06:01:07+00:00"
+        },
+        {
+            "name": "sspooky13/yaml-standards",
+            "version": "5.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sspooky13/yaml-standards.git",
+                "reference": "5b8a72e5772646a88a2f66c6180f12f51a361f82"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sspooky13/yaml-standards/zipball/5b8a72e5772646a88a2f66c6180f12f51a361f82",
+                "reference": "5b8a72e5772646a88a2f66c6180f12f51a361f82",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1",
+                "sebastian/diff": "^1.4 || ^2.0 || ^3.0",
+                "symfony/config": "^3.0 || ^4.0.10 || ^5.0",
+                "symfony/console": "^3.0 || ^4.0.10 || ^5.0",
+                "symfony/yaml": "^3.0 || ^4.0.10 || ^5.0"
+            },
+            "require-dev": {
+                "jakub-onderka/php-parallel-lint": "^0.9",
+                "phing/phing": "^2.16",
+                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan-phpunit": "^0.12.1",
+                "phpunit/phpunit": "^7.5",
+                "shopsys/coding-standards": "^7.3",
+                "symfony/var-dumper": "^3.4 || ^4.3 || ^5.0",
+                "symplify/easy-coding-standard": "^5.4.3"
+            },
+            "bin": [
+                "bin/yaml-standards"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "YamlStandards\\": [
+                        "src"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Peter Turek",
+                    "email": "peter.turek13@gmail.com"
+                }
+            ],
+            "description": "Standards for yaml files ",
+            "homepage": "https://github.com/sspooky13/yaml-standards",
+            "keywords": [
+                "alphabetical",
+                "checker",
+                "empty-line-at-end",
+                "fixer",
+                "indent",
+                "inline",
+                "service-aliasing",
+                "space-between-groups",
+                "standards",
+                "yaml",
+                "yaml-standards"
+            ],
+            "time": "2019-12-26T17:59:21+00:00"
         },
         {
             "name": "symfony/maker-bundle",

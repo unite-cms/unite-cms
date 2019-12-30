@@ -1,0 +1,12 @@
+-   pathsToCheck:
+        - ./
+    excludedPaths:
+        - ./node_modules
+        - ./public
+        - ./var
+        - ./vendor
+    checkers:
+        -   pathToChecker: YamlStandards\Model\YamlIndent\YamlIndentChecker
+            parameters:
+                { indents: 4, indentsCommentsWithoutParent: preserved }
+        -   pathToChecker: YamlStandards\Model\YamlEmptyLineAtEnd\YamlEmptyLineAtEndChecker # only for turn it on
