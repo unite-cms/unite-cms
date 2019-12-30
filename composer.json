@@ -1,7 +1,7 @@
 {
     "name": "unite-cms/unite-cms",
     "type": "project",
-    "license": "GPL-3.0-or-later",
+    "license": "MIT",
     "minimum-stability": "RC",
     "autoload": {
         "psr-4": {
