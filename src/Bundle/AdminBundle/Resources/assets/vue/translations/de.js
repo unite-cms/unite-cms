@@ -151,11 +151,13 @@ messages.de = {
                 headline: '{display_name}'
             }
         },
-
         embedded: {
             confirm: {
                 clear_union_selection: 'Möchtest du wirklich einen anderen {view.name} Typen auswählen? Deine bisherigen Eingaben für dieses Feld gehen verloren.'
             }
+        },
+        sequence: {
+            no_value_message: 'Der Wert dieses Feldes wird automatisch beim Erstellen generiert.'
         },
 
         date: de
