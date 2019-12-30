@@ -1,5 +1,13 @@
 # Changelog
 
+# 0.10.0 (2019-12-30)
+- First release of new unite cms core (0.10)
+- Define your schema with GraphQL schema language
+- Choose the database layer you want (even in-memory)
+- Reusable types with UniteEmbeddedContent
+- Complete new admin interface, now a fully decoupled Vue.js application
+- Based on Symfony 5.0 
+
 ## 0.10.x-dev (2019-11-15)
 - Complete rewrite of the unite cms core. More information wil follow. 
 
