@@ -7,6 +7,7 @@ fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home") {
 
 fragment categories on DemoCategory @tableAdminView {
     name @adminField(inlineCreate: true)
+    float
     articles {
         total
     }
