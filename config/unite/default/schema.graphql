@@ -21,8 +21,8 @@ type Media implements UniteContent {
     title: String @textField
     seq: Int! @sequenceField
 
-    date: Date @dateField
-    dateTime: DateTime @dateTimeField
+    date: Date @dateField(default: "now")
+    dateTime: DateTime @dateTimeField(default: "now")
 
     file: UniteMediaFile @mediaFileField ( s3:
         {

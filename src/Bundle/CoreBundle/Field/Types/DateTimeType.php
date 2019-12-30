@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Field\Types;
 
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use GraphQL\Error\Error;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
@@ -68,5 +69,18 @@ class DateTimeType extends AbstractFieldType
         $date = new DateTime();
         $date->setTimestamp((int)$timestamp);
         return $date;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPublicSettings(ContentTypeField $field) : ?ArrayCollection {
+        $settings = parent::getPublicSettings($field);
+
+        if($settings && !empty($settings->get('default'))) {
+            $settings->set('default', $settings->get('default')->format('c'));
+        }
+
+        return $settings;
     }
 }
