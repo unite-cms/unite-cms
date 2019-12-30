@@ -7,6 +7,7 @@
 - Reusable types with UniteEmbeddedContent
 - Complete new admin interface, now a fully decoupled Vue.js application
 - Based on Symfony 5.0 
+- Remove "v" from version tags
 
 ## 0.10.x-dev (2019-11-15)
 - Complete rewrite of the unite cms core. More information wil follow. 
