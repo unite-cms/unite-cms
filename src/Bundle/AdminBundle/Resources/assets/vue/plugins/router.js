@@ -8,7 +8,7 @@ import { Unite } from "./unite";
 import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import Explorer from "../pages/Explorer";
-import Schema from "../pages/Schema";
+//import Schema from "../pages/Schema";
 import Logs from "../pages/Logs";
 import Container from "../pages/content/Container";
 import Create from "../pages/content/Create";
@@ -30,7 +30,7 @@ const routes = [
     { path: '/login', component: Login, meta: { requiresAnonymous: true } },
     { path: '/reset-password', component: ResetPassword, meta: { requiresAnonymous: true } },
     { path: '/explorer', component: Explorer, meta: { requiresAuth: true } },
-    { path: '/schema', component: Schema, meta: { requiresAuth: true } },
+    //{ path: '/schema', component: Schema, meta: { requiresAuth: true } },
     { path: '/logs', component: Logs, meta: { requiresAuth: true } },
 
     { path: '/dashboard/:viewGroup/:type', component: Container, children: [
