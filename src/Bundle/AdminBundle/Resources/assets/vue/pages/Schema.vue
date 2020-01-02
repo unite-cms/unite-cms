@@ -48,8 +48,8 @@
 
 <script>
     import gql from 'graphql-tag';
-    import MonacoEditor from 'vue-monaco'
-    import { graphQLLanguageProvider, editorOptions } from "../plugins/monacoUnite";
+    /*import MonacoEditor from 'vue-monaco'
+    import { graphQLLanguageProvider, editorOptions } from "../plugins/monacoUnite";*/
 
     import Icon from "../components/Icon"
     import IconGraphQL from '../components/Icons/GraphQL'
