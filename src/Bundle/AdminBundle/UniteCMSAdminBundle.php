@@ -7,8 +7,6 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 use UniteCMS\AdminBundle\AdminView\AdminFieldConfiguratorInterface;
 use UniteCMS\AdminBundle\AdminView\AdminViewTypeInterface;
 use UniteCMS\AdminBundle\DependencyInjection\AdminViewTypeCompilerPass;
-
-use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\UniteCMSCoreBundle;
 
 class UniteCMSAdminBundle extends Bundle
