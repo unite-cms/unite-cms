@@ -204,7 +204,7 @@
 
           setGoogleValue(args, key) {
 
-              let value = this.values[key || 0];
+              let value = this.values[key || 0] || {};
 
               let type = GoogleTypeMap[args[0].place.types[0]] || null;
 
