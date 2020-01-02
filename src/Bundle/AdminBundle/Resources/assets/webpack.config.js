@@ -31,10 +31,6 @@ module.exports = {
             .enableSassLoader()
             .enableVueLoader()
 
-            /*.addPlugin(new MonacoEditorPlugin({
-                languages: ['graphql']
-            }))*/
-
             .copyFiles({
                 from: __dirname + '/favicons',
                 to: `favicons/[path][name].${ Encore.isProduction() ? '[hash:8].' : '' }[ext]`
