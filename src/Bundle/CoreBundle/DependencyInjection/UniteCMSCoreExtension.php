@@ -54,13 +54,19 @@ class UniteCMSCoreExtension extends Extension
 
         foreach($config['domains'] as $id => $params) {
             $params['content_manager'] = substr($params['content_manager'], 0, 1) === '@' ? substr($params['content_manager'], 1) : $params['content_manager'];
-            $config['domains'][$id]['content_manager'] = new Reference($params['content_manager']);
+            if(!empty($params['content_manager'])) {
+                $config['domains'][$id]['content_manager'] = new Reference($params['content_manager']);
+            }
 
             $params['user_manager'] = substr($params['user_manager'], 0, 1) === '@' ? substr($params['user_manager'], 1) : $params['user_manager'];
-            $config['domains'][$id]['user_manager'] = new Reference($params['user_manager']);
+            if(!empty($params['user_manager'])) {
+                $config['domains'][$id]['user_manager'] = new Reference($params['user_manager']);
+            }
 
             $params['logger'] = substr($params['logger'], 0, 1) === '@' ? substr($params['logger'], 1) : $params['logger'];
-            $config['domains'][$id]['logger'] = new Reference($params['logger']);
+            if(!empty($params['logger'])) {
+                $config['domains'][$id]['logger'] = new Reference($params['logger']);
+            }
         }
 
         $container->findDefinition(DomainManager::class)
