@@ -53,7 +53,7 @@
           },
           contentTitle() {
               let refContent = Object.assign({}, this.formData, { _meta: { id: this.contentId } });
-              return this.referencedView.contentTitle(refContent);
+              return this.field.view().contentTitle(refContent);
           },
           filter() {
               return {

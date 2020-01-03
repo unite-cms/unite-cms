@@ -51,7 +51,7 @@
                 return getAdminViewByType(this.$unite, this.field.config.content_type);
             },
             contentTitle() {
-                return this.referencedView.contentTitle(this.row);
+                return this.view.contentTitle(this.row);
             },
             filter() {
                 return {
