@@ -7,13 +7,13 @@
         <template v-if="viewGroups.length > 0">
           <div class="uk-margin-large uk-hidden@m"></div>
           <button class="view-group-toggle uk-button uk-button-default uk-box-shadow-hover-small" type="button">
-            <icon class="fix-line-height uk-margin-small-right" :name="viewGroupIcon(group)" />
-            {{ group }}
+            <icon class="fix-line-height uk-margin-small-right" :name="viewGroupIcon(actualGroup)" />
+            {{ actualGroup }}
             <icon class="dropdown-icon" :width="22" :height="22" name="chevron-down" />
           </button>
           <div ref="viewGroupSelect" uk-dropdown="mode: click; pos: bottom-justify; delay-hide: 0">
             <ul class="uk-nav uk-dropdown-nav">
-              <li v-for="viewGroup in viewGroups" :class="{ 'uk-active': group === viewGroup }"><a href="#" @click.prevent="selectGroup(viewGroup)">
+              <li v-for="viewGroup in viewGroups" :class="{ 'uk-active': actualGroup === viewGroup }"><a href="#" @click.prevent="selectGroup(viewGroup)">
                 <icon class="uk-margin-small-right" :name="viewGroupIcon(viewGroup)" />
                 {{ viewGroup }}
               </a></li>
@@ -74,7 +74,7 @@
         },
         methods: {
             inGroup(view) {
-                return !this.group || this.group === '_all_' || (view.groups.filter((group) => { return group.name === this.group}).length > 0);
+                return !this.actualGroup || this.actualGroup === '_all_' || (view.groups.filter((group) => { return group.name === this.actualGroup}).length > 0);
             },
 
             selectGroup(group) {
@@ -126,6 +126,9 @@
             }
         },
         computed: {
+            actualGroup() {
+              return this.group === '_all_' && this.viewGroups.length > 0 ? this.viewGroups[0] : this.group;
+            },
             viewGroups() {
                 let groups = [];
 
