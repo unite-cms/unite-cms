@@ -50,7 +50,26 @@ messages.en = {
                 select: 'Select',
                 confirm: 'Confirm selection of {count}'
             },
-            empty_placeholder: "No content found for this view."
+            empty_placeholder: "No content found for this view.",
+            search: {
+                placeholder: "Search...",
+                placeholder_filter: "Advanced filter applied..."
+            },
+            filter: {
+                title: 'Advanced filters',
+                clear: 'Clear',
+                cancel: 'Cancel',
+                apply: 'Apply',
+                field: "Field",
+                operator: 'Operator',
+                placeholder: "Enter/Select value...",
+                checkbox_true: 'True',
+                checkbox_false: 'False',
+                checkbox_null: 'Empty',
+                filter: "Filter",
+                AND: 'AND',
+                OR: 'OR'
+            }
         },
         form: {
             field: {

@@ -14,3 +14,8 @@
     margin: $form-padding-vertical;
   }
 }
+
+.uk-search-default .uk-search-input {
+  background: $navbar-background;
+  border-radius: 20px;
+}
