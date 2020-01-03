@@ -141,6 +141,7 @@ messages.en = {
             success: '"{contentTitle}" was removed.',
         },
         user_invite: {
+            default_text: 'This is an invitation to unite cms. Please click the following link to accept the invitation',
             headline: 'Invite "{contentTitle}" to unite cms',
             actions: {
                 submit: 'Send invitation E-Mail'

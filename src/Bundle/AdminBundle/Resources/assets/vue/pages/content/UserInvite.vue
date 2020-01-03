@@ -24,7 +24,7 @@
                 errors: [],
                 loading: false,
                 user: {},
-                text: 'This is an invitation to unite cms. Please click the following link to accept the invitation'
+                text: this.$t('content.user_invite.default_text')
             }
         },
         computed: {

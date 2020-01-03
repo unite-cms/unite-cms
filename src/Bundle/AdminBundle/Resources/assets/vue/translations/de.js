@@ -141,6 +141,7 @@ messages.de = {
             success: '"{contentTitle}" wurde entfernt.',
         },
         user_invite: {
+            default_text: 'Das ist eine Einladung zu unite cms. Bitte klicken Sie den folgenden Link an, um die Einladung zu bestätigen.',
             headline: '"{contentTitle}" zu unite cms einladen',
             actions: {
                 submit: 'Einladungs E-Mail senden'
