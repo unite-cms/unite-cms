@@ -19,16 +19,37 @@ enum ORDER {
 }
 
 enum OPERATOR {
+    """Equals"""
     EQ
+
+    """Is"""
     IS
+
+    """Not equals"""
     NEQ
+
+    """Lower than"""
     LT
+
+    """Lower than or equal"""
     LTE
+
+    """Greater than"""
     GT
+
+    """Greater than or equal"""
     GTE
+
+    """In"""
     IN
+
+    """Not in"""
     NIN
+
+    """Contains"""
     CONTAINS
+
+    """Not contains"""
     NCONTAINS
 }
 

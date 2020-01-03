@@ -1,9 +1,10 @@
 <template>
-    <div class="uk-flex uk-flex-middle uk-margin-bottom">
-        <div class="uk-flex-1 uk-flex uk-flex-middle">
+    <div class="uk-flex uk-flex-middle uk-margin-bottom uk-flex-wrap">
+        <div class="uk-flex-0 uk-flex uk-flex-middle">
             <h2 class="uk-margin-remove">{{ title }}</h2>
-
-            <ul class="uk-subnav uk-subnav-divider uk-margin-left" uk-margin v-if="showDeleteToggle">
+        </div>
+        <div class="uk-flex-0 uk-flex uk-flex-middle uk-margin-small-left uk-margin-right" v-if="showDeleteToggle">
+            <ul class="uk-subnav uk-subnav-divider uk-margin-remove" style="min-width: 180px">
                 <li :class="{'uk-active' : !deleted }"><a @click.prevent="toggleDeleted" href="#">{{
                     $t('content.list.deleted.active') }}</a></li>
                 <li :class="{'uk-active' : deleted}"><a :class="{ 'uk-text-danger' : deleted }"
@@ -12,7 +13,9 @@
                     {{ $t('content.list.deleted.deleted') }}</a></li>
             </ul>
         </div>
-        <view-filter :view="view" :value="queryFilter" @input="updateQueryFilter" />
+        <div class="uk-flex-1 uk-flex uk-flex-right uk-flex-middle">
+            <view-filter :view="view" :value="queryFilter" @input="updateQueryFilter" />
+        </div>
         <router-link :to="to('create')" class="uk-button uk-button-primary uk-margin-left" v-if="canCreate">
             <icon class="fix-line-height" name="plus"/>
             {{ labelCreate }}
@@ -22,7 +25,7 @@
 <script>
 
     import Icon from '../../components/Icon';
-    import ViewFilter from './_filter';
+    import ViewFilter from './Filter/_filter';
 
     export default {
         components: {Icon, ViewFilter},

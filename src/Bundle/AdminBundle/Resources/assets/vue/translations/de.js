@@ -50,7 +50,26 @@ messages.de = {
                 select: 'Auswählen',
                 confirm: '{count} ausgewählte Elemente übernehmen'
             },
-            empty_placeholder: "Es wurde kein Inhalt für diese Ansicht gefunden."
+            empty_placeholder: "Es wurde kein Inhalt für diese Ansicht gefunden.",
+            search: {
+                placeholder: "Suchen...",
+                placeholder_filter: "Erweiterte Suchfilter angewendet..."
+            },
+            filter: {
+                title: 'Erweiterte Suchfilter',
+                clear: 'Löschen',
+                cancel: 'Abbrechen',
+                apply: 'Übernehmen',
+                field: "Feld",
+                operator: 'Vergleich',
+                placeholder: "Wert einfügen / auswählen...",
+                checkbox_true: 'Wahr',
+                checkbox_false: 'Falsch',
+                checkbox_null: 'Leer',
+                filter: "Filter",
+                AND: 'UND',
+                OR: 'ODER'
+            }
         },
         form: {
             field: {

@@ -1,20 +1,50 @@
 <template>
-    <div class="uk-flex-1 uk-flex uk-flex-middle">
-        <form class="uk-search uk-search-default uk-width-expand" v-if="filterRules.length > 0">
-            <label for="view-filter-search" class="uk-icon uk-search-icon"><icon name="search" /></label>
-            <input id="view-filter-search" class="uk-search-input" type="search" :placeholder="$t(advancedFilter ? 'content.list.search.placeholder_filter' : 'content.list.search.placeholder', { count: value.children ? value.children.length : 0 })" v-model="searchInput" @keyup="onSearchChange">
-            <button class="uk-search-icon-flip uk-icon uk-search-icon" :class="{ 'uk-text-danger': hasFilterRules }" @click.prevent="showFilters = true"><icon name="sliders" /></button>
+    <div class="uk-flex-1" style="min-width: 180px; max-width: 360px;">
+        <form class="uk-search uk-search-default uk-width-expand" v-if="filterRules.length > 0" @submit.prevent="applySearch(searchInput)">
+            <button type="submit" class="uk-icon uk-search-icon"><icon name="search" /></button>
+            <input id="view-filter-search" class="uk-search-input" type="search" :placeholder="$t(advancedFilter ? 'content.list.search.placeholder_filter' : 'content.list.search.placeholder')" v-model="searchInput">
+            <button type="button" class="uk-search-icon-flip uk-icon uk-search-icon" :class="{ 'uk-text-danger': hasFilterRules }" @click="tmpFilter = Object.assign(value)"><icon name="sliders" /></button>
         </form>
-        <modal v-if="showFilters" @hide="showFilters = false" :title="$t('content.list.search.filters.title')">
-            <filter-rule :fields="filterRules" :value="value" @input="onFilterChange" />
+        <modal v-if="tmpFilter" @hide="tmpFilter = null" :title="$t('content.list.filter.title')">
+            <div slot class="uk-padding-small">
+                <filter-rule :fields="filterRules" v-model="tmpFilter" />
+            </div>
+            <div slot="footer" uk-grid>
+                <div class="uk-text-left uk-flex-1">
+                    <button class="uk-button uk-button-danger" type="button" @click="applyFilter()">{{ $t('content.list.filter.clear') }}</button>
+                </div>
+                <div class="uk-text-right uk-flex-1">
+                    <button class="uk-button uk-button-default uk-modal-close" type="button">{{ $t('content.list.filter.cancel') }}</button>
+                    <button class="uk-button uk-button-primary" type="button" @click="applyFilter(tmpFilter)">{{ $t('content.list.filter.apply') }}</button>
+                </div>
+            </div>
         </modal>
     </div>
 </template>
 <script>
 
-    import Icon from '../../components/Icon';
-    import Modal from "../Modal";
+    import Icon from '../../Icon';
+    import Modal from "../../Modal";
     import FilterRule from "./_filterRule";
+
+    const normalizeFilter = function(filter){
+        if(filter.field && filter.operator) {
+            return {
+                field: filter.field,
+                operator: filter.operator,
+                cast: filter.cast || undefined,
+                value: filter.value,
+            }
+        } else if(filter.AND && filter.AND.length > 0) {
+            let AND = filter.AND.map(normalizeFilter).filter(f => f !== null);
+            return AND.length > 0 ? { AND } : null;
+        } else if(filter.OR && filter.OR.length > 0) {
+            let OR = filter.OR.map(normalizeFilter).filter(f => f !== null);
+            return OR.length > 0 ? { OR } : null;
+        } else {
+            return null;
+        }
+    };
 
     export default {
         components: {FilterRule, Icon, Modal},
@@ -22,7 +52,7 @@
             return {
                 searchInput: null,
                 advancedFilter: false,
-                showFilters: false
+                tmpFilter: null
             }
         },
         props: {
@@ -75,9 +105,8 @@
             }
         },
         methods: {
-            onSearchChange(event) {
+            applySearch(value) {
                 this.advancedFilter = false;
-                let value = event.target.value;
                 this.$emit('input', !value ? {} : {
                     OR: this.searchableFields.map((field) => {
                         return {
@@ -88,10 +117,11 @@
                     }),
                 });
             },
-            onFilterChange(filter) {
+            applyFilter(filter) {
                 this.searchInput = null;
                 this.advancedFilter = true;
-                this.$emit('input', filter);
+                this.$emit('input', Object.assign({}, normalizeFilter(filter)));
+                this.tmpFilter = null;
             }
         }
     }

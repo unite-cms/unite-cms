@@ -92,7 +92,16 @@
             items: {
                 fetchPolicy: 'network-only',
                 query() { return this.query; },
-                update(data) {return data[`find${ this.view.type }`] || { total: 0, results: [] }; },
+                update(data) {
+                    let result = data[`find${ this.view.type }`];
+                    return {
+                        total: result.total || 0,
+                        result: result.result || [],
+                    };
+                },
+                error(error) {
+                    console.log(error);
+                },
                 result() {
                     this.$nextTick(() => {
                         if(this.highlightRow) {

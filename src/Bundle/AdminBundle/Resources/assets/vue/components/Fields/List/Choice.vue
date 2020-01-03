@@ -8,13 +8,15 @@
 </template>
 <script>
     import _abstract from "./_abstract";
+    import SelectInput from "../../Views/Filter/Input/SelectInput";
+
     export default {
         extends: _abstract,
 
         // static filter method
         filter(field, view, unite) {
 
-            let enumType = this.$unite.getRawType(this.field.returnType);
+            let enumType = unite.getRawType(field.returnType);
 
             if(!enumType) {
                 return false;
@@ -22,12 +24,15 @@
 
             return {
                 searchable: false,
-                type: 'select',
                 id: field.id,
                 label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
-                choices: enumType.enumValues.map((value) => {
-                    return {label: value.description, value: value.name}
-                }),
+                input: SelectInput,
+                operators: ['EQ', 'NEQ'],
+                inputProps: {
+                    options: enumType.enumValues.map((value) => {
+                        return {label: value.description, value: value.name}
+                    })
+                },
             };
         },
 

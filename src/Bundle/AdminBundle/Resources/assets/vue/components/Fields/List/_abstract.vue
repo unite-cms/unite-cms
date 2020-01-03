@@ -1,13 +1,17 @@
 <script>
+
+    import TextInput from "../../Views/Filter/Input/TextInput";
+
     export default {
 
         // static abstract filter method
         filter(field, view, unite) {
             return {
                 searchable: true,
-                type: 'text',
                 id: field.id,
                 label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
+                operators: ['EQ', 'NEQ', 'CONTAINS', 'NCONTAINS'],
+                input: TextInput
             };
         },
 

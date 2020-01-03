@@ -9,6 +9,7 @@
 <script>
     import _abstract from "./_abstract";
     import Icon from "../../Icon";
+    import CheckboxInput from "../../Views/Filter/Input/CheckboxInput";
 
     export default {
         extends: _abstract,
@@ -17,9 +18,11 @@
         filter(field, view, unite) {
             return {
                 searchable: false,
-                type: 'checkbox',
                 id: field.id,
                 label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
+                operators: ['IS'],
+                cast: 'BOOLEAN',
+                input: CheckboxInput
             };
         },
 
