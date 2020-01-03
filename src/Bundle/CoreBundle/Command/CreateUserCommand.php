@@ -157,7 +157,7 @@ class CreateUserCommand extends Command
                 '<error>@passwordAuthenticator was not configured for GraphQL user type "%s".</error>',
                 $type
             ));
-            return;
+            return 1;
         }
 
         $user = $domain->getUserManager()->create($domain, $type);
@@ -172,7 +172,7 @@ class CreateUserCommand extends Command
                 '<error>@Could not create user because of the following validation errors: %s</error>',
                 $errors
             ));
-            return;
+            return 1;
         }
 
         if($input->getOption('persist')) {
@@ -184,5 +184,7 @@ class CreateUserCommand extends Command
             sprintf('<info>%s</info> user with username <info>%s</info> %s.', $user->getType(), $user->getUsername(), $input->getOption('persist') ? 'was created' : 'will be created if you add the --persist option.'),
             '',
         ]);
+
+        return 0;
     }
 }

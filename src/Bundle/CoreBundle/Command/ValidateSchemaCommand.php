@@ -87,8 +87,10 @@ class ValidateSchemaCommand extends Command
                 $io->write(SchemaPrinter::doPrint($schema));
             }
             $io->success('Schema is valid!');
+            return 0;
         } else {
             $io->error(array_map(function(Error $error){ return FormattedError::printError($error); }, $result->errors));
+            return 1;
         }
     }
 }

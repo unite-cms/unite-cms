@@ -81,15 +81,17 @@ class ExecuteSchemaCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         if(!$input->getOption('force') && !$io->confirm('Do you really want to execute this query against the current schema? Your real database will be affected! Execute?')) {
-            return;
+            return 1;
         }
 
         $result = $this->schemaManager->execute($query);
 
         if(empty($result->errors)) {
             $io->text(json_encode($result->toArray(), JSON_PRETTY_PRINT));
+            return 0;
         } else {
             $io->error(array_map(function(Error $error){ return FormattedError::printError($error); }, $result->errors));
+            return 1;
         }
     }
 }
