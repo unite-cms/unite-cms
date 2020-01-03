@@ -42,6 +42,9 @@ fragment articles on DemoArticle @tableAdminView {
     boolTest2
 }
 
+fragment shortArticles on DemoArticle @tableAdminView(name: "Short Articles") {
+    id
+}
 
 fragment admins on Admin @tableAdminView {
     username

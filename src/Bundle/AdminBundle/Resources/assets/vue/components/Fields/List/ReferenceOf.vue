@@ -4,7 +4,8 @@
       <span v-if="total !== null" class="uk-margin-small-right uk-label uk-label-muted">{{ total }}</span>
       <button type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
     </div>
-    <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })">
+    <div v-if="!referencedView" class="uk-alert-warning" uk-alert>{{ $t('field.reference_of.missing_view_warning') }}</div>
+    <modal v-if="referencedView && modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })">
       <component :is="$unite.getViewType(referencedView)" :view="referencedView" :embedded="true" :highlight-row="highlightRow" :filter="filter" :order-by="referencedView.orderBy" :initial-create-data="initialCreateData" @onCreate="onCreate" />
     </modal>
   </div>
@@ -48,7 +49,8 @@
 
         computed: {
             referencedView() {
-                return getAdminViewByType(this.$unite, this.field.config.content_type);
+                let view = this.field.config.listView ? this.$unite.adminViews[this.field.config.listView] : getAdminViewByType(this.$unite, this.field.config.content_type);
+                return view && view.type === this.field.config.content_type ? view : null;
             },
             contentTitle() {
                 return this.view.contentTitle(this.row);
@@ -81,3 +83,9 @@
         }
     }
 </script>
+<style scoped lang="scss">
+  .uk-alert {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+</style>

@@ -1,0 +1,14 @@
+
+directive @referenceField(
+    """Set the admin view to use when selecting a content to reference. Default is the first admin view of this type."""
+    formView: String
+) on FIELD
+
+directive @referenceOfField(
+
+    """Set the admin view to use when opening the referenced content modal in a list. Default is the first admin view of this type."""
+    listView: String
+
+    """Set the admin view to use when opening the referenced content modal in a form. Default is the first admin view of this type."""
+    formView: String
+) on FIELD

@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference_of.missing_view_warning') }] : violations">
+  <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ type: 'warning', message: $t('field.reference_of.missing_view_warning') }] : violations">
     <template v-if="contentId">
       <div class="uk-input-group" v-for="value in values">
         <span v-if="value.total !== null" class="uk-margin-small-right uk-label uk-label-muted">{{ value.total }}</span>
@@ -49,7 +49,8 @@
 
       computed: {
           referencedView() {
-              return getAdminViewByType(this.$unite, this.field.config.content_type);
+              let view = this.field.config.formView ? this.$unite.adminViews[this.field.config.formView] : getAdminViewByType(this.$unite, this.field.config.content_type);
+              return view && view.type === this.field.config.content_type ? view : null;
           },
           contentTitle() {
               let refContent = Object.assign({}, this.formData, { _meta: { id: this.contentId } });

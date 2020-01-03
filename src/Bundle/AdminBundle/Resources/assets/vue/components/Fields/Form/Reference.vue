@@ -1,5 +1,5 @@
 <template>
-  <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ level: 'warning', message: $t('field.reference.missing_view_warning') }] : violations">
+  <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ type: 'warning', message: $t('field.reference.missing_view_warning') }] : violations">
       <div class="uk-input-group uk-flex uk-flex-middle uk-flex-wrap">
         <div class="uk-label uk-label-secondary" v-for="value in values">
           {{ referencedContentTitle(value) }}
@@ -50,9 +50,8 @@
       },
       computed: {
           referencedView() {
-
-              // TODO: Allow to configure the adminView to use.
-              return getAdminViewByType(this.$unite, this.field.returnType);
+              let view = this.field.config.formView ? this.$unite.adminViews[this.field.config.formView] : getAdminViewByType(this.$unite, this.field.returnType);
+              return view && view.type === this.field.returnType ? view : null;
           }
       },
 
