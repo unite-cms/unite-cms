@@ -72,18 +72,33 @@
                 return Object.keys(this.value).length > 0;
             },
             filterableFields() {
+
+                if(!this.view) {
+                    return [];
+                }
+
                 return this.view.fields.filter((field) => {
                     let component = this.$unite.getListFieldType(field);
                     return component.filter ? !!component.filter(field, this.view, this.$unite) : false;
                 })
             },
             searchableFields() {
+
+                if(!this.view) {
+                    return [];
+                }
+
                 return this.filterableFields.filter((field) => {
                     let component = this.$unite.getListFieldType(field);
                     return component.filter ? !!component.filter(field, this.view, this.$unite).searchable : false;
                 });
             },
             filterRules() {
+
+                if(!this.view) {
+                    return [];
+                }
+
                 return this.filterableFields.map((field) => {
                     let component = this.$unite.getListFieldType(field);
                     return component.filter(field, this.view, this.$unite);

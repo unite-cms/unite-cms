@@ -172,7 +172,7 @@ messages.de = {
         },
         embedded: {
             confirm: {
-                clear_union_selection: 'Möchtest du wirklich einen anderen {view.name} Typen auswählen? Deine bisherigen Eingaben für dieses Feld gehen verloren.'
+                clear_union_selection: 'Möchtest du wirklich einen anderen Typen auswählen? Deine bisherigen Eingaben für dieses Feld gehen verloren.'
             }
         },
         sequence: {

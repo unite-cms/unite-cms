@@ -116,7 +116,7 @@
           },
 
           clearUnionView(delta) {
-              UIkit.modal.confirm(this.$t('field.embedded.confirm.clear_union_selection', this.unionView[delta])).then(() => {
+              UIkit.modal.confirm(this.$t('field.embedded.confirm.clear_union_selection')).then(() => {
                   this.setValue([{}], delta);
               });
           },
