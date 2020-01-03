@@ -12,7 +12,7 @@
                     {{ $t('content.list.deleted.deleted') }}</a></li>
             </ul>
         </div>
-        <view-filter :value="queryFilter" @input="updateQueryFilter" />
+        <view-filter :view="view" :value="queryFilter" @input="updateQueryFilter" />
         <router-link :to="to('create')" class="uk-button uk-button-primary uk-margin-left" v-if="canCreate">
             <icon class="fix-line-height" name="plus"/>
             {{ labelCreate }}
@@ -40,7 +40,8 @@
                     return this.$t('content.list.actions.create');
                 }
             },
-            queryFilter: Object
+            queryFilter: Object,
+            view: Object,
         },
         methods: {
             to(action) {

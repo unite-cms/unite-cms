@@ -1,5 +1,16 @@
 <script>
     export default {
+
+        // static abstract filter method
+        filter(field, view, unite) {
+            return {
+                searchable: true,
+                type: 'text',
+                id: field.id,
+                label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
+            };
+        },
+
         props: {
             view: Object,
             field: Object,

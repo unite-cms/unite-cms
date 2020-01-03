@@ -50,7 +50,19 @@ messages.en = {
                 select: 'Select',
                 confirm: 'Confirm selection of {count}'
             },
-            empty_placeholder: "No content found for this view."
+            empty_placeholder: "No content found for this view.",
+            search: {
+                placeholder: "Search...",
+                placeholder_filter: "{count} advanced filter applied..."
+            },
+            filter: {
+                title: 'Advanced filters',
+                field: "Field",
+                operator: 'Operator',
+                textValuePlaceholder: "Enter value...",
+                AND: 'AND',
+                OR: 'OR'
+            }
         },
         form: {
             field: {

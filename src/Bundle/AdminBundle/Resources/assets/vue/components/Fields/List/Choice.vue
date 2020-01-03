@@ -1,36 +1,57 @@
 <template>
-  <div>
-    <template v-for="value in values">
-      <span class="uk-label uk-label-muted">{{ label(value) }}</span>
-      <br v-if="!isLastValue(value)" />
-    </template>
-  </div>
+    <div>
+        <template v-for="value in values">
+            <span class="uk-label uk-label-muted">{{ label(value) }}</span>
+            <br v-if="!isLastValue(value)" />
+        </template>
+    </div>
 </template>
 <script>
-  import _abstract from "./_abstract";
-  export default {
-      extends: _abstract,
-      methods: {
-          label(value) {
+    import _abstract from "./_abstract";
+    export default {
+        extends: _abstract,
 
-              if(!value) {
-                  return null;
-              }
+        // static filter method
+        filter(field, view, unite) {
 
-              let enumType = this.$unite.getRawType(this.field.returnType);
+            let enumType = this.$unite.getRawType(this.field.returnType);
 
-              if(!enumType) {
-                  return null;
-              }
+            if(!enumType) {
+                return false;
+            }
 
-              let labels = enumType.enumValues.filter((val) => {
-                  return val.name === value;
-              }).map((val) => {
-                  return val.description || val.name;
-              });
+            return {
+                searchable: false,
+                type: 'select',
+                id: field.id,
+                label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
+                choices: enumType.enumValues.map((value) => {
+                    return {label: value.description, value: value.name}
+                }),
+            };
+        },
 
-              return labels.length > 0 ? labels[0] : value;
-          }
-      }
-  }
+        methods: {
+            label(value) {
+
+                if(!value) {
+                    return null;
+                }
+
+                let enumType = this.$unite.getRawType(this.field.returnType);
+
+                if(!enumType) {
+                    return null;
+                }
+
+                let labels = enumType.enumValues.filter((val) => {
+                    return val.name === value;
+                }).map((val) => {
+                    return val.description || val.name;
+                });
+
+                return labels.length > 0 ? labels[0] : value;
+            }
+        }
+    }
 </script>
