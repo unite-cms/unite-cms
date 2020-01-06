@@ -34,10 +34,19 @@ class ContentCriteria extends Criteria
      * @return mixed
      */
     static function castValue($value, ?string $cast = null) {
+
+        if(is_array($value)) {
+            return array_map(function($singleValue) use ($cast) { return ContentCriteria::castValue($singleValue, $cast); }, $value);
+        }
+
+        if($value === null) {
+            return $value;
+        }
+
         switch ($cast) {
             case 'INT': return intval($value);
             case 'FLOAT': return floatval($value);
-            case 'BOOLEAN': return boolval($value);
+            case 'BOOLEAN': return filter_var($value, FILTER_VALIDATE_BOOLEAN);
             default: return $value;
         }
     }

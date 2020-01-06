@@ -5,6 +5,7 @@ namespace UniteCMS\DoctrineORMBundle\Query;
 use Doctrine\Common\Collections\Expr\Comparison;
 use Doctrine\Common\Collections\Expr\CompositeExpression;
 use Doctrine\Common\Collections\Expr\Expression;
+use Doctrine\Common\Collections\Expr\Value;
 use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Query\Parameter;
@@ -14,6 +15,7 @@ use Doctrine\ORM\QueryBuilder;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Query\DataFieldComparison;
 use UniteCMS\CoreBundle\Query\DataFieldOrderBy;
+use UniteCMS\CoreBundle\Query\DataFieldValue;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
 use UniteCMS\DoctrineORMBundle\Entity\Content;
 
@@ -91,6 +93,7 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
              * @var Parameter $parameter
              */
             foreach ($visitor->getParameters() as $parameter) {
+
                 $queryBuilder->setParameter(
                     $parameter->getName(),
                     $parameter->getValue(),
@@ -148,6 +151,8 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
     public function walkComparison(Comparison $comparison)
     {
         $op = $comparison->getOperator();
+        $joined_table = null;
+        $originalComparison = null;
 
         // Add joins for reference data field comparison
         if($comparison instanceof ReferenceDataFieldComparison) {
@@ -156,6 +161,7 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
             $joined_table = 'c_' . $comparison->getRootField();
 
             // Replace comparison with joined comparison.
+            $originalComparison = $comparison;
             $comparison = new DataFieldComparison(
                 $joined_table,
                 $comparison->getOperator(),
@@ -186,11 +192,16 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
             // IS NULL and IS NOT NULL
             if (in_array($op, [Comparison::EQ, Comparison::IS, Comparison::NEQ]) && $this->walkValue($comparison->getValue()) === null) {
 
-                $pattern = '/[a-z].' . $comparison->getField() . '/';
+                if($joined_table) {
+                    $pattern = '/[a-z_]+.' . str_replace($joined_table . '.', '', $comparison->getField()) . '/';
+                } else {
+                    $pattern = '/[a-z_]+.' . $comparison->getField() . '/';
+                }
 
                 if(preg_match($pattern, $expression, $matches) !== false) {
 
-                    $field = static::wrapJSONField($matches[0]);
+                    dump($matches);
+                    $field = static::wrapJSONField($matches[0], true);
 
                     // IS NOT NULL
                     if($op === Comparison::NEQ) {
@@ -221,14 +232,31 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
             // Replace a field in a comparison
             else if ($expression instanceof \Doctrine\ORM\Query\Expr\Comparison) {
                 return new \Doctrine\ORM\Query\Expr\Comparison(
-                    static::wrapJSONField($expression->getLeftExpr()),
+                    static::wrapJSONField($expression->getLeftExpr(), true),
                     $expression->getOperator(),
-                    $expression->getRightExpr()
+                    static::wrapJSONValue($expression->getRightExpr())
                 );
             }
         }
 
         return $expression;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function walkValue(Value $value)
+    {
+        if($value instanceof DataFieldValue) {
+            if(is_bool($value->getValue())) {
+                return $value->getValue() ? 'true' : 'false';
+            }
+            if(is_numeric($value->getValue())) {
+                return '' . $value->getValue();
+            }
+        }
+
+        return parent::walkValue($value);
     }
 
     /**
@@ -249,6 +277,14 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
         $field = join('.', $parts);
         $field = sprintf("JSON_EXTRACT(%s.data, '$.%s')", $alias, $field);
         return $unquote ? sprintf('JSON_UNQUOTE(%s)', $field) : $field;
+    }
+
+    /**
+     * @param $value
+     * @return string
+     */
+    static function wrapJSONValue($value) : string {
+        return sprintf("JSON_UNQUOTE(%s)", $value);
     }
 
     /**

@@ -19,6 +19,11 @@ class ReferenceDataFieldComparison extends DataFieldComparison {
     {
         $this->referencedType = $referencedType;
         $this->referencedPath = $referencedPath;
+
+        if(count($this->referencedPath) === 1) {
+            $this->referencedPath[] = 'data';
+        }
+
         parent::__construct($field, $operator, $value, $path);
     }
 

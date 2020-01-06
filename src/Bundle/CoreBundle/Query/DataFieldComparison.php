@@ -13,7 +13,7 @@ class DataFieldComparison extends BaseFieldComparison {
     public function __construct($field, $operator, $value, array $path = ['data'])
     {
         $this->path = $path;
-        parent::__construct($field, $operator, $value);
+        parent::__construct($field, $operator, is_object($value) ? $value : new DataFieldValue($value));
     }
 
     /**
