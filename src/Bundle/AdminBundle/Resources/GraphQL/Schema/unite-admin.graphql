@@ -41,7 +41,7 @@ type UniteAdminViewField {
     required: Boolean!
     show_in_list: Boolean!
     show_in_form: Boolean!
-    form_group: String
+    form_group: UniteAdminGroup
     inline_create: Boolean!
     config: [UniteAdminViewFieldConfig!]
 }

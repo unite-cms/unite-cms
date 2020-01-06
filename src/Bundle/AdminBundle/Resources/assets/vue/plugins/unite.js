@@ -107,6 +107,18 @@ const createAdminView = function (view, unite) {
     view = removeIntroSpecType(view);
     view.listFields = function(){ return this.fields.filter(field => field.show_in_list); };
     view.formFields = function(){ return this.fields.filter(field => field.show_in_form); };
+    view.formFieldGroups = function(){
+        let groups = {};
+        this.formFields().forEach((field) => {
+            if(field.form_group) {
+                if(!groups[field.form_group.name]) {
+                    groups[field.form_group.name] = { name: field.form_group.name, icon: field.form_group.icon, fields: [] };
+                }
+                groups[field.form_group.name].fields.push(field);
+            }
+        });
+        return Object.values(groups);
+    };
 
     view.rawType = unite.getRawType(view.type);
 
@@ -307,7 +319,10 @@ export const Unite = new Vue({
                         list_of
                         show_in_list
                         show_in_form
-                        form_group
+                        form_group {
+                            name
+                            icon
+                        }
                         inline_create
                         config {
                             key

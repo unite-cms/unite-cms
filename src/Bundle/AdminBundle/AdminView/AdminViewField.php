@@ -58,7 +58,7 @@ class AdminViewField
     protected $showInForm = true;
 
     /**
-     * @var string|null $formGroup
+     * @var array|null $formGroup
      */
     protected $formGroup = null;
 
@@ -248,18 +248,18 @@ class AdminViewField
     }
 
     /**
-     * @param string|null $formGroup
+     * @param array|null $formGroup
      * @return $this
      */
-    public function setFormGroup(?string $formGroup = null) : self {
+    public function setFormGroup(?array $formGroup = null) : self {
         $this->formGroup = $formGroup;
         return $this;
     }
 
     /**
-     * @return string|null
+     * @return array|null
      */
-    public function getFormGroup() : ?string {
+    public function getFormGroup() : ?array {
         return $this->formGroup;
     }
 
