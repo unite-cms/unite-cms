@@ -1,6 +1,6 @@
 <template>
   <div class="uk-margin">
-    <label class="uk-form-label" :for="domID">{{ name }}<span class="uk-text-danger" v-if="field.required"> *</span></label>
+    <label v-if="showLabel" class="uk-form-label" :for="domID">{{ name }}<span class="uk-text-danger" v-if="field.required"> *</span></label>
     <div class="uk-form-controls">
       <slot></slot>
       <p v-if="field.description" class="uk-text-meta uk-margin-small-top">{{ field.description }}</p>
@@ -18,6 +18,10 @@
             domID: String,
             field: Object,
             alerts: Array,
+            showLabel: {
+                type: Boolean,
+                default: true
+            }
         },
         computed: {
             name() {

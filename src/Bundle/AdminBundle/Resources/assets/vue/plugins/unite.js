@@ -202,7 +202,7 @@ const createAdminView = function (view, unite) {
         let data = {};
         this.formFields().forEach((field) => {
             let type = unite.getFormFieldType(field);
-            let fieldData = formData[field.id] || undefined;
+            let fieldData = formData[field.id];
             data[field.id] = !!type.normalizeMutationData ? type.normalizeMutationData(fieldData, field, unite, depth) : fieldData;
         });
         return data;
