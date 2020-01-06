@@ -2,9 +2,9 @@
     <section class="uk-section uk-position-relative">
         <div class="uk-container">
 
-            <view-header :can-create="!embedded && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="f => queryFilter = f" />
+            <view-header :can-create="!embedded && view.actions.create && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="f => queryFilter = f" />
 
-            <inline-create v-if="embedded && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
+            <inline-create v-if="embedded && view.actions.create && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
 
             <div v-if="items.result.length > 0" class="uk-overflow-auto">
                 <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
@@ -86,6 +86,18 @@
               limit
               orderBy { field, order },
               filter { field, value, operator }
+              actions {
+                create
+                toggle_delete
+                filter
+                update
+                delete
+                translate
+                revert
+                recover
+                permanent_delete
+                user_invite
+              }
           }`
         },
         apollo: {

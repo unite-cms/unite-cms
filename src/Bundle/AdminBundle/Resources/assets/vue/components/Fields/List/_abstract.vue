@@ -25,6 +25,9 @@
             is_granted(attribute) {
                 return this.row._meta.permissions[attribute] || false;
             },
+            show_action(action) {
+                return typeof this.view.actions[action] === "undefined" || this.view.actions[action];
+            },
             to(action) {
 
                 let group = this.$route.params.viewGroup;

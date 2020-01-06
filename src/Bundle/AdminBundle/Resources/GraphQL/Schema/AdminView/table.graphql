@@ -8,6 +8,7 @@ directive @tableAdminView(
     if: Expression
     groups: [UniteAdminGroupInput]
     icon: String
+    actions: TableAdminViewActionsInput
 ) on FRAGMENT_DEFINITION
 
 type TableAdminView implements UniteAdminView{
@@ -24,4 +25,31 @@ type TableAdminView implements UniteAdminView{
     filter: UniteFilter
     orderBy: [UniteOrderBy!]
     groups: [UniteAdminGroup!]
+    actions: TableAdminViewActions!
+}
+
+type TableAdminViewActions {
+    create: Boolean!
+    toggle_delete: Boolean!
+    filter: Boolean!
+    update: Boolean!
+    delete: Boolean!
+    translate: Boolean!
+    revert: Boolean!
+    recover: Boolean!
+    permanent_delete: Boolean!
+    user_invite: Boolean!
+}
+
+input TableAdminViewActionsInput {
+    create: Boolean
+    toggle_delete: Boolean
+    filter: Boolean
+    update: Boolean
+    delete: Boolean
+    translate: Boolean
+    revert: Boolean
+    recover: Boolean
+    permanent_delete: Boolean
+    user_invite: Boolean
 }

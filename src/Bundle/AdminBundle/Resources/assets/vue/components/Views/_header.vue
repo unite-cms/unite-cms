@@ -3,7 +3,7 @@
         <div class="uk-flex-0 uk-flex uk-flex-middle">
             <h2 class="uk-margin-remove">{{ title }}</h2>
         </div>
-        <div class="uk-flex-0 uk-flex uk-flex-middle uk-margin-small-left uk-margin-right" v-if="showDeleteToggle">
+        <div class="uk-flex-0 uk-flex uk-flex-middle uk-margin-small-left uk-margin-right" v-if="showDeleteToggle && view.actions.toggle_delete">
             <ul class="uk-subnav uk-subnav-divider uk-margin-remove" style="min-width: 180px">
                 <li :class="{'uk-active' : !deleted }"><a @click.prevent="toggleDeleted" href="#">{{
                     $t('content.list.deleted.active') }}</a></li>
@@ -13,7 +13,7 @@
                     {{ $t('content.list.deleted.deleted') }}</a></li>
             </ul>
         </div>
-        <div class="uk-flex-1 uk-flex uk-flex-right uk-flex-middle">
+        <div class="uk-flex-1 uk-flex uk-flex-right uk-flex-middle" v-if="view.actions.filter">
             <view-filter :view="view" :value="queryFilter" @input="updateQueryFilter" />
         </div>
         <router-link :to="to('create')" class="uk-button uk-button-primary uk-margin-left" v-if="canCreate">

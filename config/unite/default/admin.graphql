@@ -5,7 +5,18 @@ fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home") {
     }
 }
 
-fragment categories on DemoCategory @tableAdminView(titlePattern: "Category {{name}}") {
+fragment categories on DemoCategory @tableAdminView(titlePattern: "Category {{name}}", actions: {
+    create: false
+    toggle_delete: false
+    filter: false
+    update: false
+    delete: false
+    translate: false
+    revert: false
+    recover: false
+    permanent_delete: false
+    user_invite: false
+}) {
     name @adminField(inlineCreate: true)
     articles {
         total

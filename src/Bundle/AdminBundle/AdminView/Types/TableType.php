@@ -19,10 +19,30 @@ class TableType extends AbstractAdminViewType
         $config = new ArrayCollection();
         $config->set('limit', empty($directive['settings']['limit']) ? 20 : $directive['settings']['limit']);
         $config->set('orderBy', empty($directive['settings']['orderBy']) ? [['field' => 'created', 'order' => 'DESC']] : $directive['settings']['orderBy']);
+        $config->set('actions', [
+            'create' => true,
+            'toggle_delete' => true,
+            'filter' => true,
+            'update' => true,
+            'delete' => true,
+            'translate' => true,
+            'revert' => true,
+            'recover' => true,
+            'permanent_delete' => true,
+            'user_invite' => true,
+        ]);
 
         if($directive) {
             if (!empty($directive['settings']['filter']['field']) || !empty($directive['settings']['filter']['AND']) || !empty($directive['settings']['filter']['OR'])) {
                 $config->set('filter', $directive['settings']['filter']);
+            }
+
+            if (!empty($directive['settings']['actions'])) {
+                $actions = $config->get('actions');
+                foreach($directive['settings']['actions'] as $key => $value) {
+                    $actions[$key] = (bool)$value;
+                }
+                $config->set('actions', $actions);
             }
         }
 
