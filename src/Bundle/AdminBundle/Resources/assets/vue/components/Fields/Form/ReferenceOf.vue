@@ -5,8 +5,18 @@
         <span v-if="value.total !== null" class="uk-margin-small-right uk-label uk-label-muted">{{ value.total }}</span>
         <a class="uk-icon-button uk-button-light uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="more-horizontal" /></a>
       </div>
-      <modal v-if="modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })">
-        <component :is="$unite.getViewType(referencedView)" :view="referencedView" :embedded="true" :highlight-row="highlightRow" :filter="filter" :order-by="referencedView.orderBy" :initial-create-data="initialCreateData" @onCreate="onCreate" />
+      <modal v-if="modalIsOpen" @hide="modalIsOpen = false">
+        <component :is="$unite.getViewType(referencedView)"
+                   :view="referencedView"
+                   :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })"
+                   :embedded="true"
+                   :highlight-row="highlightRow"
+                   :filter="filter"
+                   :deleted="showDeleted"
+                   :order-by="referencedView.orderBy"
+                   :initial-create-data="initialCreateData"
+                   @toggleDeleted="showDeleted = !showDeleted"
+                   @onCreate="onCreate" />
       </modal>
     </template>
     <div v-else class="uk-placeholder uk-padding-small">{{ $t('field.reference_of.no_content_id') }}</div>
@@ -35,6 +45,7 @@
       data() {
           return {
               modalIsOpen: false,
+              showDeleted: false,
               highlightRow: null,
           }
       },

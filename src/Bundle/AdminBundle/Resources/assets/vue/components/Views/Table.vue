@@ -2,7 +2,7 @@
     <section class="uk-section uk-position-relative">
         <div class="uk-container">
 
-            <view-header v-if="!embedded" :can-create="is_granted('create')" :view="view" :title="view.name" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="f => queryFilter = f" />
+            <view-header :can-create="!embedded && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="f => queryFilter = f" />
 
             <inline-create v-if="embedded && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
 

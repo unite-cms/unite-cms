@@ -5,8 +5,18 @@
       <button type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
     </div>
     <div v-if="!referencedView" class="uk-alert-warning" uk-alert>{{ $t('field.reference_of.missing_view_warning') }}</div>
-    <modal v-if="referencedView && modalIsOpen" @hide="modalIsOpen = false" :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })">
-      <component :is="$unite.getViewType(referencedView)" :view="referencedView" :embedded="true" :highlight-row="highlightRow" :filter="filter" :order-by="referencedView.orderBy" :initial-create-data="initialCreateData" @onCreate="onCreate" />
+    <modal v-if="referencedView && modalIsOpen" @hide="modalIsOpen = false">
+      <component :is="$unite.getViewType(referencedView)"
+                 :view="referencedView"
+                 :title="$t('field.reference_of.modal.headline', { name: field.name, contentTitle: contentTitle })"
+                 :embedded="true"
+                 :deleted="showDeleted"
+                 :highlight-row="highlightRow"
+                 :filter="filter"
+                 :order-by="referencedView.orderBy"
+                 :initial-create-data="initialCreateData"
+                 @onCreate="onCreate"
+                 @toggleDeleted="showDeleted = !showDeleted" />
     </modal>
   </div>
 </template>
@@ -23,6 +33,7 @@
             return {
                 highlightRow: null,
                 modalIsOpen: false,
+                showDeleted: false,
             }
         },
 

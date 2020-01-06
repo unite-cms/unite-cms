@@ -71,6 +71,11 @@ union Blocks = Text | Headline
 type DemoCategory implements UniteContent {
     _meta: UniteContentMeta
     id: ID
+
+    """Float title
+    This is a longer float description.
+    It can also be multipel lines
+    """
     float: Float @floatField
     name: String! @textField
     articles(filter: UniteFilterInput, orderBy: [UniteOrderByInput!], limit: Int = 20, offset: Int = 0): UniteContentResult @referenceOfField(content_type: "DemoArticle", reference_field: "main_category")

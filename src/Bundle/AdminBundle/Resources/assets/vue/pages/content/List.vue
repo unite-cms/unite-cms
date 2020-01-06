@@ -3,6 +3,7 @@
              :view="view"
              :order-by="view.orderBy"
              :filter="view.filter"
+             :title="view.name"
              :deleted="!!$route.query.deleted"
              :highlight-row="$route.query.updated"
              :offset="parseInt($route.query.offset || 0)"

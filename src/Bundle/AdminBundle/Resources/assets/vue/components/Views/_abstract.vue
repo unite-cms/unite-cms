@@ -11,6 +11,7 @@
             view: Object,
             orderBy: Array,
             filter: Object,
+            title: String,
             offset: {
                 type: Number,
                 default: 0,

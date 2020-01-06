@@ -7,8 +7,19 @@
         </div>
         <a :id="domID" @click.prevent="selectModalOpen = true" :disabled="!referencedView" class="uk-icon-button uk-button-light uk-icon-button-small"><icon name="plus" /></a>
       </div>
-      <modal v-if="referencedView && selectModalOpen" @hide="selectModalOpen = false" :title="$t('field.reference.modal.headline')">
-        <component :is="$unite.getViewType(referencedView)" :view="referencedView" :highlight-row="highlightRow" :order-by="referencedView.orderBy" :initial-selection="values" :embedded="true" :select="field.list_of ? 'MULTIPLE' : 'SINGLE'" @select="onSelect" @onCreate="onCreate" />
+      <modal v-if="referencedView && selectModalOpen" @hide="selectModalOpen = false">
+        <component :is="$unite.getViewType(referencedView)"
+                   :view="referencedView"
+                   :title="referencedView.name"
+                   :highlight-row="highlightRow"
+                   :order-by="referencedView.orderBy"
+                   :initial-selection="values"
+                   :deleted="showDeleted"
+                   :embedded="true"
+                   :select="field.list_of ? 'MULTIPLE' : 'SINGLE'"
+                   @toggleDeleted="showDeleted = !showDeleted"
+                   @select="onSelect"
+                   @onCreate="onCreate" />
       </modal>
   </form-row>
 </template>
@@ -45,6 +56,7 @@
           return {
               referencedContent: [],
               selectModalOpen: false,
+              showDeleted: false,
               highlightRow: null,
           };
       },
