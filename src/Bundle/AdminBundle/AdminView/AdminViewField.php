@@ -154,6 +154,16 @@ class AdminViewField
     }
 
     /**
+     * @param string $name
+     * @return $this
+     */
+    public function setName(string $name) : self
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
      * @return string|null
      */
     public function getDescription(): ?string

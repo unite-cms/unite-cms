@@ -1,5 +1,6 @@
 
 directive @adminField(
+    name: String
     listIf: Expression
     formIf: Expression
     formGroup: String

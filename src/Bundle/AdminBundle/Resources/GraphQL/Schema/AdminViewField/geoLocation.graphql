@@ -13,6 +13,7 @@ input GeoLocationAdminFieldGoogleConfig {
 }
 
 directive @geoLocationAdminField(
+    name: String
     listIf: Expression
     formIf: Expression
     formGroup: String

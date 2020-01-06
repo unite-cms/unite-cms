@@ -35,6 +35,11 @@ class GenericFieldConfigurator implements AdminFieldConfiguratorInterface, Schem
      * @param AdminViewField $field
      */
     protected function processAdminFieldDirective(array $directive, AdminViewField $field) {
+
+        if(!empty($directive['args']['name'])) {
+            $field->setName($directive['args']['name']);
+        }
+
         if(!empty($directive['args']['listIf'])) {
             $field->setShowInList((bool)$this->expressionLanguage->evaluate($directive['args']['listIf']));
         }

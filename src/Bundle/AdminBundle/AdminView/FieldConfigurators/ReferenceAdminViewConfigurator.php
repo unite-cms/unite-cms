@@ -6,7 +6,7 @@ use UniteCMS\AdminBundle\AdminView\AdminView;
 use UniteCMS\AdminBundle\AdminView\AdminViewField;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 
-class ReferenceAdminViewFieldConfigurator extends GenericFieldConfigurator
+class ReferenceAdminViewConfigurator extends GenericFieldConfigurator
 {
     /**
      * {@inheritDoc}
@@ -21,7 +21,7 @@ class ReferenceAdminViewFieldConfigurator extends GenericFieldConfigurator
      */
     public function configureField(AdminViewField $field, AdminView $adminView, ContentType $contentType) {
         foreach($field->getDirectives() as $directive) {
-            if($directive['name'] === 'referenceField' || $directive['name'] === 'referenceOfField') {
+            if($directive['name'] === 'referenceAdminView') {
 
                 if(!empty($directive['args']['listView'])) {
                     $field->getConfig()->set('listView', $directive['args']['listView']);
