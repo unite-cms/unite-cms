@@ -1,6 +1,6 @@
 <template>
     <div class="uk-flex-1" style="min-width: 180px; max-width: 360px;">
-        <form class="uk-search uk-search-default uk-width-expand" v-if="filterRules.length > 0" @submit.prevent="applySearch(searchInput)">
+        <form class="uk-search uk-search-default uk-search-rounded uk-width-expand" v-if="filterRules.length > 0" @submit.prevent="applySearch(searchInput)">
             <button type="submit" class="uk-icon uk-search-icon"><icon name="search" /></button>
             <input id="view-filter-search" class="uk-search-input" type="search" :placeholder="$t(advancedFilter ? 'content.list.search.placeholder_filter' : 'content.list.search.placeholder')" v-model="searchInput">
             <button type="button" class="uk-search-icon-flip uk-icon uk-search-icon" :class="{ 'uk-text-danger': hasFilterRules }" @click="tmpFilter = Object.assign(value)"><icon name="sliders" /></button>
