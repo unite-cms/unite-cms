@@ -4,14 +4,14 @@ namespace UniteCMS\CoreBundle\Query;
 
 use Doctrine\Common\Collections\Expr\CompositeExpression;
 use Doctrine\Common\Collections\Expr\Expression;
-use InvalidArgumentException;
 use UniteCMS\CoreBundle\ContentType\ContentType;
+use UniteCMS\CoreBundle\Exception\UnknownFieldException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
 class ContentCriteriaBuilder
 {
     /**
-     * @var \UniteCMS\CoreBundle\Field\FieldTypeManager $fieldTypeManager
+     * @var FieldTypeManager $fieldTypeManager
      */
     protected $fieldTypeManager;
 
@@ -21,10 +21,11 @@ class ContentCriteriaBuilder
     }
 
     /**
-     * @param \UniteCMS\CoreBundle\ContentType\ContentType $contentType
+     * @param ContentType $contentType
      * @param array $where
      *
-     * @return \Doctrine\Common\Collections\Expr\Expression
+     * @return Expression
+     * @throws UnknownFieldException
      */
     protected function buildNestedWhereExpression(ContentType $contentType, array $where) : Expression {
 
@@ -64,7 +65,7 @@ class ContentCriteriaBuilder
             }
         }
 
-        throw new InvalidArgumentException();
+        throw new UnknownFieldException(sprintf('Field "%s" was not found on type "%s".', $where['field'], $contentType->getId()));
     }
 
     /**
@@ -72,6 +73,7 @@ class ContentCriteriaBuilder
      * @param ContentType $contentType
      *
      * @return ContentCriteria
+     * @throws UnknownFieldException
      */
     public function build(array $args, ContentType $contentType) : ContentCriteria {
 

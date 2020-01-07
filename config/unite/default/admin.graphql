@@ -6,7 +6,7 @@ fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home") {
 }
 
 fragment categories on DemoCategory @tableAdminView(titlePattern: "Category {{name}}", actions: {
-    create: false
+    create: true
     toggle_delete: false
     filter: false
     update: false

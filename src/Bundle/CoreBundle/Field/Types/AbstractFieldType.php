@@ -181,22 +181,24 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
 
         switch ($this->GraphQLInputType($field)) {
             case Type::INT:
-                $whereInput['value'] = array_map(function($value){ return (int)$value; }, $whereInput['value']);
+                $whereInput['value'] = ContentCriteria::castValue($whereInput['value'], 'INT');
                 break;
 
             case Type::FLOAT:
-                $whereInput['value'] = array_map(function($value){ return (float)$value; }, $whereInput['value']);
+                $whereInput['value'] = ContentCriteria::castValue($whereInput['value'], 'FLOAT');
                 break;
 
             case Type::BOOLEAN:
-                $whereInput['value'] = array_map(function($value){ return filter_var($value, FILTER_VALIDATE_BOOLEAN); }, $whereInput['value']);
+                $whereInput['value'] = ContentCriteria::castValue($whereInput['value'], 'BOOLEAN');
                 break;
         }
+
+        $whereInput['value'] = count($whereInput['value']) > 1 ? $whereInput['value'] : $whereInput['value'][0];
 
         return new DataFieldComparison(
             $field->getId(),
             ContentCriteria::OPERATOR_MAP[$whereInput['operator']],
-            ContentCriteria::castValue($whereInput['value'], $whereInput['cast'] ?? null),
+            $whereInput['value'],
             $whereInput['path'] ?? ['data']
         );
     }
