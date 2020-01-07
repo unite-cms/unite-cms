@@ -85,7 +85,7 @@
             adminView: gql`fragment TableAdminViewFragment on TableAdminView {
               limit
               orderBy { field, order },
-              filter { field, value, operator }
+              filter { field, value, operator, path, cast }
               actions {
                 create
                 toggle_delete
