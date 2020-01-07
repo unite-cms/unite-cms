@@ -10,6 +10,8 @@ class ContentCriteria extends Criteria
     const BASE_FIELDS = ['id', 'created', 'updated', 'deleted', 'locale', 'translate'];
 
     const NCONTAINS = 'NCONTAINS';
+    const ICONTAINS = 'ICONTAINS';
+    const INCONTAINS = 'INCONTAINS';
 
     const OPERATOR_MAP = [
         'EQ' => Comparison::EQ,
@@ -22,10 +24,12 @@ class ContentCriteria extends Criteria
         'IN' => Comparison::IN,
         'NIN' => Comparison::NIN,
         'CONTAINS' => Comparison::CONTAINS,
-        'NCONTAINS' => self::NCONTAINS,
+        /*'NCONTAINS' => self::NCONTAINS,
+        'ICONTAINS' => self::ICONTAINS,
+        'INCONTAINS' => self::INCONTAINS,
         'MEMBER_OF' => Comparison::MEMBER_OF,
         'STARTS_WITH' => Comparison::STARTS_WITH,
-        'ENDS_WITH' => Comparison::ENDS_WITH,
+        'ENDS_WITH' => Comparison::ENDS_WITH,*/
     ];
 
     /**
