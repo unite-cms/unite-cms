@@ -1,67 +1,96 @@
 <template>
-  <div>
-    <div v-for="value in values">
-      <template v-for="nestedField in nestedFields(value)">
-        <component :is="$unite.getListFieldType(nestedField)" :field="nestedField" :row="value" />
-      </template>
+    <div>
+        <div v-for="value in values">
+            <template v-for="nestedField in nestedFields(value)">
+                <component :is="$unite.getListFieldType(nestedField)" :field="nestedField" :row="value" />
+            </template>
+        </div>
     </div>
-  </div>
 </template>
 <script>
-  import _abstract from "./_abstract";
-  import { getAdminViewByType } from "../../../plugins/unite";
+    import _abstract from "./_abstract";
+    import { getAdminViewByType } from "../../../plugins/unite";
+    import CheckboxInput from "../../Views/Filter/Input/CheckboxInput";
 
-  export default {
-      extends: _abstract,
-      computed: {
-          referencedView() {
-              return getAdminViewByType(this.$unite, this.field.returnType);
-          }
-      },
-      methods: {
-          nestedFields(value) {
-              return Object.keys(value).map((key) => {
-                  return key === '__typename' ? null : this.fieldComponent(key, value.__typename)
-              }).filter((field) => { return !!field });
-          },
-          fallbackField(key) {
-              let type = 'unknown';
+    export default {
 
-              if(key === 'id') {
-                  type = 'id';
-              }
+        // static filter method
+        filter(field, view, unite) {
 
-              return {
-                  type: type,
-                  id: key,
-              };
-          },
+            // If this is an alias field
+            if(field.id !== field.type) {
+                return []
+            }
 
-          referencedRowView(type) {
+            let referencedView = getAdminViewByType(unite, field.returnType);
+            let referencedFilterRules = [];
+            referencedView.fields.forEach((field) => {
+                if(field.fieldType !== 'reference' && field.fieldType !== 'embedded') {
+                    let component = unite.getListFieldType(field);
+                    if(component.filter) {
+                        referencedFilterRules = [...referencedFilterRules, ...component.filter(field, view, unite)];
+                    }
+                }
+            });
 
-              if(!this.referencedView) {
-                  return null;
-              }
+            return referencedFilterRules.map((rule) => {
+                rule.path = rule.id;
+                rule.id = field.id;
+                rule.label = field.name.slice(0, 1).toUpperCase() + field.name.slice(1) + ' » ' + rule.label;
+                return rule;
+            });
+        },
 
-              if(this.referencedView.category === 'union') {
-                  let views = this.referencedView.possibleViews.filter((view) => { return view.type === type; });
-                  return views.length > 0 ? views[0] : null;
-              }
+        extends: _abstract,
+        computed: {
+            referencedView() {
+                return getAdminViewByType(this.$unite, this.field.returnType);
+            }
+        },
+        methods: {
+            nestedFields(value) {
+                return Object.keys(value).map((key) => {
+                    return key === '__typename' ? null : this.fieldComponent(key, value.__typename)
+                }).filter((field) => { return !!field });
+            },
+            fallbackField(key) {
+                let type = 'unknown';
 
-              return this.referencedView;
-          },
+                if(key === 'id') {
+                    type = 'id';
+                }
 
-          fieldComponent(key, type) {
+                return {
+                    type: type,
+                    id: key,
+                };
+            },
 
-              if(!this.referencedView) {
-                  return this.fallbackField(key);
-              }
-              let referencedField = this.referencedRowView(type).fields.filter((field) => {
-                  return field.id === key;
-              });
+            referencedRowView(type) {
 
-              return referencedField.length > 0 ? referencedField[0] : this.fallbackField(key);
-          }
-      }
-  }
+                if(!this.referencedView) {
+                    return null;
+                }
+
+                if(this.referencedView.category === 'union') {
+                    let views = this.referencedView.possibleViews.filter((view) => { return view.type === type; });
+                    return views.length > 0 ? views[0] : null;
+                }
+
+                return this.referencedView;
+            },
+
+            fieldComponent(key, type) {
+
+                if(!this.referencedView) {
+                    return this.fallbackField(key);
+                }
+                let referencedField = this.referencedRowView(type).fields.filter((field) => {
+                    return field.id === key;
+                });
+
+                return referencedField.length > 0 ? referencedField[0] : this.fallbackField(key);
+            }
+        }
+    }
 </script>

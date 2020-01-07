@@ -50,10 +50,18 @@ class ContentCriteriaBuilder
         elseif(!empty($where['field']) && !empty($where['operator'])) {
 
             if(in_array($where['field'], ContentCriteria::BASE_FIELDS)) {
+
+                $whereValue = null;
+
+                if($where['value']) {
+                    $whereValue = ContentCriteria::castValue($where['value'], $where['cast'] ?? null);
+                    $whereValue = count($whereValue) > 1 ? $whereValue : $whereValue[0];
+                }
+
                 return new BaseFieldComparison(
                     $where['field'],
                     ContentCriteria::OPERATOR_MAP[$where['operator']],
-                    ContentCriteria::castValue($where['value'], $where['cast'] ?? null)
+                    $whereValue
                 );
             }
 

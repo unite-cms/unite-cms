@@ -11,8 +11,8 @@
   export default {
       extends: _abstract,
 
-      // static filter method
-      filter(field, view, unite) { return _abstract.filter(field, view, unite); },
+    // static filter method
+    filter(field, view, unite) { return _abstract.filter(field, view, unite); },
   }
 </script>
 <style scoped lang="scss">

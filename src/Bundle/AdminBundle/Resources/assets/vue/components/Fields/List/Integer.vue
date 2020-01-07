@@ -13,10 +13,14 @@
         extends: _abstract,
 
         // static filter method
-        filter(field, view, unite) { return Object.assign(_abstract.filter(field, view, unite), {
-            operators: ['EQ', 'NEQ', 'GT', 'LT', 'GTE', 'LTE'],
-            cast: 'INT',
-            input: TextInput
-        }); },
+        filter(field, view, unite) {
+            return _abstract.filter(field, view, unite).map((filter) => {
+                return Object.assign(filter, {
+                    searchable: false,
+                    operators: ['EQ', 'NEQ', 'GT', 'LT', 'GTE', 'LTE'],
+                    input: TextInput
+                })
+            });
+        },
     }
 </script>

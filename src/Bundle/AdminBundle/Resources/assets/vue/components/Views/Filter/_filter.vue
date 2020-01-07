@@ -1,14 +1,17 @@
 <template>
     <div class="uk-flex-1" style="min-width: 180px; max-width: 360px;">
         <form class="uk-search uk-search-default uk-search-rounded uk-width-expand" v-if="filterRules.length > 0" @submit.prevent="applySearch(searchInput)">
-            <button type="submit" class="uk-icon uk-search-icon"><icon name="search" /></button>
+            <button type="submit" class="uk-icon uk-search-icon">
+                <icon v-if="!advancedFilter" name="search" />
+                <icon v-else name="x-circle" class="uk-text-danger" />
+            </button>
             <input id="view-filter-search" class="uk-search-input" type="search" :placeholder="$t(advancedFilter ? 'content.list.search.placeholder_filter' : 'content.list.search.placeholder')" v-model="searchInput">
-            <button type="button" class="uk-search-icon-flip uk-icon uk-search-icon" :class="{ 'uk-text-danger': hasFilterRules }" @click="tmpFilter = Object.assign(value)"><icon name="sliders" /></button>
+            <button :title="$t('content.list.filter.title')" uk-tooltip type="button" class="uk-search-icon-flip uk-icon uk-search-icon" :class="{ 'uk-text-primary': hasFilterRules }" @click="tmpFilter = Object.assign(value)"><icon name="command" /></button>
         </form>
         <modal v-if="tmpFilter" @hide="tmpFilter = null" :title="$t('content.list.filter.title')">
-            <div slot class="uk-padding-small">
-                <filter-rule :fields="filterRules" v-model="tmpFilter" />
-            </div>
+            <form slot class="uk-padding-small" @submit.prevent="applyFilter(tmpFilter)">
+                <filter-rule :rules="filterRules" v-model="tmpFilter" />
+            </form>
             <div slot="footer" uk-grid>
                 <div class="uk-text-left uk-flex-1">
                     <button class="uk-button uk-button-danger" type="button" @click="applyFilter()">{{ $t('content.list.filter.clear') }}</button>
@@ -28,10 +31,16 @@
     import FilterRule from "./_filterRule";
 
     const normalizeFilter = function(filter){
+
+        if(!filter) {
+            return null;
+        }
+
         if(filter.field && filter.operator) {
             return {
                 field: filter.field,
                 operator: filter.operator,
+                path: filter.path || undefined,
                 cast: filter.cast || undefined,
                 value: filter.value,
             }
@@ -71,38 +80,20 @@
             hasFilterRules() {
                 return Object.keys(this.value).length > 0;
             },
-            filterableFields() {
-
-                if(!this.view) {
-                    return [];
-                }
-
-                return this.view.fields.filter((field) => {
-                    let component = this.$unite.getListFieldType(field);
-                    return component.filter ? !!component.filter(field, this.view, this.$unite) : false;
-                })
-            },
-            searchableFields() {
-
-                if(!this.view) {
-                    return [];
-                }
-
-                return this.filterableFields.filter((field) => {
-                    let component = this.$unite.getListFieldType(field);
-                    return component.filter ? !!component.filter(field, this.view, this.$unite).searchable : false;
-                });
-            },
             filterRules() {
 
                 if(!this.view) {
                     return [];
                 }
 
-                return this.filterableFields.map((field) => {
+                let rules = [];
+                this.view.fields.forEach((field) => {
                     let component = this.$unite.getListFieldType(field);
-                    return component.filter(field, this.view, this.$unite);
+                    if(component.filter) {
+                        rules = [...rules, ...component.filter(field, this.view, this.$unite)];
+                    }
                 });
+                return rules;
             },
             filterLabels() {
                 return {
@@ -123,16 +114,17 @@
             applySearch(value) {
                 this.advancedFilter = false;
                 this.$emit('input', !value ? {} : {
-                    OR: this.searchableFields.map((field) => {
+                    OR: this.filterRules.filter((rule) => { return rule.searchable }).map((rule) => {
                         return {
-                            field: field.id,
+                            field: rule.id,
+                            path: rule.path || undefined,
                             operator: 'CONTAINS',
                             value: `%${value}%`
                         };
                     }),
                 });
             },
-            applyFilter(filter) {
+            applyFilter(filter = null) {
                 this.searchInput = null;
                 this.advancedFilter = true;
                 this.$emit('input', Object.assign({}, normalizeFilter(filter)));

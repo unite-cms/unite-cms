@@ -9,9 +9,27 @@
 <script>
     import _abstract from "./_abstract";
     import SelectInput from "../../Views/Filter/Input/SelectInput";
+    import TextInput from "../../Views/Filter/Input/TextInput";
 
     export default {
         extends: _abstract,
+
+        // static abstract filter method
+        filter(field, view, unite) {
+
+            // If this is an alias field
+            if(field.id !== field.type) {
+                return []
+            }
+
+            return [{
+                searchable: true,
+                id: field.id,
+                label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
+                operators: ['EQ', 'NEQ', 'CONTAINS', 'NCONTAINS'],
+                input: TextInput
+            }];
+        },
 
         // static filter method
         filter(field, view, unite) {
@@ -19,10 +37,10 @@
             let enumType = unite.getRawType(field.returnType);
 
             if(!enumType) {
-                return false;
+                return [];
             }
 
-            return {
+            return [{
                 searchable: false,
                 id: field.id,
                 label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
@@ -33,7 +51,7 @@
                         return {label: value.description, value: value.name}
                     })
                 },
-            };
+            }];
         },
 
         methods: {
