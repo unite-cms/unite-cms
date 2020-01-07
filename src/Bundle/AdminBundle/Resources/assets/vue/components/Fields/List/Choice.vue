@@ -26,7 +26,7 @@
                 searchable: true,
                 id: field.id,
                 label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
-                operators: ['EQ', 'NEQ', 'CONTAINS', 'NCONTAINS'],
+                operators: ['EQ', 'NEQ'],
                 input: TextInput
             }];
         },

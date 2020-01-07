@@ -119,7 +119,7 @@
                             field: rule.id,
                             path: rule.path || undefined,
                             operator: 'CONTAINS',
-                            value: `%${value}%`
+                            value: value
                         };
                     }),
                 });

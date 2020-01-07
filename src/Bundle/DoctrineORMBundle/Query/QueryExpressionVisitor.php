@@ -190,7 +190,7 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 
             // If this is a referenced base field, we transform it to ba base field.
             if(in_array($rootField, ContentCriteria::BASE_FIELDS)) {
-                $comparison = new BaseFieldComparison($alias . '.' . $rootField, $comparison->getOperator(), $comparison->getValue());
+                $comparison = new BaseFieldComparison($alias . '.' . $rootField, $op, $comparison->getValue());
             }
         }
 
@@ -199,14 +199,22 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 
         // Base field comparison can be just returned.
         if(!$comparison instanceof DataFieldComparison) {
+
+            // If this base field comparison has a custom operator
+            if($comparison instanceof BaseFieldComparison && $comparison->getCustomOperator() && $comparison->getCustomOperator() === ContentCriteria::NCONTAINS) {
+                return 'NOT ' . $expression;
+            }
+
             return $expression;
         }
 
-        $value = $expression instanceof \Doctrine\ORM\Query\Expr\Comparison ? $expression->getRightExpr() : null;
-
         // CONTAINS
-        if(in_array($op, [Comparison::CONTAINS, ContentCriteria::NCONTAINS])) {
-            return static::wrapJSONSearch($alias, $field, $value, $op);
+        if(in_array($op, [Comparison::CONTAINS])) {
+            return new \Doctrine\ORM\Query\Expr\Comparison(
+                sprintf('UPPER(%s)', static::wrapJSONField($alias, $field)),
+                $comparison->getCustomOperator() === ContentCriteria::NCONTAINS ? 'NOT LIKE' : 'LIKE',
+                sprintf('UPPER(%s)', static::wrapJSONValue($expression->getRightExpr()))
+            );
         }
 
         // IS NULL and IS NOT NULL
@@ -280,16 +288,5 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
      */
     static function wrapJSONValue($value) : string {
         return sprintf("JSON_UNQUOTE(%s)", $value);
-    }
-
-    /**
-     * @param string $alias
-     * @param string $field
-     * @param string $value
-     * @param string $operator
-     * @return string
-     */
-    static function wrapJSONSearch(string $alias, string $field, string $value, string $operator) : string {
-        return sprintf("JSON_SEARCH(%s.data, 'one', %s, NULL, '$.%s') %s", $alias, $value, $field, ($operator === Comparison::CONTAINS ? ' IS NOT NULL' : ' IS NULL'));
     }
 }

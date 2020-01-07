@@ -100,6 +100,18 @@ class ContentCriteriaFunctionalTest extends DatabaseAwareTestCase
             $this->content['A2'],
         ], $manager->find($domain, 'TestContentA', $criteria)->getResult());
 
+        // Find content with title Baa
+        $criteria = new ContentCriteria(new DataFieldComparison('a_text', DataFieldComparison::CONTAINS, 'ba'));
+        $this->assertEquals([
+            $this->content['A2'],
+        ], $manager->find($domain, 'TestContentA', $criteria)->getResult());
+
+        // Find content with title Baa
+        $criteria = new ContentCriteria(new DataFieldComparison('a_text', ContentCriteria::NCONTAINS, 'ba'));
+        $this->assertEquals([
+            $this->content['A1'],
+        ], $manager->find($domain, 'TestContentA', $criteria)->getResult());
+
         // Find content with title Baa or bool true
         $criteria = new ContentCriteria(new CompositeExpression(CompositeExpression::TYPE_OR, [
             new DataFieldComparison('a_text', DataFieldComparison::EQ, 'Baa'),

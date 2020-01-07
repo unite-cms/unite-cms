@@ -48,6 +48,9 @@ enum OPERATOR {
 
     """Contains"""
     CONTAINS
+
+    """Not contains"""
+    NCONTAINS
 }
 
 enum CAST {
