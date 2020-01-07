@@ -20,7 +20,7 @@ class ReferenceDataFieldComparison extends DataFieldComparison {
         $this->referencedType = $referencedType;
         $this->referencedPath = $referencedPath;
 
-        if(count($this->referencedPath) === 1) {
+        if(count($this->referencedPath) === 1 && !in_array($this->referencedPath[0], ContentCriteria::BASE_FIELDS)) {
             $this->referencedPath[] = 'data';
         }
 
@@ -40,5 +40,13 @@ class ReferenceDataFieldComparison extends DataFieldComparison {
      */
     public function getReferencedPath() : array {
         return array_merge($this->referencedPath);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getField()
+    {
+        return join('.', array_merge($this->referencedPath));
     }
 }

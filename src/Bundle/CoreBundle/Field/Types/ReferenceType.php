@@ -19,8 +19,11 @@ use UniteCMS\CoreBundle\ContentType\ContentTypeField;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\BaseFieldComparison;
+use UniteCMS\CoreBundle\Query\BaseFieldOrderBy;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
+use UniteCMS\CoreBundle\Query\DataFieldOrderBy;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
+use UniteCMS\CoreBundle\Query\ReferenceDataFieldOrderBy;
 
 class ReferenceType extends AbstractFieldType
 {
@@ -151,6 +154,19 @@ class ReferenceType extends AbstractFieldType
             new NotNull(),
             [$context->getGroup()]
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function queryOrderBy(ContentTypeField $field, array $whereInput) : ?BaseFieldOrderBy {
+
+        $parts = explode($whereInput['field'], '.');
+        if(count($parts) > 1) {
+            return new ReferenceDataFieldOrderBy(array_shift($parts), join('.', $parts), $whereInput['order']);
+        }
+
+        return parent::queryOrderBy($field, $whereInput);
     }
 
     /**
