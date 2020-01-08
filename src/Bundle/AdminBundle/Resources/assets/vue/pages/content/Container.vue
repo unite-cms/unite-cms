@@ -1,5 +1,5 @@
 <template>
-  <section class="uk-height-1-1">
+  <section>
     <router-view></router-view>
     <div class="uk-overlay-default uk-position-cover" v-if="loading">
       <div uk-spinner class="uk-position-center"></div>

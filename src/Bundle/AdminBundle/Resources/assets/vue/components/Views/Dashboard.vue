@@ -1,8 +1,5 @@
 <template>
     <section class="uk-position-relative uk-padding">
-
-        <view-header :title="view.name" :show-delete-toggle="false" />
-
         <div class="uk-flex-middle" uk-grid v-if="dashboard">
             <basic-section :title="$t('dashboard.basic.title')" :data="dashboard" />
         </div>

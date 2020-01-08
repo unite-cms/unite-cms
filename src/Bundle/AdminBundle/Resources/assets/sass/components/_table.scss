@@ -35,26 +35,35 @@
   }
 }
 
-.uk-overflow-auto {
-  padding: 0 $container-padding-horizontal $container-padding-horizontal;
-  margin-left: -$container-padding-horizontal;
-  margin-right: -$container-padding-horizontal;
-  margin-bottom: -$global-margin;
-}
+.table-overflow-container {
+  overflow: visible;
+  overflow-x: auto;
+  padding: $padding-padding;
+  margin: -$padding-padding;
+  position: relative;
 
-@media (min-width: $breakpoint-small) {
-  .uk-overflow-auto {
-    padding: 0 $container-padding-horizontal-s $container-padding-horizontal-s;
-    margin-left: -$container-padding-horizontal-s;
-    margin-right: -$container-padding-horizontal-s;
+  &.with-overflow {
+    :after {
+      content: "";
+      display: block;
+      position: absolute;
+      right: -$padding-padding;
+      width: $padding-padding;
+      height: 1px;
+    }
   }
-
 }
 
-@media (min-width: $breakpoint-medium) {
-  .uk-overflow-auto {
-    padding: 0 $container-padding-horizontal-m $container-padding-horizontal-m;
-    margin-left: -$container-padding-horizontal-m;
-    margin-right: -$container-padding-horizontal-m;
+@media (min-width: $breakpoint-large) {
+  .table-overflow-container {
+    padding: $padding-padding-l;
+    margin: -$padding-padding-l;
+
+    &.with-overflow {
+      :after {
+        right: -$padding-padding-l;
+        width: $padding-padding-l;
+      }
+    }
   }
 }

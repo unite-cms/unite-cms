@@ -23,6 +23,11 @@
             }
 
             let referencedView = getAdminViewByType(unite, field.returnType);
+
+            if(!referencedView || !referencedView.fields) {
+                return [];
+            }
+
             let referencedFilterRules = [];
             referencedView.fields.forEach((field) => {
                 if(field.fieldType !== 'reference' && field.fieldType !== 'embedded') {

@@ -6,7 +6,7 @@
 
             <inline-create v-if="embedded && view.actions.create && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
 
-            <div v-if="items.result.length > 0" class="uk-overflow-auto">
+            <div v-if="items.result.length > 0" class="uk-overflow-auto table-overflow-container" :class="{ 'with-overflow': overflow }" @scroll="overflow = true">
                 <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
                     <thead>
                     <tr>
@@ -74,6 +74,7 @@
         components: { InlineCreate, ViewHeader, ViewPagination, actionsField, Icon },
         data() {
             return {
+                overflow: false,
                 queryFilter: {},
                 items: {
                     total: 0,
@@ -175,6 +176,7 @@
         },
         watch: {
             '$route'(route){
+                this.overflow = false;
                 this.queryFilter = {};
                 this.reloadItems();
             }
@@ -227,7 +229,7 @@
                 }
 
                 this.$emit('onCreate', id);
-            }
+            },
         }
     }
 </script>
