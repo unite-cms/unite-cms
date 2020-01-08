@@ -198,6 +198,7 @@
             updateOffset(page) {
 
                 if (this.embedded) {
+                    this.offset = page.offset;
                     this.reloadItems();
 
                 } else {

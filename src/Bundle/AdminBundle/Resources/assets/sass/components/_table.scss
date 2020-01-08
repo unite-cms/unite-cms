@@ -38,8 +38,9 @@
 .table-overflow-container {
   overflow: visible;
   overflow-x: auto;
-  padding: $padding-padding;
   margin: -$padding-padding;
+  margin-top: 0;
+  padding: 0 $padding-padding $padding-padding;
   position: relative;
 
   &.with-overflow {
@@ -56,8 +57,9 @@
 
 @media (min-width: $breakpoint-large) {
   .table-overflow-container {
-    padding: $padding-padding-l;
     margin: -$padding-padding-l;
+    margin-top: 0;
+    padding: 0 $padding-padding-l $padding-padding-l;
 
     &.with-overflow {
       :after {
