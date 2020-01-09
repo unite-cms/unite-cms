@@ -1,6 +1,6 @@
 <template>
     <section class="uk-section uk-position-relative">
-        <div class="uk-container">
+        <div class="uk-container" style="max-width: none;">
 
             <view-header :can-create="!embedded && view.actions.create && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="f => queryFilter = f" />
 
