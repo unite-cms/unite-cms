@@ -16,6 +16,7 @@ class ContentVoter extends Voter
     const MUTATION = 'mutation';
     const CREATE = 'create';
     const READ = 'read';
+    const COUNT = 'count';
     const UPDATE = 'update';
     const DELETE = 'delete';
     const PERMANENT_DELETE = 'permanent_delete';
@@ -24,6 +25,7 @@ class ContentVoter extends Voter
         self::QUERY,
         self::MUTATION,
         self::CREATE,
+        self::COUNT,
     ];
 
     const ENTITY_PERMISSIONS = [
@@ -38,6 +40,7 @@ class ContentVoter extends Voter
         self::MUTATION,
         self::CREATE,
         self::READ,
+        self::COUNT,
         self::UPDATE,
         self::DELETE,
         self::PERMANENT_DELETE,

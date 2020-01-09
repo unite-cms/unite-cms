@@ -85,6 +85,7 @@ directive @access(
 
     # used in resolver
     create: Expression
+    count: Expression
     read: Expression
     update: Expression
     delete: Expression
@@ -107,6 +108,7 @@ directive @required on FIELD_DEFINITION
 
 type UniteContentListPermissions {
     create: Boolean!
+    count: Boolean!
 }
 
 type UniteContentEntityPermissions {

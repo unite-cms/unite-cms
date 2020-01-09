@@ -17,6 +17,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 use UniteCMS\CoreBundle\ContentType\UserType;
 use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ContentResolver implements FieldResolverInterface
 {
@@ -68,6 +69,11 @@ class ContentResolver implements FieldResolverInterface
         if($value instanceof ContentResultInterface) {
             switch ($info->fieldName) {
                 case 'total':
+                    $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
+                    $contentType = $contentTypeManager->getAnyType($value->getType());
+                    if(!$this->authorizationChecker->isGranted(ContentVoter::COUNT, $contentType)) {
+                        return -1;
+                    }
                     return $value->getTotal();
                 case 'result';
                     return $value->getResult();

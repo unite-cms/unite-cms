@@ -8,6 +8,10 @@ use UniteCMS\CoreBundle\Content\ContentResultInterface;
 
 class TestContentResult implements ContentResultInterface
 {
+    /**
+     * @var string $type
+     */
+    protected $type;
 
     /**
      * @var TestContent[] $content
@@ -19,8 +23,9 @@ class TestContentResult implements ContentResultInterface
      */
     protected $resultFilter;
 
-    public function __construct(array $content = [], ?callable $resultFilter = null)
+    public function __construct(string $type, array $content = [], ?callable $resultFilter = null)
     {
+        $this->type = $type;
         $this->content = $content;
         $this->resultFilter = $resultFilter;
     }
@@ -45,6 +50,6 @@ class TestContentResult implements ContentResultInterface
      * @return string
      */
     public function getType() : string {
-        return '';
+        return $this->type;
     }
 }

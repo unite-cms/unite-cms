@@ -63,6 +63,7 @@ class ContentType
      * @Assert\Collection(fields={
      *   ContentVoter::QUERY = @Assert\NotBlank(),
      *   ContentVoter::READ = @Assert\NotBlank(),
+     *   ContentVoter::COUNT = @Assert\NotBlank(),
      *   ContentVoter::MUTATION = @Assert\NotBlank(),
      *   ContentVoter::CREATE = @Assert\NotBlank(),
      *   ContentVoter::UPDATE = @Assert\NotBlank(),
@@ -77,6 +78,7 @@ class ContentType
         $this->permissions = [
             ContentVoter::QUERY => 'true',
             ContentVoter::READ => 'true',
+            ContentVoter::COUNT => 'true',
             ContentVoter::MUTATION => $defaultPermission,
             ContentVoter::CREATE => $defaultPermission,
             ContentVoter::UPDATE => $defaultPermission,
