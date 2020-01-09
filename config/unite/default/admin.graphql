@@ -34,7 +34,9 @@ fragment articles on DemoArticle @tableAdminView {
     main_category @adminField(formGroup: {name: "Extra", icon: "user"}) {
         name
     }
-
+    categories {
+        name
+    }
 
     content1 : content @textareaAdminField
     content @wysiwygAdminField

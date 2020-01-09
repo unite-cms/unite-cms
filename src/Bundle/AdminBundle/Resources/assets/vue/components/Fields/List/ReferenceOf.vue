@@ -92,10 +92,17 @@
                 return this.view.contentTitle(this.row);
             },
             filter() {
+
+                let referencedField = this.referencedView.fields.filter((field) => {
+                    return field.id === this.field.config.reference_field;
+                });
+
+                let isListOf = referencedField.length > 0 && referencedField[0].list_of;
+
                 return {
                     field: this.field.config.reference_field,
-                    operator: 'EQ',
-                    value: this.id
+                    operator: isListOf ? 'CONTAINS' : 'EQ',
+                    value: isListOf ? `"${this.id}"` : this.id
                 }
             },
             initialCreateData() {
