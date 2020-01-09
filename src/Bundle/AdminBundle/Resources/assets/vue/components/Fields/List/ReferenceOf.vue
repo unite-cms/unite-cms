@@ -2,7 +2,8 @@
   <div>
     <div class="uk-flex uk-flex-middle">
       <span v-if="total !== null" class="uk-margin-small-right uk-label uk-label-muted">{{ total }}</span>
-      <button type="button" class="uk-button-light uk-icon-button uk-icon-button-small" @click.prevent="modalIsOpen = true"><icon name="menu" /></button>
+      <button type="button" class="uk-button-light uk-icon-button uk-icon-button-small small-padding" @click.prevent="modalIsOpen = true"><icon name="list" /></button>
+      <button v-if="referencedView.permissions.create" type="button" class="uk-button-light uk-icon-button uk-icon-button-small uk-margin-small-left small-padding" @click.prevent="createContent"><icon name="plus" /></button>
     </div>
     <div v-if="!referencedView" class="uk-alert-warning" uk-alert>{{ $t('field.reference_of.missing_view_warning') }}</div>
     <modal v-if="referencedView && modalIsOpen" @hide="modalIsOpen = false">
@@ -25,6 +26,30 @@
     import Icon from "../../Icon";
     import Modal from "../../Modal";
     import { getAdminViewByType } from "../../../plugins/unite";
+
+    export const createContentLink = function(viewGroup, referencedView, referenceFieldId, id){
+        let group = viewGroup;
+        if(referencedView.groups.length === 0) {
+            group = '_all_';
+        }
+
+        else if (referencedView.groups.indexOf(group) < 0) {
+            group = referencedView.groups[0].name;
+        }
+
+        let referencedField = referencedView.fields.filter((field) => {
+            return field.id === referenceFieldId;
+        });
+
+        if(referencedField.length === 0) {
+            return;
+        }
+
+        let path = ["", referencedView.category, group, referencedView.id, 'create'].join('/');
+        let query = { updated: id };
+        query['initial_value_' + referenceFieldId] = JSON.stringify(referencedField[0].list_of ? [id] : id);
+        return {path, query};
+    };
 
     export default {
         components: {Modal, Icon},
@@ -90,11 +115,18 @@
         methods: {
             onCreate(id) {
                 this.highlightRow = id;
+            },
+            createContent() {
+                this.$router.push(createContentLink(this.$route.params.viewGroup, this.referencedView, this.field.config.reference_field, this.id));
             }
         }
     }
 </script>
 <style scoped lang="scss">
+  button {
+    cursor: pointer;
+  }
+
   .uk-alert {
     padding: 5px 10px;
     font-size: 0.8rem;

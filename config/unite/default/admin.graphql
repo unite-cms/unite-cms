@@ -21,6 +21,10 @@ fragment categories on DemoCategory @tableAdminView(titlePattern: "Category {{na
     articles {
         total
     }
+
+    other_articles {
+        total
+    }
 }
 
 fragment articles on DemoArticle @tableAdminView {

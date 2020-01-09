@@ -145,10 +145,11 @@ class ReferenceOfType extends AbstractFieldType
         }
         $referencedContentType = $this->getReferenceContentType($field);
         $criteria = $this->criteriaBuilder->build($args, $referencedContentType);
+
         $criteria->andWhere(new DataFieldComparison(
             $reference_field->getId(),
-            Comparison::EQ,
-            $content->getId()
+            $reference_field->isListOf() ? Comparison::CONTAINS : Comparison::EQ,
+            $reference_field->isListOf() ? sprintf('"%s"', $content->getId()) : $content->getId()
         ));
 
         return $contentManager->find($domain, $field->getSettings()->get('content_type'), $criteria);

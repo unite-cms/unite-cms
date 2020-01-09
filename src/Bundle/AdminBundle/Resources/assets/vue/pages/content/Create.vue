@@ -41,6 +41,11 @@
         },
         mounted() {
             this.formData = this.view.normalizeQueryData();
+            Object.keys(this.$route.query).forEach((key) => {
+                if(key.startsWith('initial_value_')) {
+                    this.formData[key.substr('initial_value_'.length)] = JSON.parse(this.$route.query[key]);
+                }
+            });
         },
         computed: {
             view() {
@@ -91,7 +96,8 @@
                         data: this.view.normalizeMutationData(Object.assign({}, this.formData)),
                     }
                 }).then((data) => {
-                    Route.back({updated: data.data[`create${this.view.type}`].id, offset: 0});
+                    let updatedId = this.$route.query.updated || data.data[`create${this.view.type}`].id;
+                    Route.back({updated: updatedId, offset: 0});
                     Alerts.$emit('push', 'success', this.$t('content.create.success', { view: this.view, contentTitle: this.contentTitle }));
                 }).finally(() => { this.loading = false }).catch((e) => {
                     Alerts.apolloErrorHandler(e);
