@@ -23,7 +23,7 @@
             }
 
             return [{
-                searchable: true,
+                searchable: field.show_in_list,
                 id: field.id,
                 label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1),
                 operators: ['EQ', 'NEQ'],

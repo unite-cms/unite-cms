@@ -29,11 +29,11 @@
             }
 
             let referencedFilterRules = [];
-            referencedView.fields.forEach((field) => {
-                if(field.fieldType !== 'reference' && field.fieldType !== 'embedded') {
-                    let component = unite.getListFieldType(field);
+            referencedView.fields.forEach((rfield) => {
+                if(rfield.fieldType !== 'reference' && rfield.fieldType !== 'embedded') {
+                    let component = unite.getListFieldType(rfield);
                     if(component.filter) {
-                        referencedFilterRules = [...referencedFilterRules, ...component.filter(field, view, unite)];
+                        referencedFilterRules = [...referencedFilterRules, ...component.filter(rfield, view, unite)];
                     }
                 }
             });
@@ -41,6 +41,7 @@
             return referencedFilterRules.map((rule) => {
                 rule.path = rule.id;
                 rule.id = field.id;
+                rule.searchable = field.show_in_list && rile.searchable;
                 rule.label = field.name.slice(0, 1).toUpperCase() + field.name.slice(1) + ' » ' + rule.label;
                 return rule;
             });
