@@ -3,9 +3,17 @@
 namespace UniteCMS\CoreBundle\Domain;
 
 use LogicException;
+use UniteCMS\CoreBundle\Content\ContentValidatorManager;
+use UniteCMS\CoreBundle\Validator\ContentValidatorInterface;
+use UniteCMS\CoreBundle\Validator\GenericContentValidatorConstraint;
 
 class DomainManager
 {
+    /**
+     * @var ContentValidatorManager
+     */
+    protected $contentValidatorManager;
+
     /**
      * @var array
      */
@@ -26,8 +34,9 @@ class DomainManager
      */
     protected $domain = null;
 
-    public function __construct(array $domainConfig = [], array $globalParameters = [], string $isAdminExpression = 'false')
+    public function __construct(ContentValidatorManager $contentValidatorManager, array $domainConfig = [], array $globalParameters = [], string $isAdminExpression = 'false')
     {
+        $this->contentValidatorManager = $contentValidatorManager;
         $this->domainConfig = $domainConfig;
         $this->globalParameters = $globalParameters;
         $this->isAdminExpression = $isAdminExpression;
@@ -139,6 +148,9 @@ class DomainManager
             $config['logger'],
             static::normalizeSchemaConfig($config['schema']),
             $this->globalParameters + ($config['parameters'] ?? []),
+            array_map(function(ContentValidatorInterface $validator){
+                return new GenericContentValidatorConstraint($validator);
+            }, $this->contentValidatorManager->getContentValidatorsForDomain($id)),
             $config['editable_schema_files_directory'] ?? null,
             $config['jwt_ttl_short_living'],
             $config['jwt_ttl_long_living']

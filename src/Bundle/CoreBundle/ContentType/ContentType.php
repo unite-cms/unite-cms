@@ -297,7 +297,9 @@ class ContentType
      * @return $this
      */
     public function addConstraint(Constraint $constraint) : self {
-        $this->constraints[] = $constraint;
+        if(!in_array($constraint, $this->constraints)) {
+            $this->constraints[] = $constraint;
+        }
         return $this;
     }
 

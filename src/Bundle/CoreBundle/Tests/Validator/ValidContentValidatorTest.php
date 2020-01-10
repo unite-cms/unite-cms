@@ -4,10 +4,16 @@
 namespace UniteCMS\CoreBundle\Tests\Validator;
 
 use DateTime;
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\FieldDataMapper;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\Event\ContentEvent;
 use UniteCMS\CoreBundle\GraphQL\ErrorFormatter;
+use UniteCMS\CoreBundle\Tests\Mock\TestContent;
 use UniteCMS\CoreBundle\Tests\SchemaAwareTestCase;
+use UniteCMS\CoreBundle\Validator\GenericContentValidatorConstraint;
 
 class ValidContentValidatorTest extends SchemaAwareTestCase
 {
@@ -458,5 +464,34 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
                 'lastname' => 'REVERT',
             ],
         ], $query, ['id' => $content->getId(), 'v' => 3]);
+    }
+
+    public function testContentValidator() {
+        $domain = static::$container->get(DomainManager::class)->current();
+        $contentManager = $domain->getContentManager();
+        $content = $contentManager->create($domain, 'Article');
+
+        // First make sure, that the validator was registered.
+        $testValidators = array_filter($domain->getContentTypeManager()->getContentType('Article')->getConstraints(), function(Constraint $constraint){
+            return $constraint instanceof GenericContentValidatorConstraint;
+        });
+        $this->assertCount(1, $testValidators);
+
+        // Validate content with special data key.
+        $content = new TestContent('Article', [
+            'firstname' => new FieldData('CREATE'),
+            'lastname' => new FieldData('CREATE'),
+            'test_global_validator' => new FieldData('foo')
+        ]);
+        $violations = static::$container->get(ValidatorInterface::class)->validate($content, null, [Constraint::DEFAULT_GROUP]);
+        $this->assertCount(1, $violations);
+        $this->assertEquals('foo', $violations->get(0)->getMessage());
+
+        $content = new TestContent('Article', [
+            'firstname' => new FieldData('CREATE'),
+            'lastname' => new FieldData('CREATE'),
+        ]);
+        $violations = static::$container->get(ValidatorInterface::class)->validate($content, null, [Constraint::DEFAULT_GROUP]);
+        $this->assertCount(0, $violations);
     }
 }

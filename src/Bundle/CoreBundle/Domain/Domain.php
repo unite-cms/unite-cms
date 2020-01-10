@@ -10,6 +10,7 @@ use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Log\LogInterface;
 use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
+use UniteCMS\CoreBundle\Validator\GenericContentValidatorConstraint;
 
 class Domain
 {
@@ -37,6 +38,11 @@ class Domain
      * @var ContentTypeManager $contentTypeManager
      */
     protected $contentTypeManager;
+
+    /**
+     * @var GenericContentValidatorConstraint[]
+     */
+    protected $genericContentConstraints = [];
 
     /**
      * @var string[] $schema
@@ -72,6 +78,7 @@ class Domain
      * @param LoggerInterface $logger
      * @param string[] $schema
      * @param array $parameters
+     * @param GenericContentValidatorConstraint[] $genericContentConstraints
      * @param string $editableSchemaFilesDirectory
      * @param int $jwtTTLShortLiving
      * @param int $jwtTTLLongLiving
@@ -84,6 +91,7 @@ class Domain
         LoggerInterface $logger,
         array $schema = [],
         array $parameters = [],
+        array $genericContentConstraints = [],
         string $editableSchemaFilesDirectory = null,
         int $jwtTTLShortLiving = Configuration::DEFAULT_JWT_TTL_SHORT_LIVING,
         int $jwtTTLLongLiving = Configuration::DEFAULT_JWT_TTL_LONG_LIVING,
@@ -94,10 +102,12 @@ class Domain
         $this->logger = $logger;
         $this->schema = $schema;
         $this->parameters = $parameters;
+        $this->genericContentConstraints = $genericContentConstraints;
         $this->editableSchemaFilesDirectory = $editableSchemaFilesDirectory;
         $this->jwtTTLShortLiving = $jwtTTLShortLiving;
         $this->jwtTTLLongLiving = $jwtTTLLongLiving;
         $this->contentTypeManager = $contentTypeManager ?? new ContentTypeManager();
+        $this->contentTypeManager->setGenericContentConstraints($genericContentConstraints);
     }
 
     /**
@@ -207,5 +217,12 @@ class Domain
      */
     public function getJwtTTLLongLiving(): int {
         return $this->jwtTTLLongLiving;
+    }
+
+    /**
+     * @return GenericContentValidatorConstraint[]
+     */
+    public function getGenericContentConstraints() : array {
+        return $this->genericContentConstraints;
     }
 }

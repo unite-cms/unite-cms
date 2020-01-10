@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\ContentType;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
+use UniteCMS\CoreBundle\Validator\GenericContentValidatorConstraint;
 
 class ContentTypeManager
 {
@@ -39,6 +40,11 @@ class ContentTypeManager
     protected $userTypes = [];
 
     /**
+     * @var GenericContentValidatorConstraint[]
+     */
+    protected $genericContentConstraints = [];
+
+    /**
      * @return ContentType[]
      */
     public function getContentTypes(): array
@@ -62,11 +68,13 @@ class ContentTypeManager
     public function registerContentType(ContentType $contentType): self
     {
         $this->contentTypes[$contentType->getId()] = $contentType;
+        $this->applyGenericContentConstraints($contentType);
 
         // Find and generate nested union types.
         foreach($contentType->getFields() as $field) {
             if(!empty($field->getUnionTypes())) {
                 $unionType = new ContentType($field->getReturnType(), $field->getReturnType(), $contentType->getPermission(ContentVoter::MUTATION));
+                $this->applyGenericContentConstraints($unionType);
 
                 foreach($field->getUnionTypes() as $type) {
                     $unionType->registerField(new ContentTypeField($type->name, $type->description ?? $type->name, $field->getType(), [], false, false, false, null, null, $type->name));
@@ -103,6 +111,7 @@ class ContentTypeManager
     public function registerSingleContentType(ContentType $contentType): self
     {
         $this->singleContentTypes[$contentType->getId()] = $contentType;
+        $this->applyGenericContentConstraints($contentType);
         return $this;
     }
 
@@ -130,12 +139,14 @@ class ContentTypeManager
     public function registerEmbeddedContentType(ContentType $contentType): self
     {
         $this->embeddedContentTypes[$contentType->getId()] = $contentType;
+        $this->applyGenericContentConstraints($contentType);
         return $this;
     }
 
     public function registerUserType(UserType $contentType) : self
     {
         $this->userTypes[$contentType->getId()] = $contentType;
+        $this->applyGenericContentConstraints($contentType);
         return $this;
     }
 
@@ -157,7 +168,7 @@ class ContentTypeManager
     }
 
     /**
-     * @return \UniteCMS\CoreBundle\ContentType\ContentType[]
+     * @return ContentType[]
      */
     public function getUnionContentTypes(): array
     {
@@ -166,7 +177,7 @@ class ContentTypeManager
 
     /**
      * @param string $id
-     * @return \UniteCMS\CoreBundle\ContentType\ContentType|null
+     * @return ContentType|null
      */
     public function getUnionContentType(string $id): ?ContentType
     {
@@ -179,9 +190,29 @@ class ContentTypeManager
     }
 
     /**
-     * @return \UniteCMS\CoreBundle\ContentType\ContentType[]
+     * @return ContentType[]
      */
     public function getAllTypes() : array {
         return $this->contentTypes + $this->singleContentTypes + $this->embeddedContentTypes + $this->unionContentTypes + $this->userTypes;
+    }
+
+    /**
+     * @param GenericContentValidatorConstraint[] $constraints
+     * @return self
+     */
+    public function setGenericContentConstraints(array $constraints) : self {
+        $this->genericContentConstraints = $constraints;
+        return $this;
+    }
+
+    /**
+     * @param ContentType $contentType
+     */
+    public function applyGenericContentConstraints(ContentType $contentType) : void {
+        foreach($this->genericContentConstraints as $constraint) {
+            if($constraint->supportsContentType($contentType)) {
+                $contentType->addConstraint($constraint);
+            }
+        }
     }
 }

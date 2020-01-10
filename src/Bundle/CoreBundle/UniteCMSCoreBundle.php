@@ -4,6 +4,7 @@ namespace UniteCMS\CoreBundle;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use UniteCMS\CoreBundle\DependencyInjection\ContentValidatorCompilerPass;
 use UniteCMS\CoreBundle\DependencyInjection\FieldTypeCompilerPass;
 use UniteCMS\CoreBundle\DependencyInjection\SchemaManagerCompilerPass;
 use UniteCMS\CoreBundle\Field\FieldTypeInterface;
@@ -13,6 +14,7 @@ use UniteCMS\CoreBundle\GraphQL\Resolver\Type\TypeResolverInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Modifier\SchemaModifierInterface;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
+use UniteCMS\CoreBundle\Validator\ContentValidatorInterface;
 
 class UniteCMSCoreBundle extends Bundle
 {
@@ -21,6 +23,7 @@ class UniteCMSCoreBundle extends Bundle
     public function build(ContainerBuilder $container)
     {
         $container->registerForAutoconfiguration(FieldTypeInterface::class)->addTag('unite.field_type');
+        $container->registerForAutoconfiguration(ContentValidatorInterface::class)->addTag('unite.content_validator');
         $container->registerForAutoconfiguration(SchemaProviderInterface::class)->addTag('unite.graphql.schema_provider');
         $container->registerForAutoconfiguration(SchemaExtenderInterface::class)->addTag('unite.graphql.schema_extender', ['position' => SchemaExtenderInterface::EXTENDER_AFTER]);
         $container->registerForAutoconfiguration(SchemaModifierInterface::class)->addTag('unite.graphql.schema_modifier');
@@ -30,5 +33,6 @@ class UniteCMSCoreBundle extends Bundle
 
         $container->addCompilerPass(new SchemaManagerCompilerPass());
         $container->addCompilerPass(new FieldTypeCompilerPass());
+        $container->addCompilerPass(new ContentValidatorCompilerPass());
     }
 }
