@@ -21,9 +21,9 @@ use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\BaseFieldComparison;
 use UniteCMS\CoreBundle\Query\BaseFieldOrderBy;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
-use UniteCMS\CoreBundle\Query\DataFieldOrderBy;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldOrderBy;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class ReferenceType extends AbstractFieldType
 {
@@ -31,7 +31,7 @@ class ReferenceType extends AbstractFieldType
     const GRAPHQL_INPUT_TYPE = Type::ID;
 
     /**
-     * @var \UniteCMS\CoreBundle\Domain\DomainManager $domainManager
+     * @var DomainManager $domainManager
      */
     protected $domainManager;
 
@@ -163,7 +163,9 @@ class ReferenceType extends AbstractFieldType
 
         $parts = explode($whereInput['field'], '.');
         if(count($parts) > 1) {
-            return new ReferenceDataFieldOrderBy(array_shift($parts), join('.', $parts), $whereInput['order']);
+            $domain = $this->domainManager->current();
+            $entityType = $domain->getContentTypeManager()->getUserType($field->getReturnType()) ? UserInterface::class : ContentInterface::class;
+            return new ReferenceDataFieldOrderBy(array_shift($parts), join('.', $parts), $whereInput['order'], $entityType);
         }
 
         return parent::queryOrderBy($field, $whereInput);
@@ -180,13 +182,17 @@ class ReferenceType extends AbstractFieldType
             return $comparison;
         }
 
+        $domain = $this->domainManager->current();
+        $entityType = $domain->getContentTypeManager()->getUserType($field->getReturnType()) ? UserInterface::class : ContentInterface::class;
+
         return new ReferenceDataFieldComparison(
             $field->getId(),
             $comparison->getOperator(),
             $comparison->getValue(),
             ['data'],
             $field->getReturnType(),
-            $whereInput['path']
+            $whereInput['path'],
+            $entityType
         );
     }
 }

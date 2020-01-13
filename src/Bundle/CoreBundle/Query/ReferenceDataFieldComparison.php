@@ -3,6 +3,8 @@
 
 namespace UniteCMS\CoreBundle\Query;
 
+use UniteCMS\CoreBundle\Content\ContentInterface;
+
 class ReferenceDataFieldComparison extends DataFieldComparison {
 
     /**
@@ -15,10 +17,16 @@ class ReferenceDataFieldComparison extends DataFieldComparison {
      */
     protected $referencedPath;
 
-    public function __construct($field, $operator, $value, array $path = ['data'], string $referencedType, array $referencedPath)
+    /**
+     * @var string $entity
+     */
+    protected $entity;
+
+    public function __construct($field, $operator, $value, array $path = ['data'], string $referencedType, array $referencedPath, string $entity = ContentInterface::class)
     {
         $this->referencedType = $referencedType;
         $this->referencedPath = $referencedPath;
+        $this->entity = $entity;
 
         if(count($this->referencedPath) === 1 && !in_array($this->referencedPath[0], ContentCriteria::BASE_FIELDS)) {
             $this->referencedPath[] = 'data';
@@ -48,5 +56,13 @@ class ReferenceDataFieldComparison extends DataFieldComparison {
     public function getField()
     {
         return join('.', array_merge($this->referencedPath));
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntity() : string
+    {
+        return $this->entity;
     }
 }

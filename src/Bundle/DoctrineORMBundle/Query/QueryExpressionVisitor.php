@@ -12,6 +12,7 @@ use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Query\QueryExpressionVisitor as BaseQueryExpressionVisitor;
 use Doctrine\ORM\QueryBuilder;
+use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Query\BaseFieldComparison;
 use UniteCMS\CoreBundle\Query\BaseFieldOrderBy;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
@@ -21,6 +22,7 @@ use UniteCMS\CoreBundle\Query\DataFieldValue;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldOrderBy;
 use UniteCMS\DoctrineORMBundle\Entity\Content;
+use UniteCMS\DoctrineORMBundle\Entity\User;
 
 class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 {
@@ -127,7 +129,7 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 
             $joins[$joined_table] = new Join(
                 Join::LEFT_JOIN,
-                Content::class,
+                $comparison->getEntity() === ContentInterface::class ? Content::class : User::class,
                 $joined_table,
                 Join::WITH,
                 sprintf('%s = %s.id', self::wrapJSONField($rootAlias, $comparison->getRootField() . '.data'), $joined_table)
@@ -148,7 +150,7 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
 
                 $joins[$joined_table] = new Join(
                     Join::LEFT_JOIN,
-                    Content::class,
+                    $ordering->getEntity() === ContentInterface::class ? Content::class : User::class,
                     $joined_table,
                     Join::WITH,
                     sprintf('%s = %s.id', self::wrapJSONField($rootAlias, $ordering->getRootField() . '.data'), $joined_table)
