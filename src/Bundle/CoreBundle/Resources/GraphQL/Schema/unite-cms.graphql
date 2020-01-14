@@ -145,7 +145,7 @@ interface UniteFieldable {
 
 interface UniteUser {
     id: ID
-    username: String!
+    username: String
     _meta: UniteContentMeta
 }
 

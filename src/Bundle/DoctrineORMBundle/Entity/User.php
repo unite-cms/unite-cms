@@ -8,7 +8,6 @@ use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\Content\SensitiveFieldData;
 
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints as Assert;
 use UniteCMS\CoreBundle\Security\User\BaseUser;
 
 /**
@@ -27,10 +26,9 @@ class User extends BaseUser
     protected $id;
 
     /**
-     * @ORM\Column(type="string")
-     * @Assert\NotBlank()
+     * @ORM\Column(type="string", nullable=true)
      */
-    protected $username = '';
+    protected $username;
 
     /**
      * @ORM\Column(type="string")

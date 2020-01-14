@@ -11,9 +11,9 @@ use UniteCMS\CoreBundle\Content\SensitiveFieldData;
 abstract class BaseUser extends BaseContent implements UserInterface
 {
     /**
-     * @var string
+     * @var string|null
      */
-    protected $username = '';
+    protected $username;
 
     /**
      * @var FieldData[]
@@ -69,7 +69,7 @@ abstract class BaseUser extends BaseContent implements UserInterface
 
         foreach($data as $name => $value) {
             if($name === 'username') {
-                $this->username = $value;
+                $this->username = $value instanceof FieldData ? $value->resolveData() : $value;
             }
 
             else if ($value instanceof SensitiveFieldData) {
@@ -97,7 +97,7 @@ abstract class BaseUser extends BaseContent implements UserInterface
     /**
      * {@inheritDoc}
      */
-    public function getUsername() : string {
+    public function getUsername() : ?string {
         return $this->username;
     }
 

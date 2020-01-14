@@ -151,7 +151,7 @@ type Admin implements UniteUser
 @emailInvite(if: "%(IS_ADMIN)%", emailField: "username", passwordField: "password") {
     _meta: UniteContentMeta
     id: ID
-    username: String! @emailField
+    username: String @emailField
     password: NULL @passwordField
 
     teaser: TeaserRegion @embeddedField

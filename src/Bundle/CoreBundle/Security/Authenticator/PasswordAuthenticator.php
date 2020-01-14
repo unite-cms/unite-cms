@@ -98,7 +98,7 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      */
     public function supports(Request $request)
     {
-        return !empty($request->headers->get('PHP_AUTH_USER')) && !empty($request->headers->get('PHP_AUTH_PW'));
+        return !empty(trim($request->headers->get('PHP_AUTH_USER'))) && !empty(trim($request->headers->get('PHP_AUTH_PW')));
     }
 
     /**
@@ -117,7 +117,7 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
-        if (!is_array($credentials) || empty($credentials['username']) || empty($credentials['password'])) {
+        if (!is_array($credentials) || empty(trim($credentials['username'])) || empty(trim($credentials['password']))) {
             throw new InvalidArgumentException(
                 sprintf('The first argument of the "%s()" method must be array with "username" and "password" keys.', __METHOD__)
             );
@@ -139,7 +139,7 @@ class PasswordAuthenticator extends AbstractGuardAuthenticator implements Schema
      */
     public function checkCredentials($credentials, UserInterface $user)
     {
-        if (!is_array($credentials) || empty($credentials['username']) || empty($credentials['password'])) {
+        if (!is_array($credentials) || empty(trim($credentials['username'])) || empty(trim($credentials['password']))) {
             throw new InvalidArgumentException(
                 sprintf('The first argument of the "%s()" method must be array with "username" and "password" keys.', __METHOD__)
             );

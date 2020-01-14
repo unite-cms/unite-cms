@@ -139,7 +139,7 @@ class ContentMetaResolver implements FieldResolverInterface
                     return false;
                 }
 
-                return $content->getFieldData($directive['args']['passwordField'])->empty();
+                return !$content->getFieldData($directive['args']['emailField'])->empty() && $content->getFieldData($directive['args']['passwordField'])->empty();
             }
         }
 
