@@ -193,7 +193,9 @@ abstract class AbstractFieldType  implements FieldTypeInterface, SchemaProviderI
                 break;
         }
 
-        $whereInput['value'] = count($whereInput['value']) > 1 ? $whereInput['value'] : $whereInput['value'][0];
+        if(is_array($whereInput['value'])) {
+            $whereInput['value'] = count($whereInput['value']) > 1 ? $whereInput['value'] : $whereInput['value'][0];
+        }
 
         return new DataFieldComparison(
             $field->getId(),

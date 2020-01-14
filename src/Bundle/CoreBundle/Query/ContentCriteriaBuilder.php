@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Query;
 use Doctrine\Common\Collections\Expr\CompositeExpression;
 use Doctrine\Common\Collections\Expr\Expression;
 use UniteCMS\CoreBundle\ContentType\ContentType;
+use UniteCMS\CoreBundle\ContentType\UserType;
 use UniteCMS\CoreBundle\Exception\UnknownFieldException;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 
@@ -49,7 +50,7 @@ class ContentCriteriaBuilder
 
         elseif(!empty($where['field']) && !empty($where['operator'])) {
 
-            if(in_array($where['field'], ContentCriteria::BASE_FIELDS)) {
+            if(in_array($where['field'], ContentCriteria::BASE_FIELDS) || $contentType instanceof UserType && $where['field'] === 'username') {
 
                 $whereValue = null;
 

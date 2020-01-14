@@ -21,6 +21,7 @@ use UniteCMS\CoreBundle\Query\DataFieldOrderBy;
 use UniteCMS\CoreBundle\Query\DataFieldValue;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldOrderBy;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 use UniteCMS\DoctrineORMBundle\Entity\Content;
 use UniteCMS\DoctrineORMBundle\Entity\User;
 
@@ -191,7 +192,7 @@ class QueryExpressionVisitor extends BaseQueryExpressionVisitor
             $rootField = array_shift($referencedPath);
 
             // If this is a referenced base field, we transform it to ba base field.
-            if(in_array($rootField, ContentCriteria::BASE_FIELDS)) {
+            if(in_array($rootField, ContentCriteria::BASE_FIELDS) || $comparison->getEntity() === UserInterface::class && $rootField === 'username') {
                 $comparison = new BaseFieldComparison($alias . '.' . $rootField, $op, $comparison->getValue());
             }
         }
