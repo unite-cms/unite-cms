@@ -6092,10 +6092,9 @@
             "name": "unite-cms/doctrine-orm-bundle",
             "version": "dev-master",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/unite-cms/DoctrineORMBundle/zipball/09cd60e4de3b1c4b06d31ea7b12def887d29cfa3",
-                "reference": "09cd60e4de3b1c4b06d31ea7b12def887d29cfa3",
-                "shasum": ""
+                "type": "path",
+                "url": "./src/Bundle/DoctrineORMBundle",
+                "reference": "bd6a9d775dc96f1f9ac9336e2144d1cc43ffa5c3"
             },
             "require": {
                 "doctrine/doctrine-bundle": "^2.0",
@@ -6113,7 +6112,6 @@
                     "/Tests/"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -6126,8 +6124,7 @@
             "description": "Adds doctrine orm support (MySQL, PostgreSQL, MariaDB etc.) for unite cms",
             "transport-options": {
                 "symlink": true
-            },
-            "time": "2020-01-13T06:35:52+00:00"
+            }
         },
         {
             "name": "unite-cms/media-bundle",
