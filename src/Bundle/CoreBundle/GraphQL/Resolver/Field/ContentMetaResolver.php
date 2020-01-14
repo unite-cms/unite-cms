@@ -102,7 +102,8 @@ class ContentMetaResolver implements FieldResolverInterface
                 }
 
                 $domain = $this->domainManager->current();
-                $versions = $domain->getContentManager()->revisions($domain, $value, 1);
+                $manager = $value instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
+                $versions = $manager->revisions($domain, $value, 1);
                 return count($versions) > 0 ? $versions[0]->getVersion() : 0;
 
             case 'revisions':
@@ -115,7 +116,8 @@ class ContentMetaResolver implements FieldResolverInterface
                 $limit = $args['limit'] ?? 20;
                 $limit = $limit > 20 ? 20 : $limit;
                 $offset = $args['offset'] ?? 0;
-                return $domain->getContentManager()->revisions($domain, $value, $limit, $offset);
+                $manager = $value instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
+                return $manager->revisions($domain, $value, $limit, $offset);
             default: return null;
         }
     }

@@ -15,6 +15,7 @@ use UniteCMS\CoreBundle\Event\ContentEventBefore;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use UniteCMS\CoreBundle\Field\Types\ReferenceOfType;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class ReferenceCascadeSubscriber implements EventSubscriberInterface
 {
@@ -83,9 +84,10 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
 
     protected function cascade(Domain $domain, ContentInterface $deletedContent, ContentInterface $referencedContent) {
 
-        $domain->getContentManager()->permanentDelete($domain, $referencedContent);
+        $manager = $referencedContent instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
+        $manager->permanentDelete($domain, $referencedContent);
         $this->eventDispatcher->dispatch(new ContentEventBefore($referencedContent), ContentEventBefore::PERMANENT_DELETE);
-        $domain->getContentManager()->flush($domain);
+        $manager->flush($domain);
 
         $domain->log(LoggerInterface::NOTICE, sprintf(
             'Cascade delete referenced "%s" content with id "%s", because "%s" content with id "%s" was hard deleted.',
@@ -100,9 +102,10 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
 
     protected function setNull(Domain $domain, ContentInterface $deletedContent, ContentInterface $referencedContent, ContentTypeField $field) {
 
-        $domain->getContentManager()->update($domain, $referencedContent, [$field->getId() => null]);
+        $manager = $referencedContent instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
+        $manager->update($domain, $referencedContent, [$field->getId() => null]);
         $this->eventDispatcher->dispatch(new ContentEventBefore($referencedContent), ContentEventBefore::UPDATE);
-        $domain->getContentManager()->flush($domain);
+        $manager->flush($domain);
 
         $domain->log(LoggerInterface::NOTICE, sprintf(
             'Set referenced "%s" of "%s" content with id "%s" to NULL, because "%s" content with id "%s" was hard deleted.',

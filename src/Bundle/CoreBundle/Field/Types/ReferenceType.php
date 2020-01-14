@@ -5,7 +5,6 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\Common\Collections\Expr\Comparison;
 use GraphQL\Type\Definition\Type;
-use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
@@ -70,19 +69,7 @@ class ReferenceType extends AbstractFieldType
         }
 
         $domain = $this->domainManager->current();
-        $contentManager = null;
-
-        if($domain->getContentTypeManager()->getContentType($field->getReturnType())) {
-            $contentManager = $domain->getContentManager();
-        }
-
-        else if($domain->getContentTypeManager()->getUserType($field->getReturnType())) {
-            $contentManager = $domain->getUserManager();
-        }
-
-        if(empty($contentManager)) {
-            throw new InvalidArgumentException(sprintf('User or Content type "%s" was not found!', $field->getReturnType()));
-        }
+        $contentManager = $content instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
 
         if($fieldData instanceof FieldDataList) {
             $rowIds = [];

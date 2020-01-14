@@ -10,6 +10,7 @@ use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Query\DataFieldOrderBy;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class SequenceType extends AbstractFieldType
 {
@@ -77,7 +78,8 @@ class SequenceType extends AbstractFieldType
             ->orderBy(new DataFieldOrderBy($field->getId(), ContentCriteria::DESC))
             ->setMaxResults(1);
 
-        $maxContent = $domain->getContentManager()->find($domain, $content->getType(), $criteria);
+        $manager = $content instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
+        $maxContent = $manager->find($domain, $content->getType(), $criteria, true);
         $result = $maxContent->getResult();
 
         if(empty($result)) {

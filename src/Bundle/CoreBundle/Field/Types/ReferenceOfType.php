@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\ContentCriteriaBuilder;
 use UniteCMS\CoreBundle\Query\DataFieldComparison;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class ReferenceOfType extends AbstractFieldType
 {
@@ -138,7 +139,7 @@ class ReferenceOfType extends AbstractFieldType
         }
 
         $domain = $this->domainManager->current();
-        $contentManager = $domain->getContentManager();
+        $contentManager = $content instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
 
         if(!$reference_field = $this->getReferenceField($content->getType(), $field)){
             return null;
