@@ -207,7 +207,17 @@ class AdminViewTypeManager
             return [];
         }
 
-        // Check all adminView fragments and create adminViews out of them.
+        // Find all fragments that are no AdminViews
+        $nativeFragments = [];
+        foreach($schema->definitions as $definition) {
+            if($definition instanceof FragmentDefinitionNode) {
+                if(($directive = Util::typedDirectiveArgs($definition, 'AdminView'))) {
+                    continue;
+                }
+                $nativeFragments[$definition->name->value] = $definition;
+            }
+        }
+
         foreach($schema->definitions as $definition) {
             if($definition instanceof FragmentDefinitionNode) {
 
@@ -230,7 +240,7 @@ class AdminViewTypeManager
                 // If this is a dashboard admin view
                 if($id === 'Query') {
                     $category = self::TYPE_DASHBOARD;
-                    $adminView = $adminViewType->createView($category, null, $definition, $directive);
+                    $adminView = $adminViewType->createView($category, null, $definition, $directive, $nativeFragments);
 
                     // Fake permissions for special dashboard views
                     $permissions = [];
@@ -251,7 +261,7 @@ class AdminViewTypeManager
                     }
 
                     // Ask the admin view type to create a new AdminView
-                    $adminView = $adminViewType->createView($category, $contentType, $definition, $directive);
+                    $adminView = $adminViewType->createView($category, $contentType, $definition, $directive, $nativeFragments);
 
                     // Check list permissions for this admin view.
                     $this->mapPermissions($adminView, $contentType);

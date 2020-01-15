@@ -14,8 +14,8 @@ class SettingsType extends AbstractAdminViewType
     /**
      * {@inheritDoc}
      */
-    public function createView(string $category, ?ContentType $contentType = null, ?FragmentDefinitionNode $definition = null, ?array $directive = null) : AdminView {
-        $view = parent::createView($category, $contentType, $definition, $directive);
+    public function createView(string $category, ?ContentType $contentType = null, ?FragmentDefinitionNode $definition = null, ?array $directive = null, array $nativeFragments = []) : AdminView {
+        $view = parent::createView($category, $contentType, $definition, $directive, $nativeFragments);
         $view->setTitlePattern($view->getName());
         return $view;
     }

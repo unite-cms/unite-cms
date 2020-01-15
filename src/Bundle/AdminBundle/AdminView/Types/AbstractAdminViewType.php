@@ -31,7 +31,7 @@ abstract class AbstractAdminViewType implements AdminViewTypeInterface, SchemaPr
     /**
      * {@inheritDoc}
      */
-    public function createView(string $category, ?ContentType $contentType = null, ?FragmentDefinitionNode $definition = null, ?array $directive = null) : AdminView {
-        return new AdminView(static::RETURN_TYPE, $category, $contentType, $definition, $directive);
+    public function createView(string $category, ?ContentType $contentType = null, ?FragmentDefinitionNode $definition = null, ?array $directive = null, array $nativeFragments = []) : AdminView {
+        return new AdminView(static::RETURN_TYPE, $category, $contentType, $definition, $directive, null, $nativeFragments);
     }
 }

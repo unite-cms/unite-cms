@@ -27,10 +27,15 @@ fragment categories on DemoCategory @tableAdminView(titlePattern: "Category {{na
     }
 }
 
-fragment articles on DemoArticle @tableAdminView {
-    id
+fragment articlesBaseFields on DemoArticle {
     locale @adminField(formGroup: { name: "Allgemein" })
     name @adminField(inlineCreate: true, formGroup: { name: "Allgemein", icon: "home" })
+    content @wysiwygAdminField
+    extra_content @wysiwygAdminField
+}
+
+fragment articlesMainFields on DemoArticle {
+    ...articlesBaseFields
     main_category @referenceAdminView(fieldsInline: true) @adminField(formGroup: {name: "Extra", icon: "user"}) {
         name
         id
@@ -42,9 +47,6 @@ fragment articles on DemoArticle @tableAdminView {
         name
     }
 
-    content1 : content @textareaAdminField
-    content @wysiwygAdminField
-    extra_content @wysiwygAdminField
     geo {
         display_name
         stairs_number
@@ -56,6 +58,12 @@ fragment articles on DemoArticle @tableAdminView {
         latitude
         longitude
     }
+}
+
+fragment articles on DemoArticle @tableAdminView {
+    id
+
+    ...articlesMainFields
 
     boolTest
     boolTest1
@@ -80,6 +88,7 @@ fragment articles on DemoArticle @tableAdminView {
 
 fragment shortArticles on DemoArticle @tableAdminView(name: "Short Articles") {
     id
+    ...articlesBaseFields
 }
 
 fragment admins on Admin @tableAdminView {

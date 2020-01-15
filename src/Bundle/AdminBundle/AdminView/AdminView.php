@@ -5,6 +5,7 @@ namespace UniteCMS\AdminBundle\AdminView;
 use Doctrine\Common\Collections\ArrayCollection;
 use GraphQL\Language\AST\FieldNode;
 use GraphQL\Language\AST\FragmentDefinitionNode;
+use GraphQL\Language\AST\FragmentSpreadNode;
 use GraphQL\Language\Printer;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\Field\Types\PasswordType;
@@ -76,13 +77,14 @@ class AdminView
      * AdminView constructor.
      *
      * @param string $returnType
-     * @param FragmentDefinitionNode $definition
-     * @param array $directive
      * @param string $category
      * @param null|ContentType $contentType
+     * @param FragmentDefinitionNode $definition
+     * @param array $directive
      * @param array|ArrayCollection $config
+     * @param FragmentDefinitionNode[] $nativeFragments
      */
-    public function __construct(string $returnType, string $category, ?ContentType $contentType = null, ?FragmentDefinitionNode $definition = null, ?array $directive = null, $config = null)
+    public function __construct(string $returnType, string $category, ?ContentType $contentType = null, ?FragmentDefinitionNode $definition = null, ?array $directive = null, $config = null, array $nativeFragments = [])
     {
         $this->returnType = $returnType;
         $this->name = empty($directive['settings']['name']) ? ($contentType ? $contentType->getName() : 'Untitled') : $directive['settings']['name'];
@@ -124,10 +126,35 @@ class AdminView
         $this->id = $definition->name->value;
         $this->type = $definition->typeCondition->name->value;
 
-        // Now check the fragment and allow to override field config.
+        // Now check the fragment and allow to override field config + create client-ready fragment from given fragment.
         $this->fields = [];
-        foreach($definition->selectionSet->selections as $selection) {
-            if($selection instanceof FieldNode) {
+        $this->fragment = $this->setFromFragmentDefinition($definition, $ctFields, $nativeFragments);
+        $this->fields = array_merge($this->fields, array_values($ctFields));
+    }
+
+    /**
+     * @param FragmentDefinitionNode $fragment
+     * @param array $ctFields
+     * @param FragmentDefinitionNode[] $nativeFragments
+     * @return string
+     */
+    protected function setFromFragmentDefinition(FragmentDefinitionNode $fragment, array &$ctFields, array $nativeFragments = []) : String {
+        $nestedFragments = '';
+        foreach($fragment->selectionSet->selections as $key => $selection) {
+
+            if($selection instanceof FragmentSpreadNode) {
+                $nativeFragment = $nativeFragments[$selection->name->value]->cloneDeep();
+                $nativeFragment->selectionSet = $nativeFragments[$selection->name->value]->selectionSet->cloneDeep();
+                $nativeFragment->selectionSet->selections = [];
+                foreach($nativeFragments[$selection->name->value]->selectionSet->selections as $cSelection) {
+                    $nativeFragment->selectionSet->selections[] = $cSelection->cloneDeep();
+                }
+
+                $nestedFragments .= $this->setFromFragmentDefinition($nativeFragment, $ctFields, $nativeFragments);
+                $selection->directives = [];
+            }
+
+            else if($selection instanceof FieldNode) {
 
                 $id = $selection->name->value;
                 $type = $id;
@@ -167,12 +194,8 @@ class AdminView
                 $this->fields[] = $field;
             }
         }
-
-        $this->fields = array_merge($this->fields, array_values($ctFields));
-
-        // Create client-ready fragment from given fragment.
-        $definition->directives = [];
-        $this->fragment = Printer::doPrint($definition);
+        $fragment->directives = [];
+        return $nestedFragments . Printer::doPrint($fragment);
     }
 
     /**
