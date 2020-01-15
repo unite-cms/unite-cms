@@ -1,16 +1,15 @@
 <template>
   <section class="uk-position-relative">
-    <div class="uk-placeholder" style="margin: 20px;">TODO: Implement</div>
-    <div class="uk-overlay-default uk-position-cover" v-if="$apollo.loading">
-      <div uk-spinner class="uk-position-center"></div>
-    </div>
+    <loading-overlay v-if="$apollo.loading" />
   </section>
 </template>
 
 <script>
     import _abstract from "./_abstract";
+    import LoadingOverlay from "../LoadingOverlay";
 
     export default {
-        extends: _abstract
+        extends: _abstract,
+        components: { LoadingOverlay }
     }
 </script>

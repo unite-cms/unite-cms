@@ -107,7 +107,7 @@ enum ArticleLocales {
 }
 
 """Articles"""
-type DemoArticle implements UniteContent & UniteTranslatableContent @access(count: "false") {
+type DemoArticle implements UniteContent & UniteTranslatableContent {
     _meta: UniteContentMeta
 
     locale: ArticleLocales @choiceField @required

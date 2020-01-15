@@ -40,6 +40,9 @@
             to(action) {
                 return this.$route.path + '/' + action;
             },
+            isSelected(id) {
+                return this.selection.indexOf(id) >= 0;
+            },
             selectRow(id) {
                 if(this.select === 'MULTIPLE') {
                     if(this.isSelected(id)) {
@@ -50,9 +53,6 @@
                 } else {
                     this.$emit('select', id);
                 }
-            },
-            isSelected(id) {
-                return this.selection.indexOf(id) >= 0;
             },
             confirmSelection() {
                 this.$emit('select', this.selection);

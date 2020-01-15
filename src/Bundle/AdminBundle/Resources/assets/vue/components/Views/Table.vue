@@ -1,80 +1,35 @@
 <template>
     <section class="uk-section uk-position-relative">
-        <div class="uk-container" style="max-width: none;">
+        <div class="uk-container uk-container-expand">
 
-            <view-header :can-create="!embedded && view.actions.create && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="f => queryFilter = f" />
+            <component :is="headerComponent" :can-create="!embedded && view.actions.create && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="f => queryFilter = f" />
+            <component :is="inlineCreateComponent" v-if="embedded && view.actions.create && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
 
-            <inline-create v-if="embedded && view.actions.create && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
+            <component :is="tableDataComponent" v-if="items.result.length > 0" :fields="view.listFields()" :view="view" :rows="items" :highlightRow="highlightRow" :offset="offset" :select="select" :embedded="embedded" :pagination="pagination" :selection="selection" @updateOffset="updateOffset" @selectRow="selectRow" />
+            <component :is="tablePlaceholderComponent" v-else-if="!hasInlineCreateForm || !is_granted('create') || deleted" :create="is_granted('create') && view.actions.create && !embedded" :create-route="to('create')" />
 
-            <div v-if="items.result.length > 0" class="uk-overflow-auto table-overflow-container" :class="{ 'with-overflow': overflow }" @scroll="overflow = true">
-                <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
-                    <thead>
-                    <tr>
-                        <th v-if="select"></th>
-                        <th v-for="field in view.listFields()">{{ field.name }}</th>
-                        <th v-if="!select"></th>
-                    </tr>
-                    </thead>
-                    <tbody class="uk-card uk-card-default uk-table-striped">
-                    <tr v-for="row in items.result" :class="{ updated: highlightRow === row._meta.id }" :key="row._meta.id" :id="'row-' + row._meta.id">
-                        <td v-if="select" class="uk-table-shrink">
-                            <button @click.prevent="selectRow(row._meta.id)" class="uk-icon-button uk-icon-button-small" :class="isSelected(row._meta.id) ? 'uk-button-primary' : 'uk-button-default'" uk-icon="check" :title="$t('content.list.selection.select')">
-                                <icon v-if="isSelected(row._meta.id)" name="check" />
-                            </button>
-                        </td>
-                        <td v-for="field in view.listFields()">
-                            <component :is="$unite.getListFieldType(field)" :view="view" :row="row" :field="field" :embedded="embedded" />
-                        </td>
-                        <td v-if="!select" class="uk-table-shrink"><actions-field :view="view" :row="row" id="_actions" :embedded="embedded" /></td>
-                    </tr>
-                    </tbody>
-                    <tfoot v-if="pagination && items.result.length < items.total">
-                    <tr>
-                        <td :colspan="view.listFields().length + 1">
-                            <view-pagination :count="items.result.length" :total="items.total" :offset="offset" :limit="view.limit" @change="updateOffset" />
-                        </td>
-                    </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <div v-else-if="!hasInlineCreateForm || !is_granted('create') || deleted" class="uk-card uk-card-default uk-card-body uk-margin uk-padding uk-text-center">
-                <div class="uk-placeholder">
-                    <icon name="maximize" :width="128" :height="128" style="opacity: 0.125" />
-                    <p class="uk-margin">{{ $t('content.list.empty_placeholder') }}</p>
-                    <p v-if="is_granted('create') && !embedded">
-                        <router-link :to="to('create')" class="uk-button uk-button-default uk-button-small"><icon name="plus" /> {{ $t('content.list.actions.create') }}</router-link>
-                    </p>
-                </div>
-            </div>
-
-            <div class="uk-overlay-default uk-position-cover" v-if="$apollo.loading">
-                <div uk-spinner class="uk-position-center"></div>
-            </div>
+            <component :is="loadingComponent" v-if="$apollo.loading" />
         </div>
 
-        <div class="uk-position-fixed uk-position-bottom uk-background-primary uk-dark uk-padding-small uk-text-center" v-if="select === 'MULTIPLE' && (selection.length > 0 || (initialSelection && initialSelection.length > 0))">
-            <button class="uk-button uk-button-default uk-button-small" @click.prevent="confirmSelection">{{ $t('content.list.selection.confirm', { count: selection.length }) }}</button>
-        </div>
+        <component :is="confirmSelectionComponent" v-if="select === 'MULTIPLE' && (selection.length > 0 || (initialSelection && initialSelection.length > 0))" :count="selection.length" @confirmSelection="confirmSelection" />
 
     </section>
 </template>
 
 <script>
     import gql from 'graphql-tag';
-    import Icon from '../../components/Icon';
-    import actionsField from '../Fields/List/_actions';
     import ViewHeader from "./_header";
-    import ViewPagination from "./_pagination";
+    import TableData from './_tableData';
+    import TablePlaceholder from './_tablePlaceholder';
     import _abstract from "./_abstract";
     import InlineCreate from "./_inlineCreate";
+    import LoadingOverlay from "../LoadingOverlay";
+    import ConfirmSelection from "./_confirmSelection";
 
     export default {
         extends: _abstract,
-        components: { InlineCreate, ViewHeader, ViewPagination, actionsField, Icon },
         data() {
             return {
-                overflow: false,
                 queryFilter: {},
                 items: {
                     total: 0,
@@ -139,6 +94,14 @@
             }
         },
         computed: {
+
+            headerComponent() { return ViewHeader },
+            inlineCreateComponent() { return InlineCreate },
+            tableDataComponent() { return TableData },
+            tablePlaceholderComponent() { return TablePlaceholder },
+            loadingComponent() { return LoadingOverlay },
+            confirmSelectionComponent() { return ConfirmSelection },
+
             activeFilter(){
                 let deletedFilter = { field: "deleted", operator: this.deleted ? 'NEQ' : 'EQ', value: null };
                 return {
@@ -176,7 +139,6 @@
         },
         watch: {
             '$route'(route){
-                this.overflow = false;
                 this.queryFilter = {};
                 this.reloadItems();
             }

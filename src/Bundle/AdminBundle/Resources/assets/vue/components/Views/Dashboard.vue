@@ -4,9 +4,7 @@
             <basic-section :title="$t('dashboard.basic.title')" :data="dashboard" />
         </div>
 
-        <div class="uk-overlay-default uk-position-cover" v-if="$apollo.loading">
-            <div uk-spinner class="uk-position-center"></div>
-        </div>
+        <loading-overlay v-if="$apollo.loading" />
     </section>
 </template>
 
@@ -15,10 +13,11 @@
     import _abstract from "./_abstract";
     import BasicSection from "../Dashboard/Sections/Basic";
     import gql from 'graphql-tag';
+    import LoadingOverlay from "../LoadingOverlay";
 
     export default {
         extends: _abstract,
-        components: { ViewHeader, BasicSection },
+        components: { ViewHeader, BasicSection, LoadingOverlay },
         data() {
             return {
                 dashboard: {}

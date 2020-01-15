@@ -5,7 +5,7 @@
     },
     "devDependencies": {
         "@symfony/webpack-encore": "^0.28.0",
-        "core-js": "^3.6.1",
+        "core-js": "^3.6.4",
         "regenerator-runtime": "^0.13.2",
         "sass-loader": "^7.0.1",
         "vue-loader": "^15.0.11",
