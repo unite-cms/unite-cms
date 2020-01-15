@@ -11,12 +11,12 @@
             <div class="uk-width-expand@m">
                 <div id="component-tab-left" class="uk-switcher">
                     <div class="form-group" :data-group-delta="delta" v-for="(group, delta) in fieldGroups">
-                        <component :key="field.id" v-for="field in group.fields" :is="$unite.getFormFieldType(field)" :form-data="formData" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
+                        <component :key="field.id" v-for="field in group.fields" :is="$unite.getFormFieldType(field)" :form-data="formData" :root-form-data="formData" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
                     </div>
                 </div>
             </div>
         </div>
-        <component v-if="!field.form_group" :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field)" :form-data="formData" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
+        <component v-if="!field.form_group" :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field)" :form-data="formData" :root-form-data="formData" :content-id="$route.params.id" :field="field" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
         <button slot="footer" class="uk-button uk-button-primary" type="submit" @click="checkInvalidHTML5FieldsInGroup">{{ $t('content.update.actions.submit') }}</button>
     </content-detail>
 </template>

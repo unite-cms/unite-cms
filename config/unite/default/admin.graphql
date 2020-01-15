@@ -60,6 +60,18 @@ fragment articlesMainFields on DemoArticle {
     }
 }
 
+fragment filteredCategories on DemoCategory @tableAdminView(filter: { field: "name", operator: CONTAINS, value: ["{{#require}}{{content.name}}{{/require}}"] }) {
+    name
+}
+
+fragment specialTeaser on TeaserRegion @embeddedAdminView(titlePattern: "") {
+    title
+    intro_text
+    main_category @referenceAdminView(formView: "filteredCategories") {
+        name
+    }
+}
+
 fragment articles on DemoArticle @tableAdminView {
     id
 
@@ -69,12 +81,8 @@ fragment articles on DemoArticle @tableAdminView {
     boolTest1
     boolTest2
 
-    teaser @referenceAdminView(fieldsInline: true) {
-        title
-        intro_text
-        main_category {
-            name
-        }
+    teaser @referenceAdminView(formView: "specialTeaser", fieldsInline: true) {
+        __typename
     }
 
     teasers @referenceAdminView(fieldsInline: true) {

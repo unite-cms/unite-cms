@@ -153,6 +153,7 @@ messages.en = {
     field: {
         reference: {
             missing_view_warning: 'No admin view for the referenced content of this field was found. Please add one to your schema!',
+            missing_required_value: 'You cannot select content for this field at the moment, because at least one field that is required for this field, is empty.',
             modal: {
                 headline: 'Select a content to reference'
             }

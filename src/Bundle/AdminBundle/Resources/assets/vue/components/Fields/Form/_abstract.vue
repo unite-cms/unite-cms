@@ -17,6 +17,7 @@
             contentId: String,
             field: Object,
             formData: Object,
+            rootFormData: Object,
             violations: Array,
             value: {}
         },

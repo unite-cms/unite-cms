@@ -152,6 +152,8 @@ messages.de = {
     },
     field: {
         reference: {
+            missing_view_warning: 'Es wurde keine AdminView für den referenzierten Inhalt dieses Feldes gefunden. Bitte füge eine AdminView zu deinem Schema.',
+            missing_required_value: 'Im Moment kann kein Inhalt ausgewählt werden, da zumindest ein Feld, das für dieses Feld notwendig ist, noch nicht ausgefüllt wurde.',
             modal: {
                 headline: 'Wähle Inhalte aus, die du referenzieren möchtest'
             }

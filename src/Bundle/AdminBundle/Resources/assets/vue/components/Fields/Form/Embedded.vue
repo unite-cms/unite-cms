@@ -14,7 +14,7 @@
           <a @click.prevent="clearUnionView(multiProps.rowKey || 0)" class="uk-icon-link"><icon name="x" /></a>
         </div>
 
-        <component :key="field.id" v-for="field in normalizedViews[multiProps.rowKey || 0].formFields()" :is="$unite.getFormFieldType(field)" :field="field" :value="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0][field.id] : undefined" @input="setFieldValue(field.id, arguments, multiProps.rowKey || 0)" :violations="violationsForField(field.id, multiProps.rowKey || 0)" />
+        <component :key="field.id" v-for="field in normalizedViews[multiProps.rowKey || 0].formFields()" :is="$unite.getFormFieldType(field)" :field="field" :form-data="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0] : {}" :root-form-data="rootFormData" :value="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0][field.id] : undefined" @input="setFieldValue(field.id, arguments, multiProps.rowKey || 0)" :violations="violationsForField(field.id, multiProps.rowKey || 0)" />
       </div>
     </multi-field>
   </form-row>
