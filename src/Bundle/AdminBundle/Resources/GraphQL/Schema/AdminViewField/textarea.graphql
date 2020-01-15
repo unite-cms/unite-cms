@@ -3,6 +3,6 @@ directive @textareaAdminField(
     name: String
     listIf: Expression
     formIf: Expression
-    formGroup: String
+    formGroup: UniteAdminGroupInput
     inlineCreate: Boolean
 ) on FIELD
