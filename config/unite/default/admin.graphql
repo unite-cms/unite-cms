@@ -31,10 +31,14 @@ fragment articles on DemoArticle @tableAdminView {
     id
     locale @adminField(formGroup: { name: "Allgemein" })
     name @adminField(inlineCreate: true, formGroup: { name: "Allgemein", icon: "home" })
-    main_category @adminField(formGroup: {name: "Extra", icon: "user"}) {
+    main_category @referenceAdminView(fieldsInline: true) @adminField(formGroup: {name: "Extra", icon: "user"}) {
         name
+        id
+        children {
+            total
+        }
     }
-    categories {
+    categories @referenceAdminView(fieldsInline: true, contentInline: true) {
         name
     }
 
@@ -56,6 +60,22 @@ fragment articles on DemoArticle @tableAdminView {
     boolTest
     boolTest1
     boolTest2
+
+    teaser @referenceAdminView(fieldsInline: true) {
+        title
+        intro_text
+        main_category {
+            name
+        }
+    }
+
+    teasers @referenceAdminView(fieldsInline: true) {
+        title
+        intro_text
+        main_category {
+            name
+        }
+    }
 }
 
 fragment shortArticles on DemoArticle @tableAdminView(name: "Short Articles") {

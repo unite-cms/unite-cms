@@ -5,4 +5,10 @@ directive @referenceAdminView(
 
     """Set the admin view to use when opening the referenced content modal in a form. Default is the first admin view of this type."""
     formView: String
+
+    """When possible, display referenced (or embedded) fields inline."""
+    fieldsInline: Boolean
+
+    """When possible, display multiple referenced (or embedded) content inline."""
+    contentInline: Boolean
 ) on FIELD

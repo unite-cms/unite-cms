@@ -31,6 +31,14 @@ class ReferenceAdminViewConfigurator extends GenericFieldConfigurator
                     $field->getConfig()->set('formView', $directive['args']['formView']);
                 }
 
+                if(!empty($directive['args']['fieldsInline'])) {
+                    $field->getConfig()->set('fieldsInline', $directive['args']['fieldsInline']);
+                }
+
+                if(!empty($directive['args']['contentInline'])) {
+                    $field->getConfig()->set('contentInline', $directive['args']['contentInline']);
+                }
+
                 break;
             }
         }

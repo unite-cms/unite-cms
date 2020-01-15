@@ -1,8 +1,10 @@
 <template>
     <div>
         <template v-for="value in values">
-            {{ value }}
-            <br v-if="!isLastValue(value)" />
+            <span :class="{ 'uk-text-nowrap': value.length < 50 }">
+                {{ value }}
+                <br v-if="!isLastValue(value)" />
+            </span>
         </template>
     </div>
 </template>

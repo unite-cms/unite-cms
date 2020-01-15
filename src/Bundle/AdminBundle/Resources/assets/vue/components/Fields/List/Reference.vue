@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <div v-for="value in values">
+    <div :class="{ 'uk-flex uk-flex-middle display-inline' : field.config.contentInline }">
+        <div v-for="value in values" :class="{ 'uk-flex uk-flex-middle display-inline' : field.config.fieldsInline }">
             <template v-for="nestedField in nestedFields(value)">
                 <component :is="$unite.getListFieldType(nestedField)" :field="nestedField" :row="value" />
             </template>
@@ -100,3 +100,10 @@
         }
     }
 </script>
+<style scoped lang="scss">
+    .display-inline {
+        > * {
+            margin: 0 5px;
+        }
+    }
+</style>
