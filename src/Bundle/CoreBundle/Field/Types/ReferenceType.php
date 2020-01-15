@@ -69,7 +69,7 @@ class ReferenceType extends AbstractFieldType
         }
 
         $domain = $this->domainManager->current();
-        $contentManager = $content instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
+        $contentManager = $domain->getContentTypeManager()->getContentType($field->getReturnType()) ? $domain->getContentManager() : $domain->getUserManager();
 
         if($fieldData instanceof FieldDataList) {
             $rowIds = [];

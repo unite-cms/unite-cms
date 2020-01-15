@@ -33,7 +33,7 @@ class TestContentManager implements ContentManagerInterface
             return new TestContentResult($type);
         }
 
-        return new TestContentResult($type, array_slice(array_filter($this->repository[$type], function(TestContent $content) use ($includeDeleted) {
+        return new TestContentResult($type, array_slice(array_filter($this->repository[$type], function($content) use ($includeDeleted) {
             return $includeDeleted || empty($content->getDeleted());
         }), $criteria->getFirstResult(), $criteria->getMaxResults()), $resultFilter);
     }

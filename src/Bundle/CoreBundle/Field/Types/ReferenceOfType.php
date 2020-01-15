@@ -10,6 +10,7 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
+use UniteCMS\CoreBundle\ContentType\UserType;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\ContentCriteriaBuilder;
@@ -139,7 +140,7 @@ class ReferenceOfType extends AbstractFieldType
         }
 
         $domain = $this->domainManager->current();
-        $contentManager = $content instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
+        $contentManager = $this->getReferenceContentType($field) instanceof UserType ? $domain->getUserManager() : $domain->getContentManager();
 
         if(!$reference_field = $this->getReferenceField($content->getType(), $field)){
             return null;

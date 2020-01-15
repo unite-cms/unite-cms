@@ -10,7 +10,14 @@ use UniteCMS\CoreBundle\Security\User\UserManagerInterface;
 class TestUserManager extends TestContentManager implements UserManagerInterface {
 
     public function create(Domain $domain, string $type): ContentInterface {
-        return new TestUser($type);
+        $content = new TestUser($type);
+        $this->actions[] = function() use ($content) {
+            $content->setId();
+            $this->repository[$content->getType()][$content->getId()] = $content;
+            $this->versionedData[$content->getId()] = $this->versionedData[$content->getId()] ?? [];
+            $this->versionedData[$content->getId()][] = $content->getData();
+        };
+        return $content;
     }
 
     public function findByUsername(Domain $domain, string $username): ?UserInterface {
