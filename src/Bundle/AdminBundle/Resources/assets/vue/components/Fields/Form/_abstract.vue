@@ -19,7 +19,11 @@
             formData: Object,
             rootFormData: Object,
             violations: Array,
-            value: {}
+            value: {},
+            prefix: {
+                type: Array,
+                default() { return []; }
+            },
         },
         watch: {
             value: {

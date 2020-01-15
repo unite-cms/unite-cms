@@ -1,6 +1,6 @@
 <template>
   <form-row :domID="domID" :field="field" :alerts="!embeddedView ? [{ level: 'warning', message: $t('field.embedded.missing_view_warning') }] : globalViolations">
-    <multi-field v-if="embeddedView" :field="field" :val="val" @addRow="val.push({})" @removeRow="removeByKey" v-slot:default="multiProps">
+    <multi-field v-if="embeddedView" :field="field" :val="val" @addRow="addRow" @removeRow="removeByKey" v-slot:default="multiProps">
 
       <div class="uk-input-group uk-text-center" v-if="embeddedView.category === 'union' && !unionViews[multiProps.rowKey || 0]">
         <a class="union-select-card uk-card uk-card-small uk-card-default uk-card-body uk-text-center" @click.prevent="setFieldValue('__typename', [view.type], multiProps.rowKey || 0)" v-for="view in embeddedView.possibleViews">
@@ -14,7 +14,8 @@
           <a @click.prevent="clearUnionView(multiProps.rowKey || 0)" class="uk-icon-link"><icon name="x" /></a>
         </div>
 
-        <component :key="field.id" v-for="field in normalizedViews[multiProps.rowKey || 0].formFields()" :is="$unite.getFormFieldType(field)" :field="field" :form-data="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0] : {}" :root-form-data="rootFormData" :value="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0][field.id] : undefined" @input="setFieldValue(field.id, arguments, multiProps.rowKey || 0)" :violations="violationsForField(field.id, multiProps.rowKey || 0)" />
+        <form-fields :view="normalizedViews[multiProps.rowKey || 0]" :form-data="values[multiProps.rowKey || 0] ? values[multiProps.rowKey || 0] : {}" :prefix="[...prefix, field.id, multiProps.rowKey].filter(p => { return p !== null; })" :root-form-data="rootFormData" :content-id="$route.params.id" @input="data => updateValue(multiProps.rowKey || 0, data)" />
+
       </div>
     </multi-field>
   </form-row>
@@ -23,9 +24,10 @@
   import _abstract from "./_abstract";
   import FormRow from './_formRow';
   import MultiField from './_multiField';
+  import FormFields from "../../Form/_formFields";
   import Icon from "../../Icon";
   import UIkit from 'uikit';
-  import {getAdminViewByType, removeIntroSpecType} from '../../../plugins/unite';
+  import {getAdminViewByType} from '../../../plugins/unite';
 
   export default {
 
@@ -68,13 +70,12 @@
 
       // Vue properties for this component.
       extends: _abstract,
-      components: { FormRow, MultiField, Icon },
+      components: { FormRow, FormFields, MultiField, Icon },
 
       computed: {
           embeddedView() {
               return getAdminViewByType(this.$unite, this.field.returnType);
           },
-
           unionViews() {
               let rows = this.values;
               rows = rows.length > 0 ? rows : [{}];
@@ -106,6 +107,9 @@
                   this.$set(this.val, field, args[0]);
               }
           },
+          updateValue(key, data) {
+              this.setValue([data], key);
+          },
 
           unionView(type) {
               if(!type || this.embeddedView.category !== 'union') {
@@ -121,18 +125,12 @@
               });
           },
 
-          violationsForField(field, key) {
-              return this.violations.filter((violation) => {
-                  if(this.field.list_of) {
-                      return violation.path.length > 2 && violation.path[1] === '' + key && violation.path[2] === field;
-                  } else {
-                      return violation.path.length > 1 && violation.path[1] === field;
-                  }
-              }).map((violation) => {
-                  let path = this.field.list_of ? violation.path.slice(2) : violation.path.slice(1);
-                  return Object.assign({}, violation, { path });
-              });
-          }
+          addRow() {
+              if(!Array.isArray(this.val)) {
+                  this.val = [];
+              }
+              this.val.push({});
+          },
       }
   }
 </script>

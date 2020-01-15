@@ -15,12 +15,13 @@
     "vuejs-datepicker": "^1.6.2",
     "vue-places": "^2.1.1",
     "leaflet": "^1.6.0",
-    "vue2-leaflet": "^2.4.1",
+    "vue2-leaflet": "^2.4.2",
     "vue-google-places": "^0.1.6",
     "vue-virtual-scroll-list": "^1.4.4",
     "tiptap": "^1.26.6",
     "tiptap-extensions": "^1.28.6",
-    "mustache": "^3.2.0"
+    "mustache": "^3.2.0",
+    "deepmerge": "^4.2.2"
   },
   "license": "UNLICENSED",
   "private": true,

@@ -74,7 +74,9 @@ export const Alerts = new Vue({
         },
         violationsForPrefix(prefix = '') {
             return this.violations.filter((violation) => {
-                return violation.path.length > 0 && violation.path[0] === prefix;
+                prefix = Array.isArray(prefix) ? prefix : [prefix];
+                prefix = prefix.map(p => `${p}`);
+                return violation.path.length >= prefix.length && JSON.stringify(prefix) === JSON.stringify(violation.path.slice(0, prefix.length));
             });
         },
         violationsWithoutPrefix(prefix = []) {

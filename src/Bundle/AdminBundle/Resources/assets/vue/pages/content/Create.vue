@@ -3,36 +3,25 @@
         <h1 class="uk-card-title">{{ $t('content.create.headline', { contentTitle, view }) }}</h1>
         <alerts-list :alerts="globalViolations" />
 
-        <div uk-grid v-if="fieldGroups.length > 0">
-            <div class="uk-width-auto@m">
-                <ul class="uk-tab-left" ref="fieldGroupContainer" uk-tab="connect: #component-tab-left; animation: uk-animation-fade">
-                    <li v-for="group in fieldGroups"><a href="#"><icon v-if="group.icon" :name="group.icon" class="uk-margin-small-right" /> {{ group.name }}</a></li>
-                </ul>
-            </div>
-            <div class="uk-width-expand@m">
-                <div id="component-tab-left" class="uk-switcher">
-                    <div class="form-group" :data-group-delta="delta" v-for="(group, delta) in fieldGroups">
-                        <component :key="field.id" v-for="field in group.fields" :is="$unite.getFormFieldType(field)" :field="field" :form-data="formData" :root-form-data="formData" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <component v-if="!field.form_group" :key="field.id" v-for="field in view.formFields()" :is="$unite.getFormFieldType(field)" :field="field" :form-data="formData" :root-form-data="formData" v-model="formData[field.id]" :violations="fieldViolations(field.id)" />
-        <button slot="footer" class="uk-button uk-button-primary" type="submit" @click="checkInvalidHTML5FieldsInGroup">{{ $t('content.create.actions.submit') }}</button>
+        <form-fields :view="view" :form-data="formData" :root-form-data="formData" @input="data => formData = data" />
+
+        <button slot="footer" class="uk-button uk-button-primary" type="submit" @click="submitClick">{{ $t('content.create.actions.submit') }}</button>
     </content-detail>
 </template>
 
 <script>
     import gql from 'graphql-tag';
-    import Icon from "../../components/Icon";
+    import deepmerge from 'deepmerge';
+
     import ContentDetail from './_detail';
+    import FormFields from "../../components/Form/_formFields";
     import Alerts from "../../state/Alerts";
     import AlertsList from '../../components/Alerts';
     import Route from "../../state/Route";
-    import UIkit from 'uikit';
+    import Form from "../../state/Form";
 
     export default {
-        components: {Icon, ContentDetail, AlertsList},
+        components: {ContentDetail, FormFields, AlertsList},
         data(){
             return {
                 loading: false,
@@ -64,24 +53,7 @@
             },
         },
         methods: {
-            findFormGroup(element) {
-                return element.tagName === 'FORM' ? null : (
-                    element.classList.contains('form-group') ? element : this.findFormGroup(element.parentElement)
-                );
-            },
-            checkInvalidHTML5FieldsInGroup(event) {
-                if(this.$refs.fieldGroupContainer) {
-                    for (let i = 0; i < event.target.form.elements.length; i++) {
-                        if (!event.target.form.elements[i].reportValidity()) {
-                            let formGroup = this.findFormGroup(event.target.form.elements[i]);
-                            if(formGroup) {
-                                UIkit.tab(this.$refs.fieldGroupContainer).show(formGroup.dataset.groupDelta);
-                                setTimeout(() => { formGroup.scrollIntoView({behavior: "smooth"}); }, 300);
-                            }
-                        }
-                    }
-                }
-            },
+            submitClick(event) { Form.checkHTML5Valid(event) },
             submit() {
                 Alerts.$emit('clear');
                 this.loading = true;
@@ -93,7 +65,7 @@
                     }`,
                     variables: {
                         persist: true,
-                        data: this.view.normalizeMutationData(Object.assign({}, this.formData)),
+                        data: this.view.normalizeMutationData(deepmerge({}, this.formData)),
                     }
                 }).then((data) => {
                     let updatedId = this.$route.query.updated || data.data[`create${this.view.type}`].id;
@@ -104,9 +76,6 @@
                     Alerts.$emit('push', 'danger', this.$t('content.create.errors', { view: this.view, contentTitle: this.contentTitle }));
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
-            },
-            fieldViolations(prefix) {
-                return Alerts.violationsForPrefix(prefix);
             }
         }
     }

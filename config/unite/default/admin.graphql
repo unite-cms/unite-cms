@@ -65,8 +65,8 @@ fragment filteredCategories on DemoCategory @tableAdminView(filter: { field: "na
 }
 
 fragment specialTeaser on TeaserRegion @embeddedAdminView(titlePattern: "") {
-    title
-    intro_text
+    title @adminField(formGroup: {name: "Group 1"})
+    intro_text @adminField(formGroup: {name: "Group 2"})
     main_category @referenceAdminView(formView: "filteredCategories") {
         name
     }
