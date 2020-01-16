@@ -1,7 +1,7 @@
 <template>
     <div>
         <template v-for="value in values">
-            <icon :name="value ? 'check-circle' : 'x-circle'" :class="value ? 'uk-text-success' : 'uk-text-danger'" />
+            <icon uk-tooltip :title="$t(value ? 'field.checkbox.description_true' : 'field.checkbox.description_false', { label: field.name.slice(0, 1).toUpperCase() + field.name.slice(1) })" :name="value ? 'check-circle' : 'x-circle'" :class="value ? 'uk-text-success' : 'uk-text-danger'" />
             <br v-if="!isLastValue(value)" />
         </template>
     </div>

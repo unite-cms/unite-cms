@@ -183,6 +183,10 @@ messages.en = {
         sequence: {
             no_value_message: 'The value of this field will automatically be generated on create.'
         },
+        checkbox: {
+            description_true: '{label}: True',
+            description_false: '{label}: False',
+        },
 
         date: en
     },

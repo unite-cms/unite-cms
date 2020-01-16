@@ -181,6 +181,10 @@ messages.de = {
         sequence: {
             no_value_message: 'Der Wert dieses Feldes wird automatisch beim Erstellen generiert.'
         },
+        checkbox: {
+            description_true: '{label}: Wahr',
+            description_false: '{label}: Falsch',
+        },
 
         date: de
     },
