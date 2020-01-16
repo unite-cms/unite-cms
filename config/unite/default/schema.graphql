@@ -30,7 +30,7 @@ type Media implements UniteContent {
             secret: "%(S3_SECRET)%",
             region: "",
             version: "latest",
-            endpoint: "http://127.0.0.1:9001"
+            endpoint: "http://127.0.0.1:9000"
             bucket: "test",
             path: "/uploads",
             use_path_style_endpoint: true,
