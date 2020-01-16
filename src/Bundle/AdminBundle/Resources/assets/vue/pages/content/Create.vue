@@ -11,7 +11,6 @@
 
 <script>
     import gql from 'graphql-tag';
-    import deepmerge from 'deepmerge';
 
     import ContentDetail from './_detail';
     import FormFields from "../../components/Form/_formFields";
@@ -65,7 +64,7 @@
                     }`,
                     variables: {
                         persist: true,
-                        data: this.view.normalizeMutationData(deepmerge({}, this.formData)),
+                        data: this.view.normalizeMutationData(this.formData),
                     }
                 }).then((data) => {
                     let updatedId = this.$route.query.updated || data.data[`create${this.view.type}`].id;

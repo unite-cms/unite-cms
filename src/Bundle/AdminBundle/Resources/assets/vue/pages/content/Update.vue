@@ -11,7 +11,6 @@
 
 <script>
     import gql from 'graphql-tag';
-    import deepmerge from 'deepmerge';
 
     import Alerts from "../../state/Alerts";
     import AlertsList from '../../components/Alerts';
@@ -93,7 +92,7 @@
                     variables: {
                         id: this.$route.params.id,
                         persist: true,
-                        data: this.view.normalizeMutationData(deepmerge({}, this.formData)),
+                        data: this.view.normalizeMutationData(this.formData),
                     }
                 }).then((data) => {
 

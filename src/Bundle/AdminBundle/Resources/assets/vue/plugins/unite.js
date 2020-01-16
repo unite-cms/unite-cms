@@ -1,6 +1,7 @@
 
 import Vue from 'vue';
 import gql from 'graphql-tag';
+import deepmerge from 'deepmerge';
 import {getIntrospectionQuery} from 'graphql'
 import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ListFieldTypeFallback from "../components/Fields/List/_fallback";
@@ -215,7 +216,16 @@ const createAdminView = function (view, unite) {
         this.formFields().forEach((field) => {
             let type = unite.getFormFieldType(field);
             let fieldData = formData[field.id];
-            data[field.id] = !!type.normalizeMutationData ? type.normalizeMutationData(fieldData, field, unite, depth) : fieldData;
+
+            if(!!type.normalizeMutationData) {
+                data[field.id] = type.normalizeMutationData(fieldData, field, unite, depth);
+            } else {
+                if(typeof fieldData === 'object') {
+                    data[field.id] = deepmerge({}, fieldData);
+                } else {
+                    data[field.id] = fieldData;
+                }
+            }
         });
         return data;
     };

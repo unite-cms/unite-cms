@@ -83,7 +83,7 @@
                     }`,
                     variables: {
                         persist: true,
-                        data: this.view.normalizeMutationData(Object.assign({}, this.formData)),
+                        data: this.view.normalizeMutationData(this.formData),
                     }
                 }).then((data) => {
                     this.$emit('onCreate', data.data[`create${this.view.type}`].id);
