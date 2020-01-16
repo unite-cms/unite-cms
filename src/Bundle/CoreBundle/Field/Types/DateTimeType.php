@@ -8,6 +8,7 @@ use GraphQL\Error\Error;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
 use UniteCMS\CoreBundle\ContentType\ContentTypeField;
+use UniteCMS\CoreBundle\Query\BaseFieldComparison;
 
 class DateTimeType extends AbstractFieldType
 {
@@ -82,5 +83,21 @@ class DateTimeType extends AbstractFieldType
         }
 
         return $settings;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function queryComparison(ContentTypeField $field, array $whereInput) : ?BaseFieldComparison {
+
+        // Convert any input (int, string etc.) to unix timestamp
+        if(!empty($whereInput['value'])) {
+            $whereInput['value'] = is_array($whereInput['value']) ? $whereInput['value'] : [$whereInput['value']];
+            $whereInput['value'] = array_map(function($value){
+                return static::parseValue($value)->getTimestamp();
+            }, $whereInput['value']);
+        }
+
+        return parent::queryComparison($field, $whereInput);
     }
 }
