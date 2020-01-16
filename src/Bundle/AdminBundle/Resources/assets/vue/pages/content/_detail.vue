@@ -4,7 +4,7 @@
       <div class="uk-flex uk-flex-middle uk-margin-bottom" v-if="canGoBack">
         <button @click="goBack" class="uk-button uk-button-small uk-button-default uk-margin-right"><icon class="fix-line-height" name="arrow-left" /> {{ $t('general.back') }}</button>
       </div>
-      <component :is="$listeners.submit ? 'form' : 'div'" :class="card ? 'uk-card uk-card-default' : null" @submit.prevent="submit">
+      <component :is="$listeners.submit ? 'form' : 'div'" :class="card ? 'uk-card uk-card-default' : null" :method="$listeners.submit ? 'POST' : null" :enctype="$listeners.submit ? 'multipart/form-data' : null" @submit.prevent="submit">
 
         <div :class="card ? 'uk-card-header' : 'detail-header'" v-if="$slots.header">
           <slot name="header"></slot>
