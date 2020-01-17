@@ -71,11 +71,13 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
                  */
                 $referencedContentResult = $fieldType->resolveField($content, $field, $content->getFieldData($field->getId()));
 
-                foreach($referencedContentResult->getResult() as $referencedContent) {
-                    if($field->getSettings()->get('onDelete') === 'CASCADE') {
-                        $this->cascade($domain, $content, $referencedContent);
-                    } else {
-                        $this->setNull($domain, $content, $referencedContent, $field);
+                if($referencedContentResult) {
+                    foreach ($referencedContentResult->getResult() as $referencedContent) {
+                        if ($field->getSettings()->get('onDelete') === 'CASCADE') {
+                            $this->cascade($domain, $content, $referencedContent);
+                        } else {
+                            $this->setNull($domain, $content, $referencedContent, $field);
+                        }
                     }
                 }
             }
