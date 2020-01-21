@@ -9,16 +9,32 @@
 }
 
 .uk-label {
+
+  &.clearable {
+    display: flex;
+
+    > span {
+      margin-top: 2px;
+    }
+
+    .uk-icon-link {
+      margin: 0 4px 0 -4px;
+
+      svg {
+        margin-top: 1px;
+      }
+
+      &:hover {
+        color: $global-danger-background;
+      }
+    }
+  }
+
   .uk-icon-link {
-    margin-right: -5px;
     color: white;
 
     svg {
       margin-top: -2px;
-    }
-
-    &:hover {
-      color: $global-danger-background;
     }
   }
 }

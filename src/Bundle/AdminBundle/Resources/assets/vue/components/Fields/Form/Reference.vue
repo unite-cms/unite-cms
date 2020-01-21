@@ -1,9 +1,9 @@
 <template>
   <form-row :domID="domID" :field="field" :alerts="!referencedView ? [{ type: 'warning', message: $t('field.reference.missing_view_warning') }] : violations">
       <div class="uk-input-group uk-flex uk-flex-middle uk-flex-wrap">
-        <div class="uk-label uk-label-secondary" v-for="value in values">
-          {{ referencedContentTitle(value) }}
-          <a href="" @click.prevent="removeValue(value)" class="uk-icon-link"><icon name="x" /></a>
+        <div class="uk-label uk-label-secondary clearable" v-for="value in values">
+            <a href="" @click.prevent="removeValue(value)" class="uk-icon-link"><icon name="x" /></a>
+            <span>{{ referencedContentTitle(value) }}</span>
         </div>
         <a :id="domID" @click.prevent="openModal" :disabled="!referencedView" class="uk-icon-button uk-button-light uk-icon-button-small"><icon name="plus" /></a>
       </div>

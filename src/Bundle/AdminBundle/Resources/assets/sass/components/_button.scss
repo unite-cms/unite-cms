@@ -11,3 +11,28 @@
   color: $button-default-hover-color;
   @if(mixin-exists(hook-button-default-hover)) {@include hook-button-default-hover();}
 }
+
+.uk-button-warning {
+  background-color: $global-warning-background;
+  color: $inverse-button-default-color;
+  @if(mixin-exists(hook-button-default)) {@include hook-button-default();}
+  border-color: $global-warning-background;
+}
+
+/* Hover + Focus */
+.uk-button-warning:hover,
+.uk-button-warning:focus {
+  color: $inverse-button-default-color;
+  background-color: darken($global-warning-background, 10%);
+  @if(mixin-exists(hook-button-default-hover)) {@include hook-button-default-hover();}
+  border-color: darken($global-warning-background, 10%);
+}
+
+/* OnClick + Active */
+.uk-button-warning:active,
+.uk-button-warning.uk-active {
+  color: $inverse-button-default-color;
+  background-color: darken($global-warning-background, 15%);
+  @if(mixin-exists(hook-button-active)) {@include hook-button-active();}
+  border-color: darken($global-warning-background, 15%);
+}
