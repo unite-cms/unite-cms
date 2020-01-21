@@ -2,7 +2,7 @@
     <div :class="{ 'uk-flex uk-flex-middle display-inline' : field.config.contentInline }">
         <div v-for="value in values" :class="{ 'uk-flex uk-flex-middle display-inline' : field.config.fieldsInline }">
             <template v-for="nestedField in nestedFields(value)">
-                <component :is="$unite.getListFieldType(nestedField)" :field="nestedField" :row="normalizedContent(value)" :view="referencedView" />
+                <component v-if="nestedField.fieldType" :is="$unite.getListFieldType(nestedField)" :field="nestedField" :row="normalizedContent(value)" :view="referencedView" />
             </template>
         </div>
     </div>
