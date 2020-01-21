@@ -3,7 +3,7 @@
     <div class="uk-flex uk-flex-middle">
       <span v-if="total !== null" class="uk-margin-small-right uk-label uk-label-muted">{{ total }}</span>
       <button type="button" class="uk-button-light uk-icon-button uk-icon-button-small small-padding" @click.prevent="modalIsOpen = true"><icon name="list" /></button>
-      <button v-if="referencedView.permissions.create" type="button" class="uk-button-light uk-icon-button uk-icon-button-small uk-margin-small-left small-padding" @click.prevent="createContent"><icon name="plus" /></button>
+      <button v-if="referencedView.permissions.create && referencedView.actions.create" type="button" class="uk-button-light uk-icon-button uk-icon-button-small uk-margin-small-left small-padding" @click.prevent="createContent"><icon name="plus" /></button>
     </div>
     <div v-if="!referencedView" class="uk-alert-warning" uk-alert>{{ $t('field.reference_of.missing_view_warning') }}</div>
     <modal v-if="referencedView && modalIsOpen" @hide="modalIsOpen = false">

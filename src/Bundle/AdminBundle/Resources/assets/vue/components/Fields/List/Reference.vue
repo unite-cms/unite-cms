@@ -2,7 +2,7 @@
     <div :class="{ 'uk-flex uk-flex-middle display-inline' : field.config.contentInline }">
         <div v-for="value in values" :class="{ 'uk-flex uk-flex-middle display-inline' : field.config.fieldsInline }">
             <template v-for="nestedField in nestedFields(value)">
-                <component :is="$unite.getListFieldType(nestedField)" :field="nestedField" :row="value" />
+                <component :is="$unite.getListFieldType(nestedField)" :field="nestedField" :row="normalizedContent(value)" :view="referencedView" />
             </template>
         </div>
     </div>
@@ -96,6 +96,21 @@
                 });
 
                 return referencedField.length > 0 ? referencedField[0] : this.fallbackField(key);
+            },
+
+            normalizedContent(value) {
+                value._meta = Object.assign({
+                    id: value.id || null,
+                    deleted: false,
+                    permissions: {
+                        read: true,
+                        update: false,
+                        delete: false,
+                        permanent_delete: false,
+                        user_invite: false,
+                    }
+                }, value._meta);
+                return value;
             }
         }
     }
