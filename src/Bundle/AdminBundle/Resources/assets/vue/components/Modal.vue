@@ -41,7 +41,9 @@
         mounted() {
             UIkit.modal(this.$refs.modal).show();
             UIkit.util.on(this.$refs.modal, 'hide', (e) => {
-                this.$emit('hide');
+                if(e.target === this.$refs.modal) {
+                    this.$emit('hide');
+                }
             });
         },
         beforeDestroy() {
