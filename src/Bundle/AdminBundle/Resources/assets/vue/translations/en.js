@@ -188,7 +188,11 @@ messages.en = {
             description_false: '{label}: False',
         },
 
-        date: en
+        date: {
+            picker: en,
+            format: 'd MMMM yyyy',
+            mondayFirst: 'false'
+        }
     },
     network_error: {
         401: 'Username or password incorrect.',

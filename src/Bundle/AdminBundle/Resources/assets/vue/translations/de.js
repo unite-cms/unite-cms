@@ -186,7 +186,11 @@ messages.de = {
             description_false: '{label}: Falsch',
         },
 
-        date: de
+        date: {
+            picker: de,
+            format: 'dd.MM.yyyy',
+            mondayFirst: 'true'
+        }
     },
     network_error: {
         401: 'Falscher Username oder falsches Passwort',

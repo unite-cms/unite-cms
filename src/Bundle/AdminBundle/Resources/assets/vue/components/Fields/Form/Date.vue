@@ -4,7 +4,7 @@
       <div class="uk-flex uk-flex-middle">
 
         <div class="uk-flex-1 date-picker-input">
-          <date-picker :required="field.required" :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setValue(arguments, multiProps.rowKey)" :language="$t('field.date')" format="d MMMM yyyy" />
+          <date-picker :required="field.required" :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setValue(arguments, multiProps.rowKey)" :full-month-name="true" :monday-first="$t('field.date.mondayFirst') === 'true'" initial-view="year" :format="$t('field.date.format')" :language="$t('field.date.picker')" />
         </div>
 
         <div v-if="!field.list_of && !field.required && val" class="uk-margin-small-left">

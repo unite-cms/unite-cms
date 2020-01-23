@@ -4,7 +4,7 @@
       <div class="uk-flex uk-flex-middle">
 
         <div class="uk-flex-1 date-picker-input">
-          <date-picker :required="field.required" :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setDate(arguments, multiProps.rowKey)" :language="$t('field.date')" format="d MMMM yyyy" />
+          <date-picker :required="field.required" :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setDate(arguments, multiProps.rowKey)" :full-month-name="true" :monday-first="$t('field.date.mondayFirst') === 'true'" initial-view="year" :format="$t('field.date.format')" :language="$t('field.date.picker')" />
         </div>
 
         <div class="date-picker-separator">:</div>
@@ -65,6 +65,7 @@
         methods: {
             setDate(args, key) {
                 let date = (this.field.list_of ? this.val[key] : this.val) || this.today;
+                date = new Date(date);
                 let prevMinutes = date.getMinutes();
                 let prevHours = date.getHours();
                 date = new Date(args[0]);
