@@ -122,32 +122,36 @@ class MutationResolver implements FieldResolverInterface
                 $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $previousContent = $content->getData();
                     $this->contentUpdate($contentManager, $domain, $content, $args['data'] ?? []);
-                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::UPDATE, $args['persist']);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::UPDATE, $args['persist'], $previousContent);
                 });
 
             case 'revert':
                 $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $previousContent = $content->getData();
                     $contentManager->revert($domain, $content, $args['version']);
-                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::REVERT, $args['persist']);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::REVERT, $args['persist'], $previousContent);
                 });
 
             case 'delete':
                 $this->contentAccess(ContentVoter::DELETE, $content, $contentManager, $domain);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $previousContent = $content->getData();
                     $contentManager->delete($domain, $content);
-                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::DELETE, $args['persist']);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::DELETE, $args['persist'], $previousContent);
                 });
 
             case 'recover':
                 $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
 
                 $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $previousContent = $content->getData();
                     $contentManager->recover($domain, $content);
-                    $this->contentPersist($contentManager, $domain, $content, ContentEvent::RECOVER, $args['persist']);
+                    $this->contentPersist($contentManager, $domain, $content, ContentEvent::RECOVER, $args['persist'], $previousContent);
                 });
 
                 // On recover: only return content if we really persist the change
@@ -161,8 +165,9 @@ class MutationResolver implements FieldResolverInterface
                 }
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
+                    $previousContent = $content->getData();
                     $contentManager->permanentDelete($domain, $content);
-                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::PERMANENT_DELETE, $args['persist']);
+                    return $this->contentPersist($contentManager, $domain, $content, ContentEvent::PERMANENT_DELETE, $args['persist'], $previousContent);
                 });
 
             default:
@@ -319,9 +324,10 @@ class MutationResolver implements FieldResolverInterface
      * @param string $eventName
      * @param bool $persist
      *
+     * @param array $previousContent
      * @return ContentInterface
      */
-    protected function contentPersist(ContentManagerInterface $contentManager, Domain $domain, ContentInterface $content, string $eventName, bool $persist = false) : ContentInterface {
+    protected function contentPersist(ContentManagerInterface $contentManager, Domain $domain, ContentInterface $content, string $eventName, bool $persist = false, array $previousContent = []) : ContentInterface {
 
         // Validate content for given event group.
         $violations = $this->validator->validate($content, null, [Constraint::DEFAULT_GROUP, $eventName]);
@@ -334,9 +340,9 @@ class MutationResolver implements FieldResolverInterface
 
         // Persist content.
         if($persist) {
-            $this->eventDispatcher->dispatch(new ContentEventBefore($content), $eventName);
+            $this->eventDispatcher->dispatch(new ContentEventBefore($content, $previousContent), $eventName);
             $contentManager->flush($domain);
-            $this->eventDispatcher->dispatch(new ContentEventAfter($content), 'AFTER ' . $eventName);
+            $this->eventDispatcher->dispatch(new ContentEventAfter($content, $previousContent), 'AFTER ' . $eventName);
         } else {
             $contentManager->noFlush($domain);
         }
