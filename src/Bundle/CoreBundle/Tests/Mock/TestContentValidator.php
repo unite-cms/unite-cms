@@ -23,6 +23,11 @@ class TestContentValidator extends ConstraintValidator implements ContentValidat
     /**
      * @inheritDoc
      */
+    function options(): ?array { return ['groups' => ['CREATE']]; }
+
+    /**
+     * @inheritDoc
+     */
     public function validate($value, Constraint $constraint)
     {
         if($value->getFieldData('test_global_validator')) {

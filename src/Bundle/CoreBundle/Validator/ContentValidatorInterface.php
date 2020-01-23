@@ -18,13 +18,18 @@ interface ContentValidatorInterface extends ConstraintValidatorInterface {
      * @param string $domain
      * @return bool
      */
-    function supportsDomain(string $domain) : bool;
+    public function supportsDomain(string $domain) : bool;
 
     /**
      * @param ContentType $contentType
      * @return bool
      */
-    function supportsContentType(ContentType $contentType) : bool;
+    public function supportsContentType(ContentType $contentType) : bool;
+
+    /**
+     * @return array|null
+     */
+    public function options() : ?array;
 
     /**
      * @param ContentInterface $value

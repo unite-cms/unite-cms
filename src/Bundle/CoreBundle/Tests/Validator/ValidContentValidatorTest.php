@@ -483,7 +483,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
             'lastname' => new FieldData('CREATE'),
             'test_global_validator' => new FieldData('foo')
         ]);
-        $violations = static::$container->get(ValidatorInterface::class)->validate($content, null, [Constraint::DEFAULT_GROUP]);
+        $violations = static::$container->get(ValidatorInterface::class)->validate($content, null, [Constraint::DEFAULT_GROUP, 'CREATE']);
         $this->assertCount(1, $violations);
         $this->assertEquals('foo', $violations->get(0)->getMessage());
 
@@ -491,7 +491,7 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
             'firstname' => new FieldData('CREATE'),
             'lastname' => new FieldData('CREATE'),
         ]);
-        $violations = static::$container->get(ValidatorInterface::class)->validate($content, null, [Constraint::DEFAULT_GROUP]);
+        $violations = static::$container->get(ValidatorInterface::class)->validate($content, null, ['CREATE']);
         $this->assertCount(0, $violations);
     }
 }

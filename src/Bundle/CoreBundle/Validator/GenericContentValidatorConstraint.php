@@ -19,7 +19,7 @@ class GenericContentValidatorConstraint extends Constraint
     public function __construct(ContentValidatorInterface $contentValidator)
     {
         $this->contentValidator = $contentValidator;
-        parent::__construct();
+        parent::__construct($contentValidator->options());
     }
 
     /**
