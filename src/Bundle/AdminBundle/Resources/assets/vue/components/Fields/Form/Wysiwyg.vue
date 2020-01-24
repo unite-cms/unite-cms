@@ -3,7 +3,7 @@
     <multi-field :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
       <editor-menu-bar :editor="editorForKey(multiProps.rowKey || 0)" v-slot="{ commands, isActive }">
         <ul class="uk-iconnav">
-          <component v-for="(menuItem, key) in menuItems" :key="key" :is="menuItem" :commands="commands" :is-active="isActive" :field="field" />
+          <component v-for="(menuItem, key) in menuItems" :key="key" :editor="editorForKey(multiProps.rowKey || 0)" :is="menuItem" :commands="commands" :is-active="isActive" :field="field" />
         </ul>
       </editor-menu-bar>
       <editor-content :editor="editorForKey(multiProps.rowKey || 0)" />
