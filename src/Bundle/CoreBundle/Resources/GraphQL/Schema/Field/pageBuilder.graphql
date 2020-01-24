@@ -1,0 +1,41 @@
+
+type UnitePageBuilderAttribute {
+    key: String!
+    value: String
+}
+
+input UnitePageBuilderAttributeInput {
+    key: String!
+    value: String
+}
+
+type UnitePageBuilderNode {
+    type: String
+    attributes: [UnitePageBuilderAttribute!]
+    text: String
+    children: [UnitePageBuilderNode!]
+    content: UniteEmbeddedContent
+}
+
+input UnitePageBuilderNodeInput {
+    type: String
+    attributes: [UnitePageBuilderAttributeInput!]
+    text: String
+    children: [UnitePageBuilderNodeInput!]
+}
+
+type UnitePageBuilderResult {
+    rendered(trim: Int = null): String
+    nodes(offse: Int = null, limit: Int = null, types: [String!] = null): [UnitePageBuilderNode!]
+}
+
+input UnitePageBuilderInput {
+    content: String!
+    nodes: [UnitePageBuilderNodeInput!]
+}
+
+directive @pageBuilderField(
+    customBlocks: [String!]
+    mediaType: String
+    templateType: String
+) on FIELD_DEFINITION

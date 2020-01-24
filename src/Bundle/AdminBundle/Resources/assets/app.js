@@ -36,6 +36,7 @@ import GeoLocationForm from "./vue/components/Fields/Form/GeoLocation";
 import ReferenceForm from "./vue/components/Fields/Form/Reference";
 import ReferenceOfForm from "./vue/components/Fields/Form/ReferenceOf";
 import EmbeddedForm from "./vue/components/Fields/Form/Embedded";
+import PageBuilder from "./vue/components/Fields/Form/PageBuilder";
 
 import Table from "./vue/components/Views/Table";
 import Settings from "./vue/components/Views/Settings";
@@ -88,6 +89,7 @@ Unite.$emit('registerFormFieldType', 'geoLocation', GeoLocationForm);
 Unite.$emit('registerFormFieldType', 'reference', ReferenceForm);
 Unite.$emit('registerFormFieldType', 'referenceOf', ReferenceOfForm);
 Unite.$emit('registerFormFieldType', 'embedded', EmbeddedForm);
+Unite.$emit('registerFormFieldType', 'pageBuilder', PageBuilder);
 
 Unite.$emit('registerViewType', 'TableAdminView', Table);
 Unite.$emit('registerViewType', 'SettingsAdminView', Settings);
