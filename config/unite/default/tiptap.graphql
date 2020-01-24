@@ -8,7 +8,8 @@ type UnitePageBuilderNode {
     type: String
     attributes: [UnitePageBuilderAttribute!]
     text: String
-    content: [UnitePageBuilderNode!]
+    children: [UnitePageBuilderNode!]
+    content: UniteEmbeddedContent
 }
 
 type UnitePageBuilderResult {
@@ -18,8 +19,8 @@ type UnitePageBuilderResult {
 
 directive @pageBuilderField(
     customBlocks: [String!]
-    mediaType: String
-    templateType: String
+    #mediaType: String
+    #templateType: String
 ) on FIELD_DEFINITION
 
 
