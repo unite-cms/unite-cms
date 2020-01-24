@@ -1,0 +1,54 @@
+
+type UnitePageBuilderAttribute {
+    key: String!
+    value: String
+}
+
+type UnitePageBuilderNode {
+    type: String
+    attributes: [UnitePageBuilderAttribute!]
+    text: String
+    content: [UnitePageBuilderNode!]
+}
+
+type UnitePageBuilderResult {
+    rendered(trim: Int = null): String
+    nodes(offse: Int = null, limit: Int = null, types: [String!] = null): [UnitePageBuilderNode!]
+}
+
+directive @pageBuilderField(
+    customBlocks: [String!]
+    mediaType: String
+    templateType: String
+) on FIELD_DEFINITION
+
+
+
+
+type IntroBlock implements UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    headline: String @textField
+}
+
+type ProductsBlock implements UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    categories: [DemoCategory!] @referenceField @required
+}
+
+fragment introBlockForm on IntroBlock @embeddedAdminView(titlePattern: "{{headline}}", icon: "home") {
+    headline @adminField(name: "Überschrift")
+}
+
+fragment procutsBlock on ProductsBlock @embeddedAdminView(titlePattern: "Produkte", icon: "list") {
+    __typename
+}
+
+type PageBuilder implements UniteContent {
+    id: ID
+    _meta: UniteContentMeta
+    title: String @textField @required
+    content: UnitePageBuilderResult
+    # content: UnitePageBuilderResult @pageBuilderField(customBlocks: ["IntroBlock", "ProductsBlock"])
+}
