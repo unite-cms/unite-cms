@@ -12,10 +12,14 @@ import {
     Italic,
     Link,
     Underline,
+    History,
+    TrailingNode,
 } from 'tiptap-extensions';
 
 import { createGenericMenuItem, basicMenuItem } from "./vue/components/TipTap/MenuItems/_basic";
 
+TipTap.$emit('registerExtension', () => { return new History(); });
+TipTap.$emit('registerExtension', () => { return new TrailingNode(); });
 TipTap.$emit('registerExtension', () => { return new HardBreak(); });
 TipTap.$emit('registerExtension', () => { return new Heading({ levels: [1, 2, 3, 4, 5, 6] }); });
 TipTap.$emit('registerExtension', () => { return new HorizontalRule(); });
@@ -33,6 +37,7 @@ TipTap.$emit('registerMenuItem', createGenericMenuItem('underline', 'underline')
 
 import { Node } from 'tiptap';
 import Icon from "./vue/components/Icon";
+import UIkit from 'uikit';
 
 import { Fragment, Node as PNode } from 'prosemirror-model';
 import { Selection, NodeSelection } from 'prosemirror-state';
@@ -44,9 +49,12 @@ class Row extends Node {
         return {
             content: 'column+',
             group: 'block',
+            marks: "",
+            atom: false,
             selectable: true,
             defining: true,
             draggable: false,
+            isolating: true,
             parseDOM: [
                 {
                     tag: 'div',
@@ -61,26 +69,7 @@ class Row extends Node {
     get view() {
         return {
             props: ['node', 'updateAttrs', 'view'],
-            methods: {
-                onAdd() {
-                    let content = this.node.content.append(
-                        Fragment.fromJSON(this.view.state.schema, [{
-                            type: "column", content: [{ type: 'paragraph' }]
-                        }])
-                    );
-
-                    console.log(this.view.state.selection);
-
-                    /*this.view.dispatch(
-                        this.view.state.tr.replaceWith(
-                            Selection.atStart(this.node).$anchor.pos,
-                            Selection.atEnd(this.node).$anchor.pos,
-                            content
-                        )
-                    );*/
-                }
-            },
-            template: '<div><div class="uk-flex uk-padding uk-placeholder" ref="content"></div><button type="button" @click.prevent="onAdd">+</button></div>'
+            template: '<div class="uk-flex" ref="content"></div>'
         }
     }
 
@@ -94,15 +83,23 @@ class Column extends Node {
             group: 'column',
             defining: true,
             draggable: false,
+            selectable: false,
+            isolating: true,
             parseDOM: [
                 {
                     tag: 'div',
                     attrs: {
-                        class: 'uk-flex-1 uk-padding uk-placeholder'
+                        class: 'uk-flex-1'
                     },
                 },
             ],
-            toDOM: () => ['div', { class: 'uk-flex-1 uk-padding uk-placeholder' }, 0],
+            toDOM: () => ['div', { class: 'uk-flex-1' }, 0],
+        }
+    }
+    get view() {
+        return {
+            props: ['node', 'updateAttrs', 'view'],
+            template: '<div class="uk-flex-1 uk-padding uk-placeholder uk-margin-remove" ref="content"></div>'
         }
     }
 }
@@ -112,9 +109,11 @@ class Placeholder extends Node {
     get schema() {
         return {
             group: 'block',
+            atom: true,
             defining: false,
             draggable: true,
-            selectable: false,
+            selectable: true,
+            isolating: true,
             parseDOM: [
                 {
                     tag: 'div',
@@ -123,12 +122,12 @@ class Placeholder extends Node {
                     },
                 },
             ],
-            toDOM: () => ['div', { class: 'special-placeholder' }, 0],
+            toDOM: () => ['div', { class: 'special-placeholder' }],
         }
     }
     get view() {
         return {
-            template: '<div class="uk-placeholder uk-padding">This is just a placeholder</div>'
+            template: '<div class="uk-placeholder uk-padding uk-margin-remove">This is just a placeholder</div>'
         }
     }
 }
@@ -144,19 +143,24 @@ TipTap.$emit('registerMenuItem', {
     },
     methods: {
         onClick() {
-            let node = PNode.fromJSON(this.editor.schema, {
-                type: 'row',
-                content: [
-                    { type: 'column', content: [{ type: 'paragraph' }] },
-                    { type: 'column', content: [{ type: 'paragraph' }] },
-                ]
-            });
-            this.editor.view.dispatch(
-                this.editor.state.tr.insert(
-                    this.editor.state.selection.$anchor.pos,
-                    node
-                )
-            );
+            UIkit.modal.prompt('Columns:', '2').then((numb) => {
+
+                let content = [];
+                for(let i = 0; i < parseInt(numb); i++) {
+                    content.push({ type: 'column', content: [{ type: 'paragraph' }] });
+                }
+
+                let node = PNode.fromJSON(this.editor.schema, {
+                    type: 'row',
+                    content: content
+                });
+                this.editor.view.dispatch(
+                    this.editor.state.tr.insert(
+                        this.editor.state.selection.$anchor.pos,
+                        node
+                    )
+                );
+            })
         }
     }
 });

@@ -6,6 +6,16 @@
           <component v-for="(menuItem, key) in menuItems" :key="key" :editor="editorForKey(multiProps.rowKey || 0)" :is="menuItem" :commands="commands" :is-active="isActive" :field="field" />
         </ul>
       </editor-menu-bar>
+      <editor-floating-menu :editor="editorForKey(multiProps.rowKey || 0)" v-slot="{ commands, isActive, menu }">
+        <div class="editor__floating-menu" :class="{ 'is-active': menu.isActive }" :style="`top: ${menu.top}px`">
+          [+]
+        </div>
+      </editor-floating-menu>
+      <editor-menu-bubble :editor="editorForKey(multiProps.rowKey || 0)" v-slot="{ commands, isActive, menu }" :keep-in-bounds="true">
+        <div class="editor__bubble-menu" :class="{ 'is-active': menu.isActive }" :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`">
+          [b]
+        </div>
+      </editor-menu-bubble>
       <editor-content :editor="editorForKey(multiProps.rowKey || 0)" />
     </multi-field>
   </form-row>
@@ -14,7 +24,7 @@
   import _abstract from "./_abstract";
   import FormRow from './_formRow';
   import MultiField from './_multiField';
-  import { Editor, EditorContent, EditorMenuBar } from 'tiptap'
+  import { Editor, EditorContent, EditorMenuBar, EditorFloatingMenu, EditorMenuBubble } from 'tiptap'
   import TipTap from "../../../plugins/tiptap";
 
   export default {
@@ -26,7 +36,7 @@
 
       // Vue properties for this component.
       extends: _abstract,
-      components: { MultiField, FormRow, EditorContent, EditorMenuBar },
+      components: { MultiField, FormRow, EditorContent, EditorMenuBar, EditorFloatingMenu, EditorMenuBubble },
       data() {
           return {
               editors: [],
@@ -60,7 +70,7 @@
                       editorProps: {
                           content: this.values[key] || '',
                           attributes: {
-                              class: 'uk-textarea',
+                              class: 'uk-textarea uk-position-relative',
                               required: this.field.required,
                               id: this.domID,
                           }
@@ -77,3 +87,16 @@
       },
   }
 </script>
+<style lang="scss">
+  .editor__floating-menu,
+  .editor__bubble-menu {
+    position: absolute;
+    opacity: 0;
+    z-index: 10;
+
+    &.is-active {
+      opacity: 1;
+    }
+
+  }
+</style>
