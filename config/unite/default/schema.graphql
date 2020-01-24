@@ -176,3 +176,31 @@ type DemoSettings implements UniteSingleContent {
     _meta: UniteContentMeta
     title: String @textField
 }
+
+
+
+
+
+
+type IntroBlock implements UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    headline: String @textField
+}
+
+type TipTapNodeAttribute {
+    key: String!
+    value: String
+}
+
+type TipTapNode {
+    type: String
+    attributes: [TipTapNodeAttribute!]
+    text: String
+    content: [TipTapNode!]
+}
+
+type TipTapDoc {
+    rendered(trim: Int = null): String
+    nodes(offse: Int = null, limit: Int = null): [TipTapNode!]
+}
