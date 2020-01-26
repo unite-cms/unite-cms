@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\Common\Collections\Expr\Comparison;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
@@ -23,6 +24,7 @@ use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldOrderBy;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ReferenceType extends AbstractFieldType
 {
@@ -34,9 +36,15 @@ class ReferenceType extends AbstractFieldType
      */
     protected $domainManager;
 
-    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage)
+    /**
+     * @var AuthorizationCheckerInterface $authorizationChecker
+     */
+    protected $authorizationChecker;
+
+    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->domainManager = $domainManager;
+        $this->authorizationChecker = $authorizationChecker;
         parent::__construct($saveExpressionLanguage);
     }
 
@@ -88,7 +96,9 @@ class ReferenceType extends AbstractFieldType
 
             // The result will not include duplicates. We need to transform it for an exact result.
             foreach($result->getResult() as $content) {
-                $resultById[$content->getId()] = $content;
+                if($this->authorizationChecker->isGranted(ContentVoter::READ, $content)) {
+                    $resultById[$content->getId()] = $content;
+                }
             }
 
             $resolvedContent = [];
@@ -106,6 +116,10 @@ class ReferenceType extends AbstractFieldType
         // which will be an empty string.
         if(!$referencedContent && $field->isNonNull()) {
             return new class($field->getReturnType()) extends BaseContent {};
+        }
+
+        if(!$this->authorizationChecker->isGranted(ContentVoter::READ, $content)) {
+            return null;
         }
 
         return $referencedContent;
