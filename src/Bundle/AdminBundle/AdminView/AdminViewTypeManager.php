@@ -230,7 +230,7 @@ class AdminViewTypeManager
                 }
 
                 // If the user is not allowed to see this adminView.
-                if(!empty($directive['args']['if']) && !(bool)$this->expressionLanguage->evaluate($directive['args']['if'])) {
+                if(!empty($directive['settings']['if']) && !(bool)$this->expressionLanguage->evaluate($directive['settings']['if'])) {
                     continue;
                 }
 
