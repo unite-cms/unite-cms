@@ -118,7 +118,7 @@ class ReferenceType extends AbstractFieldType
             return new class($field->getReturnType()) extends BaseContent {};
         }
 
-        if(!$this->authorizationChecker->isGranted(ContentVoter::READ, $content)) {
+        if(!$this->authorizationChecker->isGranted(ContentVoter::READ, $referencedContent)) {
             return null;
         }
 
