@@ -68,19 +68,23 @@ class ReferenceType extends AbstractFieldType
     }
 
     /**
-     * {@inheritDoc}
+     * @param ContentTypeField $field
+     * @param FieldData $fieldData
+     * @return ContentInterface[]
      */
-    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
+    protected function getContentForField(ContentTypeField $field, FieldData $fieldData) : array {
 
         if(empty($fieldData->getData())) {
-            return null;
+            return [];
         }
 
         $domain = $this->domainManager->current();
         $contentManager = $domain->getContentTypeManager()->getContentType($field->getReturnType()) ? $domain->getContentManager() : $domain->getUserManager();
 
         if($fieldData instanceof FieldDataList) {
+
             $rowIds = [];
+
             foreach($fieldData->rows() as $rowData) {
                 $rowIds[] = $rowData->getData();
             }
@@ -96,9 +100,7 @@ class ReferenceType extends AbstractFieldType
 
             // The result will not include duplicates. We need to transform it for an exact result.
             foreach($result->getResult() as $content) {
-                if($this->authorizationChecker->isGranted(ContentVoter::READ, $content)) {
-                    $resultById[$content->getId()] = $content;
-                }
+                $resultById[$content->getId()] = $content;
             }
 
             $resolvedContent = [];
@@ -115,14 +117,30 @@ class ReferenceType extends AbstractFieldType
         // on sub fields of this content, but at least we can query the id,
         // which will be an empty string.
         if(!$referencedContent && $field->isNonNull()) {
-            return new class($field->getReturnType()) extends BaseContent {};
+            return [new class($field->getReturnType()) extends BaseContent {}];
         }
 
         if(!$this->authorizationChecker->isGranted(ContentVoter::READ, $referencedContent)) {
-            return null;
+            return [];
         }
 
-        return $referencedContent;
+        return [$referencedContent];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
+
+        $content = array_filter($this->getContentForField($field, $fieldData), function(ContentInterface $content){
+            return $this->authorizationChecker->isGranted(ContentVoter::READ, $content);
+        });
+
+        if($field->isListOf()) {
+            return $content;
+        }
+
+        return count($content) > 0 ? $content[0] : null;
     }
 
     /**
@@ -151,7 +169,7 @@ class ReferenceType extends AbstractFieldType
 
         // Check that referenced content can be resolved.
         $validator->validate(
-            $this->resolveField($content, $field, $fieldData),
+            $this->getContentForField($field, $fieldData),
             new NotNull(),
             [$context->getGroup()]
         );
