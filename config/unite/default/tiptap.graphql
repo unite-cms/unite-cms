@@ -1,30 +1,67 @@
 
-type IntroBlock implements UniteEmbeddedContent {
+type PageBuilderBlockAttribute {
     id: ID
     _meta: UniteContentMeta
+    key: String
+    value: String
+}
+
+type PageBuilderTextMark {
+    id: ID
+    _meta: UniteContentMeta
+    type: String!
+    attrs: [PageBuilderBlockAttribute!]
+}
+
+interface PageBuilderBlockType {
+    type: String!
+    attrs: [PageBuilderBlockAttribute!]
+}
+
+type PageBuilderText {
+    attrs: [PageBuilderBlockAttribute!]
+    marks: [PageBuilderTextMark!]
+    text: String
+}
+
+type PageBuilderBlock implements PageBuilderBlockType {
+    type: String!
+    attrs: [PageBuilderBlockAttribute!]
+    content: [PageBuilderBlockType!]
+    HTML: String
+    JSON: String
+}
+
+
+
+
+type ContainerBlock implements UniteEmbeddedContent & PageBuilderBlockType {
+    id: ID
+    _meta: UniteContentMeta
+    type: String!
+    attrs: [PageBuilderBlockAttribute!]
+    content: [PageBuilderBlocks!]
+    padding: Boolean @booleanField
+    inverted: Boolean @booleanField
+}
+
+type IntroBlock implements PageBuilderBlockType {
+    type: String!
+    attrs: [PageBuilderBlockAttribute!]
     headline: String @textField
 }
 
-type ProductsBlock implements UniteEmbeddedContent {
-    id: ID
-    _meta: UniteContentMeta
+type ProductsBlock implements PageBuilderBlockType {
+    type: String!
+    attrs: [PageBuilderBlockAttribute!]
     categories: [DemoCategory!] @referenceField @required
 }
 
-fragment introBlockForm on IntroBlock @embeddedAdminView(titlePattern: "{{headline}}", icon: "home") {
-    headline @adminField(name: "Überschrift")
-}
-
-fragment procutsBlock on ProductsBlock @embeddedAdminView(titlePattern: "Produkte", icon: "list") {
-    __typename
-}
-
-union BlockType = IntroBlock | ProductsBlock
+union PageBuilderBlocks = PageBuilderText | PageBuilderBlock | ContainerBlock | IntroBlock | ProductsBlock
 
 type PageBuilder implements UniteContent {
     id: ID
     _meta: UniteContentMeta
     title: String @textField @required
-    content: UnitePageBuilderResult @pageBuilderField(customBlocks: ["IntroBlock", "ProductsBlock"])
-    _blockType: BlockType
+    page: PageBuilderBlocks @pageBuilderField
 }
