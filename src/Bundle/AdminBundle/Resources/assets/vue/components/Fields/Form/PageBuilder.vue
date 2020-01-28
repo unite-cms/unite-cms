@@ -1,32 +1,38 @@
 <template>
     <form-row :domID="domID" :field="field" :alerts="violations">
         <multi-field :field="field" :val="val" @addRow="val.push('')" @removeRow="removeByKey" v-slot:default="multiProps">
-            <editor-floating-menu :editor="editorForKey(multiProps.rowKey || 0)" v-slot="{ commands, isActive, menu }">
-                <div class="editor__floating-menu" :class="{ 'is-active': menu.isActive }" :style="`top: ${menu.top}px`">
-                    <button @click.prevent="insertCustomBlock(editorForKey(multiProps.rowKey || 0), cBlock)" type="button" class="uk-button uk-button-light" v-for="cBlock in customBlocks">
-                        {{ cBlock.rawType.name }}
-                    </button>
-                </div>
-            </editor-floating-menu>
-            <editor-menu-bubble :editor="editorForKey(multiProps.rowKey || 0)" v-slot="{ commands, isActive, menu }" :keep-in-bounds="true">
-                <div class="editor__bubble-menu" :class="{ 'is-active': menu.isActive }" :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`">
-                    <component v-for="(menuItem, key) in menuItems" :key="key" :editor="editorForKey(multiProps.rowKey || 0)" :is="menuItem" :commands="commands" :is-active="isActive" :field="field" />
-                </div>
-            </editor-menu-bubble>
-            <editor-content :editor="editorForKey(multiProps.rowKey || 0)" />
+
+            <editor :value="values[multiProps.rowKey || 0]" @input="setValue(arguments, multiProps.rowKey)" :extensions="extensions" :inline-commands="inlineCommands" :block-commands="blockCommands" />
+
         </multi-field>
     </form-row>
 </template>
 <script>
-    import { Node } from 'tiptap';
-    import { Node as PNode } from 'prosemirror-model';
+
     import _abstract from "./_abstract";
     import FormRow from './_formRow';
     import MultiField from './_multiField';
-    import { Editor, EditorContent, EditorMenuBar, EditorFloatingMenu, EditorMenuBubble } from 'tiptap'
-    import TipTap from "../../../plugins/tiptap";
-    import Icon from "../../Icon";
-    import UIkit from 'uikit';
+    import Editor from "../../TipTap/Editor";
+    import { BoldCommand, ItalicCommand } from "../../TipTap/InlineMenuCommand";
+    import { ParagraphCommand, HeadingCommand } from "../../TipTap/BlockMenuCommand";
+    import {
+        Blockquote,
+        CodeBlock,
+        HardBreak,
+        Heading,
+        OrderedList,
+        BulletList,
+        ListItem,
+        TodoItem,
+        TodoList,
+        Bold,
+        Code,
+        Italic,
+        Link,
+        Strike,
+        Underline,
+        History,
+    } from 'tiptap-extensions'
 
     export default {
 
@@ -39,8 +45,24 @@
 
         // Vue properties for this component.
         extends: _abstract,
-        components: {Icon, MultiField, FormRow, EditorContent, EditorMenuBar, EditorFloatingMenu, EditorMenuBubble },
+        components: { Editor, MultiField, FormRow },
+
         data() {
+            return {
+                extensions: [new Heading(), new HardBreak(), new Bold(), new Italic(), new History()],
+            }
+        },
+
+        computed: {
+            inlineCommands() {
+                return [BoldCommand, ItalicCommand];
+            },
+            blockCommands() {
+                return [ParagraphCommand, HeadingCommand];
+            }
+        }
+
+        /*data() {
             return {
                 editors: [],
                 customBlocks: [],
@@ -178,19 +200,6 @@
             this.editors.forEach((editor) => {
                 editor.destroy();
             });
-        },
+        },*/
     }
 </script>
-<style lang="scss">
-    .editor__floating-menu,
-    .editor__bubble-menu {
-        position: absolute;
-        opacity: 0;
-        z-index: 10;
-
-        &.is-active {
-            opacity: 1;
-        }
-
-    }
-</style>

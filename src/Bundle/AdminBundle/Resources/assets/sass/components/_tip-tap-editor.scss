@@ -1,0 +1,139 @@
+
+.tiptap-editor {
+
+  position: relative;
+
+  .editor-wrapper {
+    height: 100%;
+  }
+
+  .fullscreen-toggle {
+    color: $global-color;
+    position: absolute;
+    top: $padding-small-padding;
+    right: $padding-small-padding;
+    z-index: 1005;
+  }
+
+  &.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: white;
+
+    .ProseMirror {
+      border: none;
+      height: 100%;
+      overflow: auto;
+    }
+
+    .fullscreen-toggle {
+      color: $global-danger-background;
+    }
+  }
+
+  .ProseMirror {
+    border: 1px solid $form-border;
+    border-radius: $tooltip-border-radius;
+    min-height: $height-medium-height;
+    padding: $padding-small-padding;
+    box-sizing: content-box;
+
+    &:focus {
+      outline: none;
+      border-color: darken($form-border, 15%);
+    }
+  }
+}
+
+.tiptap-block-menu,
+.tiptap-inline-menu {
+  position: absolute;
+  z-index: 1005;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity $transition-duration ease-out, transform $transition-duration ease-out;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.tiptap-inline-menu {
+  background: $tooltip-background;
+  color: $tooltip-color;
+  border-radius: $badge-border-radius;
+  box-shadow: $global-medium-box-shadow;
+  padding: $tooltip-padding-vertical $tooltip-padding-horizontal * 2;
+  transform: translateX(-50%) translateY(75%);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 24px;
+  min-width: 100px;
+
+  &.active {
+    transform: translateX(-50%) translateY(50%);
+  }
+
+  &::after {
+    content: "";
+    background: $tooltip-background;
+    position: absolute;
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 1px;
+    transform: translateX(-50%) rotate(45deg);
+    top: -3px;
+    left: 50%;
+  }
+
+  button {
+    opacity: 0.6;
+    transition: opacity $transition-duration ease-out;
+    color: $global-inverse-color;
+    padding: 0 $tooltip-padding-vertical;
+
+    &:hover {
+      color: $global-inverse-color;
+    }
+
+    &.active {
+      opacity: 1;
+    }
+  }
+}
+
+.tiptap-block-menu {
+  transform: translateX($padding-padding * 1.5);
+
+  &.active {
+    transform: translateX($padding-padding);
+  }
+}
+
+button.tiptap-block-menu-command {
+  border: 2px solid lighten($global-color, 30%);
+  border-radius: 3px;
+  padding: $padding-small-padding / 2 $padding-small-padding / 2 $padding-small-padding / 4;
+  color: lighten($global-color, 20%);
+  line-height: 150%;
+  margin: 5px;
+  font-size: 0.7rem;
+  background: none;
+
+  .uk-icon {
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+
+  &:hover, &.active {
+    border-color: $global-primary-background;
+    color: $global-color;
+  }
+}
