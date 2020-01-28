@@ -4,7 +4,7 @@
             <editor-floating-menu :editor="editorForKey(multiProps.rowKey || 0)" v-slot="{ commands, isActive, menu }">
                 <div class="editor__floating-menu" :class="{ 'is-active': menu.isActive }" :style="`top: ${menu.top}px`">
                     <button @click.prevent="insertCustomBlock(editorForKey(multiProps.rowKey || 0), cBlock)" type="button" class="uk-button uk-button-light" v-for="cBlock in customBlocks">
-                        <icon :name="cBlock.icon" /> {{ cBlock.name }}
+                        {{ cBlock.rawType.name }}
                     </button>
                 </div>
             </editor-floating-menu>
@@ -31,7 +31,9 @@
     export default {
 
         // Static query methods for unite system.
-        queryData(field, unite, depth) { return field.id },
+        queryData(field, unite, depth) { return `
+            ${field.id} { HTML, JSON }`
+        },
         normalizeQueryData(queryData, field, unite) { return queryData; },
         normalizeMutationData(formData, field, unite) { return formData; },
 
@@ -49,8 +51,8 @@
                 handler(values) {
                     values.forEach((value, key) => {
                         let editor = this.editorForKey(key);
-                        if(editor.getHTML() !== value) {
-                            editor.setContent(value);
+                        if(editor.getJSON() !== value.JSON) {
+                            editor.setContent(JSON.parse(value.JSON));
                         }
                     });
                 }
@@ -66,9 +68,9 @@
                 if(!this.editors[key]) {
 
                     this.createCustomBlocks();
-                    let customBlocks = this.customBlocks.map((adminView) => {
+                    let customBlocks = this.customBlocks.map((type) => {
                         return new class extends Node {
-                            get name() { return adminView.id }
+                            get name() { return type.rawType.id }
                             get schema() {
                                 return {
                                     group: 'block',
@@ -81,12 +83,11 @@
                                         {
                                             tag: 'div',
                                             attrs: {
-                                                class: 'special-placeholder',
-                                                'data-custom-block-id': adminView.id
+                                                'data-custom-block-id': type.rawType.id
                                             },
                                         },
                                     ],
-                                    toDOM: () => ['div', {class: 'special-placeholder', 'data-custom-block-id': adminView.id}],
+                                    toDOM: () => ['div', {class: 'special-placeholder', 'data-custom-block-id': type.rawType.id}],
                                 }
                             }
                             get view() {
@@ -96,7 +97,7 @@
                                             UIkit.offcanvas(this.$refs.configCanvas).show();
                                         }
                                     },
-                                    template: '<div><div class="uk-placeholder uk-padding uk-margin-remove">' + adminView.name + '<button type="button" @click="openConfig">config</button></div><div ref="configCanvas" uk-offcanvas="flip: true; mode: push"><div class="uk-offcanvas-bar"><button class="uk-offcanvas-close" type="button" uk-close></button>CONFIG</div></div></div>'
+                                    template: '<div><div class="uk-placeholder uk-padding uk-margin-remove">' + type.rawType.name + '<button type="button" @click="openConfig">config</button></div><div ref="configCanvas" uk-offcanvas="flip: true; mode: push"><div class="uk-offcanvas-bar"><button class="uk-offcanvas-close" type="button" uk-close></button>CONFIG</div></div></div>'
                                 }
                             }
                         };
@@ -105,7 +106,10 @@
                     this.editors[key] = new Editor({
                         extensions: [...TipTap.buildExtensionsForField(this.field), ...customBlocks],
                         onUpdate: ( { state, getHTML, getJSON, transaction } ) => {
-                            this.setValue([getHTML()], key);
+                            this.setValue([{
+                                HTML: getHTML(),
+                                JSON: JSON.stringify(getJSON()),
+                            }], key);
                         },
                         editorProps: {
                             content: this.values[key] || '',
@@ -120,15 +124,45 @@
                 return this.editors[key];
             },
             createCustomBlocks() {
-                this.customBlocks = this.field.config.customBlocks.map((key) => {
-                    if(this.$unite.adminViews[key]) {
-                        return this.$unite.adminViews[key];
-                    }
-                    let matchedView = Object.values(this.$unite.adminViews).filter(view => {
-                        return view.viewType === 'EmbeddedAdminView' && view.type === key;
+
+                let allowedTypes = [];
+
+                if(this.field.config.customBlocks) {
+                    let unionType = this.$unite.rawTypes.filter((rawType) => {
+                        return rawType.kind === 'UNION' && rawType.name === this.field.config.customBlocks;
                     });
-                    return matchedView.length > 0 ? matchedView[0] : null;
-                }).filter(view => view);
+                    if(unionType.length > 0) {
+                        allowedTypes = unionType[0].possibleTypes.map((type) => { return type.name; });
+                    }
+                }
+
+                let blockTypes = this.$unite.rawTypes.filter((rawType) => {
+
+                    if(rawType.name === 'UnitePageBuilderBlock') {
+                        return;
+                    }
+
+                    if(allowedTypes.length > 0 && allowedTypes.indexOf(rawType.name) < 0) {
+                        return;
+                    }
+
+                    return (rawType.interfaces || []).filter((i) => {
+                        return i.name === 'UnitePageBuilderBlockType';
+                    }).length > 0;
+                });
+
+                this.customBlocks = blockTypes.map((blockType) => {
+
+                    let matchedView = Object.values(this.$unite.adminViews).filter(view => {
+                        return view.viewType === 'EmbeddedAdminView' && view.type === blockType.name;
+                    });
+
+                    return {
+                        rawType: blockType,
+                        adminView: matchedView.length > 0 ? matchedView[0] : null,
+                    };
+                });
+
             },
             insertCustomBlock(editor, adminView) {
                 let node = PNode.fromJSON(editor.schema, {type: adminView.id});

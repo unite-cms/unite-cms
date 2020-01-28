@@ -1,41 +1,41 @@
-
-type UnitePageBuilderAttribute {
-    key: String!
+type UnitePageBuilderBlockAttribute {
+    id: ID
+    _meta: UniteContentMeta
+    key: String
     value: String
 }
 
-input UnitePageBuilderAttributeInput {
-    key: String!
-    value: String
+type UnitePageBuilderTextMark {
+    id: ID
+    _meta: UniteContentMeta
+    type: String!
+    attrs: [UnitePageBuilderBlockAttribute!]
 }
 
-type UnitePageBuilderNode {
-    type: String
-    attributes: [UnitePageBuilderAttribute!]
+interface UnitePageBuilderBlockType {
+    type: String!
+    attrs: [UnitePageBuilderBlockAttribute!]
+}
+
+type UnitePageBuilderText {
+    attrs: [UnitePageBuilderBlockAttribute!]
+    marks: [UnitePageBuilderTextMark!]
     text: String
-    children: [UnitePageBuilderNode!]
-    content: UniteEmbeddedContent
 }
 
-input UnitePageBuilderNodeInput {
-    type: String
-    attributes: [UnitePageBuilderAttributeInput!]
-    text: String
-    children: [UnitePageBuilderNodeInput!]
+type UnitePageBuilderBlock implements UnitePageBuilderBlockType {
+    type: String!
+    attrs: [UnitePageBuilderBlockAttribute!]
+    content: [UnitePageBuilderBlockType!]
+    HTML: String
+    JSON: String
 }
 
-type UnitePageBuilderResult {
-    rendered(trim: Int = null): String
-    nodes(offse: Int = null, limit: Int = null, types: [String!] = null): [UnitePageBuilderNode!]
-}
-
-input UnitePageBuilderInput {
-    content: String!
-    nodes: [UnitePageBuilderNodeInput!]
+input UnitePageBuilderBlockInput {
+    JSON: String
+    HTML: String
 }
 
 directive @pageBuilderField(
-    customBlocks: [String!]
-    mediaType: String
-    templateType: String
+    customBlocks: String
 ) on FIELD_DEFINITION

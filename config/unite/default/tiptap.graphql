@@ -1,67 +1,39 @@
-
-type PageBuilderBlockAttribute {
-    id: ID
-    _meta: UniteContentMeta
-    key: String
-    value: String
+type DonationFormBlock implements UnitePageBuilderBlockType {
+    type: String!
+    attrs: [UnitePageBuilderBlockAttribute!]
 }
 
-type PageBuilderTextMark {
+type ContainerBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
     id: ID
     _meta: UniteContentMeta
     type: String!
-    attrs: [PageBuilderBlockAttribute!]
-}
-
-interface PageBuilderBlockType {
-    type: String!
-    attrs: [PageBuilderBlockAttribute!]
-}
-
-type PageBuilderText {
-    attrs: [PageBuilderBlockAttribute!]
-    marks: [PageBuilderTextMark!]
-    text: String
-}
-
-type PageBuilderBlock implements PageBuilderBlockType {
-    type: String!
-    attrs: [PageBuilderBlockAttribute!]
-    content: [PageBuilderBlockType!]
-    HTML: String
-    JSON: String
-}
-
-
-
-
-type ContainerBlock implements UniteEmbeddedContent & PageBuilderBlockType {
-    id: ID
-    _meta: UniteContentMeta
-    type: String!
-    attrs: [PageBuilderBlockAttribute!]
+    attrs: [UnitePageBuilderBlockAttribute!]
     content: [PageBuilderBlocks!]
     padding: Boolean @booleanField
     inverted: Boolean @booleanField
 }
 
-type IntroBlock implements PageBuilderBlockType {
+type IntroBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
     type: String!
-    attrs: [PageBuilderBlockAttribute!]
+    attrs: [UnitePageBuilderBlockAttribute!]
     headline: String @textField
 }
 
-type ProductsBlock implements PageBuilderBlockType {
+type ProductsBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
     type: String!
-    attrs: [PageBuilderBlockAttribute!]
+    attrs: [UnitePageBuilderBlockAttribute!]
     categories: [DemoCategory!] @referenceField @required
 }
 
-union PageBuilderBlocks = PageBuilderText | PageBuilderBlock | ContainerBlock | IntroBlock | ProductsBlock
+union PageBuilderBlocks = UnitePageBuilderBlock | UnitePageBuilderText | ContainerBlock | IntroBlock | ProductsBlock
 
 type PageBuilder implements UniteContent {
     id: ID
     _meta: UniteContentMeta
     title: String @textField @required
-    page: PageBuilderBlocks @pageBuilderField
+    page: UnitePageBuilderBlock! @pageBuilderField(customBlocks: "PageBuilderBlocks")
 }
