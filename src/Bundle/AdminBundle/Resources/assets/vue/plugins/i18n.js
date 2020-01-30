@@ -6,11 +6,13 @@ Vue.use(VueI18n);
 
 export const messages = {};
 export const dateTimeFormats = {};
+export const numberFormats = {};
 
 export const i18n = new VueI18n({
     locale: 'en',
     messages,
-    dateTimeFormats
+    dateTimeFormats,
+    numberFormats,
 });
 
 export default i18n;

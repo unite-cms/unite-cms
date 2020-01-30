@@ -1,5 +1,5 @@
 
-import { messages, dateTimeFormats, i18n } from "../plugins/i18n";
+import { messages, dateTimeFormats, numberFormats, i18n } from "../plugins/i18n";
 import { de } from 'vuejs-datepicker/dist/locale'
 
 // Set de part of messages.
@@ -265,6 +265,25 @@ dateTimeFormats.de = {
     },
     date: {
         year: '2-digit', month: '2-digit', day: '2-digit'
+    }
+};
+
+// set en part of numberFormats.
+numberFormats.de = {
+    currency: {
+        style: 'currency', currency: 'EUR'
+    },
+    USD: {
+        style: 'currency', currency: 'USD'
+    },
+    EUR: {
+        style: 'currency', currency: 'EUR'
+    },
+    decimal: {
+        style: 'decimal'
+    },
+    percent: {
+        style: 'percent'
     }
 };
 
