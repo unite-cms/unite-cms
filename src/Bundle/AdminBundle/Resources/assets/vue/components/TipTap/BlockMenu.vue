@@ -3,7 +3,7 @@
         <a href="#" @click.prevent="modalOpen = true" class="uk-icon-button uk-button-light uk-icon-button-small"><icon name="plus" /></a>
         <modal :container="false" v-if="modalOpen" @hide="modalOpen = false">
             <div class="uk-flex uk-flex-center uk-flex-middle uk-flex-wrap" style="min-height: 150px">
-                <component :is="command" :editor="editor" :is-active="isActive" :key="delta" v-for="(command, delta) in commands" @selected="modalOpen = false" />
+                <component :is="command.component || command" :editor="editor" :is-active="isActive" :key="delta" :config="command.config || null" v-for="(command, delta) in commands" @selected="modalOpen = false" />
             </div>
         </modal>
     </div>

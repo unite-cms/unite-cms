@@ -17,6 +17,9 @@
             isActive: {
                 type: Object,
                 default: () => {},
+            },
+            config: {
+                type: Object
             }
         },
         computed: {

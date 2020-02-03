@@ -13,6 +13,10 @@ type ContainerBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent 
     inverted: Boolean @booleanField
 }
 
+"""
+Intro
+This is just an example of description+
+"""
 type IntroBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
     id: ID
     _meta: UniteContentMeta
@@ -21,6 +25,7 @@ type IntroBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
     headline: String @textField
 }
 
+"""Produkte"""
 type ProductsBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
     id: ID
     _meta: UniteContentMeta
@@ -29,7 +34,11 @@ type ProductsBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
     categories: [DemoCategory!] @referenceField @required
 }
 
-union PageBuilderBlocks = UnitePageBuilderBlock | UnitePageBuilderText | ContainerBlock | IntroBlock | ProductsBlock
+fragment introFragment on IntroBlock @embeddedAdminView(titlePattern: "{{headline}}", icon: "star") {
+    __typename
+}
+
+union PageBuilderBlocks = UnitePageBuilderBlock | UnitePageBuilderText | DonationFormBlock | ContainerBlock | IntroBlock | ProductsBlock
 
 type PageBuilder implements UniteContent {
     id: ID

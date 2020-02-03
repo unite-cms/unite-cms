@@ -204,3 +204,59 @@ button.tiptap-block-menu-command {
     }
   }
 }
+
+.tiptap-custom-unite-block {
+  position: relative;
+  background: darken($background-muted-background, 1%);
+  border: 2px solid darken($background-muted-background, 4%);
+  border-radius: 4px;
+  padding: 0;
+
+  .description {
+    text-align: center;
+    opacity: 0.6;
+  }
+
+  .content {
+    min-height: 50px;
+    padding: 5px 10px;
+
+    &:hover {
+      outline: 1px dotted darken($background-muted-background, 20%)
+    }
+  }
+
+  .configure-icon {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+  }
+
+  &:not(.with-children) {
+    box-shadow: $global-medium-box-shadow;
+  }
+
+  &.with-children {
+    background: lighten($background-muted-background, 1%);
+    padding: 30px 10px 5px;
+
+    > .description {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      display: flex;
+      align-items: center;
+
+      .uk-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 5px;
+      }
+
+      .uk-text-meta {
+        text-transform: uppercase;
+        font-size: 11px;
+      }
+    }
+  }
+}

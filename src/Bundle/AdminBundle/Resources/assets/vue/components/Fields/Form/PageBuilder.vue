@@ -17,6 +17,7 @@
     import { ParagraphCommand, BlockQuoteCommand, CodeBlockCommand, OrderedListCommand, BulletListCommand } from "../../TipTap/Command/BlockMenuCommand";
     import InlineBlockCommand from "../../TipTap/Command/InlineBlockCommand";
     import InlineListCommand from "../../TipTap/Command/InlineListCommand";
+    import CustomBlockMenuCommand from "../../TipTap/CustomBlock/CustomBlockMenuCommand";
 
     import {
         Blockquote,
@@ -31,6 +32,7 @@
         History,
         TrailingNode,
     } from 'tiptap-extensions'
+    import CustomBlockNode from "../../TipTap/CustomBlock/CustomBlockNode";
 
     export default {
 
@@ -45,9 +47,38 @@
         extends: _abstract,
         components: { Editor, MultiField, FormRow },
 
-        data() {
-            return {
-                extensions: [
+        computed: {
+
+            customBlockTypes() {
+                let allowedTypes = [];
+
+                if(this.field.config.customBlocks) {
+                    let unionType = this.$unite.rawTypes.filter((rawType) => {
+                        return rawType.kind === 'UNION' && rawType.name === this.field.config.customBlocks;
+                    });
+                    if(unionType.length > 0) {
+                        allowedTypes = unionType[0].possibleTypes.map((type) => { return type.name; });
+                    }
+                }
+
+                return this.$unite.rawTypes.filter((rawType) => {
+
+                    if(rawType.name === 'UnitePageBuilderBlock') {
+                        return;
+                    }
+
+                    if(allowedTypes.length > 0 && allowedTypes.indexOf(rawType.name) < 0) {
+                        return;
+                    }
+
+                    return (rawType.interfaces || []).filter((i) => {
+                        return i.name === 'UnitePageBuilderBlockType';
+                    }).length > 0;
+                });
+            },
+
+            extensions() {
+                return [
                     new Heading({ levels: [1,2,3,4,5,6] }),
                     new HardBreak(),
                     new Bold(),
@@ -59,11 +90,12 @@
                     new OrderedList(),
                     new BulletList(),
                     new ListItem(),
-                ],
-            }
-        },
+                    ...this.customBlockTypes.map((type) => {
+                        return new CustomBlockNode({ type });
+                    })
+                ];
+            },
 
-        computed: {
             inlineCommands() {
                 return [
                     BoldCommand,
@@ -83,6 +115,12 @@
                     CodeBlockCommand,
                     OrderedListCommand,
                     BulletListCommand,
+                    ...this.customBlockTypes.map((type) => {
+                        return {
+                            component: CustomBlockMenuCommand,
+                            config: { type }
+                        }
+                    })
                 ];
             }
         }
