@@ -13,8 +13,11 @@
     import FormRow from './_formRow';
     import MultiField from './_multiField';
     import Editor from "../../TipTap/Editor";
-    import { BoldCommand, ItalicCommand } from "../../TipTap/InlineMenuCommand";
-    import { ParagraphCommand, HeadingCommand } from "../../TipTap/BlockMenuCommand";
+    import { BoldCommand, ItalicCommand, Divider } from "../../TipTap/Command/InlineMenuCommand";
+    import { ParagraphCommand, BlockQuoteCommand, CodeBlockCommand, OrderedListCommand, BulletListCommand } from "../../TipTap/Command/BlockMenuCommand";
+    import InlineBlockCommand from "../../TipTap/Command/InlineBlockCommand";
+    import InlineListCommand from "../../TipTap/Command/InlineListCommand";
+
     import {
         Blockquote,
         CodeBlock,
@@ -23,15 +26,10 @@
         OrderedList,
         BulletList,
         ListItem,
-        TodoItem,
-        TodoList,
         Bold,
-        Code,
         Italic,
-        Link,
-        Strike,
-        Underline,
         History,
+        TrailingNode,
     } from 'tiptap-extensions'
 
     export default {
@@ -49,16 +47,43 @@
 
         data() {
             return {
-                extensions: [new Heading(), new HardBreak(), new Bold(), new Italic(), new History()],
+                extensions: [
+                    new Heading({ levels: [1,2,3,4,5,6] }),
+                    new HardBreak(),
+                    new Bold(),
+                    new Italic(),
+                    new History(),
+                    new TrailingNode({ node: 'paragraph', notAfter: ['paragraph'], }),
+                    new Blockquote(),
+                    new CodeBlock(),
+                    new OrderedList(),
+                    new BulletList(),
+                    new ListItem(),
+                ],
             }
         },
 
         computed: {
             inlineCommands() {
-                return [BoldCommand, ItalicCommand];
+                return [
+                    BoldCommand,
+                    ItalicCommand,
+                    Divider,
+                    {
+                        component: InlineBlockCommand,
+                        config: { levels: [1,2,3,4,5,6] }
+                    },
+                    InlineListCommand,
+                ];
             },
             blockCommands() {
-                return [ParagraphCommand, HeadingCommand];
+                return [
+                    ParagraphCommand,
+                    BlockQuoteCommand,
+                    CodeBlockCommand,
+                    OrderedListCommand,
+                    BulletListCommand,
+                ];
             }
         }
 

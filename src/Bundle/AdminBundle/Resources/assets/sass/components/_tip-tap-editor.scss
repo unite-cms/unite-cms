@@ -64,47 +64,108 @@
 }
 
 .tiptap-inline-menu {
-  background: $tooltip-background;
+  background: darken($tooltip-background, 10%);
   color: $tooltip-color;
   border-radius: $badge-border-radius;
   box-shadow: $global-medium-box-shadow;
   padding: $tooltip-padding-vertical $tooltip-padding-horizontal * 2;
-  transform: translateX(-50%) translateY(75%);
+  transform: translateX(-50%) translateY(0%);
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  min-height: 24px;
+  min-height: 20px;
   min-width: 100px;
 
   &.active {
-    transform: translateX(-50%) translateY(50%);
+    transform: translateX(-50%) translateY(-50%);
   }
 
   &::after {
     content: "";
-    background: $tooltip-background;
+    background: darken($tooltip-background, 10%);
     position: absolute;
     display: block;
     width: 10px;
     height: 10px;
     border-radius: 1px;
     transform: translateX(-50%) rotate(45deg);
-    top: -3px;
+    top: auto;
+    bottom: -3px;
     left: 50%;
+    z-index: -1;
   }
 
-  button {
-    opacity: 0.6;
-    transition: opacity $transition-duration ease-out;
+  > button, > div {
+    opacity: 1;
+    transition: background $transition-duration ease-out;
     color: $global-inverse-color;
     padding: 0 $tooltip-padding-vertical;
+    margin: 0 $tooltip-padding-vertical / 2;
+    background: rgba(255,255,255,0.0);
+    border-radius: 2px;
+
+    button {
+      color: $global-inverse-color;
+
+      &:hover {
+        color: $global-inverse-color;
+        text-decoration: none;
+      }
+    }
 
     &:hover {
       color: $global-inverse-color;
     }
 
     &.active {
-      opacity: 1;
+      background: rgba(255,255,255,0.3);
+    }
+  }
+
+  .button-group > * {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  hr.uk-divider-vertical {
+    height: 14px;
+    margin: 0 5px;
+    padding: 0;
+    opacity: 0.3;
+  }
+
+  .uk-dropdown {
+    background: darken($tooltip-background, 10%);
+    border-radius: 3px;
+    padding: $dropdown-padding / 3 $dropdown-padding / 2;
+
+    li {
+      > a {
+        padding: 10px 0;
+
+        > * {
+          margin: 0;
+          color: $dropdown-nav-item-color;
+        }
+
+        &:hover {
+          color: $global-inverse-color;
+
+          > * {
+            color: $global-inverse-color;
+          }
+        }
+      }
+
+      &.uk-active {
+        > a {
+          color: $global-inverse-color;
+
+          > * {
+            color: $global-inverse-color;
+          }
+        }
+      }
     }
   }
 }
@@ -132,8 +193,14 @@ button.tiptap-block-menu-command {
     margin-bottom: 5px;
   }
 
-  &:hover, &.active {
-    border-color: $global-primary-background;
-    color: $global-color;
+  &[disabled] {
+    opacity: 0.3;
+  }
+
+  &:not([disabled]) {
+    &:hover, &.active {
+      border-color: $global-primary-background;
+      color: $global-color;
+    }
   }
 }

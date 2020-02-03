@@ -5,7 +5,7 @@
 </template>
 
 <script>
-    import Icon from "../Icon";
+    import Icon from "../../Icon";
     export const AbstractMenuCommand = {
         components: {Icon},
         props: {
@@ -25,6 +25,10 @@
         methods: {
             onClick() {}
         }
+    };
+
+    export const Divider = {
+        template: '<hr class="uk-divider-vertical" />',
     };
 
     export const BoldCommand = {

@@ -1,6 +1,6 @@
 <template>
     <div class="tiptap-inline-menu" :class="{ active: menuActive }" :style="menuPosition">
-        <component :is="command" :editor="editor" :is-active="isActive" :key="delta" v-for="(command, delta) in commands" />
+        <component :is="command.component || command" :editor="editor" :is-active="isActive" :key="delta" :config="command.config || null" v-for="(command, delta) in commands" />
     </div>
 </template>
 
@@ -32,7 +32,7 @@
             menuPosition() {
                 return {
                     left: `${this.menu.left}px`,
-                    top: `${this.menu.top}px`,
+                    bottom: `${this.menu.bottom}px`,
                 }
             }
         }
