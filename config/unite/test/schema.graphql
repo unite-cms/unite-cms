@@ -1,0 +1,6 @@
+
+type MyTestType implements UniteContent {
+    id: ID
+    _meta: UniteContentMeta
+    field1: String @textField
+}

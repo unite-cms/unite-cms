@@ -1,0 +1,4 @@
+
+extend type MyTestType {
+    field2: String @textField
+}

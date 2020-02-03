@@ -10,6 +10,7 @@ use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Language\Visitor;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Type\Schema;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 
 class DecorateFieldableModifier implements SchemaModifierInterface
 {
@@ -19,7 +20,7 @@ class DecorateFieldableModifier implements SchemaModifierInterface
     /**
      * {@inheritDoc}
      */
-    public function modify(DocumentNode &$document, Schema $schema) : void
+    public function modify(DocumentNode &$document, Schema $schema, ExecutionContext $context) : void
     {
         // Add a fieldable interface to all unite content types.
         $document = Visitor::visit($document, [

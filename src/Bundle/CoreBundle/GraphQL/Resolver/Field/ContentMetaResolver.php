@@ -10,6 +10,7 @@ use UniteCMS\CoreBundle\Domain\DomainManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
@@ -48,7 +49,7 @@ class ContentMetaResolver implements FieldResolverInterface
     /**
      * @inheritDoc
      */
-    public function resolve($value, $args, $context, ResolveInfo $info) {
+    public function resolve($value, $args, ExecutionContext $context, ResolveInfo $info) {
 
         if(!$value instanceof ContentInterface) {
             throw new InvalidArgumentException(sprintf('ContentMetaResolver expects an instance of %s as value.', ContentInterface::class));
@@ -61,7 +62,7 @@ class ContentMetaResolver implements FieldResolverInterface
 
             case 'deleted':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
                     return null;
                 }
 
@@ -69,7 +70,7 @@ class ContentMetaResolver implements FieldResolverInterface
 
             case 'created':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
                     return null;
                 }
 
@@ -77,7 +78,7 @@ class ContentMetaResolver implements FieldResolverInterface
 
             case 'updated':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
                     return null;
                 }
 
@@ -96,7 +97,7 @@ class ContentMetaResolver implements FieldResolverInterface
 
             case 'version':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
                     return -1;
                 }
 
@@ -107,7 +108,7 @@ class ContentMetaResolver implements FieldResolverInterface
 
             case 'revisions':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
                     return null;
                 }
 

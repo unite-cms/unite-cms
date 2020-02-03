@@ -8,6 +8,7 @@ use GraphQL\Language\AST\NodeKind;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Language\Visitor;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Type\Definition\InputObjectType;
@@ -29,8 +30,12 @@ class HideDirectiveModifier implements SchemaModifierInterface
     /**
      * {@inheritDoc}
      */
-    public function modify(DocumentNode &$document, Schema $schema) : void
+    public function modify(DocumentNode &$document, Schema $schema, ExecutionContext $context) : void
     {
+        if($context->isBypassAccessCheck()) {
+            return;
+        }
+
         $hideMap = [];
 
         foreach($schema->getTypeMap() as $type) {

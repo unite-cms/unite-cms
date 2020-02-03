@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\UnionType;
 use GraphQL\Type\Definition\WrappingType;
 use GraphQL\Type\Schema;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 
 class RemoveUnusedTypesModifier implements SchemaModifierInterface
 {
@@ -87,7 +88,7 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
     /**
      * {@inheritDoc}
      */
-    public function modify(DocumentNode &$document, Schema $schema) : void
+    public function modify(DocumentNode &$document, Schema $schema, ExecutionContext $context) : void
     {
         $usedTypes = [$schema->getQueryType()->name];
         $usedInterfaces = [];
