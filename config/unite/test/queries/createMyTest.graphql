@@ -1,0 +1,6 @@
+
+mutation createMyTest($f1: String!, $f2: String!) {
+    createMyTestType(data: { field1: $f1, field2: $f2 }, persist: true) {
+        ...myTestFields
+    }
+}

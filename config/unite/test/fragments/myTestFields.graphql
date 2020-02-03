@@ -1,0 +1,5 @@
+
+fragment myTestFields on MyTestType {
+    field1
+    field2
+}

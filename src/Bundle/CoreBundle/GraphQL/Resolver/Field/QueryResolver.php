@@ -3,6 +3,7 @@
 
 namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
@@ -45,8 +46,9 @@ class QueryResolver implements FieldResolverInterface
 
     /**
      * @inheritDoc
+     * @throws \UniteCMS\CoreBundle\Exception\UnknownFieldException
      */
-    public function resolve($value, $args, $context, ResolveInfo $info) {
+    public function resolve($value, $args, ExecutionContext $context, ResolveInfo $info) {
 
         $fieldNameParts = preg_split('/(?=[A-Z])/',$info->fieldName);
         if(count($fieldNameParts) < 2) {
@@ -80,17 +82,23 @@ class QueryResolver implements FieldResolverInterface
 
         switch ($field) {
             case 'get':
-                return $this->ifAccess(empty($args['id']) ?
+
+                $content = empty($args['id']) ?
                     $contentManager->create($domain, $type) :
-                    $contentManager->get($domain, $type, $args['id'], $args['includeDeleted'] ?? false)
-                );
+                    $contentManager->get($domain, $type, $args['id'], $args['includeDeleted'] ?? false);
+
+                if($context->isBypassAccessCheck()) {
+                    return $content;
+                }
+                return $this->ifAccess($content);
+
             case 'find':
                 return $contentManager->find(
                     $domain,
                     $type,
                     $this->criteriaBuilder->build($args, $contentTypeManager->getAnyType($type)),
                     $args['includeDeleted'],
-                    [$this, 'ifAccess']
+                    $context->isBypassAccessCheck() ? null : [$this, 'ifAccess']
                 );
             default:
                 return false;

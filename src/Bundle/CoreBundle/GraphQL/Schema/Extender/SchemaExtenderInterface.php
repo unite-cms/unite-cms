@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\GraphQL\Schema\Extender;
 
 use GraphQL\Type\Schema;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 
 /**
  * Interface SchemaExtenderInterface
@@ -33,7 +34,8 @@ interface SchemaExtenderInterface
      *
      * @param Schema $schema
      *
+     * @param ExecutionContext $context
      * @return string
      */
-    public function extend(Schema $schema) : string;
+    public function extend(Schema $schema, ExecutionContext $context) : string;
 }

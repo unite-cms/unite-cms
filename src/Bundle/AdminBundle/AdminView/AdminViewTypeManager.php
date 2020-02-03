@@ -18,6 +18,7 @@ use UniteCMS\CoreBundle\Domain\Domain;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Field\FieldTypeManager;
+use UniteCMS\CoreBundle\GraphQL\SchemaManager;
 use UniteCMS\CoreBundle\GraphQL\Util;
 use UniteCMS\CoreBundle\Log\LoggerInterface;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
@@ -41,9 +42,14 @@ class AdminViewTypeManager
     protected $adminViewFieldConfigurators = [];
 
     /**
-     * @var \UniteCMS\CoreBundle\Domain\DomainManager
+     * @var DomainManager
      */
     protected $domainManager;
+
+    /**
+     * @var SchemaManager
+     */
+    protected $schemaManager;
 
     /**
      * @var FieldTypeManager $fieldTypeManager
@@ -60,9 +66,10 @@ class AdminViewTypeManager
      */
     protected $expressionLanguage;
 
-    public function __construct(DomainManager $domainManager, FieldTypeManager $fieldTypeManager, Security $security, SaveExpressionLanguage $expressionLanguage)
+    public function __construct(DomainManager $domainManager, SchemaManager $schemaManager, FieldTypeManager $fieldTypeManager, Security $security, SaveExpressionLanguage $expressionLanguage)
     {
         $this->domainManager = $domainManager;
+        $this->schemaManager = $schemaManager;
         $this->fieldTypeManager = $fieldTypeManager;
         $this->security = $security;
         $this->expressionLanguage = $expressionLanguage;
@@ -201,7 +208,7 @@ class AdminViewTypeManager
         $adminViews = [];
 
         try {
-            $schema = Parser::parse(join("\n", $domain->getCompleteSchema()));
+            $schema = $this->schemaManager->getBaseSchemaDefinition();
         } catch(SyntaxError $e) {
             $domain->log(LoggerInterface::ERROR, sprintf('Could not parse schema for @adminView fragments, because of SyntaxError: %s', $e->getMessage()));
             return [];

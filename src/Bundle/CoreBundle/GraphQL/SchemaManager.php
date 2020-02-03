@@ -4,11 +4,17 @@
 namespace UniteCMS\CoreBundle\GraphQL;
 
 use GraphQL\Error\ClientAware;
+use GraphQL\Error\Error;
+use GraphQL\Error\SyntaxError;
+use GraphQL\Language\AST\FragmentDefinitionNode;
 use GraphQL\Language\AST\InterfaceTypeDefinitionNode;
+use GraphQL\Language\AST\OperationDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
+use GraphQL\Language\Printer;
+use GraphQL\Server\RequestError;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Throwable;
 use UniteCMS\CoreBundle\ContentType\ContentType;
@@ -60,6 +66,11 @@ class SchemaManager
      * @var LoggerInterface $logger
      */
     protected $logger;
+
+    /**
+     * @var DocumentNode
+     */
+    protected $baseSchemaDefinition = null;
 
     /**
      * @var Schema
@@ -319,7 +330,8 @@ class SchemaManager
     /**
      * @param bool $forceFresh
      *
-     * @return \GraphQL\Type\Schema
+     * @return Schema
+     * @throws SyntaxError
      */
     public function buildBaseSchema(bool $forceFresh = false) : Schema {
 
@@ -327,7 +339,7 @@ class SchemaManager
         // AST::fromArray
 
         // If the schema is already in memory, use it from there.
-        if(!$forceFresh && $this->cacheableBaseSchema) {
+        if(!$forceFresh && $this->cacheableBaseSchema && $this->baseSchemaDefinition) {
             return $this->cacheableBaseSchema;
         }
 
@@ -338,18 +350,22 @@ class SchemaManager
         }
 
         $schemaDefinition .= join("\n", $this->domainManager->current()->getCompleteSchema());
-        $this->cacheableBaseSchema = BuildSchema::build($schemaDefinition);
+        $this->baseSchemaDefinition = Parser::parse($schemaDefinition);
+        $this->cacheableBaseSchema = BuildSchema::build($this->baseSchemaDefinition);
         return $this->cacheableBaseSchema;
     }
 
     /**
      * @param bool $forceFresh
      *
+     * @param ExecutionContext|null $context
      * @return DocumentNode
-     * @throws \GraphQL\Error\Error
-     * @throws \GraphQL\Error\SyntaxError
+     * @throws Error
+     * @throws SyntaxError
      */
-    public function buildCacheableSchema(bool $forceFresh = false) : DocumentNode {
+    public function buildCacheableSchema(bool $forceFresh = false, ?ExecutionContext $context = null) : DocumentNode {
+
+        $context = $context ?? new ExecutionContext();
 
         // TODO: Cache + load from Cache + load generateContentTypes types from cache
         // AST::fromArray
@@ -364,7 +380,7 @@ class SchemaManager
 
         // Execute before type extenders.
         foreach($this->beforeTypeExtenders as $extender) {
-            if($extension = $extender->extend($schema)) {
+            if($extension = $extender->extend($schema, $context)) {
                 $parameters = $this->domainManager->getGlobalParameters() + $this->domainManager->current()->getParameters();
                 $extension = Util::replaceSchemaParameters($extension, $parameters);
                 $schema = SchemaExtender::extend($schema, Parser::parse($extension));
@@ -382,7 +398,7 @@ class SchemaManager
 
         // Execute after type extenders.
         foreach($this->afterTypeExtenders as $extender) {
-            if($extension = $extender->extend($schema)) {
+            if($extension = $extender->extend($schema, $context)) {
                 $parameters = $this->domainManager->getGlobalParameters() + $this->domainManager->current()->getParameters();
                 $extension = Util::replaceSchemaParameters($extension, $parameters);
                 $schema = SchemaExtender::extend($schema, Parser::parse($extension));
@@ -393,7 +409,7 @@ class SchemaManager
 
         // Execute schema modifiers after schema was built.
         foreach($this->modifiers as $modifier) {
-            $modifier->modify($this->cacheableSchema, $schema);
+            $modifier->modify($this->cacheableSchema, $schema, $context);
         }
 
         return $this->cacheableSchema;
@@ -402,17 +418,20 @@ class SchemaManager
     /**
      * @param bool $forceFresh
      *
-     * @return \GraphQL\Type\Schema
-     * @throws \GraphQL\Error\Error
-     * @throws \GraphQL\Error\SyntaxError
+     * @param ExecutionContext|null $context
+     * @return Schema
+     * @throws Error
+     * @throws SyntaxError
      */
-    public function buildExecutableSchema(bool $forceFresh = false) : Schema {
+    public function buildExecutableSchema(bool $forceFresh = false, ?ExecutionContext $context = null) : Schema {
+
+        $context = $context ?? new ExecutionContext();
 
         if(!$forceFresh && $this->executableSchema) {
             return $this->executableSchema;
         }
 
-        $this->executableSchema = BuildSchema::build($this->buildCacheableSchema($forceFresh), function(array $typeConfig, $typeDefinitionNode) {
+        $this->executableSchema = BuildSchema::build($this->buildCacheableSchema($forceFresh, $context), function(array $typeConfig, $typeDefinitionNode) {
 
             // Resolve GraphQL objects.
             if($typeDefinitionNode instanceof ObjectTypeDefinitionNode) {
@@ -438,33 +457,72 @@ class SchemaManager
     /**
      * @param string $query
      * @param array $args
-     * @param null $context
+     * @param null|ExecutionContext $context
      *
      * @param bool $forceFresh
      *
      * @return ExecutionResult
-     * @throws \GraphQL\Error\Error
-     * @throws \GraphQL\Error\SyntaxError
+     * @throws Error
+     * @throws SyntaxError
      */
-    public function execute(string $query, array $args = [], $context = null, bool $forceFresh = false) : ExecutionResult {
-        $schema = $this->buildExecutableSchema($forceFresh);
+    public function execute(string $query, array $args = [], ?ExecutionContext $context = null, bool $forceFresh = false) : ExecutionResult {
+
+        $context = $context ?? new ExecutionContext();
+
+        $schema = $this->buildExecutableSchema($forceFresh, $context);
         return GraphQL::executeQuery($schema, $query, null, $context, $args)
             ->setErrorFormatter([ErrorFormatter::class, 'createFromException'])->setErrorsHandler([$this, 'handleErrors']);
     }
 
     /**
+     * @param string $name
+     * @param array $fragments
+     * @param array $args
+     * @param null $context
+     * @param bool $forceFresh
+     *
+     * @return ExecutionResult
+     * @throws Error
+     * @throws SyntaxError
+     */
+    public function executeOperation(string $name, array $fragments = [], array $args = [], $context = null, bool $forceFresh = false) : ExecutionResult {
+
+        $fragmentsQuery = '';
+        $query = '';
+
+        $this->buildBaseSchema($forceFresh);
+
+        foreach($this->baseSchemaDefinition->definitions as $definition) {
+            if($definition instanceof OperationDefinitionNode && $definition->name->value === $name) {
+                $query .= Printer::doPrint($definition);
+            }
+            if($definition instanceof FragmentDefinitionNode && in_array($definition->name->value, $fragments)) {
+                $fragmentsQuery .= Printer::doPrint($definition);
+            }
+        }
+
+        if($query) {
+            return $this->execute($fragmentsQuery . $query, $args, $context, $forceFresh);
+        }
+
+        throw new InvalidArgumentException(sprintf('Operation with name "%s" was not found in your schema.', $name));
+    }
+
+    /**
      * @param Request $request
      * @param bool $debug
-     * @param null $context
+     * @param null|ExecutionContext $context
      *
      * @param bool $forceFresh
      *
      * @return ExecutionResult
-     * @throws \GraphQL\Error\Error
-     * @throws \GraphQL\Error\SyntaxError
-     * @throws \GraphQL\Server\RequestError
+     * @throws Error
+     * @throws SyntaxError
+     * @throws RequestError
      */
-    public function executeRequest(Request $request, bool $debug = false, $context = null, bool $forceFresh = false) : ExecutionResult {
+    public function executeRequest(Request $request, bool $debug = false, ?ExecutionContext $context = null, bool $forceFresh = false) : ExecutionResult {
+
+        $context = $context ?? new ExecutionContext();
 
         $server = new StandardServer(ServerConfig::create()
             ->setSchema($this->buildExecutableSchema($forceFresh))
@@ -484,10 +542,20 @@ class SchemaManager
     }
 
     /**
+     * @return DocumentNode
+     * @throws SyntaxError
+     */
+    public function getBaseSchemaDefinition() : DocumentNode {
+        $this->buildBaseSchema();
+        return $this->baseSchemaDefinition;
+    }
+
+    /**
      * Creates or updates the current domain's ContentTypeManager and returns it.
      *
      * @param Schema $schema
-     * @return \UniteCMS\CoreBundle\ContentType\ContentTypeManager
+     * @return ContentTypeManager
+     * @throws Error
      */
     protected function generateContentTypes(Schema $schema) : ContentTypeManager {
 

@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\GraphQL\Schema\Extender;
 
 use GraphQL\Type\Schema;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 
 class SchemaFileExtender implements SchemaExtenderInterface
 {
@@ -19,7 +20,7 @@ class SchemaFileExtender implements SchemaExtenderInterface
     /**
      * {@inheritDoc}
      */
-    public function extend(Schema $schema): string
+    public function extend(Schema $schema, ExecutionContext $context): string
     {
         return empty($this->schemaFile) ? '' : file_get_contents($this->schemaFile);
     }

@@ -4,6 +4,7 @@ namespace UniteCMS\AdminBundle\GraphQL\Extender;
 
 use GraphQL\Type\Schema;
 use UniteCMS\CoreBundle\Domain\DomainManager;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 use UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface;
 
 class UniteAdminExtender implements SchemaExtenderInterface
@@ -30,7 +31,7 @@ class UniteAdminExtender implements SchemaExtenderInterface
     /**
      * {@inheritDoc}
      */
-    public function extend(Schema $schema): string
+    public function extend(Schema $schema, ExecutionContext $context): string
     {
         foreach($this->permissions as $key => $expression) {
             $this->domainManager->setGlobalParameter($key, $expression);
