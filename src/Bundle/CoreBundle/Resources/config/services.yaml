@@ -34,3 +34,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    UniteCMS\CoreBundle\GraphQL\Schema\Extender\DomainSchemaExtender:
+        autoconfigure: false
+        tags:
+            - { name: 'unite.graphql.schema_extender', position: !php/const UniteCMS\CoreBundle\GraphQL\Schema\Extender\SchemaExtenderInterface::EXTENDER_BEFORE }

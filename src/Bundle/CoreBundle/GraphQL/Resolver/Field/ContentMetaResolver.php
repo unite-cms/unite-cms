@@ -9,8 +9,8 @@ use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Domain\DomainManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
-use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
@@ -49,7 +49,7 @@ class ContentMetaResolver implements FieldResolverInterface
     /**
      * @inheritDoc
      */
-    public function resolve($value, $args, $context, ResolveInfo $info) {
+    public function resolve($value, $args, ExecutionContext $context, ResolveInfo $info) {
 
         if(!$value instanceof ContentInterface) {
             throw new InvalidArgumentException(sprintf('ContentMetaResolver expects an instance of %s as value.', ContentInterface::class));
@@ -62,24 +62,24 @@ class ContentMetaResolver implements FieldResolverInterface
 
             case 'deleted':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
-                    throw new ContentAccessDeniedException(sprintf('You need %s permission to see if this content is deleted.', ContentVoter::UPDATE));
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                    return null;
                 }
 
                 return $value->getDeleted();
 
             case 'created':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
-                    throw new ContentAccessDeniedException(sprintf('You need %s permission to see the creation date of this content.', ContentVoter::UPDATE));
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                    return null;
                 }
 
                 return $value->getCreated();
 
             case 'updated':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
-                    throw new ContentAccessDeniedException(sprintf('You need %s permission to see the update date of this content.', ContentVoter::UPDATE));
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                    return null;
                 }
 
                 return $value->getUpdated();
@@ -97,8 +97,8 @@ class ContentMetaResolver implements FieldResolverInterface
 
             case 'version':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
-                    throw new ContentAccessDeniedException(sprintf('You need %s permission to see the content version.', ContentVoter::UPDATE));
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                    return -1;
                 }
 
                 $domain = $this->domainManager->current();
@@ -108,8 +108,8 @@ class ContentMetaResolver implements FieldResolverInterface
 
             case 'revisions':
 
-                if(!$this->security->isGranted(ContentVoter::UPDATE, $value)) {
-                    throw new ContentAccessDeniedException(sprintf('You need %s permission to view content revisions.', ContentVoter::UPDATE));
+                if(!$context->isBypassAccessCheck() && !$this->security->isGranted(ContentVoter::UPDATE, $value)) {
+                    return null;
                 }
 
                 $domain = $this->domainManager->current();

@@ -133,7 +133,7 @@ type UniteContentMeta {
     id: ID
     version: Int!
     revisions: [UniteContentRevision!]
-    created: DateTime!
+    created: DateTime
     updated: DateTime
     deleted: DateTime
     permissions: UniteContentEntityPermissions!

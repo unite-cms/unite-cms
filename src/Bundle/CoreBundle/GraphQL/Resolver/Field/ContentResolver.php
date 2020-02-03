@@ -14,6 +14,7 @@ use UniteCMS\CoreBundle\Field\FieldTypeManager;
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
 use UniteCMS\CoreBundle\ContentType\UserType;
 use UniteCMS\CoreBundle\Security\Voter\ContentFieldVoter;
@@ -64,14 +65,14 @@ class ContentResolver implements FieldResolverInterface
     /**
      * @inheritDoc
      */
-    public function resolve($value, $args, $context, ResolveInfo $info) {
+    public function resolve($value, $args, ExecutionContext $context, ResolveInfo $info) {
 
         if($value instanceof ContentResultInterface) {
             switch ($info->fieldName) {
                 case 'total':
                     $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
                     $contentType = $contentTypeManager->getAnyType($value->getType());
-                    if(!$this->authorizationChecker->isGranted(ContentVoter::COUNT, $contentType)) {
+                    if(!$context->isBypassAccessCheck() && !$this->authorizationChecker->isGranted(ContentVoter::COUNT, $contentType)) {
                         return -1;
                     }
                     return $value->getTotal();
@@ -137,7 +138,7 @@ class ContentResolver implements FieldResolverInterface
                         }
 
                         // If we don't have read access for this field.
-                        if(!$this->authorizationChecker->isGranted(ContentFieldVoter::READ, new ContentField($value, $info->fieldName))) {
+                        if(!$context->isBypassAccessCheck() && !$this->authorizationChecker->isGranted(ContentFieldVoter::READ, new ContentField($value, $info->fieldName))) {
                             return null;
                         }
 

@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\Common\Collections\Expr\Comparison;
 use GraphQL\Type\Definition\Type;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
@@ -23,6 +24,7 @@ use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldComparison;
 use UniteCMS\CoreBundle\Query\ReferenceDataFieldOrderBy;
 use UniteCMS\CoreBundle\Security\User\UserInterface;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ReferenceType extends AbstractFieldType
 {
@@ -34,9 +36,15 @@ class ReferenceType extends AbstractFieldType
      */
     protected $domainManager;
 
-    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage)
+    /**
+     * @var AuthorizationCheckerInterface $authorizationChecker
+     */
+    protected $authorizationChecker;
+
+    public function __construct(DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->domainManager = $domainManager;
+        $this->authorizationChecker = $authorizationChecker;
         parent::__construct($saveExpressionLanguage);
     }
 
@@ -60,19 +68,23 @@ class ReferenceType extends AbstractFieldType
     }
 
     /**
-     * {@inheritDoc}
+     * @param ContentTypeField $field
+     * @param FieldData $fieldData
+     * @return ContentInterface[]
      */
-    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
+    protected function getContentForField(ContentTypeField $field, FieldData $fieldData) : array {
 
         if(empty($fieldData->getData())) {
-            return null;
+            return [];
         }
 
         $domain = $this->domainManager->current();
         $contentManager = $domain->getContentTypeManager()->getContentType($field->getReturnType()) ? $domain->getContentManager() : $domain->getUserManager();
 
         if($fieldData instanceof FieldDataList) {
+
             $rowIds = [];
+
             foreach($fieldData->rows() as $rowData) {
                 $rowIds[] = $rowData->getData();
             }
@@ -105,10 +117,30 @@ class ReferenceType extends AbstractFieldType
         // on sub fields of this content, but at least we can query the id,
         // which will be an empty string.
         if(!$referencedContent && $field->isNonNull()) {
-            return new class($field->getReturnType()) extends BaseContent {};
+            return [new class($field->getReturnType()) extends BaseContent {}];
         }
 
-        return $referencedContent;
+        if(!$this->authorizationChecker->isGranted(ContentVoter::READ, $referencedContent)) {
+            return [];
+        }
+
+        return [$referencedContent];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function resolveField(ContentInterface $content, ContentTypeField $field, FieldData $fieldData, array $args = []) {
+
+        $content = array_filter($this->getContentForField($field, $fieldData), function(ContentInterface $content){
+            return $this->authorizationChecker->isGranted(ContentVoter::READ, $content);
+        });
+
+        if($field->isListOf()) {
+            return $content;
+        }
+
+        return count($content) > 0 ? $content[0] : null;
     }
 
     /**
@@ -137,7 +169,7 @@ class ReferenceType extends AbstractFieldType
 
         // Check that referenced content can be resolved.
         $validator->validate(
-            $this->resolveField($content, $field, $fieldData),
+            $this->getContentForField($field, $fieldData),
             new NotNull(),
             [$context->getGroup()]
         );

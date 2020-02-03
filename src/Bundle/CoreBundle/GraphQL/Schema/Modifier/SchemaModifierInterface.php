@@ -4,14 +4,12 @@
 namespace UniteCMS\CoreBundle\GraphQL\Schema\Modifier;
 
 
-use UniteCMS\CoreBundle\Domain\ExecutionContext;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Type\Schema;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 
 /**
  * Class SchemaModifierInterface
- *
- * @package App\GraphQL\Schema\Modifier
  */
 interface SchemaModifierInterface
 {
@@ -25,7 +23,8 @@ interface SchemaModifierInterface
      * @param DocumentNode &$document
      * @param Schema $schema
      *
+     * @param ExecutionContext $executionContext
      * @return void
      */
-    public function modify(DocumentNode &$document, Schema $schema) : void;
+    public function modify(DocumentNode &$document, Schema $schema, ExecutionContext $executionContext) : void;
 }

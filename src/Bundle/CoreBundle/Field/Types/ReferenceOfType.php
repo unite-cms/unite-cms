@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\Field\Types;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Expr\Comparison;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\FieldData;
@@ -15,7 +16,7 @@ use UniteCMS\CoreBundle\Domain\DomainManager;
 use UniteCMS\CoreBundle\Expression\SaveExpressionLanguage;
 use UniteCMS\CoreBundle\Query\ContentCriteriaBuilder;
 use UniteCMS\CoreBundle\Query\DataFieldComparison;
-use UniteCMS\CoreBundle\Security\User\UserInterface;
+use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
 class ReferenceOfType extends AbstractFieldType
 {
@@ -32,10 +33,16 @@ class ReferenceOfType extends AbstractFieldType
      */
     protected $domainManager;
 
-    public function __construct(ContentCriteriaBuilder $criteriaBuilder, DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage)
+    /**
+     * @var AuthorizationCheckerInterface $authorizationChecker
+     */
+    protected $authorizationChecker;
+
+    public function __construct(ContentCriteriaBuilder $criteriaBuilder, DomainManager $domainManager, SaveExpressionLanguage $saveExpressionLanguage, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->criteriaBuilder = $criteriaBuilder;
         $this->domainManager = $domainManager;
+        $this->authorizationChecker = $authorizationChecker;
         parent::__construct($saveExpressionLanguage);
     }
 
@@ -154,6 +161,23 @@ class ReferenceOfType extends AbstractFieldType
             $reference_field->isListOf() ? sprintf('"%s"', $content->getId()) : $content->getId()
         ));
 
-        return $contentManager->find($domain, $field->getSettings()->get('content_type'), $criteria);
+        return $contentManager->find($domain, $field->getSettings()->get('content_type'), $criteria, false, [$this, 'ifAccess']);
+    }
+
+    /**
+     * @param ContentInterface|null $content
+     * @return ContentInterface|null
+     */
+    public function ifAccess(ContentInterface $content = null) : ?ContentInterface {
+
+        if(empty($content)) {
+            return null;
+        }
+
+        if(!$this->authorizationChecker->isGranted(ContentVoter::READ, $content)) {
+            return null;
+        }
+
+        return $content;
     }
 }

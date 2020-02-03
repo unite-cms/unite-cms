@@ -5,6 +5,7 @@ namespace UniteCMS\CoreBundle\GraphQL\Resolver\Field;
 
 use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Type\Definition\ResolveInfo;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 
 /**
  * Interface FieldResolverInterface
@@ -36,5 +37,5 @@ interface FieldResolverInterface
      *
      * @return mixed
      */
-    public function resolve($value, $args, $context, ResolveInfo $info);
+    public function resolve($value, $args, ExecutionContext $context, ResolveInfo $info);
 }

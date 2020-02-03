@@ -25,6 +25,7 @@ use UniteCMS\CoreBundle\Event\ContentEventBefore;
 use UniteCMS\CoreBundle\Exception\ConstraintViolationsException;
 use UniteCMS\CoreBundle\Exception\ContentAccessDeniedException;
 use UniteCMS\CoreBundle\Exception\ContentNotFoundException;
+use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Security\Voter\ContentVoter;
 
@@ -76,7 +77,7 @@ class MutationResolver implements FieldResolverInterface
      * @inheritDoc
      * @throws ContentNotFoundException
      */
-    public function resolve($value, $args, $context, ResolveInfo $info) {
+    public function resolve($value, $args, ExecutionContext $context, ResolveInfo $info) {
 
         // Get current domain.
         $domain = $this->domainManager->current();
@@ -112,14 +113,14 @@ class MutationResolver implements FieldResolverInterface
         // Handle all fields
         switch ($field) {
             case 'create':
-                $this->contentAccess(ContentVoter::CREATE, $content, $contentManager, $domain);
+                $this->contentAccess(ContentVoter::CREATE, $content, $contentManager, $domain, $context);
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $this->contentUpdate($contentManager, $domain, $content, $args['data'] ?? []);
                     return $this->contentPersist($contentManager, $domain, $content, ContentEvent::CREATE, $args['persist']);
                 });
 
             case 'update':
-                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
+                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain, $context);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $previousContent = $content->getData();
@@ -128,7 +129,7 @@ class MutationResolver implements FieldResolverInterface
                 });
 
             case 'revert':
-                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
+                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain, $context);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $previousContent = $content->getData();
@@ -137,7 +138,7 @@ class MutationResolver implements FieldResolverInterface
                 });
 
             case 'delete':
-                $this->contentAccess(ContentVoter::DELETE, $content, $contentManager, $domain);
+                $this->contentAccess(ContentVoter::DELETE, $content, $contentManager, $domain, $context);
 
                 return $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $previousContent = $content->getData();
@@ -146,7 +147,7 @@ class MutationResolver implements FieldResolverInterface
                 });
 
             case 'recover':
-                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain);
+                $this->contentAccess(ContentVoter::UPDATE, $content, $contentManager, $domain, $context);
 
                 $contentManager->transactional($domain, function() use ($contentManager, $domain, $content, $args) {
                     $previousContent = $content->getData();
@@ -158,7 +159,7 @@ class MutationResolver implements FieldResolverInterface
                 return $args['persist'] ? $content: null;
 
             case 'permanent_delete':
-                $this->contentAccess(ContentVoter::PERMANENT_DELETE, $content, $contentManager, $domain);
+                $this->contentAccess(ContentVoter::PERMANENT_DELETE, $content, $contentManager, $domain, $context);
 
                 if(!$content->getDeleted() && empty($args['force'])) {
                     throw new UserError('You can only permanent delete content if it is already deleted or if you set the "force" argument to true.');
@@ -262,11 +263,12 @@ class MutationResolver implements FieldResolverInterface
      * @param ContentManagerInterface $contentManager
      * @param Domain $domain
      *
+     * @param ExecutionContext $executionContext
      * @return ContentInterface
      */
-    protected function contentAccess(string $attribute, ContentInterface $content, ContentManagerInterface $contentManager, Domain $domain) : ContentInterface {
+    protected function contentAccess(string $attribute, ContentInterface $content, ContentManagerInterface $contentManager, Domain $domain, ExecutionContext $executionContext) : ContentInterface {
 
-        if(!$this->authorizationChecker->isGranted($attribute, $content)) {
+        if(!$executionContext->isBypassAccessCheck() && !$this->authorizationChecker->isGranted($attribute, $content)) {
             $contentManager->noFlush($domain);
             throw new ContentAccessDeniedException(sprintf('You are not allowed to %s content of type "%s".', $attribute, $content->getType()));
         }

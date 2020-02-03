@@ -3,6 +3,7 @@
 namespace UniteCMS\CoreBundle\Domain;
 
 use LogicException;
+use Symfony\Component\Finder\Finder;
 use UniteCMS\CoreBundle\Content\ContentValidatorManager;
 use UniteCMS\CoreBundle\Validator\ContentValidatorInterface;
 use UniteCMS\CoreBundle\Validator\GenericContentValidatorConstraint;
@@ -76,21 +77,13 @@ class DomainManager
      * @return array
      */
     static function findSchemaFilesInDir(string $dir) : array {
+
+        $finder = new Finder();
+        $finder->files()->in($dir)->name('*.graphql');
         $schemaFiles = [];
 
-        if(is_dir($dir)) {
-
-            if(substr($dir, -1, 1) !== '/') {
-                $dir .= '/';
-            }
-
-            foreach (scandir($dir) as $file) {
-                $filePath = $dir . $file;
-
-                if($content = static::getSchemaFromFile($filePath)) {
-                    $schemaFiles[$filePath] = $content;
-                }
-            }
+        foreach($finder as $file) {
+            $schemaFiles[$file->getPathname()] = $file->getContents();
         }
 
         return $schemaFiles;

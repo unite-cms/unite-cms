@@ -1,0 +1,29 @@
+
+
+fragment testFragment on UniteContentMeta {
+    permissions {
+        read
+    }
+}
+
+
+query testInternalQuery($id: ID!) {
+    getDemoCategory(id: $id) {
+        _meta {
+            id
+            ...testFragment
+        }
+    }
+}
+
+extend type Query {
+    myTest: String
+}
+
+extend type DemoCategory {
+    myTest: String
+}
+
+extend type UniteContentMeta {
+    myTest: String
+}
