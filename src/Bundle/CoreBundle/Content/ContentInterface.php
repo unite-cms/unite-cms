@@ -10,7 +10,7 @@ use UniteCMS\CoreBundle\Event\ContentEvent;
 
 /**
  * @UniteAssert\ValidContent
- * @UniteAssert\ValidContent(groups={ ContentEvent::CREATE, ContentEvent::UPDATE, ContentEvent::DELETE, ContentEvent::REVERT, ContentEvent::RECOVER })
+ * @UniteAssert\ValidContent(groups={ ContentEvent::CREATE, ContentEvent::UPDATE, ContentEvent::DELETE, ContentEvent::REVERT, ContentEvent::RECOVER, ContentEvent::PERMANENT_DELETE })
  */
 interface ContentInterface
 {
