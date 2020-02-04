@@ -105,13 +105,17 @@ class ReferenceCascadeSubscriber implements EventSubscriberInterface
     protected function setNull(Domain $domain, ContentInterface $deletedContent, ContentInterface $referencedContent, ContentTypeField $field) {
 
         $manager = $referencedContent instanceof UserInterface ? $domain->getUserManager() : $domain->getContentManager();
-        $manager->update($domain, $referencedContent, [$field->getId() => null]);
+
+        $data = $referencedContent->getData();
+        unset($data[$field->getSettings()->get('reference_field')]);
+        $manager->update($domain, $referencedContent, $data);
+
         $this->eventDispatcher->dispatch(new ContentEventBefore($referencedContent), ContentEventBefore::UPDATE);
         $manager->flush($domain);
 
         $domain->log(LoggerInterface::NOTICE, sprintf(
             'Set referenced "%s" of "%s" content with id "%s" to NULL, because "%s" content with id "%s" was hard deleted.',
-            $field->getId(),
+            $field->getSettings()->get('reference_field'),
             $referencedContent->getType(),
             $referencedContent->getId(),
             $deletedContent->getType(),
