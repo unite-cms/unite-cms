@@ -67,6 +67,10 @@
                         return;
                     }
 
+                    if(rawType.name === 'UnitePageBuilderText') {
+                        return;
+                    }
+
                     if(allowedTypes.length > 0 && allowedTypes.indexOf(rawType.name) < 0) {
                         return;
                     }

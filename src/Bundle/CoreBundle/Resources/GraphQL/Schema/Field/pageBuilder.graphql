@@ -17,10 +17,29 @@ interface UnitePageBuilderBlockType {
     attrs: [UnitePageBuilderBlockAttribute!]
 }
 
-type UnitePageBuilderText {
+type UnitePageBuilderText implements UnitePageBuilderBlockType {
+    type: String!
     attrs: [UnitePageBuilderBlockAttribute!]
     marks: [UnitePageBuilderTextMark!]
     text: String
+}
+
+type UnitePageBuilderContainerBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
+    id: ID
+    _meta: UniteContentMeta
+    type: String!
+    attrs: [UnitePageBuilderBlockAttribute!]
+    content: [UnitePageBuilderBlockType!]
+    padding: Boolean @booleanField
+    inverted: Boolean @booleanField
+}
+
+type UnitePageBuilderColumnsBlock implements UnitePageBuilderBlockType {
+    id: ID
+    _meta: UniteContentMeta
+    type: String!
+    attrs: [UnitePageBuilderBlockAttribute!]
+    content: [UnitePageBuilderContainerBlock!]
 }
 
 type UnitePageBuilderBlock implements UnitePageBuilderBlockType {

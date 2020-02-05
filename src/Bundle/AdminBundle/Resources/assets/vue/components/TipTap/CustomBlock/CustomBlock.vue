@@ -1,6 +1,8 @@
 <template>
     <div class="tiptap-custom-unite-block" :class="{'with-children': allowChildren}">
-        <div class="content" ref="content" v-if="allowChildren"></div>
+        <div class="content" ref="content" v-if="allowChildren">
+            <a href="#" @click.prevent="addChild" class="uk-icon-button uk-button-light uk-icon-button-small"><icon name="plus" /></a>
+        </div>
         <div class="description"><icon :name="icon" :width="24" :height="24" /><br /><span class="uk-text-meta">{{ label }}</span></div>
         <template v-if="isFieldable">
             <button class="configure-icon uk-button uk-button-link" @click.prevent="openConfigModal"><icon name="settings" /></button>
@@ -75,6 +77,22 @@
             saveConfig() {
                 this.updateAttrs(Object.assign({}, this.options));
                 UIkit.offcanvas(this.$refs.configCanvas).hide();
+            },
+            addChild() {
+
+                if(!this.allowChildren) {
+                    return;
+                }
+
+                let childType = this.allowChildren[0];
+                let content = childType === 'UnitePageBuilderBlockType' ? 'paragraph' : 'Unite' + childType;
+
+                this.view.dispatch(
+                    this.view.state.tr.insert(
+                        this.view.state.selection.$anchor.pos,
+                        this.view.state.schema.node(content, null)
+                    )
+                );
             }
         }
     }

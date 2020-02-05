@@ -3,16 +3,6 @@ type DonationFormBlock implements UnitePageBuilderBlockType {
     attrs: [UnitePageBuilderBlockAttribute!]
 }
 
-type ContainerBlock implements UnitePageBuilderBlockType & UniteEmbeddedContent {
-    id: ID
-    _meta: UniteContentMeta
-    type: String!
-    attrs: [UnitePageBuilderBlockAttribute!]
-    content: [PageBuilderBlocks!]
-    padding: Boolean @booleanField
-    inverted: Boolean @booleanField
-}
-
 """
 Intro
 This is just an example of description+
@@ -38,11 +28,11 @@ fragment introFragment on IntroBlock @embeddedAdminView(titlePattern: "{{headlin
     __typename
 }
 
-union PageBuilderBlocks = UnitePageBuilderBlock | UnitePageBuilderText | DonationFormBlock | ContainerBlock | IntroBlock | ProductsBlock
+union ContentBlocks = UnitePageBuilderBlock | UnitePageBuilderContainerBlock | UnitePageBuilderColumnsBlock | DonationFormBlock | IntroBlock | ProductsBlock
 
 type PageBuilder implements UniteContent {
     id: ID
     _meta: UniteContentMeta
     title: String @textField @required
-    page: UnitePageBuilderBlock! @pageBuilderField(customBlocks: "PageBuilderBlocks")
+    page: UnitePageBuilderBlock! @pageBuilderField(customBlocks: "ContentBlocks")
 }

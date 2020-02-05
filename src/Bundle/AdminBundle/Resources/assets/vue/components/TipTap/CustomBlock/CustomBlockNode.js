@@ -4,11 +4,37 @@ import CustomBlock from "./CustomBlock";
 import { Unite } from '../../../plugins/unite';
 
 export function allowChildren(type) {
-    return type.fields.filter((field) => {
-        return field.type.kind === 'LIST'
-            && field.type.ofType.kind === 'NON_NULL'
-            && field.type.ofType.ofType.name === 'PageBuilderBlocks';
-    }).length > 0;
+
+    let contentField = type.fields.filter((field) => {
+        return field.name === 'content' && field.type.kind === 'LIST' && field.type.ofType.kind === 'NON_NULL';
+    });
+
+    if(contentField.length === 0) {
+        return false;
+    }
+
+    contentField = contentField[0];
+
+    let childrenType = contentField.type.ofType.ofType.name;
+
+    if(childrenType === 'UnitePageBuilderBlockType') {
+        return ['UnitePageBuilderBlockType'];
+    }
+
+    let rawType = Unite.rawTypes.filter(rType => rType.name === childrenType);
+
+    if(rawType.length === 0) {
+        return false;
+    }
+
+    if(rawType[0].kind === 'OBJECT') {
+        if(rawType[0].interfaces.filter(i => i.name === 'UnitePageBuilderBlockType').length === 0) {
+            return false;
+        }
+        return [rawType[0].name];
+    }
+
+    return false;
 }
 
 export function isFieldable(type) {
@@ -40,10 +66,21 @@ export default class CustomBlockNode extends Node {
             }
         }
 
+        let content = null;
+        if(withChildren) {
+            content = withChildren.map((type) => {
+                if(type === 'UnitePageBuilderBlockType') {
+                    return 'block*';
+                } else {
+                    return `Unite${type}*`;
+                }
+            }).join('|');
+        }
+
         return {
             attrs: attrs,
             group: 'block',
-            content: withChildren ? 'block*' : null,
+            content: content,
             atom: !withChildren,
             defining: false,
             draggable: true,

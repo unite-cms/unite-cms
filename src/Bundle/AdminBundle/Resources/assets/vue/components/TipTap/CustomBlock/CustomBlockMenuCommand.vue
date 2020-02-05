@@ -31,18 +31,24 @@
         methods: {
             onClick() {
 
-                let node = this.editor.schema.node(
-                    'Unite' + this.config.type.name,
-                    null,
-                    allowChildren(this.config.type) ? [this.editor.schema.node('paragraph')] : null
-                );
+                let content = null;
+                let allowedChildren = allowChildren(this.config.type);
+
+                if(allowedChildren) {
+                    if(allowedChildren[0] === 'UnitePageBuilderBlockType') {
+                        content = [this.editor.schema.node('paragraph')];
+                    } else {
+                        content = null;
+                    }
+                }
 
                 this.editor.view.dispatch(
                     this.editor.state.tr.insert(
                         this.editor.state.selection.$anchor.pos,
-                        node
+                        this.editor.schema.node('Unite' + this.config.type.name, null, content)
                     )
                 );
+
                 this.$emit('selected');
             }
         }
