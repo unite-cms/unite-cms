@@ -1,31 +1,9 @@
 
 .uk-table tbody {
 
-  &.uk-card {
-    tr {
-      background: none;
-
-      &:first-child {
-        border-top: none;
-      }
-
-      &:last-child {
-        border-bottom: none;
-      }
-    }
-
-    &.uk-table-striped > tr:nth-of-type(even) {
-      background: $table-striped-row-background;
-      @if(mixin-exists(hook-table-striped)) {@include hook-table-striped();}
-
-      &:first-child {
-        border-top: none;
-      }
-
-      &:last-child {
-        border-bottom: none;
-      }
-    }
+  &.uk-table-striped > tr:nth-of-type(odd) {
+    background: $navbar-background;
+    @if(mixin-exists(hook-table-striped)) {@include hook-table-striped();}
   }
 
   tr.updated,
@@ -36,36 +14,20 @@
 }
 
 .table-overflow-container {
-  overflow: visible;
-  overflow-x: auto;
-  margin: -$padding-padding;
+  margin: -$container-padding-horizontal;
   margin-top: 0;
-  padding: 0 $padding-padding $padding-padding;
-  position: relative;
+}
 
-  &.with-overflow {
-    :after {
-      content: "";
-      display: block;
-      position: absolute;
-      right: -$padding-padding;
-      width: $padding-padding;
-      height: 1px;
-    }
+@media (min-width: $breakpoint-small) {
+  .table-overflow-container {
+    margin: -$container-padding-horizontal-s;
+    margin-top: 0;
   }
 }
 
-@media (min-width: $breakpoint-large) {
+@media (min-width: $breakpoint-medium) {
   .table-overflow-container {
-    margin: -$padding-padding-l;
+    margin: -$container-padding-horizontal-m;
     margin-top: 0;
-    padding: 0 $padding-padding-l $padding-padding-l;
-
-    &.with-overflow {
-      :after {
-        right: -$padding-padding-l;
-        width: $padding-padding-l;
-      }
-    }
   }
 }

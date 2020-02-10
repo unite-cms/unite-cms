@@ -26,10 +26,36 @@
 
     .uk-offcanvas-bar {
       left: 0;
+
+      .minimize-toggle {
+        top: $section-padding-vertical;
+        right: $section-padding-vertical;
+      }
     }
 
     + #app-main {
       margin-left: $offcanvas-bar-width-m;
+    }
+
+    &.minimized {
+
+      .uk-offcanvas-bar {
+        width: 50px;
+        padding: $section-padding-vertical * 2 $section-padding-vertical $section-padding-vertical;
+        text-align: center;
+      }
+
+      .uk-nav-default > li > a {
+        font-size: 0;
+
+        .uk-icon.uk-margin-small-right {
+          margin-right: 0 !important;
+        }
+      }
+
+      + #app-main {
+        margin-left: 50px;
+      }
     }
   }
 }

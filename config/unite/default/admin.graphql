@@ -1,5 +1,5 @@
 
-fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home") {
+fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home", groups: [{name: "Foo"}]) {
     unite {
         _version
     }

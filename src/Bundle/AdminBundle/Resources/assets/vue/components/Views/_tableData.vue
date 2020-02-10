@@ -1,5 +1,5 @@
 <template>
-    <div class="uk-overflow-auto table-overflow-container" :class="{ 'with-overflow': overflow }" @scroll="overflow = true">
+    <div class="uk-overflow-auto table-overflow-container">
         <table class="uk-table uk-table-small uk-table-divider uk-table-middle">
             <thead>
             <tr>
@@ -8,7 +8,7 @@
                 <th v-if="!select"></th>
             </tr>
             </thead>
-            <tbody class="uk-card uk-card-default uk-table-striped">
+            <tbody class="uk-table-striped">
             <tr v-for="row in rows.result" :class="{ updated: highlightRow === row._meta.id }" :key="row._meta.id" :id="'row-' + row._meta.id">
                 <td v-if="select" class="uk-table-shrink">
                     <button @click.prevent="$emit('selectRow', row._meta.id)" class="uk-icon-button uk-icon-button-small" :class="isSelected(row._meta.id) ? 'uk-button-primary' : 'uk-button-default'" uk-icon="check" :title="$t('content.list.selection.select')">
@@ -40,11 +40,6 @@
 
     export default {
         components: { Icon, ViewPagination, actionsField },
-        data() {
-            return {
-                overflow: false,
-            }
-        },
         props: {
             fields: Array,
             rows: Object,

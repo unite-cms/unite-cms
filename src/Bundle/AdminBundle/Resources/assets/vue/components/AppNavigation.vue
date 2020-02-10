@@ -1,10 +1,17 @@
 <template>
-  <section ref="offcanvas" id="app-navigation" uk-offcanvas="overlay: true">
-    <div class="uk-offcanvas-bar">
+  <section ref="offcanvas" id="app-navigation" uk-offcanvas="overlay: true" class="uk-offcanvas" :class="{ minimized }">
+    <div class="uk-offcanvas-bar uk-box-shadow-medium">
       <button class="uk-offcanvas-close uk-hidden@m" type="button" uk-close></button>
+
       <div class="uk-flex uk-flex-column uk-height-1-1">
 
-        <template v-if="viewGroups.length > 0">
+        <ul class="minimize-toggle uk-iconnav uk-flex-center uk-position-absolute uk-position-top-right uk-visible@m">
+          <li><a @click="minimized = !minimized"><icon :name="minimized ? 'maximize-2' : 'minimize-2'" /></a></li>
+        </ul>
+
+        <hr class="uk-visible@m" v-if="minimized" />
+
+        <template v-if="viewGroups.length > 0 && !minimized">
           <div class="uk-margin-large uk-hidden@m"></div>
           <button class="view-group-toggle uk-button uk-button-default uk-box-shadow-hover-small" type="button">
             <icon class="fix-line-height uk-margin-small-right" :name="viewGroupIcon(actualGroup)" />
@@ -23,7 +30,7 @@
         </template>
 
         <ul class="uk-nav uk-nav-default uk-flex-1">
-          <li v-for="view in views"><router-link :to="viewRoute(view)"><icon :name="viewIcon(view)" class="uk-margin-small-right" /> {{ view.name }}</router-link></li>
+          <li v-for="view in views"><router-link :to="viewRoute(view)"><icon :name="viewIcon(view)" class="uk-margin-small-right" uk-tooltip :title="view.name" /> {{ view.name }}</router-link></li>
         </ul>
 
         <hr />
@@ -52,6 +59,7 @@
         data() {
           return {
             group: null,
+            minimized: false,
           }
         },
         watch: {
