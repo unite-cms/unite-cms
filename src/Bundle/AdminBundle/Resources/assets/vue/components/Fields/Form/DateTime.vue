@@ -1,26 +1,12 @@
 <template>
   <form-row :domID="domID" :field="field" :alerts="violations">
-    <multi-field :field="field" :val="val" @addRow="val.push(today)" @removeRow="removeByKey" :span-row="false" v-slot:default="multiProps">
-      <div class="uk-flex uk-flex-middle">
-
-        <div class="uk-flex-1 date-picker-input">
-          <date-picker :required="field.required" :id="domID" input-class="uk-input" :value="values[multiProps.rowKey || 0]" @input="setDate(arguments, multiProps.rowKey)" :full-month-name="true" :monday-first="$t('field.date.mondayFirst') === 'true'" initial-view="year" :format="$t('field.date.format')" :language="$t('field.date.picker')" />
+    <multi-field :field="field" :val="val" @addRow="val.push(null)" @removeRow="removeByKey" :span-row="false" v-slot:default="multiProps">
+      <div class="uk-flex">
+        <div class="uk-margin-small-right">
+          <input style="min-width: 150px;" type="date" class="uk-input" :required="field.required" :id="domID" :value="getDate(multiProps.rowKey || 0)" @input="setDate(multiProps.rowKey || 0, arguments)" />
         </div>
-
-        <div class="date-picker-separator">:</div>
-
-        <div>
-          <input pattern="\d{1,2}" class="uk-input uk-form-width-xsmall uk-text-center" placeholder="00" :value="hours[multiProps.rowKey || 0]" @input="setTime(arguments, multiProps.rowKey, false)" />
-        </div>
-
-        <div class="date-picker-separator">:</div>
-
-        <div>
-          <input pattern="\d{1,2}" class="uk-input uk-form-width-xsmall uk-text-center" placeholder="00" :value="minutes[multiProps.rowKey || 0]" @input="setTime(arguments, multiProps.rowKey, true)" />
-        </div>
-
-        <div v-if="!field.list_of && !field.required && val" class="uk-margin-small-left">
-          <a class="uk-icon-link uk-text-danger" @click.prevent="setValue(null)"><icon name="x" /></a>
+        <div v-if="field.fieldType === 'dateTime' && getDate(multiProps.rowKey || 0)">
+          <input style="min-width: 100px;" type="time" class="uk-input" :required="field.required" :id="domID" :value="getTime(multiProps.rowKey || 0)" @input="setTime(multiProps.rowKey || 0, arguments)" />
         </div>
       </div>
     </multi-field>
@@ -30,70 +16,64 @@
     import _abstract from "./_abstract";
     import FormRow from './_formRow';
     import MultiField from './_multiField';
-    import DatePicker from 'vuejs-datepicker';
-    import Icon from "../../Icon";
+
+    import moment from 'moment';
 
     export default {
 
         // Static query methods for unite system.
         queryData(field, unite, depth) { return field.id },
-        normalizeQueryData(queryData, field, unite) { return queryData; },
-        normalizeMutationData(formData, field, unite) { return formData; },
+        normalizeQueryData(queryData, field, unite) {
+          if(!queryData) { return null; }
+
+          let format = 'YYYY-MM-DD';
+          if(field.type === 'dateTime') {
+            format += 'THH:mm';
+          }
+
+          if(Array.isArray(queryData)) {
+            return queryData.map(d => moment(d, format));
+          } else {
+            return moment(queryData, format);
+          }
+
+        },
+        normalizeMutationData(formData, field, unite) {
+          if(!formData) { return null; }
+
+          let format = 'YYYY-MM-DD';
+          if(field.type === 'dateTime') {
+            format += 'THH:mm';
+          }
+
+          if(Array.isArray(formData)) {
+            return formData.map(d => d.format(format));
+          } else {
+            return formData.format(format);
+          }
+        },
 
         // Vue properties for this component.
         extends: _abstract,
-        components: { DatePicker, MultiField, FormRow, Icon },
-        computed: {
-            today() {
-                let today = new Date();
-                today.setHours(0);
-                today.setMinutes(0);
-                today.setSeconds(0);
-                return today;
-            },
-            hours() {
-                return this.values.map((date) => {
-                    return date ? (new Date(date).getHours() || null) : null;
-                });
-            },
-            minutes() {
-                return this.values.map((date) => {
-                    return date ? (new Date(date).getMinutes() || null) : null;
-                });
-            }
-        },
+        components: { MultiField, FormRow },
         methods: {
-            setDate(args, key) {
-                let date = (this.field.list_of ? this.val[key] : this.val) || this.today;
-                date = new Date(date);
-                let prevMinutes = date.getMinutes();
-                let prevHours = date.getHours();
-                date = new Date(args[0]);
-                date.setMinutes(prevMinutes);
-                date.setHours(prevHours);
+          getDate(delta) {
+            return this.values[delta] ? this.values[delta].format('YYYY-MM-DD') : null;
+          },
+          getTime(delta) {
+            return this.values[delta] ? this.values[delta].format('HH:mm') : null;
+          },
 
-                if(this.field.list_of) {
-                    this.$set(this.val, key, date);
-                } else {
-                    this.val = date;
-                }
-            },
-            setTime(args, key, minutes = true) {
-                let date = (this.field.list_of ? this.val[key] : this.val) || this.today;
-                date = new Date(date);
+          setFullDate(delta, date = null, time = null) {
+            this.setValue(date ? [moment([date, time].join(' '), 'YYYY-MM-DD HH:mm')] : null, delta);
+          },
 
-                if(minutes) {
-                    date.setMinutes(args[0].target.value);
-                } else {
-                    date.setHours(args[0].target.value);
-                }
-
-                if(this.field.list_of) {
-                    this.$set(this.val, key, date);
-                } else {
-                    this.val = date;
-                }
-            }
+          setDate(delta, args) {
+            this.setFullDate(delta, args[0].target.value, this.getTime(delta));
+          },
+          setTime(delta, args) {
+            this.setFullDate(delta, this.getDate(delta), args[0].target.value);
+          },
         }
     }
 </script>

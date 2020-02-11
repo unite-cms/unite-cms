@@ -1,6 +1,5 @@
 
-import { messages, dateTimeFormats, numberFormats, i18n } from "../plugins/i18n";
-import { en } from 'vuejs-datepicker/dist/locale'
+import { messages, numberFormats, i18n } from "../plugins/i18n";
 
 // Set en part of messages.
 messages.en = {
@@ -186,12 +185,6 @@ messages.en = {
         checkbox: {
             description_true: '{label}: True',
             description_false: '{label}: False',
-        },
-
-        date: {
-            picker: en,
-            format: 'd MMMM yyyy',
-            mondayFirst: 'false'
         }
     },
     network_error: {
@@ -257,16 +250,6 @@ messages.en = {
             success: 'Successfully saved the new password! You will be automatically logged in...',
             token_expired: 'Password reset token expired. Please request a new password reset token.'
         }
-    }
-};
-
-// Set en part of dateTimeFormats.
-dateTimeFormats.en = {
-    full: {
-        year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', seconds: '2-digit', hour12: false
-    },
-    date: {
-        year: '2-digit', month: '2-digit', day: '2-digit'
     }
 };
 

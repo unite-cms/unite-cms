@@ -1,5 +1,5 @@
 
-fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home", groups: [{name: "Foo"}]) {
+fragment intro on Query @dashboardAdminView(name: "Intro", icon: "home") {
     unite {
         _version
     }
@@ -109,6 +109,10 @@ fragment settings on DemoSettings @settingsAdminView {
 }
 
 fragment medias on Media @tableAdminView {
+    ago : date @dateAdminField(format: "ago")
+    age : date @dateAdminField(format: "age")
+    date
+
     filename : file {
         filename
         url

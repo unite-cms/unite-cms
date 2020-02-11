@@ -1,0 +1,10 @@
+
+@media (max-width: $breakpoint-medium) {
+  .uk-padding-small\@s {
+    padding: $padding-small-padding;
+  }
+
+  .uk-negative-padding-small\@s {
+    margin: 0 $padding-small-padding * -1 $padding-small-padding * -1;
+  }
+}

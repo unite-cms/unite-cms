@@ -24,6 +24,12 @@ type Media implements UniteContent {
     date: Date @dateField(default: "now")
     dateTime: DateTime @dateTimeField(default: "now")
 
+    date1: Date @dateField
+    dateTime1: DateTime @dateTimeField
+
+    date2: [Date!] @dateField
+    dateTime2: [DateTime!] @dateTimeField
+
     file: UniteMediaFile @mediaFileField ( s3:
         {
             key: "%(S3_KEY)%",

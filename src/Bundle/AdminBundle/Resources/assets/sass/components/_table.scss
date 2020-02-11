@@ -1,6 +1,5 @@
 
 .uk-table tbody {
-
   &.uk-table-striped > tr:nth-of-type(odd) {
     background: $navbar-background;
     @if(mixin-exists(hook-table-striped)) {@include hook-table-striped();}
