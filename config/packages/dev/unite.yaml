@@ -5,3 +5,4 @@ unite_cms_core:
             parameters:
                 S3_KEY: '%env(resolve:S3_KEY)%'
                 S3_SECRET: '%env(resolve:S3_SECRET)%'
+                GOOGLE_MAPS_KEY: '%env(resolve:GOOGLE_MAPS_KEY)%'

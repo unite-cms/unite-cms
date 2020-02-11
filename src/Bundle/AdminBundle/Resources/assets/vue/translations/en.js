@@ -166,9 +166,11 @@ messages.en = {
         },
         geoLocation: {
             placeholder: {
+                house_number: 'Haus',
                 stairs_number: 'Stairs',
                 door_number: 'Door'
             },
+            wrong_type: 'You are not allowed to select addresses of this type. If you want to enter a full address, please also include the street number.',
             modal: {
                 headline: '{display_name}'
             }

@@ -47,7 +47,7 @@ fragment articlesMainFields on DemoArticle {
         name
     }
 
-    geo {
+    geo @geoLocationAdminField(google: { apiKey: "%(GOOGLE_MAPS_KEY)%", countries: ["AT"], type: STREET_ADDRESS }) {
         display_name
         stairs_number
         door_number

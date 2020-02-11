@@ -165,9 +165,11 @@ messages.de = {
         },
         geoLocation: {
             placeholder: {
+                house_number: 'Haus',
                 stairs_number: 'Stiege',
                 door_number: 'Tür'
             },
+            wrong_type: 'Diese Adresse kann nicht ausgewählt werden. Wenn du eine volle Adresse eingeben willst, gib bitte auch die Hausnummer an.',
             modal: {
                 headline: '{display_name}'
             }

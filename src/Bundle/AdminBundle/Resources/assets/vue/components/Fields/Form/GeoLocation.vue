@@ -6,11 +6,10 @@
 
           <google-places v-if="provider === 'google'" class="uk-search uk-search-default" v-bind="googleOptions()" @placechanged="setGoogleValue(arguments, multiProps.rowKey)">
             <span class="uk-search-icon-flip" uk-search-icon></span>
-            <input class="uk-search-input" type="search" placeholder="" :value="geoValues[multiProps.rowKey || 0]" />
+            <input class="uk-search-input" type="search" placeholder="" :value="geoValues[multiProps.rowKey || 0]" @keypress="preventEnter" />
           </google-places>
 
           <places v-else class="uk-input" :options="algoliaOptions()" :required="field.required" :id="domID" :value="geoValues[multiProps.rowKey || 0]" @change="setAlgoliaValue(arguments, multiProps.rowKey)" />
-
         </div>
 
         <template v-if="shouldEditStairsNumber(values[multiProps.rowKey || 0])">
@@ -27,7 +26,12 @@
           </div>
         </template>
 
+        <div class="uk-margin-small-left" v-if="geoValues[multiProps.rowKey || 0]">
+          <a class="uk-text-danger" @click.prevent="clear(multiProps.rowKey)"><icon name="x" /></a>
+        </div>
+
       </div>
+      <div class="uk-alert uk-alert-warning" v-if="provider === 'google' && google_maps_wrong_type">{{ $t('field.geoLocation.wrong_type') }}</div>
     </multi-field>
   </form-row>
 </template>
@@ -37,13 +41,13 @@
   import MultiField from './_multiField';
   import GooglePlaces from 'vue-google-places/src/VueGooglePlaces'
   import Places from 'vue-places/src/Places';
+  import Icon from "../../Icon";
   import {removeIntroSpecType} from "../../../plugins/unite";
 
   const GoogleTypeMap = {
       locality: 'CITY',
       sublocality: 'SUBLOCALITY',
       street_address: 'STREET_ADDRESS',
-      route: 'STREET_ADDRESS',
   };
   const AlgoliaTypeMap = {
       city: 'CITY',
@@ -82,7 +86,12 @@
 
       // Vue properties for this component.
       extends: _abstract,
-      components: { MultiField, FormRow, Places, GooglePlaces },
+      components: { MultiField, FormRow, Places, GooglePlaces, Icon },
+      data() {
+          return {
+            google_maps_wrong_type: false
+          }
+      },
       computed: {
           geoValues() {
               return this.values.map(val => val.display_name);
@@ -128,7 +137,7 @@
                   config = Object.assign(config, {
                       apiKey: this.field.config.google.apiKey,
                       country: this.field.config.google.countries ? this.field.config.google.countries.join(':') : null,
-                      types: this.field.config.google.type ? `(${ getProviderType(this.field.config.google.type, AlgoliaTypeMap) })` : null,
+                      types: this.field.config.google.type ? getProviderType(this.field.config.google.type, AlgoliaTypeMap) : null,
                   });
               }
 
@@ -139,7 +148,6 @@
               this.val.push({
                   provided_by: null,
                   id: null,
-                  category: null,
                   display_name: null,
                   latitude: null,
                   longitude: null,
@@ -164,6 +172,12 @@
 
           shouldEditDoorNumber(value) {
               return value && value.type === 'STREET_ADDRESS';
+          },
+
+          preventEnter(event) {
+              if(event.key === 'Enter') {
+                event.preventDefault();
+              }
           },
 
           setAlgoliaValue(args, key) {
@@ -204,6 +218,8 @@
 
           setGoogleValue(args, key) {
 
+              this.google_maps_wrong_type = false;
+
               let value = this.values[key || 0] || {};
 
               let type = GoogleTypeMap[args[0].place.types[0]] || null;
@@ -229,17 +245,45 @@
                   door_number: type === 'STREET_ADDRESS' ? value.door_number : null,
               };
 
+              if(!type) {
+                this.google_maps_wrong_type = true;
+              }
+
               this.setValue([normalizedAddress], key);
           },
 
+          clear(key) {
+              this.setValue([{
+                provided_by: null,
+                id: null,
+                display_name: null,
+                latitude: null,
+                longitude: null,
+                bound_south: null,
+                bound_west: null,
+                bound_north: null,
+                bound_east: null,
+                street_number: null,
+                street_name: null,
+                postal_code: null,
+                locality: null,
+                sub_locality: null,
+                country_code: null,
+                stairs_number: null,
+                door_number: null,
+              }], key);
+          },
+
           setStairsNumber(args, key) {
-              let value = this.values[key || 0] || {};
-              value.stairs_number = args[0].target.value;
+              let value = Object.assign({}, this.values[key || 0], {
+                stairs_number: args[0].target.value,
+              });
               this.setValue([value], key);
           },
           setDoorNumber(args, key) {
-              let value = this.values[key || 0] || {};
-              value.door_number = args[0].target.value;
+              let value = Object.assign({}, this.values[key || 0], {
+                door_number: args[0].target.value,
+              });
               this.setValue([value], key);
           },
       }
