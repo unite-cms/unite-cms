@@ -7,6 +7,7 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\Security\Core\Security;
+use UniteCMS\CoreBundle\Content\ReferenceFieldData;
 use UniteCMS\CoreBundle\Query\ContentCriteria;
 use UniteCMS\CoreBundle\Content\ContentInterface;
 use UniteCMS\CoreBundle\Content\ContentManagerInterface;
@@ -18,7 +19,7 @@ use UniteCMS\DoctrineORMBundle\Entity\Revision;
 
 class ContentManager implements ContentManagerInterface
 {
-    const ENTITY = Content::class;
+    const DEFAULT_ENTITY = Content::class;
 
     /**
      * @var ManagerRegistry
@@ -51,6 +52,13 @@ class ContentManager implements ContentManagerInterface
         $this->security = $security;
     }
 
+    protected function entityForType(string $type = null) {
+        if($type === 'DemoArticle') {
+            return 'App\Entity\Article';
+        }
+        return static::DEFAULT_ENTITY;
+    }
+
     /**
      * @param \UniteCMS\CoreBundle\Domain\Domain $domain
      *
@@ -65,8 +73,8 @@ class ContentManager implements ContentManagerInterface
      *
      * @return \UniteCMS\DoctrineORMBundle\Repository\ContentRepository
      */
-    protected function repository(Domain $domain) : ObjectRepository {
-        return $this->em($domain)->getRepository(static::ENTITY);
+    protected function repository(Domain $domain, string $type = null) : ObjectRepository {
+        return $this->em($domain)->getRepository($this->entityForType($type));
     }
 
     /**
@@ -81,7 +89,7 @@ class ContentManager implements ContentManagerInterface
      */
     public function find(Domain $domain, string $type, ContentCriteria $criteria, bool $includeDeleted = false, ?callable $resultFilter = null): ContentResultInterface {
         return new ContentResult(
-            $this->repository($domain),
+            $this->repository($domain, $type),
             $type,
             $criteria,
             $includeDeleted,
@@ -93,14 +101,14 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function get(Domain $domain, string $type, string $id, bool $includeDeleted = false): ?ContentInterface {
-        return $this->repository($domain)->typedFind($type, $id, $includeDeleted);
+        return $this->repository($domain, $type)->typedFind($type, $id, $includeDeleted);
     }
 
     /**
      * {@inheritDoc}
      */
     public function create(Domain $domain, string $type): ContentInterface {
-        $class = static::ENTITY;
+        $class = $this->entityForType($type);
         $content = new $class($type);
         $this->contentToPersist[] = $content;
         return $content;

@@ -11,7 +11,7 @@ use UniteCMS\DoctrineORMBundle\Entity\User;
 
 class UserManager extends ContentManager implements UserManagerInterface
 {
-    const ENTITY = User::class;
+    const DEFAULT_ENTITY = User::class;
 
     /**
      * {@inheritDoc}

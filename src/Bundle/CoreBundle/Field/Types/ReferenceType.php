@@ -148,7 +148,8 @@ class ReferenceType extends AbstractFieldType
      */
     public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null) : FieldData {
         $fieldData = parent::normalizeInputData($content, $field, $inputData);
-        return new ReferenceFieldData($fieldData->getData());
+        $fieldData = new ReferenceFieldData($fieldData->getData());
+        return new FieldData($fieldData->resolveReference($this->domainManager->current(), $field->getReturnType(), true));
     }
 
     /**
