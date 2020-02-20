@@ -127,6 +127,8 @@ type DemoArticle implements UniteContent & UniteTranslatableContent {
     """ Article content"""
     content: String @textField(escape: false)
 
+    foo: ArticleLocales @choiceField
+
     """ Article content"""
     extra_content: [String!] @textField(escape: false)
 

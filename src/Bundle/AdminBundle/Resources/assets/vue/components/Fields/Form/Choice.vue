@@ -1,6 +1,7 @@
 <template>
   <form-row :domID="domID" :field="field" :alerts="violations">
       <select :required="field.required" v-if="!field.list_of" class="uk-select" :id="domID" v-model="val">
+          <option v-if="!field.required" :value="null"> </option>
         <option v-for="option in options" :value="option.value">{{ option.label }}</option>
       </select>
       <template v-else>
