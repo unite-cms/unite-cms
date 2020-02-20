@@ -30,8 +30,10 @@ type Media implements UniteContent {
     date2: [Date!] @dateField
     dateTime2: [DateTime!] @dateTimeField
 
-    file: UniteMediaFile @mediaFileField ( s3:
-        {
+    file: UniteMediaFile @mediaFileField (
+        allowedMimetypes: ["image/*", "application/pdf"],
+        maxFilesize: 1,
+        s3: {
             key: "%(S3_KEY)%",
             secret: "%(S3_SECRET)%",
             region: "",
@@ -49,7 +51,7 @@ type Media implements UniteContent {
         secret: "%(S3_SECRET)%",
         region: "",
         version: "latest",
-        endpoint: "http://127.0.0.1:9001"
+        endpoint: "http://127.0.0.1:9000"
         bucket: "test",
         path: "/uploads",
         use_path_style_endpoint: true,

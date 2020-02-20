@@ -1,6 +1,16 @@
 <template>
   <form-row :domID="domID" :field="field">
-    <file-pond name="file" ref="pond" :allow-multiple="field.list_of" :id="domID" :server="filePondServer" :files="values" @addfile="onFileAdded" @processfiles="onFilesProcessed" @removefile="onFileRemoved" />
+    <file-pond name="file"
+               ref="pond"
+               :allow-multiple="field.list_of"
+               :accepted-file-types="field.config.allowedMimetypes || null"
+               :max-file-size="field.config.maxFilesize ? field.config.maxFilesize * 1000 * 1000 : null"
+               :id="domID"
+               :server="filePondServer"
+               :files="values"
+               @addfile="onFileAdded"
+               @processfiles="onFilesProcessed"
+               @removefile="onFileRemoved" />
   </form-row>
 </template>
 <script>
@@ -14,6 +24,7 @@
   import vueFilePond, { setOptions } from 'vue-filepond';
   import { FileOrigin } from 'filepond';
   import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+  import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
   import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
   import FilePondPluginFilePoster from 'filepond-plugin-file-poster';
   import FilePondPluginGetFile from 'filepond-plugin-get-file';
@@ -23,7 +34,7 @@
   import 'filepond-plugin-file-poster/dist/filepond-plugin-file-poster.css';
   import 'filepond-plugin-get-file/dist/filepond-plugin-get-file.css';
 
-  const FilePond = vueFilePond( FilePondPluginFileValidateType, FilePondPluginImagePreview, FilePondPluginFilePoster, FilePondPluginGetFile );
+  const FilePond = vueFilePond( FilePondPluginFileValidateType, FilePondPluginFileValidateSize, FilePondPluginImagePreview, FilePondPluginFilePoster, FilePondPluginGetFile );
   setOptions({
       allowDownloadByUrl: true,
       allowReorder: true,

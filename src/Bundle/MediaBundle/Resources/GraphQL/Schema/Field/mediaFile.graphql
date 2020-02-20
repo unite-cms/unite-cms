@@ -1,6 +1,8 @@
 
 directive @mediaFileField(
     s3: MediaFileFieldS3Config
+    allowedMimetypes: [String]
+    maxFilesize: Int
 ) on FIELD_DEFINITION
 
 input MediaFileFieldS3Config {

@@ -2,6 +2,7 @@
 
 namespace UniteCMS\MediaBundle\Field\Types;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Exception;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\Type;
@@ -9,6 +10,8 @@ use League\Flysystem\FileNotFoundException;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Symfony\Component\Validator\Constraints\EqualTo;
+use Symfony\Component\Validator\Constraints\LessThanOrEqual;
+use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use UniteCMS\CoreBundle\Content\ContentInterface;
@@ -72,8 +75,30 @@ class MediaFileType extends AbstractFieldType
             if(!$row->empty()) {
                 $validator->validate($row->resolveData('type'), new EqualTo($field->getType()), [$context->getGroup()]);
                 $validator->validate($row->resolveData('field'), new EqualTo($field->getId()), [$context->getGroup()]);
+
+                if($maxSize = $field->getSettings()->get('maxFilesize')) {
+                    $validator->validate($row->resolveData('filesize'), new LessThanOrEqual($maxSize * 1000 * 1000), [$context->getGroup()]);
+                }
+
+                if($allowedMimtypes = $field->getSettings()->get('allowedMimetypes')) {
+                    $pattern = '/' . str_replace('/', '\/', join('|', $allowedMimtypes)) . '/i';
+
+                    $validator->validate($row->resolveData('mimetype'), new Regex([
+                        'pattern' => $pattern,
+                    ]), [$context->getGroup()]);
+                }
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPublicSettings(ContentTypeField $field) : ?ArrayCollection {
+        $settings = parent::getPublicSettings($field) ?? new ArrayCollection();
+        $settings->set('maxFilesize', $field->getSettings()->get('maxFilesize'));
+        $settings->set('allowedMimetypes', $field->getSettings()->get('allowedMimetypes'));
+        return $settings;
     }
 
     /**
