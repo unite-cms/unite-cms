@@ -19,24 +19,34 @@
 
     import moment from 'moment';
 
+    const normalizeDateTime = function(value, field){
+
+      if(!value) {
+        value = field.config.default;
+      }
+
+      if(!value) {
+        return null;
+      }
+
+      let format = 'YYYY-MM-DD';
+      if(field.type === 'dateTime') {
+        format += 'THH:mm';
+      }
+
+      if(Array.isArray(value)) {
+        return value.map(d => moment(d, format));
+      } else {
+        return moment(value, format);
+      }
+    };
+
     export default {
 
         // Static query methods for unite system.
         queryData(field, unite, depth) { return field.id },
         normalizeQueryData(queryData, field, unite) {
-          if(!queryData) { return null; }
-
-          let format = 'YYYY-MM-DD';
-          if(field.type === 'dateTime') {
-            format += 'THH:mm';
-          }
-
-          if(Array.isArray(queryData)) {
-            return queryData.map(d => moment(d, format));
-          } else {
-            return moment(queryData, format);
-          }
-
+          return normalizeDateTime(queryData, field);
         },
         normalizeMutationData(formData, field, unite) {
           if(!formData) { return null; }
@@ -50,6 +60,15 @@
             return formData.map(d => d.format(format));
           } else {
             return formData.format(format);
+          }
+        },
+
+        data() {
+          let val = this.value;
+          val = val || (this.field.list_of ? [] : null);
+
+          return {
+            val
           }
         },
 
