@@ -30,7 +30,7 @@
       }
 
       let format = 'YYYY-MM-DD';
-      if(field.type === 'dateTime') {
+      if(field.fieldType === 'dateTime') {
         format += 'THH:mm';
       }
 
@@ -52,7 +52,7 @@
           if(!formData) { return null; }
 
           let format = 'YYYY-MM-DD';
-          if(field.type === 'dateTime') {
+          if(field.fieldType === 'dateTime') {
             format += 'THH:mm';
           }
 
