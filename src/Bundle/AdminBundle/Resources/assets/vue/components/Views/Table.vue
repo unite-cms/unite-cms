@@ -138,8 +138,10 @@
             },
         },
         watch: {
-            '$route'(route){
-                this.queryFilter = {};
+            '$route'(route, oldRoute){
+                if(route.path !== oldRoute.path) {
+                    this.queryFilter = {};
+                }
                 this.reloadItems();
             }
         },
