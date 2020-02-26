@@ -120,13 +120,21 @@
    * @param fieldName
    * @param file
    * @param progress
+   * @param field
    * @returns {Promise<unknown>}
    */
-  const uploadFile = function(request, token, fieldName, file, progress){
+  const uploadFile = function(request, token, fieldName, file, progress, field){
       return new Promise((resolve, reject) => {
 
           const payload = jwtDecode(token);
+
           request.open('PUT', payload.u);
+
+          if(field.config && field.config.requestHeaders) {
+            Object.keys(field.config.requestHeaders).forEach(key => {
+              request.setRequestHeader(key, field.config.requestHeaders[key]);
+            });
+          }
 
           request.upload.onprogress = (e) => {
                 progress(e.lengthComputable, e.loaded, e.total);
@@ -209,7 +217,7 @@
 
                       // Then upload the file directly to the endpoint
                       }).then((data) => {
-                          uploadFile(request, data.data.uniteMediaPreSignedUrl, fieldName, file, progress).then((payload) => {
+                          uploadFile(request, data.data.uniteMediaPreSignedUrl, fieldName, file, progress, this.field).then((payload) => {
 
                               // Save payload for later use
                               this.fileInformation[payload.i] = {

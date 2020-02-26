@@ -15,6 +15,7 @@ input MediaFileFieldS3Config {
     use_path_style_endpoint: Boolean
     version: String
     region: String
+    ACL: String
 }
 
 type UniteMediaFile {

@@ -98,6 +98,15 @@ class MediaFileType extends AbstractFieldType
         $settings = parent::getPublicSettings($field) ?? new ArrayCollection();
         $settings->set('maxFilesize', $field->getSettings()->get('maxFilesize'));
         $settings->set('allowedMimetypes', $field->getSettings()->get('allowedMimetypes'));
+
+        if($field->getSettings()->get('s3')) {
+            if(!empty($field->getSettings()->get('s3')['ACL'])) {
+                $settings->set('requestHeaders', [
+                    'x-amz-acl' => $field->getSettings()->get('s3')['ACL'],
+                ]);
+            }
+        }
+
         return $settings;
     }
 

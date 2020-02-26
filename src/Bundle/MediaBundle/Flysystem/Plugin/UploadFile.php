@@ -58,6 +58,10 @@ class UploadFile implements PluginInterface
                 'Key' => $adapter->applyPathPrefix($config['tmp_path'] . '/' . $uploadToken->getId() . '/' . $filename),
             ];
 
+            if(!empty($config['ACL'])) {
+                $options['ACL'] = $config['ACL'];
+            }
+
             $S3Client = $adapter->getClient();
             $command = $S3Client->getCommand('PutObject', $options);
             $request = $S3Client->createPresignedRequest($command, '+5Minutes');
