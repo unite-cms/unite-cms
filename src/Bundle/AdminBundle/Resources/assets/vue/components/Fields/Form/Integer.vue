@@ -5,7 +5,7 @@
       // Static query methods for unite system.
       queryData(field, unite, depth) { return field.id },
       normalizeQueryData(queryData, field, unite) { return queryData; },
-      normalizeMutationData(formData, field, unite) { return formData; },
+      normalizeMutationData(formData, field, unite) { return parseInt(formData); },
 
       // Vue properties for this component.
       extends: Text,
