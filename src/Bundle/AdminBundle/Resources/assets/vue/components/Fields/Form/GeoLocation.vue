@@ -48,6 +48,8 @@
       locality: 'CITY',
       sublocality: 'SUBLOCALITY',
       street_address: 'STREET_ADDRESS',
+      premise: 'STREET_ADDRESS',
+      subpremise: 'STREET_ADDRESS',
   };
   const AlgoliaTypeMap = {
       city: 'CITY',
