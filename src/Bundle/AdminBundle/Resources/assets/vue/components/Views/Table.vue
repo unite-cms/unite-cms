@@ -2,7 +2,7 @@
     <section class="uk-section uk-position-relative">
         <div class="uk-container uk-container-expand">
 
-            <component :is="headerComponent" :can-create="!embedded && view.actions.create && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="f => queryFilter = f" />
+            <component :is="headerComponent" :can-create="!embedded && view.actions.create && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="changeQueryFilter" />
             <component :is="inlineCreateComponent" v-if="embedded && view.actions.create && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
 
             <component :is="tableDataComponent" v-if="items.result.length > 0" :fields="view.listFields()" :view="view" :rows="items" :highlightRow="highlightRow" :offset="offset" :select="select" :embedded="embedded" :pagination="pagination" :selection="selection" @updateOffset="updateOffset" @selectRow="selectRow" />
@@ -159,13 +159,13 @@
                 this.$emit('toggleDeleted');
             },
 
+            changeQueryFilter(filter) {
+                this.queryFilter = filter;
+                this.updateOffset(0);
+            },
+
             updateOffset(page) {
-
-                if (this.embedded) {
-                    this.offset = page.offset;
-                    this.reloadItems();
-
-                } else {
+                if(!this.embedded) {
                     let query = Object.assign({}, this.$route.query);
                     query.offset = page.offset;
 
@@ -174,7 +174,6 @@
                         query: query,
                     });
                 }
-
                 this.$emit('onOffsetChanged', page.offset);
             },
 

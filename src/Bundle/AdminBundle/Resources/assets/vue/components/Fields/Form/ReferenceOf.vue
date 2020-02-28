@@ -16,6 +16,8 @@
                    :order-by="referencedView.orderBy"
                    :initial-create-data="initialCreateData"
                    @toggleDeleted="showDeleted = !showDeleted"
+                   :offset="offset"
+                   @onOffsetChanged="v => offset = v"
                    @onCreate="onCreate" />
       </modal>
     </template>
@@ -44,6 +46,7 @@
       components: { Icon, FormRow, MultiField, Modal },
       data() {
           return {
+              offset: 0,
               modalIsOpen: false,
               showDeleted: false,
               highlightRow: null,

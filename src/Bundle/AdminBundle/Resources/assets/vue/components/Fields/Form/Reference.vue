@@ -17,8 +17,10 @@
                    :deleted="showDeleted"
                    :embedded="true"
                    :filter="filter"
+                   :offset="offset"
                    :select="field.list_of ? 'MULTIPLE' : 'SINGLE'"
                    @toggleDeleted="showDeleted = !showDeleted"
+                   @onOffsetChanged="v => offset = v"
                    @select="onSelect"
                    @onCreate="onCreate" />
       </modal>
@@ -58,6 +60,7 @@
       data(){
           return {
               filter: null,
+              offset: 0,
               referencedContent: [],
               selectModalOpen: false,
               showDeleted: false,

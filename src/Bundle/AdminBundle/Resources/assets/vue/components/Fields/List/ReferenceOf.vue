@@ -16,6 +16,8 @@
                  :filter="filter"
                  :order-by="referencedView.orderBy"
                  :initial-create-data="initialCreateData"
+                 :offset="offset"
+                 @onOffsetChanged="v => offset = v"
                  @onCreate="onCreate"
                  @toggleDeleted="showDeleted = !showDeleted" />
     </modal>
@@ -56,6 +58,7 @@
         extends: _abstract,
         data() {
             return {
+                offset: 0,
                 highlightRow: null,
                 modalIsOpen: false,
                 showDeleted: false,
