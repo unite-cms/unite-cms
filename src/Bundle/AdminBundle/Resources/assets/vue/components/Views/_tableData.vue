@@ -24,7 +24,7 @@
             <tfoot v-if="pagination && rows.result.length < rows.total">
             <tr>
                 <td :colspan="view.listFields().length + 1">
-                    <view-pagination :count="rows.result.length" :total="rows.total" :offset="offset" :limit="view.limit" @change="page => $emit('updateOffset', page)" />
+                    <view-pagination :count="rows.result.length" :total="rows.total" :offset="offset" :limit="view.limit" :mini-pager="view.miniPager || false" @change="page => $emit('updateOffset', page)" />
                 </td>
             </tr>
             </tfoot>

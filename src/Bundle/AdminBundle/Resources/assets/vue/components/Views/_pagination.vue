@@ -1,7 +1,8 @@
 <template>
-  <ul class="uk-pagination uk-flex-center">
+  <ul v-else class="uk-pagination uk-flex-center">
     <li v-if="current > 0" @click.prevent="setPage(current - 1)"><a href="#"><span uk-pagination-previous></span></a></li>
-    <li @click.prevent="setPage(page)" :class="{ 'uk-active': current === page }" v-for="page in pages"><a href="#">{{ page + 1 }}</a></li>
+    <li v-if="miniPager" class="uk-active">{{ current + 1 }}</li>
+    <li v-else @click.prevent="setPage(page)" :class="{ 'uk-active': current === page }" v-for="page in pages"><a href="#">{{ page + 1 }}</a></li>
     <li v-if="pages.length > current + 1" @click.prevent="setPage(current + 1)"><a href="#"><span uk-pagination-next></span></a></li>
   </ul>
 </template>
@@ -12,6 +13,10 @@
           count: Number,
           offset: Number,
           limit: Number,
+          miniPager: {
+            type: Boolean,
+            default: false
+          }
       },
       computed: {
           pages() {

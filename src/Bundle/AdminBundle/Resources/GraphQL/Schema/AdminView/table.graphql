@@ -5,6 +5,7 @@ directive @tableAdminView(
     filter: UniteFilterInput
     orderBy: [UniteOrderByInput!]
     limit: Int
+    miniPager: Boolean
     if: Expression
     groups: [UniteAdminGroupInput]
     icon: String
@@ -26,6 +27,7 @@ type TableAdminView implements UniteAdminView{
     orderBy: [UniteOrderBy!]
     groups: [UniteAdminGroup!]
     actions: TableAdminViewActions!
+    miniPager: Boolean
 }
 
 type TableAdminViewActions {

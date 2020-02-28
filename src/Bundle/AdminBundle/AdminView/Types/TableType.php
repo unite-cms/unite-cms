@@ -19,6 +19,7 @@ class TableType extends AbstractAdminViewType
         $config = new ArrayCollection();
         $config->set('limit', empty($directive['settings']['limit']) ? 20 : $directive['settings']['limit']);
         $config->set('orderBy', empty($directive['settings']['orderBy']) ? [['field' => 'created', 'order' => 'DESC']] : $directive['settings']['orderBy']);
+        $config->set('miniPager', empty($directive['settings']['miniPager']) ? false : $directive['settings']['miniPager']);
         $config->set('actions', [
             'create' => true,
             'toggle_delete' => true,

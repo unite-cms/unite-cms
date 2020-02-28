@@ -54,6 +54,7 @@
                 permanent_delete
                 user_invite
               }
+              miniPager
           }`
         },
         apollo: {
