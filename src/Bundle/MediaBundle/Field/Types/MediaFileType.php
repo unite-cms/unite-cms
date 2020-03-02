@@ -72,7 +72,7 @@ class MediaFileType extends AbstractFieldType
         $fieldDataRows = $fieldData instanceof FieldDataList ? $fieldData->rows() : [$fieldData];
 
         foreach($fieldDataRows as $row) {
-            if(!$row->empty()) {
+            if($row && !$row->empty()) {
                 $validator->validate($row->resolveData('type'), new EqualTo($field->getType()), [$context->getGroup()]);
                 $validator->validate($row->resolveData('field'), new EqualTo($field->getId()), [$context->getGroup()]);
 
