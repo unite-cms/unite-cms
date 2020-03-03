@@ -105,8 +105,11 @@ class ReferenceType extends AbstractFieldType
 
             $resolvedContent = [];
             foreach($rowIds as $rowId) {
-                $resolvedContent[] = array_key_exists($rowId, $resultById) ? $resultById[$rowId] : null;
+                if(array_key_exists($rowId, $resultById)) {
+                    $resolvedContent[] = $resultById[$rowId];
+                }
             }
+
             return $resolvedContent;
         }
 
