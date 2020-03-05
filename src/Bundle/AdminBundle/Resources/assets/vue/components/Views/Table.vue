@@ -2,7 +2,7 @@
     <section class="uk-section uk-position-relative">
         <div class="uk-container uk-container-expand">
 
-            <component :is="headerComponent" :can-create="!embedded && view.actions.create && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="changeQueryFilter" />
+            <component :is="headerComponent" :show-total="view.showTotal" :total="items.total" :can-create="!embedded && view.actions.create && is_granted('create')" :view="view" :title="title" :query-filter="queryFilter" :deleted="deleted" @toggleDeleted="toggleDeleted" @queryFilterChanged="changeQueryFilter" />
             <component :is="inlineCreateComponent" v-if="embedded && view.actions.create && is_granted('create') && hasInlineCreateForm && !deleted" :view="view" @onCreate="onInstantCreate" :initial-data="initialCreateData" />
 
             <component :is="tableDataComponent" v-if="items.result.length > 0" :fields="view.listFields()" :view="view" :rows="items" :highlightRow="highlightRow" :offset="offset" :select="select" :embedded="embedded" :pagination="pagination" :selection="selection" @updateOffset="updateOffset" @selectRow="selectRow" />
@@ -55,6 +55,7 @@
                 user_invite
               }
               miniPager
+              showTotal
           }`
         },
         apollo: {

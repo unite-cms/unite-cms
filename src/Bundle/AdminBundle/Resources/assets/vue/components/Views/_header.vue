@@ -2,6 +2,7 @@
     <div class="uk-flex uk-flex-middle uk-margin-bottom uk-flex-wrap">
         <div class="uk-flex-0 uk-flex uk-flex-middle">
             <h2 class="uk-margin-remove">{{ title }}</h2>
+            <span v-if="showTotal" class="uk-label uk-label-secondary uk-margin-small-left">{{ total }}</span>
         </div>
         <div class="uk-flex-0 uk-flex uk-flex-middle uk-margin-small-left uk-margin-right" v-if="showDeleteToggle && view.actions.toggle_delete">
             <ul class="uk-subnav uk-subnav-divider uk-margin-remove" style="min-width: 180px">
@@ -45,6 +46,8 @@
             },
             queryFilter: Object,
             view: Object,
+            showTotal: Boolean,
+            total: Number,
         },
         methods: {
             to(action) {
