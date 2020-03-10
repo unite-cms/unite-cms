@@ -212,3 +212,5 @@ type UniteMutation {
     generateJWT: String! @hide(if: "user.isAnonymous()")
     generateLongLivingJWT: String! @hide(if: "not user.isFullyAuthenticated()")
 }
+
+directive @named(name: String) on FIELD

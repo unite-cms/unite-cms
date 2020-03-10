@@ -91,6 +91,7 @@
                         filter: this.activeFilter,
                         orderBy: this.orderBy,
                         showDeleted: this.deleted,
+                        queryName: this.view.id,
                     }
                 },
             }
@@ -118,8 +119,8 @@
             query() {
                 return gql`
                     ${ this.view.fragment }
-                    query($offset: Int!, $limit: Int!, $filter: UniteFilterInput, $orderBy: [UniteOrderByInput!], $showDeleted: Boolean!) {
-                      find${ this.view.type }(offset:$offset, limit:$limit, filter: $filter, orderBy: $orderBy, includeDeleted: $showDeleted) {
+                    query($offset: Int!, $limit: Int!, $filter: UniteFilterInput, $orderBy: [UniteOrderByInput!], $showDeleted: Boolean!, $queryName: String) {
+                      find${ this.view.type }(offset:$offset, limit:$limit, filter: $filter, orderBy: $orderBy, includeDeleted: $showDeleted) @named(name: $queryName) {
                           total
                           result {
                               _meta {

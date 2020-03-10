@@ -5,7 +5,6 @@ namespace UniteCMS\CoreBundle\GraphQL\Schema\Modifier;
 
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Language\AST\NodeKind;
-use GraphQL\Language\AST\ObjectTypeDefinitionNode;
 use GraphQL\Language\Visitor;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\InterfaceType;
@@ -18,6 +17,8 @@ use UniteCMS\CoreBundle\GraphQL\ExecutionContext;
 
 class RemoveUnusedTypesModifier implements SchemaModifierInterface
 {
+    const CLIENT_SAFE_DIRECTIVES = ['named'];
+
     /**
      * @param array $types
      * @param array $interfaces
@@ -122,6 +123,12 @@ class RemoveUnusedTypesModifier implements SchemaModifierInterface
                     NodeKind::INPUT_OBJECT_TYPE_DEFINITION
                 ])) {
                     if(!in_array($node->name->value, $usedTypes)) {
+
+                        // Allow client safe directives
+                        if($node->kind === NodeKind::DIRECTIVE_DEFINITION && in_array($node->name->value, static::CLIENT_SAFE_DIRECTIVES)) {
+                            return null;
+                        }
+
                         return Visitor::removeNode();
                     }
                 }
