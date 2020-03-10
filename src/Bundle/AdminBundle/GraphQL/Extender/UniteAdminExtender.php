@@ -26,6 +26,10 @@ class UniteAdminExtender implements SchemaExtenderInterface
             'UNITE_ADMIN_ACCESS_SCHEMA_FILES' => $accessSchemaFiles ?? $domainManager->getIsAdminExpression(),
             'UNITE_ADMIN_ACCESS_QUERY_EXPLORER' => $accessQueryExplorer ?? $domainManager->getIsAdminExpression(),
         ];
+
+        foreach($this->permissions as $key => $expression) {
+            $this->domainManager->setGlobalParameter($key, $expression);
+        }
     }
 
     /**
@@ -33,10 +37,6 @@ class UniteAdminExtender implements SchemaExtenderInterface
      */
     public function extend(Schema $schema, ExecutionContext $context): string
     {
-        foreach($this->permissions as $key => $expression) {
-            $this->domainManager->setGlobalParameter($key, $expression);
-        }
-
         return file_get_contents(__DIR__ . '/../../Resources/GraphQL/Schema/unite-admin-extender.graphql');
     }
 }

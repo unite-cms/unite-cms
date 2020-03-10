@@ -62,12 +62,12 @@ class SchemaAwareTestCase extends KernelTestCase
 
         if($catch) {
             try {
-                return $schemaManager->buildCacheableSchema();
+                return $schemaManager->buildCacheableSchema(true);
             } catch (Exception $e) {
                 return null;
             }
         } else {
-            return $schemaManager->buildCacheableSchema();
+            return $schemaManager->buildCacheableSchema(true);
         }
     }
 
@@ -118,7 +118,7 @@ class SchemaAwareTestCase extends KernelTestCase
         $result = null;
 
         try {
-            $result = static::$container->get(SchemaManager::class)->execute($query, $args);
+            $result = static::$container->get(SchemaManager::class)->execute($query, $args, null, true);
         } catch (SyntaxError $e) {
             $this->fail(sprintf('Could not build GraphQL schema: %s', $e->getMessage()));
             return [];

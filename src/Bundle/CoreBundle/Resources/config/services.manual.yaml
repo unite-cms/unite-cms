@@ -2,6 +2,15 @@
 # Create services based on arguments
 services:
 
+    unite.cms_core.graphql.schema_cache.adapter:
+        class: Symfony\Component\Cache\Adapter\PhpFilesAdapter
+        factory: ['Symfony\Component\Cache\Adapter\PhpFilesAdapter', 'createSystemCache']
+        arguments:
+            - 'unite'
+            - 0
+            - 0
+            - '%kernel.cache_dir%'
+
     unite.cms_core.graphql.provider.unite_cms:
         parent: UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaFileProvider
         arguments: ['%kernel.project_dir%/vendor/unite-cms/core-bundle/Resources/GraphQL/Schema/unite-cms.graphql']

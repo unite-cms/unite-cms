@@ -77,7 +77,7 @@ class ContentTypeManager
                 $this->applyGenericContentConstraints($unionType);
 
                 foreach($field->getUnionTypes() as $type) {
-                    $unionType->registerField(new ContentTypeField($type->name, $type->description ?? $type->name, $field->getType(), [], false, false, false, null, null, $type->name));
+                    $unionType->registerField(new ContentTypeField($type['name'], $type['description'] ?? $type['name'], $field->getType(), [], false, false, false, null, null, $type['name']));
                 }
 
                 $this->unionContentTypes[$unionType->getId()] = $unionType;
@@ -213,6 +213,59 @@ class ContentTypeManager
             if($constraint->supportsContentType($contentType)) {
                 $contentType->addConstraint($constraint);
             }
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray() : array
+    {
+        $data = [
+            'content' => [],
+            'single' => [],
+            'embedded' => [],
+            'user' => [],
+        ];
+
+        foreach($this->getContentTypes() as $key => $type) {
+            $data['content'][] = $type->toArray();
+        }
+
+        foreach($this->getSingleContentTypes() as $key => $type) {
+            $data['single'][] = $type->toArray();
+        }
+
+        foreach($this->getEmbeddedContentTypes() as $key => $type) {
+            $data['embedded'][] = $type->toArray();
+        }
+
+        foreach($this->getUserTypes() as $key => $type) {
+            $data['user'][] = $type->toArray();
+        }
+
+        return $data;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function fromArray(array $types = [])
+    {
+        foreach($types['content'] as $key => $data) {
+            $this->registerContentType(ContentType::fromArray($data));
+        }
+
+        foreach($types['single'] as $key => $data) {
+            $this->registerSingleContentType(ContentType::fromArray($data));
+        }
+
+        foreach($types['embedded'] as $key => $data) {
+            $this->registerEmbeddedContentType(ContentType::fromArray($data));
+        }
+
+        foreach($types['user'] as $key => $data) {
+            $this->registerUserType(UserType::fromArray($data));
         }
     }
 }
