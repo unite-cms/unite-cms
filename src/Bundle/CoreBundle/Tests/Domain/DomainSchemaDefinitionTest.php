@@ -17,7 +17,7 @@ class DomainSchemaDefinitionTest extends SchemaAwareTestCase
             ->current();
 
         // Try to mutate without permissions
-        $result = static::$container->get(SchemaManager::class)->executeOperation('createMyTest', ['myTestFields'], ['f1' => 'Foo', 'f2' => 'Baa']);
+        $result = static::$container->get(SchemaManager::class)->executeOperation('createMyTest', ['myTestFields'], ['f1' => 'Foo', 'f2' => 'Baa'], null, true);
         $this->assertNull($result->data);
         $this->assertCount(1, $result->errors);
         $this->assertEquals('Cannot query field "createMyTestType" on type "Mutation".', $result->errors[0]->getMessage());

@@ -37,6 +37,11 @@ class ContentType
     protected $translatable = false;
 
     /**
+     * @var string $defaultPermission
+     */
+    protected $defaultPermission;
+
+    /**
      * @var array $directives
      */
     protected $directives = [];
@@ -75,6 +80,7 @@ class ContentType
 
     public function __construct(string $id, string $name, string $defaultPermission)
     {
+        $this->defaultPermission = $defaultPermission;
         $this->permissions = [
             ContentVoter::QUERY => 'true',
             ContentVoter::READ => 'true',
@@ -99,26 +105,8 @@ class ContentType
     static function fromObjectType(ObjectType $type, string $defaultPermission) : self {
         $contentType = new static($type->name, $type->description ?? $type->name, $defaultPermission);
 
-        // Get all directives of this content type.
-        $contentType->directives = Util::getDirectives($type->astNode);
-
-        foreach ($contentType->directives as $directive) {
-
-            // Special handle access directive.
-            if($directive['name'] === 'access') {
-                $contentType->setPermissions($directive['args']);
-            }
-
-            // Special handle valid directive.
-            if($directive['name'] === 'valid') {
-                $contentType->addConstraintFromDirective($directive);
-            }
-
-            // Special handle webhook directive.
-            if($directive['name'] === 'webhook') {
-                $contentType->addWebhook(new ContentTypeWebhook($directive['args']['if'], $directive['args']['url'], $directive['args']['groups']));
-            }
-        }
+        // Manage directives of this content type.
+        $contentType->applyDirectives(Util::getDirectives($type->astNode));
 
         foreach($type->getInterfaces() as $interface) {
 
@@ -139,6 +127,35 @@ class ContentType
         }
 
         return $contentType;
+    }
+
+    /**
+     * @param array $directives
+     * @return self
+     */
+    public function applyDirectives(array $directives) : self {
+
+        $this->directives = $directives;
+
+        foreach ($this->directives as $directive) {
+
+            // Special handle access directive.
+            if($directive['name'] === 'access') {
+                $this->setPermissions($directive['args']);
+            }
+
+            // Special handle valid directive.
+            if($directive['name'] === 'valid') {
+                $this->addConstraintFromDirective($directive);
+            }
+
+            // Special handle webhook directive.
+            if($directive['name'] === 'webhook') {
+                $this->addWebhook(new ContentTypeWebhook($directive['args']['if'], $directive['args']['url'], $directive['args']['groups']));
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -343,5 +360,41 @@ class ContentType
      */
     public function getWebhooks() : array {
         return $this->webhooks;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray() : array {
+        $data = [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'defaultPermissions' => $this->defaultPermission,
+            'translatable' => $this->translatable,
+            'directives' => $this->directives,
+            'fields' => [],
+        ];
+
+        foreach($this->fields as $key => $field) {
+            $data['fields'][] = $field->toArray();
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return static
+     */
+    static function fromArray(array $data = []) {
+        $ct = new static($data['id'], $data['name'], $data['defaultPermissions']);
+        $ct->applyDirectives($data['directives']);
+        $ct->setTranslatable($data['translatable']);
+
+        foreach($data['fields'] as $fieldData) {
+            $ct->registerField(ContentTypeField::fromArray($fieldData));
+        }
+
+        return $ct;
     }
 }

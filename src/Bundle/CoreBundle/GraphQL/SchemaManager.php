@@ -13,9 +13,12 @@ use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
 use GraphQL\Language\Printer;
 use GraphQL\Server\RequestError;
+use GraphQL\Utils\AST;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 use Throwable;
 use UniteCMS\CoreBundle\ContentType\ContentType;
 use UniteCMS\CoreBundle\ContentType\ContentTypeManager;
@@ -44,6 +47,7 @@ use GraphQL\Utils\SchemaPrinter;
 use Symfony\Component\HttpFoundation\Request;
 use UniteCMS\CoreBundle\GraphQL\Schema\Provider\SchemaProviderInterface;
 use UniteCMS\CoreBundle\ContentType\UserType;
+use UniteCMS\CoreBundle\Security\User\UserInterface;
 
 class SchemaManager
 {
@@ -53,9 +57,19 @@ class SchemaManager
     const GRAPHQL_NAME_REGEX = '/^[_a-zA-Z][_a-zA-Z0-9]*$/';
 
     /**
+     * @var CacheInterface $uniteCmsCoreGraphqlSchemaCache
+     */
+    protected $uniteCmsCoreGraphqlSchemaCache;
+
+    /**
      * @var DomainManager $domainManager
      */
     protected $domainManager;
+
+    /**
+     * @var Security $security
+     */
+    protected $security;
 
     /**
      * @var ValidatorInterface $validator
@@ -122,9 +136,11 @@ class SchemaManager
      */
     protected $scalarResolvers = [];
 
-    public function __construct(DomainManager $domainManager, ValidatorInterface $validator, LoggerInterface $logger)
+    public function __construct(DomainManager $domainManager, Security $security, ValidatorInterface $validator, LoggerInterface $logger, CacheInterface $uniteCmsCoreGraphqlSchemaCache)
     {
+        $this->uniteCmsCoreGraphqlSchemaCache = $uniteCmsCoreGraphqlSchemaCache;
         $this->domainManager = $domainManager;
+        $this->security = $security;
         $this->validator = $validator;
         $this->logger = $logger;
     }
@@ -328,29 +344,73 @@ class SchemaManager
     }
 
     /**
+     * @param bool $byUser
+     * @return string
+     */
+    protected function cacheKey($byUser = true) : string {
+        $key = 'unite_cms_core_schema';
+        $key .= '__domain_' . $this->domainManager->current()->getId();
+
+        if($byUser) {
+
+            $user = $this->security->getUser();
+            $user_hash = [];
+
+            if($user) {
+
+                $user_hash[] = $user->getUsername();
+                $user_hash[] = $user->getRoles();
+
+                if ($user instanceof UserInterface) {
+                    $user_hash[] = $user->isFullyAuthenticated();
+                    $user_hash[] = $user->getType();
+                    $user_hash[] = $user->getUpdated()->getTimestamp();
+                }
+
+                $key .= '__u_'.md5(serialize($user_hash));
+
+            } else {
+                $key .= '__u_anon';
+            }
+
+        } else {
+            $key .= '__u_ignore';
+        }
+
+        return $key;
+    }
+
+    /**
      * @param bool $forceFresh
      *
      * @return Schema
      * @throws SyntaxError
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function buildBaseSchema(bool $forceFresh = false) : Schema {
 
-        // TODO: Cache + load from Cache + load generateContentTypes types from cache
-        // AST::fromArray
-
         // If the schema is already in memory, use it from there.
-        if(!$forceFresh && $this->cacheableBaseSchema && $this->baseSchemaDefinition) {
+        if(!$forceFresh && $this->cacheableBaseSchema) {
             return $this->cacheableBaseSchema;
         }
 
-        // Init with graphQL schema.
-        $schemaDefinition = '';
-        foreach ($this->providers as $provider) {
-            $schemaDefinition .= $provider->extend() . "\n";
-        }
+        // If the schema is not in memory load it from cache or generate it and save it to the cache
+        $ast = $this->uniteCmsCoreGraphqlSchemaCache->get($this->cacheKey(false), function() {
 
-        $schemaDefinition .= join("\n", $this->domainManager->current()->getCompleteSchema());
-        $this->baseSchemaDefinition = Parser::parse($schemaDefinition);
+            // Init with graphQL schema.
+            $schemaDefinition = '';
+
+            foreach ($this->providers as $provider) {
+                $schemaDefinition .= $provider->extend() . "\n";
+            }
+
+            $schemaDefinition .= join("\n", $this->domainManager->current()->getCompleteSchema());
+            $ast = Parser::parse($schemaDefinition);
+            return AST::toArray($ast);
+
+        }, $forceFresh ? INF : 0);
+
+        $this->baseSchemaDefinition = AST::fromArray($ast);
         $this->cacheableBaseSchema = BuildSchema::build($this->baseSchemaDefinition);
         return $this->cacheableBaseSchema;
     }
@@ -367,9 +427,6 @@ class SchemaManager
 
         $context = $context ?? new ExecutionContext();
 
-        // TODO: Cache + load from Cache + load generateContentTypes types from cache
-        // AST::fromArray
-
         // If the schema is already in memory, use it from there.
         if(!$forceFresh && $this->cacheableSchema) {
             return $this->cacheableSchema;
@@ -378,39 +435,57 @@ class SchemaManager
         // Build base schema from domain and providers.
         $schema = $this->buildBaseSchema($forceFresh);
 
-        // Execute before type extenders.
-        foreach($this->beforeTypeExtenders as $extender) {
-            if($extension = $extender->extend($schema, $context)) {
-                $parameters = $this->domainManager->getGlobalParameters() + $this->domainManager->current()->getParameters();
-                $extension = Util::replaceSchemaParameters($extension, $parameters);
-                $schema = SchemaExtender::extend($schema, Parser::parse($extension));
+        // Get current content type manager.
+        $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
+
+        // If the schema is not in memory load it from cache or generate it and save it to the cache
+        list($ast, $types) = $this->uniteCmsCoreGraphqlSchemaCache->get($this->cacheKey(true), function() use ($context, $schema, $contentTypeManager) {
+
+            // Execute before type extenders.
+            foreach($this->beforeTypeExtenders as $extender) {
+                if($extension = $extender->extend($schema, $context)) {
+                    $parameters = $this->domainManager->getGlobalParameters() + $this->domainManager->current()->getParameters();
+                    $extension = Util::replaceSchemaParameters($extension, $parameters);
+                    $schema = SchemaExtender::extend($schema, Parser::parse($extension));
+                }
             }
-        }
 
-        // Generate content types based on schema and validate it.
-        $violations = $this->validator->validate(
-            $this->generateContentTypes($schema)
-        );
+            // Generate content types based on schema and validate it.
+            $contentTypeManager = $this->generateContentTypes($schema, $contentTypeManager);
+            $violations = $this->validator->validate($contentTypeManager);
 
-        if(count($violations) > 0) {
-            throw new ConstraintViolationsException($violations);
-        }
-
-        // Execute after type extenders.
-        foreach($this->afterTypeExtenders as $extender) {
-            if($extension = $extender->extend($schema, $context)) {
-                $parameters = $this->domainManager->getGlobalParameters() + $this->domainManager->current()->getParameters();
-                $extension = Util::replaceSchemaParameters($extension, $parameters);
-                $schema = SchemaExtender::extend($schema, Parser::parse($extension));
+            if(count($violations) > 0) {
+                throw new ConstraintViolationsException($violations);
             }
-        }
 
-        $this->cacheableSchema = Parser::parse(SchemaPrinter::doPrint($schema));
+            // Execute after type extenders.
+            foreach($this->afterTypeExtenders as $extender) {
+                if($extension = $extender->extend($schema, $context)) {
+                    $parameters = $this->domainManager->getGlobalParameters() + $this->domainManager->current()->getParameters();
+                    $extension = Util::replaceSchemaParameters($extension, $parameters);
+                    $schema = SchemaExtender::extend($schema, Parser::parse($extension));
+                }
+            }
 
-        // Execute schema modifiers after schema was built.
-        foreach($this->modifiers as $modifier) {
-            $modifier->modify($this->cacheableSchema, $schema, $context);
-        }
+            $cacheableSchema = Parser::parse(SchemaPrinter::doPrint($schema));
+
+            // Execute schema modifiers after schema was built.
+            foreach($this->modifiers as $modifier) {
+                $modifier->modify($cacheableSchema, $schema, $context);
+            }
+
+            return [
+                AST::toArray($cacheableSchema),
+                $contentTypeManager->toArray(),
+            ];
+
+        }, $forceFresh ? INF : 0);
+
+        // Get schema from cached ast
+        $this->cacheableSchema = AST::fromArray($ast);
+
+        // Get Content Type Manager form cached types
+        $contentTypeManager->fromArray($types);
 
         return $this->cacheableSchema;
     }
@@ -554,10 +629,11 @@ class SchemaManager
      * Creates or updates the current domain's ContentTypeManager and returns it.
      *
      * @param Schema $schema
+     * @param ContentTypeManager $contentTypeManager
      * @return ContentTypeManager
      * @throws Error
      */
-    protected function generateContentTypes(Schema $schema) : ContentTypeManager {
+    protected function generateContentTypes(Schema $schema, ContentTypeManager $contentTypeManager) : ContentTypeManager {
 
         /**
          * @var InterfaceType $uniteContent
@@ -578,8 +654,6 @@ class SchemaManager
          * @var InterfaceType $uniteUser
          */
         $uniteUser = $schema->getType('UniteUser');
-
-        $contentTypeManager = $this->domainManager->current()->getContentTypeManager();
 
         // Fill content type manager from graphql objects.
         foreach($schema->getTypeMap() as $key => $type) {

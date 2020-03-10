@@ -17,3 +17,7 @@ framework:
         # Namespaced pools use the above "app" backend by default
         #pools:
             #my.dedicated.cache: null
+        pools:
+            unite.cms_core.graphql_schema_cache:
+                adapter: cache.adapter.psr6
+                provider: 'unite.cms_core.graphql.schema_cache.adapter'

@@ -66,7 +66,7 @@ class ContentTypeField
     protected $enumValues;
 
     /**
-     * @var string[]|null
+     * @var array[]|null
      */
     protected $unionTypes;
 
@@ -166,7 +166,10 @@ class ContentTypeField
             if($actualType instanceof UnionType) {
                 $unionTypes = [];
                 foreach($actualType->getTypes() as $type) {
-                    $unionTypes[$type->name] = $type;
+                    $unionTypes[$type->name] = [
+                        'name' => $type->name,
+                        'description' => $type->description,
+                    ];
                 }
             }
 
@@ -183,39 +186,47 @@ class ContentTypeField
                 $actualType->name
             );
 
-            // Get all directives of this content type field.
-            $field->directives = Util::getDirectives($fieldDefinition->astNode);
-
-            foreach ($field->directives as $directive) {
-
-                // Special handle access directive.
-                if($directive['name'] === 'access') {
-                    $field->setPermissions($directive['args']);
-                }
-
-                // Special handle valid directive.
-                if($directive['name'] === 'valid') {
-                    $options = [
-                        'expression' => $directive['args']['if'],
-                    ];
-                    if(!empty($directive['args']['message'])) {
-                        $options['message'] = $directive['args']['message'];
-                    }
-                    if(!empty($directive['args']['groups'])) {
-                        $options['groups'] = $directive['args']['groups'];
-                    }
-                    $field->addConstraint(new SaveExpression($options));
-                }
-
-                // Special handle required directive.
-                if($directive['name'] === 'required') {
-                    $field->setRequired(true);
-                }
-            }
+            $field->applyDirectives(Util::getDirectives($fieldDefinition->astNode));
 
             return $field;
         }
         return null;
+    }
+
+    /**
+     * @param $directives
+     */
+    public function applyDirectives($directives) {
+
+        // Get all directives of this content type field.
+        $this->directives = $directives;
+
+        foreach ($this->directives as $directive) {
+
+            // Special handle access directive.
+            if($directive['name'] === 'access') {
+                $this->setPermissions($directive['args']);
+            }
+
+            // Special handle valid directive.
+            if($directive['name'] === 'valid') {
+                $options = [
+                    'expression' => $directive['args']['if'],
+                ];
+                if(!empty($directive['args']['message'])) {
+                    $options['message'] = $directive['args']['message'];
+                }
+                if(!empty($directive['args']['groups'])) {
+                    $options['groups'] = $directive['args']['groups'];
+                }
+                $this->addConstraint(new SaveExpression($options));
+            }
+
+            // Special handle required directive.
+            if($directive['name'] === 'required') {
+                $this->setRequired(true);
+            }
+        }
     }
 
     /**
@@ -324,7 +335,7 @@ class ContentTypeField
     }
 
     /**
-     * @return \UniteCMS\CoreBundle\ContentType\ContentType[]|null
+     * @return array|null
      */
     public function getUnionTypes() : ?array {
         return $this->unionTypes;
@@ -372,5 +383,43 @@ class ContentTypeField
      */
     public function getConstraints() : array {
         return $this->constraints;
+    }
+
+    public function toArray() : array {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'type' => $this->getType(),
+            'settings' => $this->getSettings()->all(),
+            'directives' => $this->directives ?? [],
+            'nonNull' => $this->isNonNull(),
+            'required' => $this->isRequired(),
+            'listOf' => $this->isListOf(),
+            'enumValues' => $this->getEnumValues(),
+            'unionTypes' => $this->getUnionTypes(),
+            'returnType' => $this->getReturnType(),
+        ];
+    }
+
+    /**
+     * @param array $data
+     * @return static
+     */
+    static function fromArray(array $data = []) {
+
+        $field = new self(
+            $data['id'],
+            $data['name'],
+            $data['type'],
+            $data['settings'],
+            $data['nonNull'],
+            $data['required'],
+            $data['listOf'],
+            $data['enumValues'],
+            $data['unionTypes'],
+            $data['returnType']
+        );
+        $field->applyDirectives($data['directives'] ?? []);
+        return $field;
     }
 }
