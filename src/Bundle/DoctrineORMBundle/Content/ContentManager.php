@@ -73,7 +73,18 @@ class ContentManager implements ContentManagerInterface
      * {@inheritDoc}
      */
     public function transactional(Domain $domain, callable $transaction) {
-        return $this->em($domain)->transactional($transaction);
+        $ret = null;
+
+        try {
+            $this->em($domain)->beginTransaction();
+            $ret = $transaction();
+            $this->em($domain)->getConnection()->commit();
+        } catch (\Exception $e) {
+            $this->em($domain)->getConnection()->rollBack();
+            throw $e;
+        }
+
+        return $ret;
     }
 
     /**
