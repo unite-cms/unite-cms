@@ -24,12 +24,12 @@ class ValidContentValidatorTest extends SchemaAwareTestCase
             '
             type Article implements UniteContent 
                 @access(query: "true", mutation: "true", create: "true", read: "true", update: "true", delete: "true")
-                @valid(if: "this.getFieldData(\'firstname\') == \'CREATE\'", groups: [ CREATE ], message: "INVALID CREATE!")
-                @valid(if: "this.getFieldData(\'firstname\') == \'UPDATE\'", groups: [ UPDATE ], message: "INVALID UPDATE!")
-                @valid(if: "this.getFieldData(\'firstname\') == \'DELETE\'", groups: [ DELETE ], message: "INVALID DELETE!")
-                @valid(if: "this.getFieldData(\'firstname\') == \'RECOVER\'", groups: [ RECOVER ], message: "INVALID RECOVER!")
-                @valid(if: "this.getFieldData(\'firstname\') == \'REVERT\'", groups: [ REVERT ], message: "INVALID REVERT!")
-                @valid(if: "this.getFieldData(\'lastname\') and not this.getFieldData(\'lastname\').empty()", message: "INVALID ALL GROUPS!")
+                @valid(if: "this.get(\'firstname\') == \'CREATE\'", groups: [ CREATE ], message: "INVALID CREATE!")
+                @valid(if: "this.get(\'firstname\') == \'UPDATE\'", groups: [ UPDATE ], message: "INVALID UPDATE!")
+                @valid(if: "this.get(\'firstname\') == \'DELETE\'", groups: [ DELETE ], message: "INVALID DELETE!")
+                @valid(if: "this.get(\'firstname\') == \'RECOVER\'", groups: [ RECOVER ], message: "INVALID RECOVER!")
+                @valid(if: "this.get(\'firstname\') == \'REVERT\'", groups: [ REVERT ], message: "INVALID REVERT!")
+                @valid(if: "this.get(\'lastname\')", message: "INVALID ALL GROUPS!")
             {
                 id: ID
                 _meta: UniteContentMeta
