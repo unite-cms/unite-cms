@@ -11,7 +11,15 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UniteCMS\CoreBundle\Security\User\BaseUser;
 
 /**
- * @ORM\Table(name="unite_user")
+ * @ORM\Table(name="unite_user", indexes={
+ *     @ORM\Index(name="type", columns={"type"}),
+ *     @ORM\Index(name="locale", columns={"locale"}),
+ *     @ORM\Index(name="translate_id", columns={"translate_id"}),
+ *     @ORM\Index(name="created", columns={"created"}),
+ *     @ORM\Index(name="updated", columns={"updated"}),
+ *     @ORM\Index(name="deleted", columns={"deleted"}),
+ *     @ORM\Index(name="type_deleted", columns={"type", "deleted"})
+ * }))
  * @ORM\Entity(repositoryClass="UniteCMS\DoctrineORMBundle\Repository\UserRepository")
  * @UniqueEntity("username")
  * @UniqueEntity({"locale", "translate"}, errorPath="locale", message="You cannot add two translations with the same locale.")
