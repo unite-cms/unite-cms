@@ -47,12 +47,12 @@ services:
   # Provide FieldableFormType form as a service, pass tokenstorage as an argument, auto wire not working in forms
   unite.cms.fieldable_form_type:
     class: UniteCMS\CoreBundle\Form\FieldableFormType
-    arguments: ['@security.token_storage', '@monolog.logger.security']
+    arguments: ['@security.untracked_token_storage', '@monolog.logger.security']
     tags: [form.type]
 
   # Provide ContentDeleteFormType form as a service, pass tokenstorage as an argument, auto wire not working in forms
   UniteCMS\CoreBundle\Form\ContentDeleteFormType:
-      arguments: ['@security.token_storage']
+      arguments: ['@security.untracked_token_storage']
       tags: [form.type]
 
   # Provide Stete Type as a service, pass translator as an argument

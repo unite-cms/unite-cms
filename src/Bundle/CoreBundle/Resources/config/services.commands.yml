@@ -7,7 +7,7 @@ services:
             - { name: 'console.command', command: 'unite:domain:create' }
 
     UniteCMS\CoreBundle\Command\ImportDomainCommand:
-        arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@unite.cms.domain_config_manager', '@request_stack', '@security.token_storage']
+        arguments: ['@doctrine.orm.default_entity_manager', '@validator', '@unite.cms.domain_config_manager', '@request_stack', '@security.untracked_token_storage']
         tags:
             - { name: 'console.command', command: 'unite:domain:import' }
 

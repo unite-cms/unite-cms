@@ -33,7 +33,7 @@ services:
     # Provide PreSignFormType form as a service for S3 presigning from type
     UniteCMS\StorageBundle\Form\PreSignFormType:
         tags: [form.type]
-        arguments: ['@security.token_storage']
+        arguments: ['@security.untracked_token_storage']
 
 
     UniteCMS\StorageBundle\Service\StorageService: "@unite.cms.storage.service"

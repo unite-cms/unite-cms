@@ -4,7 +4,7 @@ services:
   # Handling HTTP CORS requests
   UniteCMS\CoreBundle\Subscriber\CorsListener:
     public: false
-    arguments: ['@security.firewall.map', '@security.token_storage']
+    arguments: ['@security.firewall.map', '@security.untracked_token_storage']
     tags:
       - { name: kernel.event_listener, event: kernel.request, priority: 10 }
       - { name: kernel.event_listener, event: kernel.response }
