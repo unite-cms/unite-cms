@@ -52,8 +52,8 @@ class DateTimeType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null) : FieldData {
-        $fieldData = parent::normalizeInputData($content, $field, $inputData);
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null, array $rawInputData = []) : FieldData {
+        $fieldData = parent::normalizeInputData($content, $field, $inputData, $rowDelta, $rawInputData);
         return $fieldData->empty() ? $fieldData : new FieldData($fieldData->getData()->getTimestamp());
     }
 

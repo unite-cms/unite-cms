@@ -113,7 +113,7 @@ class MediaFileType extends AbstractFieldType
     /**
      * {@inheritDoc}
      */
-    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null) : FieldData {
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null, array $rawInputData = []) : FieldData {
 
         // If empty input data, we return an empty field data object.
         if(empty($inputData)) {

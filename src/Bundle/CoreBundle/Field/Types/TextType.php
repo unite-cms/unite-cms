@@ -11,7 +11,7 @@ class TextType extends AbstractFieldType
 {
     const TYPE = 'text';
 
-    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null): FieldData {
+    public function normalizeInputData(ContentInterface $content, ContentTypeField $field, $inputData = null, int $rowDelta = null, array $rawInputData = []): FieldData {
 
         if(!empty($inputData)) {
             $inputData = (string)$inputData;
@@ -27,6 +27,6 @@ class TextType extends AbstractFieldType
             }
         }
 
-        return parent::normalizeInputData($content, $field, $inputData, $rowDelta);
+        return parent::normalizeInputData($content, $field, $inputData, $rowDelta, $rawInputData);
     }
 }

@@ -81,13 +81,13 @@ class FieldDataMapper
 
                 $listData = [];
                 foreach(($fieldData ?? []) as $rowId => $rowData) {
-                    $listData[$rowId] = $this->normalizeFieldData($field, $domain, $content, $rowData, $rowId);
+                    $listData[$rowId] = $this->normalizeFieldData($field, $domain, $content, $rowData, $rowId, $inputData);
                 }
                 $normalizedData[$id] = new FieldDataList($listData);
             }
 
             else {
-                $normalizedData[$id] = $this->normalizeFieldData($field, $domain, $content, $fieldData);
+                $normalizedData[$id] = $this->normalizeFieldData($field, $domain, $content, $fieldData, null, $inputData);
             }
         }
 
@@ -101,9 +101,10 @@ class FieldDataMapper
      * @param $rowData
      * @param int|null $rowDelta
      *
+     * @param array $inputData
      * @return FieldData|null
      */
-    protected function normalizeFieldData(ContentTypeField $field, Domain $domain, ContentInterface $content, $rowData, int $rowDelta = null) {
+    protected function normalizeFieldData(ContentTypeField $field, Domain $domain, ContentInterface $content, $rowData, int $rowDelta = null, array $inputData = []) {
         if(!empty($field->getUnionTypes())) {
 
             if(empty($rowData)) {
@@ -117,7 +118,7 @@ class FieldDataMapper
         }
 
         $fieldType = $this->fieldTypeManager->getFieldType($field->getType());
-        return $fieldType->normalizeInputData($content, $field, $rowData, $rowDelta);
+        return $fieldType->normalizeInputData($content, $field, $rowData, $rowDelta, $inputData);
     }
 }
 

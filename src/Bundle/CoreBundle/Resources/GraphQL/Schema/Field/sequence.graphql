@@ -1,2 +1,4 @@
 
-directive @sequenceField on FIELD_DEFINITION
+directive @sequenceField(
+    criteria: UniteFilterInput
+) on FIELD_DEFINITION
