@@ -3,7 +3,7 @@
 namespace UniteCMS\DoctrineORMBundle\Logger;
 
 use DateTime;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\Security\Core\Security;
