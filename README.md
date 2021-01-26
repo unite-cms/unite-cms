@@ -1,8 +1,8 @@
 unite cms
 =========
 
-[![Build Status](https://travis-ci.org/unite-cms/unite-cms.svg?branch=master)](https://travis-ci.org/unite-cms/unite-cms)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/59a0dce5677500c486a5/test_coverage)](https://codeclimate.com/github/unite-cms/unite-cms/test_coverage)
+⚠️ At the moment there is no active development on this open source cms, as we are now focusing on internal products. Thank you all for your support and intereset in this project ove the last years!
+------------
 
 
 Version 0.10
