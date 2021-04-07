@@ -3,6 +3,7 @@
 namespace UniteCMS\DoctrineORMBundle\Content;
 
 use DateTime;
+use Doctrine\DBAL\Exception\DeadlockException;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
@@ -74,14 +75,29 @@ class ContentManager implements ContentManagerInterface
      */
     public function transactional(Domain $domain, callable $transaction) {
         $ret = null;
+        $retries = 4;
 
-        try {
-            $this->em($domain)->beginTransaction();
-            $ret = $transaction();
-            $this->em($domain)->getConnection()->commit();
-        } catch (\Exception $e) {
-            $this->em($domain)->getConnection()->rollBack();
-            throw $e;
+        while($retries > 0) {
+            try {
+                $this->em($domain)->beginTransaction();
+                $ret = $transaction();
+                $this->em($domain)->getConnection()->commit();
+
+                return $ret;
+            } catch (DeadlockException $deadlockException) {
+                $retries--;
+
+                if($retries <= 0) {
+                    throw $deadlockException;
+                }
+
+                // Wait for 1 sec and try again.
+                sleep(1);
+
+            } catch (\Exception $e) {
+                $this->em($domain)->getConnection()->rollBack();
+                throw $e;
+            }
         }
 
         return $ret;
