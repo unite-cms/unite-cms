@@ -85,6 +85,7 @@ class ContentManager implements ContentManagerInterface
 
                 return $ret;
             } catch (DeadlockException $deadlockException) {
+                $this->em($domain)->getConnection()->rollBack();
                 $retries--;
 
                 if($retries <= 0) {
