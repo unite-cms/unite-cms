@@ -4,7 +4,7 @@
         "@unite/media": "file:./vendor/unite-cms/media-bundle"
     },
     "devDependencies": {
-        "@symfony/webpack-encore": "^0.28.0",
+        "@symfony/webpack-encore": "^4.1.1",
         "core-js": "^3.6.4",
         "regenerator-runtime": "^0.13.2",
         "sass-loader": "^7.0.1",
